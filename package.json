@@ -1,0 +1,29 @@
+{
+  "name": "gl-draw",
+  "version": "0.0.1",
+  "description": "GL draw experiment",
+  "main": "index.js",
+  "scripts": {
+    "start": "watchify src/index.js -o bundle.js & serve -p 3100"
+  },
+  "author": "Eden Halperin",
+  "license": "BSD",
+  "browserify": {
+    "transform": [
+      [
+        "reactify",
+        {
+          "es6": true
+        }
+      ]
+    ]
+  },
+  "dependencies": {
+    "browserify": "^8.1.1",
+    "immutable": "^3.6.2",
+    "react": "^0.12.2",
+    "reactify": "^1.0.0",
+    "serve": "^1.4.0",
+    "watchify": "^2.2.1"
+  }
+}
