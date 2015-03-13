@@ -1,29 +1,33 @@
 {
   "name": "gl-draw",
-  "version": "0.0.1",
-  "description": "GL draw experiment",
+  "version": "0.0.0",
+  "description": "A drawing component for Mapbox GL JS",
   "main": "index.js",
   "scripts": {
-    "start": "watchify src/index.js -o bundle.js & serve -p 3100"
+    "test": "eslint src/*.js",
+    "start": "watchify -v -d index.js -o dist/mapboxgl.draw.js & serve"
   },
-  "author": "Eden Halperin",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/gl-draw.git"
+  },
+  "keywords": [
+    "gl",
+    "draw",
+    "mapbox",
+    "draw",
+    "drawing"
+  ],
+  "author": "mapbox",
   "license": "BSD",
-  "browserify": {
-    "transform": [
-      [
-        "reactify",
-        {
-          "es6": true
-        }
-      ]
-    ]
+  "bugs": {
+    "url": "https://github.com/mapbox/gl-draw/issues"
   },
-  "dependencies": {
-    "browserify": "^8.1.1",
-    "immutable": "^3.6.2",
-    "react": "^0.12.2",
-    "reactify": "^1.0.0",
+  "homepage": "https://github.com/mapbox/gl-draw",
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "eslint": "^0.16.2",
     "serve": "^1.4.0",
-    "watchify": "^2.2.1"
+    "watchify": "^2.4.0"
   }
 }
