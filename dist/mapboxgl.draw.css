@@ -1,0 +1,28 @@
+@font-face {
+  font-family:'mapboxgl-draw';
+    src:url('mapboxgl-draw.eot?v=1');
+    src:url('mapboxgl-draw.eot?v=1#iefix') format('embedded-opentype'),
+        url('mapboxgl-draw.woff?v=1') format('woff');
+  font-weight:normal;
+  font-style:normal;
+  }
+
+.mapboxgl-ctrl-draw-btn:before {
+  font-family:'mapboxgl-draw';
+  content:'';
+  display:inline-block;
+  font-size:20px;
+  color:inherit;
+  vertical-align:middle;
+  speak:none;
+  font-style:normal;
+  font-weight:normal;
+  font-variant:normal;
+  text-transform:none;
+  line-height:1;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  }
+  .mapboxgl-ctrl-draw-btn.shape:before   { content:'\e600'; }
+  .mapboxgl-ctrl-draw-btn.circle:before  { content:'\e601'; }
+  .mapboxgl-ctrl-draw-btn.marker:before  { content:'\e602'; }
