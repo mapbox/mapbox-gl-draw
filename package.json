@@ -12,8 +12,7 @@
     "url": "git://github.com/mapbox/gl-draw.git"
   },
   "keywords": [
-    "gl",
-    "draw",
+    "webgl",
     "mapbox",
     "draw",
     "drawing"

@@ -28,3 +28,6 @@
   .mapboxgl-ctrl-draw-btn.circle:before { content:'\e602'; }
   .mapboxgl-ctrl-draw-btn.square:before   { content:'\e603'; }
   .mapboxgl-ctrl-draw-btn.line:before  { content:'\e604'; }
+
+.mapboxgl-ctrl-draw-btn.active,
+.mapboxgl-ctrl-draw-btn.active:hover { background-color:rgba(0,0,0,0.10); }

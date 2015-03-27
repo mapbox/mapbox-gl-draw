@@ -4,7 +4,7 @@
  * @class mapbox.Draw
  *
  * @param {Object} options
- * @param {String} [options.position=topright] A string indicating the control's position on the map. Options are `topright`, `topleft`, `bottomright`, `bottomleft`
+ * @param {String} [options.position=top-right] A string indicating the control's position on the map. Options are `topright`, `topleft`, `bottomright`, `bottomleft`
  * @returns {Draw} `this`
  * @example
  * var map = new mapboxgl.Map({
