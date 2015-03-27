@@ -1,8 +1,8 @@
 @font-face {
   font-family:'mapboxgl-draw';
-    src:url('mapboxgl-draw.eot?v=1');
-    src:url('mapboxgl-draw.eot?v=1#iefix') format('embedded-opentype'),
-        url('mapboxgl-draw.woff?v=1') format('woff');
+    src:url('font/mapboxgl-draw.eot?v=1');
+    src:url('font/mapboxgl-draw.eot?v=1#iefix') format('embedded-opentype'),
+        url('font/mapboxgl-draw.woff?v=1') format('woff');
   font-weight:normal;
   font-style:normal;
   }
@@ -23,6 +23,8 @@
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   }
-  .mapboxgl-ctrl-draw-btn.shape:before   { content:'\e600'; }
-  .mapboxgl-ctrl-draw-btn.circle:before  { content:'\e601'; }
-  .mapboxgl-ctrl-draw-btn.marker:before  { content:'\e602'; }
+  .mapboxgl-ctrl-draw-btn.marker:before { content:'\e600'; }
+  .mapboxgl-ctrl-draw-btn.shape:before { content:'\e601'; }
+  .mapboxgl-ctrl-draw-btn.circle:before { content:'\e602'; }
+  .mapboxgl-ctrl-draw-btn.square:before   { content:'\e603'; }
+  .mapboxgl-ctrl-draw-btn.line:before  { content:'\e604'; }

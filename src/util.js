@@ -16,32 +16,5 @@ module.exports = {
           obj.options[i] = options[i];
       }
       return obj.options;
-  },
-
-  /* Take the properties from a source object and combine them with a destination object
-   *
-   * @param {Object} dest
-   * @param {Object} src
-   * @returns {Object} The destination object
-   */
-  extendAll: function(dest, src) {
-    for (var i in src) {
-      Object.defineProperty(dest, i, Object.getOwnPropertyDescriptor(src, i));
-    }
-    return dest;
-  },
-
-  /* Interface for a parent class to share its methods with a child
-   *
-   * @param {Object} parent
-   * @param {Object} props
-   * @returns {Object}
-   */
-  inherit: function(parent, props) {
-    var parentProto = typeof parent === 'function' ? parent.prototype : parent,
-        proto = Object.create(parentProto);
-        this.extendAll(proto, props);
-
-    return proto;
   }
 };

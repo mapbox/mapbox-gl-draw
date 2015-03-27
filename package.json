@@ -29,5 +29,8 @@
     "eslint": "^0.16.2",
     "serve": "^1.4.0",
     "watchify": "^2.4.0"
+  },
+  "dependencies": {
+    "xtend": "^4.0.0"
   }
 }
