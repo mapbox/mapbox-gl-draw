@@ -1,6 +1,6 @@
 mapboxgl.draw
 ---
-[![Build Status](https://circleci.com/gh/mapbox/gl-draw.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw)
+[![Build Status](https://circleci.com/gh/mapbox/gl-draw/tree/buildout.svg?style=shield)](https://circleci.com/gh/mapbox/gl-draw)
 
 Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) 
 maps.

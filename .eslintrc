@@ -9,6 +9,7 @@
     "comma-style": 2,
     "eqeqeq": 0,
     "new-cap": 2,
+    "no-new": 0,
     "no-multi-spaces": 2,
     "brace-style": 2,
     "no-underscore-dangle": [0],

@@ -30,6 +30,15 @@
   }));
 
   map.addControl(new mapboxgl.Draw());
+
+  map.on('draw.start', function(e) {
+    // console.log(e.featureType);
+  });
+
+  map.on('draw.created', function(e) {
+    // console.log(e.featureType);
+    // console.log(e.feature);
+  });
 </script>
 </body>
 </html>

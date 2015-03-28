@@ -31,3 +31,5 @@
 
 .mapboxgl-ctrl-draw-btn.active,
 .mapboxgl-ctrl-draw-btn.active:hover { background-color:rgba(0,0,0,0.10); }
+
+.mapboxgl-draw-activated .mapboxgl-canvas.mapboxgl-interactive { cursor:crosshair; }

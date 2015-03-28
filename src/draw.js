@@ -1,16 +1,19 @@
 'use strict';
 
+/* global mapboxgl */
+
 var extend = require('xtend');
 var Control = require('./control');
 var util = require('./util');
+var theme = require('./theme');
 var DOM = util.DOM;
 
 // Control handlers
-var Shape = require('./handlers/shape');
+var Polygon = require('./handlers/polygon');
 var Line = require('./handlers/line');
 var Circle = require('./handlers/circle');
 var Square = require('./handlers/square');
-var Marker = require('./handlers/marker');
+var Point = require('./handlers/point');
 
 module.exports = Draw;
 
@@ -35,16 +38,18 @@ Draw.prototype = extend(Control, {
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
 
-    if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawShape.bind(map));
+    if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawPolygon.bind(map));
     if (controls.line) this._createButton(controlClass + ' line', 'Line tool', this._drawLine.bind(map));
     if (controls.circle) this._createButton(controlClass + ' circle', 'Circle tool', this._drawCircle.bind(map));
     if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(map));
-    if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawMarker.bind(map));
+    if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(map));
+
+    this._mapState(map);
     return container;
   },
 
-  _drawShape: function() {
-    new Shape(this);
+  _drawPolygon: function() {
+    new Polygon(this);
   },
 
   _drawLine: function() {
@@ -59,8 +64,8 @@ Draw.prototype = extend(Control, {
     new Square(this);
   },
 
-  _drawMarker: function() {
-    new Marker(this);
+  _drawPoint: function() {
+    new Point(this);
   },
 
   _createButton: function(className, title, fn) {
@@ -69,10 +74,13 @@ Draw.prototype = extend(Control, {
     });
 
     var controlClass = this._controlClass;
+
     a.addEventListener('click', function(e) {
       e.preventDefault();
 
-      if (!this.classList.contains('active')) {
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+      } else {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
         this.classList.add('active');
         fn();
@@ -80,5 +88,28 @@ Draw.prototype = extend(Control, {
     });
 
     return a;
+  },
+
+  _mapState: function(map) {
+    var drawLayer;
+
+    map.on('load', function() {
+
+      map.on('draw.feature.created', function(e) {
+        if (drawLayer) {
+          drawLayer.setData(e.geojson);
+        } else {
+          drawLayer = new mapboxgl.GeoJSONSource({
+            data: e.geojson
+          });
+          map.addSource('draw', drawLayer);
+
+          theme.forEach(function(style) {
+            map.addLayer(style);
+          });
+        }
+      });
+
+    });
   }
 });
