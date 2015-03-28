@@ -16,24 +16,24 @@ function Point(map) {
 
 Point.prototype = extend(Handlers, {
 
-	drawStart: function() {
-		if (this._map) {
+  drawStart: function() {
+    if (this._map) {
       this._map.on('click', function(e) {
         this._onClick(e);
       }.bind(this));
-		}
-	},
+    }
+  },
 
-	drawStop: function() {
-		if (this._map) {
+  drawStop: function() {
+    if (this._map) {
       this._map.off('click', this._onClick);
-		}
-	},
+    }
+  },
 
-	_onClick: function(e) {
+  _onClick: function(e) {
     var c = this._map.unproject([e.point.x, e.point.y]);
     var point = [c.lng, c.lat];
     this.create(this.type, point);
-	}
+  }
 
 });
