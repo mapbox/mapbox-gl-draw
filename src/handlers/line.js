@@ -1,5 +1,7 @@
 'use strict';
 
+/* global mapboxgl */
+
 var extend = require('xtend');
 var Handlers = require('./handlers');
 var util = require('../util');
@@ -25,20 +27,17 @@ Line.prototype = extend(Handlers, {
       // Container to hold on to an
       // Array points of coordinates
       this._nodes = [];
+      var container = this._map.getContainer();
 
-      this._map.on('click', function(e) {
-        this._onClick(e);
-      }.bind(this));
-
-      this._map.on('mousedown', function(e) {
+      container.addEventListener('mousedown', function(e) {
         this._onMouseDown(e);
       }.bind(this));
 
-      this._map.on('mousemove', function(e) {
+      container.addEventListener('mousemove', function(e) {
         this._onMouseMove(e);
       }.bind(this));
 
-      this._map.on('mouseUp', function(e) {
+      container.addEventListener('mouseup', function(e) {
         this._onMouseUp(e);
       }.bind(this));
 
@@ -55,26 +54,40 @@ Line.prototype = extend(Handlers, {
   },
 
   _onClick: function(e) {
-    var c = this._map.unproject([e.point.x, e.point.y]);
-    var point = [c.lng, c.lat];
-    this.create(this.type, point);
+    // var c = this._map.unproject([e.point.x, e.point.y]);
+    // var point = [c.lng, c.lat];
+    // this.create(this.type, point);
   },
 
   _onMouseDown: function(e) {
-    this._currentLatLng = this._map.unproject([e.point.x, e.point.y]);
+    var point = this._mousePos(e);
+    this._currentLatLng = this._map.unproject([point.x, point.y]);
   },
 
   _onMouseMove: function(e) {
-    var newPos = this._map.unproject([e.point.x, e.point.y]);
-    this._updateGuide(newPos);
+    if (this._currentLatLng) {
+      var point = this._mousePos(e);
+      var newPos = this._map.unproject([point.x, point.y]);
+      this._updateGuide(newPos);
+    }
   },
 
   _onMouseUp: function(e) {
     if (this._currentLatLng) {
-      this.addVertex(this._map.unproject([e.point.x, e.point.y]));
+      var point = this._mousePos(e);
+      this._addVertex(this._map.unproject([point.x, point.y]));
     }
 
     this._currentLatLng = null;
+  },
+
+  _mousePos: function(e) {
+    var el = this._map.getContainer();
+    var rect = el.getBoundingClientRect();
+    return new mapboxgl.Point(
+      e.clientX - rect.left - el.clientLeft,
+      e.clientY - rect.top - el.clientTop
+    );
   },
 
   _createHandles: function(latLng) {
