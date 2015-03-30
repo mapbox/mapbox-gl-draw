@@ -8,7 +8,7 @@ module.exports = {
     if (this.options && this.options.position) {
       var pos = this.options.position;
       var corner = map._controlCorners[pos];
-      container.className += ' mapboxgl-ctrl';
+      container.className += ' mapboxgl-ctrl-draw mapboxgl-ctrl';
 
       if (pos.indexOf('bottom') !== -1) {
         corner.insertBefore(container, corner.firstChild);

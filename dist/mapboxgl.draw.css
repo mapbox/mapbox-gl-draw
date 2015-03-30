@@ -7,6 +7,38 @@
   font-style:normal;
   }
 
+/* Override default control style */
+.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl-draw,
+.mapboxgl-ctrl-top-left .mapboxgl-ctrl-draw {
+  margin-left:0;
+  border-radius:0 4px 4px 0;
+  }
+.mapboxgl-ctrl-top-right .mapboxgl-ctrl-draw,
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-draw {
+  margin-right:0;
+  border-radius:4px 0 0 4px;
+  }
+.mapboxgl-ctrl-draw {
+  background-color:rgba(0,0,0,0.75);
+  border-color:rgba(0,0,0,0.9);
+  }
+.mapboxgl-ctrl-draw > button {
+  border-color:rgba(0,0,0,0.9);
+  color:rgba(255,255,255,0.5);
+  width:36px;
+  height:36px;
+  }
+
+.mapboxgl-ctrl-draw > button:hover {
+  background-color:rgba(0,0,0,0.85);
+  color:rgba(255,255,255,0.75);
+  }
+.mapboxgl-ctrl-draw > button.active,
+.mapboxgl-ctrl-draw > button.active:hover {
+  background-color:rgba(0,0,0,0.95);
+  color:#fff;
+  }
+
 .mapboxgl-ctrl-draw-btn:before {
   font-family:'mapboxgl-draw';
   content:'';
@@ -29,7 +61,12 @@
   .mapboxgl-ctrl-draw-btn.square:before   { content:'\e603'; }
   .mapboxgl-ctrl-draw-btn.line:before  { content:'\e604'; }
 
-.mapboxgl-ctrl-draw-btn.active,
-.mapboxgl-ctrl-draw-btn.active:hover { background-color:rgba(0,0,0,0.10); }
-
 .mapboxgl-draw-activated .mapboxgl-canvas.mapboxgl-interactive { cursor:crosshair; }
+
+.mapboxgl-draw-guide-dash {
+  background-color:#f06eaa;
+	opacity:0.6;
+	position:absolute;
+	width:5px;
+	height:5px;
+  }

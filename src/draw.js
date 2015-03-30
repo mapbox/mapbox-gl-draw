@@ -4,8 +4,8 @@
 
 var extend = require('xtend');
 var Control = require('./control');
-var util = require('./util');
 var theme = require('./theme');
+var util = require('./util');
 var DOM = util.DOM;
 
 // Control handlers
@@ -94,7 +94,6 @@ Draw.prototype = extend(Control, {
     var drawLayer;
 
     map.on('load', function() {
-
       map.on('draw.feature.created', function(e) {
         if (drawLayer) {
           drawLayer.setData(e.geojson);
@@ -102,6 +101,7 @@ Draw.prototype = extend(Control, {
           drawLayer = new mapboxgl.GeoJSONSource({
             data: e.geojson
           });
+
           map.addSource('draw', drawLayer);
 
           theme.forEach(function(style) {

@@ -67,8 +67,16 @@ var selectProp = testProp([
   'msUserSelect'
 ]);
 
-var userSelect;
+var transformProp = testProp([
+  'transform',
+  'WebkitTransform'
+]);
 
+module.exports.setTransform = function(el, value) {
+  el.style[transformProp] = value;
+};
+
+var userSelect;
 module.exports.DOM.disableSelection = function() {
   if (selectProp) {
     userSelect = docStyle[selectProp];
