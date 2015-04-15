@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint src/*.js",
+    "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
     "start": "watchify -v -d index.js -o dist/mapboxgl.draw.js & serve"
   },
   "repository": {
@@ -27,6 +28,7 @@
     "browserify": "^9.0.3",
     "eslint": "^0.16.2",
     "serve": "^1.4.0",
+    "uglify-js": "^2.4.20",
     "watchify": "^2.4.0"
   },
   "dependencies": {
