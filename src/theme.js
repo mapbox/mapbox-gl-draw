@@ -5,9 +5,8 @@ module.exports = [
     "source": "draw",
     "filter": ["all", ["==", "$type", "Point"]],
     "layout": {
-      "icon-image": "dot.sdf",
-      "icon-ignore-placement": true,
-      "icon-max-size": 1,
+      "icon-image": "marker-12",
+      "text-anchor": "top",
       "icon-allow-overlap": true
     },
     "paint": {
