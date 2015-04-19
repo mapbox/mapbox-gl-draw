@@ -21,6 +21,8 @@ module.exports = {
       this._container.classList.add('mapboxgl-draw-activated');
       this._map.fire('draw.start', { featureType: this.type });
       this.drawStart();
+
+      this._map.on('draw.cancel', this.disable.bind(this));
     }
   },
 
@@ -50,7 +52,7 @@ module.exports = {
 
   _cancelDrawing: function(e) {
     if (e.keyCode === 27) { // esc
-      this.disable();
+      this._map.fire('draw.cancel');
     }
   }
 };

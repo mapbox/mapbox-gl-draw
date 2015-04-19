@@ -74,9 +74,13 @@ Draw.prototype = extend(Control, {
     });
 
     var controlClass = this._controlClass;
+    var map = this._map;
 
     a.addEventListener('click', function(e) {
       e.preventDefault();
+
+      // Cancel any initialized handlers
+      map.fire('draw.cancel');
 
       if (this.classList.contains('active')) {
         this.classList.remove('active');
@@ -92,8 +96,14 @@ Draw.prototype = extend(Control, {
 
   _mapState: function(map) {
     var drawLayer;
+    var controlClass = this._controlClass;
 
     map.on('load', function() {
+
+      map.on('draw.stop', function(e) {
+        DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
+      });
+
       map.on('draw.feature.created', function(e) {
         if (drawLayer) {
           drawLayer.setData(e.geojson);
