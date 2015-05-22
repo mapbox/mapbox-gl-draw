@@ -13,6 +13,6 @@
  * });
  *
  * // Initialize the drawing component
- * map.addControl(new mapboxgl.Draw());
+ * map.addControl(mapboxgl.Draw());
  */
 mapboxgl.Draw = require('./src/draw.js');

@@ -2,21 +2,21 @@
 
 module.exports = {
 
-  getAll: function() {
+  getAll() {
     return this._data;
   },
 
-  get: function() {
+  get() {
     // TODO get a specific geojson object
   },
 
-  unset: function() {
+  unset() {
     // TODO undo management.
     this._history = this.getAll().features;
     // TODO remove a specific geojson object
   },
 
-  set: function(type, coordinates) {
+  set(type, coordinates) {
 
     var obj = {
       type: 'Feature',

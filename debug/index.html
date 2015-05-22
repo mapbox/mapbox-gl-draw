@@ -29,7 +29,7 @@
     position: 'top-left'
   }));
 
-  map.addControl(new mapboxgl.Draw());
+  map.addControl(mapboxgl.Draw());
 
   map.on('draw.start', function(e) {
     // console.log(e.featureType);

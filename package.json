@@ -3,10 +3,15 @@
   "version": "0.0.0",
   "description": "A drawing component for Mapbox GL JS",
   "main": "index.js",
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
+  },
   "scripts": {
     "test": "eslint src/*.js",
     "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
-    "start": "watchify -v -d index.js -o dist/mapboxgl.draw.js & serve"
+    "start": "budo index.js --serve=dist/mapboxgl.draw.js --live -d | bistre"
   },
   "repository": {
     "type": "git",
@@ -19,17 +24,18 @@
     "drawing"
   ],
   "author": "mapbox",
-  "license": "BSD",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/mapbox/gl-draw/issues"
   },
   "homepage": "https://github.com/mapbox/gl-draw",
   "devDependencies": {
+    "babel-eslint": "^3.1.7",
+    "babelify": "^6.1.1",
+    "bistre": "^1.0.1",
     "browserify": "^9.0.3",
-    "eslint": "^0.16.2",
-    "serve": "^1.4.0",
-    "uglify-js": "^2.4.20",
-    "watchify": "^2.4.0"
+    "budo": "^4.0.0",
+    "eslint": "^0.16.2"
   },
   "dependencies": {
     "xtend": "^4.0.0"

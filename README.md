@@ -14,7 +14,7 @@ maps.
 
 Install dependencies, build the source files and crank up a server via:
 
-    npm start & open http://localhost:3000/debug/
+    npm start & open http://localhost:9966/debug/
 
 You'll need to set a [Mapbox API token](https://www.mapbox.com/help/define-access-token/) 
 to see anything. Set this in `localStorage` from your browsers console after

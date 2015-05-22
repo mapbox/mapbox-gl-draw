@@ -1,18 +1,18 @@
 'use strict';
 
-var util = require('../util');
-var store = require('../store');
+let util = require('../util');
+let store = require('../store');
 
 module.exports = {
 
-  initialize: function(map, options) {
+  initialize(map, options) {
     this._map = map;
     this._container = map.getContainer();
     util.setOptions(this, options);
     this.enable();
   },
 
-  enable: function() {
+  enable() {
     var map = this._map;
     if (map) {
       util.DOM.disableSelection();
@@ -26,7 +26,7 @@ module.exports = {
     }
   },
 
-  disable: function() {
+  disable() {
     if (this._map) {
       util.DOM.enableSelection();
       this._container.removeEventListener('keyup', this._cancelDrawing.bind(this));
@@ -36,21 +36,21 @@ module.exports = {
     }
   },
 
-  create: function(type, coordinates) {
+  create(type, coordinates) {
     var feature = store.set(type, coordinates);
     this._map.fire('draw.feature.created', {geojson: store.getAll()});
     this._created(feature);
     if (!this.options.repeatMode) this.disable();
   },
 
-  _created: function(feature) {
+  _created(feature) {
     this._map.fire('draw.created', {
       featureType: this.type,
       feature: feature
     });
   },
 
-  _cancelDrawing: function(e) {
+  _cancelDrawing(e) {
     if (e.keyCode === 27) { // esc
       this._map.fire('draw.cancel');
     }

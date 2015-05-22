@@ -1,23 +1,20 @@
 'use strict';
 
-/* global mapboxgl */
-
-var extend = require('xtend');
-var Control = require('./control');
-var theme = require('./theme');
-var util = require('./util');
-var DOM = util.DOM;
+let extend = require('xtend');
+let Control = require('./control');
+let theme = require('./theme');
+let util = require('./util');
+let DOM = util.DOM;
 
 // Control handlers
-var Polygon = require('./handlers/polygon');
-var Line = require('./handlers/line');
-var Circle = require('./handlers/circle');
-var Square = require('./handlers/square');
-var Point = require('./handlers/point');
-
-module.exports = Draw;
+let Polygon = require('./handlers/polygon');
+let Line = require('./handlers/line');
+let Circle = require('./handlers/circle');
+let Square = require('./handlers/square');
+let Point = require('./handlers/point');
 
 function Draw(options) {
+  if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
 }
 
@@ -33,7 +30,7 @@ Draw.prototype = extend(Control, {
     }
   },
 
-  onAdd: function(map) {
+  onAdd(map) {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
@@ -48,27 +45,28 @@ Draw.prototype = extend(Control, {
     return container;
   },
 
-  _drawPolygon: function() {
+  _drawPolygon() {
+    // TODO should this._map, & this.options.polygon be passed?
     new Polygon(this);
   },
 
-  _drawLine: function() {
+  _drawLine() {
     new Line(this);
   },
 
-  _drawCircle: function() {
+  _drawCircle() {
     new Circle(this);
   },
 
-  _drawSquare: function() {
+  _drawSquare() {
     new Square(this);
   },
 
-  _drawPoint: function() {
+  _drawPoint() {
     new Point(this);
   },
 
-  _createButton: function(className, title, fn) {
+  _createButton(className, title, fn) {
     var a = DOM.create('button', className, this._container, {
       title: title
     });
@@ -94,17 +92,17 @@ Draw.prototype = extend(Control, {
     return a;
   },
 
-  _mapState: function(map) {
+  _mapState(map) {
     var drawLayer;
     var controlClass = this._controlClass;
 
-    map.on('load', function() {
+    map.on('load', () => {
 
-      map.on('draw.stop', function(e) {
+      map.on('draw.stop', () => {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      map.on('draw.feature.created', function(e) {
+      map.on('draw.feature.created', (e) => {
         if (drawLayer) {
           drawLayer.setData(e.geojson);
         } else {
@@ -123,3 +121,5 @@ Draw.prototype = extend(Control, {
     });
   }
 });
+
+module.exports = Draw;

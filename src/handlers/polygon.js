@@ -1,9 +1,7 @@
 'use strict';
 
-var extend = require('xtend');
-var Line = require('./line');
-
-module.exports = Polygon;
+let extend = require('xtend');
+let Line = require('./line');
 
 function Polygon(map) {
   var options = {
@@ -16,10 +14,12 @@ function Polygon(map) {
 
 Polygon.prototype = extend(Line, {
 
-  drawStart: function() {},
+  drawStart() {},
 
-  drawStop: function() {},
+  drawStop() {},
 
-  _onClick: function(e) {}
+  _onClick(e) {}
 
 });
+
+module.exports = Polygon;

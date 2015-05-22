@@ -1,13 +1,9 @@
 'use strict';
 
-/* global mapboxgl */
-
-var extend = require('xtend');
-var Handlers = require('./handlers');
-var util = require('../util');
-var DOM = util.DOM;
-
-module.exports = Line;
+let extend = require('xtend');
+let Handlers = require('./handlers');
+let util = require('../util');
+let DOM = util.DOM;
 
 function Line(map) {
   var options = {
@@ -21,7 +17,7 @@ function Line(map) {
 
 Line.prototype = extend(Handlers, {
 
-  drawStart: function() {
+  drawStart() {
     if (this._map) {
 
       // Container to hold on to an
@@ -47,24 +43,24 @@ Line.prototype = extend(Handlers, {
     }
   },
 
-  drawStop: function() {
+  drawStop() {
     if (this._map) {
       this._map.off('click', this._onClick);
     }
   },
 
-  _onClick: function(e) {
+  _onClick(e) {
     // var c = this._map.unproject([e.point.x, e.point.y]);
     // var point = [c.lng, c.lat];
     // this.create(this.type, point);
   },
 
-  _onMouseDown: function(e) {
+  _onMouseDown(e) {
     var point = this._mousePos(e);
     this._currentLatLng = this._map.unproject([point.x, point.y]);
   },
 
-  _onMouseMove: function(e) {
+  _onMouseMove(e) {
     if (this._currentLatLng) {
       var point = this._mousePos(e);
       var newPos = this._map.unproject([point.x, point.y]);
@@ -72,7 +68,7 @@ Line.prototype = extend(Handlers, {
     }
   },
 
-  _onMouseUp: function(e) {
+  _onMouseUp(e) {
     if (this._currentLatLng) {
       var point = this._mousePos(e);
       this._addVertex(this._map.unproject([point.x, point.y]));
@@ -81,7 +77,7 @@ Line.prototype = extend(Handlers, {
     this._currentLatLng = null;
   },
 
-  _mousePos: function(e) {
+  _mousePos(e) {
     var el = this._map.getContainer();
     var rect = el.getBoundingClientRect();
     return new mapboxgl.Point(
@@ -90,7 +86,7 @@ Line.prototype = extend(Handlers, {
     );
   },
 
-  _createHandles: function(latLng) {
+  _createHandles(latLng) {
     // 1. TODO Take the current coordinates.
     // 2. unproject and plot a div on the map
     // to act as a interactive control that listens
@@ -98,22 +94,22 @@ Line.prototype = extend(Handlers, {
     // The click event should respond to this._finishShape();
   },
 
-  _addVertex: function(latLng) {
+  _addVertex(latLng) {
     this._nodes.push(latLng);
     this._createHandles();
     this._vertexChanged(latLng, true);
   },
 
-  _vertexChanged: function(latLng, added) {
+  _vertexChanged(latLng, added) {
     // this._updateRunningMeasure(latlng, added);
     this._clearGuides();
   },
 
-  _onZoomEnd: function(e) {
+  _onZoomEnd(e) {
     this._updateGuide();
   },
 
-  _updateGuide: function(newPos) {
+  _updateGuide(newPos) {
     if (this._nodes.length) {
       var nodes = this._nodes;
       newPos = newPos || this._map.project(this._currentLatLng);
@@ -128,7 +124,7 @@ Line.prototype = extend(Handlers, {
     }
   },
 
-  _drawGuide: function(a, b) {
+  _drawGuide(a, b) {
     var length = Math.floor(Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)));
     var dashDistance = this.options.dashDistance;
 
@@ -155,7 +151,7 @@ Line.prototype = extend(Handlers, {
     }
   },
 
-  _clearGuides: function() {
+  _clearGuides() {
     if (this._guidesContainer) {
       while (this._guidesContainer.firstChild) {
         this._guidesContainer.removeChild(this._guidesContainer.firstChild);
@@ -164,3 +160,5 @@ Line.prototype = extend(Handlers, {
   }
 
 });
+
+module.exports = Line;
