@@ -18,7 +18,7 @@ Polygon.prototype = extend(Line, {
 
   drawStop() {},
 
-  _onClick(e) {}
+  _onClick() {}
 
 });
 

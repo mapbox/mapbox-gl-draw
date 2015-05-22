@@ -49,7 +49,7 @@ Line.prototype = extend(Handlers, {
     }
   },
 
-  _onClick(e) {
+  _onClick() {
     // var c = this._map.unproject([e.point.x, e.point.y]);
     // var point = [c.lng, c.lat];
     // this.create(this.type, point);
@@ -86,7 +86,7 @@ Line.prototype = extend(Handlers, {
     );
   },
 
-  _createHandles(latLng) {
+  _createHandles(g) {
     // 1. TODO Take the current coordinates.
     // 2. unproject and plot a div on the map
     // to act as a interactive control that listens
