@@ -1,14 +1,14 @@
 'use strict';
 
-let extend = require('xtend');
-let Handlers = require('./handlers');
-let util = require('../util');
-let DOM = util.DOM;
+var extend = require('xtend');
+var Handlers = require('./handlers');
+var util = require('../util');
+var DOM = util.DOM;
 
 function Line(map) {
   var options = {
     dashDistance: 20,
-    repeatMode: true,
+    repeatMode: true
   };
 
   this.type = 'LineString';
