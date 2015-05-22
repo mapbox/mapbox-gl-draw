@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 /** A drawing component for mapboxgl
  * @class mapbox.Draw

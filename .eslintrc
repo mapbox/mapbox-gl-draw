@@ -1,4 +1,12 @@
 {
+  "parser": "babel-eslint",
+  "env": {
+    "node": true,
+    "browser": true
+  },
+  "globals": {
+    "mapboxgl": true
+  },
   "rules": {
     "strict": [0],
     "curly": [0],
@@ -14,12 +22,5 @@
     "comma-spacing": [0],
     "key-spacing": [0],
     "no-use-before-define": [0]
-  },
-  "env": {
-    "node": true,
-    "browser": true
-  },
-  "globals": {
-    "mapboxgl": true
   }
 }
