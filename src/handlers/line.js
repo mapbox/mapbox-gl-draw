@@ -86,7 +86,7 @@ Line.prototype = extend(Handlers, {
     );
   },
 
-  _createHandles(g) {
+  _createHandles(latLng) {
     // 1. TODO Take the current coordinates.
     // 2. unproject and plot a div on the map
     // to act as a interactive control that listens
