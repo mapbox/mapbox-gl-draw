@@ -35,35 +35,35 @@ Draw.prototype = extend(Control, {
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
 
-    if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawPolygon.bind(map));
-    if (controls.line) this._createButton(controlClass + ' line', 'Line tool', this._drawLine.bind(map));
-    if (controls.circle) this._createButton(controlClass + ' circle', 'Circle tool', this._drawCircle.bind(map));
-    if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(map));
-    if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(map));
+    if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawPolygon.bind(this, map));
+    if (controls.line) this._createButton(controlClass + ' line', 'Line tool', this._drawLine.bind(this, map));
+    if (controls.circle) this._createButton(controlClass + ' circle', 'Circle tool', this._drawCircle.bind(this, map));
+    if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(this, map));
+    if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(this, map));
 
     this._mapState(map);
     return container;
   },
 
-  _drawPolygon() {
+  _drawPolygon(map) {
     // TODO should this._map, & this.options.polygon be passed?
-    new Polygon(this);
+    this._control = new Polygon(map);
   },
 
-  _drawLine() {
-    new Line(this);
+  _drawLine(map) {
+    this._control = new Line(map);
   },
 
-  _drawCircle() {
-    new Circle(this);
+  _drawCircle(map) {
+    this._control = new Circle(map);
   },
 
-  _drawSquare() {
-    new Square(this);
+  _drawSquare(map) {
+    this._control = new Square(map);
   },
 
-  _drawPoint() {
-    new Point(this);
+  _drawPoint(map) {
+    this._control = new Point(map);
   },
 
   _createButton(className, title, fn) {
@@ -72,19 +72,18 @@ Draw.prototype = extend(Control, {
     });
 
     var controlClass = this._controlClass;
-    var map = this._map;
 
-    a.addEventListener('click', function(e) {
+    a.addEventListener('click', (e) => {
       e.preventDefault();
+      var el = e.target;
 
-      // Cancel any initialized handlers
-      map.fire('draw.cancel');
-
-      if (this.classList.contains('active')) {
-        this.classList.remove('active');
+      if (el.classList.contains('active')) {
+        if (this._control) this._control.disable();
+        el.classList.remove('active');
       } else {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
-        this.classList.add('active');
+        if (this._control) this._control.disable();
+        el.classList.add('active');
         fn();
       }
     });
@@ -112,7 +111,7 @@ Draw.prototype = extend(Control, {
 
           map.addSource('draw', drawLayer);
 
-          theme.forEach(function(style) {
+          theme.forEach((style) => {
             map.addLayer(style);
           });
         }

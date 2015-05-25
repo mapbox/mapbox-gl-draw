@@ -4,10 +4,6 @@ let extend = require('xtend');
 let Line = require('./line');
 
 function Polygon(map) {
-  var options = {
-    repeatMode: true
-  };
-
   this.type = 'Polygon';
   this.initialize(map, options);
 }

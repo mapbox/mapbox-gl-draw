@@ -7,8 +7,7 @@ var DOM = util.DOM;
 
 function Line(map) {
   var options = {
-    dashDistance: 20,
-    repeatMode: true
+    dashDistance: 20
   };
 
   this.type = 'LineString';

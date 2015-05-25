@@ -21,8 +21,6 @@ module.exports = {
       this._container.classList.add('mapboxgl-draw-activated');
       this._map.fire('draw.start', { featureType: this.type });
       this.drawStart();
-
-      this._map.on('draw.cancel', this.disable.bind(this));
     }
   },
 
@@ -40,7 +38,6 @@ module.exports = {
     var feature = store.set(type, coordinates);
     this._map.fire('draw.feature.created', {geojson: store.getAll()});
     this._created(feature);
-    if (!this.options.repeatMode) this.disable();
   },
 
   _created(feature) {
@@ -51,8 +48,6 @@ module.exports = {
   },
 
   _cancelDrawing(e) {
-    if (e.keyCode === 27) { // esc
-      this._map.fire('draw.cancel');
-    }
+    if (e.keyCode === 27) this.disable();
   }
 };
