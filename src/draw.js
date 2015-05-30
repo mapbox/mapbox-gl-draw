@@ -46,7 +46,6 @@ Draw.prototype = extend(Control, {
   },
 
   _drawPolygon(map) {
-    // TODO should this._map, & this.options.polygon be passed?
     this._control = new Polygon(map);
   },
 

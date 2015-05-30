@@ -1,10 +1,10 @@
 mapboxgl.draw
 ---
 
-[![Build Status](https://circleci.com/gh/mapbox/gl-draw/tree/dev-pages.svg?style=shield)](https://circleci.com/gh/mapbox/gl-draw/)
-
 Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) 
 maps.
+
+[![Circle CI](https://circleci.com/gh/mapbox/gl-draw.svg?style=svg&circle-token=4824a281fabf173154f542867cb39a7fa6c1c8a4)](https://circleci.com/gh/mapbox/gl-draw)
 
 ### Installing 
 
@@ -14,10 +14,5 @@ maps.
 
 Install dependencies, build the source files and crank up a server via:
 
-    npm start & open http://localhost:9966/debug/
+    npm start & open http://localhost:9966/
 
-You'll need to set a [Mapbox API token](https://www.mapbox.com/help/define-access-token/) 
-to see anything. Set this in `localStorage` from your browsers console after
-`npm start`
-
-    localStorage.setItem('accessToken', 'YOUR ACCESS TOKEN HERE')
