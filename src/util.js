@@ -72,7 +72,7 @@ var transformProp = testProp([
   'WebkitTransform'
 ]);
 
-module.exports.setTransform = function(el, value) {
+module.exports.DOM.setTransform = function(el, value) {
   el.style[transformProp] = value;
 };
 

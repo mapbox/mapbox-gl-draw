@@ -10,7 +10,7 @@ module.exports = [
       'icon-allow-overlap': true
     },
     'paint': {
-      'icon-color': '#f1f075',
+      'icon-color': '#ff00ff',
       'icon-size': 2
     }
   }, {
@@ -19,7 +19,7 @@ module.exports = [
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
-      'fill-color': '#56b881',
+      'fill-color': '#ff00ff',
       'fill-outline-color': '#56b881',
       'fill-opacity': 0.5
     }
@@ -33,7 +33,7 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#56b881',
+      'line-color': '#ff00ff',
       'line-width': 2
     }
   }, {
@@ -46,8 +46,8 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#8a8acb',
-      'line-width': 4
+      'line-color': '#ff00ff',
+      'line-width': 2
     }
   }
 ];

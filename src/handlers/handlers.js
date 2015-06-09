@@ -1,7 +1,10 @@
 'use strict';
 
-let util = require('../util');
-let store = require('../store');
+var util = require('../util');
+var Store = require('../store');
+
+var drawStore = new Store([]);
+var editStore = new Store([]);
 
 module.exports = {
 
@@ -34,9 +37,14 @@ module.exports = {
     }
   },
 
-  create(type, coordinates) {
-    var feature = store.set(type, coordinates);
-    this._map.fire('draw.feature.created', {geojson: store.getAll()});
+  editCreate(coords) {
+    editStore.set('Point', coords);
+    this._map.fire('edit.feature.create', {geojson: editStore.getAll()});
+  },
+
+  drawCreate(type, coords) {
+    var feature = drawStore.set(type, coords);
+    this._map.fire('draw.feature.create', {geojson: drawStore.getAll()});
     this._created(feature);
   },
 

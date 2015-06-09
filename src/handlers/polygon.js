@@ -1,11 +1,11 @@
 'use strict';
 
-let extend = require('xtend');
-let Line = require('./line');
+var extend = require('xtend');
+var Line = require('./line');
 
 function Polygon(map) {
   this.type = 'Polygon';
-  this.initialize(map, options);
+  this.initialize(map);
 }
 
 Polygon.prototype = extend(Line, {

@@ -1,17 +1,18 @@
 'use strict';
 
-let extend = require('xtend');
-let Control = require('./control');
-let theme = require('./theme');
-let util = require('./util');
-let DOM = util.DOM;
+var extend = require('xtend');
+var Control = require('./control');
+var themeStyle = require('./theme/style');
+var themeEdit = require('./theme/edit');
+var util = require('./util');
+var DOM = util.DOM;
 
 // Control handlers
-let Polygon = require('./handlers/polygon');
-let Line = require('./handlers/line');
-let Circle = require('./handlers/circle');
-let Square = require('./handlers/square');
-let Point = require('./handlers/point');
+var Polygon = require('./handlers/polygon');
+var Line = require('./handlers/line');
+var Circle = require('./handlers/circle');
+var Square = require('./handlers/square');
+var Point = require('./handlers/point');
 
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
@@ -91,7 +92,7 @@ Draw.prototype = extend(Control, {
   },
 
   _mapState(map) {
-    var drawLayer;
+    var drawLayer, editLayer;
     var controlClass = this._controlClass;
 
     map.on('load', () => {
@@ -100,17 +101,29 @@ Draw.prototype = extend(Control, {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      map.on('draw.feature.created', (e) => {
+      map.on('edit.feature.create', (e) => {
+        if (editLayer) {
+          editLayer.setData(e.geojson);
+        } else {
+          editLayer = new mapboxgl.GeoJSONSource({
+            data: e.geojson
+          });
+          map.addSource('edit', editLayer);
+          themeEdit.forEach((style) => {
+            map.addLayer(style);
+          });
+        }
+      });
+
+      map.on('draw.feature.create', (e) => {
         if (drawLayer) {
           drawLayer.setData(e.geojson);
         } else {
           drawLayer = new mapboxgl.GeoJSONSource({
             data: e.geojson
           });
-
           map.addSource('draw', drawLayer);
-
-          theme.forEach((style) => {
+          themeStyle.forEach((style) => {
             map.addLayer(style);
           });
         }

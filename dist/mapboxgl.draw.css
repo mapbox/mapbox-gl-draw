@@ -25,8 +25,8 @@
 .mapboxgl-ctrl-draw > button {
   border-color:rgba(0,0,0,0.9);
   color:rgba(255,255,255,0.5);
-  width:40px;
-  height:40px;
+  width:30px;
+  height:30px;
   }
 
 .mapboxgl-ctrl-draw > button:hover {
@@ -61,12 +61,15 @@
   .mapboxgl-ctrl-draw-btn.square:before   { content:'\e603'; }
   .mapboxgl-ctrl-draw-btn.line:before  { content:'\e604'; }
 
-.mapboxgl-draw-activated .mapboxgl-canvas.mapboxgl-interactive { cursor:crosshair; }
+.mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
 
 .mapboxgl-draw-guide-dash {
-  background-color:#f06eaa;
-	opacity:0.6;
-	position:absolute;
-	width:5px;
-	height:5px;
+  background-color:magenta;
+  opacity:0.6;
+  position:absolute;
+  width:4px;
+  height:4px;
   }
+  .mapboxgl-draw-guide-dash:last-child {
+    display:none;
+    }

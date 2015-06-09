@@ -1,9 +1,19 @@
 'use strict';
 
-module.exports = {
+function Store(obj) {
+  this._data = {
+    type: 'FeatureCollection',
+    features: obj
+  };
+}
 
+Store.prototype = {
   getAll() {
     return this._data;
+  },
+
+  clear() {
+    this._data.features = [];
   },
 
   get() {
@@ -16,23 +26,20 @@ module.exports = {
     // TODO remove a specific geojson object
   },
 
-  set(type, coordinates) {
+  set(type, coords) {
 
     var obj = {
       type: 'Feature',
       properties: {},
       geometry: {
         type: type,
-        coordinates: coordinates
+        coordinates: coords
       }
     };
 
     this._data.features.push(obj);
     return obj;
-  },
-
-  _data: {
-    type: 'FeatureCollection',
-    features: []
   }
 };
+
+module.exports = Store;

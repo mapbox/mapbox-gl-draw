@@ -6,147 +6,93 @@ var util = require('../util');
 var DOM = util.DOM;
 
 function Line(map) {
-  var options = {
-    dashDistance: 20
-  };
-
   this.type = 'LineString';
-  this.initialize(map, options);
+  this.initialize(map);
 }
 
 Line.prototype = extend(Handlers, {
 
   drawStart() {
     if (this._map) {
+      this._data = [];
+      this._enabled = true;
 
-      // Container to hold on to an
-      // Array points of coordinates
-      this._nodes = [];
-      var container = this._map.getContainer();
-
-      container.addEventListener('mousedown', function(e) {
-        this._onMouseDown(e);
-      }.bind(this));
-
-      container.addEventListener('mousemove', function(e) {
-        this._onMouseMove(e);
-      }.bind(this));
-
-      container.addEventListener('mouseup', function(e) {
-        this._onMouseUp(e);
-      }.bind(this));
-
-      this._map.on('zoomend', function(e) {
-        this._onZoomEnd(e);
-      }.bind(this));
+      this._map.on('mousemove', this._onMouseMove.bind(this));
+      this._map.on('click', this._onClick.bind(this));
+      this._map.on('move', this._onMove.bind(this));
     }
   },
 
   drawStop() {
-    if (this._map) {
-      this._map.off('click', this._onClick);
-    }
+    if (this._map) this._map.off('click', this._onClick);
   },
 
-  _onClick() {
-    // var c = this._map.unproject([e.point.x, e.point.y]);
-    // var point = [c.lng, c.lat];
-    // this.create(this.type, point);
-  },
-
-  _onMouseDown(e) {
-    var point = this._mousePos(e);
-    this._currentLatLng = this._map.unproject([point.x, point.y]);
+  _onClick(e) {
+    var c = this._map.unproject([e.point.x, e.point.y]);
+    var coords = [c.lng, c.lat];
+    this._data.push(coords);
+    this._addVertex(coords);
   },
 
   _onMouseMove(e) {
-    if (this._currentLatLng) {
-      var point = this._mousePos(e);
-      var newPos = this._map.unproject([point.x, point.y]);
-      this._updateGuide(newPos);
+    if (this._data.length) {
+      // Update the guide line
+      this._currentPos = {x: e.point.x, y: e.point.y};
+      this._updateGuide(this._currentPos);
     }
   },
 
-  _onMouseUp(e) {
-    if (this._currentLatLng) {
-      var point = this._mousePos(e);
-      this._addVertex(this._map.unproject([point.x, point.y]));
-    }
-
-    this._currentLatLng = null;
+  _addVertex(coords) {
+    this.editCreate(coords);
+    this._vertexCreate(coords, true);
   },
 
-  _mousePos(e) {
-    var el = this._map.getContainer();
-    var rect = el.getBoundingClientRect();
-    return new mapboxgl.Point(
-      e.clientX - rect.left - el.clientLeft,
-      e.clientY - rect.top - el.clientTop
-    );
-  },
-
-  _createHandles(latLng) {
-    // 1. TODO Take the current coordinates.
-    // 2. unproject and plot a div on the map
-    // to act as a interactive control that listens
-    // to a click event to complete a path.
-    // The click event should respond to this._finishShape();
-  },
-
-  _addVertex(latLng) {
-    this._nodes.push(latLng);
-    this._createHandles();
-    this._vertexChanged(latLng, true);
-  },
-
-  _vertexChanged(latLng, added) {
-    // this._updateRunningMeasure(latlng, added);
-    this._clearGuides();
-  },
-
-  _onZoomEnd(e) {
-    this._updateGuide();
-  },
-
-  _updateGuide(newPos) {
-    if (this._nodes.length) {
-      var nodes = this._nodes;
-      newPos = newPos || this._map.project(this._currentLatLng);
-
+  _vertexCreate() {
+    if (this._data.length >= 2) {
+      this.drawCreate(this.type, this._data);
       this._clearGuides();
-
-      // Draw the new guide line
-      this._drawGuide(
-        this._map.project(nodes[nodes.length - 1]),
-        newPos
-      );
     }
+  },
+
+  _onMove() {
+    if (this._data.length) this._updateGuide();
+  },
+
+  _updateGuide(pos) {
+    var d = this._data;
+    this._clearGuides();
+
+    var a = d[d.length - 1];
+    a = this._map.project([a[1], a[0]]);
+
+    var b = pos || this._currentPos;
+
+    // Draw guide line
+    this._drawGuide(a, b);
   },
 
   _drawGuide(a, b) {
     var length = Math.floor(Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)));
-    var dashDistance = this.options.dashDistance;
+    var dashDistance = 10;
 
     if (!this._guidesContainer) {
       this._guidesContainer = DOM.create('div', 'mapboxgl-draw-guides', this._map.getContainer());
     }
 
     // Draw a dash every GuildeLineDistance
-    var fraction, dashPoint, dash;
-    for (var i; i < length; i += dashDistance) {
+    for (var i = 0; i < length; i += dashDistance) {
+
       // Work out a fraction along line we are
-      fraction = i / length;
+      var fraction = i / length;
 
       // Calculate a new x,y point
-      dashPoint = {
-        x: Math.floor((a.x * (1 - fraction)) + (fraction * b.x)),
-        y: Math.floor((a.y * (1 - fraction)) + (fraction * b.y))
-      };
+      var x = Math.floor((a.x * (1 - fraction)) + (fraction * b.x));
+      var y = Math.floor((a.y * (1 - fraction)) + (fraction * b.y));
 
       // Add guide dash to guide container
-      dash = DOM.create('div', 'mapboxgl-draw-guide-dash', this._guidesContainer);
-
-      DOM.setTransform(dash, dashPoint);
+      var dash = DOM.create('div', 'mapboxgl-draw-guide-dash', this._guidesContainer);
+      dash.style.top = y + 'px';
+      dash.style.left = x + 'px';
     }
   },
 
