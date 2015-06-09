@@ -18,7 +18,7 @@ module.exports = {
   enable() {
     var map = this._map;
     if (map) {
-      util.DOM.disableSelection();
+      util.DOM.disableDrag();
       map.getContainer().focus();
       this._container.addEventListener('keyup', this._cancelDrawing.bind(this));
       this._container.classList.add('mapboxgl-draw-activated');
@@ -29,7 +29,7 @@ module.exports = {
 
   disable() {
     if (this._map) {
-      util.DOM.enableSelection();
+      util.DOM.enableDrag();
       this._container.removeEventListener('keyup', this._cancelDrawing.bind(this));
       this._container.classList.remove('mapboxgl-draw-activated');
       this._map.fire('draw.stop', { featureType: this.type });

@@ -56,13 +56,22 @@
   -moz-osx-font-smoothing:grayscale;
   }
   .mapboxgl-ctrl-draw-btn.marker:before { content:'\e600'; }
-  .mapboxgl-ctrl-draw-btn.shape:before { content:'\e601'; }
+  .mapboxgl-ctrl-draw-btn.shape:before  { content:'\e601'; }
   .mapboxgl-ctrl-draw-btn.circle:before { content:'\e602'; }
-  .mapboxgl-ctrl-draw-btn.square:before   { content:'\e603'; }
-  .mapboxgl-ctrl-draw-btn.line:before  { content:'\e604'; }
+  .mapboxgl-ctrl-draw-btn.square:before { content:'\e603'; }
+  .mapboxgl-ctrl-draw-btn.line:before   { content:'\e604'; }
 
 .mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
 
+.mapboxgl-draw-guide-square {
+  position: absolute;
+  top:0;
+  left:0;
+  width:0;
+  height:0;
+  background:#fff;
+  border:2px dotted magenta;
+  }
 .mapboxgl-draw-guide-dash {
   background-color:magenta;
   opacity:0.6;

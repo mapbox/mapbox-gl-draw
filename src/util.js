@@ -7,13 +7,13 @@
  * @returns {Object}
  */
 module.exports.setOptions = function(obj, options) {
-    if (!obj.hasOwnProperty('options')) {
-        obj.options = obj.options ? Object.create(obj.options) : {};
-    }
-    for (var i in options) {
-        obj.options[i] = options[i];
-    }
-    return obj.options;
+  if (!obj.hasOwnProperty('options')) {
+    obj.options = obj.options ? Object.create(obj.options) : {};
+  }
+  for (var i in options) {
+    obj.options[i] = options[i];
+  }
+  return obj.options;
 };
 
 module.exports.DOM = {};
@@ -60,13 +60,6 @@ function testProp(props) {
   }
 }
 
-var selectProp = testProp([
-  'userSelect',
-  'MozUserSelect',
-  'WebkitUserSelect',
-  'msUserSelect'
-]);
-
 var transformProp = testProp([
   'transform',
   'WebkitTransform'
@@ -76,15 +69,21 @@ module.exports.DOM.setTransform = function(el, value) {
   el.style[transformProp] = value;
 };
 
-var userSelect;
-module.exports.DOM.disableSelection = function() {
+var selectProp = testProp([
+  'userSelect',
+  'MozUserSelect',
+  'WebkitUserSelect',
+  'msUserSelect'
+]), userSelect;
+
+module.exports.DOM.disableDrag = function () {
   if (selectProp) {
     userSelect = docStyle[selectProp];
     docStyle[selectProp] = 'none';
   }
 };
 
-module.exports.DOM.enableSelection = function() {
+module.exports.DOM.enableDrag = function () {
   if (selectProp) {
     docStyle[selectProp] = userSelect;
   }

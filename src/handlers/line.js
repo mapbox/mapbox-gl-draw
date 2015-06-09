@@ -28,10 +28,19 @@ Line.prototype = extend(Handlers, {
   },
 
   _onClick(e) {
-    var c = this._map.unproject([e.point.x, e.point.y]);
+    var c = this._map.unproject(e.point);
     var coords = [c.lng, c.lat];
-    this._data.push(coords);
-    this._addVertex(coords);
+
+    this._map.featuresAt(e.point, {
+      radius: 0
+    }, (err, feature) => {
+      if (err) throw err;
+
+      // TODO complete a linestring if featuresAt returns a point.
+      console.log(feature);
+      this._data.push(coords);
+      this._addVertex(coords);
+    });
   },
 
   _onMouseMove(e) {
@@ -91,8 +100,7 @@ Line.prototype = extend(Handlers, {
 
       // Add guide dash to guide container
       var dash = DOM.create('div', 'mapboxgl-draw-guide-dash', this._guidesContainer);
-      dash.style.top = y + 'px';
-      dash.style.left = x + 'px';
+      DOM.setTransform(dash, 'translate(' + x + 'px,' + y + 'px)');
     }
   },
 
