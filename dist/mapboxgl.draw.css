@@ -57,7 +57,6 @@
   }
   .mapboxgl-ctrl-draw-btn.marker:before { content:'\e600'; }
   .mapboxgl-ctrl-draw-btn.shape:before  { content:'\e601'; }
-  .mapboxgl-ctrl-draw-btn.circle:before { content:'\e602'; }
   .mapboxgl-ctrl-draw-btn.square:before { content:'\e603'; }
   .mapboxgl-ctrl-draw-btn.line:before   { content:'\e604'; }
 

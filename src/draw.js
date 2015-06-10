@@ -10,7 +10,6 @@ var DOM = util.DOM;
 // Control handlers
 var Polygon = require('./handlers/polygon');
 var Line = require('./handlers/line');
-var Circle = require('./handlers/circle');
 var Square = require('./handlers/square');
 var Point = require('./handlers/point');
 
@@ -38,7 +37,6 @@ Draw.prototype = extend(Control, {
 
     if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawPolygon.bind(this, map));
     if (controls.line) this._createButton(controlClass + ' line', 'Line tool', this._drawLine.bind(this, map));
-    if (controls.circle) this._createButton(controlClass + ' circle', 'Circle tool', this._drawCircle.bind(this, map));
     if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(this, map));
     if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(this, map));
 
@@ -52,10 +50,6 @@ Draw.prototype = extend(Control, {
 
   _drawLine(map) {
     this._control = new Line(map);
-  },
-
-  _drawCircle(map) {
-    this._control = new Circle(map);
   },
 
   _drawSquare(map) {
