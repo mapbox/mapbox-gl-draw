@@ -18,6 +18,20 @@ module.exports.setOptions = function(obj, options) {
 
 module.exports.DOM = {};
 
+/* Captures mouse position
+ *
+ * @param {Object} e Mouse event
+ * @param {Object} el Container element.
+ * @returns {Point}
+ */
+module.exports.DOM.mousePos = function(e, el) {
+  var rect = el.getBoundingClientRect();
+  return new mapboxgl.Point(
+    e.clientX - rect.left - el.clientLeft,
+    e.clientY - rect.top - el.clientTop
+  );
+};
+
 /* Builds DOM elements
  *
  * @param {String} tag Element name
@@ -76,14 +90,14 @@ var selectProp = testProp([
   'msUserSelect'
 ]), userSelect;
 
-module.exports.DOM.disableDrag = function () {
+module.exports.DOM.disableSelection = function () {
   if (selectProp) {
     userSelect = docStyle[selectProp];
     docStyle[selectProp] = 'none';
   }
 };
 
-module.exports.DOM.enableDrag = function () {
+module.exports.DOM.enableSelection = function () {
   if (selectProp) {
     docStyle[selectProp] = userSelect;
   }
