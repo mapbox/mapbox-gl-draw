@@ -55,17 +55,24 @@ Polygon.prototype = extend(Vertices, {
   },
 
   _addVertex(coords) {
-    this.editCreate(coords);
+    this.editCreate('Point', coords);
     this._vertexCreate();
   },
 
   _vertexCreate() {
+    if (this._data.length === 2) {
+      // Add a LineString guide that mimics the `mousemove` one.
+      this.editCreate('LineString', this._data);
+    }
+
     if (this._data.length >= 3) {
       this._data.push(this._data[0]);
       this.drawCreate(this.type, [this._data]);
 
       // Slice the last item out.
       this._data = this._data.slice(0, (this._data.length - 1));
+
+      // TODO Clear the lineString guide.
     }
 
     this.clearGuides();

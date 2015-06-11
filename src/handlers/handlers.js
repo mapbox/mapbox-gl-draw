@@ -37,8 +37,8 @@ module.exports = {
     this.drawStop(this._map);
   },
 
-  editCreate(coords) {
-    editStore.set('Point', coords);
+  editCreate(type, coords) {
+    editStore.set(type, coords);
     this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
   },
 

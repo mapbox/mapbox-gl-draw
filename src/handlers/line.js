@@ -55,7 +55,7 @@ Line.prototype = extend(Vertices, {
   },
 
   _addVertex(coords) {
-    this.editCreate(coords);
+    this.editCreate('Point', coords);
     this._vertexCreate();
   },
 
@@ -83,6 +83,7 @@ Line.prototype = extend(Vertices, {
     // Draw guide line
     this.drawGuide(this._map, a, b);
   }
+
 });
 
 module.exports = Line;
