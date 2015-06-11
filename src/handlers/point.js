@@ -11,16 +11,15 @@ function Point(map) {
 Point.prototype = extend(Handlers, {
 
   drawStart() {
-    if (this._map) this._map.on('click', this._onClick.bind(this));
-    this._enabled = true;
+    this._onClick = this._onClick.bind(this);
+    this._map.on('click', this._onClick);
   },
 
   drawStop() {
-    if (this._map) this._enabled = false;
+    this._map.off('click', this._onClick);
   },
 
   _onClick(e) {
-    if (!this._enabled) return;
     var c = this._map.unproject([e.point.x, e.point.y]);
     var coords = [c.lng, c.lat];
     this.drawCreate(this.type, coords);

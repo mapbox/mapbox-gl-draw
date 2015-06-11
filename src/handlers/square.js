@@ -13,22 +13,24 @@ function Square(map) {
 Square.prototype = extend(Handlers, {
 
   drawStart() {
-    if (this._map) {
-      this._container = this._map.getContainer();
-      this._enabled = true;
-      this._container.addEventListener('mousedown', this._onMouseDown.bind(this), true);
-      this._container.addEventListener('mouseup', this._onMouseUp.bind(this));
-      this._map.on('mousemove', this._onMouseMove.bind(this));
-    }
+    this._onMouseDown = this._onMouseDown.bind(this);
+    this._onMouseUp = this._onMouseUp.bind(this);
+    this._onMouseMove = this._onMouseMove.bind(this);
+
+    this._container = this._map.getContainer();
+    this._container.addEventListener('mousedown', this._onMouseDown, true);
+    this._container.addEventListener('mouseup', this._onMouseUp);
+    this._map.on('mousemove', this._onMouseMove);
   },
 
   drawStop() {
-    if (this._map) this._map.off('click', this._onClick);
+    this._container.removeEventListener('mousedown', this._onMouseDown, true);
+    this._container.removeEventListener('mouseup', this._onMouseUp);
+    this._map.off('mousemove', this._onMouseMove);
   },
 
   _onMouseDown(e) {
     e.stopPropagation();
-    if (!this._enabled) return;
     this._activated = true;
     this._start = DOM.mousePos(e, this._container);
     this._squareDiv = DOM.create('div', 'mapboxgl-draw-guide-square', this._container);

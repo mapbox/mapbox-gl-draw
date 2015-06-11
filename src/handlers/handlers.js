@@ -12,6 +12,8 @@ module.exports = {
     this._map = map;
     this._container = map.getContainer();
     util.setOptions(this, options);
+
+    this._onKeyUp = this._onKeyUp.bind(this);
     this.enable();
   },
 
@@ -20,21 +22,19 @@ module.exports = {
     if (map) {
       map.getContainer().focus();
       util.DOM.disableSelection();
-      this._container.addEventListener('keyup', this._cancelDrawing.bind(this));
+      this._container.addEventListener('keyup', this._onKeyUp);
       this._container.classList.add('mapboxgl-draw-activated');
-      this._map.fire('draw.start', { featureType: this.type });
+      map.fire('draw.start', { featureType: this.type });
       this.drawStart();
     }
   },
 
   disable() {
-    if (this._map) {
-      util.DOM.enableSelection();
-      this._container.removeEventListener('keyup', this._cancelDrawing.bind(this));
-      this._container.classList.remove('mapboxgl-draw-activated');
-      this._map.fire('draw.stop', { featureType: this.type });
-      this.drawStop();
-    }
+    util.DOM.enableSelection();
+    this._container.removeEventListener('keyup', this._cancelDrawing);
+    this._container.classList.remove('mapboxgl-draw-activated');
+    this._map.fire('draw.stop', { featureType: this.type });
+    this.drawStop(this._map);
   },
 
   editCreate(coords) {
@@ -55,7 +55,11 @@ module.exports = {
     });
   },
 
-  _cancelDrawing(e) {
-    if (e.keyCode === 27) this.disable();
+  _onKeyUp(e) {
+    switch (e.keyCode) {
+      case 27: // Esc
+      this.disable();
+      break;
+    }
   }
 };

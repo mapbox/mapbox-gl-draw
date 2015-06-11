@@ -11,18 +11,21 @@ function Polygon(map) {
 Polygon.prototype = extend(Vertices, {
 
   drawStart() {
-    if (this._map) {
-      this._data = [];
-      this._enabled = true;
+    this._data = [];
 
-      this._map.on('mousemove', this._onMouseMove.bind(this));
-      this._map.on('click', this._onClick.bind(this));
-      this._map.on('move', this._onMove.bind(this));
-    }
+    this._onMouseMove = this._onMouseMove.bind(this);
+    this._onClick = this._onClick.bind(this);
+    this._onMove = this._onMove.bind(this);
+
+    this._map.on('mousemove', this._onMouseMove);
+    this._map.on('click', this._onClick);
+    this._map.on('move', this._onMove);
   },
 
   drawStop() {
-    if (this._map) this._map.off('click', this._onClick);
+    this._map.off('mousemove', this._onMouseMove);
+    this._map.off('click', this._onClick);
+    this._map.off('move', this._onMove);
   },
 
   _onClick(e) {
