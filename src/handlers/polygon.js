@@ -23,6 +23,8 @@ Polygon.prototype = extend(Vertices, {
   },
 
   drawStop() {
+    this.clearGuides();
+    this.editDestroy();
     this._map.off('mousemove', this._onMouseMove);
     this._map.off('click', this._onClick);
     this._map.off('move', this._onMove);
@@ -54,7 +56,7 @@ Polygon.prototype = extend(Vertices, {
 
   _addVertex(coords) {
     this.editCreate(coords);
-    this._vertexCreate(coords, true);
+    this._vertexCreate();
   },
 
   _vertexCreate() {

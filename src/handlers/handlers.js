@@ -39,12 +39,17 @@ module.exports = {
 
   editCreate(coords) {
     editStore.set('Point', coords);
-    this._map.fire('edit.feature.create', {geojson: editStore.getAll()});
+    this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
+  },
+
+  editDestroy() {
+    editStore.clear();
+    this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
   },
 
   drawCreate(type, coords) {
     var feature = drawStore.set(type, coords);
-    this._map.fire('draw.feature.create', {geojson: drawStore.getAll()});
+    this._map.fire('draw.feature.update', {geojson: drawStore.getAll()});
     this._created(feature);
   },
 

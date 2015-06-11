@@ -94,7 +94,7 @@ Draw.prototype = extend(Control, {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      map.on('edit.feature.create', (e) => {
+      map.on('edit.feature.update', (e) => {
         if (editLayer) {
           editLayer.setData(e.geojson);
         } else {
@@ -108,7 +108,7 @@ Draw.prototype = extend(Control, {
         }
       });
 
-      map.on('draw.feature.create', (e) => {
+      map.on('draw.feature.update', (e) => {
         if (drawLayer) {
           drawLayer.setData(e.geojson);
         } else {
