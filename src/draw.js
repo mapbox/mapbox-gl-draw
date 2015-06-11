@@ -39,8 +39,18 @@ Draw.prototype = extend(Control, {
     if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(this, map));
     if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(this, map));
 
+    map.getContainer().addEventListener('mousedown', this._onMouseDown, true);
+
     this._mapState(map);
     return container;
+  },
+
+  _onMouseDown(e) {
+    if (e.altKey) {
+      e.stopPropagation();
+      // TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
+      // this._captureFeatures();
+    }
   },
 
   _drawPolygon(map) {
