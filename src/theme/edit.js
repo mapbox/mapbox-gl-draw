@@ -12,6 +12,7 @@ module.exports = [
     'paint': {
       'icon-color': '#f1f075',
       'icon-size': 2
-    }
+    },
+    'interactive': true
   }
 ];

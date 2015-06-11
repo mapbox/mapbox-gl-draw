@@ -12,7 +12,8 @@ module.exports = [
     'paint': {
       'icon-color': '#ff00ff',
       'icon-size': 2
-    }
+    },
+    'interactive': true
   }, {
     'id': 'gl-draw-polygons',
     'type': 'fill',
@@ -22,7 +23,8 @@ module.exports = [
       'fill-color': '#ff00ff',
       'fill-outline-color': '#56b881',
       'fill-opacity': 0.5
-    }
+    },
+    'interactive': true
   }, {
     'id': 'gl-draw-polygon-stroke',
     'type': 'line',
@@ -35,7 +37,8 @@ module.exports = [
     'paint': {
       'line-color': '#ff00ff',
       'line-width': 2
-    }
+    },
+    'interactive': true
   }, {
     'id': 'gl-draw-line',
     'type': 'line',
@@ -48,6 +51,7 @@ module.exports = [
     'paint': {
       'line-color': '#ff00ff',
       'line-width': 2
-    }
+    },
+    'interactive': true
   }
 ];
