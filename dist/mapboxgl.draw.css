@@ -1,8 +1,9 @@
 @font-face {
   font-family:'mapboxgl-draw';
-    src:url('font/mapboxgl-draw.eot?v=1');
-    src:url('font/mapboxgl-draw.eot?v=1#iefix') format('embedded-opentype'),
-        url('font/mapboxgl-draw.woff?v=1') format('woff');
+    src:url('font/mapboxgl-draw.eot?v=2');
+    src:url('font/mapboxgl-draw.eot?v=2#iefix') format('embedded-opentype'),
+        url('font/mapboxgl-draw.woff2?v=2') format('woff2'),
+        url('font/mapboxgl-draw.woff?v=2') format('woff');
   font-weight:normal;
   font-style:normal;
   }
@@ -57,26 +58,26 @@
   }
   .mapboxgl-ctrl-draw-btn.marker:before { content:'\e600'; }
   .mapboxgl-ctrl-draw-btn.shape:before  { content:'\e601'; }
-  .mapboxgl-ctrl-draw-btn.square:before { content:'\e603'; }
-  .mapboxgl-ctrl-draw-btn.line:before   { content:'\e604'; }
+  .mapboxgl-ctrl-draw-btn.square:before { content:'\e602'; }
+  .mapboxgl-ctrl-draw-btn.line:before   { content:'\e603'; }
 
 .mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
 
 .mapboxgl-draw-guide-square {
-  position: absolute;
+  background:rgba(255,0,255,0.10);
+  border:3px dotted magenta;
+  position:absolute;
   top:0;
   left:0;
   width:0;
   height:0;
-  background:#fff;
-  border:2px dotted magenta;
   }
 .mapboxgl-draw-guide-dash {
   background-color:magenta;
   opacity:0.6;
   position:absolute;
-  width:4px;
-  height:4px;
+  width:3px;
+  height:3px;
   }
   .mapboxgl-draw-guide-dash:last-child {
     display:none;

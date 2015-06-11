@@ -1,16 +1,14 @@
 'use strict';
 
 var extend = require('xtend');
-var Handlers = require('./handlers');
-var util = require('../util');
-var DOM = util.DOM;
+var Vertices = require('./vertices');
 
 function Line(map) {
   this.type = 'LineString';
   this.initialize(map);
 }
 
-Line.prototype = extend(Handlers, {
+Line.prototype = extend(Vertices, {
 
   drawStart() {
     if (this._map) {
@@ -59,8 +57,9 @@ Line.prototype = extend(Handlers, {
   _vertexCreate() {
     if (this._data.length >= 2) {
       this.drawCreate(this.type, this._data);
-      this._clearGuides();
     }
+
+    this._clearGuides();
   },
 
   _onMove() {
@@ -77,41 +76,8 @@ Line.prototype = extend(Handlers, {
     var b = pos || this._currentPos;
 
     // Draw guide line
-    this._drawGuide(a, b);
-  },
-
-  _drawGuide(a, b) {
-    var length = Math.floor(Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)));
-    var dashDistance = 10;
-
-    if (!this._guidesContainer) {
-      this._guidesContainer = DOM.create('div', 'mapboxgl-draw-guides', this._map.getContainer());
-    }
-
-    // Draw a dash every GuildeLineDistance
-    for (var i = 0; i < length; i += dashDistance) {
-
-      // Work out a fraction along line we are
-      var fraction = i / length;
-
-      // Calculate a new x,y point
-      var x = Math.floor((a.x * (1 - fraction)) + (fraction * b.x));
-      var y = Math.floor((a.y * (1 - fraction)) + (fraction * b.y));
-
-      // Add guide dash to guide container
-      var dash = DOM.create('div', 'mapboxgl-draw-guide-dash', this._guidesContainer);
-      DOM.setTransform(dash, 'translate(' + x + 'px,' + y + 'px)');
-    }
-  },
-
-  _clearGuides() {
-    if (this._guidesContainer) {
-      while (this._guidesContainer.firstChild) {
-        this._guidesContainer.removeChild(this._guidesContainer.firstChild);
-      }
-    }
+    this._drawGuide(this._map, a, b);
   }
-
 });
 
 module.exports = Line;
