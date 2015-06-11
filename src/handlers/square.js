@@ -24,6 +24,7 @@ Square.prototype = extend(Handlers, {
   },
 
   drawStop() {
+    this._clearSquareGuide();
     this._container.removeEventListener('mousedown', this._onMouseDown, true);
     this._container.removeEventListener('mouseup', this._onMouseUp);
     this._map.off('mousemove', this._onMouseMove);
@@ -33,13 +34,13 @@ Square.prototype = extend(Handlers, {
     e.stopPropagation();
     this._activated = true;
     this._start = DOM.mousePos(e, this._container);
-    this._squareDiv = DOM.create('div', 'mapboxgl-draw-guide-square', this._container);
+    this._squareGuide = DOM.create('div', 'mapboxgl-draw-guide-square', this._container);
   },
 
   _onMouseMove(e) {
     if (!this._activated) return;
     var current = e.point;
-    var box = this._squareDiv;
+    var box = this._squareGuide;
 
     var pos1 = this._map.unproject(this._start);
     var pos2 = this._map.unproject([this._start.x, current.y]);
@@ -64,9 +65,15 @@ Square.prototype = extend(Handlers, {
     box.style.height = (maxY - minY) + 'px';
   },
 
+  _clearSquareGuide() {
+    if (this._squareGuide.parentNode) {
+      this._squareGuide.parentNode.removeChild(this._squareGuide);
+    }
+  },
+
   _onMouseUp() {
     this._activated = false;
-    this._squareDiv.parentNode.removeChild(this._squareDiv);
+    this._clearSquareGuide();
     this.drawCreate(this.type, [this._data]);
   }
 

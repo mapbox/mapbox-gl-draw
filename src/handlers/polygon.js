@@ -66,7 +66,7 @@ Polygon.prototype = extend(Vertices, {
       this._data = this._data.slice(0, (this._data.length - 1));
     }
 
-    this._clearGuides();
+    this.clearGuides();
   },
 
   _onMove() {
@@ -75,7 +75,7 @@ Polygon.prototype = extend(Vertices, {
 
   _updateGuide(pos) {
     var d = this._data;
-    this._clearGuides();
+    this.clearGuides();
 
     var a = d[d.length - 1];
     a = this._map.project([a[1], a[0]]);
@@ -83,7 +83,7 @@ Polygon.prototype = extend(Vertices, {
     var b = pos || this._currentPos;
 
     // Draw guide line
-    this._drawGuide(this._map, a, b);
+    this.drawGuide(this._map, a, b);
   }
 
 });

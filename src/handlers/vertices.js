@@ -6,7 +6,7 @@ var DOM = require('../util').DOM;
 
 module.exports = extend(handlers, {
 
-  _drawGuide(map, a, b) {
+  drawGuide(map, a, b) {
     var length = Math.floor(Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2)));
     var dashDistance = 6;
 
@@ -30,7 +30,7 @@ module.exports = extend(handlers, {
     }
   },
 
-  _clearGuides() {
+  clearGuides() {
     if (this._guidesContainer) {
       while (this._guidesContainer.firstChild) {
         this._guidesContainer.removeChild(this._guidesContainer.firstChild);
