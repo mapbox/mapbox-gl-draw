@@ -25,8 +25,7 @@ Draw.prototype = extend(Control, {
       marker: true,
       line: true,
       shape: true,
-      square: true,
-      circle: true
+      square: true
     }
   },
 
