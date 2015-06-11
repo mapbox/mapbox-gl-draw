@@ -12,7 +12,8 @@
     ]
   },
   "scripts": {
-    "test": "eslint --no-eslintrc -c .eslintrc index.js src",
+    "test": "npm run lint && browserify test/test.js | tap-closer | smokestack | faucet",
+    "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
     "start": "budo index.js --serve=dist/mapboxgl.draw.js --live -d | bistre"
   },
@@ -36,6 +37,10 @@
     "browserify": "^9.0.3",
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
+    "faucet": "0.0.1",
+    "smokestack": "^3.3.0",
+    "tap-closer": "^1.0.0",
+    "tape": "^4.0.0",
     "uglify-js": "^2.4.23"
   },
   "dependencies": {

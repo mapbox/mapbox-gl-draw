@@ -66,7 +66,7 @@ Square.prototype = extend(Handlers, {
   },
 
   _clearSquareGuide() {
-    if (this._squareGuide.parentNode) {
+    if (this._squareGuide && this._squareGuide.parentNode) {
       this._squareGuide.parentNode.removeChild(this._squareGuide);
     }
   },
