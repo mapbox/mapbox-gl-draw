@@ -2,6 +2,7 @@
 
 var util = require('../util');
 var Store = require('../store');
+var hat = require('hat');
 
 var drawStore = new Store([]);
 var editStore = new Store([]);
@@ -37,7 +38,7 @@ module.exports = {
   },
 
   editCreate(type, coords) {
-    editStore.set(type, coords);
+    editStore.set(type, hat(), coords);
     this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
   },
 
@@ -47,7 +48,7 @@ module.exports = {
   },
 
   drawCreate(type, coords) {
-    var feature = drawStore.set(type, coords);
+    var feature = drawStore.set(type, hat(), coords);
     this._map.fire('draw.feature.update', {geojson: drawStore.getAll()});
     this._created(feature);
   },

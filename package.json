@@ -44,6 +44,8 @@
     "uglify-js": "^2.4.23"
   },
   "dependencies": {
+    "hat": "0.0.3",
+    "immutable": "^3.7.3",
     "xtend": "^4.0.0"
   }
 }
