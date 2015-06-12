@@ -26,11 +26,11 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16"
-     inkscape:cx="6.6642533"
+     inkscape:cx="14.164253"
      inkscape:cy="8.88572"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
-     showgrid="true"
+     showgrid="false"
      units="px"
      inkscape:window-width="1280"
      inkscape:window-height="751"
@@ -82,5 +82,10 @@
        d="M 10 2 C 6.686292 2 4 4.6863 4 8 C 4 11.3137 10 17 10 17 C 10 17 16 11.3137 16 8 C 16 4.6863 13.313708 2 10 2 z M 10 4 C 12.071068 4 13.75 5.6789 13.75 7.75 C 13.75 9.8211 10 14 10 14 C 10 14 6.25 9.8211 6.25 7.75 C 6.25 5.6789 7.928932 4 10 4 z "
        transform="translate(0,1032.3622)"
        id="path17305" />
+    <path
+       style="fill:#000000;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       d="m 8,1045.3622 4,0 -2,2 z"
+       id="path17396"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>

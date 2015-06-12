@@ -20,14 +20,14 @@ Square.prototype = extend(Handlers, {
     this._container = this._map.getContainer();
     this._container.addEventListener('mousedown', this._onMouseDown, true);
     this._container.addEventListener('mouseup', this._onMouseUp);
-    this._map.on('mousemove', this._onMouseMove);
+    this._container.addEventListener('mousemove', this._onMouseMove);
   },
 
   drawStop() {
     this._clearSquareGuide();
     this._container.removeEventListener('mousedown', this._onMouseDown, true);
     this._container.removeEventListener('mouseup', this._onMouseUp);
-    this._map.off('mousemove', this._onMouseMove);
+    this._container.removeEventListener('mousemove', this._onMouseMove);
   },
 
   _onMouseDown(e) {
@@ -39,7 +39,7 @@ Square.prototype = extend(Handlers, {
 
   _onMouseMove(e) {
     if (!this._activated) return;
-    var current = e.point;
+    var current = DOM.mousePos(e, this._container);
     var box = this._squareGuide;
 
     var pos1 = this._map.unproject(this._start);

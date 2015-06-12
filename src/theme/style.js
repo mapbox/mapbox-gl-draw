@@ -21,8 +21,8 @@ module.exports = [
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
       'fill-color': '#ff00ff',
-      'fill-outline-color': '#56b881',
-      'fill-opacity': 0.5
+      'fill-outline-color': '#ff00ff',
+      'fill-opacity': 0.25
     },
     'interactive': true
   }, {
