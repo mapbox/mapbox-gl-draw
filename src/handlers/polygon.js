@@ -1,14 +1,14 @@
 'use strict';
 
 var extend = require('xtend');
-var Vertices = require('./vertices');
+var vertices = require('./vertices');
 
 function Polygon(map) {
   this.type = 'Polygon';
   this.initialize(map);
 }
 
-Polygon.prototype = extend(Vertices, {
+Polygon.prototype = extend(vertices, {
 
   drawStart() {
     this._data = [];

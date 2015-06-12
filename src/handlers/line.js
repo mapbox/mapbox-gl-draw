@@ -1,14 +1,14 @@
 'use strict';
 
 var extend = require('xtend');
-var Vertices = require('./vertices');
+var vertices = require('./vertices');
 
 function Line(map) {
   this.type = 'LineString';
   this.initialize(map);
 }
 
-Line.prototype = extend(Vertices, {
+Line.prototype = extend(vertices, {
 
   drawStart() {
     this._data = [];

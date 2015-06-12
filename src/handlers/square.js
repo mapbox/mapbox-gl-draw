@@ -1,7 +1,7 @@
 'use strict';
 
 var extend = require('xtend');
-var Handlers = require('./handlers');
+var handlers = require('./handlers');
 var util = require('../util');
 var DOM = util.DOM;
 
@@ -10,7 +10,7 @@ function Square(map) {
   this.initialize(map);
 }
 
-Square.prototype = extend(Handlers, {
+Square.prototype = extend(handlers, {
 
   drawStart() {
     this._onMouseDown = this._onMouseDown.bind(this);

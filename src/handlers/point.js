@@ -1,14 +1,14 @@
 'use strict';
 
 let extend = require('xtend');
-let Handlers = require('./handlers');
+let handlers = require('./handlers');
 
 function Point(map) {
   this.type = 'Point';
   this.initialize(map);
 }
 
-Point.prototype = extend(Handlers, {
+Point.prototype = extend(handlers, {
 
   drawStart() {
     this._onClick = this._onClick.bind(this);

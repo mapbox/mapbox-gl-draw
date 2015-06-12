@@ -21,8 +21,6 @@ Store.prototype = {
   },
 
   unset() {
-    // TODO undo management.
-    this._history = this.getAll().features;
     // TODO remove a specific geojson object
   },
 
