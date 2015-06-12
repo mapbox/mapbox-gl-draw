@@ -75,6 +75,7 @@ Square.prototype = extend(handlers, {
     this._activated = false;
     this._clearSquareGuide();
     this.drawCreate(this.type, [this._data]);
+    this.featureComplete();
   }
 
 });

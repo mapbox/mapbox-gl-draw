@@ -39,7 +39,7 @@ Line.prototype = extend(vertices, {
     }, (err, feature) => {
       if (err) throw err;
 
-      // TODO complete a linestring if featuresAt returns a point.
+      // TODO complete a linestring if featuresAt returns the last point.
       console.log(feature);
       this._data.push(coords);
       this._addVertex(coords);

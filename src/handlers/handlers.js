@@ -11,6 +11,7 @@ module.exports = {
 
   initialize(map, options) {
     this._map = map;
+    this._currentFeature = false;
     this._container = map.getContainer();
     util.setOptions(this, options);
 
@@ -37,6 +38,10 @@ module.exports = {
     this.drawStop(this._map);
   },
 
+  featureComplete() {
+    this._currentFeature = false;
+  },
+
   editCreate(type, coords) {
     editStore.set(type, hat(), coords);
     this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
@@ -48,12 +53,13 @@ module.exports = {
   },
 
   drawCreate(type, coords) {
-    var feature = drawStore.set(type, hat(), coords);
-    this._map.fire('draw.feature.update', {geojson: drawStore.getAll()});
-    this._created(feature);
-  },
+    if (!this._currentFeature) this._currentFeature = hat();
+    var feature = drawStore.set(type, this._currentFeature, coords);
 
-  _created(feature) {
+    this._map.fire('draw.feature.update', {
+      geojson: drawStore.getAll()
+    });
+
     this._map.fire('draw.created', {
       featureType: this.type,
       feature: feature

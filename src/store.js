@@ -2,7 +2,7 @@
 
 var Immutable = require('immutable');
 
-function Store(obj) {
+function Store() {
   this.historyIndex = 0;
   this.history = [Immutable.List([])];
   this.annotations = [Immutable.List([])];
@@ -10,8 +10,9 @@ function Store(obj) {
 
 Store.prototype = {
 
-  // http://www.macwright.org/2015/05/18/practical-undo.html
   operation(fn, annotation) {
+    // Wrap an operation: Given a function, apply it the history list.
+    // via http://www.macwright.org/2015/05/18/practical-undo.html
     this.annotations = this.annotations.slice(0, this.historyIndex + 1);
     this.history = this.history.slice(0, this.historyIndex + 1);
     var newVersion = fn(this.history[this.historyIndex]);
@@ -33,20 +34,31 @@ Store.prototype = {
   },
 
   get(id) {
-    // TODO get a specific geojson object
+    var current = this.history[this.historyIndex];
+    return current.filter((feature) => {
+      return feature.get('properties').id === id;
+    });
   },
 
   unset(type, id) {
-   this.operation(function(data) {
-    return data.filter(function(feature) {
-        return feature.get('id') !== id;
+   this.operation((data) => {
+    return data.filter((feature) => {
+        return feature.get('properties').id !== id;
       });
     }, 'Removed a ' + type);
   },
 
+  _findIndex(id) {
+    var index;
+    this.history[this.historyIndex].forEach((feature, i) => {
+      if (feature.get('properties').id === id) index = i;
+    });
+    return index;
+  },
+
   set(type, id, coords) {
-    this.operation(function(data) {
-      return data.push(Immutable.Map({
+    this.operation((data) => {
+      var feature = Immutable.Map({
         type: 'Feature',
         properties: {
           id: id
@@ -55,19 +67,25 @@ Store.prototype = {
           type: type,
           coordinates: coords
         }
-      }));
+      });
+
+      // Does an index for this exist?
+      var updateIndex = this._findIndex(id);
+
+      return (updateIndex >= 0) ?
+        data.set(updateIndex, feature) :
+        data.push(feature);
+
     }, 'Added a ' + type);
   },
 
   redo() {
-    // TODO redo management. the function that calls this
-    // should follow with a redraw of features.
+    // TODO The function that calls this should redraw features.
     if (this.historyIndex < this.history.length) this.historyIndex++;
   },
 
   undo() {
-    // TODO undo management. the function that calls this
-    // should follow with a redraw of features.
+    // TODO The function that calls this should redraw features.
     if (this.historyIndex > 0) this.historyIndex--;
   }
 };

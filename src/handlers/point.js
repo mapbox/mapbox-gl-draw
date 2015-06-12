@@ -23,6 +23,7 @@ Point.prototype = extend(handlers, {
     var c = this._map.unproject([e.point.x, e.point.y]);
     var coords = [c.lng, c.lat];
     this.drawCreate(this.type, coords);
+    this.featureComplete();
   }
 
 });

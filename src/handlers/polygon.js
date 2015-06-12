@@ -39,7 +39,7 @@ Polygon.prototype = extend(vertices, {
     }, (err, feature) => {
       if (err) throw err;
 
-      // TODO complete a linestring if featuresAt returns a point.
+      // TODO complete the polygon if featuresAt returns the first point.
       console.log('featuresAt', feature);
       this._data.push(coords);
       this._addVertex(coords);
@@ -72,7 +72,7 @@ Polygon.prototype = extend(vertices, {
       // Slice the last item out.
       this._data = this._data.slice(0, (this._data.length - 1));
 
-      // TODO Clear the lineString guide.
+      // TODO Clear the lineString guide. i.e. call unset from the store
     }
 
     this.clearGuides();
