@@ -74,7 +74,7 @@ Square.prototype = extend(handlers, {
   _onMouseUp() {
     this._activated = false;
     this._clearSquareGuide();
-    this.drawCreate(this.type, [this._data]);
+    if (this._data) this.drawCreate(this.type, [this._data]);
     this.featureComplete();
   }
 

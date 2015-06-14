@@ -78,6 +78,8 @@ Draw.prototype = extend(Control, {
 
     a.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+
       var el = e.target;
 
       if (el.classList.contains('active')) {
