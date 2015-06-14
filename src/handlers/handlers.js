@@ -23,7 +23,7 @@ module.exports = {
     var map = this._map;
     if (map) {
       util.DOM.disableSelection();
-      this._container.addEventListener('keyup', this._onkeyup);
+      this._container.addEventListener('keyup', this._onKeyUp);
       this._container.classList.add('mapboxgl-draw-activated');
       map.fire('draw.start', { featureType: this.type });
       this.drawStart();

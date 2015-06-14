@@ -81,7 +81,7 @@ Draw.prototype = extend(Control, {
   _onKeyUp(e) {
     var event = document.createEvent('HTMLEvents');
     event.initEvent('click', true, false);
-    switch (e.which) {
+    switch (e.keyCode) {
       case 76: // (l) linestring
       this.lineCtrl.dispatchEvent(event);
       break;
