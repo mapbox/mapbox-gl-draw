@@ -1,20 +1,5 @@
 module.exports = [
   {
-    'id': 'gl-draw-points',
-    'type': 'symbol',
-    'source': 'draw',
-    'filter': ['all', ['==', '$type', 'Point']],
-    'layout': {
-      'icon-image': 'marker-12',
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
-    'paint': {
-      'icon-color': '#ff00ff',
-      'icon-size': 2
-    },
-    'interactive': true
-  }, {
     'id': 'gl-draw-polygons',
     'type': 'fill',
     'source': 'draw',
@@ -51,6 +36,21 @@ module.exports = [
     'paint': {
       'line-color': '#ff00ff',
       'line-width': 2
+    },
+    'interactive': true
+  }, {
+    'id': 'gl-draw-points',
+    'type': 'symbol',
+    'source': 'draw',
+    'filter': ['all', ['==', '$type', 'Point']],
+    'layout': {
+      'icon-image': 'marker-12',
+      'text-anchor': 'top',
+      'icon-allow-overlap': true
+    },
+    'paint': {
+      'icon-color': '#ff00ff',
+      'icon-size': 2
     },
     'interactive': true
   }

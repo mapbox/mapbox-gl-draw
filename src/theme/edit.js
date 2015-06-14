@@ -1,5 +1,19 @@
 module.exports = [
   {
+    'id': 'gl-edit-line',
+    'type': 'line',
+    'source': 'edit',
+    'filter': ['all', ['==', '$type', 'LineString']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#ff00ff',
+      'line-dasharray': [0, 2],
+      'line-width': 3
+    }
+  }, {
     'id': 'gl-edit-points',
     'type': 'symbol',
     'source': 'edit',
@@ -14,19 +28,5 @@ module.exports = [
       'icon-size': 2
     },
     'interactive': true
-  }, {
-    'id': 'gl-edit-line',
-    'type': 'line',
-    'source': 'edit',
-    'filter': ['all', ['==', '$type', 'LineString']],
-    'layout': {
-      'line-cap': 'round',
-      'line-join': 'round'
-    },
-    'paint': {
-      'line-color': '#ff00ff',
-      'line-dasharray': [0, 2],
-      'line-width': 3
-    }
   }
 ];
