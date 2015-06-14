@@ -43,8 +43,18 @@ module.exports = {
   },
 
   editCreate(type, coords) {
-    editStore.set(type, hat(), coords);
+    var id = hat();
+
+    // Keeps track of temporary linestring guideline that's
+    // drawn after the second point is selected.
+    if (type === 'LineString') this._editLineGuide = id;
+    editStore.set(type, id, coords);
     this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
+  },
+
+  editUnsetGuide() {
+    if (this._editLineGuide) editStore.unset('LineString', this._editLineGuide);
+    this._editLineGuide = false;
   },
 
   editDestroy() {

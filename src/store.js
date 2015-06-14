@@ -80,12 +80,10 @@ Store.prototype = {
   },
 
   redo() {
-    // TODO The function that calls this should redraw features.
     if (this.historyIndex < this.history.length) this.historyIndex++;
   },
 
   undo() {
-    // TODO The function that calls this should redraw features.
     if (this.historyIndex > 0) this.historyIndex--;
   }
 };

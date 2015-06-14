@@ -61,7 +61,7 @@ Polygon.prototype = extend(vertices, {
 
   _vertexCreate() {
     if (this._data.length === 2) {
-      // Add a LineString guide that mimics the `mousemove` one.
+      // Add a LineString that mimics a `mousemove` guideline.
       this.editCreate('LineString', this._data);
     }
 
@@ -72,7 +72,8 @@ Polygon.prototype = extend(vertices, {
       // Slice the last item out.
       this._data = this._data.slice(0, (this._data.length - 1));
 
-      // TODO Clear the lineString guide. i.e. call unset from the store
+      // Clears the temporary guide that's drawn.
+      this.editUnsetGuide();
     }
 
     this.clearGuides();
