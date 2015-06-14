@@ -1,9 +1,21 @@
 'use strict';
 
-var test = require('tape');
+var test = require('prova');
+// var mapboxgl = require('mapbox-gl');
 
-test('rendered', (t) => {
+test('gl-draw', function(t) {
+  function createMap() {
+    return new mapboxgl({
+      container: {
+        offsetWidth: 200,
+        offsetHeight: 200
+      }
+    });
+  }
 
-  document.createElement('div');
-  t.end();
+  t.test('rendered', function(t) {
+    console.log(createMap);
+    t.end();
+  });
+
 });
