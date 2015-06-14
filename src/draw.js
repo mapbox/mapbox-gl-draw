@@ -10,7 +10,7 @@ var DOM = util.DOM;
 // Control handlers
 var Polygon = require('./handlers/polygon');
 var Line = require('./handlers/line');
-var Square = require('./handlers/square');
+var Rectangle = require('./handlers/rectangle');
 var Point = require('./handlers/point');
 
 function Draw(options) {
@@ -21,11 +21,12 @@ function Draw(options) {
 Draw.prototype = extend(Control, {
   options: {
     position: 'top-left',
+    keybindings: true,
     controls: {
       marker: true,
       line: true,
       shape: true,
-      square: true
+      rectangle: true
     }
   },
 
@@ -34,15 +35,66 @@ Draw.prototype = extend(Control, {
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
 
-    if (controls.line) this._createButton(controlClass + ' line', 'Line tool', this._drawLine.bind(this, map));
-    if (controls.shape) this._createButton(controlClass + ' shape', 'Shape tool', this._drawPolygon.bind(this, map));
-    if (controls.square) this._createButton(controlClass + ' square', 'Rectangle tool', this._drawSquare.bind(this, map));
-    if (controls.marker) this._createButton(controlClass + ' marker', 'Marker tool', this._drawPoint.bind(this, map));
+    // Build out draw controls
+    if (controls.line) {
+      this.lineCtrl = this._createButton({
+        className: controlClass + ' line',
+        title: 'Line tool' + (this.options.keybindings ? ' (l)' : ''),
+        fn: this._drawLine.bind(this, map)
+      });
+    }
+
+    if (controls.shape) {
+      this.shapeCtrl = this._createButton({
+        className: controlClass + ' shape',
+        title: 'Shape tool' + (this.options.keybindings ? ' (s)' : ''),
+        fn: this._drawPolygon.bind(this, map)
+      });
+    }
+
+    if (controls.rectangle) {
+      this.rectangleCtrl = this._createButton({
+        className: controlClass + ' square',
+        title: 'Rectangle tool' + (this.options.keybindings ? ' (r)' : ''),
+        fn: this._drawRectangle.bind(this, map)
+      });
+    }
+
+    if (controls.marker) {
+      this.markerCtrl = this._createButton({
+        className: controlClass + ' marker',
+        title: 'Marker tool' + (this.options.keybindings ? ' (m)' : ''),
+        fn: this._drawPoint.bind(this, map)
+      });
+    }
 
     map.getContainer().addEventListener('mousedown', this._onMouseDown, true);
 
+    if (this.options.keybindings) {
+      map.getContainer().addEventListener('keyup', this._onKeyUp.bind(this));
+    }
+
     this._mapState(map);
     return container;
+  },
+
+  _onKeyUp(e) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent('click', true, false);
+    switch (e.which) {
+      case 76: // (l) linestring
+      this.lineCtrl.dispatchEvent(event);
+      break;
+      case 77: // (m) marker
+      this.markerCtrl.dispatchEvent(event);
+      break;
+      case 82: // (r) rectangle
+      this.rectangleCtrl.dispatchEvent(event);
+      break;
+      case 83: // (s) shape
+      this.shapeCtrl.dispatchEvent(event);
+      break;
+    }
   },
 
   _onMouseDown(e) {
@@ -61,17 +113,17 @@ Draw.prototype = extend(Control, {
     this._control = new Line(map);
   },
 
-  _drawSquare(map) {
-    this._control = new Square(map);
+  _drawRectangle(map) {
+    this._control = new Rectangle(map);
   },
 
   _drawPoint(map) {
     this._control = new Point(map);
   },
 
-  _createButton(className, title, fn) {
-    var a = DOM.create('button', className, this._container, {
-      title: title
+  _createButton(opts) {
+    var a = DOM.create('button', opts.className, this._container, {
+      title: opts.title
     });
 
     var controlClass = this._controlClass;
@@ -89,7 +141,7 @@ Draw.prototype = extend(Control, {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
         if (this._control) this._control.disable();
         el.classList.add('active');
-        fn();
+        opts.fn();
       }
     });
 

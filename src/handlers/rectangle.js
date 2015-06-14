@@ -5,12 +5,12 @@ var handlers = require('./handlers');
 var util = require('../util');
 var DOM = util.DOM;
 
-function Square(map) {
+function Rectangle(map) {
   this.type = 'Polygon';
   this.initialize(map);
 }
 
-Square.prototype = extend(handlers, {
+Rectangle.prototype = extend(handlers, {
 
   drawStart() {
     this._onMouseDown = this._onMouseDown.bind(this);
@@ -24,7 +24,7 @@ Square.prototype = extend(handlers, {
   },
 
   drawStop() {
-    this._clearSquareGuide();
+    this._clearRectangleGuide();
     this._container.removeEventListener('mousedown', this._onMouseDown, true);
     this._container.removeEventListener('mouseup', this._onMouseUp);
     this._container.removeEventListener('mousemove', this._onMouseMove);
@@ -34,13 +34,13 @@ Square.prototype = extend(handlers, {
     e.stopPropagation();
     this._activated = true;
     this._start = DOM.mousePos(e, this._container);
-    this._squareGuide = DOM.create('div', 'mapboxgl-draw-guide-square', this._container);
+    this._rectangleGuide = DOM.create('div', 'mapboxgl-draw-guide-rectangle', this._container);
   },
 
   _onMouseMove(e) {
     if (!this._activated) return;
     var current = DOM.mousePos(e, this._container);
-    var box = this._squareGuide;
+    var box = this._rectangleGuide;
 
     var pos1 = this._map.unproject(this._start);
     var pos2 = this._map.unproject([this._start.x, current.y]);
@@ -65,19 +65,19 @@ Square.prototype = extend(handlers, {
     box.style.height = (maxY - minY) + 'px';
   },
 
-  _clearSquareGuide() {
-    if (this._squareGuide && this._squareGuide.parentNode) {
-      this._squareGuide.parentNode.removeChild(this._squareGuide);
+  _clearRectangleGuide() {
+    if (this._rectangleGuide && this._rectangleGuide.parentNode) {
+      this._rectangleGuide.parentNode.removeChild(this._rectangleGuide);
     }
   },
 
   _onMouseUp() {
     this._activated = false;
-    this._clearSquareGuide();
+    this._clearRectangleGuide();
     if (this._data) this.drawCreate(this.type, [this._data]);
     this.featureComplete();
   }
 
 });
 
-module.exports = Square;
+module.exports = Rectangle;
