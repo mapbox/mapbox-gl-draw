@@ -3,9 +3,9 @@
 let extend = require('xtend');
 let handlers = require('./handlers');
 
-function Point(map) {
+function Point(map, options) {
   this.type = 'Point';
-  this.initialize(map);
+  this.initialize(map, options);
 }
 
 Point.prototype = extend(handlers, {

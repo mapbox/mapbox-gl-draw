@@ -63,7 +63,7 @@
 
 .mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
 
-.mapboxgl-draw-guide-rectangle {
+.mapboxgl-draw-guide-square {
   background:rgba(255,0,255,0.10);
   border:3px dotted magenta;
   position:absolute;

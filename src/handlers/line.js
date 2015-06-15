@@ -3,9 +3,9 @@
 var extend = require('xtend');
 var vertices = require('./vertices');
 
-function Line(map) {
+function Line(map, options) {
   this.type = 'LineString';
-  this.initialize(map);
+  this.initialize(map, options);
 }
 
 Line.prototype = extend(vertices, {

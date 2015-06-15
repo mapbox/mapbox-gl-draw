@@ -4,17 +4,15 @@ var util = require('../util');
 var Store = require('../store');
 var hat = require('hat');
 
-var drawStore = new Store([]);
-var editStore = new Store([]);
-
 module.exports = {
 
   initialize(map, options) {
     this._map = map;
     this._currentFeature = false;
     this._container = map.getContainer();
+    this._editStore = new Store([]);
     util.setOptions(this, options);
-
+    this._drawStore = this.options.geoJSON;
     this._onKeyUp = this._onKeyUp.bind(this);
     this.enable();
   },
@@ -48,26 +46,26 @@ module.exports = {
     // Keeps track of temporary linestring guideline that's
     // drawn after the second point is selected.
     if (type === 'LineString') this._editLineGuide = id;
-    editStore.set(type, id, coords);
-    this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
+    this._editStore.set(type, id, coords);
+    this._map.fire('edit.feature.update', {geojson: this._editStore.getAll()});
   },
 
   editUnsetGuide() {
-    if (this._editLineGuide) editStore.unset('LineString', this._editLineGuide);
+    if (this._editLineGuide) this._editStore.unset('LineString', this._editLineGuide);
     this._editLineGuide = false;
   },
 
   editDestroy() {
-    editStore.clear();
-    this._map.fire('edit.feature.update', {geojson: editStore.getAll()});
+    this._editStore.clear();
+    this._map.fire('edit.feature.update', {geojson: this._editStore.getAll()});
   },
 
   drawCreate(type, coords) {
     if (!this._currentFeature) this._currentFeature = hat();
-    var feature = drawStore.set(type, this._currentFeature, coords);
+    var feature = this._drawStore.set(type, this._currentFeature, coords);
 
     this._map.fire('draw.feature.update', {
-      geojson: drawStore.getAll()
+      geojson: this._drawStore.getAll()
     });
 
     this._map.fire('draw.created', {

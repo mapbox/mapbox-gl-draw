@@ -3,9 +3,9 @@
 var extend = require('xtend');
 var vertices = require('./vertices');
 
-function Polygon(map) {
+function Polygon(map, options) {
   this.type = 'Polygon';
-  this.initialize(map);
+  this.initialize(map, options);
 }
 
 Polygon.prototype = extend(vertices, {

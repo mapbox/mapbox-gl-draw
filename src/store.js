@@ -1,10 +1,21 @@
 'use strict';
 
 var Immutable = require('immutable');
+var hat = require('hat');
 
-function Store() {
+function Store(data) {
   this.historyIndex = 0;
+
+  // Apply an internal ID to any potential added feature
+  if (data.length) {
+    data.forEach((d) => {
+      d.properties._drawid = hat();
+    });
+  }
+
   this.history = [Immutable.List([])];
+  this.history.push(Immutable.Map(data));
+
   this.annotations = [Immutable.List([])];
 }
 
@@ -29,6 +40,7 @@ Store.prototype = {
   },
 
   clear() {
+    // TODO Iterate down historyIndex instead.
     this.historyIndex = 0;
     this.history = [Immutable.List([])];
   },
@@ -36,14 +48,14 @@ Store.prototype = {
   get(id) {
     var current = this.history[this.historyIndex];
     return current.filter((feature) => {
-      return feature.get('properties').id === id;
+      return feature.get('properties')._drawid === id;
     });
   },
 
   unset(type, id) {
    this.operation((data) => {
     return data.filter((feature) => {
-        return feature.get('properties').id !== id;
+        return feature.get('properties')._drawid !== id;
       });
     }, 'Removed a ' + type);
   },
@@ -51,7 +63,7 @@ Store.prototype = {
   _findIndex(id) {
     var index;
     this.history[this.historyIndex].forEach((feature, i) => {
-      if (feature.get('properties').id === id) index = i;
+      if (feature.get('properties')._drawid === id) index = i;
     });
     return index;
   },
@@ -61,7 +73,7 @@ Store.prototype = {
       var feature = Immutable.Map({
         type: 'Feature',
         properties: {
-          id: id
+          _drawid: id
         },
         geometry: {
           type: type,
