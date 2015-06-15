@@ -88,16 +88,24 @@ Draw.prototype = extend(Control, {
     event.initEvent('click', true, false);
     switch (e.keyCode) {
       case 76: // (l) linestring
-      this.lineStringCtrl.dispatchEvent(event);
+        if (!this.lineStringCtrl.classList.contains('active')) {
+          this.lineStringCtrl.dispatchEvent(event);
+        }
       break;
       case 77: // (m) marker
-      this.markerCtrl.dispatchEvent(event);
+        if (!this.markerCtrl.classList.contains('active')) {
+          this.markerCtrl.dispatchEvent(event);
+        }
       break;
       case 80: // (p) polygon
-      this.polygonCtrl.dispatchEvent(event);
+        if (!this.polygonCtrl.classList.contains('active')) {
+          this.polygonCtrl.dispatchEvent(event);
+        }
       break;
       case 83: // (s) square
-      this.squareCtrl.dispatchEvent(event);
+        if (!this.squareCtrl.classList.contains('active')) {
+          this.squareCtrl.dispatchEvent(event);
+        }
       break;
     }
   },
