@@ -37,6 +37,7 @@
     "browserify": "^9.0.3",
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
+    "mapbox-gl": "^0.8.0",
     "prova": "^2.1.2",
     "uglify-js": "^2.4.23"
   },
