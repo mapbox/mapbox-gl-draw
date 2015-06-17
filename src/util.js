@@ -1,7 +1,5 @@
 'use strict';
 
-var mapboxgl = require('mapbox-gl');
-
 /* Merge user provided options object with a default one
  *
  * @param {Object} obj Containing an options key with which to merge
