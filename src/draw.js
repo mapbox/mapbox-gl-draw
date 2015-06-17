@@ -1,6 +1,7 @@
 'use strict';
 
 var extend = require('xtend');
+var mapboxgl = require('mapbox-gl');
 var Control = require('./control');
 var themeStyle = require('./theme/style');
 var themeEdit = require('./theme/edit');
