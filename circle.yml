@@ -3,4 +3,4 @@ machine:
     version: '0.10'
 dependencies:
   pre:
-    - sudo apt-get -y install libglew-dev
+    - sudo apt-get -y install libglew-dev gbd

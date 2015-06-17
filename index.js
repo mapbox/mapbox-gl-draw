@@ -1,6 +1,5 @@
 'use strict';
 
-var mapboxgl = require('mapbox-gl');
 /** A drawing component for mapboxgl
  * @class mapbox.Draw
  *
