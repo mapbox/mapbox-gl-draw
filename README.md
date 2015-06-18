@@ -25,7 +25,8 @@ You'll also want to include [mapboxgl.draw.css]()
 ### Usage
 
 ```js
-mapboxgl.accessToken = 'pk.eyJ1IjoiamFrZXBydWl0dCIsImEiOiJZTFhpY08wIn0.1SjgrkmWrBeXHkyN2PPzrQ';
+mapboxgl.accessToken = localStorage.accessToken;
+
 var map = new mapboxgl.Map({
   container: 'map', // container id
   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json', //stylesheet location

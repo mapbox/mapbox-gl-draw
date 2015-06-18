@@ -16,7 +16,7 @@
 <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
 <script src='dist/mapboxgl.draw.js'></script>
 <script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoidHJpc3RlbiIsImEiOiJiUzBYOEJzIn0.VyXs9qNWgTfABLzSI3YcrQ';
+  mapboxgl.accessToken = localStorage.accessToken;
 
   var map = new mapboxgl.Map({
     container: 'map',
