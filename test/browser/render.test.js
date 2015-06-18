@@ -2,7 +2,7 @@
 
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
-var Draw = require('../src/draw.js');
+var Draw = require('../../src/draw.js');
 
 function createMap() {
   var mapEl = document.createElement('div');
