@@ -1,6 +1,7 @@
 'use strict';
 
-/* Merge user provided options object with a default one
+/**
+ * Merge user provided options object with a default one
  *
  * @param {Object} obj Containing an options key with which to merge
  * @param {options} options Provided options with which to merge
@@ -18,7 +19,8 @@ module.exports.setOptions = function(obj, options) {
 
 module.exports.DOM = {};
 
-/* Captures mouse position
+/**
+ * Captures mouse position
  *
  * @param {Object} e Mouse event
  * @param {Object} el Container element.
@@ -32,7 +34,8 @@ module.exports.DOM.mousePos = function(e, el) {
   );
 };
 
-/* Builds DOM elements
+/**
+ * Builds DOM elements
  *
  * @param {String} tag Element name
  * @param {String} [className]
@@ -53,7 +56,8 @@ module.exports.DOM.create = function(tag, className, container, attributes) {
   return el;
 };
 
-/* Removes classes from an array of DOM elements
+/**
+ * Removes classes from an array of DOM elements
  *
  * @param {HTMLElement} elements
  * @param {String} klass
