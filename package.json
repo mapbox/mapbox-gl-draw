@@ -12,7 +12,8 @@
     ]
   },
   "scripts": {
-    "test": "npm run lint && npm run build",
+    "test": "npm run lint && npm run test-unit && npm run build",
+    "test-unit": "npm run lint && (browserify test/unit/*.test.js | tap-closer | smokestack | tap-status)",
     "test-browser": "npm run lint && (browserify test/browser/*.test.js | tap-closer | smokestack | tap-status)",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
@@ -48,6 +49,7 @@
     "uglify-js": "^2.4.23"
   },
   "dependencies": {
+    "happen": "^0.1.3",
     "hat": "0.0.3",
     "immutable": "^3.7.3",
     "xtend": "^4.0.0"
