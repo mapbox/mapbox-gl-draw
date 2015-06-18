@@ -1,6 +1,0 @@
-machine:
-  node:
-    version: '0.10'
-dependencies:
-  pre:
-    - sudo apt-get -y install libglew-dev gdb
