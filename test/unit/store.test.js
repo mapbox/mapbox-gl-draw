@@ -36,7 +36,7 @@ test('Store constructor', (t) => {
 });
 
 test('Store constructor with data', (t) => {
-  var polygonGeoJSON = [{
+  var polygonGeoJSON = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -50,15 +50,14 @@ test('Store constructor with data', (t) => {
         ]
       ]
     }
-  }];
+  };
   var store = new Store(polygonGeoJSON);
 
   t.equals(store.history.length, 2, 'history has two elements');
   t.ok(store.history[0] instanceof Immutable.List, 'history has a list');
   t.equals(store.history[0].count(), 0, 'history\'s list is empty');
   t.ok(store.history[1] instanceof Immutable.Map, 'history has a map');
-  t.deepEquals(store.history[1].toJS(), polygonGeoJSON, 'history\'s map equals the inputted geoJSON');
-  console.log(store.history[1]);
+  t.deepEquals(store.history[1].toObject(), polygonGeoJSON, 'history\'s map equals the inputted geoJSON');
 
   t.end();
 });
