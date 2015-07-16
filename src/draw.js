@@ -19,7 +19,7 @@ var Point = require('./handlers/point');
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
-  this.dragPointStart = this._dragPointStart.bind(this);
+  this.dragPoint = this._dragPoint.bind(this);
   this.dragPointStop = this._dragPointStop.bind(this);
 }
 
@@ -120,7 +120,9 @@ Draw.prototype = extend(Control, {
     map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
       if (!err && features.length) {
         this.activeId = features[0].properties._drawid;
-        map.getContainer().addEventListener('mousemove', this.dragPointStart);
+        var type = features[0].geometry.type;
+        this.options.geoJSON.dragUnset(type, this.activeId);
+        map.getContainer().addEventListener('mousemove', this.dragPoint, true);
         map.getContainer().addEventListener('mouseup', this.dragPointStop);
       }
     });
@@ -132,13 +134,14 @@ Draw.prototype = extend(Control, {
     //}
   },
 
-  _dragPointStart(e) {
-    console.log(e.x, e.y);
-    console.log(this.activeId);
+  _dragPoint(e) {
+    e.stopPropagation();
+    //var pos = DOM.mousePos(e, this._map.getContainer());
+    //console.log(pos.x, pos.y);
+    //console.log(this.activeId);
   },
   _dragPointStop() {
-    console.log('ending drag');
-    this._map.getContainer().removeEventListener('mousemove', this.dragPointStart);
+    this._map.getContainer().removeEventListener('mousemove', this.dragPoint, true);
     this._map.getContainer().removeEventListener('mouseup', this.dragPointStop);
   },
 

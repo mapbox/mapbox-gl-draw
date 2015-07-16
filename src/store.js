@@ -52,12 +52,11 @@ Store.prototype = {
     });
   },
 
-  unset(type, id) {
-   this.operation((data) => {
-    return data.filter((feature) => {
-        return feature.get('properties')._drawid !== id;
-      });
-    }, 'Removed a ' + type);
+  unset(type, id, annotation) {
+    this.operation(
+      data => data.filterNot(feature => feature.get('properties')._drawid === id),
+      annotation || 'Removed a ' + type
+    );
   },
 
   _findIndex(id) {
@@ -90,6 +89,11 @@ Store.prototype = {
 
     }, 'Added a ' + type);
   },
+
+  dragUnset(type, id) {
+    this.unset(type, id, 'Started a drag');
+  },
+
 
   redo() {
     if (this.historyIndex < this.history.length) this.historyIndex++;
