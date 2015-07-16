@@ -121,7 +121,7 @@ Draw.prototype = extend(Control, {
       if (!err && features.length) {
         this.activeId = features[0].properties._drawid;
         var type = features[0].geometry.type;
-        this.options.geoJSON.dragUnset(type, this.activeId);
+        this.options.geoJSON.dragUnset(type, this.activeId, this._map);
         map.getContainer().addEventListener('mousemove', this.dragPoint, true);
         map.getContainer().addEventListener('mouseup', this.dragPointStop);
       }

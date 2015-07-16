@@ -90,8 +90,11 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  dragUnset(type, id) {
+  dragUnset(type, id, map) {
     this.unset(type, id, 'Started a drag');
+    map.fire('draw.feature.update', {
+      geojson: this.history[this.historyIndex]
+    });
   },
 
 
