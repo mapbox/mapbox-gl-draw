@@ -91,10 +91,13 @@ Store.prototype = {
   },
 
   dragUnset(type, id, map) {
+    var oldData = this.history[this.historyIndex]
+      .find(feature => feature.get('properties')._drawid === id);
     this.unset(type, id, 'Started a drag');
     map.fire('draw.feature.update', {
       geojson: this.history[this.historyIndex]
     });
+    return oldData;
   },
 
 

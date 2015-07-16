@@ -19,8 +19,9 @@ var Point = require('./handlers/point');
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
-  this.dragPoint = this._dragPoint.bind(this);
-  this.dragPointStop = this._dragPointStop.bind(this);
+  this.dragging = false;
+  this.drag = this._drag.bind(this);
+  this.dragStop = this._dragStop.bind(this);
 }
 
 Draw.prototype = extend(Control, {
@@ -117,13 +118,11 @@ Draw.prototype = extend(Control, {
 
   _onMouseDown(map, e) {
     var coords = DOM.mousePos(e, map._container);
-    map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
-      if (!err && features.length) {
-        this.activeId = features[0].properties._drawid;
-        var type = features[0].geometry.type;
-        this.options.geoJSON.dragUnset(type, this.activeId, this._map);
-        map.getContainer().addEventListener('mousemove', this.dragPoint, true);
-        map.getContainer().addEventListener('mouseup', this.dragPointStop);
+    map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
+      if (!err && features.length) { // if you click on a feature
+        map.getContainer().addEventListener('mousemove', this.drag, true); // add event listeners
+        map.getContainer().addEventListener('mouseup', this.dragStop);
+        this.dragId = features[0].properties._drawid;
       }
     });
 
@@ -134,15 +133,30 @@ Draw.prototype = extend(Control, {
     //}
   },
 
-  _dragPoint(e) {
+  _drag(e) {
     e.stopPropagation();
+    if (!this.dragging) {
+      this.dragging = true;
+      var oldData = this.options.geoJSON.dragUnset(type, this.dragId, this._map);
+      var type = oldData.get('geometry').type;
+      switch (type) {
+        case 'Point':
+          console.log(type);
+          break;
+        case 'Polygon':
+          console.log(type);
+          break;
+      }
+    }
+    this._drawPoint(this._map, this.options);
     //var pos = DOM.mousePos(e, this._map.getContainer());
     //console.log(pos.x, pos.y);
     //console.log(this.activeId);
   },
-  _dragPointStop() {
-    this._map.getContainer().removeEventListener('mousemove', this.dragPoint, true);
-    this._map.getContainer().removeEventListener('mouseup', this.dragPointStop);
+  _dragStop() {
+    this.dragging = false;
+    this._map.getContainer().removeEventListener('mousemove', this.drag, true);
+    this._map.getContainer().removeEventListener('mouseup', this.dragStop);
   },
 
   _drawPolygon(map, options) {
@@ -221,6 +235,7 @@ Draw.prototype = extend(Control, {
       });
 
       map.on('edit.feature.update', (e) => {
+        console.log(JSON.stringify(e.geojson));
         editLayer.setData(e.geojson);
       });
 
