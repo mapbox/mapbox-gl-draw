@@ -52,10 +52,10 @@ Store.prototype = {
     });
   },
 
-  unset(type, id, annotation) {
+  unset(type, id, dragging) {
     this.operation(
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
-      annotation || 'Removed a ' + type
+      `${dragging ? 'Began dragging' : 'Removed a ' + type}`
     );
   },
 
@@ -93,7 +93,7 @@ Store.prototype = {
   dragUnset(type, id, map) {
     var oldData = this.history[this.historyIndex]
       .find(feature => feature.get('properties')._drawid === id);
-    this.unset(type, id, 'Started a drag');
+    this.unset(type, id, true);
     map.fire('draw.feature.update', {
       geojson: this.history[this.historyIndex]
     });

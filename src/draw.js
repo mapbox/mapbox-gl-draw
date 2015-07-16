@@ -120,7 +120,7 @@ Draw.prototype = extend(Control, {
     var coords = DOM.mousePos(e, map._container);
     map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
       if (!err && features.length) { // if you click on a feature
-        map.getContainer().addEventListener('mousemove', this.drag, true); // add event listeners
+        map.getContainer().addEventListener('mousemove', this.drag, true); // add the drag event listeners
         map.getContainer().addEventListener('mouseup', this.dragStop);
         this.dragId = features[0].properties._drawid;
       }
@@ -148,8 +148,8 @@ Draw.prototype = extend(Control, {
           break;
       }
     }
-    this._drawPoint(this._map, this.options);
-    //var pos = DOM.mousePos(e, this._map.getContainer());
+    var pos = DOM.mousePos(e, this._map.getContainer());
+    this._drawPoint(this._map, this.options, pos);
     //console.log(pos.x, pos.y);
     //console.log(this.activeId);
   },
