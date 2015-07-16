@@ -19,6 +19,8 @@ var Point = require('./handlers/point');
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
+  this.dragPointStart = this._dragPointStart.bind(this);
+  this.dragPointStop = this._dragPointStop.bind(this);
 }
 
 Draw.prototype = extend(Control, {
@@ -79,8 +81,9 @@ Draw.prototype = extend(Control, {
       map.getContainer().addEventListener('keyup', this._onKeyUp.bind(this));
     }
 
-    this._mapState(map);
+    this._map = map;
 
+    this._mapState(map);
     return container;
   },
 
@@ -116,15 +119,27 @@ Draw.prototype = extend(Control, {
     var coords = DOM.mousePos(e, map._container);
     map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
       if (!err && features.length) {
-        console.log(features);
+        this.activeId = features[0].properties._drawid;
+        map.getContainer().addEventListener('mousemove', this.dragPointStart);
+        map.getContainer().addEventListener('mouseup', this.dragPointStop);
       }
     });
 
-    if (e.altKey) {
-      e.stopPropagation();
-      // TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
-      // this._captureFeatures();
-    }
+    //if (e.altKey) {
+    //  e.stopPropagation();
+    //    TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
+    //    this._captureFeatures();
+    //}
+  },
+
+  _dragPointStart(e) {
+    console.log(e.x, e.y);
+    console.log(this.activeId);
+  },
+  _dragPointStop() {
+    console.log('ending drag');
+    this._map.getContainer().removeEventListener('mousemove', this.dragPointStart);
+    this._map.getContainer().removeEventListener('mouseup', this.dragPointStop);
   },
 
   _drawPolygon(map, options) {
