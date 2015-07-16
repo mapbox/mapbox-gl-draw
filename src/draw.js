@@ -73,15 +73,17 @@ Draw.prototype = extend(Control, {
       });
     }
 
-    map.getContainer().addEventListener('mousedown', this._onMouseDown, true);
+    map.getContainer().addEventListener('mousedown', this._onMouseDown.bind(this, map), true);
 
     if (this.options.keybindings) {
       map.getContainer().addEventListener('keyup', this._onKeyUp.bind(this));
     }
 
     this._mapState(map);
+
     return container;
   },
+
 
   _onKeyUp(e) {
     var event = document.createEvent('HTMLEvents');
@@ -110,7 +112,14 @@ Draw.prototype = extend(Control, {
     }
   },
 
-  _onMouseDown(e) {
+  _onMouseDown(map, e) {
+    var coords = DOM.mousePos(e, map._container);
+    map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+      if (!err && features.length) {
+        console.log(features);
+      }
+    });
+
     if (e.altKey) {
       e.stopPropagation();
       // TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
