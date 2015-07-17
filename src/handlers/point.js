@@ -7,7 +7,6 @@ function Point(map, options, position) {
   this.type = 'Point';
   this.initialize(map, options);
   this.position = position;
-  console.log(this.position);
 }
 
 Point.prototype = extend(handlers, {
@@ -28,8 +27,8 @@ Point.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  move(pos) {
-    console.log(pos.x, pos.y);
+  move(store, id, pos) {
+    store.dragUnset(id, this._map);
     var c = this._map.unproject([pos.x, pos.y]);
     var coords = [c.lng, c.lat];
     this.drawCreate(this.type, coords);

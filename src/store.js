@@ -52,10 +52,10 @@ Store.prototype = {
     });
   },
 
-  unset(type, id, dragging) {
+  unset(type, id) {
     this.operation(
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
-      `${dragging ? 'Began dragging' : 'Removed a ' + type}`
+      'Removed a ' + type
     );
   },
 
@@ -90,14 +90,11 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  dragUnset(type, id, map) {
-    var oldData = this.history[this.historyIndex]
-      .find(feature => feature.get('properties')._drawid === id);
-    this.unset(type, id, true);
+  dragUnset(id, map) {
     map.fire('draw.feature.update', {
       geojson: this.history[this.historyIndex]
+        .filterNot(feature => feature.get('properties')._drawid === id)
     });
-    return oldData;
   },
 
 

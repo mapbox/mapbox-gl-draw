@@ -137,21 +137,10 @@ Draw.prototype = extend(Control, {
     e.stopPropagation();
     if (!this.dragging) {
       this.dragging = true;
-      var oldData = this.options.geoJSON.dragUnset(type, this.dragId, this._map);
-      var type = oldData.get('geometry').type;
-      switch (type) {
-        case 'Point':
-          console.log(type);
-          this._control = new Point(this._map, this.options);
-          break;
-        case 'Polygon':
-          console.log(type);
-          break;
-      }
+      this._control = new Point(this._map, this.options);
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.move(pos);
-    this._drawPoint(this._map, this.options, pos);
+    this._control.move(this.options.geoJSON, this.dragId, pos);
   },
 
   _dragStop() {
