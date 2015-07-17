@@ -98,9 +98,10 @@ Store.prototype = {
       this.history.push(this.history[this.historyIndex++]);
       this.dragging = true;
     }
-    this.history[this.historyIndex] = this.history[this.historyIndex] // remove this item
-      .filterNot(feat => feat.get('properties')._drawid === id); // from the current state in history
-    this.history[this.historyIndex].push(Immutable.Map({
+    var idx = this.historyIndex;
+    this.history[idx] = this.history[idx]
+      .filterNot(feat => feat.get('properties')._drawid === id);
+    var feature = Immutable.Map({
       type: 'Feature',
       properties: {
         _drawid: id
@@ -109,7 +110,8 @@ Store.prototype = {
         type: type,
         coordinates: coords
       }
-    }));
+    });
+    this.history[idx] = this.history[idx].push(feature);
   },
 
   redo() {

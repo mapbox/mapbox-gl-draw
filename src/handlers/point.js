@@ -34,7 +34,6 @@ Point.prototype = extend(handlers, {
     this._map.fire('draw.feature.update', {
       geojson: this._drawStore.getAll()
     });
-    this.featureComplete();
   }
 
 });
