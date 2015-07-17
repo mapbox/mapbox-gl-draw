@@ -26,6 +26,14 @@ Point.prototype = extend(handlers, {
     var coords = [c.lng, c.lat];
     this.drawCreate(this.type, coords);
     this.featureComplete();
+  },
+
+  move(pos) {
+    console.log(pos.x, pos.y);
+    var c = this._map.unproject([pos.x, pos.y]);
+    var coords = [c.lng, c.lat];
+    this.drawCreate(this.type, coords);
+    this.featureComplete();
   }
 
 });

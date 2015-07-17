@@ -142,6 +142,7 @@ Draw.prototype = extend(Control, {
       switch (type) {
         case 'Point':
           console.log(type);
+          this._control = new Point(this._map, this.options);
           break;
         case 'Polygon':
           console.log(type);
@@ -149,10 +150,10 @@ Draw.prototype = extend(Control, {
       }
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
+    this._control.move(pos);
     this._drawPoint(this._map, this.options, pos);
-    //console.log(pos.x, pos.y);
-    //console.log(this.activeId);
   },
+
   _dragStop() {
     this.dragging = false;
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
