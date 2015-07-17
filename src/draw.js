@@ -145,6 +145,7 @@ Draw.prototype = extend(Control, {
 
   _dragStop() {
     this.dragging = false;
+    this._control.disable();
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
     this._map.getContainer().removeEventListener('mouseup', this.dragStop);
   },
