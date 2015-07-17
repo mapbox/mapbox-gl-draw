@@ -27,11 +27,13 @@ Point.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  move(store, id, pos) {
-    store.dragUnset(id, this._map);
+  move(id, pos) {
     var c = this._map.unproject([pos.x, pos.y]);
     var coords = [c.lng, c.lat];
-    this.drawCreate(this.type, coords);
+    this._drawStore.update(id, coords, 'Point');
+    this._map.fire('draw.feature.update', {
+      geojson: this._drawStore.getAll()
+    });
     this.featureComplete();
   }
 

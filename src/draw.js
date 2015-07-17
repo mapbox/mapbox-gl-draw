@@ -140,7 +140,7 @@ Draw.prototype = extend(Control, {
       this._control = new Point(this._map, this.options);
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.move(this.options.geoJSON, this.dragId, pos);
+    this._control.move(this.dragId, pos);
   },
 
   _dragStop() {
@@ -225,7 +225,6 @@ Draw.prototype = extend(Control, {
       });
 
       map.on('edit.feature.update', (e) => {
-        console.log(JSON.stringify(e.geojson));
         editLayer.setData(e.geojson);
       });
 

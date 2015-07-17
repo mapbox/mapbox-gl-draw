@@ -17,6 +17,8 @@ function Store(data) {
   this.history.push(Immutable.Map(data));
 
   this.annotations = [Immutable.List([])];
+
+  this.dragging = false;
 }
 
 Store.prototype = {
@@ -90,13 +92,25 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  dragUnset(id, map) {
-    map.fire('draw.feature.update', {
-      geojson: this.history[this.historyIndex]
-        .filterNot(feature => feature.get('properties')._drawid === id)
-    });
+  update(id, coords, type) {
+    if (!this.dragging) {
+      // increment history index and add new entry only once at start of drag
+      this.history.push(this.history[this.historyIndex++]);
+      this.dragging = true;
+    }
+    this.history[this.historyIndex] = this.history[this.historyIndex] // remove this item
+      .filterNot(feat => feat.get('properties')._drawid === id); // from the current state in history
+    this.history[this.historyIndex].push(Immutable.Map({
+      type: 'Feature',
+      properties: {
+        _drawid: id
+      },
+      geometry: {
+        type: type,
+        coordinates: coords
+      }
+    }));
   },
-
 
   redo() {
     if (this.historyIndex < this.history.length) this.historyIndex++;
