@@ -78,8 +78,15 @@ Square.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  translate(id/*, pos*/) {
+  translate(id, prev, pos) {
     var square = this._drawStore.getById(id);
+    var dx = pos.x - prev.x;
+    var dy = pos.y - prev.y;
+    var coords = square.geometry.coordinates[0].map(coord => {
+      var c = this._map.project(coord);
+      c = this._map.unproject([c.x + dx, c.y + dy]);
+      return [c.lng, c.lat];
+    });
     square = {
       type: 'Feature',
       properties: {
@@ -87,7 +94,7 @@ Square.prototype = extend(handlers, {
       },
       geometry: {
         type: 'Polygon',
-        coordinates: square ////////
+        coordinates: [coords]
       }
     };
     this._drawStore.update(id, square);

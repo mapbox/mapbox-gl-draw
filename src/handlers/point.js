@@ -26,7 +26,7 @@ Point.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  translate(id, pos) {
+  translate(id, prev, pos) {
     var c = this._map.unproject([pos.x, pos.y]);
     var coords = [c.lng, c.lat];
     var point = this._drawStore.getById(id);

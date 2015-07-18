@@ -199,7 +199,6 @@ Draw.prototype = extend(Control, {
           this._control = new Line(this._map, this.options);
           break;
         case 'square':
-          console.log('here');
           this._control = new Square(this._map, this.options);
           break;
         case 'polygon':
@@ -207,8 +206,9 @@ Draw.prototype = extend(Control, {
           break;
       }
     }
-    var pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.translate(this.editId, pos);
+    this.prev = this.pos || DOM.mousePos(e, this._map.getContainer());
+    this.pos = DOM.mousePos(e, this._map.getContainer());
+    this._control.translate(this.editId, this.prev, this.pos);
   },
 
   _endDrag() {

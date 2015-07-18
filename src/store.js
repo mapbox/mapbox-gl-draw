@@ -43,7 +43,7 @@ Store.prototype = {
 
   getById(id) {
     return this.history[this.historyIndex]
-      .find(feature => feature.get('properties')._drawid === id);
+      .find(feature => feature.get('properties')._drawid === id).toJS();
   },
 
   clear() {
