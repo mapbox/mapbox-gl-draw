@@ -41,6 +41,11 @@ Store.prototype = {
     };
   },
 
+  getById(id) {
+    return this.history[this.historyIndex]
+      .find(feature => feature.get('properties')._drawid === id);
+  },
+
   clear() {
     // TODO Iterate down historyIndex instead.
     this.historyIndex = 0;
@@ -92,7 +97,7 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  update(id, coords, type) {
+  update(id, feature) {
     if (!this.dragging) {
       // increment history index and add new entry only once at start of drag
       this.history.push(this.history[this.historyIndex++]);
@@ -101,17 +106,7 @@ Store.prototype = {
     var idx = this.historyIndex;
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
-    var feature = Immutable.Map({
-      type: 'Feature',
-      properties: {
-        _drawid: id
-      },
-      geometry: {
-        type: type,
-        coordinates: coords
-      }
-    });
-    this.history[idx] = this.history[idx].push(feature);
+    this.history[idx] = this.history[idx].push(Immutable.Map(feature));
   },
 
   redo() {

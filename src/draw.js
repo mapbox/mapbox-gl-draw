@@ -181,7 +181,7 @@ Draw.prototype = extend(Control, {
       this._control = new Point(this._map, this.options);
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.move(this.editId, pos);
+    this._control.translate(this.editId, pos);
   },
 
   _endDrag() {

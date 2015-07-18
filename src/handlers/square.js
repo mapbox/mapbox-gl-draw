@@ -76,6 +76,24 @@ Square.prototype = extend(handlers, {
     this._clearSquareGuide();
     if (this._data) this.drawCreate(this.type, [this._data]);
     this.featureComplete();
+  },
+
+  translate(id, pos) {
+    var square = this._drawStore.getById(id);
+    square = {
+      type: 'Feature',
+      properties: {
+        _drawid: id
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: pos ////////
+      }
+    };
+    this._drawStore.update(id, square);
+    this._map.fire('draw.feature.update', {
+      geojson: this._drawStore.getAll()
+    });
   }
 
 });

@@ -26,10 +26,21 @@ Point.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  move(id, pos) {
+  translate(id, pos) {
     var c = this._map.unproject([pos.x, pos.y]);
     var coords = [c.lng, c.lat];
-    this._drawStore.update(id, coords, 'Point');
+    var point = this._drawStore.getById(id);
+    point = {
+      type: 'Feature',
+      properties: {
+        _drawid: id
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: coords
+      }
+    };
+    this._drawStore.update(id, point);
     this._map.fire('draw.feature.update', {
       geojson: this._drawStore.getAll()
     });
