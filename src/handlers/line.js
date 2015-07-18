@@ -82,6 +82,10 @@ Line.prototype = extend(vertices, {
 
     // Draw guide line
     this.drawGuide(this._map, a, b);
+  },
+
+  translate(id, prev, pos) {
+    this._translate(id, prev, pos);
   }
 
 });

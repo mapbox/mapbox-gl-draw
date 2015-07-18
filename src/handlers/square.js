@@ -79,28 +79,7 @@ Square.prototype = extend(handlers, {
   },
 
   translate(id, prev, pos) {
-    var square = this._drawStore.getById(id);
-    var dx = pos.x - prev.x;
-    var dy = pos.y - prev.y;
-    var coords = square.geometry.coordinates[0].map(coord => {
-      var c = this._map.project(coord);
-      c = this._map.unproject([c.x + dx, c.y + dy]);
-      return [c.lng, c.lat];
-    });
-    square = {
-      type: 'Feature',
-      properties: {
-        _drawid: id
-      },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [coords]
-      }
-    };
-    this._drawStore.update(id, square);
-    this._map.fire('draw.feature.update', {
-      geojson: this._drawStore.getAll()
-    });
+    this._translate(id, prev, pos);
   }
 
 });
