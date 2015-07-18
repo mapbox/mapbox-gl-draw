@@ -180,6 +180,7 @@ Draw.prototype = extend(Control, {
     e.stopPropagation();
     if (!this.dragging) {
       this.dragging = true;
+      this.init = DOM.mousePos(e, this._map.getContainer());
       switch (this.featureType) {
         case 'point':
           this._control = new Point(this._map, this.options);
@@ -195,9 +196,8 @@ Draw.prototype = extend(Control, {
           break;
       }
     }
-    this.prev = this.pos || DOM.mousePos(e, this._map.getContainer());
     this.pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.translate(this.editId, this.prev, this.pos);
+    this._control.translate(this.editId, this.init, this.pos);
   },
 
   _endDrag() {
