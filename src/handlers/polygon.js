@@ -36,11 +36,10 @@ Polygon.prototype = extend(vertices, {
 
     this._map.featuresAt(e.point, {
       radius: 0
-    }, (err, feature) => {
+    }, (err/*, feature*/) => {
       if (err) throw err;
 
       // TODO complete the polygon if featuresAt returns the first point.
-      console.log('featuresAt', feature);
       this._data.push(coords);
       this._addVertex(coords);
     });

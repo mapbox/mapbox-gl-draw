@@ -163,7 +163,7 @@ Draw.prototype = extend(Control, {
 
       if (feature.geometry.type === 'Point')
         this.featureType = 'point';
-      else if (feature.geometry.type === 'LineString')
+      else if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString')
         this.featureType = 'line';
       else if (coords[0][0][0] === coords[0][1][0])
         this.featureType = 'square';

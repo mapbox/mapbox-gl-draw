@@ -36,11 +36,10 @@ Line.prototype = extend(vertices, {
 
     this._map.featuresAt(e.point, {
       radius: 0
-    }, (err, feature) => {
+    }, (err/*, feature*/) => {
       if (err) throw err;
 
       // TODO complete a linestring if featuresAt returns the last point.
-      console.log('featuresAt', feature);
       this._data.push(coords);
       this._addVertex(coords);
     });

@@ -75,25 +75,43 @@ module.exports = {
   },
 
   _translate(id, prev, pos) {
-    var square = this._drawStore.getById(id);
+    var feature = this._drawStore.getById(id);
     var dx = pos.x - prev.x;
     var dy = pos.y - prev.y;
-    var coords = square.geometry.coordinates[0].map(coord => {
-      var c = this._map.project(coord);
-      c = this._map.unproject([c.x + dx, c.y + dy]);
-      return [c.lng, c.lat];
-    });
-    square = {
+    var coords;
+
+    if (feature.geometry.type === 'Polygon')
+      coords = feature.geometry.coordinates[0].map(point => {
+        var c = this._map.project(point);
+        c = this._map.unproject([c.x + dx, c.y + dy]);
+        return [c.lng, c.lat];
+      });
+    else if (feature.geometry.type === 'MultiLineString')
+      coords = feature.geometry.coordinates.map(line =>
+        line.map(point => {
+          var c = this._map.project(point);
+          c = this._map.unproject([c.x + dx, c.y + dy]);
+          return [c.lng, c.lat];
+        })
+      );
+    else
+      coords = feature.geometry.coordinates.map(point => {
+        var c = this._map.project(point);
+        c = this._map.unproject([c.x + dx, c.y + dy]);
+        return [c.lng, c.lat];
+      });
+
+    feature = {
       type: 'Feature',
       properties: {
         _drawid: id
       },
       geometry: {
-        type: 'Polygon',
-        coordinates: [coords]
+        type: feature.geometry.type,
+        coordinates: feature.geometry.type === 'Polygon' ? [coords] : coords
       }
     };
-    this._drawStore.update(id, square);
+    this._drawStore.update(id, feature);
     this._map.fire('draw.feature.update', {
       geojson: this._drawStore.getAll()
     });
