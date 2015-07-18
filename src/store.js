@@ -66,14 +66,6 @@ Store.prototype = {
     );
   },
 
-  _findIndex(id) {
-    var index;
-    this.history[this.historyIndex].forEach((feature, i) => {
-      if (feature.get('properties')._drawid === id) index = i;
-    });
-    return index;
-  },
-
   set(type, id, coords) {
     this.operation((data) => {
       var feature = Immutable.Map({
@@ -88,18 +80,29 @@ Store.prototype = {
       });
 
       // Does an index for this exist?
-      var updateIndex = this._findIndex(id);
+      var updateIndex = this.history[this.historyIndex]
+        .findIndex(feat => feat.get('properties')._drawid === id);
 
-      return (updateIndex >= 0) ?
+      return (updateIndex > -1) ?
         data.set(updateIndex, feature) :
         data.push(feature);
 
     }, 'Added a ' + type);
   },
 
+  edit(/*id*/) {
+    /*
+    this.history.push([this.historyIndex++]);
+    var idx = this.historyIndex;
+    var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
+    this.history[idx] = this.history[idx]
+      .filterNot(feat => feat.get('properties')._drawid === id);
+    return feature;
+    */
+  },
+
   update(id, feature) {
     if (!this.dragging) {
-      // increment history index and add new entry only once at start of drag
       this.history.push(this.history[this.historyIndex++]);
       this.dragging = true;
     }

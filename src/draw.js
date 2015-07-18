@@ -164,6 +164,7 @@ Draw.prototype = extend(Control, {
   },
 
   _edit() {
+    this.activeFeature = this.options.geoJSON.edit(this.editId); // remove from draw store and return
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
   },
 
