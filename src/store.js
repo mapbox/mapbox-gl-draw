@@ -13,7 +13,7 @@ function Store(data) {
     });
   }
 
-  this.history = [Immutable.List(data.length ? [data] : [])];
+  this.history = [Immutable.List(data.length ? [Immutable.Map(data)] : [])];
 
   this.annotations = [Immutable.List([])];
 
