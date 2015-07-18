@@ -13,8 +13,7 @@ function Store(data) {
     });
   }
 
-  this.history = [Immutable.List([])];
-  this.history.push(Immutable.Map(data));
+  this.history = [Immutable.List(data.length ? [data] : [])];
 
   this.annotations = [Immutable.List([])];
 
@@ -90,26 +89,23 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  edit(/*id*/) {
-    /*
-    this.history.push([this.historyIndex++]);
+  edit(id) {
+    this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
     var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
     return feature;
-    */
   },
 
-  update(id, feature) {
-    if (!this.dragging) {
-      this.history.push(this.history[this.historyIndex++]);
-      this.dragging = true;
-    }
+  update(id, feature) { // only used for edit stores
+    this.history[0] = Immutable.Map(feature);
+    /*
     var idx = this.historyIndex;
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
     this.history[idx] = this.history[idx].push(Immutable.Map(feature));
+    */
   },
 
   redo() {

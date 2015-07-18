@@ -1,6 +1,7 @@
 'use strict';
 
 var extend = require('xtend');
+var R = require('ramda');
 var Control = require('./control');
 var themeStyle = require('./theme/style');
 var themeEdit = require('./theme/edit');
@@ -136,17 +137,12 @@ Draw.prototype = extend(Control, {
   _onClick(e) {
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
-      if (err) {
-        return;
-      } else if (!features.length && this.editId) {
-        this._exitEdit();
-        this.editId = false;
-        return;
-      } else if (!features.length) {
-        return;
-      }
+      if (err) return;
+      else if (!features.length && this.editId) return this._exitEdit();
+      else if (!features.length) return;
 
       var feature = features[0];
+      if (this.editId === feature.properties._drawid) return; // already editting that feature
       this.editId = feature.properties._drawid;
       coords = feature.geometry.coordinates;
 
@@ -164,12 +160,14 @@ Draw.prototype = extend(Control, {
   },
 
   _edit() {
-    this.activeFeature = this.options.geoJSON.edit(this.editId); // remove from draw store and return
+    var activeFeature = this.options.geoJSON.edit(this.editId);
+    this.editStore = new Store([activeFeature.toJS()]);
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
   },
 
   _exitEdit() {
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
+    this.editId = false;
   },
 
   _initiateDrag() {
@@ -180,20 +178,23 @@ Draw.prototype = extend(Control, {
   _drag(e) {
     e.stopPropagation();
     if (!this.dragging) {
+      //console.log(JSON.stringify(this.options, null, 2));
+      //console.log(this.editStore);
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
+      var options = R.merge(this.options, { geoJSON: this.editStore });
       switch (this.featureType) {
         case 'point':
-          this._control = new Point(this._map, this.options);
+          this._control = new Point(this._map, options);
           break;
         case 'line':
-          this._control = new Line(this._map, this.options);
+          this._control = new Line(this._map, options);
           break;
         case 'square':
-          this._control = new Square(this._map, this.options);
+          this._control = new Square(this._map, options);
           break;
         case 'polygon':
-          this._control = new Polygon(this._map, this.options);
+          this._control = new Polygon(this._map, options);
           break;
       }
     }
