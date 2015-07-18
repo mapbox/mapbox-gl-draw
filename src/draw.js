@@ -156,7 +156,20 @@ Draw.prototype = extend(Control, {
       } else if (!features.length) { // if you are not editting and you click on the map, return
         return;
       }
-      this.editId = features[0].properties._drawid;
+
+      var feature = features[0];
+      this.editId = feature.properties._drawid;
+      coords = feature.geometry.coordinates;
+
+      if (feature.geometry.type === 'Point')
+        this.featureType = 'point';
+      else if (feature.geometry.type === 'LineString')
+        this.featureType = 'line';
+      else if (coords[0][0][0] === coords[0][1][0])
+        this.featureType = 'square';
+      else
+        this.featureType = 'polygon';
+
       this._edit();
     });
   },
@@ -178,7 +191,21 @@ Draw.prototype = extend(Control, {
     e.stopPropagation();
     if (!this.dragging) {
       this.dragging = true;
-      this._control = new Point(this._map, this.options);
+      switch (this.featureType) {
+        case 'point':
+          this._control = new Point(this._map, this.options);
+          break;
+        case 'line':
+          this._control = new Line(this._map, this.options);
+          break;
+        case 'square':
+          console.log('here');
+          this._control = new Square(this._map, this.options);
+          break;
+        case 'polygon':
+          this._control = new Polygon(this._map, this.options);
+          break;
+      }
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
     this._control.translate(this.editId, pos);

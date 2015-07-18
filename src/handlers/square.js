@@ -78,7 +78,7 @@ Square.prototype = extend(handlers, {
     this.featureComplete();
   },
 
-  translate(id, pos) {
+  translate(id/*, pos*/) {
     var square = this._drawStore.getById(id);
     square = {
       type: 'Feature',
@@ -87,7 +87,7 @@ Square.prototype = extend(handlers, {
       },
       geometry: {
         type: 'Polygon',
-        coordinates: pos ////////
+        coordinates: square ////////
       }
     };
     this._drawStore.update(id, square);
