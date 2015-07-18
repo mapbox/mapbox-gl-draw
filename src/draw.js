@@ -54,7 +54,7 @@ Draw.prototype = extend(Control, {
       this.lineStringCtrl = this._createButton({
         className: controlClass + ' line',
         title: 'LineString tool' + (this.options.keybindings ? ' (l)' : ''),
-        fn: this._drawLine.bind(this, map, this.options)
+        fn: this._drawLine.bind(this)
       });
     }
 
@@ -62,7 +62,7 @@ Draw.prototype = extend(Control, {
       this.polygonCtrl = this._createButton({
         className: controlClass + ' shape',
         title: 'Polygon tool' + (this.options.keybindings ? ' (p)' : ''),
-        fn: this._drawPolygon.bind(this, map, this.options)
+        fn: this._drawPolygon.bind(this)
       });
     }
 
@@ -70,7 +70,7 @@ Draw.prototype = extend(Control, {
       this.squareCtrl = this._createButton({
         className: controlClass + ' square',
         title: 'Square tool' + (this.options.keybindings ? ' (s)' : ''),
-        fn: this._drawSquare.bind(this, map, this.options)
+        fn: this._drawSquare.bind(this)
       });
     }
 
@@ -78,7 +78,7 @@ Draw.prototype = extend(Control, {
       this.markerCtrl = this._createButton({
         className: controlClass + ' marker',
         title: 'Marker tool' + (this.options.keybindings ? ' (m)' : ''),
-        fn: this._drawPoint.bind(this, map, this.options)
+        fn: this._drawPoint.bind(this)
       });
     }
 
@@ -126,17 +126,6 @@ Draw.prototype = extend(Control, {
   },
 
   _onMouseDown(/*e*/) {
-    /*
-    var coords = DOM.mousePos(e, this._map._container);
-    this._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
-      if (!err && features.length) { // if you click on a feature
-        this._map.getContainer().addEventListener('mousemove', this.drag, true); // add the drag event listeners
-        this._map.getContainer().addEventListener('mouseup', this.dragStop);
-        this.editId = features[0].properties._drawid;
-      }
-    });
-    */
-
     //if (e.altKey) {
     //  e.stopPropagation();
     //    TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
@@ -147,13 +136,13 @@ Draw.prototype = extend(Control, {
   _onClick(e) {
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
-      if (err) { // return on error, handle this
+      if (err) {
         return;
-      } else if (!features.length && this.editId) { // if you're in edit mode and you click outside, exit
+      } else if (!features.length && this.editId) {
         this._exitEdit();
         this.editId = false;
         return;
-      } else if (!features.length) { // if you are not editting and you click on the map, return
+      } else if (!features.length) {
         return;
       }
 
@@ -218,20 +207,20 @@ Draw.prototype = extend(Control, {
     this._control.disable();
   },
 
-  _drawPolygon(map, options) {
-    this._control = new Polygon(map, options);
+  _drawPolygon() {
+    this._control = new Polygon(this._map, this.options);
   },
 
-  _drawLine(map, options) {
-    this._control = new Line(map, options);
+  _drawLine() {
+    this._control = new Line(this._map, this.options);
   },
 
-  _drawSquare(map, options) {
-    this._control = new Square(map, options);
+  _drawSquare() {
+    this._control = new Square(this._map, this.options);
   },
 
-  _drawPoint(map, options) {
-    this._control = new Point(map, options);
+  _drawPoint() {
+    this._control = new Point(this._map, this.options);
   },
 
   _createButton(opts) {
