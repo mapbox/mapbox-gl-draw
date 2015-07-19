@@ -21,10 +21,10 @@ function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
 
+  // functions that will be event listeners
   this.onClick = this._onClick.bind(this);
   this.onMouseDown = this._onMouseDown.bind(this);
   this.onKeyUp = this._onKeyUp.bind(this);
-
   this.initiateDrag = this._initiateDrag.bind(this);
   this.endDrag = this._endDrag.bind(this);
   this.drag = this._drag.bind(this);
@@ -94,7 +94,7 @@ Draw.prototype = extend(Control, {
 
     this._map = map;
 
-    this._mapState(map);
+    this._mapState();
     return container;
   },
 
@@ -136,7 +136,7 @@ Draw.prototype = extend(Control, {
 
   _onClick(e) {
     var coords = DOM.mousePos(e, this._map._container);
-    this._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
+    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
       if (err) return;
       else if (!features.length && this.editId) return this._exitEdit();
       else if (!features.length) return;
@@ -165,6 +165,7 @@ Draw.prototype = extend(Control, {
     var activeFeature = this.options.geoJSON.edit(this.editId);
     this.editStore = new Store([activeFeature]);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
+    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
   },
 
@@ -172,6 +173,8 @@ Draw.prototype = extend(Control, {
     // save the changes into the draw store
     this.options.geoJSON.save(this.editStore.getAll().features[0]);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
+    this.editStore.clear();
+    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
   },
@@ -256,10 +259,10 @@ Draw.prototype = extend(Control, {
     return a;
   },
 
-  _mapState(map) {
+  _mapState() {
     var controlClass = this._controlClass;
 
-    map.on('load', () => {
+    this._map.on('load', () => {
 
       // Initialize the draw layer with any possible
       // features passed via `options.geoJSON`
@@ -267,32 +270,32 @@ Draw.prototype = extend(Control, {
         data: this.options.geoJSON.getAll()
       });
 
-      map.addSource('draw', drawLayer);
+      this._map.addSource('draw', drawLayer);
       themeStyle.forEach((style) => {
-        map.addLayer(style);
+        this._map.addLayer(style);
       });
 
       // Initialize an editLayer that provides
       // marker anchors and guides during the
-      // draw process.
+      // draw process and during editting.
       var editLayer = new mapboxgl.GeoJSONSource({
         data: []
       });
 
-      map.addSource('edit', editLayer);
+      this._map.addSource('edit', editLayer);
       themeEdit.forEach((style) => {
-        map.addLayer(style);
+        this._map.addLayer(style);
       });
 
-      map.on('draw.stop', () => {
+      this._map.on('draw.stop', () => {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      map.on('edit.feature.update', (e) => {
+      this._map.on('edit.feature.update', (e) => {
         editLayer.setData(e.geojson);
       });
 
-      map.on('draw.feature.update', (e) => {
+      this._map.on('draw.feature.update', (e) => {
         drawLayer.setData(e.geojson);
       });
     });

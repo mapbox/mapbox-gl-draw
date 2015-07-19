@@ -28,5 +28,30 @@ module.exports = [
       'icon-size': 2
     },
     'interactive': true
+  }, {
+    'id': 'gl-edit-polygon',
+    'type': 'fill',
+    'source': 'edit',
+    'filter': ['all', ['==', '$type', 'Polygon']],
+    'paint': {
+      'fill-color': '#ff00ff',
+      'fill-outline-color': '#ff00ff',
+      'fill-opacity': 0.25
+    },
+    'interactive': true
+  }, {
+    'id': 'gl-edit-polygon-stroke',
+    'type': 'line',
+    'source': 'edit',
+    'filter': ['all', ['==', '$type', 'Polygon']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#ff00ff',
+      'line-dasharray': [4, 4],
+      'line-width': 3
+    }
   }
 ];
