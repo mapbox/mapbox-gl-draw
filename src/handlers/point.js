@@ -27,21 +27,20 @@ Point.prototype = extend(handlers, {
   },
 
   translate(id, prev, pos) {
+    // points implement their own translation for efficiency
     var c = this._map.unproject([pos.x, pos.y]);
-    var coords = [c.lng, c.lat];
-    var point = this._drawStore.getById(id);
-    point = {
+    var point = {
       type: 'Feature',
       properties: {
         _drawid: id
       },
       geometry: {
         type: 'Point',
-        coordinates: coords
+        coordinates: [c.lng, c.lat]
       }
     };
 
-    this._drawStore.update(id, point);
+    this._drawStore.update(point);
 
     this._map.fire('edit.feature.update', {
       geojson: this._drawStore.getAll()

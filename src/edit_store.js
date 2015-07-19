@@ -1,12 +1,21 @@
 'use strict';
 
+/**
+ * A store for keeping track of in progress
+ * feature edits before they written into history
+ *
+ * @param {array} data - an array of geojson features
+ *
+ * will eventually support mass edits
+ */
+
 function EditStore(data) {
-  this.features = data; // an array of features for editing
+  this.features = data;
 }
 
 EditStore.prototype = {
 
-  getAll() { // for rendering
+  getAll() {
     return {
       type: 'FeatureCollection',
       features: this.features
@@ -22,7 +31,8 @@ EditStore.prototype = {
   },
 
   update(feature) {
-    this.features = this.features.filter(feat => feat.properties._drawid !== feature.properties._drawid);
+    this.features = this.features
+      .filter(feat => feat.properties._drawid !== feature.properties._drawid);
     this.features.push(feature);
   }
 };

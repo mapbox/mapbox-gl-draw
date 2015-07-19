@@ -108,22 +108,27 @@ Draw.prototype = extend(Control, {
         if (!this.lineStringCtrl.classList.contains('active')) {
           this.lineStringCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 77: // (m) marker
         if (!this.markerCtrl.classList.contains('active')) {
           this.markerCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 80: // (p) polygon
         if (!this.polygonCtrl.classList.contains('active')) {
           this.polygonCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 83: // (s) square
         if (!this.squareCtrl.classList.contains('active')) {
           this.squareCtrl.dispatchEvent(event);
         }
-      break;
+        break;
+      case 27: // (escape) exit edit mode
+        if (this.editId) {
+          this._exitEdit();
+        }
+        break;
     }
   },
 
@@ -174,7 +179,7 @@ Draw.prototype = extend(Control, {
 
   _exitEdit() {
     // save the changes into the draw store
-    this.options.geoJSON.save(this.editStore.getAll().features[0]);
+    this.options.geoJSON.save(this.editStore.getAll());
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this.editStore.clear();
     this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });

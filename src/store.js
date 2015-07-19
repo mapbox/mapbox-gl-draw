@@ -3,20 +3,24 @@
 var Immutable = require('immutable');
 var hat = require('hat');
 
+/**
+ * A store for keeping track of versions of drawings
+ *
+ * @param {Array} data An array of GeoJSON object
+ *
+ */
+
 function Store(data) {
   this.historyIndex = 0;
+  this.history = [ Immutable.List([]) ];
+  this.annotations = Immutable.List([]);
 
-  // Apply an internal ID to any potential added feature
   if (data.length) {
-    data.forEach((d) => {
-      d.properties._drawid = d.properties._drawid || hat();
+    data.forEach(d => {
+      d.properties._drawid = hat();
+      this.history[0] = this.history[0].push(Immutable.Map(d));
     });
-    data = data.map(feat => Immutable.Map(feat));
   }
-
-  this.history = [ Immutable.List(data.length ? data : []) ];
-
-  this.annotations = [ Immutable.List([]) ];
 }
 
 Store.prototype = {
@@ -28,7 +32,7 @@ Store.prototype = {
     this.history = this.history.slice(0, this.historyIndex + 1);
     var newVersion = fn(this.history[this.historyIndex]);
     this.history.push(newVersion);
-    this.annotations.push(annotation);
+    this.annotations = this.annotations.push(annotation);
     this.historyIndex++;
   },
 
@@ -97,10 +101,12 @@ Store.prototype = {
     return feature.toJS();
   },
 
-  save(feature) {
+  save(features) {
     var idx = this.historyIndex;
-    this.history[idx] = this.history[idx].push(Immutable.Map(feature));
-    this.annonatations = this.annotations.push('editted a feature');
+    features.features.forEach(feat => {
+      this.history[idx] = this.history[idx].push(Immutable.Map(feat));
+    });
+    this.annonatations = this.annotations.push('editted features');
   },
 
   redo() {
