@@ -1,7 +1,6 @@
 'use strict';
 
 var extend = require('xtend');
-var R = require('ramda');
 var Control = require('./control');
 var themeStyle = require('./theme/style');
 var themeEdit = require('./theme/edit');
@@ -197,7 +196,7 @@ Draw.prototype = extend(Control, {
     if (!this.dragging) {
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
-      var options = R.merge(this.options, { geoJSON: this.editStore });
+      var options = extend(this.options, { geoJSON: this.editStore });
       switch (this.featureType) {
         case 'point':
           this._control = new Point(this._map, options);
