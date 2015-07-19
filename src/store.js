@@ -88,7 +88,7 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  edit(id) { // used for draw store
+  edit(id) {
     this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
     var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
@@ -97,11 +97,7 @@ Store.prototype = {
     return feature.toJS();
   },
 
-  update(id, feature) { // only used for edit stores
-    this.history[this.historyIndex] = Immutable.Map(feature);
-  },
-
-  save(feature) { // used for draw store
+  save(feature) {
     var idx = this.historyIndex;
     this.history[idx] = this.history[idx].push(Immutable.Map(feature));
     this.annonatations = this.annotations.push('editted a feature');

@@ -40,8 +40,10 @@ Point.prototype = extend(handlers, {
         coordinates: coords
       }
     };
+
     this._drawStore.update(id, point);
-    this._map.fire('draw.feature.update', {
+
+    this._map.fire('edit.feature.update', {
       geojson: this._drawStore.getAll()
     });
   }

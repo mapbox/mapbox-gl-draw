@@ -100,12 +100,9 @@ module.exports = {
         coordinates: this.type === 'Polygon' ? [coords] : coords
       }
     };
+
     this._drawStore.update(id, feature);
-    /*
-    this._map.fire('draw.feature.update', {
-      geojson: this._drawStore.getAll()
-    });
-    */
+
     this._map.fire('edit.feature.update', {
       geojson: this._drawStore.getAll()
     });

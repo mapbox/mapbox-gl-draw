@@ -10,6 +10,7 @@ var DOM = util.DOM;
 
 // Data store
 var Store = require('./store');
+var EditStore = require('./edit_store');
 
 // Control handlers
 var Polygon = require('./handlers/polygon');
@@ -137,7 +138,7 @@ Draw.prototype = extend(Control, {
   _onClick(e) {
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
-      if (err) return;
+      if (err) throw err;
       else if (!features.length && this.editId) return this._exitEdit();
       else if (!features.length) return;
 
@@ -146,10 +147,11 @@ Draw.prototype = extend(Control, {
 
       this.editId = feature.properties._drawid;
       coords = feature.geometry.coordinates;
+      var type = feature.geometry.type;
 
-      if (feature.geometry.type === 'Point')
+      if (type === 'Point')
         this.featureType = 'point';
-      else if (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString')
+      else if (type === 'LineString' || type === 'MultiLineString')
         this.featureType = 'line';
       else if (coords[0][0][0] === coords[0][1][0])
         this.featureType = 'square';
@@ -163,7 +165,8 @@ Draw.prototype = extend(Control, {
   _edit() {
     // move the feature clicked on out of the draw store into an edit store
     var activeFeature = this.options.geoJSON.edit(this.editId);
-    this.editStore = new Store([activeFeature]);
+    //this.editStore = new Store([activeFeature]);
+    this.editStore = new EditStore([activeFeature]);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
@@ -205,8 +208,8 @@ Draw.prototype = extend(Control, {
           break;
       }
     }
-    this.pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.translate(this.editId, this.init, this.pos);
+    var pos = DOM.mousePos(e, this._map.getContainer());
+    this._control.translate(this.editId, this.init, pos);
   },
 
   _endDrag() {
