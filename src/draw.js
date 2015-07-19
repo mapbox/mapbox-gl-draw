@@ -143,7 +143,8 @@ Draw.prototype = extend(Control, {
       else if (!features.length) return;
 
       var feature = features[0];
-      if (this.editId === feature.properties._drawid) return; // already editting that feature
+      if (this.editId && this.editId !== feature.properties._drawid) this._exitEdit();
+      else if (this.editId === feature.properties._drawid) return;
 
       this.editId = feature.properties._drawid;
       coords = feature.geometry.coordinates;
