@@ -101,7 +101,7 @@ module.exports = {
       }
     };
 
-    this._drawStore.update(id, feature);
+    this._drawStore.update(feature);
 
     this._map.fire('edit.feature.update', {
       geojson: this._drawStore.getAll()

@@ -21,9 +21,9 @@ EditStore.prototype = {
     this.features = [];
   },
 
-  update(id, feature) {
-    this.data = this.data.filter(feat => feat.properties._drawid !== id);
-    this.data.push(feature);
+  update(feature) {
+    this.features = this.features.filter(feat => feat.properties._drawid !== feature.properties._drawid);
+    this.features.push(feature);
   }
 };
 

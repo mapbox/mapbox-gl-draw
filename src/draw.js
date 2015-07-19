@@ -166,7 +166,6 @@ Draw.prototype = extend(Control, {
   _edit() {
     // move the feature clicked on out of the draw store into an edit store
     var activeFeature = this.options.geoJSON.edit(this.editId);
-    //this.editStore = new Store([activeFeature]);
     this.editStore = new EditStore([activeFeature]);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
