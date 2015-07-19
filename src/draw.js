@@ -211,6 +211,8 @@ Draw.prototype = extend(Control, {
           this._control = new Polygon(this._map, options);
           break;
       }
+      this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+      this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
     }
     var pos = DOM.mousePos(e, this._map.getContainer());
     this._control.translate(this.editId, this.init, pos);
@@ -219,6 +221,7 @@ Draw.prototype = extend(Control, {
   _endDrag() {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
+    this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
     this.dragging = false;
     this._control.disable();
   },
