@@ -4,7 +4,7 @@
  * A store for keeping track of in progress
  * feature edits before they written into history
  *
- * @param {array} data - an array of geojson features
+ * @param {array} data - an array of geojson features (for a Feature Collection)
  *
  * will eventually support mass edits
  */
