@@ -143,6 +143,7 @@ Draw.prototype = extend(Control, {
 
       var feature = features[0];
       if (this.editId === feature.properties._drawid) return; // already editting that feature
+
       this.editId = feature.properties._drawid;
       coords = feature.geometry.coordinates;
 
@@ -160,12 +161,17 @@ Draw.prototype = extend(Control, {
   },
 
   _edit() {
+    // move the feature clicked on out of the draw store into an edit store
     var activeFeature = this.options.geoJSON.edit(this.editId);
-    this.editStore = new Store([activeFeature.toJS()]);
+    this.editStore = new Store([activeFeature]);
+    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
   },
 
   _exitEdit() {
+    // save the changes into the draw store
+    this.options.geoJSON.save(this.editStore.getAll().features[0]);
+    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
   },
@@ -178,8 +184,6 @@ Draw.prototype = extend(Control, {
   _drag(e) {
     e.stopPropagation();
     if (!this.dragging) {
-      //console.log(JSON.stringify(this.options, null, 2));
-      //console.log(this.editStore);
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
       var options = R.merge(this.options, { geoJSON: this.editStore });

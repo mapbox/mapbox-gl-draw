@@ -42,7 +42,6 @@ module.exports = {
 
   editCreate(type, coords) {
     var id = hat();
-
     // Keeps track of temporary linestring guideline that's
     // drawn after the second point is selected.
     if (type === 'LineString') this._editLineGuide = id;

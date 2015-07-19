@@ -9,15 +9,14 @@ function Store(data) {
   // Apply an internal ID to any potential added feature
   if (data.length) {
     data.forEach((d) => {
-      d.properties._drawid = hat();
+      d.properties._drawid = d.properties._drawid || hat();
     });
+    data = data.map(feat => Immutable.Map(feat));
   }
 
-  this.history = [Immutable.List(data.length ? [Immutable.Map(data)] : [])];
+  this.history = [ Immutable.List(data.length ? data : []) ];
 
-  this.annotations = [Immutable.List([])];
-
-  this.dragging = false;
+  this.annotations = [ Immutable.List([]) ];
 }
 
 Store.prototype = {
@@ -89,23 +88,23 @@ Store.prototype = {
     }, 'Added a ' + type);
   },
 
-  edit(id) {
+  edit(id) { // used for draw store
     this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
     var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
-    return feature;
+    return feature.toJS();
   },
 
   update(id, feature) { // only used for edit stores
-    this.history[0] = Immutable.Map(feature);
-    /*
+    this.history[this.historyIndex] = Immutable.Map(feature);
+  },
+
+  save(feature) { // used for draw store
     var idx = this.historyIndex;
-    this.history[idx] = this.history[idx]
-      .filterNot(feat => feat.get('properties')._drawid === id);
     this.history[idx] = this.history[idx].push(Immutable.Map(feature));
-    */
+    this.annonatations = this.annotations.push('editted a feature');
   },
 
   redo() {
