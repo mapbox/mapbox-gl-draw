@@ -34,13 +34,10 @@ Line.prototype = extend(vertices, {
     var c = this._map.unproject(e.point);
     var coords = [c.lng, c.lat];
 
-    this._map.featuresAt(e.point, {
-      radius: 0
-    }, (err, feature) => {
+    this._map.featuresAt(e.point, { radius: 0 }, (err/*, feature*/) => {
       if (err) throw err;
 
       // TODO complete a linestring if featuresAt returns the last point.
-      console.log('featuresAt', feature);
       this._data.push(coords);
       this._addVertex(coords);
     });
@@ -82,6 +79,10 @@ Line.prototype = extend(vertices, {
 
     // Draw guide line
     this.drawGuide(this._map, a, b);
+  },
+
+  translate(id, prev, pos) {
+    this._translate(id, prev, pos);
   }
 
 });

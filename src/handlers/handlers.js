@@ -42,7 +42,6 @@ module.exports = {
 
   editCreate(type, coords) {
     var id = hat();
-
     // Keeps track of temporary linestring guideline that's
     // drawn after the second point is selected.
     if (type === 'LineString') this._editLineGuide = id;
@@ -72,6 +71,47 @@ module.exports = {
       featureType: this.type,
       feature: feature
     });
+  },
+
+  _translate(id, init, pos) {
+    if (!this.initialCoords) {
+      var f = this._drawStore.getById(id);
+      this.initialCoords = f.geometry.coordinates;
+      this.type = f.geometry.type;
+    }
+    var dx = pos.x - init.x;
+    var dy = pos.y - init.y;
+    var coords;
+
+    if (this.type === 'Polygon')
+      coords = this.initialCoords[0].map(p => this._translatePoint(p, dx, dy));
+    else if (this.type === 'MultiLineString')
+      coords = this.initialCoords.map(line => line.map(p => this._translatePoint(p, dx, dy)));
+    else
+      coords = this.initialCoords.map(p => this._translatePoint(p, dx, dy));
+
+    var feature = {
+      type: 'Feature',
+      properties: {
+        _drawid: id
+      },
+      geometry: {
+        type: this.type,
+        coordinates: this.type === 'Polygon' ? [coords] : coords
+      }
+    };
+
+    this._drawStore.update(feature);
+
+    this._map.fire('edit.feature.update', {
+      geojson: this._drawStore.getAll()
+    });
+  },
+
+  _translatePoint(point, dx, dy) {
+    var c = this._map.project([ point[1], point[0] ]);
+    c = this._map.unproject([c.x + dx, c.y + dy]);
+    return [c.lng, c.lat];
   },
 
   _onKeyUp(e) {

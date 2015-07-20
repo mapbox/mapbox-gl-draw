@@ -62,6 +62,7 @@
   .mapboxgl-ctrl-draw-btn.line:before   { content:'\e603'; }
 
 .mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
+.mapboxgl-draw-move-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:move; }
 
 .mapboxgl-draw-guide-square {
   background:rgba(255,0,255,0.10);

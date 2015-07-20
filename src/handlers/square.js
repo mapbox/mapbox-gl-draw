@@ -76,6 +76,10 @@ Square.prototype = extend(handlers, {
     this._clearSquareGuide();
     if (this._data) this.drawCreate(this.type, [this._data]);
     this.featureComplete();
+  },
+
+  translate(id, prev, pos) {
+    this._translate(id, prev, pos);
   }
 
 });

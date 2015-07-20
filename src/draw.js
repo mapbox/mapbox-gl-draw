@@ -9,6 +9,7 @@ var DOM = util.DOM;
 
 // Data store
 var Store = require('./store');
+var EditStore = require('./edit_store');
 
 // Control handlers
 var Polygon = require('./handlers/polygon');
@@ -19,6 +20,14 @@ var Point = require('./handlers/point');
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   util.setOptions(this, options);
+
+  // functions that will be event listeners
+  this.onClick = this._onClick.bind(this);
+  this.onKeyUp = this._onKeyUp.bind(this);
+  this.initiateDrag = this._initiateDrag.bind(this);
+  this.endDrag = this._endDrag.bind(this);
+  this.drag = this._drag.bind(this);
+
 }
 
 Draw.prototype = extend(Control, {
@@ -45,7 +54,7 @@ Draw.prototype = extend(Control, {
       this.lineStringCtrl = this._createButton({
         className: controlClass + ' line',
         title: 'LineString tool' + (this.options.keybindings ? ' (l)' : ''),
-        fn: this._drawLine.bind(this, map, this.options)
+        fn: this._drawLine.bind(this)
       });
     }
 
@@ -53,7 +62,7 @@ Draw.prototype = extend(Control, {
       this.polygonCtrl = this._createButton({
         className: controlClass + ' shape',
         title: 'Polygon tool' + (this.options.keybindings ? ' (p)' : ''),
-        fn: this._drawPolygon.bind(this, map, this.options)
+        fn: this._drawPolygon.bind(this)
       });
     }
 
@@ -61,7 +70,7 @@ Draw.prototype = extend(Control, {
       this.squareCtrl = this._createButton({
         className: controlClass + ' square',
         title: 'Square tool' + (this.options.keybindings ? ' (s)' : ''),
-        fn: this._drawSquare.bind(this, map, this.options)
+        fn: this._drawSquare.bind(this)
       });
     }
 
@@ -69,19 +78,22 @@ Draw.prototype = extend(Control, {
       this.markerCtrl = this._createButton({
         className: controlClass + ' marker',
         title: 'Marker tool' + (this.options.keybindings ? ' (m)' : ''),
-        fn: this._drawPoint.bind(this, map, this.options)
+        fn: this._drawPoint.bind(this)
       });
     }
 
-    map.getContainer().addEventListener('mousedown', this._onMouseDown, true);
+    map.getContainer().addEventListener('click', this.onClick);
 
     if (this.options.keybindings) {
-      map.getContainer().addEventListener('keyup', this._onKeyUp.bind(this));
+      map.getContainer().addEventListener('keyup', this.onKeyUp);
     }
 
-    this._mapState(map);
+    this._map = map;
+
+    this._mapState();
     return container;
   },
+
 
   _onKeyUp(e) {
     var event = document.createEvent('HTMLEvents');
@@ -91,47 +103,138 @@ Draw.prototype = extend(Control, {
         if (!this.lineStringCtrl.classList.contains('active')) {
           this.lineStringCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 77: // (m) marker
         if (!this.markerCtrl.classList.contains('active')) {
           this.markerCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 80: // (p) polygon
         if (!this.polygonCtrl.classList.contains('active')) {
           this.polygonCtrl.dispatchEvent(event);
         }
-      break;
+        break;
       case 83: // (s) square
         if (!this.squareCtrl.classList.contains('active')) {
           this.squareCtrl.dispatchEvent(event);
         }
-      break;
+        break;
+      case 27: // (escape) exit edit mode
+        if (this.editId) {
+          this._exitEdit();
+        }
+        break;
     }
   },
 
-  _onMouseDown(e) {
-    if (e.altKey) {
-      e.stopPropagation();
-      // TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
-      // this._captureFeatures();
+  _onClick(e) {
+    var coords = DOM.mousePos(e, this._map._container);
+    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+      if (err) throw err;
+      else if (!features.length && this.editId) return this._exitEdit();
+      else if (!features.length) return;
+
+      var feature = features[0];
+      if (this.editId && this.editId !== feature.properties._drawid) this._exitEdit();
+      else if (this.editId === feature.properties._drawid) return;
+
+      this.editId = feature.properties._drawid;
+      var c = feature.geometry.coordinates;
+      var type = feature.geometry.type;
+
+      if (type === 'Point')
+        this.featureType = 'point';
+      else if (type === 'LineString' || type === 'MultiLineString')
+        this.featureType = 'line';
+      else if (c[0][0][0] === c[0][1][0])
+        this.featureType = 'square';
+      else
+        this.featureType = 'polygon';
+
+      this._edit();
+    });
+  },
+
+  _edit() {
+    // move the feature clicked on out of the draw store into an edit store
+    var activeFeature = this.options.geoJSON.edit(this.editId);
+    this.editStore = new EditStore([activeFeature]);
+    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
+    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
+    this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
+  },
+
+  _exitEdit() {
+    // save the changes into the draw store
+    this.options.geoJSON.save(this.editStore.getAll());
+    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
+    this.editStore.clear();
+    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
+    this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
+    this.editId = false;
+  },
+
+  _initiateDrag(e) {
+    var coords = DOM.mousePos(e, this._map._container);
+    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+      if (err) throw err;
+      else if (!features.length) return this._exitEdit();
+      else if (features[0].properties._drawid !== this.editId) return;
+
+      this._map.getContainer().addEventListener('mousemove', this.drag, true);
+      this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
+    });
+  },
+
+  _drag(e) {
+    e.stopPropagation();
+    if (!this.dragging) {
+      this.dragging = true;
+      this.init = DOM.mousePos(e, this._map.getContainer());
+      var options = extend(this.options, { geoJSON: this.editStore });
+      switch (this.featureType) {
+        case 'point':
+          this._control = new Point(this._map, options);
+          break;
+        case 'line':
+          this._control = new Line(this._map, options);
+          break;
+        case 'square':
+          this._control = new Square(this._map, options);
+          break;
+        case 'polygon':
+          this._control = new Polygon(this._map, options);
+          break;
+      }
+      this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+      this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
     }
+    var pos = DOM.mousePos(e, this._map.getContainer());
+    this._control.translate(this.editId, this.init, pos);
   },
 
-  _drawPolygon(map, options) {
-    this._control = new Polygon(map, options);
+  _endDrag() {
+    this._map.getContainer().removeEventListener('mousemove', this.drag, true);
+    this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
+    this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+    this.dragging = false;
+    this._control.disable();
   },
 
-  _drawLine(map, options) {
-    this._control = new Line(map, options);
+  _drawPolygon() {
+    this._control = new Polygon(this._map, this.options);
   },
 
-  _drawSquare(map, options) {
-    this._control = new Square(map, options);
+  _drawLine() {
+    this._control = new Line(this._map, this.options);
   },
 
-  _drawPoint(map, options) {
-    this._control = new Point(map, options);
+  _drawSquare() {
+    this._control = new Square(this._map, this.options);
+  },
+
+  _drawPoint() {
+    this._control = new Point(this._map, this.options);
   },
 
   _createButton(opts) {
@@ -161,10 +264,10 @@ Draw.prototype = extend(Control, {
     return a;
   },
 
-  _mapState(map) {
+  _mapState() {
     var controlClass = this._controlClass;
 
-    map.on('load', () => {
+    this._map.on('load', () => {
 
       // Initialize the draw layer with any possible
       // features passed via `options.geoJSON`
@@ -172,32 +275,32 @@ Draw.prototype = extend(Control, {
         data: this.options.geoJSON.getAll()
       });
 
-      map.addSource('draw', drawLayer);
+      this._map.addSource('draw', drawLayer);
       themeStyle.forEach((style) => {
-        map.addLayer(style);
+        this._map.addLayer(style);
       });
 
       // Initialize an editLayer that provides
       // marker anchors and guides during the
-      // draw process.
+      // draw process and during editting.
       var editLayer = new mapboxgl.GeoJSONSource({
         data: []
       });
 
-      map.addSource('edit', editLayer);
+      this._map.addSource('edit', editLayer);
       themeEdit.forEach((style) => {
-        map.addLayer(style);
+        this._map.addLayer(style);
       });
 
-      map.on('draw.stop', () => {
+      this._map.on('draw.stop', () => {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      map.on('edit.feature.update', (e) => {
+      this._map.on('edit.feature.update', (e) => {
         editLayer.setData(e.geojson);
       });
 
-      map.on('draw.feature.update', (e) => {
+      this._map.on('draw.feature.update', (e) => {
         drawLayer.setData(e.geojson);
       });
     });

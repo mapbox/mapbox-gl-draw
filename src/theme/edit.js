@@ -9,7 +9,7 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#ff00ff',
+      'line-color': '#00ffff',
       'line-dasharray': [0, 2],
       'line-width': 3
     }
@@ -28,5 +28,30 @@ module.exports = [
       'icon-size': 2
     },
     'interactive': true
+  }, {
+    'id': 'gl-edit-polygon',
+    'type': 'fill',
+    'source': 'edit',
+    'filter': ['all', ['==', '$type', 'Polygon']],
+    'paint': {
+      'fill-color': '#00ffff',
+      'fill-outline-color': '#00ffff',
+      'fill-opacity': 0.25
+    },
+    'interactive': true
+  }, {
+    'id': 'gl-edit-polygon-stroke',
+    'type': 'line',
+    'source': 'edit',
+    'filter': ['all', ['==', '$type', 'Polygon']],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#00ffff',
+      'line-dasharray': [2, 2],
+      'line-width': 3
+    }
   }
 ];

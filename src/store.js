@@ -3,20 +3,24 @@
 var Immutable = require('immutable');
 var hat = require('hat');
 
+/**
+ * A store for keeping track of versions of drawings
+ *
+ * @param {Array} data An array of GeoJSON object
+ *
+ */
+
 function Store(data) {
   this.historyIndex = 0;
+  this.history = [ Immutable.List([]) ];
+  this.annotations = Immutable.List([]);
 
-  // Apply an internal ID to any potential added feature
   if (data.length) {
-    data.forEach((d) => {
+    data.forEach(d => {
       d.properties._drawid = hat();
+      this.history[0] = this.history[0].push(Immutable.Map(d));
     });
   }
-
-  this.history = [Immutable.List([])];
-  this.history.push(Immutable.Map(data));
-
-  this.annotations = [Immutable.List([])];
 }
 
 Store.prototype = {
@@ -28,7 +32,7 @@ Store.prototype = {
     this.history = this.history.slice(0, this.historyIndex + 1);
     var newVersion = fn(this.history[this.historyIndex]);
     this.history.push(newVersion);
-    this.annotations.push(annotation);
+    this.annotations = this.annotations.push(annotation);
     this.historyIndex++;
   },
 
@@ -37,6 +41,11 @@ Store.prototype = {
       type: 'FeatureCollection',
       features: this.history[this.historyIndex].toJS()
     };
+  },
+
+  getById(id) {
+    return this.history[this.historyIndex]
+      .find(feature => feature.get('properties')._drawid === id).toJS();
   },
 
   clear() {
@@ -53,19 +62,10 @@ Store.prototype = {
   },
 
   unset(type, id) {
-   this.operation((data) => {
-    return data.filter((feature) => {
-        return feature.get('properties')._drawid !== id;
-      });
-    }, 'Removed a ' + type);
-  },
-
-  _findIndex(id) {
-    var index;
-    this.history[this.historyIndex].forEach((feature, i) => {
-      if (feature.get('properties')._drawid === id) index = i;
-    });
-    return index;
+    this.operation(
+      data => data.filterNot(feature => feature.get('properties')._drawid === id),
+      'Removed a ' + type
+    );
   },
 
   set(type, id, coords) {
@@ -82,13 +82,31 @@ Store.prototype = {
       });
 
       // Does an index for this exist?
-      var updateIndex = this._findIndex(id);
+      var updateIndex = this.history[this.historyIndex]
+        .findIndex(feat => feat.get('properties')._drawid === id);
 
-      return (updateIndex >= 0) ?
+      return (updateIndex > -1) ?
         data.set(updateIndex, feature) :
         data.push(feature);
 
     }, 'Added a ' + type);
+  },
+
+  edit(id) {
+    this.history.push(this.history[this.historyIndex++]);
+    var idx = this.historyIndex;
+    var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
+    this.history[idx] = this.history[idx]
+      .filterNot(feat => feat.get('properties')._drawid === id);
+    return feature.toJS();
+  },
+
+  save(features) {
+    var idx = this.historyIndex;
+    features.features.forEach(feat => {
+      this.history[idx] = this.history[idx].push(Immutable.Map(feat));
+    });
+    this.annonatations = this.annotations.push('editted features');
   },
 
   redo() {
