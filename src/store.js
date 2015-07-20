@@ -61,10 +61,10 @@ Store.prototype = {
     });
   },
 
-  unset(type, id) {
+  unset(id) {
     this.operation(
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
-      'Removed a ' + type
+      'Removed a feature'
     );
   },
 
