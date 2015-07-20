@@ -4,8 +4,7 @@ var extend = require('xtend');
 var Control = require('./control');
 var themeStyle = require('./theme/style');
 var themeEdit = require('./theme/edit');
-var util = require('./util');
-var DOM = util.DOM;
+var { DOM } = require('./util');
 
 // Data store
 var Store = require('./store');
@@ -122,7 +121,7 @@ Draw.prototype = extend(Control, {
         break;
       case 68: // (d) delete the feature in edit mode
         if (this.editId) {
-          this._destroy(this, this.editId);
+          this._destroy(this.editId);
         }
     }
   },
@@ -180,6 +179,7 @@ Draw.prototype = extend(Control, {
   },
 
   _initiateDrag(e) {
+    e.stopPropagation();
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
       if (err) throw err;
