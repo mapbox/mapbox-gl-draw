@@ -46,6 +46,7 @@ module.exports = [
     'layout': {
       'icon-image': 'marker-12',
       'text-anchor': 'top',
+      'icon-offset': [-0.5,-5],
       'icon-allow-overlap': true
     },
     'paint': {
