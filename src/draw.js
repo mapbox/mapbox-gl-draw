@@ -27,7 +27,6 @@ function Draw(options) {
   this.initiateDrag = this._initiateDrag.bind(this);
   this.endDrag = this._endDrag.bind(this);
   this.drag = this._drag.bind(this);
-
 }
 
 Draw.prototype = extend(Control, {
@@ -124,6 +123,10 @@ Draw.prototype = extend(Control, {
           this._exitEdit();
         }
         break;
+      case 68: // (d) delete the feature in edit mode
+        if (this.editId) {
+          this.destroy(this.editId);
+        }
     }
   },
 
@@ -235,6 +238,12 @@ Draw.prototype = extend(Control, {
 
   _drawPoint() {
     this._control = new Point(this._map, this.options);
+  },
+
+  destroy(id) {
+    this._exitEdit();
+    this.options.geoJSON.unset(id);
+    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
   },
 
   _createButton(opts) {
