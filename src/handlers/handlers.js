@@ -11,7 +11,7 @@ module.exports = {
     this._currentFeature = false;
     this._container = map.getContainer();
     this._editStore = new Store([]);
-    util.setOptions(this, options);
+    mapboxgl.util.setOptions(this, options);
     this._drawStore = this.options.geoJSON;
     this._onKeyUp = this._onKeyUp.bind(this);
     this.enable();

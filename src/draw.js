@@ -19,7 +19,7 @@ var Point = require('./handlers/point');
 
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
-  util.setOptions(this, options);
+  mapboxgl.util.setOptions(this, options);
 
   // functions that will be event listeners
   this.onKeyUp = this._onKeyUp.bind(this);
