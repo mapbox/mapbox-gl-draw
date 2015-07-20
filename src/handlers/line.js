@@ -34,9 +34,7 @@ Line.prototype = extend(vertices, {
     var c = this._map.unproject(e.point);
     var coords = [c.lng, c.lat];
 
-    this._map.featuresAt(e.point, {
-      radius: 0
-    }, (err/*, feature*/) => {
+    this._map.featuresAt(e.point, { radius: 0 }, (err/*, feature*/) => {
       if (err) throw err;
 
       // TODO complete a linestring if featuresAt returns the last point.

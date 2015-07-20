@@ -23,7 +23,6 @@ function Draw(options) {
 
   // functions that will be event listeners
   this.onClick = this._onClick.bind(this);
-  this.onMouseDown = this._onMouseDown.bind(this);
   this.onKeyUp = this._onKeyUp.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
   this.endDrag = this._endDrag.bind(this);
@@ -85,12 +84,9 @@ Draw.prototype = extend(Control, {
 
     map.getContainer().addEventListener('click', this.onClick);
 
-    map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
-
     if (this.options.keybindings) {
       map.getContainer().addEventListener('keyup', this.onKeyUp);
     }
-
 
     this._map = map;
 
@@ -129,14 +125,6 @@ Draw.prototype = extend(Control, {
         }
         break;
     }
-  },
-
-  _onMouseDown(/*e*/) {
-    //if (e.altKey) {
-    //  e.stopPropagation();
-    //    TODO https://github.com/mapbox/mapbox-gl-js/issues/1264
-    //    this._captureFeatures();
-    //}
   },
 
   _onClick(e) {
