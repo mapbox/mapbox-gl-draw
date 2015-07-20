@@ -22,7 +22,6 @@ function Draw(options) {
   util.setOptions(this, options);
 
   // functions that will be event listeners
-  this.onClick = this._onClick.bind(this);
   this.onKeyUp = this._onKeyUp.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
   this.endDrag = this._endDrag.bind(this);
@@ -52,36 +51,34 @@ Draw.prototype = extend(Control, {
     if (controls.line) {
       this.lineStringCtrl = this._createButton({
         className: controlClass + ' line',
-        title: 'LineString tool' + (this.options.keybindings ? ' (l)' : ''),
+        title: `LineString tool ${this.options.keybindings && '(l)'}`,
         fn: this._drawLine.bind(this)
       });
     }
 
     if (controls.shape) {
       this.polygonCtrl = this._createButton({
-        className: controlClass + ' shape',
-        title: 'Polygon tool' + (this.options.keybindings ? ' (p)' : ''),
+        className: `${controlClass} shape`,
+        title: `Polygon tool ${this.options.keybindings && '(p)'}`,
         fn: this._drawPolygon.bind(this)
       });
     }
 
     if (controls.square) {
       this.squareCtrl = this._createButton({
-        className: controlClass + ' square',
-        title: 'Square tool' + (this.options.keybindings ? ' (s)' : ''),
+        className: `${controlClass} square`,
+        title: `Square tool ${this.options.keybindings && '(s)'}`,
         fn: this._drawSquare.bind(this)
       });
     }
 
     if (controls.marker) {
       this.markerCtrl = this._createButton({
-        className: controlClass + ' marker',
-        title: 'Marker tool' + (this.options.keybindings ? ' (m)' : ''),
+        className: `${controlClass} marker`,
+        title: `Marker tool ${this.options.keybindings && '(m)'}`,
         fn: this._drawPoint.bind(this)
       });
     }
-
-    map.getContainer().addEventListener('click', this.onClick);
 
     if (this.options.keybindings) {
       map.getContainer().addEventListener('keyup', this.onKeyUp);
@@ -125,14 +122,13 @@ Draw.prototype = extend(Control, {
         break;
       case 68: // (d) delete the feature in edit mode
         if (this.editId) {
-          this.destroy(this.editId);
+          this._destroy(this, this.editId);
         }
     }
   },
 
   _onClick(e) {
-    var coords = DOM.mousePos(e, this._map._container);
-    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+    this._map.featuresAt([e.point.x, e.point.y], { radius: 10 }, (err, features) => {
       if (err) throw err;
       else if (!features.length && this.editId) return this._exitEdit();
       else if (!features.length) return;
@@ -165,10 +161,16 @@ Draw.prototype = extend(Control, {
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
+    this.deleteBtn = this._createButton({
+      className: '',
+      title: `delete ${this.featureType}`,
+      fn: this._destroy.bind(this, this.editId)
+    });
   },
 
   _exitEdit() {
     // save the changes into the draw store
+    DOM.destroy(this.deleteBtn);
     this.options.geoJSON.save(this.editStore.getAll());
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this.editStore.clear();
@@ -240,7 +242,7 @@ Draw.prototype = extend(Control, {
     this._control = new Point(this._map, this.options);
   },
 
-  destroy(id) {
+  _destroy(id) {
     this._exitEdit();
     this.options.geoJSON.unset(id);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
@@ -268,7 +270,7 @@ Draw.prototype = extend(Control, {
         el.classList.add('active');
         opts.fn();
       }
-    });
+    }, true);
 
     return a;
   },
@@ -312,7 +314,11 @@ Draw.prototype = extend(Control, {
       this._map.on('draw.feature.update', (e) => {
         drawLayer.setData(e.geojson);
       });
+
+      this._map.on('click', this._onClick.bind(this));
+
     });
+
   }
 });
 

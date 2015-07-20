@@ -57,6 +57,15 @@ module.exports.DOM.create = function(tag, className, container, attributes) {
 };
 
 /**
+ * Removes DOM elements
+ *
+ * @param {el} The DOM element
+ */
+module.exports.DOM.destroy = function(el) {
+  el.parentElement.removeChild(el);
+};
+
+/**
  * Removes classes from an array of DOM elements
  *
  * @param {HTMLElement} elements
