@@ -83,7 +83,7 @@ Draw.prototype = extend(Control, {
       });
     }
 
-    map.getContainer().addEventListener('click', this.onClick, true);
+    map.getContainer().addEventListener('click', this.onClick);
 
     map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
 
@@ -151,14 +151,14 @@ Draw.prototype = extend(Control, {
       else if (this.editId === feature.properties._drawid) return;
 
       this.editId = feature.properties._drawid;
-      coords = feature.geometry.coordinates;
+      var c = feature.geometry.coordinates;
       var type = feature.geometry.type;
 
       if (type === 'Point')
         this.featureType = 'point';
       else if (type === 'LineString' || type === 'MultiLineString')
         this.featureType = 'line';
-      else if (coords[0][0][0] === coords[0][1][0])
+      else if (c[0][0][0] === c[0][1][0])
         this.featureType = 'square';
       else
         this.featureType = 'polygon';
@@ -186,9 +186,16 @@ Draw.prototype = extend(Control, {
     this.editId = false;
   },
 
-  _initiateDrag() {
-    this._map.getContainer().addEventListener('mousemove', this.drag, true);
-    this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
+  _initiateDrag(e) {
+    var coords = DOM.mousePos(e, this._map._container);
+    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+      if (err) throw err;
+      else if (!features.length) return this._exitEdit();
+      else if (features[0].properties._drawid !== this.editId) return;
+
+      this._map.getContainer().addEventListener('mousemove', this.drag, true);
+      this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
+    });
   },
 
   _drag(e) {
