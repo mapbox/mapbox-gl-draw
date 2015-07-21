@@ -1,52 +1,47 @@
 'use strict';
 
-let extend = require('xtend');
-let handlers = require('./handlers');
+var Immutable = require('immutable');
+var hat = require('hat');
+var EditStore = require('../edit_store');
 
-function Point(map, options) {
-  this.type = 'Point';
-  this.initialize(map, options);
-}
+function Point(map, drawStore, data) {
 
-Point.prototype = extend(handlers, {
+  this._map = map;
+  this.store = new EditStore(this._map);
+  this.drawStore = drawStore;
 
-  drawStart() {
-    this._onClick = this._onClick.bind(this);
-    this._map.on('click', this._onClick);
-  },
-
-  drawStop() {
-    this._map.off('click', this._onClick);
-  },
-
-  _onClick(e) {
-    var c = this._map.unproject([e.point.x, e.point.y]);
-    var coords = [c.lng, c.lat];
-    this.drawCreate(this.type, coords);
-    this.featureComplete();
-  },
-
-  translate(id, prev, pos) {
-    // points implement their own translation for efficiency
-    var c = this._map.unproject([pos.x, pos.y]);
-    var point = {
-      type: 'Feature',
-      properties: {
-        _drawid: id
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [c.lng, c.lat]
-      }
-    };
-
-    this._drawStore.update(point);
-
-    this._map.fire('edit.feature.update', {
-      geojson: this._drawStore.getAll()
-    });
+  if (data) {
+    this.drawStore.set('Point', hat(), data);
+  } else {
+    this.coordinates = Immutable.List([]);
   }
 
-});
+  this.feature = {
+    type: 'Feature',
+    properties: {
+      _drawid: hat()
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: this.coordinates.toJS()
+    }
+  };
+
+  // event handler
+  this.completeDraw = this._completeDraw.bind(this);
+}
+
+Point.prototype = {
+
+  startDraw() {
+    this._map.on('click', this.completeDraw);
+  },
+
+  _completeDraw(e) {
+    this._map.off('click', this.completeDraw);
+    this.drawStore.set('Point', hat(), [ e.latLng.lng, e.latLng.lat ]);
+  }
+
+};
 
 module.exports = Point;

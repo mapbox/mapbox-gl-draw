@@ -1,87 +1,89 @@
 'use strict';
 
-var extend = require('xtend');
-var handlers = require('./handlers');
-var util = require('../util');
-var DOM = util.DOM;
+var Immutable = require('immutable');
+var hat = require('hat');
+var EditStore = require('../edit_store');
 
-function Square(map, options) {
-  this.type = 'Polygon';
-  this.initialize(map, options);
+function Square(map, drawStore, data) {
+
+  this._map = map;
+  this.store = new EditStore(this._map);
+  this.drawStore = drawStore;
+
+  if (data) {
+    this.coordinates = Immutable.List(data.geometry.coordinates);
+  } else {
+    this.coordinates = Immutable.List([]);
+  }
+
+  this.feature = {
+    type: 'Feature',
+    properties: {
+      _drawid: hat()
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: this.coordinates.toJS()
+    }
+  };
+
+  // event handlers
+  this.onMouseDown = this._onMouseDown.bind(this);
+  this.onMouseMove = this._onMouseMove.bind(this);
+  this.completeDraw = this._completeDraw.bind(this);
+
 }
 
-Square.prototype = extend(handlers, {
+Square.prototype = {
 
-  drawStart() {
-    this._onMouseDown = this._onMouseDown.bind(this);
-    this._onMouseUp = this._onMouseUp.bind(this);
-    this._onMouseMove = this._onMouseMove.bind(this);
-
-    this._container = this._map.getContainer();
-    this._container.addEventListener('mousedown', this._onMouseDown, true);
-    this._container.addEventListener('mouseup', this._onMouseUp);
-    this._container.addEventListener('mousemove', this._onMouseMove);
-  },
-
-  drawStop() {
-    this._clearSquareGuide();
-    this._container.removeEventListener('mousedown', this._onMouseDown, true);
-    this._container.removeEventListener('mouseup', this._onMouseUp);
-    this._container.removeEventListener('mousemove', this._onMouseMove);
+  startDraw() {
+    this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
   },
 
   _onMouseDown(e) {
     e.stopPropagation();
-    this._activated = true;
-    this._start = DOM.mousePos(e, this._container);
-    this._squareGuide = DOM.create('div', 'mapboxgl-draw-guide-square', this._container);
-  },
+    this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
+    this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
-  _onMouseMove(e) {
-    if (!this._activated) return;
-    var current = DOM.mousePos(e, this._container);
-    var box = this._squareGuide;
-
-    var pos1 = this._map.unproject(this._start);
-    var pos2 = this._map.unproject([this._start.x, current.y]);
-    var pos3 = this._map.unproject(current);
-    var pos4 = this._map.unproject([current.x, this._start.y]);
-
-    this._data = [
-      [pos1.lng, pos1.lat],
-      [pos2.lng, pos2.lat],
-      [pos3.lng, pos3.lat],
-      [pos4.lng, pos4.lat],
-      [pos1.lng, pos1.lat]
-    ];
-
-    var minX = Math.min(this._start.x, current.x);
-    var maxX = Math.max(this._start.x, current.x);
-    var minY = Math.min(this._start.y, current.y);
-    var maxY = Math.max(this._start.y, current.y);
-
-    DOM.setTransform(box, 'translate(' + minX + 'px,' + minY + 'px)');
-    box.style.width = (maxX - minX) + 'px';
-    box.style.height = (maxY - minY) + 'px';
-  },
-
-  _clearSquareGuide() {
-    if (this._squareGuide && this._squareGuide.parentNode) {
-      this._squareGuide.parentNode.removeChild(this._squareGuide);
+    var c = this._map.unproject([e.x, e.y]);
+    var i = 0;
+    while (i++ < 5) {
+      this.coordinates = this.coordinates.push([ c.lng, c.lat ]);
     }
   },
 
-  _onMouseUp() {
-    this._activated = false;
-    this._clearSquareGuide();
-    if (this._data) this.drawCreate(this.type, [this._data]);
-    this.featureComplete();
+  _onMouseMove(e) {
+    e.stopPropagation();
+
+    if (!this.started) {
+      this.started = true;
+      this._map.getContainer().addEventListener('mouseup', this.completeDraw, true);
+    }
+
+    var c = this._map.unproject([e.x, e.y]);
+    var orig = this.coordinates;
+    this.coordinates = this.coordinates.set(1, [ orig.get(0)[0], c.lat ]);
+    this.coordinates = this.coordinates.set(2, [ c.lng, c.lat ]);
+    this.coordinates = this.coordinates.set(3, [ c.lng, orig.get(0)[1] ]);
+
+
+    this.feature.geometry.coordinates = [ this.coordinates.toJS() ];
+    this.store.update(this.feature);
   },
 
-  translate(id, prev, pos) {
-    this._translate(id, prev, pos);
-  }
+  _completeDraw() {
+    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
+    this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 
-});
+    // render the changes
+    this.store.clear();
+    this.drawStore.set('Polygon', hat(), [ this.coordinates.toJS() ]);
+  },
+
+  startEdit() {},
+
+  completeEdit() {}
+
+};
 
 module.exports = Square;

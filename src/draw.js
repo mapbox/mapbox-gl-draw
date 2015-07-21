@@ -227,19 +227,23 @@ Draw.prototype = extend(Control, {
   },
 
   _drawPolygon() {
-    this._control = new Polygon(this._map, this.options);
+    this._control = new Polygon(this._map, this.options.geoJSON);
+    this._control.startDraw();
   },
 
   _drawLine() {
-    this._control = new Line(this._map, this.options);
+    this._control = new Line(this._map, this.options.geoJSON);
+    this._control.startDraw();
   },
 
   _drawSquare() {
-    this._control = new Square(this._map, this.options);
+    this._control = new Square(this._map, this.options.geoJSON);
+    this._control.startDraw();
   },
 
   _drawPoint() {
-    this._control = new Point(this._map, this.options);
+    this._control = new Point(this._map, this.options.geoJSON);
+    this._control.startDraw();
   },
 
   _destroy(id) {
@@ -262,11 +266,11 @@ Draw.prototype = extend(Control, {
       var el = e.target;
 
       if (el.classList.contains('active')) {
-        if (this._control) this._control.disable();
+        //if (this._control) this._control.disable();
         el.classList.remove('active');
       } else {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
-        if (this._control) this._control.disable();
+        //if (this._control) this._control.disable();
         el.classList.add('active');
         opts.fn();
       }
@@ -319,9 +323,11 @@ Draw.prototype = extend(Control, {
 
     });
 
-    var P = require('./handlers/point2');
+    /*
+    var P = require('./handlers/square2');
     var poly = new P(this._map, this.options.geoJSON);
     poly.startDraw();
+    */
 
   }
 });

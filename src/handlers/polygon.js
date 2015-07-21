@@ -1,102 +1,82 @@
 'use strict';
 
-var extend = require('xtend');
-var vertices = require('./vertices');
+var Immutable = require('immutable');
+var hat = require('hat');
+var EditStore = require('../edit_store');
 
-function Polygon(map, options) {
-  this.type = 'Polygon';
-  this.initialize(map, options);
+function Polygon(map, drawStore, data) {
+
+  this._map = map;
+  this.store = new EditStore(this._map);
+  this.drawStore = drawStore;
+
+  if (data) {
+    this.coodinates = Immutable.List(data.geometry.coordinates);
+  } else {
+    this.coordinates = Immutable.List([]);
+  }
+
+  this.feature = {
+    type: 'Feature',
+    properties: {
+      _drawid: hat()
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: this.coordinates.toJS()
+    }
+  };
+
+  // event handlers
+  this.addVertex = this._addVertex.bind(this);
+  this.onMouseMove = this._onMouseMove.bind(this);
+  this.completeDraw = this._completeDraw.bind(this);
+
 }
 
-Polygon.prototype = extend(vertices, {
+Polygon.prototype = {
 
-  drawStart() {
-    this._data = [];
-
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onClick = this._onClick.bind(this);
-    this._onMove = this._onMove.bind(this);
-
-    this._map.on('mousemove', this._onMouseMove);
-    this._map.on('click', this._onClick);
-    this._map.on('move', this._onMove);
+  startDraw() {
+    this._map.on('click', this.addVertex);
+    this._map.on('dblclick', this.completeDraw);
   },
 
-  drawStop() {
-    this.clearGuides();
-    this.editDestroy();
-    this._map.off('mousemove', this._onMouseMove);
-    this._map.off('click', this._onClick);
-    this._map.off('move', this._onMove);
-  },
+  _addVertex(e) {
+    var p = [ e.latLng.lng, e.latLng.lat ];
 
-  _onClick(e) {
-    var c = this._map.unproject(e.point);
-    var coords = [c.lng, c.lat];
+    if (this.editting) {
+      this.coordinates = this.coordinates.splice(-1, 0, p);
+    } else {
+      this.editting = true;
+      this.coordinates = Immutable.List([ p, p ]);
+      this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+    }
 
-    this._map.featuresAt(e.point, { radius: 0 }, (err/*, feature*/) => {
-      if (err) throw err;
-
-      // TODO complete the polygon if featuresAt returns the first point.
-      this._data.push(coords);
-      this._addVertex(coords);
-    });
+    this.feature.geometry.coordinates = [ this.coordinates.toJS() ];
+    this.store.update(this.feature);
   },
 
   _onMouseMove(e) {
-    if (this._data.length) {
-      // Update the guide line
-      this._currentPos = {x: e.point.x, y: e.point.y};
-      this._updateGuide(this._currentPos);
-    }
+    var coords = this._map.unproject([e.x, e.y]);
+    var c = this.coordinates;
+    c = c.splice(-1, 0, [ coords.lng, coords.lat ]);
+    this.feature.geometry.coordinates = [ c.toJS() ];
+    this.store.update(this.feature);
   },
 
-  _addVertex(coords) {
-    this.editCreate('Point', coords);
-    this._vertexCreate();
+  _completeDraw() {
+    this._map.off('click', this.addVertex);
+    this._map.off('dblclick', this.completeDraw);
+    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
+
+    // render the changes
+    this.store.clear();
+    this.drawStore.set('Polygon', hat(), [ this.coordinates.toJS() ]);
   },
 
-  _vertexCreate() {
-    if (this._data.length === 2) {
-      // Add a LineString that mimics a `mousemove` guideline.
-      this.editCreate('LineString', this._data);
-    }
+  startEdit() {},
 
-    if (this._data.length >= 3) {
-      this._data.push(this._data[0]);
-      this.drawCreate(this.type, [this._data]);
-
-      // Slice the last item out.
-      this._data = this._data.slice(0, (this._data.length - 1));
-
-      // Clears the temporary guide that's drawn.
-      this.editUnsetGuide();
-    }
-
-    this.clearGuides();
-  },
-
-  _onMove() {
-    if (this._data.length) this._updateGuide();
-  },
-
-  _updateGuide(pos) {
-    var d = this._data;
-    this.clearGuides();
-
-    var a = d[d.length - 1];
-    a = this._map.project([a[1], a[0]]);
-
-    var b = pos || this._currentPos;
-
-    // Draw guide line
-    this.drawGuide(this._map, a, b);
-  },
-
-  translate(id, prev, pos) {
-    this._translate(id, prev, pos);
-  }
-
-});
+  completeEdit() {}
+};
 
 module.exports = Polygon;
