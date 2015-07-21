@@ -3,6 +3,7 @@
 /**
  * A store for keeping track of in progress
  * feature edits before they written into history
+ * We also call draft rendering here
  *
  * @param {array} data - an array of geojson features (for a Feature Collection)
  *

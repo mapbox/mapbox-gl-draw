@@ -5,17 +5,19 @@ var hat = require('hat');
 var EditStore = require('../edit_store');
 var { translate } = require('../util');
 
+/**
+ * Square geometry object
+ *
+ * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} drawStore - The overall drawStore for this session
+ * @param {Object} data - GeoJSON polygon feature
+ */
+
 function Square(map, drawStore, data) {
 
   this._map = map;
-  this.store = new EditStore(this._map, data ? [data] : []);
   this.drawStore = drawStore;
-
-  if (data) {
-    this.coordinates = Immutable.List(data.geometry.coordinates);
-  } else {
-    this.coordinates = Immutable.List([]);
-  }
+  this.coordinates = Immutable.List(data ? data.geometry.coordinates[0] : []);
 
   this.feature = {
     type: 'Feature',
@@ -24,9 +26,11 @@ function Square(map, drawStore, data) {
     },
     geometry: {
       type: 'Polygon',
-      coordinates: this.coordinates.toJS()
+      coordinates: [ this.coordinates.toJS() ]
     }
   };
+
+  this.store = new EditStore(this._map, [ this.feature ]);
 
   // event handlers
   this.onMouseDown = this._onMouseDown.bind(this);
@@ -83,12 +87,23 @@ Square.prototype = {
   startEdit() {},
 
   translate(init, curr) {
-    this.feature = translate(this.feature, init, curr, this._map);
-    this.store.update(this.feature);
+    if (this.translating) {
+      this.feature = translate(this.initGeom, init, curr, this._map);
+      this.store.update(this.feature);
+    } else {
+      this.translating = true;
+      this.initGeom = this.feature;
+    }
   },
 
-  completeEdit() {}
+  completeEdit() {
+    this.store.clear();
+    this.drawStore.set('Polygon', hat(), [ this.coordinate ]);
+  },
 
+  get() {
+    return this.feature;
+  }
 };
 
 module.exports = Square;

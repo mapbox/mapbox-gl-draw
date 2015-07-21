@@ -8,7 +8,6 @@ var { DOM } = require('./util');
 
 // Data store
 var Store = require('./store');
-//var EditStore = require('./edit_store');
 
 // Control handlers
 var Polygon = require('./handlers/polygon');
@@ -173,10 +172,10 @@ Draw.prototype = extend(Control, {
   _exitEdit() {
     // save the changes into the draw store
     //DOM.destroy(this.deleteBtn);
-    this.options.geoJSON.save(this.editStore.getAll());
+    this.options.geoJSON.save(this._control.get());
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
-    this.editStore.clear();
-    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
+    //this.editStore.clear();
+    //this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
   },
