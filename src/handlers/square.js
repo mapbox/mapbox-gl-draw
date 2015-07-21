@@ -12,25 +12,24 @@ var { translate } = require('../util');
  * @param {Object} drawStore - The overall drawStore for this session
  * @param {Object} data - GeoJSON polygon feature
  */
-
 function Square(map, drawStore, data) {
 
   this._map = map;
   this.drawStore = drawStore;
   this.coordinates = Immutable.List(data ? data.geometry.coordinates[0] : []);
 
-  this.feature = {
+  this.feature = Immutable.Map({
     type: 'Feature',
     properties: {
-      _drawid: hat()
+      _drawid: data ? data.properties._drawid : hat()
     },
     geometry: {
       type: 'Polygon',
       coordinates: [ this.coordinates.toJS() ]
     }
-  };
+  });
 
-  this.store = new EditStore(this._map, [ this.feature ]);
+  this.store = new EditStore(this._map, [ this.feature.toJS() ]);
 
   // event handlers
   this.onMouseDown = this._onMouseDown.bind(this);
@@ -71,8 +70,10 @@ Square.prototype = {
     this.coordinates = this.coordinates.set(3, [ c.lng, orig.get(0)[1] ]);
 
 
-    this.feature.geometry.coordinates = [ this.coordinates.toJS() ];
-    this.store.update(this.feature);
+    var geom = this.feature.get('geometry');
+    geom.coordinates = [ this.coordinates.toJS() ];
+    this.feature.set('geometry', geom);
+    this.store.update(this.feature.toJS());
   },
 
   _completeDraw() {
@@ -88,12 +89,13 @@ Square.prototype = {
 
   translate(init, curr) {
     if (this.translating) {
-      this.feature = translate(this.initGeom, init, curr, this._map);
-      this.store.update(this.feature);
+      console.log(JSON.stringify(this.initGeom, null, 2));
+      this.store.update(this.feature.toJS());
     } else {
       this.translating = true;
-      this.initGeom = this.feature;
+      this.initGeom = Immutable.fromJS(this.feature.toJS());
     }
+    this.feature = Immutable.Map(translate(this.initGeom.toJS(), init, curr, this._map));
   },
 
   completeEdit() {
@@ -102,7 +104,7 @@ Square.prototype = {
   },
 
   get() {
-    return this.feature;
+    return this.feature.toJS();
   }
 };
 
