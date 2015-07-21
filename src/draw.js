@@ -155,21 +155,24 @@ Draw.prototype = extend(Control, {
 
   _edit() {
     // move the feature clicked on out of the draw store into an edit store
+    if (this._control) return;
     var activeFeature = this.options.geoJSON.edit(this.editId);
     this.editStore = new EditStore([activeFeature]);
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
+    /*
     this.deleteBtn = this._createButton({
       className: '',
       title: `delete ${this.featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
+    */
   },
 
   _exitEdit() {
     // save the changes into the draw store
-    DOM.destroy(this.deleteBtn);
+    //DOM.destroy(this.deleteBtn);
     this.options.geoJSON.save(this.editStore.getAll());
     this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
     this.editStore.clear();
@@ -322,12 +325,6 @@ Draw.prototype = extend(Control, {
       this._map.on('click', this._onClick.bind(this));
 
     });
-
-    /*
-    var P = require('./handlers/square2');
-    var poly = new P(this._map, this.options.geoJSON);
-    poly.startDraw();
-    */
 
   }
 });

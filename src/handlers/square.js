@@ -41,7 +41,6 @@ Square.prototype = {
   },
 
   _onMouseDown(e) {
-    e.stopPropagation();
     this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
     this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
