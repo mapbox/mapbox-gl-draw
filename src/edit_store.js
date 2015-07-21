@@ -31,17 +31,17 @@ EditStore.prototype = {
 
   clear() {
     this.features = [];
-
-    this._map.fire('edit.feature.update', {
-      geojson: this.getAll()
-    });
+    this.render();
   },
 
   update(feature) {
     this.features = this.features
       .filter(feat => feat.properties._drawid !== feature.properties._drawid);
     this.features.push(feature);
+    this.render();
+  },
 
+  render() {
     this._map.fire('edit.feature.update', {
       geojson: this.getAll()
     });

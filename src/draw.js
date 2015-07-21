@@ -27,6 +27,7 @@ function Draw(options) {
 }
 
 Draw.prototype = extend(Control, {
+
   options: {
     position: 'top-left',
     keybindings: true,
@@ -113,11 +114,12 @@ Draw.prototype = extend(Control, {
           this.squareCtrl.dispatchEvent(event);
         }
         break;
-      case 27: // (escape) exit edit mode
-        if (this.editId) {
-          this._exitEdit();
-        } else if (this._control) {
+      case 27: // (escape) exit edit mode FIX THIS!!!!!!!!!!
+        if (this._control && !this.editId) {
           this._control = false;
+        } else if (this.editId) {
+          this._control.completeEdit();
+          this._exitEdit();
         }
         break;
       case 68: // (d) delete the feature in edit mode
@@ -157,8 +159,6 @@ Draw.prototype = extend(Control, {
     else
       this._control = new Polygon(this._map, this.options.geoJSON, feature);
 
-    this._control.startEdit();
-
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
     /*
     this.deleteBtn = this._createButton({
@@ -172,10 +172,7 @@ Draw.prototype = extend(Control, {
   _exitEdit() {
     // save the changes into the draw store
     //DOM.destroy(this.deleteBtn);
-    this.options.geoJSON.save(this._control.get());
-    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
-    //this.editStore.clear();
-    //this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
+    this.options.geoJSON.save([ this._control.get() ]);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
   },

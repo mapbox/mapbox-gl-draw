@@ -1,37 +1,24 @@
 'use strict';
 
-var Immutable = require('immutable');
-var hat = require('hat');
-var EditStore = require('../edit_store');
+var xtend = require('xtend');
+var Handler = require('./handlers');
 
+/**
+ * Point geometry object
+ *
+ * @param {Object} map - Instance of MpaboxGL Map
+ * @param {Object} drawStore - The draw store for this session
+ * @param {Object} data - GeoJSON polygon feature
+ */
 function Point(map, drawStore, data) {
 
-  this._map = map;
-  this.store = new EditStore(this._map);
-  this.drawStore = drawStore;
-
-  if (data) {
-    this.drawStore.set('Point', hat(), data);
-  } else {
-    this.coordinates = Immutable.List([]);
-  }
-
-  this.feature = {
-    type: 'Feature',
-    properties: {
-      _drawid: hat()
-    },
-    geometry: {
-      type: 'Polygon',
-      coordinates: this.coordinates.toJS()
-    }
-  };
+  this.initialize(map, drawStore, 'Point', data);
 
   // event handler
   this.completeDraw = this._completeDraw.bind(this);
 }
 
-Point.prototype = {
+Point.prototype = xtend(Handler, {
 
   startDraw() {
     this._map.on('click', this.completeDraw);
@@ -39,9 +26,10 @@ Point.prototype = {
 
   _completeDraw(e) {
     this._map.off('click', this.completeDraw);
-    this.drawStore.set('Point', hat(), [ e.latLng.lng, e.latLng.lat ]);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
+    this.drawStore.set(this.feature.toJS());
   }
 
-};
+});
 
 module.exports = Point;

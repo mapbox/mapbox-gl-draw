@@ -1,31 +1,16 @@
 'use strict';
 
-var Immutable = require('immutable');
-var hat = require('hat');
-var EditStore = require('../edit_store');
+var xtend = require('xtend');
+var Handler = require('./handlers');
 
-function Line(map, drawStore, feature) {
+/**
+ * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} drawStore - The overall drawStore for this session
+ * @param {Object} data - GeoJSON line string feature
+ */
+function Line(map, drawStore, data) {
 
-  this._map = map;
-  this.store = new EditStore(this._map);
-  this.drawStore = drawStore;
-
-  if (feature) {
-    this.coordinates = Immutable.List(feature.geometry.coordinates);
-  } else {
-    this.coordinates = Immutable.List([]);
-  }
-
-  this.feature = {
-    type: 'Feature',
-    properties: {
-      _drawid: hat()
-    },
-    geometry: {
-      type: 'LineString',
-      coordinates: this.coordinates.toJS()
-    }
-  };
+  this.initialize(map, drawStore, 'LineString', data);
 
   // event listeners
   this.addPoint = this._addPoint.bind(this);
@@ -34,7 +19,7 @@ function Line(map, drawStore, feature) {
 
 }
 
-Line.prototype = {
+Line.prototype = xtend(Handler, {
 
   startDraw() {
     this._map.on('click', this.addPoint);
@@ -51,32 +36,28 @@ Line.prototype = {
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
     }
     this.coordinates = this.coordinates.push(p);
-    this.feature.geometry.coordinates = this.coordinates.toJS();
-    this.store.update(this.feature);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.store.update(this.feature.toJS());
   },
 
   _onMouseMove(e) {
     var coords = this._map.unproject([e.x, e.y]);
     var c = this.coordinates;
     c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
-    this.feature.geometry.coordinates = c.toJS();
-    this.store.update(this.feature);
+    this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());
   },
 
   _completeDraw() {
-    // remove draw event listener
     this._map.off('click', this.addPoint);
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
     this.coodinates = this.coordinates.splice(-1, 1);
 
-    // render the changes
     this.store.clear();
-    this.drawStore.set('LineString', hat(), this.coordinates.toJS());
-  },
+    this.drawStore.set(this.feature.toJS());
+  }
 
-  startEdit() {}
-};
+});
 
 module.exports = Line;

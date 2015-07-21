@@ -6,10 +6,8 @@ var hat = require('hat');
 /**
  * A store for keeping track of versions of drawings
  *
- * @param {Array} data An array of GeoJSON object
- *
+ * @param {Array<Object>} data An array of GeoJSON object
  */
-
 function Store(data, map) {
   this._map = map;
   this.historyIndex = 0;
@@ -50,7 +48,6 @@ Store.prototype = {
   },
 
   clear() {
-    // TODO Iterate down historyIndex instead.
     this.historyIndex = 0;
     this.history = [Immutable.List([])];
   },
@@ -67,40 +64,34 @@ Store.prototype = {
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
       'Removed a feature'
     );
-
-    this._map.fire('draw.feature.update', {
-      geojson: this.getAll()
-    });
+    this.render();
   },
 
-  set(type, id, coords) {
-    this.operation((data) => {
-      var feature = Immutable.Map({
-        type: 'Feature',
-        properties: {
-          _drawid: id
-        },
-        geometry: {
-          type: type,
-          coordinates: coords
-        }
-      });
+  /**
+   * @param {Object} feature - GeoJSON feature
+   */
+  set(feature) {
+    this.operation(data => {
+      feature = Immutable.Map(feature);
 
       // Does an index for this exist?
       var updateIndex = this.history[this.historyIndex]
-        .findIndex(feat => feat.get('properties')._drawid === id);
+        .findIndex(feat =>
+          feat.get('properties')._drawid === feature.get('properties')._drawid
+        );
 
       return (updateIndex > -1) ?
         data.set(updateIndex, feature) :
         data.push(feature);
 
-    }, 'Added a ' + type);
-
-    this._map.fire('draw.feature.update', {
-      geojson: this.getAll()
-    });
+    }, 'Added a ' + feature.geometry.type);
+    this.render();
   },
 
+  /**
+   * @param {String} id - the _drawid of a feature
+   * @return {Object} - GeoJSON feature
+   */
   edit(id) {
     this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
@@ -108,19 +99,26 @@ Store.prototype = {
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
 
-    this._map.fire('draw.feature.update', {
-      geojson: this.getAll()
-    });
-
+    this.render();
     return feature.toJS();
   },
 
+  /**
+   * @param {Array<Object>} features - An array of GeoJSON features
+   */
   save(features) {
     var idx = this.historyIndex;
-    features.features.forEach(feat => {
+    features.forEach(feat => {
       this.history[idx] = this.history[idx].push(Immutable.Map(feat));
     });
     this.annonatations = this.annotations.push('editted features');
+    this.render();
+  },
+
+  render() {
+    this._map.fire('draw.feature.update', {
+      geojson: this.getAll()
+    });
   },
 
   redo() {

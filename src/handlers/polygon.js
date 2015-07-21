@@ -1,31 +1,19 @@
 'use strict';
 
 var Immutable = require('immutable');
-var hat = require('hat');
-var EditStore = require('../edit_store');
+var xtend = require('xtend');
+var Handler = require('./handlers');
 
+/**
+ * Polygon geometry object
+ *
+ * @param {Object} map - Instance of MapboxGl Map
+ * @param {Object} drawStore - The drawStore for this session
+ * @param {Object} data - GeoJSON polygon feature
+ */
 function Polygon(map, drawStore, data) {
 
-  this._map = map;
-  this.store = new EditStore(this._map);
-  this.drawStore = drawStore;
-
-  if (data) {
-    this.coodinates = Immutable.List(data.geometry.coordinates);
-  } else {
-    this.coordinates = Immutable.List([]);
-  }
-
-  this.feature = {
-    type: 'Feature',
-    properties: {
-      _drawid: hat()
-    },
-    geometry: {
-      type: 'Polygon',
-      coordinates: this.coordinates.toJS()
-    }
-  };
+  this.initialize(map, drawStore, 'Polygon', data);
 
   // event handlers
   this.addVertex = this._addVertex.bind(this);
@@ -34,7 +22,7 @@ function Polygon(map, drawStore, data) {
 
 }
 
-Polygon.prototype = {
+Polygon.prototype = xtend(Handler, {
 
   startDraw() {
     this._map.on('click', this.addVertex);
@@ -45,23 +33,23 @@ Polygon.prototype = {
     var p = [ e.latLng.lng, e.latLng.lat ];
 
     if (this.editting) {
-      this.coordinates = this.coordinates.splice(-1, 0, p);
+      var c = this.coordinates.get(0).splice(-1, 0, p);
+      this.coordinates = this.coordinates.set(0, c);
     } else {
       this.editting = true;
-      this.coordinates = Immutable.List([ p, p ]);
+      this.coordinates = Immutable.fromJS([[ p, p ]]);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
     }
 
-    this.feature.geometry.coordinates = [ this.coordinates.toJS() ];
-    this.store.update(this.feature);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.store.update(this.feature.toJS());
   },
 
   _onMouseMove(e) {
     var coords = this._map.unproject([e.x, e.y]);
-    var c = this.coordinates;
-    c = c.splice(-1, 0, [ coords.lng, coords.lat ]);
-    this.feature.geometry.coordinates = [ c.toJS() ];
-    this.store.update(this.feature);
+    var c = this.coordinates.get(0).splice(-1, 0, [ coords.lng, coords.lat ]);
+    var temp = this.coordinates.set(0, c);
+    this.store.update(this.feature.setIn(['geometry', 'coordinates'], temp).toJS());
   },
 
   _completeDraw() {
@@ -69,14 +57,12 @@ Polygon.prototype = {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    // render the changes
     this.store.clear();
-    this.drawStore.set('Polygon', hat(), [ this.coordinates.toJS() ]);
+    this.drawStore.set(this.feature.toJS());
   },
 
-  startEdit() {},
-
   completeEdit() {}
-};
+
+});
 
 module.exports = Polygon;
