@@ -10,7 +10,8 @@ var hat = require('hat');
  *
  */
 
-function Store(data) {
+function Store(data, map) {
+  this._map = map;
   this.historyIndex = 0;
   this.history = [ Immutable.List([]) ];
   this.annotations = Immutable.List([]);
@@ -66,6 +67,10 @@ Store.prototype = {
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
       'Removed a feature'
     );
+
+    this._map.fire('draw.feature.update', {
+      geojson: this.getAll()
+    });
   },
 
   set(type, id, coords) {
@@ -90,6 +95,10 @@ Store.prototype = {
         data.push(feature);
 
     }, 'Added a ' + type);
+
+    this._map.fire('draw.feature.update', {
+      geojson: this.getAll()
+    });
   },
 
   edit(id) {

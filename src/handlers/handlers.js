@@ -103,6 +103,7 @@ module.exports = {
 
     this._drawStore.update(feature);
 
+    console.log(this._drawStore.getAll());
     this._map.fire('edit.feature.update', {
       geojson: this._drawStore.getAll()
     });

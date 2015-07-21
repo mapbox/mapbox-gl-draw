@@ -9,8 +9,9 @@
  * will eventually support mass edits
  */
 
-function EditStore(data) {
-  this.features = data;
+function EditStore(map, data) {
+  this._map = map;
+  this.features = data || [];
 }
 
 EditStore.prototype = {
@@ -28,12 +29,20 @@ EditStore.prototype = {
 
   clear() {
     this.features = [];
+
+    this._map.fire('edit.feature.update', {
+      geojson: this.getAll()
+    });
   },
 
   update(feature) {
     this.features = this.features
       .filter(feat => feat.properties._drawid !== feature.properties._drawid);
     this.features.push(feature);
+
+    this._map.fire('edit.feature.update', {
+      geojson: this.getAll()
+    });
   }
 };
 

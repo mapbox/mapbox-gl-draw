@@ -44,7 +44,7 @@ Draw.prototype = extend(Control, {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
-    this.options.geoJSON = new Store(this.options.geoJSON);
+    this.options.geoJSON = new Store(this.options.geoJSON, map);
 
     // Build out draw controls
     if (controls.line) {
@@ -318,6 +318,10 @@ Draw.prototype = extend(Control, {
       this._map.on('click', this._onClick.bind(this));
 
     });
+
+    var P = require('./handlers/point2');
+    var poly = new P(this._map, this.options.geoJSON);
+    poly.startDraw();
 
   }
 });

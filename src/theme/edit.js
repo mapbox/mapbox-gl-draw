@@ -9,7 +9,7 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#00ffff',
+      'line-color': '#000000',
       'line-dasharray': [0, 2],
       'line-width': 3
     }
@@ -34,8 +34,8 @@ module.exports = [
     'source': 'edit',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
-      'fill-color': '#00ffff',
-      'fill-outline-color': '#00ffff',
+      'fill-color': '#000000',
+      'fill-outline-color': '#000000',
       'fill-opacity': 0.25
     },
     'interactive': true
@@ -49,7 +49,7 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#00ffff',
+      'line-color': '#000000',
       'line-dasharray': [2, 2],
       'line-width': 3
     }
