@@ -42,19 +42,26 @@ module.exports = {
   },
 
   /**
+   * Clear the edit drawings and render the changes to the main draw layer
+   */
+  completeEdit() {
+    this.store.clear();
+    this.drawStore.set(this.feature.toJS());
+  },
+
+  /**
    * Translate this polygon
    *
    * @param {Array<Number>} init - Mouse position at the beginining of the drag
    * @param {Array<Number>} curr - Current mouse position
    */
   translate(init, curr) {
-    if (this.translating) {
-      this.store.update(this.feature.toJS());
-    } else {
+    if (!this.translating) {
       this.translating = true;
       this.initGeom = Immutable.fromJS(this.feature.toJS());
     }
-    this.feature = Immutable.Map(translate(this.initGeom.toJS(), init, curr, this._map));
+    this.feature = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
+    this.store.update(this.feature.toJS());
   }
 };
 

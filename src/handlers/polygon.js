@@ -59,9 +59,7 @@ Polygon.prototype = xtend(Handler, {
 
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
-  },
-
-  completeEdit() {}
+  }
 
 });
 

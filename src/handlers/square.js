@@ -65,16 +65,8 @@ Square.prototype = xtend(Handler, {
 
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
-  },
-
-  completeEdit() {
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
-  },
-
-  get() {
-    return this.feature.toJS();
   }
+
 });
 
 module.exports = Square;
