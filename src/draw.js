@@ -8,7 +8,7 @@ var { DOM } = require('./util');
 
 // Data store
 var Store = require('./store');
-var EditStore = require('./edit_store');
+//var EditStore = require('./edit_store');
 
 // Control handlers
 var Polygon = require('./handlers/polygon');
@@ -117,6 +117,8 @@ Draw.prototype = extend(Control, {
       case 27: // (escape) exit edit mode
         if (this.editId) {
           this._exitEdit();
+        } else if (this._control) {
+          this._control = false;
         }
         break;
       case 68: // (d) delete the feature in edit mode
@@ -129,6 +131,7 @@ Draw.prototype = extend(Control, {
   _onClick(e) {
     this._map.featuresAt([e.point.x, e.point.y], { radius: 10 }, (err, features) => {
       if (err) throw err;
+      else if (this._control) return;
       else if (!features.length && this.editId) return this._exitEdit();
       else if (!features.length) return;
 
@@ -136,30 +139,27 @@ Draw.prototype = extend(Control, {
       if (this.editId && this.editId !== feature.properties._drawid) this._exitEdit();
       else if (this.editId === feature.properties._drawid) return;
 
-      this.editId = feature.properties._drawid;
-      var c = feature.geometry.coordinates;
-      var type = feature.geometry.type;
-
-      if (type === 'Point')
-        this.featureType = 'point';
-      else if (type === 'LineString' || type === 'MultiLineString')
-        this.featureType = 'line';
-      else if (c[0][0][0] === c[0][1][0])
-        this.featureType = 'square';
-      else
-        this.featureType = 'polygon';
-
-      this._edit();
+      this._edit(feature);
     });
   },
 
-  _edit() {
-    // move the feature clicked on out of the draw store into an edit store
-    if (this._control) return;
-    var activeFeature = this.options.geoJSON.edit(this.editId);
-    this.editStore = new EditStore([activeFeature]);
-    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
-    this._map.fire('edit.feature.update', { geojson: this.editStore.getAll() });
+  _edit(feature) {
+    this.editId = feature.properties._drawid;
+    feature = this.options.geoJSON.edit(this.editId);
+    var c = feature.geometry.coordinates;
+    var featureType = feature.geometry.type;
+
+    if (featureType === 'Point')
+      this._control = new Point(this._map, this.options.geoJSON, feature);
+    else if (featureType === 'LineString')
+      this._control = new Line(this._map, this.options.geoJSON, feature);
+    else if (c[0][0][0] === c[0][1][0])
+      this._control = new Square(this._map, this.options.geoJSON, feature);
+    else
+      this._control = new Polygon(this._map, this.options.geoJSON, feature);
+
+    this._control.startEdit();
+
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
     /*
     this.deleteBtn = this._createButton({
@@ -199,26 +199,11 @@ Draw.prototype = extend(Control, {
     if (!this.dragging) {
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
-      var options = extend(this.options, { geoJSON: this.editStore });
-      switch (this.featureType) {
-        case 'point':
-          this._control = new Point(this._map, options);
-          break;
-        case 'line':
-          this._control = new Line(this._map, options);
-          break;
-        case 'square':
-          this._control = new Square(this._map, options);
-          break;
-        case 'polygon':
-          this._control = new Polygon(this._map, options);
-          break;
-      }
       this._map.getContainer().classList.remove('mapboxgl-draw-activated');
       this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
     }
-    var pos = DOM.mousePos(e, this._map.getContainer());
-    this._control.translate(this.editId, this.init, pos);
+    var curr = DOM.mousePos(e, this._map.getContainer());
+    this._control.translate(this.init, curr);
   },
 
   _endDrag() {
@@ -226,7 +211,6 @@ Draw.prototype = extend(Control, {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
     this.dragging = false;
-    this._control.disable();
   },
 
   _drawPolygon() {

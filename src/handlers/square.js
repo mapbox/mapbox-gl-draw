@@ -3,11 +3,12 @@
 var Immutable = require('immutable');
 var hat = require('hat');
 var EditStore = require('../edit_store');
+var { translate } = require('../util');
 
 function Square(map, drawStore, data) {
 
   this._map = map;
-  this.store = new EditStore(this._map);
+  this.store = new EditStore(this._map, data ? [data] : []);
   this.drawStore = drawStore;
 
   if (data) {
@@ -80,6 +81,11 @@ Square.prototype = {
   },
 
   startEdit() {},
+
+  translate(init, curr) {
+    this.feature = translate(this.feature, init, curr, this._map);
+    this.store.update(this.feature);
+  },
 
   completeEdit() {}
 

@@ -107,6 +107,11 @@ Store.prototype = {
     var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
     this.history[idx] = this.history[idx]
       .filterNot(feat => feat.get('properties')._drawid === id);
+
+    this._map.fire('draw.feature.update', {
+      geojson: this.getAll()
+    });
+
     return feature.toJS();
   },
 

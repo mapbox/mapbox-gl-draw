@@ -98,3 +98,42 @@ module.exports.DOM.enableSelection = function () {
     docStyle[selectProp] = userSelect;
   }
 };
+
+/**
+ * Translates geometries based on mouse movement
+ *
+ * @param {Object} feature A GeoJSON feature
+ * @param {Array} init Initial position of the mouse
+ * @param {Array} curr Current position of the mouse
+ * @param {Object} map Instance of MapboxGL map
+ * @param {Boolean} point Geometry is a point
+ * @returns {Object} GeoJSON feature
+ */
+
+module.exports.translate = function(feature, init, curr, map, point) {
+  if (point) {
+    feature.geometry.coordinates = feature.geometry.coordinates;
+    return feature;
+  }
+
+  var dx = curr.x - init.x;
+  var dy = curr.y - init.y;
+  var geom = feature.geometry;
+
+  if (geom.type === 'Polygon')
+    geom.coordinates = geom.coordinates
+      .map(coord => coord.map(pt => translatePoint(pt, dx, dy, map)));
+  else
+    geom.coordinates = geom.coodinates.map(pt => translatePoint(pt, dx, dy, map));
+
+  feature.geometry = geom;
+
+  return feature;
+};
+
+// helper function for exports.translate
+function translatePoint(point, dx, dy, map) {
+  var c = map.project([ point[1], point[0] ]);
+  c = map.unproject([ c.x + dx, c.y + dy ]);
+  return [ c.lng, c.lat ];
+}

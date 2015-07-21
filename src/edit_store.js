@@ -9,9 +9,10 @@
  * will eventually support mass edits
  */
 
-function EditStore(map, data) {
+function EditStore(map, features) {
   this._map = map;
-  this.features = data || [];
+  this.features = features;
+  this.features.forEach(feat => this.update(feat));
 }
 
 EditStore.prototype = {
