@@ -19,7 +19,7 @@ function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   mapboxgl.util.setOptions(this, options);
 
-  // functions that will be event listeners
+  // event listeners
   this.onKeyUp = this._onKeyUp.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
   this.endDrag = this._endDrag.bind(this);
@@ -114,10 +114,10 @@ Draw.prototype = extend(Control, {
           this.squareCtrl.dispatchEvent(event);
         }
         break;
-      case 27: // (escape) exit edit mode FIX THIS!!!!!!!!!!
-        if (this._control && !this.editId) {
+      case 27: // (escape) exit draw/edit mode
+        if (this._control && !this.editId) { // exit draw mode
           this._control = false;
-        } else if (this.editId) {
+        } else if (this.editId) { // exit edit mode
           this._control.completeEdit();
           this._exitEdit();
         }
@@ -231,8 +231,10 @@ Draw.prototype = extend(Control, {
 
   _destroy(id) {
     this._exitEdit();
+    this._control.store.clear(); // I don't like this
     this.options.geoJSON.unset(id);
-    this._map.fire('draw.feature.update', { geojson: this.options.geoJSON.getAll() });
+    this._control = false;
+    this.editId = false;
   },
 
   _createButton(opts) {
@@ -240,23 +242,22 @@ Draw.prototype = extend(Control, {
       title: opts.title
     });
 
-    var controlClass = this._controlClass;
-
     a.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       var el = e.target;
 
+      if (this._control) this._control.completeDraw();
+
       if (el.classList.contains('active')) {
-        //if (this._control) this._control.disable();
         el.classList.remove('active');
       } else {
-        DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
-        //if (this._control) this._control.disable();
+        DOM.removeClass(document.querySelectorAll('.' + this._controlClass), 'active');
         el.classList.add('active');
         opts.fn();
       }
+
     }, true);
 
     return a;

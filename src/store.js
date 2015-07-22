@@ -17,7 +17,7 @@ function Store(data, map) {
   if (data.length) {
     data.forEach(d => {
       d.properties._drawid = hat();
-      this.history[0] = this.history[0].push(Immutable.Map(d));
+      this.history[0] = this.history[0].push(Immutable.fromJS(d));
     });
   }
 }
@@ -33,6 +33,7 @@ Store.prototype = {
     this.history.push(newVersion);
     this.annotations = this.annotations.push(annotation);
     this.historyIndex++;
+    this.render();
   },
 
   getAll() {
@@ -44,18 +45,18 @@ Store.prototype = {
 
   getById(id) {
     return this.history[this.historyIndex]
-      .find(feature => feature.get('properties')._drawid === id).toJS();
+      .find(feature => feature.get('properties').get('_drawid') === id).toJS();
   },
 
   clear() {
     this.historyIndex = 0;
-    this.history = [Immutable.List([])];
+    this.history = [Immutable.fromJS([])];
   },
 
   get(id) {
     var current = this.history[this.historyIndex];
     return current.filter((feature) => {
-      return feature.get('properties')._drawid === id;
+      return feature.get('properties').get('_drawid') === id;
     });
   },
 
@@ -64,7 +65,6 @@ Store.prototype = {
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
       'Removed a feature'
     );
-    this.render();
   },
 
   /**
@@ -72,12 +72,12 @@ Store.prototype = {
    */
   set(feature) {
     this.operation(data => {
-      feature = Immutable.Map(feature);
+      feature = Immutable.fromJS(feature);
 
       // Does an index for this exist?
       var updateIndex = this.history[this.historyIndex]
         .findIndex(feat =>
-          feat.get('properties')._drawid === feature.get('properties')._drawid
+          feat.get('properties')._drawid === feature.get('properties').get('_drawid')
         );
 
       return (updateIndex > -1) ?
@@ -85,7 +85,6 @@ Store.prototype = {
         data.push(feature);
 
     }, 'Added a ' + feature.geometry.type);
-    this.render();
   },
 
   /**
@@ -95,9 +94,9 @@ Store.prototype = {
   edit(id) {
     this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
-    var feature = this.history[idx].find(feat => feat.get('properties')._drawid === id);
+    var feature = this.history[idx].find(feat => feat.get('properties').get('_drawid') === id);
     this.history[idx] = this.history[idx]
-      .filterNot(feat => feat.get('properties')._drawid === id);
+      .filterNot(feat => feat.get('properties').get('_drawid') === id);
 
     this.render();
     return feature.toJS();
