@@ -42,9 +42,36 @@ EditStore.prototype = {
     this.render();
   },
 
+  _addVertices() {
+    var vertices = [];
+
+    for (var i = 0; i < this.features.length; i++) {
+      var feat = this.features[i];
+
+      if (feat.geometry.type === 'Polygon') {
+        // would it be more efficient to dedupe here or
+        // just render the extra point?
+        vertices = vertices.concat(feat.geometry.coordinates[0]);
+      } else {
+        vertices = vertices.concat(feat.geometry.coordinates);
+      }
+    }
+
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'MultiPoint',
+        coordinates: vertices
+      }
+    };
+  },
+
   render() {
+    var geom = this.getAll();
+    geom.features = geom.features.concat([ this._addVertices() ]);
     this._map.fire('edit.feature.update', {
-      geojson: this.getAll()
+      geojson: geom
     });
   }
 };

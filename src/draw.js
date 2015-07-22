@@ -115,7 +115,9 @@ Draw.prototype = extend(Control, {
         }
         break;
       case 27: // (escape) exit draw/edit mode
-        if (this._control) {
+        if (this._control && !this.editId) {
+          this._control.completeDraw();
+        } else if (this._control) {
           this._control.completeEdit();
           this._exitEdit();
         }
@@ -161,7 +163,7 @@ Draw.prototype = extend(Control, {
 
     this.deleteBtn = this._createButton({
       className: '',
-      title: `delete ${this.featureType}`,
+      title: `delete ${featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
   },
