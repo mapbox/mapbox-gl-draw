@@ -52,7 +52,7 @@ EditStore.prototype = {
         // would it be more efficient to dedupe here or
         // just render the extra point?
         vertices = vertices.concat(feat.geometry.coordinates[0]);
-      } else {
+      } else if (feat.geometry.type === 'LineString') {
         vertices = vertices.concat(feat.geometry.coordinates);
       }
     }

@@ -302,8 +302,6 @@ Draw.prototype = extend(Control, {
         drawLayer.setData(e.geojson);
       });
 
-      this._map.on('done', () => { console.log('yay'); });
-
       this._map.on('click', this._onClick.bind(this));
 
     });
