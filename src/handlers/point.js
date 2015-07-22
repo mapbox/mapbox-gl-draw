@@ -21,6 +21,7 @@ function Point(map, drawStore, data) {
 Point.prototype = xtend(Handler, {
 
   startDraw() {
+    this._map.fire('draw.start', { featureType: 'point' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.completeDraw);
   },
@@ -29,7 +30,7 @@ Point.prototype = xtend(Handler, {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
     this.feature = this.feature.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
-    this._done();
+    this._done('point');
   }
 
 });

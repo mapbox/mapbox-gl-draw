@@ -22,6 +22,7 @@ function Line(map, drawStore, data) {
 Line.prototype = xtend(Handler, {
 
   startDraw() {
+    this._map.fire('draw.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addPoint);
     this._map.on('dblclick', this.completeDraw);
@@ -55,7 +56,7 @@ Line.prototype = xtend(Handler, {
 
     this.coodinates = this.coordinates.splice(-1, 1);
 
-    this._done();
+    this._done('line');
   }
 
 });

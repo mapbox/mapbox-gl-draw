@@ -41,10 +41,13 @@ module.exports = {
     return this.feature.toJS();
   },
 
-  _done() {
+  /**
+   * Called after a draw is done
+   */
+  _done(type) {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
-    this._map.fire('draw.stop');
+    this._map.fire('draw.stop', { featureType: type });
   },
 
   /**

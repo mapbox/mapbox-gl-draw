@@ -1,6 +1,5 @@
 var Store = require('../../src/store');
 var test = require('tape');
-var Immutable = require('immutable');
 
 test('Store has correct properties', t => {
   t.ok(Store, 'store exists');

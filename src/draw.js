@@ -130,7 +130,7 @@ Draw.prototype = extend(Control, {
   },
 
   _onClick(e) {
-    this._map.featuresAt([e.point.x, e.point.y], { radius: 10 }, (err, features) => {
+    this._map.featuresAt(e.point, { radius: 10 }, (err, features) => {
       if (err) throw err;
       else if (this._control) return;
       else if (!features.length && this.editId) return this._exitEdit();
