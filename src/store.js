@@ -108,7 +108,7 @@ Store.prototype = {
   save(features) {
     var idx = this.historyIndex;
     features.forEach(feat => {
-      this.history[idx] = this.history[idx].push(Immutable.Map(feat));
+      this.history[idx] = this.history[idx].push(Immutable.fromJS(feat));
     });
     this.annonatations = this.annotations.push('editted features');
     this.render();

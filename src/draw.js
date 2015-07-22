@@ -168,12 +168,12 @@ Draw.prototype = extend(Control, {
     });
   },
 
-  _exitEdit() {
-    // save the changes into the draw store
+  _exitEdit(deleting) {
     DOM.destroy(this.deleteBtn);
-    this.options.geoJSON.save([ this._control.get() ]);
+    if (!deleting) this.options.geoJSON.save([ this._control.get() ]);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
+    this._control = false;
   },
 
   _initiateDrag(e) {
@@ -204,6 +204,7 @@ Draw.prototype = extend(Control, {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+    this._control.translating = false;
     this.dragging = false;
   },
 
@@ -228,10 +229,9 @@ Draw.prototype = extend(Control, {
   },
 
   _destroy(id) {
-    this._exitEdit();
     this._control.store.clear(); // I don't like this
     this.options.geoJSON.unset(id);
-    this._control = false;
+    this._exitEdit(true);
     this.editId = false;
   },
 
@@ -266,8 +266,6 @@ Draw.prototype = extend(Control, {
 
     this._map.on('load', () => {
 
-      // Initialize the draw layer with any possible
-      // features passed via `options.geoJSON`
       var drawLayer = new mapboxgl.GeoJSONSource({
         data: this.options.geoJSON.getAll()
       });
@@ -277,9 +275,6 @@ Draw.prototype = extend(Control, {
         this._map.addLayer(style);
       });
 
-      // Initialize an editLayer that provides
-      // marker anchors and guides during the
-      // draw process and during editting.
       var editLayer = new mapboxgl.GeoJSONSource({
         data: []
       });
