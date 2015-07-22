@@ -22,6 +22,7 @@ function Line(map, drawStore, data) {
 Line.prototype = xtend(Handler, {
 
   startDraw() {
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addPoint);
     this._map.on('dblclick', this.completeDraw);
   },
@@ -48,6 +49,7 @@ Line.prototype = xtend(Handler, {
   },
 
   _completeDraw() {
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.addPoint);
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);

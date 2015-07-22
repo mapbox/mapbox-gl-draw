@@ -25,6 +25,7 @@ function Square(map, drawStore, data) {
 Square.prototype = xtend(Handler, {
 
   startDraw() {
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
   },
 
@@ -60,6 +61,7 @@ Square.prototype = xtend(Handler, {
   },
 
   _completeDraw() {
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 

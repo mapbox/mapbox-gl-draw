@@ -25,6 +25,7 @@ function Polygon(map, drawStore, data) {
 Polygon.prototype = xtend(Handler, {
 
   startDraw() {
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addVertex);
     this._map.on('dblclick', this.completeDraw);
   },
@@ -53,9 +54,11 @@ Polygon.prototype = xtend(Handler, {
   },
 
   _completeDraw() {
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.addVertex);
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
