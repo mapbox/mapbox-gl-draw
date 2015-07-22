@@ -44,6 +44,7 @@ Square.prototype = xtend(Handler, {
 
   _onMouseMove(e) {
     e.stopPropagation();
+    e.preventDefault();
 
     if (!this.started) {
       this.started = true;
@@ -65,8 +66,7 @@ Square.prototype = xtend(Handler, {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
+    this._done();
   }
 
 });

@@ -29,7 +29,7 @@ Point.prototype = xtend(Handler, {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
     this.feature = this.feature.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
-    this.drawStore.set(this.feature.toJS());
+    this._done();
   }
 
 });

@@ -29,13 +29,12 @@ Line.prototype = xtend(Handler, {
 
   _addPoint(e) {
     var p = [ e.latLng.lng, e.latLng.lat ];
-    if (this.editting) {
-      this.coordinates = this.coordinates.splice(-1, 1, p);
-    } else {
+    if (!this.editting) {
       this.editting = true;
       this.coordinates = this.coordinates.push(p);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
     }
+    this.coordinates = this.coordinates.splice(-1, 1, p);
     this.coordinates = this.coordinates.push(p);
     this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
     this.store.update(this.feature.toJS());
@@ -56,8 +55,7 @@ Line.prototype = xtend(Handler, {
 
     this.coodinates = this.coordinates.splice(-1, 1);
 
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
+    this._done();
   }
 
 });

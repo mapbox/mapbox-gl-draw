@@ -41,6 +41,12 @@ module.exports = {
     return this.feature.toJS();
   },
 
+  _done() {
+    this.store.clear();
+    this.drawStore.set(this.feature.toJS());
+    this._map.fire('draw.stop');
+  },
+
   /**
    * Clear the edit drawings and render the changes to the main draw layer
    */

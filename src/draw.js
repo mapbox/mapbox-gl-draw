@@ -115,9 +115,7 @@ Draw.prototype = extend(Control, {
         }
         break;
       case 27: // (escape) exit draw/edit mode
-        if (this._control && !this.editId) { // exit draw mode
-          this._control = false;
-        } else if (this.editId) { // exit edit mode
+        if (this._control) {
           this._control.completeEdit();
           this._exitEdit();
         }
@@ -160,18 +158,17 @@ Draw.prototype = extend(Control, {
       this._control = new Polygon(this._map, this.options.geoJSON, feature);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
-    /*
+
     this.deleteBtn = this._createButton({
       className: '',
       title: `delete ${this.featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
-    */
   },
 
   _exitEdit() {
     // save the changes into the draw store
-    //DOM.destroy(this.deleteBtn);
+    DOM.destroy(this.deleteBtn);
     this.options.geoJSON.save([ this._control.get() ]);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
@@ -195,7 +192,6 @@ Draw.prototype = extend(Control, {
     if (!this.dragging) {
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
-      this._map.getContainer().classList.remove('mapboxgl-draw-activated');
       this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
     }
     var curr = DOM.mousePos(e, this._map.getContainer());
@@ -293,6 +289,7 @@ Draw.prototype = extend(Control, {
 
       this._map.on('draw.stop', () => {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
+        this._control = false;
       });
 
       this._map.on('edit.feature.update', (e) => {
@@ -302,6 +299,8 @@ Draw.prototype = extend(Control, {
       this._map.on('draw.feature.update', (e) => {
         drawLayer.setData(e.geojson);
       });
+
+      this._map.on('done', () => { console.log('yay'); });
 
       this._map.on('click', this._onClick.bind(this));
 

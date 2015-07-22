@@ -13,7 +13,8 @@
 function EditStore(map, features) {
   this._map = map;
   this.features = features;
-  this.features.forEach(feat => this.update(feat));
+  if (this.features[0].geometry.coordinates.length)
+    this.features.forEach(feat => this.update(feat));
 }
 
 EditStore.prototype = {

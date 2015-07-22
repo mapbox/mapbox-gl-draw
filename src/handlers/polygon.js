@@ -60,8 +60,7 @@ Polygon.prototype = xtend(Handler, {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
+    this._done();
   }
 
 });
