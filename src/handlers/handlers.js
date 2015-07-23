@@ -1,124 +1,76 @@
 'use strict';
 
-var util = require('../util');
-var Store = require('../store');
-var hat = require('hat');
+var Immutable = require('immutable');
+var EditStore = require('../edit_store');
+var { translate } = require('../util');
 
 module.exports = {
 
-  initialize(map, options) {
+  /**
+   * Initializes geometries
+   *
+   * @param {Object} map - Instancce of MapboxGL Map
+   * @param {Object} drawStore - Overall store for session
+   * @param {String} type - Type of GeoJSON geometry
+   * @param {Object} data - GeoJSON feature
+   */
+  initialize(map, drawStore, type, data) {
     this._map = map;
-    this._currentFeature = false;
-    this._container = map.getContainer();
-    this._editStore = new Store([]);
-    mapboxgl.util.setOptions(this, options);
-    this._drawStore = this.options.geoJSON;
-    this._onKeyUp = this._onKeyUp.bind(this);
-    this.enable();
-  },
+    this.drawStore = drawStore;
+    this.coordinates = Immutable.fromJS(data ? data.geometry.coordinates : []);
 
-  enable() {
-    var map = this._map;
-    if (map) {
-      util.DOM.disableSelection();
-      this._container.addEventListener('keyup', this._onKeyUp);
-      this._container.classList.add('mapboxgl-draw-activated');
-      map.fire('draw.start', { featureType: this.type });
-      this.drawStart();
-    }
-  },
-
-  disable() {
-    util.DOM.enableSelection();
-    this._container.removeEventListener('keyup', this._onKeyUp);
-    this._container.classList.remove('mapboxgl-draw-activated');
-    this._map.fire('draw.stop', { featureType: this.type });
-    this.drawStop(this._map);
-  },
-
-  featureComplete() {
-    this._currentFeature = false;
-  },
-
-  editCreate(type, coords) {
-    var id = hat();
-    // Keeps track of temporary linestring guideline that's
-    // drawn after the second point is selected.
-    if (type === 'LineString') this._editLineGuide = id;
-    this._editStore.set(type, id, coords);
-    this._map.fire('edit.feature.update', {geojson: this._editStore.getAll()});
-  },
-
-  editUnsetGuide() {
-    if (this._editLineGuide) this._editStore.unset('LineString', this._editLineGuide);
-    this._editLineGuide = false;
-  },
-
-  editDestroy() {
-    this._editStore.clear();
-    this._map.fire('edit.feature.update', {geojson: this._editStore.getAll()});
-  },
-
-  drawCreate(type, coords) {
-    if (!this._currentFeature) this._currentFeature = hat();
-    var feature = this._drawStore.set(type, this._currentFeature, coords);
-
-    this._map.fire('draw.feature.update', {
-      geojson: this._drawStore.getAll()
-    });
-
-    this._map.fire('draw.created', {
-      featureType: this.type,
-      feature: feature
-    });
-  },
-
-  _translate(id, init, pos) {
-    if (!this.initialCoords) {
-      var f = this._drawStore.getById(id);
-      this.initialCoords = f.geometry.coordinates;
-      this.type = f.geometry.type;
-    }
-    var dx = pos.x - init.x;
-    var dy = pos.y - init.y;
-    var coords;
-
-    if (this.type === 'Polygon')
-      coords = this.initialCoords[0].map(p => this._translatePoint(p, dx, dy));
-    else if (this.type === 'MultiLineString')
-      coords = this.initialCoords.map(line => line.map(p => this._translatePoint(p, dx, dy)));
-    else
-      coords = this.initialCoords.map(p => this._translatePoint(p, dx, dy));
-
-    var feature = {
+    this.feature = Immutable.fromJS({
       type: 'Feature',
       properties: {
-        _drawid: id
+        _drawid: data ? data.properties._drawid : null
       },
       geometry: {
-        type: this.type,
-        coordinates: this.type === 'Polygon' ? [coords] : coords
+        type: type,
+        coordinates: this.coordinates.toJS()
       }
-    };
-
-    this._drawStore.update(feature);
-
-    this._map.fire('edit.feature.update', {
-      geojson: this._drawStore.getAll()
     });
+
+    this.store = new EditStore(this._map, [ this.feature.toJS() ]);
   },
 
-  _translatePoint(point, dx, dy) {
-    var c = this._map.project([ point[1], point[0] ]);
-    c = this._map.unproject([c.x + dx, c.y + dy]);
-    return [c.lng, c.lat];
+  /**
+   * @return {Object} GeoJSON feature
+   */
+  get() {
+    return this.feature.toJS();
   },
 
-  _onKeyUp(e) {
-    switch (e.keyCode) {
-      case 27: // ESC
-      this.disable();
-      break;
+  /**
+   * Called after a draw is done
+   */
+  _done(type) {
+    this.store.clear();
+    this.drawStore.set(this.feature.toJS());
+    this._map.fire('draw.end', { featureType: type });
+  },
+
+  /**
+   * Clear the edit drawings and render the changes to the main draw layer
+   */
+  completeEdit() {
+    this.store.clear();
+    this.drawStore.set(this.feature.toJS());
+    this._map.fire('edit.end');
+  },
+
+  /**
+   * Translate this polygon
+   *
+   * @param {Array<Number>} init - Mouse position at the beginining of the drag
+   * @param {Array<Number>} curr - Current mouse position
+   */
+  translate(init, curr) {
+    if (!this.translating) {
+      this.translating = true;
+      this.initGeom = Immutable.fromJS(this.feature.toJS());
     }
+    this.feature = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
+    this.store.update(this.feature.toJS());
   }
 };
+

@@ -1,88 +1,62 @@
 'use strict';
 
-var extend = require('xtend');
-var vertices = require('./vertices');
+var xtend = require('xtend');
+var Handler = require('./handlers');
 
-function Line(map, options) {
-  this.type = 'LineString';
-  this.initialize(map, options);
+/**
+ * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} drawStore - The overall drawStore for this session
+ * @param {Object} data - GeoJSON line string feature
+ */
+function Line(map, drawStore, data) {
+
+  this.initialize(map, drawStore, 'LineString', data);
+
+  // event listeners
+  this.addPoint = this._addPoint.bind(this);
+  this.onMouseMove = this._onMouseMove.bind(this);
+  this.completeDraw = this._completeDraw.bind(this);
+
 }
 
-Line.prototype = extend(vertices, {
+Line.prototype = xtend(Handler, {
 
-  drawStart() {
-    this._data = [];
-
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onClick = this._onClick.bind(this);
-    this._onMove = this._onMove.bind(this);
-
-    this._map.on('mousemove', this._onMouseMove);
-    this._map.on('click', this._onClick);
-    this._map.on('move', this._onMove);
+  startDraw() {
+    this._map.fire('draw.start', { featureType: 'line' });
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
+    this._map.on('click', this.addPoint);
+    this._map.on('dblclick', this.completeDraw);
   },
 
-  drawStop() {
-    this.clearGuides();
-    this.editDestroy();
-    this._map.off('mousemove', this._onMouseMove);
-    this._map.off('click', this._onClick);
-    this._map.off('move', this._onMove);
-  },
-
-  _onClick(e) {
-    var c = this._map.unproject(e.point);
-    var coords = [c.lng, c.lat];
-
-    this._map.featuresAt(e.point, { radius: 0 }, (err/*, feature*/) => {
-      if (err) throw err;
-
-      // TODO complete a linestring if featuresAt returns the last point.
-      this._data.push(coords);
-      this._addVertex(coords);
-    });
+  _addPoint(e) {
+    var p = [ e.latLng.lng, e.latLng.lat ];
+    if (!this.editting) {
+      this.editting = true;
+      this.coordinates = this.coordinates.push(p);
+      this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+    }
+    this.coordinates = this.coordinates.splice(-1, 1, p);
+    this.coordinates = this.coordinates.push(p);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.store.update(this.feature.toJS());
   },
 
   _onMouseMove(e) {
-    if (this._data.length) {
-      // Update the guide line
-      this._currentPos = {x: e.point.x, y: e.point.y};
-      this._updateGuide(this._currentPos);
-    }
+    var coords = this._map.unproject([e.x, e.y]);
+    var c = this.coordinates;
+    c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
+    this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());
   },
 
-  _addVertex(coords) {
-    this.editCreate('Point', coords);
-    this._vertexCreate();
-  },
+  _completeDraw() {
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+    this._map.off('click', this.addPoint);
+    this._map.off('dblclick', this.completeDraw);
+    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-  _vertexCreate() {
-    if (this._data.length >= 2) {
-      this.drawCreate(this.type, this._data);
-    }
+    this.coodinates = this.coordinates.splice(-1, 1);
 
-    this.clearGuides();
-  },
-
-  _onMove() {
-    if (this._data.length) this._updateGuide();
-  },
-
-  _updateGuide(pos) {
-    var d = this._data;
-    this.clearGuides();
-
-    var a = d[d.length - 1];
-    a = this._map.project([a[1], a[0]]);
-
-    var b = pos || this._currentPos;
-
-    // Draw guide line
-    this.drawGuide(this._map, a, b);
-  },
-
-  translate(id, prev, pos) {
-    this._translate(id, prev, pos);
+    this._done('line');
   }
 
 });

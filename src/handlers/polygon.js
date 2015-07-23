@@ -1,102 +1,67 @@
 'use strict';
 
-var extend = require('xtend');
-var vertices = require('./vertices');
+var Immutable = require('immutable');
+var xtend = require('xtend');
+var Handler = require('./handlers');
 
-function Polygon(map, options) {
-  this.type = 'Polygon';
-  this.initialize(map, options);
+/**
+ * Polygon geometry object
+ *
+ * @param {Object} map - Instance of MapboxGl Map
+ * @param {Object} drawStore - The drawStore for this session
+ * @param {Object} data - GeoJSON polygon feature
+ */
+function Polygon(map, drawStore, data) {
+
+  this.initialize(map, drawStore, 'Polygon', data);
+
+  // event handlers
+  this.addVertex = this._addVertex.bind(this);
+  this.onMouseMove = this._onMouseMove.bind(this);
+  this.completeDraw = this._completeDraw.bind(this);
+
 }
 
-Polygon.prototype = extend(vertices, {
+Polygon.prototype = xtend(Handler, {
 
-  drawStart() {
-    this._data = [];
-
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onClick = this._onClick.bind(this);
-    this._onMove = this._onMove.bind(this);
-
-    this._map.on('mousemove', this._onMouseMove);
-    this._map.on('click', this._onClick);
-    this._map.on('move', this._onMove);
+  startDraw() {
+    this._map.fire('draw.start', { featureType: 'polygon' });
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
+    this._map.on('click', this.addVertex);
+    this._map.on('dblclick', this.completeDraw);
   },
 
-  drawStop() {
-    this.clearGuides();
-    this.editDestroy();
-    this._map.off('mousemove', this._onMouseMove);
-    this._map.off('click', this._onClick);
-    this._map.off('move', this._onMove);
-  },
+  _addVertex(e) {
+    var p = [ e.latLng.lng, e.latLng.lat ];
 
-  _onClick(e) {
-    var c = this._map.unproject(e.point);
-    var coords = [c.lng, c.lat];
+    if (this.editting) {
+      var c = this.coordinates.get(0).splice(-1, 0, p);
+      this.coordinates = this.coordinates.set(0, c);
+    } else {
+      this.editting = true;
+      this.coordinates = Immutable.fromJS([[ p, p ]]);
+      this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+    }
 
-    this._map.featuresAt(e.point, {
-      radius: 0
-    }, (err/*, feature*/) => {
-      if (err) throw err;
-
-      // TODO complete the polygon if featuresAt returns the first point.
-      this._data.push(coords);
-      this._addVertex(coords);
-    });
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.store.update(this.feature.toJS());
   },
 
   _onMouseMove(e) {
-    if (this._data.length) {
-      // Update the guide line
-      this._currentPos = {x: e.point.x, y: e.point.y};
-      this._updateGuide(this._currentPos);
-    }
+    var coords = this._map.unproject([e.x, e.y]);
+    var c = this.coordinates.get(0).splice(-1, 0, [ coords.lng, coords.lat ]);
+    var temp = this.coordinates.set(0, c);
+    this.store.update(this.feature.setIn(['geometry', 'coordinates'], temp).toJS());
   },
 
-  _addVertex(coords) {
-    this.editCreate('Point', coords);
-    this._vertexCreate();
-  },
+  _completeDraw() {
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+    this._map.off('click', this.addVertex);
+    this._map.off('dblclick', this.completeDraw);
+    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
-  _vertexCreate() {
-    if (this._data.length === 2) {
-      // Add a LineString that mimics a `mousemove` guideline.
-      this.editCreate('LineString', this._data);
-    }
-
-    if (this._data.length >= 3) {
-      this._data.push(this._data[0]);
-      this.drawCreate(this.type, [this._data]);
-
-      // Slice the last item out.
-      this._data = this._data.slice(0, (this._data.length - 1));
-
-      // Clears the temporary guide that's drawn.
-      this.editUnsetGuide();
-    }
-
-    this.clearGuides();
-  },
-
-  _onMove() {
-    if (this._data.length) this._updateGuide();
-  },
-
-  _updateGuide(pos) {
-    var d = this._data;
-    this.clearGuides();
-
-    var a = d[d.length - 1];
-    a = this._map.project([a[1], a[0]]);
-
-    var b = pos || this._currentPos;
-
-    // Draw guide line
-    this.drawGuide(this._map, a, b);
-  },
-
-  translate(id, prev, pos) {
-    this._translate(id, prev, pos);
+    this._done('polygon');
   }
 
 });
