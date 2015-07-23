@@ -60,6 +60,7 @@
   .mapboxgl-ctrl-draw-btn.shape:before  { content:'\e601'; }
   .mapboxgl-ctrl-draw-btn.square:before { content:'\e602'; }
   .mapboxgl-ctrl-draw-btn.line:before   { content:'\e603'; }
+  .mapboxgl-ctrl-draw-btn.trash:before  { content:'\e604'; }
 
 .mapboxgl-draw-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:crosshair; }
 .mapboxgl-draw-move-activated .mapboxgl-canvas-container.mapboxgl-interactive { cursor:move; }

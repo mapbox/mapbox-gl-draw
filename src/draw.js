@@ -178,7 +178,7 @@ Draw.prototype = extend(Control, {
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
     this.deleteBtn = this._createButton({
-      className: '',
+      className: 'mapboxgl-ctrl-draw-btn trash',
       title: `delete ${featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
