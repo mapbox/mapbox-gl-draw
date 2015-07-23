@@ -119,7 +119,7 @@ module.exports.translate = function(feature, init, curr, map) {
       coord.map(pt => translatePoint(pt, dx, dy, map))
     );
   } else if (geom.type === 'LineString') {
-    geom.coordinates = geom.coodinates.map(pt => translatePoint(pt, dx, dy, map));
+    geom.coordinates = geom.coordinates.map(pt => translatePoint(pt, dx, dy, map));
   } else {
     geom.coordinates = translatePoint(geom.coordinates, dx, dy, map);
   }
