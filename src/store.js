@@ -43,7 +43,7 @@ Store.prototype = {
     };
   },
 
-  getById(id) {
+  get(id) {
     return this.history[this.historyIndex]
       .find(feature => feature.get('properties').get('_drawid') === id).toJS();
   },
@@ -51,13 +51,6 @@ Store.prototype = {
   clear() {
     this.historyIndex = 0;
     this.history = [Immutable.fromJS([])];
-  },
-
-  get(id) {
-    var current = this.history[this.historyIndex];
-    return current.filter((feature) => {
-      return feature.get('properties').get('_drawid') === id;
-    });
   },
 
   unset(id) {
