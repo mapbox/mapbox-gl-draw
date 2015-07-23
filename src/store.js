@@ -73,6 +73,7 @@ Store.prototype = {
   set(feature) {
     this.operation(data => {
       feature = Immutable.fromJS(feature);
+      feature = feature.setIn(['properties', '_drawid'], hat());
 
       // Does an index for this exist?
       var updateIndex = this.history[this.historyIndex]
@@ -102,9 +103,11 @@ Store.prototype = {
     return feature.toJS();
   },
 
+
   /**
    * @param {Array<Object>} features - An array of GeoJSON features
    */
+  /*
   save(features) {
     var idx = this.historyIndex;
     features.forEach(feat => {
@@ -113,6 +116,7 @@ Store.prototype = {
     this.annonatations = this.annotations.push('editted features');
     this.render();
   },
+  */
 
   render() {
     this._map.fire('draw.feature.update', {

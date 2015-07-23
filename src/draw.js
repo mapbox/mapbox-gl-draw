@@ -1,29 +1,30 @@
 'use strict';
 
 var extend = require('xtend');
-var Control = require('./control');
-var themeStyle = require('./theme/style');
-var themeEdit = require('./theme/edit');
 var { DOM } = require('./util');
+var Control = require('./control');
+var themeEdit = require('./theme/edit');
+var themeStyle = require('./theme/style');
 
 // Data store
 var Store = require('./store');
 
 // Control handlers
-var Polygon = require('./handlers/polygon');
 var Line = require('./handlers/line');
-var Square = require('./handlers/square');
 var Point = require('./handlers/point');
+var Square = require('./handlers/square');
+var Polygon = require('./handlers/polygon');
 
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   mapboxgl.util.setOptions(this, options);
 
   // event listeners
-  this.onKeyUp = this._onKeyUp.bind(this);
-  this.initiateDrag = this._initiateDrag.bind(this);
-  this.endDrag = this._endDrag.bind(this);
   this.drag = this._drag.bind(this);
+  this.onClick = this._onClick.bind(this);
+  this.onKeyUp = this._onKeyUp.bind(this);
+  this.endDrag = this._endDrag.bind(this);
+  this.initiateDrag = this._initiateDrag.bind(this);
 }
 
 Draw.prototype = extend(Control, {
@@ -115,11 +116,10 @@ Draw.prototype = extend(Control, {
         }
         break;
       case 27: // (escape) exit draw/edit mode
-        if (this._control && !this.editId) {
+        if (this._control && !this.editId) { // draw mode
           this._control.completeDraw();
         } else if (this._control) {
-          this._control.completeEdit();
-          this._exitEdit();
+          this._control.completeEdit(); // edit mode
         }
         break;
       case 68: // (d) delete the feature in edit mode
@@ -130,18 +130,34 @@ Draw.prototype = extend(Control, {
   },
 
   _onClick(e) {
+
     this._map.featuresAt(e.point, { radius: 10 }, (err, features) => {
       if (err) throw err;
-      else if (this._control) return;
-      else if (!features.length && this.editId) return this._exitEdit();
-      else if (!features.length) return;
 
-      var feature = features[0];
-      if (this.editId && this.editId !== feature.properties._drawid) this._exitEdit();
-      else if (this.editId === feature.properties._drawid) return;
+      if (features.length) { // clicked on a feature
+        if (this._control && !this.editId) { // clicked on a feature while in draw mode
+          return;
+        } else if (this._control && this.editId) { // clicked on a feature while in edit mode
+          if (features[0].properties._drawid === this.editId) { // clicked on the feature you're editing
+            return;
+          } else { // clicked on a different feature while in edit mode
+            this._control.completeEdit();
+          }
+        }
+      } else { // clicked not on a feaure
+        if (!this._control && !this.editId) { // click outside features while not drawing or editing
+          return;
+        } else if (this._control && !this.editId) { // clicked outside features while drawing
+          return;
+        } else if (this._control && this.editId) { // clicked outside features while editing
+          return this._control.completeEdit();
+        }
+      }
 
-      this._edit(feature);
+      // if (clicked on a feature && ((!editing && !drawing) || editing))
+      this._edit(features[0]);
     });
+
   },
 
   _edit(feature) {
@@ -168,22 +184,21 @@ Draw.prototype = extend(Control, {
     });
   },
 
-  _exitEdit(deleting) {
+  _exitEdit() {
     DOM.destroy(this.deleteBtn);
-    if (!deleting) this.options.geoJSON.save([ this._control.get() ]);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
     this._control = false;
   },
 
   _initiateDrag(e) {
-    e.stopPropagation();
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
       if (err) throw err;
-      else if (!features.length) return this._exitEdit();
+      else if (!features.length) return;
       else if (features[0].properties._drawid !== this.editId) return;
 
+      e.stopPropagation();
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
     });
@@ -231,8 +246,7 @@ Draw.prototype = extend(Control, {
   _destroy(id) {
     this._control.store.clear(); // I don't like this
     this.options.geoJSON.unset(id);
-    this._exitEdit(true);
-    this.editId = false;
+    this._exitEdit();
   },
 
   _createButton(opts) {
@@ -284,10 +298,12 @@ Draw.prototype = extend(Control, {
         this._map.addLayer(style);
       });
 
-      this._map.on('draw.stop', () => {
+      this._map.on('draw.end', () => {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
         this._control = false;
       });
+
+      this._map.on('edit.end', this._exitEdit.bind(this));
 
       this._map.on('edit.feature.update', (e) => {
         editLayer.setData(e.geojson);
@@ -297,7 +313,7 @@ Draw.prototype = extend(Control, {
         drawLayer.setData(e.geojson);
       });
 
-      this._map.on('click', this._onClick.bind(this));
+      this._map.on('click', this.onClick);
 
     });
 

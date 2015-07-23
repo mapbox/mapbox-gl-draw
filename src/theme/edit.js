@@ -12,7 +12,8 @@ module.exports = [
       'line-color': '#000000',
       'line-dasharray': [0, 2],
       'line-width': 3
-    }
+    },
+    'interactive': true
   }, {
     'id': 'gl-edit-points',
     'type': 'symbol',
@@ -52,6 +53,7 @@ module.exports = [
       'line-color': '#000000',
       'line-dasharray': [2, 2],
       'line-width': 3
-    }
+    },
+    'interactive': true
   }
 ];

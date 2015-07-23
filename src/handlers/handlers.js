@@ -1,7 +1,6 @@
 'use strict';
 
 var Immutable = require('immutable');
-var hat = require('hat');
 var EditStore = require('../edit_store');
 var { translate } = require('../util');
 
@@ -23,7 +22,7 @@ module.exports = {
     this.feature = Immutable.fromJS({
       type: 'Feature',
       properties: {
-        _drawid: data ? data.properties._drawid : hat()
+        _drawid: data ? data.properties._drawid : null
       },
       geometry: {
         type: type,
@@ -47,7 +46,7 @@ module.exports = {
   _done(type) {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
-    this._map.fire('draw.stop', { featureType: type });
+    this._map.fire('draw.end', { featureType: type });
   },
 
   /**
@@ -56,6 +55,7 @@ module.exports = {
   completeEdit() {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
+    this._map.fire('edit.end');
   },
 
   /**
