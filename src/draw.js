@@ -2,7 +2,6 @@
 
 var extend = require('xtend');
 var { DOM } = require('./util');
-var Control = require('./control');
 var themeEdit = require('./theme/edit');
 var themeStyle = require('./theme/style');
 
@@ -25,9 +24,10 @@ function Draw(options) {
   this.onKeyUp = this._onKeyUp.bind(this);
   this.endDrag = this._endDrag.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
+  console.log(mapboxgl.Control);
 }
 
-Draw.prototype = extend(Control, {
+Draw.prototype = extend(mapboxgl.Control.prototype, {
 
   options: {
     position: 'top-left',
