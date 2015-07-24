@@ -82,12 +82,14 @@ Polygon.prototype = xtend(Handler, {
       });
       this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, this.vertexIdx]);
     }
+
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
     var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
-    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, this.vertexIdx], newPoint);
+
+    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, this.vertexIdx], Immutable.fromJS(newPoint));
     if (this.vertexIdx === 0)
-      this.feature = this.feature.setIn(['geometry', 'coordinates', 0, -1], newPoint);
+      this.feature = this.feature.setIn(['geometry', 'coordinates', 0, -1], Immutable.fromJS(newPoint));
 
     this.store.update(this.feature.toJS());
   }
