@@ -78,13 +78,17 @@ Square.prototype = xtend(Handler, {
       var coords = vertex.geometry.coordinates;
       var diff = Infinity;
 
-      this.feature.getIn(['geometry', 'coordinates', 0]).forEach((v, i) => {
+      var c = this.feature.getIn(['geometry', 'coordinates', 0]);
+
+      for (var i = 0; i < c.size; i++) {
+        var v = c.get(i);
         var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;
         }
-      });
+      }
+
       this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, this.vertexIdx]);
     }
 
@@ -97,7 +101,6 @@ Square.prototype = xtend(Handler, {
 
     var x = newPoint[0];
     var y = newPoint[1];
-    console.log(this.vertexIdx);
 
     switch (this.vertexIdx) {
       case 0:

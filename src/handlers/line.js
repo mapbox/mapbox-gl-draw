@@ -69,15 +69,17 @@ Line.prototype = xtend(Handler, {
       var coords = vertex.geometry.coordinates;
       var diff = Infinity;
 
-      console.log(JSON.stringify(this.feature, null, 2));
+      var c = this.feature.getIn(['geometry', 'coordinates']);
 
-      this.feature.getIn(['geometry', 'coordinates']).forEach((v, i) => {
+      for (var i = 0; i < c.size; i++) {
+        var v = c.get(i);
         var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;
         }
-      });
+      }
+
       this.initCoords = this.feature.getIn(['geometry', 'coordinates', this.vertexIdx]);
     }
 
