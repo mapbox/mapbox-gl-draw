@@ -73,8 +73,7 @@ Polygon.prototype = xtend(Handler, {
       var diff = Infinity;
 
       this.feature.getIn(['geometry', 'coordinates', 0]).forEach((v, i) => {
-        //var d = Math.sqrt(Math.pow(v.get(0) - coords[1], 2) + Math.pow(v.get(1) - coords[0], 2));
-        var d = Math.abs(v.get(0) - coords[0]);
+        var d = Math.sqrt(Math.pow(v.get(0) - coords[1], 2) + Math.pow(v.get(1) - coords[0], 2));
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;

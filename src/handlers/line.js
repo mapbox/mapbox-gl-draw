@@ -56,7 +56,8 @@ Line.prototype = xtend(Handler, {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    this.coodinates = this.coordinates.splice(-1, 1);
+    this.coordinates = this.coordinates.splice(-1, 1);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
 
     this._done('line');
   },
@@ -68,9 +69,10 @@ Line.prototype = xtend(Handler, {
       var coords = vertex.geometry.coordinates;
       var diff = Infinity;
 
+      console.log(JSON.stringify(this.feature, null, 2));
+
       this.feature.getIn(['geometry', 'coordinates']).forEach((v, i) => {
-        //var d = Math.sqrt(Math.pow(v.get(0) - coords[1], 2) + Math.pow(v.get(1) - coords[0], 2));
-        var d = Math.abs(v.get(0) - coords[0]);
+        var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;
