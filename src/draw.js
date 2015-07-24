@@ -229,8 +229,14 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+
     this._control.translating = false;
     this.dragging = false;
+
+    if (this.vertex) {
+      this.vertex = false;
+      this._control.movingVertex = false;
+    }
   },
 
   _drawPolygon() {
