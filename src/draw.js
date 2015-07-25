@@ -200,7 +200,9 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
       e.stopPropagation();
 
-      this.vertex = R.find(feat => feat.geometry.type === 'Point')(features);
+      if (features.length > 1) {
+        this.vertex = R.find(feat => feat.geometry.type === 'Point')(features);
+      }
 
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
