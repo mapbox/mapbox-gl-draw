@@ -161,6 +161,8 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
   },
 
   _edit(feature) {
+    if (!feature.properties._drawid) return; // for when null geometries are returned
+
     this.editId = feature.properties._drawid;
     feature = this.options.geoJSON.edit(this.editId);
     var c = feature.geometry.coordinates;
