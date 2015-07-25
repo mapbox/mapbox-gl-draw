@@ -1,7 +1,9 @@
 'use strict';
 
 var xtend = require('xtend');
+var Immutable = require('immutable');
 var Handler = require('./handlers');
+var { translatePoint } = require('../util');
 
 /**
  * @param {Object} map - Instance of MapboxGL Map
@@ -54,9 +56,40 @@ Line.prototype = xtend(Handler, {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    this.coodinates = this.coordinates.splice(-1, 1);
+    this.coordinates = this.coordinates.splice(-1, 1);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
 
     this._done('line');
+  },
+
+  moveVertex(init, curr, vertex) {
+    if (!this.movingVertex) {
+      this.movingVertex = true;
+
+      var coords = vertex.geometry.coordinates;
+      var diff = Infinity;
+
+      var c = this.feature.getIn(['geometry', 'coordinates']);
+
+      for (var i = 0; i < c.size; i++) {
+        var v = c.get(i);
+        var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
+        if (d < diff) {
+          this.vertexIdx = i;
+          diff = d;
+        }
+      }
+
+      this.initCoords = this.feature.getIn(['geometry', 'coordinates', this.vertexIdx]);
+    }
+
+    var dx = curr.x - init.x;
+    var dy = curr.y - init.y;
+    var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
+
+    this.feature = this.feature.setIn(['geometry', 'coordinates', this.vertexIdx], Immutable.fromJS(newPoint));
+
+    this.store.update(this.feature.toJS());
   }
 
 });

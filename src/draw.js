@@ -1,5 +1,6 @@
 'use strict';
 
+var R = require('ramda');
 var extend = require('xtend');
 var { DOM } = require('./util');
 var themeEdit = require('./theme/edit');
@@ -24,7 +25,6 @@ function Draw(options) {
   this.onKeyUp = this._onKeyUp.bind(this);
   this.endDrag = this._endDrag.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
-  console.log(mapboxgl.Control);
 }
 
 Draw.prototype = extend(mapboxgl.Control.prototype, {
@@ -193,12 +193,15 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
-    this._map.featuresAt([coords.x, coords.y], { radius: 10 }, (err, features) => {
+    this._map.featuresAt([coords.x, coords.y], { radius: 10, includeGeometry: true }, (err, features) => {
       if (err) throw err;
       else if (!features.length) return;
       else if (features[0].properties._drawid !== this.editId) return;
 
       e.stopPropagation();
+
+      this.vertex = R.find(feat => feat.geometry.type === 'Point')(features);
+
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
     });
@@ -206,21 +209,34 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
   _drag(e) {
     e.stopPropagation();
+
     if (!this.dragging) {
       this.dragging = true;
       this.init = DOM.mousePos(e, this._map.getContainer());
       this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
     }
+
     var curr = DOM.mousePos(e, this._map.getContainer());
-    this._control.translate(this.init, curr);
+
+    if (this.vertex) {
+      this._control.moveVertex(this.init, curr, this.vertex);
+    } else {
+      this._control.translate(this.init, curr);
+    }
   },
 
   _endDrag() {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+
     this._control.translating = false;
     this.dragging = false;
+
+    if (this.vertex) {
+      this.vertex = false;
+      this._control.movingVertex = false;
+    }
   },
 
   _drawPolygon() {
