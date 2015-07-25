@@ -280,7 +280,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
       var el = e.target;
 
-      if (this._control) this._control.completeDraw();
+      if (this._control && !this.editId) this._control.completeDraw();
 
       if (el.classList.contains('active')) {
         el.classList.remove('active');
