@@ -96,21 +96,6 @@ Store.prototype = {
     return feature.toJS();
   },
 
-
-  /**
-   * @param {Array<Object>} features - An array of GeoJSON features
-   */
-  /*
-  save(features) {
-    var idx = this.historyIndex;
-    features.forEach(feat => {
-      this.history[idx] = this.history[idx].push(Immutable.fromJS(feat));
-    });
-    this.annonatations = this.annotations.push('editted features');
-    this.render();
-  },
-  */
-
   render() {
     this._map.fire('draw.feature.update', {
       geojson: this.getAll()
