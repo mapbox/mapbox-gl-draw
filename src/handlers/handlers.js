@@ -46,7 +46,7 @@ module.exports = {
   _done(type) {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
-    this._map.fire('draw.end', { featureType: type, geometry: this.feature.toJS() });
+    this._map.fire('draw.end', { featureType: type });
   },
 
   /**

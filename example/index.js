@@ -1,4 +1,21 @@
-/* global React, map */
+/* global React, mapboxgl */
+mapboxgl.accessToken = localStorage.accessToken;
+
+// initialize map
+var map = new mapboxgl.Map({
+  container: 'map',
+  zoom: 12,
+  center: [43.6579, -79.3712],
+  style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
+});
+
+// add gl-draw controls
+map.addControl(new mapboxgl.Navigation({
+  position: 'top-left'
+}));
+
+map.addControl(mapboxgl.Draw());
+
 class App extends React.Component { // eslint-disable-line
 
   constructor() {
@@ -9,19 +26,12 @@ class App extends React.Component { // eslint-disable-line
         features: []
       }
     };
-    this.setGeoJSON = this.setGeoJSON.bind(this);
   }
 
   componentWillMount() {
-    map.on('draw.end', this.setGeoJSON);
-  }
-
-  setGeoJSON(feature) {
-    var geoj = this.state.geojson;
-    var feats = geoj.features;
-    feats.push(feature.geometry);
-    geoj.features = feats;
-    this.setState({ geojson: geoj });
+    map.on('draw.feature.update', e => {
+      this.setState({ geojson: e.geojson });
+    });
   }
 
   setMap(e) {
@@ -41,6 +51,7 @@ class App extends React.Component { // eslint-disable-line
       </div>
     );
   }
+
 }
 
 React.render(<App />, document.getElementById('geojson'));
