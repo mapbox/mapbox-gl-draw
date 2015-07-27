@@ -98,9 +98,11 @@ Polygon.prototype = xtend(Handler, {
     this.store.update(this.feature.toJS());
   },
 
-  editAddVertex(/*latLng*/) {
-    var vertices = this.feature.getIn(['geometry', 'coordinates']);
-    console.log(JSON.stringify(vertices, null, 2));
+  editAddVertex(coords, idx) {
+    coords = this._map.unproject(coords);
+    var newCoords = this.feature.getIn(['geometry', 'coordinates', 0]).splice(idx + 1, 0, [ coords.lng, coords.lat ]);
+    this.feature = this.feature.setIn(['geometry', 'coordinates', 0], newCoords);
+    this.store.update(this.feature.toJS());
   }
 
 });

@@ -204,7 +204,11 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
       if (features.length > 1) {
         this.vertex = R.find(feat => feat.properties.meta === 'vertices')(features);
-        this.newVertex = R.find(feat => feat.properties.meta === 'midpoints')(features);
+        this.newVertex = R.find(feat => feat.properties.meta === 'midpoint')(features);
+      }
+
+      if (this.newVertex) {
+        this._control.editAddVertex(coords, this.newVertex.properties.index);
       }
 
       this._map.getContainer().addEventListener('mousemove', this.drag, true);

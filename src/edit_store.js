@@ -95,6 +95,7 @@ EditStore.prototype = {
             }
           });
         }
+
       }
     }
 
@@ -104,7 +105,6 @@ EditStore.prototype = {
   render() {
     var geom = this.getAll();
     geom.features = geom.features.concat([ this._addVertices() ], this._addMidpoints());
-    console.log(JSON.stringify(this._addMidpoints(), null, 2));
     this._map.fire('edit.feature.update', {
       geojson: geom
     });
