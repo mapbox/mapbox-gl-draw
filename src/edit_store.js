@@ -75,21 +75,14 @@ EditStore.prototype = {
     for (var i = 0; i < this.features.length; i++) {
       var feat = this.features[i];
       var c = feat.geometry.coordinates;
-      var mid, j;
-      if (feat.geometry.type === 'LineString') {
 
-        for (j = 0; j < c.length - 1; j++) {
-          mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
+      if (feat.geometry.type === 'LineString' ||
+          feat.geometry.type === 'Polygon' && c[0][0][0] !== c[0][1][0]) {
+        c = feat.geometry.type === 'Polygon' ? c[0] : c;
+        for (var j = 0; j < c.length - 1; j++) {
+          var mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
           midpoints.push(mid);
         }
-
-      } else if (feat.geometry.type === 'Polygon' && c[0][0][0] !== c[0][1][0]) {
-
-        for (j = 0; j < c.length - 1; j++) {
-          mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
-          midpoints.push(mid);
-        }
-
       }
     }
 
