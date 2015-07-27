@@ -76,7 +76,8 @@ Polygon.prototype = xtend(Handler, {
 
       for (var i = 0; i < c.size; i++) {
         var v = c.get(i);
-        var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
+        //var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
+        var d = Math.abs(v.get(0) - coords[0]) + Math.abs(v.get(1) - coords[1]);
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;

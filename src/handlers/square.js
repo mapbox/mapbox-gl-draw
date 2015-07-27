@@ -82,7 +82,8 @@ Square.prototype = xtend(Handler, {
 
       for (var i = 0; i < c.size; i++) {
         var v = c.get(i);
-        var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
+        //var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
+        var d = Math.abs(v.get(0) - coords[0]) + Math.abs(v.get(1) - coords[1]);
         if (d < diff) {
           this.vertexIdx = i;
           diff = d;
@@ -121,6 +122,7 @@ Square.prototype = xtend(Handler, {
         break;
     }
 
+    // always reset last point to equal the first point
     this.feature = this._setV(4, this._getV(0).toJS());
 
     this.store.update(this.feature.toJS());
@@ -132,6 +134,7 @@ Square.prototype = xtend(Handler, {
    * @param {Number} idx - index
    * @param {Array<Number>} val - new coordinates
    * @return {Object} an Immutable Map of a GeoJSON feature
+   * @private
    */
   _setV(idx, val) {
     return this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(val));
@@ -142,6 +145,7 @@ Square.prototype = xtend(Handler, {
    *
    * @param {Number} idx - index of the vertex you want
    * @return {Array<Number>} Immutable List
+   * @private
    */
   _getV(idx) {
     return this.feature.getIn(['geometry', 'coordinates', 0, idx]);
