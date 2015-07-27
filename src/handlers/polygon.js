@@ -96,6 +96,10 @@ Polygon.prototype = xtend(Handler, {
       this.feature = this.feature.setIn(['geometry', 'coordinates', 0, -1], Immutable.fromJS(newPoint));
 
     this.store.update(this.feature.toJS());
+  },
+
+  editAddVertex(latLng) {
+    console.log(latLng);
   }
 
 });

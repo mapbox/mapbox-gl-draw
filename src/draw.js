@@ -139,7 +139,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
           return;
         } else if (this._control && this.editId) { // clicked on a feature while in edit mode
           if (features[0].properties._drawid === this.editId) { // clicked on the feature you're editing
-            return;
+            return this._control.editAddVertex(e.latLng);
           } else { // clicked on a different feature while in edit mode
             this._control.completeEdit();
           }
