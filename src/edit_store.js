@@ -78,29 +78,33 @@ EditStore.prototype = {
 
       if (feat.geometry.type === 'LineString' ||
           feat.geometry.type === 'Polygon' && c[0][0][0] !== c[0][1][0]) {
+
         c = feat.geometry.type === 'Polygon' ? c[0] : c;
+
         for (var j = 0; j < c.length - 1; j++) {
           var mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
-          midpoints.push(mid);
+          midpoints.push({
+            type: 'Feature',
+            properties: {
+              meta: 'midpoint',
+              index: j
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: mid
+            }
+          });
         }
       }
     }
 
-    return {
-      type: 'Feature',
-      properties: {
-        meta: 'midpoints'
-      },
-      geometry: {
-        type: 'MultiPoint',
-        coordinates: midpoints
-      }
-    };
+    return midpoints;
   },
 
   render() {
     var geom = this.getAll();
-    geom.features = geom.features.concat([ this._addVertices(), this._addMidpoints() ]);
+    geom.features = geom.features.concat([ this._addVertices() ], this._addMidpoints());
+    console.log(JSON.stringify(this._addMidpoints(), null, 2));
     this._map.fire('edit.feature.update', {
       geojson: geom
     });

@@ -131,7 +131,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
   _onClick(e) {
 
-    this._map.featuresAt(e.point, { radius: 10 }, (err, features) => {
+    this._map.featuresAt(e.point, { radius: 10, includeGeometry: true }, (err, features) => {
       if (err) throw err;
 
       if (features.length) { // clicked on a feature
@@ -139,12 +139,12 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
           return;
         } else if (this._control && this.editId) { // clicked on a feature while in edit mode
           if (features[0].properties._drawid === this.editId) { // clicked on the feature you're editing
-            return this._control.editAddVertex(e.latLng);
+            return;
           } else { // clicked on a different feature while in edit mode
             this._control.completeEdit();
           }
         }
-      } else { // clicked not on a feaure
+      } else { // clicked not on a feature
         if (!this._control && !this.editId) { // click outside features while not drawing or editing
           return;
         } else if (this._control && !this.editId) { // clicked outside features while drawing
@@ -154,7 +154,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
         }
       }
 
-      // if (clicked on a feature && ((!editing && !drawing) || editing))
+      // if (clicked on a feature && ((!editing this feature && !drawing))
       this._edit(features[0]);
     });
 
@@ -203,7 +203,8 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       e.stopPropagation();
 
       if (features.length > 1) {
-        this.vertex = R.find(feat => feat.geometry.type === 'Point')(features);
+        this.vertex = R.find(feat => feat.properties.meta === 'vertices')(features);
+        this.newVertex = R.find(feat => feat.properties.meta === 'midpoints')(features);
       }
 
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
