@@ -98,8 +98,9 @@ Polygon.prototype = xtend(Handler, {
     this.store.update(this.feature.toJS());
   },
 
-  editAddVertex(latLng) {
-    console.log(latLng);
+  editAddVertex(/*latLng*/) {
+    var vertices = this.feature.getIn(['geometry', 'coordinates']);
+    console.log(JSON.stringify(vertices, null, 2));
   }
 
 });

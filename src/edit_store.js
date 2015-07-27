@@ -59,7 +59,9 @@ EditStore.prototype = {
 
     return {
       type: 'Feature',
-      properties: {},
+      properties: {
+        meta: 'vertices'
+      },
       geometry: {
         type: 'MultiPoint',
         coordinates: vertices
@@ -67,9 +69,45 @@ EditStore.prototype = {
     };
   },
 
+  _addMidpoints() {
+    var midpoints = [];
+
+    for (var i = 0; i < this.features.length; i++) {
+      var feat = this.features[i];
+      var c = feat.geometry.coordinates;
+      var mid, j;
+      if (feat.geometry.type === 'LineString') {
+
+        for (j = 0; j < c.length - 1; j++) {
+          mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
+          midpoints.push(mid);
+        }
+
+      } else if (feat.geometry.type === 'Polygon' && c[0][0][0] !== c[0][1][0]) {
+
+        for (j = 0; j < c.length - 1; j++) {
+          mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
+          midpoints.push(mid);
+        }
+
+      }
+    }
+
+    return {
+      type: 'Feature',
+      properties: {
+        meta: 'midpoints'
+      },
+      geometry: {
+        type: 'MultiPoint',
+        coordinates: midpoints
+      }
+    };
+  },
+
   render() {
     var geom = this.getAll();
-    geom.features = geom.features.concat([ this._addVertices() ]);
+    geom.features = geom.features.concat([ this._addVertices(), this._addMidpoints() ]);
     this._map.fire('edit.feature.update', {
       geojson: geom
     });
