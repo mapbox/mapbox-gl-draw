@@ -1,68 +1,65 @@
 'use strict';
 
+import Geometry from './geometry';
 import Immutable from 'immutable';
-import Geometry from './handlers';
 import { translatePoint } from '../util';
 
 /**
- * Polygon geometry object
- *
- * @param {Object} map - Instance of MapboxGl Map
- * @param {Object} drawStore - The drawStore for this session
- * @param {Object} data - GeoJSON polygon feature
- * @return {Polygon} this
+ * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} drawStore - The overall drawStore for this session
+ * @param {Object} data - GeoJSON line string feature
+ * @return {Line} this
  */
-export default class Polygon extends Geometry {
+export default class Line extends Geometry {
 
   constructor(map, drawStore, data) {
-    super(map, drawStore, 'Polygon', data);
 
-    // event handlers
-    this.addVertex = this._addVertex.bind(this);
+    super(map, drawStore, 'LineString', data);
+
+    // event listeners
+    this.addPoint = this._addPoint.bind(this);
     this.onMouseMove = this._onMouseMove.bind(this);
     this.completeDraw = this._completeDraw.bind(this);
 
   }
 
-
   startDraw() {
-    this._map.fire('draw.start', { featureType: 'polygon' });
+    this._map.fire('draw.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
-    this._map.on('click', this.addVertex);
+    this._map.on('click', this.addPoint);
     this._map.on('dblclick', this.completeDraw);
   }
 
-  _addVertex(e) {
+  _addPoint(e) {
     var p = [ e.latLng.lng, e.latLng.lat ];
-
-    if (this.editting) {
-      var c = this.coordinates.get(0).splice(-1, 0, p);
-      this.coordinates = this.coordinates.set(0, c);
-    } else {
+    if (!this.editting) {
       this.editting = true;
-      this.coordinates = Immutable.fromJS([[ p, p ]]);
+      this.coordinates = this.coordinates.push(p);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
     }
-
+    this.coordinates = this.coordinates.splice(-1, 1, p);
+    this.coordinates = this.coordinates.push(p);
     this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
     this.store.update(this.feature.toJS());
   }
 
   _onMouseMove(e) {
     var coords = this._map.unproject([e.x, e.y]);
-    var c = this.coordinates.get(0).splice(-1, 0, [ coords.lng, coords.lat ]);
-    var temp = this.coordinates.set(0, c);
-    this.store.update(this.feature.setIn(['geometry', 'coordinates'], temp).toJS());
+    var c = this.coordinates;
+    c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
+    this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());
   }
 
   _completeDraw() {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.off('click', this.addVertex);
+    this._map.off('click', this.addPoint);
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
-    this._done('polygon');
+    this.coordinates = this.coordinates.splice(-1, 1);
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+
+    this._done('line');
   }
 
   /**
@@ -75,16 +72,14 @@ export default class Polygon extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, idx]);
+      this.initCoords = this.feature.getIn(['geometry', 'coordinates', idx]);
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
     var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
 
-    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(newPoint));
-    if (idx === 0)
-      this.feature = this.feature.setIn(['geometry', 'coordinates', 0, -1], Immutable.fromJS(newPoint));
+    this.feature = this.feature.setIn(['geometry', 'coordinates', idx], Immutable.fromJS(newPoint));
 
     this.store.update(this.feature.toJS());
   }
@@ -97,8 +92,8 @@ export default class Polygon extends Geometry {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    var newCoords = this.feature.getIn(['geometry', 'coordinates', 0]).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
-    this.feature = this.feature.setIn(['geometry', 'coordinates', 0], newCoords);
+    var newCoords = this.feature.getIn(['geometry', 'coordinates']).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], newCoords);
     this.store.update(this.feature.toJS());
   }
 

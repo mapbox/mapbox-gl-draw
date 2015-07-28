@@ -1,6 +1,6 @@
 'use strict';
 
-import Geometry from './handlers';
+import Geometry from './geometry';
 
 /**
  * Point geometry object

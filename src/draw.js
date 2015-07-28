@@ -9,10 +9,10 @@ import themeStyle from './theme/style';
 import Store from './store';
 
 // Control handlers
-import Line from './handlers/line';
-import Point from './handlers/point';
-import Square from './handlers/square';
-import Polygon from './handlers/polygon';
+import Line from './geometries/line';
+import Point from './geometries/point';
+import Square from './geometries/square';
+import Polygon from './geometries/polygon';
 
 export default class Draw extends mapboxgl.Control {
 

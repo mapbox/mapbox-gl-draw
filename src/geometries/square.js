@@ -1,6 +1,6 @@
 'use strict';
 
-import Geometry from './handlers';
+import Geometry from './geometry';
 import Immutable from 'immutable';
 import { translatePoint } from '../util';
 
@@ -134,5 +134,3 @@ export default class Square extends Geometry {
   }
 
 }
-
-//module.exports = Square;
