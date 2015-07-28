@@ -5,10 +5,12 @@ import Immutable from 'immutable';
 import { translatePoint } from '../util';
 
 /**
+ * Line geometry class
+ *
  * @param {Object} map - Instance of MapboxGL Map
  * @param {Object} drawStore - The overall drawStore for this session
- * @param {Object} data - GeoJSON line string feature
- * @return {Line} this
+ * @param {Object} [data] - GeoJSON line string feature
+ * @returns {Line} this
  */
 export default class Line extends Geometry {
 

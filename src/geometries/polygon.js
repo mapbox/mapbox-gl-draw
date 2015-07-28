@@ -5,12 +5,12 @@ import Geometry from './geometry';
 import { translatePoint } from '../util';
 
 /**
- * Polygon geometry object
+ * Polygon geometry class
  *
  * @param {Object} map - Instance of MapboxGl Map
  * @param {Object} drawStore - The drawStore for this session
- * @param {Object} data - GeoJSON polygon feature
- * @return {Polygon} this
+ * @param {Object} [data] - GeoJSON polygon feature
+ * @returns {Polygon} this
  */
 export default class Polygon extends Geometry {
 

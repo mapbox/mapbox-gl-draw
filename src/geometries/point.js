@@ -3,12 +3,12 @@
 import Geometry from './geometry';
 
 /**
- * Point geometry object
+ * Point geometry class
  *
  * @param {Object} map - Instance of MpaboxGL Map
  * @param {Object} drawStore - The draw store for this session
- * @param {Object} data - GeoJSON polygon feature
- * @return {Point} this
+ * @param {Object} [data] - GeoJSON polygon feature
+ * @returns {Point} this
  */
 export default class Point extends Geometry {
 
