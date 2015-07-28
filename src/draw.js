@@ -1,7 +1,7 @@
 'use strict';
 
 import R from 'ramda';
-import xtend from 'xtend';
+//import xtend from 'xtend';
 import { DOM } from './util';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
@@ -15,6 +15,7 @@ import Point from './handlers/point';
 import Square from './handlers/square';
 import Polygon from './handlers/polygon';
 
+/*
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
   mapboxgl.util.setOptions(this, options);
@@ -26,20 +27,37 @@ function Draw(options) {
   this.endDrag = this._endDrag.bind(this);
   this.initiateDrag = this._initiateDrag.bind(this);
 }
+*/
 
-Draw.prototype = xtend(mapboxgl.Control.prototype, {
+//Draw.prototype = xtend(mapboxgl.Control.prototype, {
 
-  options: {
-    position: 'top-left',
-    keybindings: true,
-    geoJSON: [],
-    controls: {
-      marker: true,
-      line: true,
-      shape: true,
-      square: true
-    }
-  },
+export default class Draw extends mapboxgl.Control {
+
+  constructor(options) {
+    super();
+
+    if (!(this instanceof Draw)) return new Draw(options);
+    mapboxgl.util.setOptions(this, options);
+
+    // event listeners
+    this.drag = this._drag.bind(this);
+    this.onClick = this._onClick.bind(this);
+    this.onKeyUp = this._onKeyUp.bind(this);
+    this.endDrag = this._endDrag.bind(this);
+    this.initiateDrag = this._initiateDrag.bind(this);
+
+    this.options = {
+      position: 'top-left',
+      keybindings: true,
+      geoJSON: [],
+      controls: {
+        marker: true,
+        line: true,
+        shape: true,
+        square: true
+      }
+    };
+  }
 
   onAdd(map) {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
@@ -88,7 +106,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
 
     this._mapState();
     return container;
-  },
+  }
 
 
   _onKeyUp(e) {
@@ -127,7 +145,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
           this._destroy(this.editId);
         }
     }
-  },
+  }
 
   /**
    * Handles clicks on the maps in a number of scenarios
@@ -163,7 +181,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
       this._edit(features[0]);
     });
 
-  },
+  }
 
   _edit(feature) {
     if (!feature.properties._drawid) return; // for when null geometries are returned
@@ -189,14 +207,14 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
       title: `delete ${featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
-  },
+  }
 
   _exitEdit() {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
     this._control = false;
-  },
+  }
 
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
@@ -220,7 +238,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
     });
-  },
+  }
 
   _drag(e) {
     e.stopPropagation();
@@ -238,7 +256,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
     } else {
       this._control.translate(this.init, curr);
     }
-  },
+  }
 
   _endDrag() {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
@@ -252,33 +270,33 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
       this.vertex = false;
       this._control.movingVertex = false;
     }
-  },
+  }
 
   _drawPolygon() {
     this._control = new Polygon(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawLine() {
     this._control = new Line(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawSquare() {
     this._control = new Square(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawPoint() {
     this._control = new Point(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _destroy(id) {
     this._control.store.clear(); // I don't like this
     this.options.geoJSON.unset(id);
     this._exitEdit();
-  },
+  }
 
   _createButton(opts) {
     var a = DOM.create('button', opts.className, this._container, {
@@ -304,7 +322,7 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
     }, true);
 
     return a;
-  },
+  }
 
   _mapState() {
     var controlClass = this._controlClass;
@@ -349,6 +367,6 @@ Draw.prototype = xtend(mapboxgl.Control.prototype, {
     });
 
   }
-});
+}
 
-module.exports = Draw;
+//module.exports = Draw;
