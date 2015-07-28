@@ -63,28 +63,16 @@ Line.prototype = xtend(Handler, {
     this._done('line');
   },
 
+  /**
+   * Update the position of a vertex in the polygon
+   *
+   * @param {Array<Number>} init - the position of the mouse at the start of the drag
+   * @param {Array<Number>} curr - the current position of the mouse
+   * @param {Number} idx - the index of the point being updated in `feature.geometry.coordinates`
+   */
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      /*
-
-      var coords = vertex.geometry.coordinates;
-      var diff = Infinity;
-
-      var c = this.feature.getIn(['geometry', 'coordinates']);
-
-      for (var i = 0; i < c.size; i++) {
-        var v = c.get(i);
-        //var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
-        var d = Math.abs(v.get(0) - coords[0]) + Math.abs(v.get(1) - coords[1]);
-        if (d < diff) {
-          this.vertexIdx = i;
-          diff = d;
-        }
-      }
-
-      this.initCoords = this.feature.getIn(['geometry', 'coordinates', this.vertexIdx]);
-      */
       this.initCoords = this.feature.getIn(['geometry', 'coordinates', idx]);
     }
 
@@ -97,6 +85,12 @@ Line.prototype = xtend(Handler, {
     this.store.update(this.feature.toJS());
   },
 
+  /**
+   * Add a new vertex to a polygon in edit mode
+   *
+   * @param {Object} coords - The coordinates of the new vertex in the for { lng: <Number>, lat: <Number> }
+   * @param {Number} idx - the index at which the new point will be placed in `feature.geometry.coordinates`
+   */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
     var newCoords = this.feature.getIn(['geometry', 'coordinates']).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
