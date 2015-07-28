@@ -11,6 +11,7 @@ var { translatePoint } = require('../util');
  * @param {Object} map - Instance of MapboxGL Map
  * @param {Object} drawStore - The overall drawStore for this session
  * @param {Object} data - GeoJSON polygon feature
+ * @return {Square} this
  */
 function Square(map, drawStore, data) {
 

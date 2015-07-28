@@ -11,7 +11,7 @@
  * @param {Boolean} [options.controls.line=true]
  * @param {Boolean} [options.controls.shape=true]
  * @param {Boolean} [options.controls.square=true]
- * @returns {Draw} `this`
+ * @return {Draw} `this`
  * @example
  * var map = new mapboxgl.Map({
  *   container: 'map',

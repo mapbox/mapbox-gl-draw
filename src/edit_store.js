@@ -46,27 +46,27 @@ EditStore.prototype = {
     var vertices = [];
 
     for (var i = 0; i < this.features.length; i++) {
-      var feat = this.features[i];
-
-      if (feat.geometry.type === 'Polygon') {
-        // would it be more efficient to dedupe here or
-        // just render the extra point?
-        vertices = vertices.concat(feat.geometry.coordinates[0]);
-      } else if (feat.geometry.type === 'LineString') {
-        vertices = vertices.concat(feat.geometry.coordinates);
+      var coords = this.features[i].geometry.coordinates;
+      var type = this.features[i].geometry.type;
+      if (type === 'LineString' || type === 'Polygon') {
+        coords = type === 'Polygon' ? coords[0] : coords;
+        for (var j = 0; j < coords.length - 1; j++) {
+          vertices.push({
+            type: 'Feature',
+            properties: {
+              meta: 'vertex',
+              index: j
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: coords[j]
+            }
+          });
+        }
       }
     }
 
-    return {
-      type: 'Feature',
-      properties: {
-        meta: 'vertices'
-      },
-      geometry: {
-        type: 'MultiPoint',
-        coordinates: vertices
-      }
-    };
+    return vertices;
   },
 
   _addMidpoints() {
@@ -87,7 +87,7 @@ EditStore.prototype = {
             type: 'Feature',
             properties: {
               meta: 'midpoint',
-              index: j
+              index: j + 1
             },
             geometry: {
               type: 'Point',
@@ -104,7 +104,7 @@ EditStore.prototype = {
 
   render() {
     var geom = this.getAll();
-    geom.features = geom.features.concat([ this._addVertices() ], this._addMidpoints());
+    geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
     this._map.fire('edit.feature.update', {
       geojson: geom
     });

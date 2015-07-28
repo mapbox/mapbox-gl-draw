@@ -9,6 +9,7 @@ var { translatePoint } = require('../util');
  * @param {Object} map - Instance of MapboxGL Map
  * @param {Object} drawStore - The overall drawStore for this session
  * @param {Object} data - GeoJSON line string feature
+ * @return {Line} this
  */
 function Line(map, drawStore, data) {
 
