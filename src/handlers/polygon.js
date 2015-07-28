@@ -81,7 +81,7 @@ Polygon.prototype = xtend(Handler, {
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
+    var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
 
     this.feature = this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(newPoint));
     if (idx === 0)
@@ -98,7 +98,7 @@ Polygon.prototype = xtend(Handler, {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    var newCoords = this.feature.getIn(['geometry', 'coordinates', 0]).splice(idx, 0, [ coords.lng, coords.lat ]);
+    var newCoords = this.feature.getIn(['geometry', 'coordinates', 0]).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
     this.feature = this.feature.setIn(['geometry', 'coordinates', 0], newCoords);
     this.store.update(this.feature.toJS());
   }
