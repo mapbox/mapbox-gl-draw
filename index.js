@@ -21,4 +21,5 @@
  * // Initialize the drawing component
  * map.addControl(mapboxgl.Draw());
  */
-mapboxgl.Draw = require('./src/draw.js');
+import Draw from './src/draw';
+mapboxgl.Draw = function(options) { return new Draw(options); };

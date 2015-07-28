@@ -1,7 +1,6 @@
 'use strict';
 
 import R from 'ramda';
-//import xtend from 'xtend';
 import { DOM } from './util';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
@@ -15,28 +14,11 @@ import Point from './handlers/point';
 import Square from './handlers/square';
 import Polygon from './handlers/polygon';
 
-/*
-function Draw(options) {
-  if (!(this instanceof Draw)) return new Draw(options);
-  mapboxgl.util.setOptions(this, options);
-
-  // event listeners
-  this.drag = this._drag.bind(this);
-  this.onClick = this._onClick.bind(this);
-  this.onKeyUp = this._onKeyUp.bind(this);
-  this.endDrag = this._endDrag.bind(this);
-  this.initiateDrag = this._initiateDrag.bind(this);
-}
-*/
-
-//Draw.prototype = xtend(mapboxgl.Control.prototype, {
-
 export default class Draw extends mapboxgl.Control {
 
   constructor(options) {
     super();
 
-    if (!(this instanceof Draw)) return new Draw(options);
     mapboxgl.util.setOptions(this, options);
 
     // event listeners
@@ -368,5 +350,3 @@ export default class Draw extends mapboxgl.Control {
 
   }
 }
-
-//module.exports = Draw;
