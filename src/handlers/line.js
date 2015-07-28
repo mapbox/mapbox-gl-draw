@@ -63,9 +63,10 @@ Line.prototype = xtend(Handler, {
     this._done('line');
   },
 
-  moveVertex(init, curr, vertex) {
+  moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
+      /*
 
       var coords = vertex.geometry.coordinates;
       var diff = Infinity;
@@ -83,14 +84,23 @@ Line.prototype = xtend(Handler, {
       }
 
       this.initCoords = this.feature.getIn(['geometry', 'coordinates', this.vertexIdx]);
+      */
+      this.initCoords = this.feature.getIn(['geometry', 'coordinates', idx]);
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
     var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
 
-    this.feature = this.feature.setIn(['geometry', 'coordinates', this.vertexIdx], Immutable.fromJS(newPoint));
+    this.feature = this.feature.setIn(['geometry', 'coordinates', idx], Immutable.fromJS(newPoint));
 
+    this.store.update(this.feature.toJS());
+  },
+
+  editAddVertex(coords, idx) {
+    coords = this._map.unproject(coords);
+    var newCoords = this.feature.getIn(['geometry', 'coordinates']).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
+    this.feature = this.feature.setIn(['geometry', 'coordinates'], newCoords);
     this.store.update(this.feature.toJS());
   }
 
