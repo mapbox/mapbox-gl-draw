@@ -1,19 +1,19 @@
 'use strict';
 
-var R = require('ramda');
-var extend = require('xtend');
-var { DOM } = require('./util');
-var themeEdit = require('./theme/edit');
-var themeStyle = require('./theme/style');
+import R from 'ramda';
+import xtend from 'xtend';
+import { DOM } from './util';
+import themeEdit from './theme/edit';
+import themeStyle from './theme/style';
 
 // Data store
-var Store = require('./store');
+import Store from './store';
 
 // Control handlers
-var Line = require('./handlers/line');
-var Point = require('./handlers/point');
-var Square = require('./handlers/square');
-var Polygon = require('./handlers/polygon');
+import Line from './handlers/line';
+import Point from './handlers/point';
+import Square from './handlers/square';
+import Polygon from './handlers/polygon';
 
 function Draw(options) {
   if (!(this instanceof Draw)) return new Draw(options);
@@ -27,7 +27,7 @@ function Draw(options) {
   this.initiateDrag = this._initiateDrag.bind(this);
 }
 
-Draw.prototype = extend(mapboxgl.Control.prototype, {
+Draw.prototype = xtend(mapboxgl.Control.prototype, {
 
   options: {
     position: 'top-left',
