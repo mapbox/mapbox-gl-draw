@@ -355,6 +355,6 @@ export default class Draw extends mapboxgl.Control {
       this._map.on('click', this.onClick);
 
     });
-
   }
+
 }
