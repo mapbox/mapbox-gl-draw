@@ -46,30 +46,65 @@ EditStore.prototype = {
     var vertices = [];
 
     for (var i = 0; i < this.features.length; i++) {
-      var feat = this.features[i];
-
-      if (feat.geometry.type === 'Polygon') {
-        // would it be more efficient to dedupe here or
-        // just render the extra point?
-        vertices = vertices.concat(feat.geometry.coordinates[0]);
-      } else if (feat.geometry.type === 'LineString') {
-        vertices = vertices.concat(feat.geometry.coordinates);
+      var coords = this.features[i].geometry.coordinates;
+      var type = this.features[i].geometry.type;
+      if (type === 'LineString' || type === 'Polygon') {
+        coords = type === 'Polygon' ? coords[0] : coords;
+        for (var j = 0; j < coords.length - 1; j++) {
+          vertices.push({
+            type: 'Feature',
+            properties: {
+              meta: 'vertex',
+              index: j
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: coords[j]
+            }
+          });
+        }
       }
     }
 
-    return {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'MultiPoint',
-        coordinates: vertices
+    return vertices;
+  },
+
+  _addMidpoints() {
+    var midpoints = [];
+
+    for (var i = 0; i < this.features.length; i++) {
+      var feat = this.features[i];
+      var c = feat.geometry.coordinates;
+
+      if (feat.geometry.type === 'LineString' ||
+          feat.geometry.type === 'Polygon' && c[0][0][0] !== c[0][1][0]) {
+
+        c = feat.geometry.type === 'Polygon' ? c[0] : c;
+
+        for (var j = 0; j < c.length - 1; j++) {
+          var mid = [ (c[j][0] + c[j + 1][0]) / 2, (c[j][1] + c[j + 1][1]) / 2];
+          midpoints.push({
+            type: 'Feature',
+            properties: {
+              meta: 'midpoint',
+              index: j + 1
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: mid
+            }
+          });
+        }
+
       }
-    };
+    }
+
+    return midpoints;
   },
 
   render() {
     var geom = this.getAll();
-    geom.features = geom.features.concat([ this._addVertices() ]);
+    geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
     this._map.fire('edit.feature.update', {
       geojson: geom
     });

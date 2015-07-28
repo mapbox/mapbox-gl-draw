@@ -11,6 +11,7 @@ var { translatePoint } = require('../util');
  * @param {Object} map - Instance of MapboxGL Map
  * @param {Object} drawStore - The overall drawStore for this session
  * @param {Object} data - GeoJSON polygon feature
+ * @return {Square} this
  */
 function Square(map, drawStore, data) {
 
@@ -71,26 +72,10 @@ Square.prototype = xtend(Handler, {
     this._done('square');
   },
 
-  moveVertex(init, curr, vertex) {
+  moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-
-      var coords = vertex.geometry.coordinates;
-      var diff = Infinity;
-
-      var c = this.feature.getIn(['geometry', 'coordinates', 0]);
-
-      for (var i = 0; i < c.size; i++) {
-        var v = c.get(i);
-        //var d = Math.sqrt(Math.pow(v.get(0) - coords[0], 2) + Math.pow(v.get(1) - coords[1], 2));
-        var d = Math.abs(v.get(0) - coords[0]) + Math.abs(v.get(1) - coords[1]);
-        if (d < diff) {
-          this.vertexIdx = i;
-          diff = d;
-        }
-      }
-
-      this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, this.vertexIdx]);
+      this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, idx]);
     }
 
     var dx = curr.x - init.x;
@@ -98,12 +83,12 @@ Square.prototype = xtend(Handler, {
     var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
 
 
-    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, this.vertexIdx], Immutable.fromJS(newPoint));
+    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(newPoint));
 
     var x = newPoint[0];
     var y = newPoint[1];
 
-    switch (this.vertexIdx) {
+    switch (idx) {
       case 0:
         this.feature = this._setV(1, [ x, this._getV(1).get(1) ]);
         this.feature = this._setV(3, [ this._getV(3).get(0), y ]);

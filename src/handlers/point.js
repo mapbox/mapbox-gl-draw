@@ -9,6 +9,7 @@ var Handler = require('./handlers');
  * @param {Object} map - Instance of MpaboxGL Map
  * @param {Object} drawStore - The draw store for this session
  * @param {Object} data - GeoJSON polygon feature
+ * @return {Point} this
  */
 function Point(map, drawStore, data) {
 

@@ -129,9 +129,14 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
     }
   },
 
+  /**
+   * Handles clicks on the maps in a number of scenarios
+   * @param {Object} e - the object passed to the callback of map.on('click', ...)
+   * @private
+   */
   _onClick(e) {
 
-    this._map.featuresAt(e.point, { radius: 10 }, (err, features) => {
+    this._map.featuresAt(e.point, { radius: 10, includeGeometry: true }, (err, features) => {
       if (err) throw err;
 
       if (features.length) { // clicked on a feature
@@ -144,7 +149,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
             this._control.completeEdit();
           }
         }
-      } else { // clicked not on a feaure
+      } else { // clicked not on a feature
         if (!this._control && !this.editId) { // click outside features while not drawing or editing
           return;
         } else if (this._control && !this.editId) { // clicked outside features while drawing
@@ -154,7 +159,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
         }
       }
 
-      // if (clicked on a feature && ((!editing && !drawing) || editing))
+      // if (clicked on a feature && ((!editing this feature && !drawing))
       this._edit(features[0]);
     });
 
@@ -203,7 +208,13 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       e.stopPropagation();
 
       if (features.length > 1) {
-        this.vertex = R.find(feat => feat.geometry.type === 'Point')(features);
+        this.vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
+        this.newVertex = R.find(feat => feat.properties.meta === 'midpoint')(features);
+      }
+
+      if (this.newVertex) {
+        this._control.editAddVertex(coords, this.newVertex.properties.index);
+        this.vertex = this.newVertex;
       }
 
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
@@ -223,7 +234,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
     var curr = DOM.mousePos(e, this._map.getContainer());
 
     if (this.vertex) {
-      this._control.moveVertex(this.init, curr, this.vertex);
+      this._control.moveVertex(this.init, curr, this.vertex.properties.index);
     } else {
       this._control.translate(this.init, curr);
     }
