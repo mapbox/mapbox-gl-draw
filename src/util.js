@@ -103,9 +103,9 @@ module.exports.DOM.enableSelection = function () {
  * Translates geometries based on mouse location
  *
  * @param {Object} feature - A GeoJSON feature
- * @param {Array} init - Initial position of the mouse
- * @param {Array} curr - Current position of the mouse
- * @param {Object} map - Instance of MapboxGL Map
+ * @param {Array<Number>} init - Initial position of the mouse
+ * @param {Array<Number>} curr - Current position of the mouse
+ * @param {Map} map - Instance of mapboxhl.Map
  * @returns {Object} GeoJSON feature
  */
 module.exports.translate = function(feature, init, curr, map) {
@@ -132,11 +132,11 @@ module.exports.translate = function(feature, init, curr, map) {
 /**
  * Translate a point based on mouse location
  *
- * @param {Array} point - [ latitude, longitude ]
+ * @param {Array<Number>} point - [ latitude, longitude ]
  * @param {Number} dx - Difference between the initial x mouse position and current x position
  * @param {Number} dy - Difference between the initial y mouse position and current y position
- * @param {Object} map - Instance of MapboxGL Map
- * @returns {Array} new translated point
+ * @param {Map} map - Instance of mapboxgl.Map
+ * @returns {Array<Number>} new translated point
  */
 var translatePoint = function(point, dx, dy, map) {
   var c = map.project([ point[1], point[0] ]);

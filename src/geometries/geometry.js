@@ -1,20 +1,22 @@
 'use strict';
 
-var Immutable = require('immutable');
-var EditStore = require('../edit_store');
-var { translate } = require('../util');
+import Immutable from 'immutable';
+import EditStore from '../edit_store';
+import { translate } from '../util';
 
-module.exports = {
+/**
+ * Base Geometry class from which other geometries inherit
+ *
+ * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} drawStore - Overall store for session
+ * @param {String} type - Type of GeoJSON geometry
+ * @param {Object} [data] - GeoJSON feature
+ * @returns {Geometry} this
+ * @private
+ */
+export default class Geometry {
 
-  /**
-   * Initializes geometries
-   *
-   * @param {Object} map - Instancce of MapboxGL Map
-   * @param {Object} drawStore - Overall store for session
-   * @param {String} type - Type of GeoJSON geometry
-   * @param {Object} data - GeoJSON feature
-   */
-  initialize(map, drawStore, type, data) {
+  constructor(map, drawStore, type, data) {
     this._map = map;
     this.drawStore = drawStore;
     this.coordinates = Immutable.fromJS(data ? data.geometry.coordinates : []);
@@ -31,14 +33,14 @@ module.exports = {
     });
 
     this.store = new EditStore(this._map, [ this.feature.toJS() ]);
-  },
+  }
 
   /**
    * @return {Object} GeoJSON feature
    */
   get() {
     return this.feature.toJS();
-  },
+  }
 
   /**
    * Called after a draw is done
@@ -47,7 +49,7 @@ module.exports = {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
     this._map.fire('draw.end', { featureType: type });
-  },
+  }
 
   /**
    * Clear the edit drawings and render the changes to the main draw layer
@@ -56,7 +58,7 @@ module.exports = {
     this.store.clear();
     this.drawStore.set(this.feature.toJS());
     this._map.fire('edit.end');
-  },
+  }
 
   /**
    * Translate this polygon
@@ -72,5 +74,5 @@ module.exports = {
     this.feature = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
     this.store.update(this.feature.toJS());
   }
-};
 
+}

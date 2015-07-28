@@ -1,28 +1,29 @@
 'use strict';
 
-var Immutable = require('immutable');
-var hat = require('hat');
+import Immutable from 'immutable';
+import hat from 'hat';
 
 /**
  * A store for keeping track of versions of drawings
  *
  * @param {Array<Object>} data An array of GeoJSON object
+ * @returns {Store} this
  */
-function Store(data, map) {
-  this._map = map;
-  this.historyIndex = 0;
-  this.history = [ Immutable.List([]) ];
-  this.annotations = Immutable.List([]);
+export default class Store {
 
-  if (data.length) {
-    data.forEach(d => {
-      d.properties._drawid = hat();
-      this.history[0] = this.history[0].push(Immutable.fromJS(d));
-    });
+  constructor(data, map) {
+    this._map = map;
+    this.historyIndex = 0;
+    this.history = [ Immutable.List([]) ];
+    this.annotations = Immutable.List([]);
+
+    if (data.length) {
+      data.forEach(d => {
+        d.properties._drawid = hat();
+        this.history[0] = this.history[0].push(Immutable.fromJS(d));
+      });
+    }
   }
-}
-
-Store.prototype = {
 
   operation(fn, annotation) {
     // Wrap an operation: Given a function, apply it the history list.
@@ -34,31 +35,31 @@ Store.prototype = {
     this.annotations = this.annotations.push(annotation);
     this.historyIndex++;
     this.render();
-  },
+  }
 
   getAll() {
     return {
       type: 'FeatureCollection',
       features: this.history[this.historyIndex].toJS()
     };
-  },
+  }
 
   get(id) {
     return this.history[this.historyIndex]
       .find(feature => feature.get('properties').get('_drawid') === id).toJS();
-  },
+  }
 
   clear() {
     this.historyIndex = 0;
     this.history = [Immutable.fromJS([])];
-  },
+  }
 
   unset(id) {
     this.operation(
       data => data.filterNot(feature => feature.get('properties')._drawid === id),
       'Removed a feature'
     );
-  },
+  }
 
   /**
    * @param {Object} feature - GeoJSON feature
@@ -79,7 +80,7 @@ Store.prototype = {
         data.push(feature);
 
     }, 'Added a ' + feature.geometry.type);
-  },
+  }
 
   /**
    * @param {String} id - the _drawid of a feature
@@ -94,21 +95,20 @@ Store.prototype = {
 
     this.render();
     return feature.toJS();
-  },
+  }
 
   render() {
     this._map.fire('draw.feature.update', {
       geojson: this.getAll()
     });
-  },
+  }
 
   redo() {
     if (this.historyIndex < this.history.length) this.historyIndex++;
-  },
+  }
 
   undo() {
     if (this.historyIndex > 0) this.historyIndex--;
   }
-};
 
-module.exports = Store;
+}

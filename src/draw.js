@@ -1,45 +1,45 @@
 'use strict';
 
-var R = require('ramda');
-var extend = require('xtend');
-var { DOM } = require('./util');
-var themeEdit = require('./theme/edit');
-var themeStyle = require('./theme/style');
+import R from 'ramda';
+import { DOM } from './util';
+import themeEdit from './theme/edit';
+import themeStyle from './theme/style';
 
 // Data store
-var Store = require('./store');
+import Store from './store';
 
 // Control handlers
-var Line = require('./handlers/line');
-var Point = require('./handlers/point');
-var Square = require('./handlers/square');
-var Polygon = require('./handlers/polygon');
+import Line from './geometries/line';
+import Point from './geometries/point';
+import Square from './geometries/square';
+import Polygon from './geometries/polygon';
 
-function Draw(options) {
-  if (!(this instanceof Draw)) return new Draw(options);
-  mapboxgl.util.setOptions(this, options);
+export default class Draw extends mapboxgl.Control {
 
-  // event listeners
-  this.drag = this._drag.bind(this);
-  this.onClick = this._onClick.bind(this);
-  this.onKeyUp = this._onKeyUp.bind(this);
-  this.endDrag = this._endDrag.bind(this);
-  this.initiateDrag = this._initiateDrag.bind(this);
-}
+  constructor(options) {
+    super();
 
-Draw.prototype = extend(mapboxgl.Control.prototype, {
+    mapboxgl.util.setOptions(this, options);
 
-  options: {
-    position: 'top-left',
-    keybindings: true,
-    geoJSON: [],
-    controls: {
-      marker: true,
-      line: true,
-      shape: true,
-      square: true
-    }
-  },
+    // event listeners
+    this.drag = this._drag.bind(this);
+    this.onClick = this._onClick.bind(this);
+    this.onKeyUp = this._onKeyUp.bind(this);
+    this.endDrag = this._endDrag.bind(this);
+    this.initiateDrag = this._initiateDrag.bind(this);
+
+    this.options = {
+      position: 'top-left',
+      keybindings: true,
+      geoJSON: [],
+      controls: {
+        marker: true,
+        line: true,
+        shape: true,
+        square: true
+      }
+    };
+  }
 
   onAdd(map) {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
@@ -88,7 +88,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
     this._mapState();
     return container;
-  },
+  }
 
 
   _onKeyUp(e) {
@@ -116,18 +116,14 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
         }
         break;
       case 27: // (escape) exit draw/edit mode
-        if (this._control && !this.editId) { // draw mode
-          this._control.completeDraw();
-        } else if (this._control) {
-          this._control.completeEdit(); // edit mode
-        }
+        this._finish();
         break;
       case 68: // (d) delete the feature in edit mode
         if (this.editId) {
           this._destroy(this.editId);
         }
     }
-  },
+  }
 
   /**
    * Handles clicks on the maps in a number of scenarios
@@ -163,7 +159,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       this._edit(features[0]);
     });
 
-  },
+  }
 
   _edit(feature) {
     if (!feature.properties._drawid) return; // for when null geometries are returned
@@ -189,14 +185,22 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       title: `delete ${featureType}`,
       fn: this._destroy.bind(this, this.editId)
     });
-  },
+  }
+
+  _finish() {
+    if (this._control && this.editId) { // edit mode
+      this._control.completeEdit();
+    } else if (this._control) {
+      this._control.completeDraw(); // draw mode
+    }
+  }
 
   _exitEdit() {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
     this._control = false;
-  },
+  }
 
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
@@ -220,7 +224,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
     });
-  },
+  }
 
   _drag(e) {
     e.stopPropagation();
@@ -238,7 +242,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
     } else {
       this._control.translate(this.init, curr);
     }
-  },
+  }
 
   _endDrag() {
     this._map.getContainer().removeEventListener('mousemove', this.drag, true);
@@ -252,33 +256,37 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       this.vertex = false;
       this._control.movingVertex = false;
     }
-  },
+  }
 
   _drawPolygon() {
+    this._finish();
     this._control = new Polygon(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawLine() {
+    this._finish();
     this._control = new Line(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawSquare() {
+    this._finish();
     this._control = new Square(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _drawPoint() {
+    this._finish();
     this._control = new Point(this._map, this.options.geoJSON);
     this._control.startDraw();
-  },
+  }
 
   _destroy(id) {
     this._control.store.clear(); // I don't like this
     this.options.geoJSON.unset(id);
     this._exitEdit();
-  },
+  }
 
   _createButton(opts) {
     var a = DOM.create('button', opts.className, this._container, {
@@ -304,7 +312,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
     }, true);
 
     return a;
-  },
+  }
 
   _mapState() {
     var controlClass = this._controlClass;
@@ -325,7 +333,7 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
       });
 
       this._map.addSource('edit', editLayer);
-      themeEdit.forEach((style) => {
+      themeEdit.forEach(style => {
         this._map.addLayer(style);
       });
 
@@ -336,19 +344,17 @@ Draw.prototype = extend(mapboxgl.Control.prototype, {
 
       this._map.on('edit.end', this._exitEdit.bind(this));
 
-      this._map.on('edit.feature.update', (e) => {
+      this._map.on('edit.feature.update', e => {
         editLayer.setData(e.geojson);
       });
 
-      this._map.on('draw.feature.update', (e) => {
+      this._map.on('draw.feature.update', e => {
         drawLayer.setData(e.geojson);
       });
 
       this._map.on('click', this.onClick);
 
     });
-
   }
-});
 
-module.exports = Draw;
+}
