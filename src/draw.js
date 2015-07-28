@@ -116,11 +116,7 @@ export default class Draw extends mapboxgl.Control {
         }
         break;
       case 27: // (escape) exit draw/edit mode
-        if (this._control && !this.editId) { // draw mode
-          this._control.completeDraw();
-        } else if (this._control) {
-          this._control.completeEdit(); // edit mode
-        }
+        this._finish();
         break;
       case 68: // (d) delete the feature in edit mode
         if (this.editId) {
@@ -191,6 +187,14 @@ export default class Draw extends mapboxgl.Control {
     });
   }
 
+  _finish() {
+    if (this._control && this.editId) { // edit mode
+      this._control.completeEdit();
+    } else if (this._control) {
+      this._control.completeDraw(); // draw mode
+    }
+  }
+
   _exitEdit() {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
@@ -255,21 +259,25 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawPolygon() {
+    this._finish();
     this._control = new Polygon(this._map, this.options.geoJSON);
     this._control.startDraw();
   }
 
   _drawLine() {
+    this._finish();
     this._control = new Line(this._map, this.options.geoJSON);
     this._control.startDraw();
   }
 
   _drawSquare() {
+    this._finish();
     this._control = new Square(this._map, this.options.geoJSON);
     this._control.startDraw();
   }
 
   _drawPoint() {
+    this._finish();
     this._control = new Point(this._map, this.options.geoJSON);
     this._control.startDraw();
   }
@@ -325,7 +333,7 @@ export default class Draw extends mapboxgl.Control {
       });
 
       this._map.addSource('edit', editLayer);
-      themeEdit.forEach((style) => {
+      themeEdit.forEach(style => {
         this._map.addLayer(style);
       });
 
@@ -336,11 +344,11 @@ export default class Draw extends mapboxgl.Control {
 
       this._map.on('edit.end', this._exitEdit.bind(this));
 
-      this._map.on('edit.feature.update', (e) => {
+      this._map.on('edit.feature.update', e => {
         editLayer.setData(e.geojson);
       });
 
-      this._map.on('draw.feature.update', (e) => {
+      this._map.on('draw.feature.update', e => {
         drawLayer.setData(e.geojson);
       });
 
