@@ -1,7 +1,6 @@
 'use strict';
 
-var xtend = require('xtend');
-var Handler = require('./handlers');
+import Geometry from './handlers';
 
 /**
  * Point geometry object
@@ -11,21 +10,18 @@ var Handler = require('./handlers');
  * @param {Object} data - GeoJSON polygon feature
  * @return {Point} this
  */
-function Point(map, drawStore, data) {
+export default class Point extends Geometry {
 
-  this.initialize(map, drawStore, 'Point', data);
-
-  // event handler
-  this.completeDraw = this._completeDraw.bind(this);
-}
-
-Point.prototype = xtend(Handler, {
+  constructor(map, drawStore, data) {
+    super(map, drawStore, 'Point', data);
+    this.completeDraw = this._completeDraw.bind(this);
+  }
 
   startDraw() {
     this._map.fire('draw.start', { featureType: 'point' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.completeDraw);
-  },
+  }
 
   _completeDraw(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
@@ -34,6 +30,4 @@ Point.prototype = xtend(Handler, {
     this._done('point');
   }
 
-});
-
-module.exports = Point;
+}

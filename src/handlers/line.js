@@ -1,9 +1,8 @@
 'use strict';
 
-var xtend = require('xtend');
-var Immutable = require('immutable');
-var Handler = require('./handlers');
-var { translatePoint } = require('../util');
+import Geometry from './handlers';
+import Immutable from 'immutable';
+import { translatePoint } from '../util';
 
 /**
  * @param {Object} map - Instance of MapboxGL Map
@@ -11,25 +10,25 @@ var { translatePoint } = require('../util');
  * @param {Object} data - GeoJSON line string feature
  * @return {Line} this
  */
-function Line(map, drawStore, data) {
+export default class Line extends Geometry {
 
-  this.initialize(map, drawStore, 'LineString', data);
+  constructor(map, drawStore, data) {
 
-  // event listeners
-  this.addPoint = this._addPoint.bind(this);
-  this.onMouseMove = this._onMouseMove.bind(this);
-  this.completeDraw = this._completeDraw.bind(this);
+    super(map, drawStore, 'LineString', data);
 
-}
+    // event listeners
+    this.addPoint = this._addPoint.bind(this);
+    this.onMouseMove = this._onMouseMove.bind(this);
+    this.completeDraw = this._completeDraw.bind(this);
 
-Line.prototype = xtend(Handler, {
+  }
 
   startDraw() {
     this._map.fire('draw.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addPoint);
     this._map.on('dblclick', this.completeDraw);
-  },
+  }
 
   _addPoint(e) {
     var p = [ e.latLng.lng, e.latLng.lat ];
@@ -42,14 +41,14 @@ Line.prototype = xtend(Handler, {
     this.coordinates = this.coordinates.push(p);
     this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
     this.store.update(this.feature.toJS());
-  },
+  }
 
   _onMouseMove(e) {
     var coords = this._map.unproject([e.x, e.y]);
     var c = this.coordinates;
     c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
     this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());
-  },
+  }
 
   _completeDraw() {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
@@ -61,7 +60,7 @@ Line.prototype = xtend(Handler, {
     this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
 
     this._done('line');
-  },
+  }
 
   /**
    * Update the position of a vertex in the polygon
@@ -83,7 +82,7 @@ Line.prototype = xtend(Handler, {
     this.feature = this.feature.setIn(['geometry', 'coordinates', idx], Immutable.fromJS(newPoint));
 
     this.store.update(this.feature.toJS());
-  },
+  }
 
   /**
    * Add a new vertex to a polygon in edit mode
@@ -98,6 +97,4 @@ Line.prototype = xtend(Handler, {
     this.store.update(this.feature.toJS());
   }
 
-});
-
-module.exports = Line;
+}

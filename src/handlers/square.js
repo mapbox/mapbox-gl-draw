@@ -1,9 +1,8 @@
 'use strict';
 
-var Immutable = require('immutable');
-var xtend = require('xtend');
-var Handler = require('./handlers');
-var { translatePoint } = require('../util');
+import Geometry from './handlers';
+import Immutable from 'immutable';
+import { translatePoint } from '../util';
 
 /**
  * Square geometry object
@@ -13,24 +12,22 @@ var { translatePoint } = require('../util');
  * @param {Object} data - GeoJSON polygon feature
  * @return {Square} this
  */
-function Square(map, drawStore, data) {
+export default class Square extends Geometry {
 
-  this.initialize(map, drawStore, 'Polygon', data);
+  constructor(map, drawStore, data) {
+    super(map, drawStore, 'Polygon', data);
 
-  // event handlers
-  this.onMouseDown = this._onMouseDown.bind(this);
-  this.onMouseMove = this._onMouseMove.bind(this);
-  this.completeDraw = this._completeDraw.bind(this);
-
-}
-
-Square.prototype = xtend(Handler, {
+    // event handlers
+    this.onMouseDown = this._onMouseDown.bind(this);
+    this.onMouseMove = this._onMouseMove.bind(this);
+    this.completeDraw = this._completeDraw.bind(this);
+  }
 
   startDraw() {
     this._map.fire('draw.start', { featureType: 'square' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
-  },
+  }
 
   _onMouseDown(e) {
     this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
@@ -43,7 +40,7 @@ Square.prototype = xtend(Handler, {
       arr.push([ c.lng, c.lat]);
     }
     this.coordinates = this.coordinates.push(Immutable.fromJS(arr));
-  },
+  }
 
   _onMouseMove(e) {
     e.stopPropagation();
@@ -62,7 +59,7 @@ Square.prototype = xtend(Handler, {
 
     this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
     this.store.update(this.feature.toJS());
-  },
+  }
 
   _completeDraw() {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
@@ -70,7 +67,7 @@ Square.prototype = xtend(Handler, {
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 
     this._done('square');
-  },
+  }
 
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
@@ -111,7 +108,7 @@ Square.prototype = xtend(Handler, {
     this.feature = this._setV(4, this._getV(0).toJS());
 
     this.store.update(this.feature.toJS());
-  },
+  }
 
   /**
    * Given and index and a val, set that vertex in `this.feature`
@@ -123,7 +120,7 @@ Square.prototype = xtend(Handler, {
    */
   _setV(idx, val) {
     return this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(val));
-  },
+  }
 
   /**
    * Given an index, returns the vertex in the features list of coordinates
@@ -136,6 +133,6 @@ Square.prototype = xtend(Handler, {
     return this.feature.getIn(['geometry', 'coordinates', 0, idx]);
   }
 
-});
+}
 
-module.exports = Square;
+//module.exports = Square;
