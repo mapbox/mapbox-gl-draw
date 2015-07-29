@@ -50,7 +50,8 @@ export default class EditStore {
       var type = this.features[i].geometry.type;
       if (type === 'LineString' || type === 'Polygon') {
         coords = type === 'Polygon' ? coords[0] : coords;
-        for (var j = 0; j < coords.length - 1; j++) {
+        var l = type === 'LineString' ? coords.length : coords.length - 1;
+        for (var j = 0; j < l; j++) {
           vertices.push({
             type: 'Feature',
             properties: {
