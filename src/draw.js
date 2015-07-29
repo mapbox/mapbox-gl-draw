@@ -283,6 +283,9 @@ export default class Draw extends mapboxgl.Control {
   }
 
 
+  /**
+   * @private
+   */
   _destroy(id) {
     this._control.store.clear();
     this.options.geoJSON.unset(id);
@@ -291,12 +294,45 @@ export default class Draw extends mapboxgl.Control {
 
 
   // API Methods
+  /**
+   * add a geometry
+   *
+   * @param {Object} feature - GeoJSON feature
+   */
   addGeometry(feature) {
     this.options.geoJSON.set(feature);
   }
 
+  /**
+   * remove a geometry by its draw id
+   *
+   * @param {String} id - the drawid of the geometry
+   */
+  removeGeometry(id) {
+    this.options.geoJSON.unset(id);
+  }
+
+  /**
+   * get all draw geometries
+   *
+   * @returns {Object} a GeoJSON feature collection
+   */
   getAll() {
     return this.options.geoJSON.getAll();
+  }
+
+  /**
+   * remove all geometries
+   */
+  clear() {
+    this.options.geoJSON.clear();
+  }
+
+  /**
+   * remove all geometries and clears the history
+   */
+  clearAll() {
+    this.options.geoJSON.clearAll();
   }
 
   _createButton(opts) {

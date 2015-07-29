@@ -50,8 +50,13 @@ export default class Store {
   }
 
   clear() {
+    this.operation(() => Immutable.List([]), 'remove all geometries');
+  }
+
+  clearAll() {
     this.historyIndex = 0;
     this.history = [Immutable.fromJS([])];
+    this.annotations = Immutable.List([]);
   }
 
   unset(id) {
