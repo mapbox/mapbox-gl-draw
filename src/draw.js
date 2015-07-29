@@ -282,8 +282,12 @@ export default class Draw extends mapboxgl.Control {
     this._control.startDraw();
   }
 
+  addGeometry(feature) {
+    console.log(feature);
+  }
+
   _destroy(id) {
-    this._control.store.clear(); // I don't like this
+    this._control.store.clear();
     this.options.geoJSON.unset(id);
     this._exitEdit();
   }

@@ -29,7 +29,9 @@
     position: 'top-left'
   }));
 
-  map.addControl(mapboxgl.Draw());
+  //map.addControl(mapboxgl.Draw());
+  var Draw = mapboxgl.Draw();
+  map.addControl(Draw);
 
   map.on('draw.start', function(e) {
     // console.log(e.featureType);
@@ -38,6 +40,10 @@
   map.on('draw.created', function(e) {
     // console.log(e.featureType);
     // console.log(e.feature);
+  });
+
+  Draw.addGeometry({
+    type: 'Feature'
   });
 </script>
 </body>
