@@ -21,13 +21,6 @@ export default class Draw extends mapboxgl.Control {
 
     mapboxgl.util.setOptions(this, options);
 
-    // event listeners
-    this.drag = this._drag.bind(this);
-    this.onClick = this._onClick.bind(this);
-    this.onKeyUp = this._onKeyUp.bind(this);
-    this.endDrag = this._endDrag.bind(this);
-    this.initiateDrag = this._initiateDrag.bind(this);
-
     this.options = {
       position: 'top-left',
       keybindings: true,
@@ -39,6 +32,13 @@ export default class Draw extends mapboxgl.Control {
         square: true
       }
     };
+
+    // event listeners
+    this.drag = this._drag.bind(this);
+    this.onClick = this._onClick.bind(this);
+    this.onKeyUp = this._onKeyUp.bind(this);
+    this.endDrag = this._endDrag.bind(this);
+    this.initiateDrag = this._initiateDrag.bind(this);
   }
 
   onAdd(map) {
@@ -89,7 +89,6 @@ export default class Draw extends mapboxgl.Control {
     this._mapState();
     return container;
   }
-
 
   _onKeyUp(e) {
     var event = document.createEvent('HTMLEvents');
@@ -283,9 +282,60 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _destroy(id) {
-    this._control.store.clear(); // I don't like this
+    this._control.store.clear();
     this.options.geoJSON.unset(id);
     this._exitEdit();
+  }
+
+  // API Methods
+  /**
+   * add a geometry
+   *
+   * @param {Object} feature - GeoJSON feature
+   */
+  addGeometry(feature) {
+    this.options.geoJSON.set(feature);
+  }
+
+  /**
+   * remove a geometry by its draw id
+   *
+   * @param {String} id - the drawid of the geometry
+   */
+  removeGeometry(id) {
+    this.options.geoJSON.unset(id);
+  }
+
+  /**
+   * get a geometry by its draw id
+   *
+   * @param {String} id - the draw id of the geometry
+   */
+  get(id) {
+    return this.options.geoJSON.get(id);
+  }
+
+  /**
+   * get all draw geometries
+   *
+   * @returns {Object} a GeoJSON feature collection
+   */
+  getAll() {
+    return this.options.geoJSON.getAll();
+  }
+
+  /**
+   * remove all geometries
+   */
+  clear() {
+    this.options.geoJSON.clear();
+  }
+
+  /**
+   * remove all geometries and clears the history
+   */
+  clearAll() {
+    this.options.geoJSON.clearAll();
   }
 
   _createButton(opts) {

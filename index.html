@@ -29,8 +29,10 @@
     position: 'top-left'
   }));
 
-  map.addControl(mapboxgl.Draw());
+  var Draw = mapboxgl.Draw();
+  map.addControl(Draw);
 
+  /*
   map.on('draw.start', function(e) {
     // console.log(e.featureType);
   });
@@ -39,6 +41,21 @@
     // console.log(e.featureType);
     // console.log(e.feature);
   });
+
+  Draw.addGeometry({
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
+  });
+  var geoms = Draw.getAll();
+  var id = geoms.features[0].properties._drawid;
+  var g = Draw.get(id);
+  console.log(JSON.stringify(g, null, 2));
+  Draw.clear();
+  */
 </script>
 </body>
 </html>
