@@ -21,13 +21,6 @@ export default class Draw extends mapboxgl.Control {
 
     mapboxgl.util.setOptions(this, options);
 
-    // event listeners
-    this.drag = this._drag.bind(this);
-    this.onClick = this._onClick.bind(this);
-    this.onKeyUp = this._onKeyUp.bind(this);
-    this.endDrag = this._endDrag.bind(this);
-    this.initiateDrag = this._initiateDrag.bind(this);
-
     this.options = {
       position: 'top-left',
       keybindings: true,
@@ -39,6 +32,13 @@ export default class Draw extends mapboxgl.Control {
         square: true
       }
     };
+
+    // event listeners
+    this.drag = this._drag.bind(this);
+    this.onClick = this._onClick.bind(this);
+    this.onKeyUp = this._onKeyUp.bind(this);
+    this.endDrag = this._endDrag.bind(this);
+    this.initiateDrag = this._initiateDrag.bind(this);
   }
 
   onAdd(map) {
@@ -89,7 +89,6 @@ export default class Draw extends mapboxgl.Control {
     this._mapState();
     return container;
   }
-
 
   _onKeyUp(e) {
     var event = document.createEvent('HTMLEvents');
@@ -282,16 +281,11 @@ export default class Draw extends mapboxgl.Control {
     this._control.startDraw();
   }
 
-
-  /**
-   * @private
-   */
   _destroy(id) {
     this._control.store.clear();
     this.options.geoJSON.unset(id);
     this._exitEdit();
   }
-
 
   // API Methods
   /**
@@ -310,6 +304,15 @@ export default class Draw extends mapboxgl.Control {
    */
   removeGeometry(id) {
     this.options.geoJSON.unset(id);
+  }
+
+  /**
+   * get a geometry by its draw id
+   *
+   * @param {String} id - the draw id of the geometry
+   */
+  get(id) {
+    return this.options.geoJSON.get(id);
   }
 
   /**

@@ -90,6 +90,7 @@ export default class Store {
   /**
    * @param {String} id - the _drawid of a feature
    * @return {Object} - GeoJSON feature
+   * @private
    */
   edit(id) {
     this.history.push(this.history[this.historyIndex++]);
