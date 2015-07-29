@@ -5,7 +5,7 @@ Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapb
 
 [![Circle CI](https://circleci.com/gh/mapbox/gl-draw/tree/dev-pages.svg?style=svg&circle-token=9a1c59bacd6403294df7c5191a33adc7615ce1e7)](https://circleci.com/gh/mapbox/gl-draw/tree/dev-pages)
 
-### Installing 
+### Installing
 
     npm install
 
@@ -16,7 +16,7 @@ Include [mapboxgl.draw.js]() after `mapbox-gl.js`
 <script src="mapboxgl.draw.js"></script>
 ```
 
-You'll also want to include [mapboxgl.draw.css]()
+You'll also want to include [mapboxgl.draw.css](https://github.com/mapbox/gl-draw/blob/dev-pages/dist/mapboxgl.draw.css)
 
 ```html
 <link href="mapboxgl.draw.css" rel="stylesheet" />
@@ -34,7 +34,7 @@ var map = new mapboxgl.Map({
   zoom: 9 // starting zoom
 });
 
-map.addControl(new mapboxgl.Draw({
+var Draw = mapboxgl.Draw({
   position: 'top-left',
   keybindings: true,
   geoJSON: [],
@@ -44,7 +44,9 @@ map.addControl(new mapboxgl.Draw({
     shape, true,
     square: true
   }
-}));
+});
+
+map.addControl(Draw)
 
 map.on('draw.start', function(e) {
   console.log(e.featureType);
@@ -62,9 +64,31 @@ map.on('draw.created', function(e) {
   console.log(e.feature);
   // => feature
 });
+
+var input = {
+  type: 'Feature',
+  properties: {},
+  geometry: {
+    type: 'Point',
+    coordinates: [0, 0]
+  }
+};
+
+Draw.addGeometry(input);
+
+var geoms = Draw.getAll();
+
+var id = geoms.features[0].properties._drawid;
+
+var g = Draw.get(id);
+
+console.log(g);
+// => input
+
+Draw.clear();
 ```
 
-### Developing 
+### Developing
 
 Install dependencies, build the source files and crank up a server via:
 
