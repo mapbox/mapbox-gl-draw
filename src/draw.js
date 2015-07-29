@@ -283,7 +283,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   addGeometry(feature) {
-    console.log(feature);
+    this.options.geoJSON.set(feature);
   }
 
   _destroy(id) {

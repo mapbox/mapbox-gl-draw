@@ -29,7 +29,6 @@
     position: 'top-left'
   }));
 
-  //map.addControl(mapboxgl.Draw());
   var Draw = mapboxgl.Draw();
   map.addControl(Draw);
 
@@ -43,7 +42,12 @@
   });
 
   Draw.addGeometry({
-    type: 'Feature'
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
   });
 </script>
 </body>
