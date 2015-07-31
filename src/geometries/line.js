@@ -2,7 +2,7 @@
 
 import Geometry from './geometry';
 import Immutable from 'immutable';
-import { translatePoint } from '../util';
+import { translatePoint, DOM } from '../util';
 
 /**
  * Line geometry class
@@ -46,7 +46,8 @@ export default class Line extends Geometry {
   }
 
   _onMouseMove(e) {
-    var coords = this._map.unproject([e.x, e.y]);
+    var pos = DOM.mousePos(e, this._map._container);
+    var coords = this._map.unproject([pos.x, pos.y]);
     var c = this.coordinates;
     c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
     this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());

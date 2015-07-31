@@ -2,7 +2,7 @@
 
 import Immutable from 'immutable';
 import Geometry from './geometry';
-import { translatePoint } from '../util';
+import { translatePoint, DOM } from '../util';
 
 /**
  * Polygon geometry class
@@ -49,7 +49,8 @@ export default class Polygon extends Geometry {
   }
 
   _onMouseMove(e) {
-    var coords = this._map.unproject([e.x, e.y]);
+    var pos = DOM.mousePos(e, this._map._container);
+    var coords = this._map.unproject([pos.x, pos.y]);
     var c = this.coordinates.get(0).splice(-1, 0, [ coords.lng, coords.lat ]);
     var temp = this.coordinates.set(0, c);
     this.store.update(this.feature.setIn(['geometry', 'coordinates'], temp).toJS());

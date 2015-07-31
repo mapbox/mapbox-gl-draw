@@ -2,7 +2,7 @@
 
 import Geometry from './geometry';
 import Immutable from 'immutable';
-import { translatePoint } from '../util';
+import { translatePoint, DOM } from '../util';
 
 /**
  * Square geometry class
@@ -51,7 +51,8 @@ export default class Square extends Geometry {
       this._map.getContainer().addEventListener('mouseup', this.completeDraw, true);
     }
 
-    var c = this._map.unproject([e.x, e.y]);
+    var pos = DOM.mousePos(e, this._map._container);
+    var c = this._map.unproject([pos.x, pos.y]);
     var orig = this.coordinates.get(0).get(0);
     this.coordinates = this.coordinates.setIn([0, 1], [ orig.get(0), c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
