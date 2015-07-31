@@ -15,28 +15,12 @@ module.exports = [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-points',
-    'type': 'symbol',
-    'source': 'edit',
-    'filter': ['all', ['==', '$type', 'Point']],
-    'layout': {
-      'icon-image': 'circle-stroked-12',
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
-    'paint': {
-      'icon-color': '#f1f075',
-      'icon-size': 2
-    },
-    'interactive': true
-  }, {
     'id': 'gl-edit-polygon',
     'type': 'fill',
     'source': 'edit',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
       'fill-color': '#000000',
-      'fill-outline-color': '#000000',
       'fill-opacity': 0.25
     },
     'interactive': true
@@ -53,6 +37,42 @@ module.exports = [
       'line-color': '#000000',
       'line-dasharray': [2, 2],
       'line-width': 3
+    },
+    'interactive': true
+  }, {
+    'id': 'gl-edit-points',
+    'type': 'symbol',
+    'source': 'edit',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['!=', 'meta', 'midpoint']],
+    'layout': {
+      'icon-image': 'circle.sdf',
+      'text-anchor': 'top',
+      'icon-allow-overlap': true
+    },
+    'paint': {
+      'icon-color': '#ffffff',
+      'icon-halo-color': '#000000',
+      'icon-halo-width': 2,
+      'icon-size': 1.1
+    },
+    'interactive': true
+  }, {
+    'id': 'gl-edit-points-mid',
+    'type': 'symbol',
+    'source': 'edit',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['==', 'meta', 'midpoint']],
+    'layout': {
+      'icon-image': 'circle.sdf',
+      'text-anchor': 'top',
+      'icon-allow-overlap': true
+    },
+    'paint': {
+      'icon-color': '#000000',
+      'icon-size': 1
     },
     'interactive': true
   }

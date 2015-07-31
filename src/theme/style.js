@@ -44,14 +44,13 @@ module.exports = [
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Point']],
     'layout': {
-      'icon-image': 'marker-12',
+      'icon-image': 'circle.sdf',
       'text-anchor': 'top',
-      'icon-offset': [-0.5,-5],
       'icon-allow-overlap': true
     },
     'paint': {
       'icon-color': '#ff00ff',
-      'icon-size': 2
+      'icon-size': 1
     },
     'interactive': true
   }
