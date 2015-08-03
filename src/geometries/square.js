@@ -33,7 +33,8 @@ export default class Square extends Geometry {
     this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
     this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
-    var c = this._map.unproject([e.x, e.y]);
+    var pos = DOM.mousePos(e, this._map._container);
+    var c = this._map.unproject([pos.x, pos.y]);
     var arr = [];
     var i = -1;
     while (++i < 5) {
