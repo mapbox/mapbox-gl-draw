@@ -14,7 +14,8 @@ map.addControl(new mapboxgl.Navigation({
   position: 'top-left'
 }));
 
-map.addControl(mapboxgl.Draw());
+var Draw = mapboxgl.Draw();
+map.addControl(Draw);
 
 class App extends React.Component { // eslint-disable-line
 

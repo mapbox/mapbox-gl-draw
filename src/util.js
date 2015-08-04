@@ -1,5 +1,7 @@
 'use strict';
 
+var mapboxgl = require('mapbox-gl');
+
 module.exports.DOM = {};
 
 /**

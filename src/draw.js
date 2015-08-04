@@ -2,6 +2,7 @@
 
 import R from 'ramda';
 import { DOM } from './util';
+import mapboxgl from 'mapbox-gl';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 

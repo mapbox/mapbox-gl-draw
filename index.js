@@ -13,13 +13,32 @@
  * @param {Boolean} [options.controls.square=true]
  * @return {Draw} `this`
  * @example
+ * // in the browser
  * var map = new mapboxgl.Map({
  *   container: 'map',
  *   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
  * });
+ * var Draw = mapboxgl.Draw();
+ * map.addControl(Draw);
  *
- * // Initialize the drawing component
- * map.addControl(mapboxgl.Draw());
+ * // or using using node and browserify
+ * var mapboxgl = require('mapbox-gl');
+ * var GLDraw = require('gl-draw');
+ * var map = new mapboxgl.Map({
+ *   container: 'map',
+ *   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
+ * });
+ * var Draw = GLDraw();
+ * mapboxgl.addControl(Draw);
  */
 import Draw from './src/draw';
-mapboxgl.Draw = function(options) { return new Draw(options); };
+
+function exportFn(options) {
+  return new Draw(options);
+}
+
+if (window.mapboxgl) {
+  mapboxgl.Draw = exportFn;
+} else {
+  module.exports = exportFn;
+}
