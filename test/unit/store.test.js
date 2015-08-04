@@ -1,5 +1,22 @@
 var Store = require('../../src/store');
 var test = require('tape');
+var mapboxgl = require('mapbox-gl');
+var GLDraw = require('../../');
+
+mapboxgl.accessToken = 'pk.eyJ1Ijoia2VsdmluYWJyb2t3YSIsImEiOiJkcUF1TWlVIn0.YzBtz0O019DJGk3IpFi72g';
+
+function createMap() {
+  var div = document.createElement('div');
+  div.setAttribute('id', 'map');
+  document.body.appendChild(div);
+
+  var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+  });
+
+  return map;
+}
 
 test('Store has correct properties', t => {
   t.ok(Store, 'store exists');
@@ -8,6 +25,9 @@ test('Store has correct properties', t => {
 });
 
 test('Store constructor', t => {
+  var map = createMap();
+  var Draw = GLDraw();
+  map.addControl(Draw);
   /*
   var store = new Store([]);
   t.equals(store.historyIndex, 0, 'historyIndex starts at zero');
