@@ -37,7 +37,7 @@ function exportFn(options) {
   return new Draw(options);
 }
 
-if (mapboxgl) {
+if (window.mapboxgl) {
   mapboxgl.Draw = exportFn;
 } else if (typeof module !== 'undefined') {
   module.exports = exportFn;
