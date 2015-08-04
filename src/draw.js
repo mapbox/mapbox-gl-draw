@@ -20,8 +20,6 @@ export default class Draw extends mapboxgl.Control {
   constructor(options) {
     super();
 
-    mapboxgl.util.setOptions(this, options);
-
     this.options = {
       position: 'top-left',
       keybindings: true,
@@ -33,6 +31,8 @@ export default class Draw extends mapboxgl.Control {
         square: true
       }
     };
+
+    mapboxgl.util.setOptions(this, options);
 
     // event listeners
     this.drag = this._drag.bind(this);
