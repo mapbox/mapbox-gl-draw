@@ -1,7 +1,7 @@
 'use strict';
 
 /** A drawing component for mapboxgl
- * @class mapbox.Draw
+ * @class mapboxgl.Draw
  *
  * @param {Object} options
  * @param {String} [options.position=top-left] A string indicating the control's position on the map. Options are `topright`, `topleft`, `bottomright`, `bottomleft`
@@ -37,8 +37,8 @@ function exportFn(options) {
   return new Draw(options);
 }
 
-if (window.mapboxgl) {
+if (mapboxgl) {
   mapboxgl.Draw = exportFn;
-} else {
+} else if (typeof module !== 'undefined') {
   module.exports = exportFn;
 }

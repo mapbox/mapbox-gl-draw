@@ -4,7 +4,7 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset="UTF-8">
   <title>Example gl-draw app</title>
-  <script src="https://fb.me/react-0.13.3.min.js"></script>
+  <script src='https://fb.me/react-0.13.3.min.js'></script>
   <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
   <link href='../../dist/mapboxgl.draw.css' rel='stylesheet' />
   <style>
@@ -18,6 +18,25 @@
   <div id='geojson'></div>
   <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
   <script src='../../dist/mapboxgl.draw.js'></script>
+  <script>
+    mapboxgl.accessToken = localStorage.accessToken;
+
+    // initialize map
+    var map = new mapboxgl.Map({
+      container: 'map',
+      zoom: 12,
+      center: [43.6579, -79.3712],
+      style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+    });
+
+    // add gl-draw controls
+    map.addControl(new mapboxgl.Navigation({
+      position: 'top-left'
+    }));
+
+    var Draw = mapboxgl.Draw();
+    map.addControl(Draw);
+  </script>
   <script src='bundle.js'></script>
 </body>
 </html>
