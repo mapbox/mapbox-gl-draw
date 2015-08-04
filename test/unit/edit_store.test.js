@@ -1,52 +1,78 @@
 var EditStore = require('../../src/edit_store');
 var test = require('tape');
+var mapboxgl = require('mapbox-gl');
+var GLDraw = require('../../');
+//var Immutable = require('immutable');
+
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
+
+function createMap() {
+  var div = document.createElement('div');
+  div.setAttribute('id', 'map');
+  document.body.appendChild(div);
+
+  var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+  });
+
+  return map;
+}
+
+var feature = {
+  type: 'Feature',
+  properties: {},
+  geometry: {
+    type: 'Point',
+    coordinates: [0, 0]
+  }
+};
 
 test('Edit store has correct properties', t => {
   t.ok(EditStore, 'edit store exists');
-  t.ok(typeof EditStore === 'function', 'edit store is a function');
+  t.equals(typeof EditStore, 'function', 'edit store is a function');
   t.end();
 });
 
 test('Edit store constructor', t => {
+  var map = createMap();
+  var Draw = GLDraw();
+  map.addControl(Draw);
+
+  var editStore = new EditStore(map, [ feature ]);
+
+  // are they even there?
+  t.equals(typeof editStore.getAll, 'function', 'get exists');
+  t.equals(typeof editStore.getById, 'function', 'getById exists');
+  t.equals(typeof editStore.clear, 'function', 'clear exists');
+  t.equals(typeof editStore.update, 'function', 'update exists');
+  t.equals(typeof editStore._addVertices, 'function', '_addVertices exists');
+  t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');
+  t.equals(typeof editStore.render, 'function', 'render exists');
+
+  t.deepEquals(
+    editStore.getAll().features[0].geometry,
+    feature.geometry,
+    'the geometry in the store is the same as the one with which we initiated the store'
+  );
+
+  // getAll
+  t.equals(editStore.getAll().type, 'FeatureCollection', 'getAll() returns a feature collection');
+
+  // getById
+  var f = editStore.getAll().features[0];
+  t.equals(
+    editStore.getById(f.properties._drawid).geometry,
+    feature.geometry,
+    'getById returns the same geometry entered'
+  );
+
+  //update
+  var newFeature = JSON.parse(JSON.stringify(f));
+  newFeature.geometry.coordinates = [1, 1];
+  editStore.update(newFeature);
+  var id = newFeature.properties.id;
+  t.deepEquals(editStore.getById(id).geometry.coordinates, [1, 1], 'updating geometry works');
+
   t.end();
-  /*
-  var map = new mapboxgl.Map({};
-  var editStore = new EditStore(map, []);
-
-  t.ok(typeof editStore.getAll === 'function', 'get exists');
-  t.ok(typeof editStore.getById === 'function', 'getById exists');
-  t.ok(typeof editStore.clear === 'function', 'clear exists');
-  t.ok(typeof editStore.update === 'function', 'update exists');
-
-  t.end();
-});
-
-test('Edit store functions', t => {
-  var polygonGeoJSON = [{
-    type: 'Feature',
-    properties: {
-      _drawid: 123
-    },
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [1,1],
-          [1,2],
-          [2,1],
-          [1,1]
-        ]
-      ]
-    }
-  }];
-  var editStore = new EditStore(polygonGeoJSON);
-
-  t.deepEquals(polygonGeoJSON, editStore.getAll().features, 'getAll returns array with inputted geojson');
-  t.deepEquals(polygonGeoJSON[0], editStore.getById(polygonGeoJSON[0].properties._drawid), 'getById returns inputted geojson');
-
-  editStore.clear();
-  t.deepEquals([], editStore.getAll().features, 'clear clears the store');
-
-  t.end();
-  */
 });

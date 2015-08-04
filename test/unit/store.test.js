@@ -4,7 +4,7 @@ var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../../');
 var Immutable = require('immutable');
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoia2VsdmluYWJyb2t3YSIsImEiOiJkcUF1TWlVIn0.YzBtz0O019DJGk3IpFi72g';
+mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
 function createMap() {
   var div = document.createElement('div');
@@ -52,17 +52,17 @@ test('Store constructor', t => {
   t.equals(store.annotations.size, 0, 'annotations list is empty');
 
   // are the methods even there?
-  t.ok(typeof store.operation === 'function', 'operation exists');
-  t.ok(typeof store.getAll === 'function', 'getAll exists');
-  t.ok(typeof store.get === 'function', 'get exists');
-  t.ok(typeof store.clear === 'function', 'clear exists');
-  t.ok(typeof store.clearAll === 'function', 'clearAll exists');
-  t.ok(typeof store.unset === 'function', 'unset exists');
-  t.ok(typeof store.set === 'function', 'set exists');
-  t.ok(typeof store.edit === 'function', 'edit exists');
-  t.ok(typeof store.render === 'function', 'render exists');
-  t.ok(typeof store.redo === 'function', 'redo exists');
-  t.ok(typeof store.undo === 'function', 'undo exists');
+  t.equals(typeof store.operation, 'function', 'operation exists');
+  t.equals(typeof store.getAll, 'function', 'getAll exists');
+  t.equals(typeof store.get, 'function', 'get exists');
+  t.equals(typeof store.clear, 'function', 'clear exists');
+  t.equals(typeof store.clearAll, 'function', 'clearAll exists');
+  t.equals(typeof store.unset, 'function', 'unset exists');
+  t.equals(typeof store.set, 'function', 'set exists');
+  t.equals(typeof store.edit, 'function', 'edit exists');
+  t.equals(typeof store.render, 'function', 'render exists');
+  t.equals(typeof store.redo, 'function', 'redo exists');
+  t.equals(typeof store.undo, 'function', 'undo exists');
 
   t.deepEquals(store.getAll(), {
     type: 'FeatureCollection',
@@ -73,7 +73,7 @@ test('Store constructor', t => {
   store.set(feature);
   var f = store.getAll().features[0];
   t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
-  t.ok(typeof f.properties._drawid === 'string', 'the set feature gets a drawid');
+  t.equals(typeof f.properties._drawid, 'string', 'the set feature gets a drawid');
 
   // get
   var storeFeat = store.get(f.properties._drawid);
@@ -81,12 +81,12 @@ test('Store constructor', t => {
 
   // unset
   store.unset(f.properties._drawid);
-  t.ok(store.getAll().features.length === 0, 'calling unset removes the feature');
+  t.equals(store.getAll().features.length, 0, 'calling unset removes the feature');
 
   // clear
   store.set(feature);
   store.clear();
-  t.ok(store.getAll().features.length === 0, '0 features remaining after clearing the store the store');
+  t.equals(store.getAll().features.length, 0, '0 features remaining after clearing the store the store');
 
   t.end();
 });
