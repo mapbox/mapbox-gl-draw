@@ -2,6 +2,7 @@
 
 import R from 'ramda';
 import { DOM } from './util';
+import mapboxgl from 'mapbox-gl';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 
@@ -369,20 +370,23 @@ export default class Draw extends mapboxgl.Control {
 
     this._map.on('load', () => {
 
-      var drawLayer = new mapboxgl.GeoJSONSource({
-        data: this.options.geoJSON.getAll()
+      this._map.addSource('draw', {
+        data: this.options.geoJSON.getAll(),
+        type: 'geojson'
       });
 
-      this._map.addSource('draw', drawLayer);
       themeStyle.forEach((style) => {
         this._map.addLayer(style);
       });
 
-      var editLayer = new mapboxgl.GeoJSONSource({
-        data: []
+      this._map.addSource('edit', {
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        },
+        type: 'geojson'
       });
 
-      this._map.addSource('edit', editLayer);
       themeEdit.forEach(style => {
         this._map.addLayer(style);
       });
@@ -395,11 +399,11 @@ export default class Draw extends mapboxgl.Control {
       this._map.on('edit.end', this._exitEdit.bind(this));
 
       this._map.on('edit.feature.update', e => {
-        editLayer.setData(e.geojson);
+        this._map.getSource('edit').setData(e.geojson);
       });
 
       this._map.on('draw.feature.update', e => {
-        drawLayer.setData(e.geojson);
+        this._map.getSource('draw').setData(e.geojson);
       });
 
       this._map.on('click', this.onClick);

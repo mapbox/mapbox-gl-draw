@@ -1,20 +1,4 @@
-/* global React, mapboxgl */
-mapboxgl.accessToken = localStorage.accessToken;
-
-// initialize map
-var map = new mapboxgl.Map({
-  container: 'map',
-  zoom: 12,
-  center: [43.6579, -79.3712],
-  style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
-});
-
-// add gl-draw controls
-map.addControl(new mapboxgl.Navigation({
-  position: 'top-left'
-}));
-
-map.addControl(mapboxgl.Draw());
+/* global React, map */
 
 class App extends React.Component { // eslint-disable-line
 
@@ -29,9 +13,9 @@ class App extends React.Component { // eslint-disable-line
   }
 
   componentWillMount() {
-    map.on('draw.feature.update', e => {
+    map.on('draw.feature.update', function(e) {
       this.setState({ geojson: e.geojson });
-    });
+    }.bind(this));
   }
 
   setMap(e) {

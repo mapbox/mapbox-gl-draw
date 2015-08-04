@@ -17,6 +17,7 @@
     "test-browser": "npm run lint && (browserify test/browser/*.test.js | tap-closer | smokestack | tap-status)",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
+    "build-examples": "./build-examples.sh",
     "start": "budo index.js --serve=dist/mapboxgl.draw.js --live -d | bistre"
   },
   "repository": {
@@ -39,7 +40,6 @@
     "browserify": "^9.0.3",
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
-    "mapbox-gl": "^0.8.1",
     "rewire": "^2.3.4",
     "rewireify": "^0.2.1",
     "smokestack": "^3.3.0",
@@ -52,6 +52,7 @@
     "happen": "^0.1.3",
     "hat": "0.0.3",
     "immutable": "^3.7.3",
+    "mapbox-gl": "^0.9.0",
     "ramda": "^0.17.1"
   }
 }
