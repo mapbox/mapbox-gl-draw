@@ -374,6 +374,7 @@ export default class Draw extends mapboxgl.Control {
         data: this.options.geoJSON.getAll(),
         type: 'geojson'
       });
+
       themeStyle.forEach((style) => {
         this._map.addLayer(style);
       });
@@ -385,6 +386,7 @@ export default class Draw extends mapboxgl.Control {
         },
         type: 'geojson'
       });
+
       themeEdit.forEach(style => {
         this._map.addLayer(style);
       });

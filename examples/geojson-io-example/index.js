@@ -13,9 +13,9 @@ class App extends React.Component { // eslint-disable-line
   }
 
   componentWillMount() {
-    map.on('draw.feature.update', e => {
+    map.on('draw.feature.update', function(e) {
       this.setState({ geojson: e.geojson });
-    });
+    }.bind(this));
   }
 
   setMap(e) {
