@@ -183,7 +183,8 @@ export default class Draw extends mapboxgl.Control {
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
       title: `delete ${featureType}`,
-      fn: this._destroy.bind(this, this.editId)
+      fn: this._destroy.bind(this, this.editId),
+      id: 'deleteBtn'
     });
   }
 
@@ -340,9 +341,11 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _createButton(opts) {
-    var a = DOM.create('button', opts.className, this._container, {
-      title: opts.title
-    });
+    var attr = { title: opts.title };
+    if (opts.id) {
+      attr.id = opts.id;
+    }
+    var a = DOM.create('button', opts.className, this._container, attr);
 
     a.addEventListener('click', (e) => {
       e.preventDefault();
