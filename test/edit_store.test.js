@@ -1,7 +1,7 @@
-var EditStore = require('../../src/edit_store');
+var EditStore = require('../src/edit_store');
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../../');
+var GLDraw = require('../');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 

@@ -1,8 +1,8 @@
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../../');
-var Store = require('../../src/store');
-var Point = require('../../src/geometries/point');
+var GLDraw = require('../');
+var Store = require('../src/store');
+var Point = require('../src/geometries/point');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -72,6 +72,23 @@ test('Draw class test', t => {
   t.ok(Draw._map instanceof mapboxgl.Map, 'this._map is an instance of mapboxgl.Map');
   t.ok(Draw.options.geoJSON instanceof Store, 'Draw.options.geoJSON is an instance of the store class');
 
+  // check for control buttons in the DOM
+  t.ok(
+    document.getElementById('lineDrawBtn'),
+    'line draw button is in the DOM'
+  );
+  t.ok(
+    document.getElementById('polygonDrawBtn'),
+    'polygon draw button is in the DOM'
+  );
+  t.ok(
+    document.getElementById('squareDrawBtn'),
+    'square draw button is in the DOM'
+  );
+  t.ok(
+    document.getElementById('pointDrawBtn'),
+    'point draw button is in the DOM'
+  );
 
   // test edit mode
   Draw.addGeometry(feature);

@@ -1,7 +1,7 @@
-var Store = require('../../src/store');
+var Store = require('../src/store');
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../../');
+var GLDraw = require('../');
 var Immutable = require('immutable');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';

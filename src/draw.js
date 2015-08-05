@@ -53,7 +53,8 @@ export default class Draw extends mapboxgl.Control {
       this.lineStringCtrl = this._createButton({
         className: controlClass + ' line',
         title: `LineString tool ${this.options.keybindings && '(l)'}`,
-        fn: this._drawLine.bind(this)
+        fn: this._drawLine.bind(this),
+        id: 'lineDrawBtn'
       });
     }
 
@@ -61,7 +62,8 @@ export default class Draw extends mapboxgl.Control {
       this.polygonCtrl = this._createButton({
         className: `${controlClass} shape`,
         title: `Polygon tool ${this.options.keybindings && '(p)'}`,
-        fn: this._drawPolygon.bind(this)
+        fn: this._drawPolygon.bind(this),
+        id: 'polygonDrawBtn'
       });
     }
 
@@ -69,7 +71,8 @@ export default class Draw extends mapboxgl.Control {
       this.squareCtrl = this._createButton({
         className: `${controlClass} square`,
         title: `Square tool ${this.options.keybindings && '(s)'}`,
-        fn: this._drawSquare.bind(this)
+        fn: this._drawSquare.bind(this),
+        id: 'squareDrawBtn'
       });
     }
 
@@ -77,7 +80,8 @@ export default class Draw extends mapboxgl.Control {
       this.markerCtrl = this._createButton({
         className: `${controlClass} marker`,
         title: `Marker tool ${this.options.keybindings && '(m)'}`,
-        fn: this._drawPoint.bind(this)
+        fn: this._drawPoint.bind(this),
+        id: 'pointDrawBtn'
       });
     }
 
