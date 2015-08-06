@@ -4,14 +4,58 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
-  <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
-  <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+  <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
+  <link href='dist/mapboxgl.draw.css' rel='stylesheet' />
   <style>
     body { margin:0; padding:0; }
+    html, body, #map { height: 100%; }
   </style>
 </head>
 <body>
-  <div id='app'></div>
-  <script src='bundle.js'></script>
+<div id='map'></div>
+<script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
+<script src='dist/mapboxgl.draw.js'></script>
+<script>
+  mapboxgl.accessToken = localStorage.accessToken;
+
+  var map = new mapboxgl.Map({
+    container: 'map',
+    zoom: 4,
+    center: [0, 0],
+    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+  });
+
+  map.addControl(new mapboxgl.Navigation({
+    position: 'top-left'
+  }));
+
+  var Draw = mapboxgl.Draw();
+  map.addControl(Draw);
+
+  /*
+  map.on('draw.start', function(e) {
+    console.log(e.featureType);
+  });
+
+  map.on('draw.created', function(e) {
+    console.log(e.featureType);
+    console.log(e.feature);
+  });
+
+  Draw.addGeometry({
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
+  });
+  var geoms = Draw.getAll();
+  var id = geoms.features[0].properties._drawid;
+  var g = Draw.get(id);
+  console.log(JSON.stringify(g, null, 2));
+  Draw.clear();
+  */
+</script>
 </body>
 </html>

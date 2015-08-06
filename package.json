@@ -1,29 +1,57 @@
 {
   "name": "gl-draw",
-  "version": "0.0.1",
-  "description": "GL draw experiment",
+  "version": "0.0.0",
+  "description": "A drawing component for Mapbox GL JS",
+  "homepage": "https://github.com/mapbox/gl-draw",
+  "author": "mapbox",
+  "license": "ISC",
   "main": "index.js",
-  "scripts": {
-    "start": "watchify src/index.js -o bundle.js & serve -p 3100"
-  },
-  "author": "Eden Halperin",
-  "license": "BSD",
   "browserify": {
     "transform": [
-      [
-        "reactify",
-        {
-          "es6": true
-        }
-      ]
+      "babelify"
     ]
   },
+  "scripts": {
+    "test": "npm run lint && npm run build",
+    "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
+    "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
+    "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
+    "build-examples": "./build-examples.sh",
+    "start": "budo index.js --serve=dist/mapboxgl.draw.js --live -d | bistre"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/gl-draw.git"
+  },
+  "keywords": [
+    "webgl",
+    "mapbox",
+    "draw",
+    "drawing"
+  ],
+  "bugs": {
+    "url": "https://github.com/mapbox/gl-draw/issues"
+  },
+  "devDependencies": {
+    "babel-eslint": "^3.1.7",
+    "babelify": "^6.1.1",
+    "bistre": "^1.0.1",
+    "browserify": "^9.0.3",
+    "budo": "^4.0.0",
+    "eslint": "^0.21.2",
+    "rewire": "^2.3.4",
+    "rewireify": "^0.2.1",
+    "smokestack": "^3.3.0",
+    "tap-closer": "^1.0.0",
+    "tap-status": "^1.0.1",
+    "tape": "^4.0.0",
+    "uglify-js": "^2.4.23"
+  },
   "dependencies": {
-    "browserify": "^8.1.1",
-    "immutable": "^3.6.2",
-    "react": "^0.12.2",
-    "reactify": "^1.0.0",
-    "serve": "^1.4.0",
-    "watchify": "^2.2.1"
+    "happen": "^0.1.3",
+    "hat": "0.0.3",
+    "immutable": "^3.7.3",
+    "mapbox-gl": "^0.9.0",
+    "ramda": "^0.17.1"
   }
 }
