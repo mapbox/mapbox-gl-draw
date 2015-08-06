@@ -12,9 +12,8 @@
     ]
   },
   "scripts": {
-    "test": "npm run lint && npm run test-unit && npm run build",
-    "test-unit": "npm run lint && (browserify test/unit/*.test.js | tap-closer | smokestack | tap-status)",
-    "test-browser": "npm run lint && (browserify test/browser/*.test.js | tap-closer | smokestack | tap-status)",
+    "test": "npm run lint && npm run build",
+    "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
     "build-examples": "./build-examples.sh",

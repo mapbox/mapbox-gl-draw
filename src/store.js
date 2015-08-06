@@ -61,7 +61,7 @@ export default class Store {
 
   unset(id) {
     this.operation(
-      data => data.filterNot(feature => feature.get('properties')._drawid === id),
+      data => data.filterNot(feature => feature.get('properties').get('_drawid') === id),
       'Removed a feature'
     );
   }
