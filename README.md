@@ -98,8 +98,8 @@ Install dependencies, build the source files and crank up a server via:
 To run the example apps
 ```
 npm run-script build-examples
-serve
-open localhost:3000/examples/geojson-io-example/ && open localhost:3000/examples/node-example/
+npm start
+open http://localhost:3000/examples/geojson-io-example/ && open http://localhost:3000/examples/node-example/
 ```
 
 ### Testing
