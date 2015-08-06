@@ -136,7 +136,11 @@ export default class Draw extends mapboxgl.Control {
    */
   _onClick(e) {
 
-    this._map.featuresAt(e.point, { radius: 10, includeGeometry: true }, (err, features) => {
+    this._map.featuresAt(e.point, {
+      radius: 10,
+      includeGeometry: true,
+      layer: 'gl-draw-polygons'
+    }, (err, features) => {
       if (err) throw err;
 
       if (features.length) { // clicked on a feature
@@ -210,6 +214,7 @@ export default class Draw extends mapboxgl.Control {
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
     this._map.featuresAt([coords.x, coords.y], { radius: 10, includeGeometry: true }, (err, features) => {
+
       if (err) throw err;
       else if (!features.length) return;
       else if (features[0].properties._drawid !== this.editId) return;
