@@ -9,8 +9,7 @@ class App extends React.Component { // eslint-disable-line
       geojson: {
         type: 'FeatureCollection',
         features: []
-      },
-      mode: 'text'
+      }
     };
   }
 
@@ -22,10 +21,6 @@ class App extends React.Component { // eslint-disable-line
 
   setMap(e) {
     this.setState({ geojson: JSON.parse(e.target.value) });
-  }
-
-  toggleMode(mode) {
-    this.setState({ mode: mode });
   }
 
   fetchURL(e) {
@@ -44,24 +39,20 @@ class App extends React.Component { // eslint-disable-line
     return (
       <div style={{ height: '100%', width: '100%' }}>
 
-        <div>
-          <button onClick={this.toggleMode.bind(this, 'text')}>Text</button>
-          <button onClick={this.toggleMode.bind(this, 'url')}>URL</button>
-        </div>
-
-        {this.state.mode === 'text' && <textarea
+        <input
+          placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
           type='text'
-          style={{ height: '100%', width: '100%' }}
+          style={{ width: '100%', height: '30px', fontSize: '15px' }}
+          onChange={this.fetchURL}
+        />
+
+        <textarea
+          type='text'
+          style={{ height: '100%', width: '100%', fontSize: '15px' }}
           onChange={this.setMap}
           value={JSON.stringify(this.state.geojson, null, 4)}
         >
-        </textarea>}
-
-        {this.state.mode === 'url' && <input
-          type='text'
-          style={{ width: '100%' }}
-          onChange={this.fetchURL}
-        />}
+        </textarea>
 
       </div>
     );
