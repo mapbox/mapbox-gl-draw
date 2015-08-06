@@ -1,4 +1,5 @@
 /* global React, map, Draw */
+var extent = require('turf-extent');
 
 class App extends React.Component { // eslint-disable-line
 
@@ -31,9 +32,11 @@ class App extends React.Component { // eslint-disable-line
     var req = new XMLHttpRequest();
     req.open('GET', e.target.value);
     req.onload = () => {
-      Draw.update(JSON.parse(req.responseText));
-      this.setState({ geojson: JSON.parse(req.responseText) });
-    }.bind(this);
+      var data = JSON.parse(req.responseText);
+      Draw.update(data);
+      var ext = extent(data);
+      map.fitBounds([[ext[1], ext[0]], [ext[3], ext[2]]]);
+    };
     req.send();
   }
 
