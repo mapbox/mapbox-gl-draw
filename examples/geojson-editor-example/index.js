@@ -37,18 +37,18 @@ class App extends React.Component { // eslint-disable-line
 
   render() {
     return (
-      <div style={{ height: '100%', width: '100%' }}>
+      <div style={{ height: '100%', display: 'flex', flexFlow: 'column', alignItems: 'stretch' }}>
 
         <input
           placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
           type='text'
-          style={{ width: '100%', height: '30px', fontSize: '15px' }}
+          style={{ fontSize: '15px' }}
           onChange={this.fetchURL}
         />
 
         <textarea
           type='text'
-          style={{ height: '100%', width: '100%', fontSize: '15px' }}
+          style={{ flex: '1 1 auto', fontSize: '15px' }}
           onChange={this.setMap}
           value={JSON.stringify(this.state.geojson, null, 4)}
         >
