@@ -433,6 +433,25 @@ export default class Draw extends mapboxgl.Control {
 
       this._map.on('click', this.onClick);
 
+      this._map.on('mousemove', e => {
+        //////////////////////////////////////////////////////////////////////
+        //////////// FIX THIS WHEN MULTIPLE LAYER QUERIES LAND ///////////////
+        //////////////////////////////////////////////////////////////////////
+        this._map.featuresAt(e.point, { radius: 7, layer: 'gl-edit-points' }, (err, features) => {
+          if (err) throw err;
+
+          var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
+          var midpoint = R.find(feat => feat.properties.meta === 'midPoint')(features);
+
+          if (vertex || midpoint) {
+            this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
+            this.hoveringOnVertex = true;
+          } else if (this.hoveringOnVertex) {
+            this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+          }
+        });
+      });
+
     });
   }
 
