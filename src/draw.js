@@ -213,11 +213,12 @@ export default class Draw extends mapboxgl.Control {
 
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
-    this._map.featuresAt([coords.x, coords.y], { radius: 10, includeGeometry: true }, (err, features) => {
+
+    this._map.featuresAt([coords.x, coords.y], { radius: 20, includeGeometry: true }, (err, features) => {
 
       if (err) throw err;
       else if (!features.length) return;
-      else if (features[0].properties._drawid !== this.editId) return;
+      else if (R.none(feat => feat.properties._drawid === this.editId)(features)) return;
 
       e.stopPropagation();
 
@@ -233,6 +234,7 @@ export default class Draw extends mapboxgl.Control {
 
       this._map.getContainer().addEventListener('mousemove', this.drag, true);
       this._map.getContainer().addEventListener('mouseup', this.endDrag, true);
+
     });
   }
 
