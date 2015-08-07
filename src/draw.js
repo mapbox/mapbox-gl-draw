@@ -441,6 +441,7 @@ export default class Draw extends mapboxgl.Control {
         //////////////////////////////////////////////////////////////////////
         this._map.featuresAt(e.point, { radius: 7, layer: 'gl-edit-points' }, (err, features) => {
           if (err) throw err;
+          if (!features.length) return;
 
           var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
           var midpoint = R.find(feat => feat.properties.meta === 'midPoint')(features);
