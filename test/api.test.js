@@ -36,7 +36,7 @@ test('API test', t => {
   t.deepEquals(f.geometry, feature.geometry, 'the geometry added is the same returned by Draw.getAll');
   t.deepEquals(
     feature.geometry,
-    Draw.get(f.properties._drawid).geometry,
+    Draw.get(f.properties.drawId).geometry,
     'the geomtry added is the same returned by Draw.get(itsDrawId)'
   );
 
@@ -48,7 +48,7 @@ test('API test', t => {
 
   Draw.addGeometry(feature);
   f = Draw.getAll().features[0];
-  Draw.removeGeometry(f.properties._drawid);
+  Draw.removeGeometry(f.properties.drawId);
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
 
   t.end();

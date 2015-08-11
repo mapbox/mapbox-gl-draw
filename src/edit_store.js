@@ -27,7 +27,7 @@ export default class EditStore {
   }
 
   getById(id) {
-    return this.features.filter(feat => feat.properties._drawid === id)[0];
+    return this.features.filter(feat => feat.properties.drawId === id)[0];
   }
 
   clear() {
@@ -37,7 +37,7 @@ export default class EditStore {
 
   update(feature) {
     this.features = this.features
-      .filter(feat => feat.properties._drawid !== feature.properties._drawid);
+      .filter(feat => feat.properties.drawId !== feature.properties.drawId);
     this.features.push(feature);
     this.render();
   }

@@ -7,7 +7,9 @@ Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapb
 
 ### Installing
 
-    npm install
+```
+npm install
+```
 
 Include [mapboxgl.draw.js]() after `mapbox-gl.js`
 
@@ -78,7 +80,7 @@ Draw.addGeometry(input);
 
 var geoms = Draw.getAll();
 
-var id = geoms.features[0].properties._drawid;
+var id = geoms.features[0].properties.drawId;
 
 var g = Draw.get(id);
 

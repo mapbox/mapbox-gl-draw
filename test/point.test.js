@@ -54,7 +54,7 @@ test('Point draw class', t => {
   // data
   t.ok(Point.coordinates instanceof Immutable.List, 'Point.coordinates is an Immutable.List');
   t.ok(Point.feature instanceof Immutable.Map, 'Point.feature is an Immutable.Map');
-  t.ok(Point.feature.get('properties').get('_drawid'), 'the feature has a _drawid');
+  t.ok(Point.feature.get('properties').get('drawId'), 'the feature has a drawId');
 
   t.end();
 });

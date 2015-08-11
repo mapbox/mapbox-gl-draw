@@ -73,14 +73,14 @@ test('Store constructor', t => {
   store.set(feature);
   var f = store.getAll().features[0];
   t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
-  t.equals(typeof f.properties._drawid, 'string', 'the set feature gets a drawid');
+  t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawid');
 
   // get
-  var storeFeat = store.get(f.properties._drawid);
+  var storeFeat = store.get(f.properties.drawId);
   t.deepEqual(storeFeat.geometry, feature.geometry, 'get returns the same geometry you set');
 
   // unset
-  store.unset(f.properties._drawid);
+  store.unset(f.properties.drawId);
   t.equals(store.getAll().features.length, 0, 'calling unset removes the feature');
 
   // clear
@@ -99,7 +99,7 @@ test('Store constructor with data', t => {
   var store = Draw.options.geoJSON;
 
   var f = store.getAll().features[0];
-  t.ok(typeof f.properties._drawid === 'string', 'initiating store with data assigns ids to entries');
+  t.ok(typeof f.properties.drawId === 'string', 'initiating store with data assigns ids to entries');
   t.deepEquals(f.geometry, feature.geometry, 'the feature in the store is the same as the one set');
 
   t.end();

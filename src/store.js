@@ -19,7 +19,7 @@ export default class Store {
 
     if (data.length) {
       data.forEach(d => {
-        d.properties._drawid = hat();
+        d.properties.drawId = hat();
         this.history[0] = this.history[0].push(Immutable.fromJS(d));
       });
     }
@@ -46,7 +46,7 @@ export default class Store {
 
   get(id) {
     return this.history[this.historyIndex]
-      .find(feature => feature.get('properties').get('_drawid') === id).toJS();
+      .find(feature => feature.get('properties').get('drawId') === id).toJS();
   }
 
   clear() {
@@ -61,7 +61,7 @@ export default class Store {
 
   unset(id) {
     this.operation(
-      data => data.filterNot(feature => feature.get('properties').get('_drawid') === id),
+      data => data.filterNot(feature => feature.get('properties').get('drawId') === id),
       'Removed a feature'
     );
   }
@@ -72,12 +72,12 @@ export default class Store {
   set(feature) {
     this.operation(data => {
       feature = Immutable.fromJS(feature);
-      feature = feature.setIn(['properties', '_drawid'], hat());
+      feature = feature.setIn(['properties', 'drawId'], hat());
 
       // Does an index for this exist?
       var updateIndex = this.history[this.historyIndex]
         .findIndex(feat =>
-          feat.get('properties')._drawid === feature.get('properties').get('_drawid')
+          feat.get('properties').drawId === feature.get('properties').get('drawId')
         );
 
       return (updateIndex > -1) ?
@@ -88,16 +88,16 @@ export default class Store {
   }
 
   /**
-   * @param {String} id - the _drawid of a feature
+   * @param {String} id - the drawId of a feature
    * @return {Object} - GeoJSON feature
    * @private
    */
   edit(id) {
     this.history.push(this.history[this.historyIndex++]);
     var idx = this.historyIndex;
-    var feature = this.history[idx].find(feat => feat.get('properties').get('_drawid') === id);
+    var feature = this.history[idx].find(feat => feat.get('properties').get('drawId') === id);
     this.history[idx] = this.history[idx]
-      .filterNot(feat => feat.get('properties').get('_drawid') === id);
+      .filterNot(feat => feat.get('properties').get('drawId') === id);
 
     this.render();
     return feature.toJS();

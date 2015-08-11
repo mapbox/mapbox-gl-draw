@@ -147,7 +147,7 @@ export default class Draw extends mapboxgl.Control {
         if (this._control && !this.editId) { // clicked on a feature while in draw mode
           return;
         } else if (this._control && this.editId) { // clicked on a feature while in edit mode
-          if (features[0].properties._drawid === this.editId) { // clicked on the feature you're editing
+          if (features[0].properties.drawId === this.editId) { // clicked on the feature you're editing
             return;
           } else { // clicked on a different feature while in edit mode
             this._control.completeEdit();
@@ -170,9 +170,9 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _edit(feature) {
-    if (!feature.properties._drawid) return; // for when null geometries are returned
+    if (!feature.properties.drawId) return; // for when null geometries are returned
 
-    this.editId = feature.properties._drawid;
+    this.editId = feature.properties.drawId;
     feature = this.options.geoJSON.edit(this.editId);
     var c = feature.geometry.coordinates;
     var featureType = feature.geometry.type;
@@ -218,7 +218,7 @@ export default class Draw extends mapboxgl.Control {
 
       if (err) throw err;
       else if (!features.length) return;
-      else if (R.none(feat => feat.properties._drawid === this.editId)(features)) return;
+      else if (R.none(feat => feat.properties.drawId === this.editId)(features)) return;
 
       e.stopPropagation();
 

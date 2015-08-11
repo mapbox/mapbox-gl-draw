@@ -24,7 +24,7 @@ export default class Geometry {
     this.feature = Immutable.fromJS({
       type: 'Feature',
       properties: {
-        _drawid: data ? data.properties._drawid : null
+        drawId: data ? data.properties.drawId : null
       },
       geometry: {
         type: type,

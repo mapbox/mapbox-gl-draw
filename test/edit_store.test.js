@@ -61,7 +61,7 @@ test('Edit store constructor', t => {
   // getById
   var f = editStore.getAll().features[0];
   t.equals(
-    editStore.getById(f.properties._drawid).geometry,
+    editStore.getById(f.properties.drawId).geometry,
     feature.geometry,
     'getById returns the same geometry entered'
   );

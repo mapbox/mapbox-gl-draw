@@ -115,7 +115,7 @@ test('Draw class test', t => {
   Draw.addGeometry(feature);
   f = Draw.getAll().features[0];
   Draw._edit(f);
-  Draw._destroy(f.properties._drawid);
+  Draw._destroy(f.properties.drawId);
   t.equals(Draw.getAll().features.length, 0, 'Draw._destroy removes the geometry from the store');
 
   t.end();
