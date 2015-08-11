@@ -5,6 +5,7 @@ import { DOM } from './util';
 import mapboxgl from 'mapbox-gl';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
+import { LatLng, LatLngBounds } from 'mapbox-gl';
 
 // Data store
 import Store from './store';
@@ -40,6 +41,11 @@ export default class Draw extends mapboxgl.Control {
     this.onKeyUp = this._onKeyUp.bind(this);
     this.endDrag = this._endDrag.bind(this);
     this.initiateDrag = this._initiateDrag.bind(this);
+
+
+    this.onKeyDown = this._onKeyDown.bind(this);
+    this.onMouseDown = this._onMouseDown.bind(this);
+    this.onMouseUp = this._onMouseUp.bind(this);
   }
 
   onAdd(map) {
@@ -89,10 +95,18 @@ export default class Draw extends mapboxgl.Control {
       map.getContainer().addEventListener('keyup', this.onKeyUp);
     }
 
+    map.getContainer().addEventListener('keydown', this.onKeyDown);
+
     this._map = map;
 
     this._mapState();
     return container;
+  }
+
+  _onKeyDown(e) {
+    if (e.keyCode === 16) {
+      this.shiftDown = true;
+    }
   }
 
   _onKeyUp(e) {
@@ -127,6 +141,32 @@ export default class Draw extends mapboxgl.Control {
           this._destroy(this.editId);
         }
     }
+    if (e.keyCode === 16) {
+      this.shiftDown = false;
+    }
+  }
+
+  _onMouseDown(e) {
+    if (!this.shiftDown) return;
+    this.featInStart = DOM.mousePos(e, this._map.getContainer());
+  }
+
+  _onMouseUp(e) {
+    if (!this.shiftDown) return;
+    var end = DOM.mousePos(e, this._map.getContainer());
+
+    var ne = this.featInStart.x > end.x ? this.featInStart : end;
+    var sw = this.featInStart.x > end.x ? end : this.featInStart;
+
+    ne = this._map.unproject(ne);
+    sw = this._map.unproject(sw);
+
+    var bounds = new LatLngBounds(
+      new LatLng(sw.lat, sw.lng),
+      new LatLng(ne.lat, ne.lng)
+    );
+    var feats = this.options.geoJSON.getFeaturesIn(bounds);
+    console.log(feats);
   }
 
   /**
@@ -389,7 +429,10 @@ export default class Draw extends mapboxgl.Control {
         });
       });
 
+      this._map.getContainer().addEventListener('mousedown', this.onMouseDown);
+      this._map.getContainer().addEventListener('mouseup', this.onMouseUp);
     });
+
   }
 
   /***************/

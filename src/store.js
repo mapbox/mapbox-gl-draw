@@ -1,6 +1,8 @@
 'use strict';
 
+import { LatLng, LatLngBounds } from 'mapbox-gl';
 import Immutable from 'immutable';
+import extent from 'turf-extent';
 import hat from 'hat';
 
 /**
@@ -47,6 +49,26 @@ export default class Store {
   get(id) {
     return this.history[this.historyIndex]
       .find(feature => feature.get('properties').get('drawId') === id).toJS();
+  }
+
+  getFeaturesIn(bounds) {
+    var results = [];
+    var features = this.getAll().features;
+    for (var i = 0; i < features.length; i++) {
+      var ext = extent(features[i]);
+      ext = new LatLngBounds(
+        new LatLng(ext[1], ext[0]),
+        new LatLng(ext[3], ext[2])
+      );
+      if (bounds.getNorth() < ext.getSouth() ||
+          bounds.getSouth() > ext.getNorth() ||
+          bounds.getEast() < ext.getWest() ||
+          bounds.getWest() > ext.getEast()) {
+        continue;
+      } else {
+        results.push(features[i]);
+      }
+    }
   }
 
   clear() {
