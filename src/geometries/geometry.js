@@ -1,8 +1,11 @@
 'use strict';
 
+import hat from 'hat';
 import Immutable from 'immutable';
-import EditStore from '../edit_store';
+//import EditStore from '../edit_store';
 import { translate } from '../util';
+import { LatLng, LatLngBounds } from 'mapbox-gl';
+import extent from 'turf-extent';
 
 /**
  * Base Geometry class from which other geometries inherit
@@ -16,48 +19,47 @@ import { translate } from '../util';
  */
 export default class Geometry {
 
-  constructor(map, drawStore, type, data) {
+  constructor(map, type) {
     this._map = map;
-    this.drawStore = drawStore;
-    this.coordinates = Immutable.fromJS(data ? data.geometry.coordinates : []);
+    this.drawId = hat();
+    this.coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0]]]);
 
-    this.feature = Immutable.fromJS({
+    this.geojson = Immutable.fromJS({
       type: 'Feature',
       properties: {
-        drawId: data ? data.properties.drawId : null
+        drawId: this.drawId
       },
       geometry: {
         type: type,
         coordinates: this.coordinates.toJS()
       }
     });
-
-    this.store = new EditStore(this._map, [ this.feature.toJS() ]);
   }
 
   /**
    * @return {Object} GeoJSON feature
    */
   get() {
-    return this.feature.toJS();
+    return this.geojson.toJS();
   }
 
   /**
    * Called after a draw is done
    */
   _done(type) {
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
-    this._map.fire('draw.end', { featureType: type });
+    this._map.fire('finish.edit');
+    this._map.fire('draw.end', {
+      geometry: this,
+      featureType: type
+    });
   }
 
   /**
    * Clear the edit drawings and render the changes to the main draw layer
    */
   completeEdit() {
-    this.store.clear();
-    this.drawStore.set(this.feature.toJS());
-    this._map.fire('edit.end');
+    //this.drawStore.set(this.geojson.toJS());
+    this._map.fire('edit.end', { geometry: this });
   }
 
   /**
@@ -69,10 +71,18 @@ export default class Geometry {
   translate(init, curr) {
     if (!this.translating) {
       this.translating = true;
-      this.initGeom = Immutable.fromJS(this.feature.toJS());
+      this.initGeom = Immutable.fromJS(this.geojson.toJS());
     }
-    this.feature = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
-    this.store.update(this.feature.toJS());
+    this.geojson = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
+    this._map.fire('new.edit');
+  }
+
+  getExtent() {
+    var ext = extent(this.get());
+    return new LatLngBounds(
+      new LatLng(ext[1], ext[0]),
+      new LatLng(ext[3], ext[2])
+    );
   }
 
 }

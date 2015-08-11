@@ -3,7 +3,6 @@
 import { LatLng, LatLngBounds } from 'mapbox-gl';
 import Immutable from 'immutable';
 import extent from 'turf-extent';
-import hat from 'hat';
 
 /**
  * A store for keeping track of versions of drawings
@@ -13,18 +12,21 @@ import hat from 'hat';
  */
 export default class Store {
 
-  constructor(data, map) {
+  constructor(map, data) {
     this._map = map;
     this.historyIndex = 0;
     this.history = [ Immutable.List([]) ];
     this.annotations = Immutable.List([]);
 
     if (data.length) {
-      data.forEach(d => {
-        d.properties.drawId = hat();
-        this.history[0] = this.history[0].push(Immutable.fromJS(d));
-      });
+      for (var i = 0; i < data.length; i++) {
+        this.history[0] = this.history[0].push(data[i]);
+      }
     }
+
+    this._map.on('edit.end', e => {
+      this.set(e.geometry);
+    });
   }
 
   operation(fn, annotation) {
@@ -42,13 +44,19 @@ export default class Store {
   getAll() {
     return {
       type: 'FeatureCollection',
-      features: this.history[this.historyIndex].toJS()
+      features: this.history[this.historyIndex]
+    };
+  }
+
+  getAllGeoJSON() {
+    return {
+      type: 'FeatureCollection',
+      features: this.history[this.historyIndex].map(feature => feature.geojson.toJS()).toJS()
     };
   }
 
   get(id) {
-    return this.history[this.historyIndex]
-      .find(feature => feature.get('properties').get('drawId') === id).toJS();
+    return this.history[this.historyIndex].find(feature => feature.drawId === id);
   }
 
   getFeaturesIn(bounds) {
@@ -84,7 +92,7 @@ export default class Store {
 
   unset(id) {
     this.operation(
-      data => data.filterNot(feature => feature.get('properties').get('drawId') === id),
+      data => data.filterNot(feature => feature.drawId === id),
       'Removed a feature'
     );
   }
@@ -93,21 +101,7 @@ export default class Store {
    * @param {Object} feature - GeoJSON feature
    */
   set(feature) {
-    this.operation(data => {
-      feature = Immutable.fromJS(feature);
-      feature = feature.setIn(['properties', 'drawId'], hat());
-
-      // Does an index for this exist?
-      var updateIndex = this.history[this.historyIndex]
-        .findIndex(feat =>
-          feat.get('properties').drawId === feature.get('properties').get('drawId')
-        );
-
-      return (updateIndex > -1) ?
-        data.set(updateIndex, feature) :
-        data.push(feature);
-
-    }, 'Added a ' + feature.geometry.type);
+    this.operation(data => data.push(feature), 'Added a ' + feature.type);
   }
 
   /**
@@ -116,19 +110,17 @@ export default class Store {
    * @private
    */
   edit(id) {
-    this.history.push(this.history[this.historyIndex++]);
-    var idx = this.historyIndex;
-    var feature = this.history[idx].find(feat => feat.get('properties').get('drawId') === id);
-    this.history[idx] = this.history[idx]
-      .filterNot(feat => feat.get('properties').get('drawId') === id);
+    var data = this.history[this.historyIndex];
+    var geometry = data.find(geom => geom.drawId === id);
+    this.history[++this.historyIndex] = data.filterNot(geom => geom.drawId === id);
 
     this.render();
-    return feature.toJS();
+    return geometry;
   }
 
   render() {
     this._map.fire('draw.feature.update', {
-      geojson: this.getAll()
+      geojson: this.getAllGeoJSON()
     });
   }
 

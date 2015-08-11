@@ -3,6 +3,7 @@
 import R from 'ramda';
 import { DOM } from './util';
 import mapboxgl from 'mapbox-gl';
+import EditStore from './edit_store';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 import { LatLng, LatLngBounds } from 'mapbox-gl';
@@ -52,9 +53,11 @@ export default class Draw extends mapboxgl.Control {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
-    this.options.geoJSON = new Store(this.options.geoJSON, map);
+    this.options.geoJSON = new Store(map, this.options.geoJSON);
+    this._editStore = new EditStore(map);
 
     // Build out draw controls
+    /*
     if (controls.line) {
       this.lineStringCtrl = this._createButton({
         className: controlClass + ' line',
@@ -73,6 +76,7 @@ export default class Draw extends mapboxgl.Control {
       });
     }
 
+    */
     if (controls.square) {
       this.squareCtrl = this._createButton({
         className: `${controlClass} square`,
@@ -82,6 +86,7 @@ export default class Draw extends mapboxgl.Control {
       });
     }
 
+    /*
     if (controls.marker) {
       this.markerCtrl = this._createButton({
         className: `${controlClass} marker`,
@@ -90,6 +95,7 @@ export default class Draw extends mapboxgl.Control {
         id: 'pointDrawBtn'
       });
     }
+    */
 
     if (this.options.keybindings) {
       map.getContainer().addEventListener('keyup', this.onKeyUp);
@@ -166,7 +172,7 @@ export default class Draw extends mapboxgl.Control {
       new LatLng(ne.lat, ne.lng)
     );
     var feats = this.options.geoJSON.getFeaturesIn(bounds);
-    console.log(feats);
+    this._massEdit(feats.map(feat => feat.properties.drawId));
   }
 
   /**
@@ -199,7 +205,7 @@ export default class Draw extends mapboxgl.Control {
         } else if (this._control && !this.editId) { // clicked outside features while drawing
           return;
         } else if (this._control && this.editId) { // clicked outside features while editing
-          return this._control.completeEdit();
+          return this._finish();
         }
       }
 
@@ -210,37 +216,34 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _edit(feature) {
-    if (!feature.properties.drawId) return; // for when null geometries are returned
-
     this.editId = feature.properties.drawId;
-    feature = this.options.geoJSON.edit(this.editId);
-    var c = feature.geometry.coordinates;
-    var featureType = feature.geometry.type;
-
-    if (featureType === 'Point')
-      this._control = new Point(this._map, this.options.geoJSON, feature);
-    else if (featureType === 'LineString')
-      this._control = new Line(this._map, this.options.geoJSON, feature);
-    else if (c[0][0][0] === c[0][1][0])
-      this._control = new Square(this._map, this.options.geoJSON, feature);
-    else
-      this._control = new Polygon(this._map, this.options.geoJSON, feature);
+    this._control = true; ///////////////// FIX THIS
+    var feat = this.options.geoJSON.edit(this.editId);
+    this._editStore.add(feat);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
-      title: `delete ${featureType}`,
+      title: `delete ${feat.type}`,
       fn: this._destroy.bind(this, this.editId),
       id: 'deleteBtn'
     });
   }
 
+  /**
+   * @param {Array<String>} features - an array of drawIds
+   * @private
+   */
+  _massEdit(drawIds) {
+    console.log(drawIds);
+  }
+
   _finish() {
-    if (this._control && this.editId) { // edit mode
-      this._control.completeEdit();
+    if (this._control && this.editId) {
+      this._editStore.get(this.editId).completeEdit();
     } else if (this._control) {
-      this._control.completeDraw(); // draw mode
+      this._editStore.get(this.editId).completeDraw();
     }
   }
 
@@ -290,9 +293,9 @@ export default class Draw extends mapboxgl.Control {
     var curr = DOM.mousePos(e, this._map.getContainer());
 
     if (this.vertex) {
-      this._control.moveVertex(this.init, curr, this.vertex.properties.index);
+      this._editStore.get(this.editId).moveVertex(this.init, curr, this.vertex.properties.index);
     } else {
-      this._control.translate(this.init, curr);
+      this._editStore.get(this.editId).translate(this.init, curr);
     }
   }
 
@@ -301,12 +304,12 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
-    this._control.translating = false;
+    this._editStore.get(this.editId).translating = false;
     this.dragging = false;
 
     if (this.vertex) {
       this.vertex = false;
-      this._control.movingVertex = false;
+      this._editStore.get(this.editId).movingVertex = false;
     }
   }
 
@@ -324,8 +327,9 @@ export default class Draw extends mapboxgl.Control {
 
   _drawSquare() {
     this._finish();
-    this._control = new Square(this._map, this.options.geoJSON);
-    this._control.startDraw();
+    var square = new Square(this._map);
+    this._editStore.add(square);
+    square.startDraw();
   }
 
   _drawPoint() {
@@ -394,7 +398,8 @@ export default class Draw extends mapboxgl.Control {
         this._map.addLayer(style);
       });
 
-      this._map.on('draw.end', () => {
+      this._map.on('draw.end', e => {
+        this.options.geoJSON.set(e.geometry);
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
         this._control = false;
       });
