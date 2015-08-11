@@ -69,6 +69,7 @@ export default class Store {
         results.push(features[i]);
       }
     }
+    return results;
   }
 
   clear() {
