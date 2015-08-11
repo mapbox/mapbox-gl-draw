@@ -1,5 +1,5 @@
 for example in examples/*; do
-  if [ -d examples/$example ]; then
-    browserify examples/$example/index.js > examples/$example/bundle.js;
+  if [ -d $example ]; then
+    browserify $example/index.js > $example/bundle.js;
   fi
 done;

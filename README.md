@@ -92,24 +92,21 @@ Draw.clear();
 
 Install dependencies, build the source files and crank up a server via:
 
-    npm start & open http://localhost:9966/debug
-
+```
+npm start & open http://localhost:9966/debug
+```
 
 To run the example apps
+
 ```
 npm run-script build-examples
 npm start
-open http://localhost:3000/examples/geojson-io-example/ && open http://localhost:3000/examples/node-example/
+open http://localhost:9966/examples/geojson-editor-example/ && open http://localhost:9966/examples/node-example/
 ```
 
 ### Testing
 
-Testing is split up into two parts, integration tests in `/test/browser` that tests user interaction and unit tests in `/test/unit` that test the logic of modules.
 
-To run the browser tests, run
-
-    npm run test-browser
-
-To run the unit tests, run
-
-    npm run test-unit
+```
+npm run test
+```
