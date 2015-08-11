@@ -90,13 +90,6 @@ export default class Store {
     this.annotations = Immutable.List([]);
   }
 
-  unset(id) {
-    this.operation(
-      data => data.filterNot(feature => feature.drawId === id),
-      'Removed a feature'
-    );
-  }
-
   /**
    * @param {Object} feature - GeoJSON feature
    */

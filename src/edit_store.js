@@ -36,7 +36,6 @@ export default class EditStore {
 
     this._map.on('edit.end', e => {
       this.endEdit(e.geometry.drawId);
-      this.render();
     });
   }
 
@@ -65,6 +64,7 @@ export default class EditStore {
 
   endEdit(id) {
     this.features = this.features.filter(feat => feat.drawId !== id);
+    this.render();
   }
 
   clear() {

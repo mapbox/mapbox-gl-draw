@@ -60,6 +60,8 @@ export default class Square extends Geometry {
     this.coordinates = this.coordinates.setIn([0, 1], [ orig.get(0), c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 3], [ c.lng, orig.get(1)]);
+    // MAKE THIS BETTER
+    this.coordinates = Immutable.fromJS(this.coordinates.toJS());
 
     this.geojson = this.geojson.setIn(['geometry', 'coordinates'], this.coordinates);
     this._map.fire('new.edit');

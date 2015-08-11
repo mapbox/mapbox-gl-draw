@@ -58,7 +58,6 @@ export default class Geometry {
    * Clear the edit drawings and render the changes to the main draw layer
    */
   completeEdit() {
-    //this.drawStore.set(this.geojson.toJS());
     this._map.fire('edit.end', { geometry: this });
   }
 

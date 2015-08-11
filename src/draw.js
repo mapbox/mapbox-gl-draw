@@ -271,7 +271,8 @@ export default class Draw extends mapboxgl.Control {
       }
 
       if (this.newVertex) {
-        this._control.editAddVertex(coords, this.newVertex.properties.index);
+        //this._control.editAddVertex(coords, this.newVertex.properties.index);
+        this._editStore.get(this.editId).editAddVertex(coords, this.newVertex.properties.index);
         this.vertex = this.newVertex;
       }
 
@@ -339,8 +340,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _destroy(id) {
-    this._control.store.clear();
-    this.options.geoJSON.unset(id);
+    this._editStore.endEdit(id);
     this._exitEdit();
   }
 
@@ -357,7 +357,7 @@ export default class Draw extends mapboxgl.Control {
 
       var el = e.target;
 
-      if (this._control && !this.editId) this._control.completeDraw();
+      if (this._control && !this.editId) this._editStore.get(this.editId).completeDraw();//this._control.completeDraw();
 
       if (el.classList.contains('active')) {
         el.classList.remove('active');
