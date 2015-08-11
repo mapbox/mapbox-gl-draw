@@ -300,70 +300,6 @@ export default class Draw extends mapboxgl.Control {
     this._exitEdit();
   }
 
-  // API Methods
-  /**
-   * add a geometry
-   *
-   * @param {Object} feature - GeoJSON feature
-   */
-  addGeometry(feature) {
-    this.options.geoJSON.set(feature);
-  }
-
-  /**
-   * remove a geometry by its draw id
-   *
-   * @param {String} id - the drawid of the geometry
-   */
-  removeGeometry(id) {
-    this.options.geoJSON.unset(id);
-  }
-
-  /**
-   * add a feature collection (removes all currently draw features)
-   *
-   * @param {Object} featureCollection - a GeoJSON FeatureCollection
-   */
-  update(featureCollection) {
-    this.options.geoJSON.clear();
-    var feats = featureCollection.features;
-    for (var i = 0, ii = feats.length; i < ii; i++) {
-      this.options.geoJSON.set(feats[i]);
-    }
-  }
-
-  /**
-   * get a geometry by its draw id
-   *
-   * @param {String} id - the draw id of the geometry
-   */
-  get(id) {
-    return this.options.geoJSON.get(id);
-  }
-
-  /**
-   * get all draw geometries
-   *
-   * @returns {Object} a GeoJSON feature collection
-   */
-  getAll() {
-    return this.options.geoJSON.getAll();
-  }
-
-  /**
-   * remove all geometries
-   */
-  clear() {
-    this.options.geoJSON.clear();
-  }
-
-  /**
-   * remove all geometries and clears the history
-   */
-  clearAll() {
-    this.options.geoJSON.clearAll();
-  }
-
   _createButton(opts) {
     var attr = { title: opts.title };
     if (opts.id) {
@@ -454,6 +390,73 @@ export default class Draw extends mapboxgl.Control {
       });
 
     });
+  }
+
+  /***************/
+  /* API Methods */
+  /***************/
+
+  /**
+   * add a geometry
+   *
+   * @param {Object} feature - GeoJSON feature
+   */
+  addGeometry(feature) {
+    this.options.geoJSON.set(feature);
+  }
+
+  /**
+   * remove a geometry by its draw id
+   *
+   * @param {String} id - the drawid of the geometry
+   */
+  removeGeometry(id) {
+    this.options.geoJSON.unset(id);
+  }
+
+  /**
+   * add a feature collection (removes all currently draw features)
+   *
+   * @param {Object} featureCollection - a GeoJSON FeatureCollection
+   */
+  update(featureCollection) {
+    this.options.geoJSON.clear();
+    var feats = featureCollection.features;
+    for (var i = 0, ii = feats.length; i < ii; i++) {
+      this.options.geoJSON.set(feats[i]);
+    }
+  }
+
+  /**
+   * get a geometry by its draw id
+   *
+   * @param {String} id - the draw id of the geometry
+   */
+  get(id) {
+    return this.options.geoJSON.get(id);
+  }
+
+  /**
+   * get all draw geometries
+   *
+   * @returns {Object} a GeoJSON feature collection
+   */
+  getAll() {
+    return this.options.geoJSON.getAll();
+  }
+
+  /**
+   * remove all geometries
+   */
+  clear() {
+    this.options.geoJSON.clear();
+  }
+
+  /**
+   * remove all geometries and clears the history
+   */
+  clearAll() {
+    this.options.geoJSON.clearAll();
   }
 
 }
