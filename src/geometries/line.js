@@ -34,22 +34,24 @@ export default class Line extends Geometry {
 
   _addPoint(e) {
     var p = [ e.latLng.lng, e.latLng.lat ];
-    if (!this.drawing) {
-      this.drawing = true;
+    if (typeof this.vertexIdx === 'undefined') {
       this.coordinates = Immutable.List([p]);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+      this.vertexIdx = 0;
+    } else {
+      this.coordinates = this.coordinates.splice(-1, 1, p, p);
+      this.vertexIdx++;
     }
-    this.coordinates = this.coordinates.splice(-1, 1, p, p);
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], this.coordinates);
+
     this._map.fire('new.edit');
   }
 
   _onMouseMove(e) {
     var pos = DOM.mousePos(e, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    var c = this.coordinates;
-    c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], c);
+    this.coordinates = this.coordinates.set(this.vertexIdx + 1,[ coords.lng, coords.lat ]);
+    console.log(JSON.stringify(this.coordinates));
+
     this._map.fire('new.edit');
   }
 
@@ -59,8 +61,7 @@ export default class Line extends Geometry {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    this.coordinates = this.coordinates.splice(-1, 1);
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.coordinates = this.coordinates.delete(this.vertexIdx + 1);
 
     this._done('line');
   }
@@ -75,16 +76,15 @@ export default class Line extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = this.geojson.getIn(['geometry', 'coordinates', idx]);
+      this.initCoords = this.coordinates.get(idx);
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
+    var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates', idx], Immutable.fromJS(newPoint));
+    this.coordinates = this.coordinates.set(idx, newPoint);
 
-    //this.store.update(this.geojson.toJS());
     this._map.fire('new.edit');
   }
 
@@ -96,8 +96,8 @@ export default class Line extends Geometry {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    var newCoords = this.geojson.getIn(['geometry', 'coordinates']).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], newCoords);
+    this.coordinates = this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
+
     this._map.fire('new.edit');
   }
 
