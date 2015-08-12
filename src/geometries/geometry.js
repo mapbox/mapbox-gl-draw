@@ -75,6 +75,10 @@ export default class Geometry {
 
     var translatedGeom = translate(JSON.parse(JSON.stringify(this.initGeom)), init, curr, this._map);
     this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
+    if (this.coordinates.get(0).length > 1) {
+      // you should be ashamed of yourself
+      this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
+    }
 
     this._map.fire('new.edit');
   }

@@ -40,8 +40,8 @@ export default class Line extends Geometry {
       this.vertexIdx = 0;
     } else {
       this.coordinates = this.coordinates.splice(-1, 1, p, p);
-      this.vertexIdx++;
     }
+    this.vertexIdx++;
 
     this._map.fire('new.edit');
   }
@@ -49,8 +49,7 @@ export default class Line extends Geometry {
   _onMouseMove(e) {
     var pos = DOM.mousePos(e, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    this.coordinates = this.coordinates.set(this.vertexIdx + 1,[ coords.lng, coords.lat ]);
-    console.log(JSON.stringify(this.coordinates));
+    this.coordinates = this.coordinates.set(this.vertexIdx,[ coords.lng, coords.lat ]);
 
     this._map.fire('new.edit');
   }
@@ -61,7 +60,7 @@ export default class Line extends Geometry {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    this.coordinates = this.coordinates.delete(this.vertexIdx + 1);
+    this.coordinates = this.coordinates.remove(this.vertexIdx);
 
     this._done('line');
   }

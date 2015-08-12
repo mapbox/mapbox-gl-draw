@@ -28,7 +28,7 @@ export default class Point extends Geometry {
   _completeDraw(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
-    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
+    this.coordinates = Immutable.List([ e.latLng.lng, e.latLng.lat ]);
     this._done('point');
   }
 

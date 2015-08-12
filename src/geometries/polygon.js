@@ -37,17 +37,18 @@ export default class Polygon extends Geometry {
     if (typeof this.vertexIdx === 'undefined') {
       this.vertexIdx = 0;
       this.first = p;
-      this.coordinates = Immutable.fromJS([[p, p, p, p]]);
+      var coords = this.coordinates.get(0);
+      this.coordinates = this.coordinates.set(0, coords.splice(0, 4, p, p, p, p));
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
-    } else {
-      this.vertexIdx++;
     }
+
+    this.vertexIdx++;
 
     this.coordinates = this.coordinates.setIn([0, this.vertexIdx], p);
 
     if (this.vertexIdx > 2) {
-      this.coordinates = this.coordinates.setIn([0, this.vertexIdx + 1], p);
-      this.coordinates = this.coordinates.setIn([0, this.vertexIdx + 2], this.first);
+      var c = this.coordinates.get(0);
+      this.coordinates = this.coordinates.set(0, c.push(this.first));
     }
 
     this._map.fire('new.edit');
@@ -56,14 +57,16 @@ export default class Polygon extends Geometry {
   _onMouseMove(e) {
     var pos = DOM.mousePos(e, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    this.coordinates = this.coordinates.setIn([0, this.vertexIdx + 1], [coords.lng, coords.lat]);
+    this.coordinates = this.coordinates.setIn([0, this.vertexIdx], [coords.lng, coords.lat]);
 
     this._map.fire('new.edit');
   }
 
   _completeDraw() {
-    if (this.vertexIdx > 2)
-      this.coordinates = this.coordinates.delete(this.vertexIdx + 1);
+    if (this.vertexIdx > 2) {
+      var c = this.coordinates.get(0);
+      this.coordinates = this.coordinates.set(0, c.remove(this.vertexIdx));
+    }
 
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.addVertex);
@@ -92,9 +95,9 @@ export default class Polygon extends Geometry {
     var dy = curr.y - init.y;
     var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
 
-    this.coordinates = this.coordinates.setIn([0, idx], Immutable.fromJS(newPoint));
+    this.coordinates = this.coordinates.setIn([0, idx], newPoint);
     if (idx === 0)
-      this.coordinates = this.coordinates.setIn([0, -1], Immutable.fromJS(newPoint));
+      this.coordinates = this.coordinates.setIn([0, -1], newPoint);
 
     this._map.fire('new.edit');
   }
@@ -108,7 +111,7 @@ export default class Polygon extends Geometry {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    var newCoords = this.coordinates.get(0).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
+    var newCoords = this.coordinates.get(0).splice(idx, 0, [ coords.lng, coords.lat ]);
     this.coordinates = this.coordinates.set(0, newCoords);
 
     this._map.fire('new.edit');
