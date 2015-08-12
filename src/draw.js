@@ -53,7 +53,7 @@ export default class Draw extends mapboxgl.Control {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
-    this.options.geoJSON = new Store(map, this.options.geoJSON);
+    this._store = new Store(map, this.options.geoJSON);
     this._editStore = new EditStore(map);
 
     // Build out draw controls
@@ -169,7 +169,7 @@ export default class Draw extends mapboxgl.Control {
       new LatLng(sw.lat, sw.lng),
       new LatLng(ne.lat, ne.lng)
     );
-    var feats = this.options.geoJSON.getFeaturesIn(bounds);
+    var feats = this._store.getFeaturesIn(bounds);
     this._massEdit(feats.map(feat => feat.drawId));
   }
 
@@ -215,7 +215,7 @@ export default class Draw extends mapboxgl.Control {
 
   _edit(feature) {
     this.editId = feature.properties.drawId;
-    var feat = this.options.geoJSON.edit(this.editId);
+    var feat = this._store.edit(this.editId);
     this._editStore.add(feat);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
@@ -377,7 +377,7 @@ export default class Draw extends mapboxgl.Control {
     this._map.on('load', () => {
 
       this._map.addSource('draw', {
-        data: this.options.geoJSON.getAll(),
+        data: this._store.getAll(),
         type: 'geojson'
       });
 
@@ -398,7 +398,7 @@ export default class Draw extends mapboxgl.Control {
       });
 
       this._map.on('draw.end', e => {
-        this.options.geoJSON.set(e.geometry);
+        this._store.set(e.geometry);
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
@@ -448,7 +448,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    */
   addGeometry(feature) {
-    this.options.geoJSON.set(feature);
+    this._store.set(feature);
   }
 
   /**
@@ -457,7 +457,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the drawid of the geometry
    */
   removeGeometry(id) {
-    this.options.geoJSON.unset(id);
+    this._store.unset(id);
   }
 
   /**
@@ -466,10 +466,10 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} featureCollection - a GeoJSON FeatureCollection
    */
   update(featureCollection) {
-    this.options.geoJSON.clear();
+    this._store.clear();
     var feats = featureCollection.features;
     for (var i = 0, ii = feats.length; i < ii; i++) {
-      this.options.geoJSON.set(feats[i]);
+      this._store.set(feats[i]);
     }
   }
 
@@ -479,7 +479,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the draw id of the geometry
    */
   get(id) {
-    return this.options.geoJSON.get(id);
+    return this._store.get(id);
   }
 
   /**
@@ -488,21 +488,21 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Object} a GeoJSON feature collection
    */
   getAll() {
-    return this.options.geoJSON.getAll();
+    return this._store.getAll();
   }
 
   /**
    * remove all geometries
    */
   clear() {
-    this.options.geoJSON.clear();
+    this._store.clear();
   }
 
   /**
    * remove all geometries and clears the history
    */
   clearAll() {
-    this.options.geoJSON.clearAll();
+    this._store.clearAll();
   }
 
 }

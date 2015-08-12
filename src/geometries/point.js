@@ -1,6 +1,7 @@
 'use strict';
 
 import Geometry from './geometry';
+import Immutable from 'immutable';
 
 /**
  * Point geometry class
@@ -13,7 +14,8 @@ import Geometry from './geometry';
 export default class Point extends Geometry {
 
   constructor(map) {
-    super(map, 'Point');
+    var coordinates = Immutable.List([0, 0]);
+    super(map, 'Point', coordinates);
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }
