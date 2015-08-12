@@ -49,7 +49,7 @@ export default class EditStore {
   getAllGeoJSON() {
     return {
       type: 'FeatureCollection',
-      features: this.features.map(feature => feature.geojson.toJS())
+      features: this.features.map(feature => feature.getGeoJSON())
     };
   }
 
@@ -75,8 +75,8 @@ export default class EditStore {
     var vertices = [];
 
     for (var i = 0; i < this.features.length; i++) {
-      var coords = this.features[i].get().geometry.coordinates;
-      var type = this.features[i].get().geometry.type;
+      var coords = this.features[i].getGeoJSON().geometry.coordinates;
+      var type = this.features[i].getGeoJSON().geometry.type;
       if (type === 'LineString' || type === 'Polygon') {
         coords = type === 'Polygon' ? coords[0] : coords;
         var l = type === 'LineString' ? coords.length : coords.length - 1;
@@ -106,12 +106,12 @@ export default class EditStore {
       if (this.features[i].type === 'square') continue;
 
       var feat = this.features[i];
-      var c = feat.get().geometry.coordinates;
+      var c = feat.getGeoJSON().geometry.coordinates;
 
-      if (feat.get().geometry.type === 'LineString' ||
-          feat.get().geometry.type === 'Polygon') {
+      if (feat.getGeoJSON().geometry.type === 'LineString' ||
+          feat.getGeoJSON().geometry.type === 'Polygon') {
 
-        c = feat.get().geometry.type === 'Polygon' ? c[0] : c;
+        c = feat.getGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
 
         for (var j = 0; j < c.length - 1; j++) {
           var ptA = this._map.project([ c[j][1], c[j][0] ]);

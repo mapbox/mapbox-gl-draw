@@ -7,9 +7,8 @@ import Immutable from 'immutable';
  * Point geometry class
  *
  * @param {Object} map - Instance of MpaboxGL Map
- * @param {Object} drawStore - The draw store for this session
- * @param {Object} [data] - GeoJSON polygon feature
  * @returns {Point} this
+ * @private
  */
 export default class Point extends Geometry {
 

@@ -51,7 +51,7 @@ export default class Store {
   getAllGeoJSON() {
     return {
       type: 'FeatureCollection',
-      features: this.history[this.historyIndex].map(feature => feature.geojson.toJS()).toJS()
+      features: this.history[this.historyIndex].map(feature => feature.getGeoJSON()).toJS()
     };
   }
 

@@ -23,7 +23,7 @@ export default class Geometry {
     this.drawId = hat();
     this.coordinates = coordinates;
 
-    this.geojson = Immutable.fromJS({
+    this.geojson = {
       type: 'Feature',
       properties: {
         drawId: this.drawId
@@ -32,14 +32,15 @@ export default class Geometry {
         type: type,
         coordinates: this.coordinates.toJS()
       }
-    });
+    };
   }
 
   /**
    * @return {Object} GeoJSON feature
    */
-  get() {
-    return this.geojson.toJS();
+  getGeoJSON() {
+    this.geojson.geometry.coordinates = this.coordinates.toJS();
+    return this.geojson;
   }
 
   /**
@@ -69,14 +70,17 @@ export default class Geometry {
   translate(init, curr) {
     if (!this.translating) {
       this.translating = true;
-      this.initGeom = Immutable.fromJS(this.geojson.toJS());
+      this.initGeom = JSON.parse(JSON.stringify(this.getGeoJSON()));
     }
-    this.geojson = Immutable.fromJS(translate(this.initGeom.toJS(), init, curr, this._map));
+
+    var translatedGeom = translate(JSON.parse(JSON.stringify(this.initGeom)), init, curr, this._map);
+    this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
+
     this._map.fire('new.edit');
   }
 
   getExtent() {
-    var ext = extent(this.get());
+    var ext = extent(this.getGeoJSON());
     return new LatLngBounds(
       new LatLng(ext[1], ext[0]),
       new LatLng(ext[3], ext[2])

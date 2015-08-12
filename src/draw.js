@@ -66,7 +66,6 @@ export default class Draw extends mapboxgl.Control {
       });
     }
 
-    /*
     if (controls.shape) {
       this.polygonCtrl = this._createButton({
         className: `${controlClass} shape`,
@@ -76,7 +75,6 @@ export default class Draw extends mapboxgl.Control {
       });
     }
 
-    */
     if (controls.square) {
       this.squareCtrl = this._createButton({
         className: `${controlClass} square`,
