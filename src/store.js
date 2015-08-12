@@ -1,8 +1,8 @@
 'use strict';
 
-import { LatLng, LatLngBounds } from 'mapbox-gl';
+//import { LatLng, LatLngBounds } from 'mapbox-gl';
 import Immutable from 'immutable';
-import extent from 'turf-extent';
+//import extent from 'turf-extent';
 
 /**
  * A store for keeping track of versions of drawings
@@ -61,20 +61,16 @@ export default class Store {
 
   getFeaturesIn(bounds) {
     var results = [];
-    var features = this.history[this.historyIndex].map(feat => feat.geojson.toJS()).toJS();
-    for (var i = 0; i < features.length; i++) {
-      var ext = extent(features[i]);
-      ext = new LatLngBounds(
-        new LatLng(ext[1], ext[0]),
-        new LatLng(ext[3], ext[2])
-      );
+    var features = this.history[this.historyIndex];
+    for (var i = 0; i < features.size; i++) {
+      var ext = features.get(i).getExtent();
       if (bounds.getNorth() < ext.getSouth() ||
           bounds.getSouth() > ext.getNorth() ||
           bounds.getEast() < ext.getWest() ||
           bounds.getWest() > ext.getEast()) {
         continue;
       } else {
-        results.push(features[i]);
+        results.push(features.get(i));
       }
     }
     return results;

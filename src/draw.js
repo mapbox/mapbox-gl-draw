@@ -170,7 +170,7 @@ export default class Draw extends mapboxgl.Control {
       new LatLng(ne.lat, ne.lng)
     );
     var feats = this.options.geoJSON.getFeaturesIn(bounds);
-    this._massEdit(feats.map(feat => feat.properties.drawId));
+    this._massEdit(feats.map(feat => feat.drawId));
   }
 
   /**
@@ -240,7 +240,7 @@ export default class Draw extends mapboxgl.Control {
     if (this.editId) {
       this._editStore.get(this.editId).completeEdit();
     } else if (this._editStore.inProgress()) {
-      this._editStore.get(this.editId).completeDraw();
+      this._editStore.getAll()[0].completeDraw(); // REVISIT BRUH
     }
   }
 
@@ -418,7 +418,7 @@ export default class Draw extends mapboxgl.Control {
         //////////////////////////////////////////////////////////////////////
         //////////// FIX THIS WHEN MULTIPLE LAYER QUERIES LAND ///////////////
         //////////////////////////////////////////////////////////////////////
-        this._map.featuresAt(e.point, { radius: 7, layer: 'gl-edit-points' }, (err, features) => {
+        this._map.featuresAt(e.point, { radius: 7, layer: ['gl-edit-points'/*, 'gl-draw-polygons'*/] }, (err, features) => {
           if (err) throw err;
           if (!features.length) return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
@@ -438,9 +438,9 @@ export default class Draw extends mapboxgl.Control {
 
   }
 
-  /***************/
-  /* API Methods */
-  /***************/
+  //****************//
+  //  API Methods   //
+  //****************//
 
   /**
    * add a geometry

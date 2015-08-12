@@ -43,6 +43,10 @@ export default class EditStore {
   }
 
   getAll() {
+    return this.features;
+  }
+
+  getAllGeoJSON() {
     return {
       type: 'FeatureCollection',
       features: this.features.map(feature => feature.geojson.toJS())
@@ -133,7 +137,7 @@ export default class EditStore {
   }
 
   render() {
-    var geom = this.getAll();
+    var geom = this.getAllGeoJSON();
     geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
     this._map.fire('edit.feature.update', {
       geojson: geom
