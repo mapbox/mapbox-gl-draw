@@ -61,7 +61,7 @@ export default class Store {
 
   getFeaturesIn(bounds) {
     var results = [];
-    var features = this.getAll().features;
+    var features = this.history[this.historyIndex].map(feat => feat.geojson.toJS()).toJS();
     for (var i = 0; i < features.length; i++) {
       var ext = extent(features[i]);
       ext = new LatLngBounds(

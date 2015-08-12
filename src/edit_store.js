@@ -8,18 +8,9 @@
  * @param {Map} map - an instance of mapboxgl.Map
  * @param {Array<Object>} [features] - an array of geojson features
  * @returns {EditStore} this
- *
+ * @private
  */
 export default class EditStore {
-
-  /*
-  constructor(map, features) {
-    this._map = map;
-    this.features = features;
-    if (this.features[0].geometry.coordinates.length)
-      this.features.forEach(feat => this.update(feat));
-  }
-  */
 
   constructor(map, features) {
     this._map = map;
@@ -72,7 +63,7 @@ export default class EditStore {
     this.render();
   }
 
-  isEditting() {
+  inProgress() {
     return this.features.length > 0;
   }
 

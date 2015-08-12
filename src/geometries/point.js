@@ -12,8 +12,9 @@ import Geometry from './geometry';
  */
 export default class Point extends Geometry {
 
-  constructor(map, drawStore, data) {
-    super(map, drawStore, 'Point', data);
+  constructor(map) {
+    super(map, 'Point');
+    this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }
 
@@ -26,7 +27,7 @@ export default class Point extends Geometry {
   _completeDraw(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
+    this.geojson = this.geojson.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
     this._done('point');
   }
 

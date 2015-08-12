@@ -15,7 +15,8 @@ import { translatePoint, DOM } from '../util';
 export default class Square extends Geometry {
 
   constructor(map) {
-    super(map, 'Polygon');
+    var coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0]]]);
+    super(map, 'Polygon', coordinates);
 
     this.type = 'square';
 

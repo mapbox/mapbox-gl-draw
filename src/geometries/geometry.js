@@ -2,7 +2,6 @@
 
 import hat from 'hat';
 import Immutable from 'immutable';
-//import EditStore from '../edit_store';
 import { translate } from '../util';
 import { LatLng, LatLngBounds } from 'mapbox-gl';
 import extent from 'turf-extent';
@@ -19,10 +18,10 @@ import extent from 'turf-extent';
  */
 export default class Geometry {
 
-  constructor(map, type) {
+  constructor(map, type, coordinates) {
     this._map = map;
     this.drawId = hat();
-    this.coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0]]]);
+    this.coordinates = coordinates;
 
     this.geojson = Immutable.fromJS({
       type: 'Feature',
