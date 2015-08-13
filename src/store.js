@@ -42,10 +42,7 @@ export default class Store {
   }
 
   getAll() {
-    return {
-      type: 'FeatureCollection',
-      features: this.history[this.historyIndex]
-    };
+    return this.history[this.historyIndex];
   }
 
   getAllGeoJSON() {
@@ -59,6 +56,12 @@ export default class Store {
     return this.history[this.historyIndex].find(feature => feature.drawId === id);
   }
 
+  /**
+   * Get all features within a given extent
+   *
+   * @param {LatLngBounds} bounds
+   * @private
+   */
   getFeaturesIn(bounds) {
     var results = [];
     var features = this.history[this.historyIndex];

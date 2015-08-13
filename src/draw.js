@@ -232,8 +232,16 @@ export default class Draw extends mapboxgl.Control {
    */
   _massEdit(drawIds) {
     for (var i = 0; i < drawIds.length; i++) {
-      this._edit(drawIds[i]);
+      var feat = this._store.edit(drawIds[i]);
+      this._editStore.add(feat);
     }
+
+    this.deleteBtn = this._createButton({
+      className: 'mapboxgl-ctrl-draw-btn trash',
+      title: 'delete all features in edit mode',
+      fn: this._destroyAll.bind(this),
+      id: 'deleteBtn'
+    });
   }
 
   _finish() {
@@ -309,6 +317,16 @@ export default class Draw extends mapboxgl.Control {
     }
   }
 
+  _destroy(id) {
+    this._editStore.endEdit(id);
+    this._exitEdit();
+  }
+
+  _destroyAll() {
+    this._editStore.clear();
+    this._exitEdit();
+  }
+
   _drawPolygon() {
     this._finish();
     var polygon = new Polygon(this._map);
@@ -337,11 +355,6 @@ export default class Draw extends mapboxgl.Control {
     point.startDraw();
   }
 
-  _destroy(id) {
-    this._editStore.endEdit(id);
-    this._exitEdit();
-  }
-
   _createButton(opts) {
     var attr = { title: opts.title };
     if (opts.id) {
@@ -354,9 +367,6 @@ export default class Draw extends mapboxgl.Control {
       e.stopPropagation();
 
       var el = e.target;
-
-      if (this._editStore.inProgress() && !this.editId)
-        this._editStore.get(this.editId).completeDraw();
 
       if (el.classList.contains('active')) {
         el.classList.remove('active');
@@ -377,7 +387,7 @@ export default class Draw extends mapboxgl.Control {
     this._map.on('load', () => {
 
       this._map.addSource('draw', {
-        data: this._store.getAll(),
+        data: this._store.getAllGeoJSON(),
         type: 'geojson'
       });
 
@@ -415,15 +425,15 @@ export default class Draw extends mapboxgl.Control {
       this._map.on('click', this.onClick);
 
       this._map.on('mousemove', e => {
-        //////////////////////////////////////////////////////////////////////
-        //////////// FIX THIS WHEN MULTIPLE LAYER QUERIES LAND ///////////////
-        //////////////////////////////////////////////////////////////////////
-        this._map.featuresAt(e.point, { radius: 7, layer: ['gl-edit-points'/*, 'gl-draw-polygons'*/] }, (err, features) => {
+        this._map.featuresAt(e.point, {
+          radius: 7,
+          layer: ['gl-edit-points', 'gl-edit-points-mid']
+        }, (err, features) => {
           if (err) throw err;
           if (!features.length) return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
           var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
-          var midpoint = R.find(feat => feat.properties.meta === 'midPoint')(features);
+          var midpoint = R.find(feat => feat.properties.meta === 'midpoint')(features);
 
           if (vertex || midpoint) {
             this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
