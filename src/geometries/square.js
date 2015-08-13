@@ -8,14 +8,16 @@ import { translatePoint, DOM } from '../util';
  * Square geometry class
  *
  * @param {Object} map - Instance of MapboxGL Map
- * @param {Object} drawStore - The overall drawStore for this session
- * @param {Object} [data] - GeoJSON polygon feature
  * @returns {Square} this
+ * @private
  */
 export default class Square extends Geometry {
 
-  constructor(map, drawStore, data) {
-    super(map, drawStore, 'Polygon', data);
+  constructor(map) {
+    var coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]]);
+    super(map, 'Polygon', coordinates);
+
+    this.type = 'square';
 
     // event handlers
     this.onMouseDown = this._onMouseDown.bind(this);
@@ -33,14 +35,12 @@ export default class Square extends Geometry {
     this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
     this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
-    var pos = DOM.mousePos(e, this._map._container);
+    var pos = DOM.mousePos(e, this._map.getContainer());
     var c = this._map.unproject([pos.x, pos.y]);
-    var arr = [];
     var i = -1;
     while (++i < 5) {
-      arr.push([ c.lng, c.lat]);
+      this.coordinates = this.coordinates.setIn([0, i], [ c.lng, c.lat ]);
     }
-    this.coordinates = this.coordinates.push(Immutable.fromJS(arr));
   }
 
   _onMouseMove(e) {
@@ -54,13 +54,12 @@ export default class Square extends Geometry {
 
     var pos = DOM.mousePos(e, this._map._container);
     var c = this._map.unproject([pos.x, pos.y]);
-    var orig = this.coordinates.get(0).get(0);
-    this.coordinates = this.coordinates.setIn([0, 1], [ orig.get(0), c.lat ]);
+    var orig = this.coordinates.getIn([0, 0]);
+    this.coordinates = this.coordinates.setIn([0, 1], [ orig[0], c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
-    this.coordinates = this.coordinates.setIn([0, 3], [ c.lng, orig.get(1)]);
+    this.coordinates = this.coordinates.setIn([0, 3], [ c.lng, orig[1] ]);
 
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
-    this.store.update(this.feature.toJS());
+    this._map.fire('new.edit');
   }
 
   _completeDraw() {
@@ -74,42 +73,41 @@ export default class Square extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = this.feature.getIn(['geometry', 'coordinates', 0, idx]);
+      this.initCoords = this.coordinates.getIn([0, idx]);
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
+    var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
-
-    this.feature = this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(newPoint));
+    this.coordinates = this.coordinates.setIn([0, idx], newPoint);
 
     var x = newPoint[0];
     var y = newPoint[1];
 
     switch (idx) {
       case 0:
-        this.feature = this._setV(1, [ x, this._getV(1).get(1) ]);
-        this.feature = this._setV(3, [ this._getV(3).get(0), y ]);
+        this.coordinates = this._setV(1, [ x, this._getV(1)[1] ]);
+        this.coordinates = this._setV(3, [ this._getV(3)[0], y ]);
         break;
       case 1:
-        this.feature = this._setV(0, [ x, this._getV(0).get(1) ]);
-        this.feature = this._setV(2, [ this._getV(2).get(0), y ]);
+        this.coordinates = this._setV(0, [ x, this._getV(0)[1] ]);
+        this.coordinates = this._setV(2, [ this._getV(2)[0], y ]);
         break;
       case 2:
-        this.feature = this._setV(1, [ this._getV(1).get(0), y ]);
-        this.feature = this._setV(3, [ x, this._getV(3).get(1) ]);
+        this.coordinates = this._setV(1, [ this._getV(1)[0], y ]);
+        this.coordinates = this._setV(3, [ x, this._getV(3)[1] ]);
         break;
       case 3:
-        this.feature = this._setV(0, [ this._getV(0).get(0), y ]);
-        this.feature = this._setV(2, [ x, this._getV(2).get(1) ]);
+        this.coordinates = this._setV(0, [ this._getV(0)[0], y ]);
+        this.coordinates = this._setV(2, [ x, this._getV(2)[1] ]);
         break;
     }
 
     // always reset last point to equal the first point
-    this.feature = this._setV(4, this._getV(0).toJS());
+    this.coordinates = this._setV(4, this._getV(0));
 
-    this.store.update(this.feature.toJS());
+    this._map.fire('new.edit');
   }
 
   /**
@@ -121,7 +119,7 @@ export default class Square extends Geometry {
    * @private
    */
   _setV(idx, val) {
-    return this.feature.setIn(['geometry', 'coordinates', 0, idx], Immutable.fromJS(val));
+    return this.coordinates.setIn([0, idx], val);
   }
 
   /**
@@ -132,7 +130,7 @@ export default class Square extends Geometry {
    * @private
    */
   _getV(idx) {
-    return this.feature.getIn(['geometry', 'coordinates', 0, idx]);
+    return this.coordinates.getIn([0, idx]);
   }
 
 }

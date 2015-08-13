@@ -1,19 +1,21 @@
 'use strict';
 
 import Geometry from './geometry';
+import Immutable from 'immutable';
 
 /**
  * Point geometry class
  *
  * @param {Object} map - Instance of MpaboxGL Map
- * @param {Object} drawStore - The draw store for this session
- * @param {Object} [data] - GeoJSON polygon feature
  * @returns {Point} this
+ * @private
  */
 export default class Point extends Geometry {
 
-  constructor(map, drawStore, data) {
-    super(map, drawStore, 'Point', data);
+  constructor(map) {
+    var coordinates = Immutable.List([0, 0]);
+    super(map, 'Point', coordinates);
+    this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }
 
@@ -26,7 +28,7 @@ export default class Point extends Geometry {
   _completeDraw(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], [ e.latLng.lng, e.latLng.lat ]);
+    this.coordinates = Immutable.List([ e.latLng.lng, e.latLng.lat ]);
     this._done('point');
   }
 

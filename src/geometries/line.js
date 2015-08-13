@@ -8,21 +8,21 @@ import { translatePoint, DOM } from '../util';
  * Line geometry class
  *
  * @param {Object} map - Instance of MapboxGL Map
- * @param {Object} drawStore - The overall drawStore for this session
- * @param {Object} [data] - GeoJSON line string feature
  * @returns {Line} this
+ * @private
  */
 export default class Line extends Geometry {
 
-  constructor(map, drawStore, data) {
+  constructor(map) {
+    var coordinates = Immutable.List([[0, 0], [0, 0]]);
+    super(map, 'LineString', coordinates);
 
-    super(map, drawStore, 'LineString', data);
+    this.type = 'line';
 
     // event listeners
     this.addPoint = this._addPoint.bind(this);
     this.onMouseMove = this._onMouseMove.bind(this);
     this.completeDraw = this._completeDraw.bind(this);
-
   }
 
   startDraw() {
@@ -34,23 +34,24 @@ export default class Line extends Geometry {
 
   _addPoint(e) {
     var p = [ e.latLng.lng, e.latLng.lat ];
-    if (!this.editting) {
-      this.editting = true;
-      this.coordinates = this.coordinates.push(p);
+    if (typeof this.vertexIdx === 'undefined') {
+      this.coordinates = Immutable.List([p]);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+      this.vertexIdx = 0;
+    } else {
+      this.coordinates = this.coordinates.splice(-1, 1, p, p);
     }
-    this.coordinates = this.coordinates.splice(-1, 1, p);
-    this.coordinates = this.coordinates.push(p);
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
-    this.store.update(this.feature.toJS());
+    this.vertexIdx++;
+
+    this._map.fire('new.edit');
   }
 
   _onMouseMove(e) {
     var pos = DOM.mousePos(e, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    var c = this.coordinates;
-    c = c.splice(-1, 1, [ coords.lng, coords.lat ]);
-    this.store.update(this.feature.setIn(['geometry', 'coordinates'], c).toJS());
+    this.coordinates = this.coordinates.set(this.vertexIdx,[ coords.lng, coords.lat ]);
+
+    this._map.fire('new.edit');
   }
 
   _completeDraw() {
@@ -59,8 +60,7 @@ export default class Line extends Geometry {
     this._map.off('dblclick', this.completeDraw);
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
 
-    this.coordinates = this.coordinates.splice(-1, 1);
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], this.coordinates);
+    this.coordinates = this.coordinates.remove(this.vertexIdx);
 
     this._done('line');
   }
@@ -75,16 +75,16 @@ export default class Line extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = this.feature.getIn(['geometry', 'coordinates', idx]);
+      this.initCoords = this.coordinates.get(idx);
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords.toJS(), dx, dy, this._map);
+    var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
-    this.feature = this.feature.setIn(['geometry', 'coordinates', idx], Immutable.fromJS(newPoint));
+    this.coordinates = this.coordinates.set(idx, newPoint);
 
-    this.store.update(this.feature.toJS());
+    this._map.fire('new.edit');
   }
 
   /**
@@ -95,9 +95,9 @@ export default class Line extends Geometry {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    var newCoords = this.feature.getIn(['geometry', 'coordinates']).splice(idx, 0, Immutable.fromJS([ coords.lng, coords.lat ]));
-    this.feature = this.feature.setIn(['geometry', 'coordinates'], newCoords);
-    this.store.update(this.feature.toJS());
+    this.coordinates = this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
+
+    this._map.fire('new.edit');
   }
 
 }

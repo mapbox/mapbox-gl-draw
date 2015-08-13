@@ -3,8 +3,10 @@
 import R from 'ramda';
 import { DOM } from './util';
 import mapboxgl from 'mapbox-gl';
+import EditStore from './edit_store';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
+import { LatLng, LatLngBounds } from 'mapbox-gl';
 
 // Data store
 import Store from './store';
@@ -40,13 +42,19 @@ export default class Draw extends mapboxgl.Control {
     this.onKeyUp = this._onKeyUp.bind(this);
     this.endDrag = this._endDrag.bind(this);
     this.initiateDrag = this._initiateDrag.bind(this);
+
+
+    this.onKeyDown = this._onKeyDown.bind(this);
+    this.onMouseDown = this._onMouseDown.bind(this);
+    this.onMouseUp = this._onMouseUp.bind(this);
   }
 
   onAdd(map) {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
     var controls = this.options.controls;
-    this.options.geoJSON = new Store(this.options.geoJSON, map);
+    this._store = new Store(map, this.options.geoJSON);
+    this._editStore = new EditStore(map);
 
     // Build out draw controls
     if (controls.line) {
@@ -89,10 +97,18 @@ export default class Draw extends mapboxgl.Control {
       map.getContainer().addEventListener('keyup', this.onKeyUp);
     }
 
+    map.getContainer().addEventListener('keydown', this.onKeyDown);
+
     this._map = map;
 
     this._mapState();
     return container;
+  }
+
+  _onKeyDown(e) {
+    if (e.keyCode === 16) {
+      this.shiftDown = true;
+    }
   }
 
   _onKeyUp(e) {
@@ -127,6 +143,32 @@ export default class Draw extends mapboxgl.Control {
           this._destroy(this.editId);
         }
     }
+    if (e.keyCode === 16) {
+      this.shiftDown = false;
+    }
+  }
+
+  _onMouseDown(e) {
+    if (!this.shiftDown) return;
+    this.featInStart = DOM.mousePos(e, this._map.getContainer());
+  }
+
+  _onMouseUp(e) {
+    if (!this.shiftDown) return;
+    var end = DOM.mousePos(e, this._map.getContainer());
+
+    var ne = this.featInStart.x > end.x ? this.featInStart : end;
+    var sw = this.featInStart.x > end.x ? end : this.featInStart;
+
+    ne = this._map.unproject(ne);
+    sw = this._map.unproject(sw);
+
+    var bounds = new LatLngBounds(
+      new LatLng(sw.lat, sw.lng),
+      new LatLng(ne.lat, ne.lng)
+    );
+    var feats = this._store.getFeaturesIn(bounds);
+    this._massEdit(feats.map(feat => feat.drawId));
   }
 
   /**
@@ -144,63 +186,61 @@ export default class Draw extends mapboxgl.Control {
       if (err) throw err;
 
       if (features.length) { // clicked on a feature
-        if (this._control && !this.editId) { // clicked on a feature while in draw mode
+        if (this._editStore.inProgress() && !this.editId) { // clicked on a feature while in draw mode
           return;
-        } else if (this._control && this.editId) { // clicked on a feature while in edit mode
+        } else if (this._editStore.inProgress() && this.editId) { // clicked on a feature while in edit mode
           if (features[0].properties.drawId === this.editId) { // clicked on the feature you're editing
             return;
           } else { // clicked on a different feature while in edit mode
-            this._control.completeEdit();
+            this._editStore.get(this.editId).completeDraw();
           }
         }
       } else { // clicked not on a feature
-        if (!this._control && !this.editId) { // click outside features while not drawing or editing
+        if (!this._editStore.inProgress()) { // click outside features while not drawing or editing
           return;
-        } else if (this._control && !this.editId) { // clicked outside features while drawing
+        } else if (this._editStore.inProgress() && !this.editId) { // clicked outside features while drawing
           return;
-        } else if (this._control && this.editId) { // clicked outside features while editing
-          return this._control.completeEdit();
+        } else if (this.editId) { // clicked outside features while editing
+          return this._finish();
         }
       }
 
       // if (clicked on a feature && ((!editing this feature && !drawing))
-      this._edit(features[0]);
+      this._edit(features[0].properties.drawId);
     });
 
   }
 
-  _edit(feature) {
-    if (!feature.properties.drawId) return; // for when null geometries are returned
-
-    this.editId = feature.properties.drawId;
-    feature = this.options.geoJSON.edit(this.editId);
-    var c = feature.geometry.coordinates;
-    var featureType = feature.geometry.type;
-
-    if (featureType === 'Point')
-      this._control = new Point(this._map, this.options.geoJSON, feature);
-    else if (featureType === 'LineString')
-      this._control = new Line(this._map, this.options.geoJSON, feature);
-    else if (c[0][0][0] === c[0][1][0])
-      this._control = new Square(this._map, this.options.geoJSON, feature);
-    else
-      this._control = new Polygon(this._map, this.options.geoJSON, feature);
+  _edit(drawId) {
+    this.editId = drawId;
+    var feat = this._store.edit(this.editId);
+    this._editStore.add(feat);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
-      title: `delete ${featureType}`,
+      title: `delete ${feat.type}`,
       fn: this._destroy.bind(this, this.editId),
       id: 'deleteBtn'
     });
   }
 
+  /**
+   * @param {Array<String>} features - an array of drawIds
+   * @private
+   */
+  _massEdit(drawIds) {
+    for (var i = 0; i < drawIds.length; i++) {
+      this._edit(drawIds[i]);
+    }
+  }
+
   _finish() {
-    if (this._control && this.editId) { // edit mode
-      this._control.completeEdit();
-    } else if (this._control) {
-      this._control.completeDraw(); // draw mode
+    if (this.editId) {
+      this._editStore.get(this.editId).completeEdit();
+    } else if (this._editStore.inProgress()) {
+      this._editStore.getAll()[0].completeDraw(); // REVISIT BRUH
     }
   }
 
@@ -208,7 +248,6 @@ export default class Draw extends mapboxgl.Control {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     this.editId = false;
-    this._control = false;
   }
 
   _initiateDrag(e) {
@@ -228,7 +267,7 @@ export default class Draw extends mapboxgl.Control {
       }
 
       if (this.newVertex) {
-        this._control.editAddVertex(coords, this.newVertex.properties.index);
+        this._editStore.get(this.editId).editAddVertex(coords, this.newVertex.properties.index);
         this.vertex = this.newVertex;
       }
 
@@ -250,9 +289,9 @@ export default class Draw extends mapboxgl.Control {
     var curr = DOM.mousePos(e, this._map.getContainer());
 
     if (this.vertex) {
-      this._control.moveVertex(this.init, curr, this.vertex.properties.index);
+      this._editStore.get(this.editId).moveVertex(this.init, curr, this.vertex.properties.index);
     } else {
-      this._control.translate(this.init, curr);
+      this._editStore.get(this.editId).translate(this.init, curr);
     }
   }
 
@@ -261,42 +300,45 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
-    this._control.translating = false;
+    this._editStore.get(this.editId).translating = false;
     this.dragging = false;
 
     if (this.vertex) {
       this.vertex = false;
-      this._control.movingVertex = false;
+      this._editStore.get(this.editId).movingVertex = false;
     }
   }
 
   _drawPolygon() {
     this._finish();
-    this._control = new Polygon(this._map, this.options.geoJSON);
-    this._control.startDraw();
+    var polygon = new Polygon(this._map);
+    this._editStore.add(polygon);
+    polygon.startDraw();
   }
 
   _drawLine() {
     this._finish();
-    this._control = new Line(this._map, this.options.geoJSON);
-    this._control.startDraw();
+    var line = new Line(this._map);
+    this._editStore.add(line);
+    line.startDraw();
   }
 
   _drawSquare() {
     this._finish();
-    this._control = new Square(this._map, this.options.geoJSON);
-    this._control.startDraw();
+    var square = new Square(this._map);
+    this._editStore.add(square);
+    square.startDraw();
   }
 
   _drawPoint() {
     this._finish();
-    this._control = new Point(this._map, this.options.geoJSON);
-    this._control.startDraw();
+    var point = new Point(this._map);
+    this._editStore.add(point);
+    point.startDraw();
   }
 
   _destroy(id) {
-    this._control.store.clear();
-    this.options.geoJSON.unset(id);
+    this._editStore.endEdit(id);
     this._exitEdit();
   }
 
@@ -313,7 +355,8 @@ export default class Draw extends mapboxgl.Control {
 
       var el = e.target;
 
-      if (this._control && !this.editId) this._control.completeDraw();
+      if (this._editStore.inProgress() && !this.editId)
+        this._editStore.get(this.editId).completeDraw();
 
       if (el.classList.contains('active')) {
         el.classList.remove('active');
@@ -334,7 +377,7 @@ export default class Draw extends mapboxgl.Control {
     this._map.on('load', () => {
 
       this._map.addSource('draw', {
-        data: this.options.geoJSON.getAll(),
+        data: this._store.getAll(),
         type: 'geojson'
       });
 
@@ -354,9 +397,9 @@ export default class Draw extends mapboxgl.Control {
         this._map.addLayer(style);
       });
 
-      this._map.on('draw.end', () => {
+      this._map.on('draw.end', e => {
+        this._store.set(e.geometry);
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
-        this._control = false;
       });
 
       this._map.on('edit.end', this._exitEdit.bind(this));
@@ -375,7 +418,7 @@ export default class Draw extends mapboxgl.Control {
         //////////////////////////////////////////////////////////////////////
         //////////// FIX THIS WHEN MULTIPLE LAYER QUERIES LAND ///////////////
         //////////////////////////////////////////////////////////////////////
-        this._map.featuresAt(e.point, { radius: 7, layer: 'gl-edit-points' }, (err, features) => {
+        this._map.featuresAt(e.point, { radius: 7, layer: ['gl-edit-points'/*, 'gl-draw-polygons'*/] }, (err, features) => {
           if (err) throw err;
           if (!features.length) return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
@@ -389,12 +432,15 @@ export default class Draw extends mapboxgl.Control {
         });
       });
 
+      this._map.getContainer().addEventListener('mousedown', this.onMouseDown);
+      this._map.getContainer().addEventListener('mouseup', this.onMouseUp);
     });
+
   }
 
-  /***************/
-  /* API Methods */
-  /***************/
+  //****************//
+  //  API Methods   //
+  //****************//
 
   /**
    * add a geometry
@@ -402,7 +448,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    */
   addGeometry(feature) {
-    this.options.geoJSON.set(feature);
+    this._store.set(feature);
   }
 
   /**
@@ -411,7 +457,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the drawid of the geometry
    */
   removeGeometry(id) {
-    this.options.geoJSON.unset(id);
+    this._store.unset(id);
   }
 
   /**
@@ -420,10 +466,10 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} featureCollection - a GeoJSON FeatureCollection
    */
   update(featureCollection) {
-    this.options.geoJSON.clear();
+    this._store.clear();
     var feats = featureCollection.features;
     for (var i = 0, ii = feats.length; i < ii; i++) {
-      this.options.geoJSON.set(feats[i]);
+      this._store.set(feats[i]);
     }
   }
 
@@ -433,7 +479,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the draw id of the geometry
    */
   get(id) {
-    return this.options.geoJSON.get(id);
+    return this._store.get(id);
   }
 
   /**
@@ -442,21 +488,21 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Object} a GeoJSON feature collection
    */
   getAll() {
-    return this.options.geoJSON.getAll();
+    return this._store.getAll();
   }
 
   /**
    * remove all geometries
    */
   clear() {
-    this.options.geoJSON.clear();
+    this._store.clear();
   }
 
   /**
    * remove all geometries and clears the history
    */
   clearAll() {
-    this.options.geoJSON.clearAll();
+    this._store.clearAll();
   }
 
 }

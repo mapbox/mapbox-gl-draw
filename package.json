@@ -53,6 +53,7 @@
     "hat": "0.0.3",
     "immutable": "^3.7.3",
     "mapbox-gl": "^0.9.0",
-    "ramda": "^0.17.1"
+    "ramda": "^0.17.1",
+    "turf-extent": "^1.0.4"
   }
 }
