@@ -206,13 +206,13 @@ export default class Draw extends mapboxgl.Control {
       }
 
       // if (clicked on a feature && ((!editing this feature && !drawing))
-      this._edit(features[0]);
+      this._edit(features[0].properties.drawId);
     });
 
   }
 
-  _edit(feature) {
-    this.editId = feature.properties.drawId;
+  _edit(drawId) {
+    this.editId = drawId;
     var feat = this._store.edit(this.editId);
     this._editStore.add(feat);
 
@@ -231,7 +231,9 @@ export default class Draw extends mapboxgl.Control {
    * @private
    */
   _massEdit(drawIds) {
-    console.log(drawIds);
+    for (var i = 0; i < drawIds.length; i++) {
+      this._edit(drawIds[i]);
+    }
   }
 
   _finish() {
