@@ -32,7 +32,7 @@ export default class Polygon extends Geometry {
   }
 
   _addVertex(e) {
-    var p = [ e.latLng.lng, e.latLng.lat ];
+    var p = [ e.lngLat.lng, e.lngLat.lat ];
 
     if (typeof this.vertexIdx === 'undefined') {
       this.vertexIdx = 0;

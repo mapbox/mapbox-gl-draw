@@ -3,7 +3,7 @@
 import hat from 'hat';
 import Immutable from 'immutable';
 import { translate } from '../util';
-import { LatLng, LatLngBounds } from 'mapbox-gl';
+import { LngLat, LngLatBounds } from 'mapbox-gl';
 import extent from 'turf-extent';
 
 /**
@@ -85,9 +85,9 @@ export default class Geometry {
 
   getExtent() {
     var ext = extent(this.getGeoJSON());
-    return new LatLngBounds(
-      new LatLng(ext[1], ext[0]),
-      new LatLng(ext[3], ext[2])
+    return new LngLatBounds(
+      new LngLat(ext[0], ext[1]),
+      new LngLat(ext[2], ext[3])
     );
   }
 

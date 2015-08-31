@@ -6,7 +6,7 @@ import mapboxgl from 'mapbox-gl';
 import EditStore from './edit_store';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
-import { LatLng, LatLngBounds } from 'mapbox-gl';
+import { LngLat, LngLatBounds } from 'mapbox-gl';
 
 // Data store
 import Store from './store';
@@ -163,9 +163,9 @@ export default class Draw extends mapboxgl.Control {
     ne = this._map.unproject(ne);
     sw = this._map.unproject(sw);
 
-    var bounds = new LatLngBounds(
-      new LatLng(sw.lat, sw.lng),
-      new LatLng(ne.lat, ne.lng)
+    var bounds = new LngLatBounds(
+      new LngLat(sw.lng, sw.lat),
+      new LngLat(ne.lng, ne.lat)
     );
     var feats = this._store.getFeaturesIn(bounds);
     this._massEdit(feats.map(feat => feat.drawId));

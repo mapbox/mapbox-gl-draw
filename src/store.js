@@ -1,8 +1,6 @@
 'use strict';
 
-//import { LatLng, LatLngBounds } from 'mapbox-gl';
 import Immutable from 'immutable';
-//import extent from 'turf-extent';
 
 /**
  * A store for keeping track of versions of drawings
@@ -59,7 +57,7 @@ export default class Store {
   /**
    * Get all features within a given extent
    *
-   * @param {LatLngBounds} bounds
+   * @param {LngLatBounds} bounds
    * @private
    */
   getFeaturesIn(bounds) {
