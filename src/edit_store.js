@@ -114,8 +114,8 @@ export default class EditStore {
         c = feat.getGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
 
         for (var j = 0; j < c.length - 1; j++) {
-          var ptA = this._map.project([ c[j][1], c[j][0] ]);
-          var ptB = this._map.project([ c[j + 1][1], c[j + 1][0] ]);
+          var ptA = this._map.project([ c[j][0], c[j][1] ]);
+          var ptB = this._map.project([ c[j + 1][0], c[j + 1][1] ]);
           var mid = this._map.unproject([ (ptA.x + ptB.x) / 2, (ptA.y + ptB.y) / 2 ]);
           midpoints.push({
             type: 'Feature',
