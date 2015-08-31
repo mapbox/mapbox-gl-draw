@@ -41,13 +41,12 @@ module.exports = [
     'interactive': true
   }, {
     'id': 'gl-edit-points',
-    'type': 'symbol',
+    'type': 'circle',
     'source': 'edit',
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['!=', 'meta', 'midpoint']],
     'layout': {
-      'icon-image': 'circle.sdf',
       'text-anchor': 'top',
       'icon-allow-overlap': true
     },
@@ -60,13 +59,12 @@ module.exports = [
     'interactive': true
   }, {
     'id': 'gl-edit-points-mid',
-    'type': 'symbol',
+    'type': 'circle',
     'source': 'edit',
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
     'layout': {
-      'icon-image': 'circle.sdf',
       'text-anchor': 'top',
       'icon-allow-overlap': true
     },

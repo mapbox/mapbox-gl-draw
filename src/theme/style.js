@@ -40,11 +40,10 @@ module.exports = [
     'interactive': true
   }, {
     'id': 'gl-draw-points',
-    'type': 'symbol',
+    'type': 'circle',
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Point']],
     'layout': {
-      'icon-image': 'circle.sdf',
       'text-anchor': 'top',
       'icon-allow-overlap': true
     },
