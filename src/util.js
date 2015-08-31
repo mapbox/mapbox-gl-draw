@@ -134,14 +134,14 @@ module.exports.translate = function(feature, init, curr, map) {
 /**
  * Translate a point based on mouse location
  *
- * @param {Array<Number>} point - [ latitude, longitude ]
+ * @param {Array<Number>} point - [ longitude, latitude ]
  * @param {Number} dx - Difference between the initial x mouse position and current x position
  * @param {Number} dy - Difference between the initial y mouse position and current y position
  * @param {Map} map - Instance of mapboxgl.Map
  * @returns {Array<Number>} new translated point
  */
 var translatePoint = function(point, dx, dy, map) {
-  var c = map.project([ point[1], point[0] ]);
+  var c = map.project([ point[0], point[1] ]);
   c = map.unproject([ c.x + dx, c.y + dy ]);
   return [ c.lng, c.lat ];
 };
