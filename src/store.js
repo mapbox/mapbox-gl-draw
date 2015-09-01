@@ -54,6 +54,10 @@ export default class Store {
     return this.history[this.historyIndex].find(feature => feature.drawId === id);
   }
 
+  getGeoJSON(id) {
+    return this.get(id).getGeoJSON();
+  }
+
   /**
    * Get all features within a given extent
    *
@@ -92,6 +96,10 @@ export default class Store {
    */
   set(feature) {
     this.operation(data => data.push(feature), 'Added a ' + feature.type);
+  }
+
+  unset(id) {
+    this.operation(data => data.filterNot(d => d.drawId === id), 'removed feature ' + id);
   }
 
   /**

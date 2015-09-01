@@ -8,13 +8,14 @@ import { translatePoint, DOM } from '../util';
  * Polygon geometry class
  *
  * @param {Object} map - Instance of MapboxGl Map
+ * @param {Object} [data] - GeoJSON feature
  * @returns {Polygon} this
  * @private
  */
 export default class Polygon extends Geometry {
 
-  constructor(map) {
-    var coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0]]]);
+  constructor(map, data) {
+    var coordinates = Immutable.fromJS(data ? data.geometry.coordinates : [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
     super(map, 'Polygon', coordinates);
 
     // event handlers

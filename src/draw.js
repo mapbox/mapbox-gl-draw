@@ -458,6 +458,17 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    */
   addGeometry(feature) {
+    switch (feature.geometry.type) {
+      case 'Point':
+        feature = new Point(feature);
+        break;
+      case 'LineString':
+        feature = new Line(feature);
+        break;
+      case 'Polygon':
+        feature = new Polygon(feature);
+        break;
+    }
     this._store.set(feature);
   }
 
@@ -489,7 +500,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the draw id of the geometry
    */
   get(id) {
-    return this._store.get(id);
+    return this._store.getGeoJSON(id);
   }
 
   /**
@@ -498,7 +509,7 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Object} a GeoJSON feature collection
    */
   getAll() {
-    return this._store.getAll();
+    return this._store.getAllGeoJSON();
   }
 
   /**

@@ -6,14 +6,15 @@ import Immutable from 'immutable';
 /**
  * Point geometry class
  *
- * @param {Object} map - Instance of MpaboxGL Map
+ * @param {Object} map - Instance of MaboxGL Map
+ * @param {Object} [data] - GeoJSON feature
  * @returns {Point} this
  * @private
  */
 export default class Point extends Geometry {
 
-  constructor(map) {
-    var coordinates = Immutable.List([0, 0]);
+  constructor(map, data) {
+    var coordinates = Immutable.List(data ? data.geometry.coordinates : [0, 0]);
     super(map, 'Point', coordinates);
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);

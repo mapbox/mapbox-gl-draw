@@ -37,14 +37,14 @@ test('API test', t => {
   t.deepEquals(
     feature.geometry,
     Draw.get(f.properties.drawId).geometry,
-    'the geomtry added is the same returned by Draw.get(itsDrawId)'
+    'the geometry added is the same returned by Draw.get(itsDrawId)'
   );
 
   Draw.clear();
   t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
 
   Draw.clearAll();
-  t.equals(Draw.options.geoJSON.historyIndex, 0, 'Draw.clearAll resets the history index to 0');
+  t.equals(Draw._store.historyIndex, 0, 'Draw.clearAll resets the history index to 0');
 
   Draw.addGeometry(feature);
   f = Draw.getAll().features[0];
