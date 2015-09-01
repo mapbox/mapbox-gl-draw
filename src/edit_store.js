@@ -57,6 +57,10 @@ export default class EditStore {
     return this.features.filter(feat => feat.drawId === id)[0];
   }
 
+  getGeoJSON(id) {
+    return this.features.filter(feat => feat.drawId === id)[0].getGeoJSON();
+  }
+
   endEdit(id) {
     this.features = this.features.filter(feat => feat.drawId !== id);
     this.render();

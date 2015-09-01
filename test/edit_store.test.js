@@ -38,40 +38,39 @@ test('Edit store constructor', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  var editStore = new EditStore(map, [ feature ]);
+  var editStore = new EditStore(map);
 
   // are they even there?
+  t.equals(typeof editStore.get, 'function', 'getById exists');
   t.equals(typeof editStore.getAll, 'function', 'get exists');
-  t.equals(typeof editStore.getById, 'function', 'getById exists');
   t.equals(typeof editStore.clear, 'function', 'clear exists');
-  t.equals(typeof editStore.update, 'function', 'update exists');
   t.equals(typeof editStore._addVertices, 'function', '_addVertices exists');
   t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');
   t.equals(typeof editStore.render, 'function', 'render exists');
 
+  Draw.addGeometry(feature);
+  var id = Draw.getAll().features[0].properties.drawId;
+  Draw._edit(id);
+
   t.deepEquals(
-    editStore.getAll().features[0].geometry,
+    Draw._editStore.getAllGeoJSON().features[0].geometry,
     feature.geometry,
     'the geometry in the store is the same as the one with which we initiated the store'
   );
 
   // getAll
-  t.equals(editStore.getAll().type, 'FeatureCollection', 'getAll() returns a feature collection');
-
-  // getById
-  var f = editStore.getAll().features[0];
   t.equals(
-    editStore.getById(f.properties.drawId).geometry,
-    feature.geometry,
-    'getById returns the same geometry entered'
+    Draw._editStore.getAllGeoJSON().type,
+    'FeatureCollection',
+    'getAllGeoJSON() returns a feature collection'
   );
 
-  //update
-  var newFeature = JSON.parse(JSON.stringify(f));
-  newFeature.geometry.coordinates = [1, 1];
-  editStore.update(newFeature);
-  var id = newFeature.properties.id;
-  t.deepEquals(editStore.getById(id).geometry.coordinates, [1, 1], 'updating geometry works');
+  // get
+  t.deepEquals(
+    Draw._editStore.getGeoJSON(id).geometry,
+    feature.geometry,
+    'getGeoJSON returns the same geometry entered'
+  );
 
   t.end();
 });

@@ -460,13 +460,13 @@ export default class Draw extends mapboxgl.Control {
   addGeometry(feature) {
     switch (feature.geometry.type) {
       case 'Point':
-        feature = new Point(feature);
+        feature = new Point(this._map, feature);
         break;
       case 'LineString':
-        feature = new Line(feature);
+        feature = new Line(this._map, feature);
         break;
       case 'Polygon':
-        feature = new Polygon(feature);
+        feature = new Polygon(this._map, feature);
         break;
     }
     this._store.set(feature);
