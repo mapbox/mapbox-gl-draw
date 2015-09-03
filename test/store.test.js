@@ -39,7 +39,7 @@ test('Store constructor', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  var store = Draw.options.geoJSON;
+  var store = Draw._store;
 
   t.equals(store.historyIndex, 0, 'historyIndex starts at zero');
   t.ok(store.history, 'history exists');
@@ -64,43 +64,26 @@ test('Store constructor', t => {
   t.equals(typeof store.redo, 'function', 'redo exists');
   t.equals(typeof store.undo, 'function', 'undo exists');
 
-  t.deepEquals(store.getAll(), {
-    type: 'FeatureCollection',
-    features: []
-  }, 'history initiates with an empty feature collection');
+  t.ok(store.getAll() instanceof Immutable.List, 'history initiates with an empty Immutable.List');
 
   // set
-  store.set(feature);
-  var f = store.getAll().features[0];
+  Draw.addGeometry(feature);
+  var f = Draw.getAll().features[0];
   t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
-  t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawid');
+  t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
 
   // get
   var storeFeat = store.get(f.properties.drawId);
-  t.deepEqual(storeFeat.geometry, feature.geometry, 'get returns the same geometry you set');
+  t.deepEqual(storeFeat.getGeoJSON().geometry, feature.geometry, 'get returns the same geometry you set');
 
   // unset
   store.unset(f.properties.drawId);
-  t.equals(store.getAll().features.length, 0, 'calling unset removes the feature');
+  t.equals(store.getAllGeoJSON().features.length, 0, 'calling unset removes the feature');
 
   // clear
-  store.set(feature);
+  Draw.addGeometry(feature);
   store.clear();
-  t.equals(store.getAll().features.length, 0, '0 features remaining after clearing the store the store');
-
-  t.end();
-});
-
-test('Store constructor with data', t => {
-  var map = createMap();
-  var Draw = GLDraw({ geoJSON: [feature] });
-  map.addControl(Draw);
-
-  var store = Draw.options.geoJSON;
-
-  var f = store.getAll().features[0];
-  t.ok(typeof f.properties.drawId === 'string', 'initiating store with data assigns ids to entries');
-  t.deepEquals(f.geometry, feature.geometry, 'the feature in the store is the same as the one set');
+  t.equals(store.getAllGeoJSON().features.length, 0, '0 features remaining after clearing the store the store');
 
   t.end();
 });
