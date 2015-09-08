@@ -6,19 +6,37 @@
   <title>Example gl-draw app</title>
   <script src='https://fb.me/react-0.13.3.min.js'></script>
   <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
-  <link href='../../dist/mapboxgl.draw.css' rel='stylesheet' />
+  <link href='mapboxgl.draw.css' rel='stylesheet' />
   <style>
     body, div { margin:0; padding:0; }
     html, body { height: 100%; }
-    #map { height: 100%; width: 60%; float: left }
-    #geojson { height: 100%; width: 40%; float: left }
+    #map {
+      height: 100%;
+      width: 60%;
+      float: left
+    }
+    #geojson {
+      height: 100%;
+      width: 40%;
+      float: left;
+      font-size: 15px;
+    }
+    .side-bar {
+      height: 100%;
+      display: flex;
+      flex: flexFlow;
+      alignItems: stretch;
+    }
+    .geojson-input {
+      flex: 1 1 auto;
+    }
   </style>
 </head>
 <body>
   <div id='map'></div>
   <div id='geojson'></div>
   <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
-  <script src='../../dist/mapboxgl.draw.js'></script>
+  <script src='mapboxgl.draw.js'></script>
   <script>
     mapboxgl.accessToken = localStorage.accessToken;
 

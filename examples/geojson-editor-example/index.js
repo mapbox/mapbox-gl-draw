@@ -15,12 +15,26 @@ class App extends React.Component { // eslint-disable-line
 
   componentWillMount() {
     map.on('draw.feature.update', function(e) {
-      this.setState({ geojson: e.geojson });
+      this.setState({
+        geojson: e.geojson,
+        input: JSON.stringify(e.geojson)
+      });
     }.bind(this));
   }
 
   setMap(e) {
-    this.setState({ geojson: JSON.parse(e.target.value) });
+    try {
+      this.setState({
+        input: e.target.value,
+        geojson: JSON.parse(e.target.value),
+        valid: true
+      });
+    } catch (err) {
+      this.setState({
+        input: e.target.value,
+        valid: false
+      });
+    }
   }
 
   fetchURL(e) {
@@ -30,25 +44,24 @@ class App extends React.Component { // eslint-disable-line
       var data = JSON.parse(req.responseText);
       Draw.update(data);
       var ext = extent(data);
-      map.fitBounds([[ext[1], ext[0]], [ext[3], ext[2]]]);
+      map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
     };
     req.send();
   }
 
   render() {
     return (
-      <div style={{ height: '100%', display: 'flex', flexFlow: 'column', alignItems: 'stretch' }}>
+      <div className='side-bar'>
 
         <input
           placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
           type='text'
-          style={{ fontSize: '15px' }}
           onChange={this.fetchURL}
         />
 
         <textarea
           type='text'
-          style={{ flex: '1 1 auto', fontSize: '15px' }}
+          className='geojson-input'
           onChange={this.setMap}
           value={JSON.stringify(this.state.geojson, null, 4)}
         >
