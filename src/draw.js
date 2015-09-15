@@ -470,6 +470,7 @@ export default class Draw extends mapboxgl.Control {
         break;
     }
     this._store.set(feature);
+    return this;
   }
 
   /**
@@ -479,6 +480,7 @@ export default class Draw extends mapboxgl.Control {
    */
   removeGeometry(id) {
     this._store.unset(id);
+    return this;
   }
 
   /**
@@ -492,6 +494,7 @@ export default class Draw extends mapboxgl.Control {
     for (var i = 0, ii = feats.length; i < ii; i++) {
       this._store.set(feats[i]);
     }
+    return this;
   }
 
   /**
@@ -517,6 +520,7 @@ export default class Draw extends mapboxgl.Control {
    */
   clear() {
     this._store.clear();
+    return this;
   }
 
   /**
@@ -524,6 +528,7 @@ export default class Draw extends mapboxgl.Control {
    */
   clearAll() {
     this._store.clearAll();
+    return this;
   }
 
 }

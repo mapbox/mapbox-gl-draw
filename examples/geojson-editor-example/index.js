@@ -11,13 +11,15 @@ class App extends React.Component { // eslint-disable-line
         features: []
       }
     };
+    this.state.input = JSON.stringify(this.state.geojson, null, 4);
+    this.state.valid = true;
   }
 
   componentWillMount() {
     map.on('draw.feature.update', function(e) {
       this.setState({
         geojson: e.geojson,
-        input: JSON.stringify(e.geojson)
+        input: JSON.stringify(e.geojson, null, 4)
       });
     }.bind(this));
   }
@@ -50,6 +52,7 @@ class App extends React.Component { // eslint-disable-line
   }
 
   render() {
+    var input = this.state.input;
     return (
       <div className='side-bar'>
 
@@ -63,9 +66,8 @@ class App extends React.Component { // eslint-disable-line
           type='text'
           className='geojson-input'
           onChange={this.setMap}
-          value={JSON.stringify(this.state.geojson, null, 4)}
-        >
-        </textarea>
+          value={input}
+        />
 
       </div>
     );
