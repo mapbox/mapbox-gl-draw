@@ -36,6 +36,8 @@ export default class Draw extends mapboxgl.Control {
 
     mapboxgl.util.setOptions(this, options);
 
+    this.editIds = [];
+
     // event listeners
     this.drag = this._drag.bind(this);
     this.onClick = this._onClick.bind(this);
@@ -139,8 +141,8 @@ export default class Draw extends mapboxgl.Control {
         this._finish();
         break;
       case 68: // (d) delete the feature in edit mode
-        if (this.editId) {
-          this._destroy(this.editId);
+        if (this.editIds.length) {
+          this._destroy();
         }
     }
     if (e.keyCode === 16) {
@@ -168,7 +170,7 @@ export default class Draw extends mapboxgl.Control {
       new LngLat(ne.lng, ne.lat)
     );
     var feats = this._store.getFeaturesIn(bounds);
-    this._massEdit(feats.map(feat => feat.drawId));
+    this._batchEdit(feats.map(feat => feat.drawId));
   }
 
   /**
@@ -186,21 +188,21 @@ export default class Draw extends mapboxgl.Control {
       if (err) throw err;
 
       if (features.length) { // clicked on a feature
-        if (this._editStore.inProgress() && !this.editId) { // clicked on a feature while in draw mode
+        if (this._editStore.inProgress() && !this.editIds.length) { // clicked on a feature while in draw mode
           return;
-        } else if (this._editStore.inProgress() && this.editId) { // clicked on a feature while in edit mode
-          if (features[0].properties.drawId === this.editId) { // clicked on the feature you're editing
+        } else if (this._editStore.inProgress() && this.editIds.length) { // clicked on a feature while in edit mode
+          if (features[0].properties.drawId === this.editIds.length) { // clicked on the feature you're editing
             return;
           } else { // clicked on a different feature while in edit mode
-            this._editStore.get(this.editId).completeDraw();
+            this._editStore.get(this.editIds.length).completeDraw();
           }
         }
       } else { // clicked not on a feature
         if (!this._editStore.inProgress()) { // click outside features while not drawing or editing
           return;
-        } else if (this._editStore.inProgress() && !this.editId) { // clicked outside features while drawing
+        } else if (this._editStore.inProgress() && !this.editIds.length) { // clicked outside features while drawing
           return;
-        } else if (this.editId) { // clicked outside features while editing
+        } else if (this.editIds.length) { // clicked outside features while editing
           return this._finish();
         }
       }
@@ -212,8 +214,8 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _edit(drawId) {
-    this.editId = drawId;
-    var feat = this._store.edit(this.editId);
+    this.editIds.push(drawId);
+    var feat = this._store.edit(drawId);
     this._editStore.add(feat);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
@@ -221,7 +223,7 @@ export default class Draw extends mapboxgl.Control {
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
       title: `delete ${feat.type}`,
-      fn: this._destroy.bind(this, this.editId),
+      fn: this._destroy.bind(this, drawId),
       id: 'deleteBtn'
     });
   }
@@ -230,12 +232,15 @@ export default class Draw extends mapboxgl.Control {
    * @param {Array<String>} features - an array of drawIds
    * @private
    */
-  _massEdit(drawIds) {
-    this.editId = drawIds;
+  _batchEdit(drawIds) {
+    this.editIds.concat(drawIds);
     for (var i = 0; i < drawIds.length; i++) {
       var feat = this._store.edit(drawIds[i]);
       this._editStore.add(feat);
     }
+    this.editIds
+      .map(id => this._store.edit(id))
+      .forEach(feat => { this._editStore.add(feat); });
 
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
@@ -246,10 +251,9 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _finish() {
-    if (typeof this.editId === 'string' || typeof this.editId === 'object') {
-      var ids = [].concat(this.editId);
-      for (var i = 0; i < ids.length; i++) {
-        this._editStore.get(ids[i]).completeEdit();
+    if (this.editIds.length) {
+      for (var i = 0; i < this.editIds.length; i++) {
+        this._editStore.get(this.editIds[i]).completeEdit();
       }
     } else if (this._editStore.inProgress()) {
       this._editStore.getAll()[0].completeDraw();
@@ -259,7 +263,7 @@ export default class Draw extends mapboxgl.Control {
   _exitEdit() {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
-    this.editId = false;
+    this.editIds = []; // REVISIT
   }
 
   _initiateDrag(e) {
@@ -269,7 +273,7 @@ export default class Draw extends mapboxgl.Control {
 
       if (err) throw err;
       else if (!features.length) return;
-      else if (R.none(feat => feat.properties.drawId === this.editId)(features)) return;
+      else if (R.none(feat => R.contains(feat.properties.drawId, this.editIds))(features)) return;
 
       e.stopPropagation();
 
@@ -279,7 +283,7 @@ export default class Draw extends mapboxgl.Control {
       }
 
       if (this.newVertex) {
-        this._editStore.get(this.editId).editAddVertex(coords, this.newVertex.properties.index);
+        this._editStore.get(this.editIds[0]).editAddVertex(coords, this.newVertex.properties.index); // !!!!!!
         this.vertex = this.newVertex;
       }
 
@@ -301,9 +305,9 @@ export default class Draw extends mapboxgl.Control {
     var curr = DOM.mousePos(e, this._map.getContainer());
 
     if (this.vertex) {
-      this._editStore.get(this.editId).moveVertex(this.init, curr, this.vertex.properties.index);
+      this._editStore.get(this.editIds[0]).moveVertex(this.init, curr, this.vertex.properties.index);
     } else {
-      this._editStore.get(this.editId).translate(this.init, curr);
+      this._editStore.get(this.editIds[0]).translate(this.init, curr);
     }
   }
 
@@ -312,17 +316,19 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
-    this._editStore.get(this.editId).translating = false;
+    this._editStore.get(this.editIds[0]).translating = false;
     this.dragging = false;
 
     if (this.vertex) {
       this.vertex = false;
-      this._editStore.get(this.editId).movingVertex = false;
+      this._editStore.get(this.editIds[0]).movingVertex = false;
     }
   }
 
-  _destroy(id) {
-    this._editStore.endEdit(id);
+  _destroy() {
+    for (var i = 0; i < this.editIds.length; i++) {
+      this._editStore.endEdit(this.editIds[i]);
+    }
     this._exitEdit();
   }
 
