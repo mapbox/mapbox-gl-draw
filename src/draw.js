@@ -231,6 +231,7 @@ export default class Draw extends mapboxgl.Control {
    * @private
    */
   _massEdit(drawIds) {
+    this.editId = drawIds;
     for (var i = 0; i < drawIds.length; i++) {
       var feat = this._store.edit(drawIds[i]);
       this._editStore.add(feat);
@@ -245,10 +246,13 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _finish() {
-    if (this.editId) {
-      this._editStore.get(this.editId).completeEdit();
+    if (typeof this.editId === 'string' || typeof this.editId === 'object') {
+      var ids = [].concat(this.editId);
+      for (var i = 0; i < ids.length; i++) {
+        this._editStore.get(ids[i]).completeEdit();
+      }
     } else if (this._editStore.inProgress()) {
-      this._editStore.getAll()[0].completeDraw(); // REVISIT BRUH
+      this._editStore.getAll()[0].completeDraw();
     }
   }
 

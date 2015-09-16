@@ -10,7 +10,6 @@ import extent from 'turf-extent';
  * Base Geometry class from which other geometries inherit
  *
  * @param {Object} map - Instance of MapboxGL Map
- * @param {Object} drawStore - Overall store for session
  * @param {String} type - Type of GeoJSON geometry
  * @param {Object} [data] - GeoJSON feature
  * @returns {Geometry} this
