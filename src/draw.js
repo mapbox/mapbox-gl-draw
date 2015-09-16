@@ -458,6 +458,11 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   addGeometry(feature) {
+    if (!feature.geometry)
+      feature = {
+        type: 'Feature',
+        geometry: feature
+      };
     switch (feature.geometry.type) {
       case 'Point':
         feature = new Point(this._map, feature);
