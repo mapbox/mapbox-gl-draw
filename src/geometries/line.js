@@ -15,8 +15,9 @@ import { translatePoint, DOM } from '../util';
 export default class Line extends Geometry {
 
   constructor(map, data) {
-    var coordinates = Immutable.List(data ? data.geometry.coordinates : [[0, 0], [0, 0]]);
-    super(map, 'LineString', coordinates);
+    if (!data) data = { geometry: {} };
+    data.geometry.coordinates = Immutable.List(data.geometry.coordinates || [[0, 0], [0, 0]]);
+    super(map, 'LineString', data);
 
     this.type = 'line';
 

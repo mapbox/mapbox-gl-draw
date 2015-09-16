@@ -15,8 +15,9 @@ import { translatePoint, DOM } from '../util';
 export default class Polygon extends Geometry {
 
   constructor(map, data) {
-    var coordinates = Immutable.fromJS(data ? data.geometry.coordinates : [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
-    super(map, 'Polygon', coordinates);
+    if (!data) data = { geometry: {} };
+    data.geometry.coordinates = Immutable.fromJS(data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
+    super(map, 'Polygon', data);
 
     // event handlers
     this.addVertex = this._addVertex.bind(this);

@@ -18,16 +18,16 @@ import extent from 'turf-extent';
  */
 export default class Geometry {
 
-  constructor(map, type, coordinates) {
+  constructor(map, type, data) {
     this._map = map;
     this.drawId = hat();
-    this.coordinates = coordinates;
+    this.coordinates = data.geometry.coordinates;
+    var props = data.properties || {};
+    props.drawId = this.drawId;
 
     this.geojson = {
       type: 'Feature',
-      properties: {
-        drawId: this.drawId
-      },
+      properties: props,
       geometry: {
         type: type,
         coordinates: this.coordinates.toJS()

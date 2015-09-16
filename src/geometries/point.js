@@ -14,8 +14,9 @@ import Immutable from 'immutable';
 export default class Point extends Geometry {
 
   constructor(map, data) {
-    var coordinates = Immutable.List(data ? data.geometry.coordinates : [0, 0]);
-    super(map, 'Point', coordinates);
+    if (!data) data = { geometry: {} };
+    data.geometry.coordinates = Immutable.List(data.geometry.coordinates || [0, 0]);
+    super(map, 'Point', data);
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }
