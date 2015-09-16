@@ -234,11 +234,8 @@ export default class Draw extends mapboxgl.Control {
    * @private
    */
   _batchEdit(drawIds) {
-    this.editIds.concat(drawIds);
-    for (var i = 0; i < drawIds.length; i++) {
-      var feat = this._store.edit(drawIds[i]);
-      this._editStore.add(feat);
-    }
+    this._finish();
+    this.editIds = drawIds;
     this.editIds
       .map(id => this._store.edit(id))
       .forEach(feat => { this._editStore.add(feat); });
