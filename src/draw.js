@@ -505,17 +505,21 @@ export default class Draw extends mapboxgl.Control {
   }
 
   /**
-   * add a feature collection (removes all currently draw features)
-   * @param {Object} featureCollection - a GeoJSON FeatureCollection
+   * Updates an existing feature
+   * @param {String} drawId - the drawId of the feature to update
+   * @param {Object} feature - a GeoJSON feature
    * @returns {Draw} this
    */
-  update(featureCollection) {
+  update(drawId, feature) {
+    /*
     this._store.clear();
     var feats = featureCollection.features;
     for (var i = 0, ii = feats.length; i < ii; i++) {
       this._store.set(feats[i]);
     }
+    */
     return this;
+
   }
 
   /**
