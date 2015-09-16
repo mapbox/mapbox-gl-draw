@@ -454,8 +454,8 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * add a geometry
-   *
    * @param {Object} feature - GeoJSON feature
+   * @returns {Draw} this
    */
   addGeometry(feature) {
     switch (feature.geometry.type) {
@@ -475,8 +475,8 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * remove a geometry by its draw id
-   *
    * @param {String} id - the drawid of the geometry
+   * @returns {Draw} this
    */
   removeGeometry(id) {
     this._store.unset(id);
@@ -485,8 +485,8 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * add a feature collection (removes all currently draw features)
-   *
    * @param {Object} featureCollection - a GeoJSON FeatureCollection
+   * @returns {Draw} this
    */
   update(featureCollection) {
     this._store.clear();
@@ -499,7 +499,6 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * get a geometry by its draw id
-   *
    * @param {String} id - the draw id of the geometry
    */
   get(id) {
@@ -508,7 +507,6 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * get all draw geometries
-   *
    * @returns {Object} a GeoJSON feature collection
    */
   getAll() {
@@ -517,6 +515,7 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * remove all geometries
+   * @returns {Draw} this
    */
   clear() {
     this._store.clear();
@@ -525,6 +524,7 @@ export default class Draw extends mapboxgl.Control {
 
   /**
    * remove all geometries and clears the history
+   * @returns {Draw} this
    */
   clearAll() {
     this._store.clearAll();
