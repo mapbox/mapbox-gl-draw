@@ -458,23 +458,31 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   addGeometry(feature) {
-    if (!feature.geometry)
-      feature = {
-        type: 'Feature',
-        geometry: feature
-      };
-    switch (feature.geometry.type) {
-      case 'Point':
-        feature = new Point(this._map, feature);
-        break;
-      case 'LineString':
-        feature = new Line(this._map, feature);
-        break;
-      case 'Polygon':
-        feature = new Polygon(this._map, feature);
-        break;
+    if (feature.type === 'FeatureCollection') {
+      for (var i = 0; i < feature.features.length; i++) {
+        this.addGeometry(feature.features[i]);
+      }
+    } else {
+      if (!feature.geometry)
+        feature = {
+          type: 'Feature',
+          geometry: feature
+        };
+      if (feature.type !== 'FeatureCollection') {
+        switch (feature.geometry.type) {
+          case 'Point':
+            feature = new Point(this._map, feature);
+            break;
+          case 'LineString':
+            feature = new Line(this._map, feature);
+            break;
+          case 'Polygon':
+            feature = new Polygon(this._map, feature);
+            break;
+        }
+        this._store.set(feature);
+      }
     }
-    this._store.set(feature);
     return this;
   }
 
