@@ -194,7 +194,8 @@ export default class Draw extends mapboxgl.Control {
           if (features[0].properties.drawId === this.editIds.length) { // clicked on the feature you're editing
             return;
           } else { // clicked on a different feature while in edit mode
-            this._editStore.get(this.editIds.length).completeDraw();
+            this._editStore.get(this.editIds[0]).completeDraw();
+            this.editIds = [];
           }
         }
       } else { // clicked not on a feature
