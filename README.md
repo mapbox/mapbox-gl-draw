@@ -1,4 +1,4 @@
-gl-draw
+GL Draw
 ---
 
 Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) maps.
@@ -8,10 +8,12 @@ Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapb
 ### Installing
 
 ```
+git clone https://github.com/mapbox/gl-draw.git
+cd gl-draw
 npm install
 ```
 
-Include [mapboxgl.draw.js]() after `mapbox-gl.js`
+Include [mapboxgl.draw.js](https://github.com/mapbox/gl-draw/blob/master/dist/mapboxgl.draw.js) after `mapbox-gl.js`
 
 ```html
 <script src="mapbox-gl.js"></script>
@@ -49,46 +51,8 @@ var Draw = mapboxgl.Draw({
 });
 
 map.addControl(Draw)
-
-map.on('draw.start', function(e) {
-  console.log(e.featureType);
-  // => 'Polygon'|'Square'|'LineString'|'Marker'
-});
-
-map.on('draw.end', function(e) {
-  console.log(e.featureType);
-  // => 'Polygon'|'Square'|'LineString'|'Marker'
-});
-
-map.on('draw.created', function(e) {
-  console.log(e.featureType);
-  // => 'Polygon'|'Square'|'LineString'|'Marker'
-  console.log(e.feature);
-  // => feature
-});
-
-var input = {
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'Point',
-    coordinates: [0, 0]
-  }
-};
-
-Draw.addGeometry(input);
-
-var geoms = Draw.getAll();
-
-var id = geoms.features[0].properties.drawId;
-
-var g = Draw.get(id);
-
-console.log(g);
-// => input
-
-Draw.clear();
 ```
+See [API.md](https://github.com/mapbox/gl-draw/blob/master/API.md) for advanced usage.
 
 ### Developing
 
@@ -107,7 +71,6 @@ open http://localhost:9966/examples/geojson-editor-example/ && open http://local
 ```
 
 ### Testing
-
 
 ```
 npm run test

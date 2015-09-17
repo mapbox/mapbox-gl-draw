@@ -511,6 +511,7 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   update(drawId, feature) {
+    // TO DO!!!
     /*
     this._store.clear();
     var feats = featureCollection.features;
