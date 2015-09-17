@@ -511,14 +511,13 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   update(drawId, feature) {
-    // TO DO!!!
-    /*
-    this._store.clear();
-    var feats = featureCollection.features;
-    for (var i = 0, ii = feats.length; i < ii; i++) {
-      this._store.set(feats[i]);
+    var newFeatType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
+    var feat = this._store.get(drawId);
+    if (feat.getGeoJSONType() !== newFeatType || feat.getType() === 'square') {
+      throw 'Can not update feature to different type and can not update squares';
     }
-    */
+    feat.setCoordinates(feature.coordinates || feature.geometry.coordinates);
+    if (feature.properties) feat.setProperties(feature.properties);
     return this;
 
   }

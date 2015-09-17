@@ -42,6 +42,25 @@ export default class Geometry {
     return this.geojson;
   }
 
+  getType() {
+    return this.type;
+  }
+
+  getGeoJSONType() {
+    return this.geojson.geometry.type;
+  }
+
+  setCoordinates(coords) {
+    this.coordinates = Immutable.List(coords);
+    return this;
+  }
+
+  setProperties(props) {
+    props.drawId = this.drawId;
+    this.geojson.properties = props;
+    return this;
+  }
+
   /**
    * Called after a draw is done
    */
