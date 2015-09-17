@@ -3,8 +3,8 @@ var extent = require('turf-extent');
 
 class App extends React.Component { // eslint-disable-line
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       geojson: {
         type: 'FeatureCollection',
@@ -13,6 +13,7 @@ class App extends React.Component { // eslint-disable-line
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
+    this.setMap = this.setMap.bind(this);
   }
 
   componentWillMount() {
