@@ -491,7 +491,7 @@ export default class Draw extends mapboxgl.Control {
         this._store.set(feature);
       }
     }
-    return this;
+    return feature.drawId;
   }
 
   /**
