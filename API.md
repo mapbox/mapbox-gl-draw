@@ -73,7 +73,7 @@ console.log(Draw.get(id));
 //=> { type: 'Point', coordinates: [0, 0] }
 ```
 
-##`.getAll() -> Object`
+###`.getAll() -> Object`
 
 This method returns all features added to Draw in a single GeoJSON FeatureCollection.
 

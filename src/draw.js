@@ -465,7 +465,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    * @returns {Draw} this
    */
-  addGeometry(feature) {
+  set(feature) {
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
         this.addGeometry(feature.features[i]);
