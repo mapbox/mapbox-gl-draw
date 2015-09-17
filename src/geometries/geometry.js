@@ -36,16 +36,25 @@ export default class Geometry {
 
   /**
    * @return {Object} GeoJSON feature
+   * @private
    */
   getGeoJSON() {
     this.geojson.geometry.coordinates = this.coordinates.toJS();
     return this.geojson;
   }
 
+  /**
+   * @returns Draw type
+   * @private
+   */
   getType() {
     return this.type;
   }
 
+  /*
+   * @returns GeoJSON type
+   * @private
+   */
   getGeoJSONType() {
     return this.geojson.geometry.type;
   }

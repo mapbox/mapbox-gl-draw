@@ -31,8 +31,8 @@ test('API test', t => {
   map.addControl(Draw);
 
   // API tests
-  Draw.addGeometry(feature);
-  var f = Draw.getAll().features[0];
+  var id = Draw.set(feature);
+  var f = Draw.get(id);
   t.deepEquals(f.geometry, feature.geometry, 'the geometry added is the same returned by Draw.getAll');
   t.deepEquals(
     feature.geometry,
@@ -46,8 +46,8 @@ test('API test', t => {
   Draw.clearAll();
   t.equals(Draw._store.historyIndex, 0, 'Draw.clearAll resets the history index to 0');
 
-  Draw.addGeometry(feature);
-  f = Draw.getAll().features[0];
+  id = Draw.set(feature);
+  f = Draw.get(id);
   Draw.removeGeometry(f.properties.drawId);
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
 

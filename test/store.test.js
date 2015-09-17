@@ -67,8 +67,8 @@ test('Store constructor', t => {
   t.ok(store.getAll() instanceof Immutable.List, 'history initiates with an empty Immutable.List');
 
   // set
-  Draw.addGeometry(feature);
-  var f = Draw.getAll().features[0];
+  var id = Draw.set(feature);
+  var f = Draw.get(id);
   t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
   t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
 
@@ -81,7 +81,7 @@ test('Store constructor', t => {
   t.equals(store.getAllGeoJSON().features.length, 0, 'calling unset removes the feature');
 
   // clear
-  Draw.addGeometry(feature);
+  Draw.set(feature);
   store.clear();
   t.equals(store.getAllGeoJSON().features.length, 0, '0 features remaining after clearing the store the store');
 

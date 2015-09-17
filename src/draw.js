@@ -456,9 +456,9 @@ export default class Draw extends mapboxgl.Control {
 
   }
 
-  //****************//
-  //  API Methods   //
-  //****************//
+  //*************************//
+  //  API Methods - turn up  //
+  //*************************//
 
   /**
    * add a geometry
@@ -499,7 +499,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {String} id - the drawid of the geometry
    * @returns {Draw} this
    */
-  removeGeometry(id) {
+  remove(id) {
     this._store.unset(id);
     return this;
   }

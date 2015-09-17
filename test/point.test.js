@@ -32,8 +32,8 @@ test('Point draw class', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  Draw.addGeometry(feature);
-  var Point = Draw._store.getAll().get(0);
+  var id = Draw.set(feature);
+  var Point = Draw._store.get(id);
 
   // functions
   t.equals(typeof Point.constructor, 'function', 'Point.constructor exists');

@@ -90,8 +90,8 @@ test('Draw class test', t => {
   );
 
   // test edit mode
-  Draw.addGeometry(feature);
-  var f = Draw.getAll().features[0].properties.drawId;
+  var id = Draw.set(feature);
+  var f = Draw.get(id).properties.drawId;
   Draw._edit(f);
   t.ok(
     document.getElementById('deleteBtn'),
@@ -106,7 +106,7 @@ test('Draw class test', t => {
   Draw.clearAll();
 
   // delete feature
-  Draw.addGeometry(feature);
+  Draw.set(feature);
   /*
   f = Draw.getAll().features[0];
   Draw._edit(f);
