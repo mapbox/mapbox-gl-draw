@@ -468,7 +468,7 @@ export default class Draw extends mapboxgl.Control {
   set(feature) {
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
-        this.addGeometry(feature.features[i]);
+        this.set(feature.features[i]);
       }
     } else {
       if (!feature.geometry)

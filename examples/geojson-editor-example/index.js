@@ -31,6 +31,9 @@ class App extends React.Component { // eslint-disable-line
         input: e.target.value,
         geojson: JSON.parse(e.target.value),
         valid: true
+      }, () => {
+        Draw.clear();
+        Draw.set(this.state.geojson);
       });
     } catch (err) {
       this.setState({
