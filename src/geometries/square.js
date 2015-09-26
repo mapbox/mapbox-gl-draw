@@ -37,6 +37,7 @@ export default class Square extends Geometry {
     this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
     var pos = DOM.mousePos(e, this._map.getContainer());
+    this.initPos = pos;
     var c = this._map.unproject([pos.x, pos.y]);
     var i = -1;
     while (++i < 5) {
@@ -55,10 +56,11 @@ export default class Square extends Geometry {
 
     var pos = DOM.mousePos(e, this._map._container);
     var c = this._map.unproject([pos.x, pos.y]);
-    var orig = this.coordinates.getIn([0, 0]);
-    this.coordinates = this.coordinates.setIn([0, 1], [ orig[0], c.lat ]);
+    var ne = this._map.unproject([this.initPos.x, pos.y]);
+    var sw = this._map.unproject([pos.x, this.initPos.y]);
+    this.coordinates = this.coordinates.setIn([0, 1], [ ne.lng, ne.lat ]);
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
-    this.coordinates = this.coordinates.setIn([0, 3], [ c.lng, orig[1] ]);
+    this.coordinates = this.coordinates.setIn([0, 3], [ sw.lng, sw.lat ]);
 
     this._map.fire('new.edit');
   }
@@ -83,25 +85,31 @@ export default class Square extends Geometry {
 
     this.coordinates = this.coordinates.setIn([0, idx], newPoint);
 
-    var x = newPoint[0];
-    var y = newPoint[1];
-
+    var ne, nw, se, sw;
     switch (idx) {
       case 0:
-        this.coordinates = this._setV(1, [ x, this._getV(1)[1] ]);
-        this.coordinates = this._setV(3, [ this._getV(3)[0], y ]);
+        ne = this._getNE(newPoint, this._getV(2));
+        sw = this._getSW(newPoint, this._getV(2));
+        this.coordinates = this._setV(1, [ ne.lng, ne.lat ]);
+        this.coordinates = this._setV(3, [ sw.lng, sw.lat ]);
         break;
       case 1:
-        this.coordinates = this._setV(0, [ x, this._getV(0)[1] ]);
-        this.coordinates = this._setV(2, [ this._getV(2)[0], y ]);
+        nw = this._getNW(newPoint, this._getV(3));
+        se = this._getSE(newPoint, this._getV(3));
+        this.coordinates = this._setV(0, [ nw.lng, nw.lat ]);
+        this.coordinates = this._setV(2, [ se.lng, se.lat ]);
         break;
       case 2:
-        this.coordinates = this._setV(1, [ this._getV(1)[0], y ]);
-        this.coordinates = this._setV(3, [ x, this._getV(3)[1] ]);
+        ne = this._getNE(this._getV(0), newPoint);
+        sw = this._getSW(this._getV(0), newPoint);
+        this.coordinates = this._setV(1, [ ne.lng, ne.lat ]);
+        this.coordinates = this._setV(3, [ sw.lng, sw.lat ]);
         break;
       case 3:
-        this.coordinates = this._setV(0, [ this._getV(0)[0], y ]);
-        this.coordinates = this._setV(2, [ x, this._getV(2)[1] ]);
+        nw = this._getNW(this._getV(1), newPoint);
+        se = this._getSE(this._getV(1), newPoint);
+        this.coordinates = this._setV(0, [ nw.lng, nw.lat ]);
+        this.coordinates = this._setV(2, [ se.lng, se.lat ]);
         break;
     }
 
@@ -132,6 +140,33 @@ export default class Square extends Geometry {
    */
   _getV(idx) {
     return this.coordinates.getIn([0, idx]);
+  }
+
+  _getNE(nw, se) {
+    var nwPx = this._map.project(nw);
+    var sePx = this._map.project(se);
+    var nePx = [sePx.x, nwPx.y];
+    return this._map.unproject(nePx);
+  }
+
+  _getNW(ne, sw) {
+    var nePx = this._map.project(ne);
+    var swPx = this._map.project(sw);
+    var nwPx = [swPx.x, nePx.y];
+    return this._map.unproject(nwPx);
+  }
+
+  _getSE(ne, sw) {
+    var nePx = this._map.project(ne);
+    var swPx = this._map.project(sw);
+    var sePx = [nePx.x, swPx.y];
+    return this._map.unproject(sePx);
+  }
+  _getSW(nw, se) {
+    var nwPx = this._map.project(nw);
+    var sePx = this._map.project(se);
+    var swPx = [nwPx.x, sePx.y];
+    return this._map.unproject(swPx);
   }
 
 }
