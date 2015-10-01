@@ -72,6 +72,7 @@ export default class Geometry {
 
   /**
    * Called after a draw is done
+   * @private
    */
   _done(type) {
     this._map.fire('finish.edit');

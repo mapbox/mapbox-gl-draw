@@ -11,7 +11,7 @@ function createMap() {
 
   var map = new mapboxgl.Map({
     container: 'map',
-    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+    style: 'mapbox://styles/mapbox/streets-v8'
   });
 
   return map;
@@ -33,7 +33,11 @@ test('API test', t => {
   // API tests
   var id = Draw.set(feature);
   var f = Draw.get(id);
-  t.deepEquals(f.geometry, feature.geometry, 'the geometry added is the same returned by Draw.getAll');
+  t.deepEquals(
+    feature.geometry.coordinates,
+    f.geometry.coordinates,
+    'the geometry added is the same returned by Draw.getAll'
+  );
   t.deepEquals(
     feature.geometry,
     Draw.get(f.properties.drawId).geometry,
@@ -48,7 +52,7 @@ test('API test', t => {
 
   id = Draw.set(feature);
   f = Draw.get(id);
-  Draw.removeGeometry(f.properties.drawId);
+  Draw.remove(f.properties.drawId);
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
 
   t.end();

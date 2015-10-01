@@ -466,6 +466,7 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   set(feature) {
+    feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
         this.set(feature.features[i]);
@@ -511,6 +512,7 @@ export default class Draw extends mapboxgl.Control {
    * @returns {Draw} this
    */
   update(drawId, feature) {
+    feature = JSON.parse(JSON.stringify(feature));
     var newFeatType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
     var feat = this._store.get(drawId);
     if (feat.getGeoJSONType() !== newFeatType || feat.getType() === 'square') {

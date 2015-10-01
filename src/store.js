@@ -27,7 +27,7 @@ export default class Store {
     });
   }
 
-  operation(fn, annotation) {
+  _operation(fn, annotation) {
     // Wrap an operation: Given a function, apply it the history list.
     // via http://www.macwright.org/2015/05/18/practical-undo.html
     this.annotations = this.annotations.slice(0, this.historyIndex + 1);
@@ -36,7 +36,7 @@ export default class Store {
     this.history.push(newVersion);
     this.annotations = this.annotations.push(annotation);
     this.historyIndex++;
-    this.render();
+    this._render();
   }
 
   getAll() {
@@ -82,7 +82,7 @@ export default class Store {
   }
 
   clear() {
-    this.operation(() => Immutable.List([]), 'remove all geometries');
+    this._operation(() => Immutable.List([]), 'remove all geometries');
   }
 
   clearAll() {
@@ -95,11 +95,14 @@ export default class Store {
    * @param {Object} feature - GeoJSON feature
    */
   set(feature) {
-    this.operation(data => data.push(feature), 'Added a ' + feature.type);
+    this._operation(data => data.push(feature), 'Added a ' + feature.type);
   }
 
+  /**
+   * @param {String} id - feature id
+   */
   unset(id) {
-    this.operation(data => data.filterNot(d => d.drawId === id), 'removed feature ' + id);
+    this._operation(data => data.filterNot(d => d.drawId === id), 'removed feature ' + id);
   }
 
   /**
@@ -112,11 +115,11 @@ export default class Store {
     var geometry = data.find(geom => geom.drawId === id);
     this.history[++this.historyIndex] = data.filterNot(geom => geom.drawId === id);
 
-    this.render();
+    this._render();
     return geometry;
   }
 
-  render() {
+  _render() {
     this._map.fire('draw.feature.update', {
       geojson: this.getAllGeoJSON()
     });
