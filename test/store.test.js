@@ -13,7 +13,7 @@ function createMap() {
 
   var map = new mapboxgl.Map({
     container: 'map',
-    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+    style: 'mapbox://styles/mapbox/streets-v8'
   });
 
   return map;
@@ -52,7 +52,7 @@ test('Store constructor', t => {
   t.equals(store.annotations.size, 0, 'annotations list is empty');
 
   // are the methods even there?
-  t.equals(typeof store.operation, 'function', 'operation exists');
+  t.equals(typeof store._operation, 'function', '_operation exists');
   t.equals(typeof store.getAll, 'function', 'getAll exists');
   t.equals(typeof store.get, 'function', 'get exists');
   t.equals(typeof store.clear, 'function', 'clear exists');
@@ -60,7 +60,7 @@ test('Store constructor', t => {
   t.equals(typeof store.unset, 'function', 'unset exists');
   t.equals(typeof store.set, 'function', 'set exists');
   t.equals(typeof store.edit, 'function', 'edit exists');
-  t.equals(typeof store.render, 'function', 'render exists');
+  t.equals(typeof store._render, 'function', '_render exists');
   t.equals(typeof store.redo, 'function', 'redo exists');
   t.equals(typeof store.undo, 'function', 'undo exists');
 
