@@ -113,37 +113,49 @@ export default class Draw extends mapboxgl.Control {
     }
   }
 
+
   _onKeyUp(e) {
+
+    // draw shortcuts
+    const LINESTRING_KEY = 76; // (l)
+    const MARKER_KEY = 77; // (m)
+    const POLYGON_KEY = 88; // (p)
+    const SQUARE_KEY = 83; // (s)
+    const EXIT_EDIT_KEY = 27; // (esc)
+    const DELETE_KEY = 68; // (d)
+
     var event = document.createEvent('HTMLEvents');
     event.initEvent('click', true, false);
+
     switch (e.keyCode) {
-      case 76: // (l) linestring
+      case LINESTRING_KEY:
         if (!this.lineStringCtrl.classList.contains('active')) {
           this.lineStringCtrl.dispatchEvent(event);
         }
         break;
-      case 77: // (m) marker
+      case MARKER_KEY:
         if (!this.markerCtrl.classList.contains('active')) {
           this.markerCtrl.dispatchEvent(event);
         }
         break;
-      case 80: // (p) polygon
+      case POLYGON_KEY:
         if (!this.polygonCtrl.classList.contains('active')) {
           this.polygonCtrl.dispatchEvent(event);
         }
         break;
-      case 83: // (s) square
+      case SQUARE_KEY:
         if (!this.squareCtrl.classList.contains('active')) {
           this.squareCtrl.dispatchEvent(event);
         }
         break;
-      case 27: // (escape) exit draw/edit mode
+      case EXIT_EDIT_KEY:
         this._finish();
         break;
-      case 68: // (d) delete the feature in edit mode
+      case DELETE_KEY:
         if (this.editIds.length) {
           this._destroy();
         }
+        break;
     }
     if (e.keyCode === 16) {
       this.shiftDown = false;

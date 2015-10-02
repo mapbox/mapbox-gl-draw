@@ -15,6 +15,7 @@ export default class EditStore {
   constructor(map, features) {
     this._map = map;
     this.features = features || [];
+    this.active = null;
 
     this._map.on('new.edit', () => {
       this._render();
