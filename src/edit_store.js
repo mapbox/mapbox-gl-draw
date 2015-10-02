@@ -6,7 +6,7 @@
  * We also call draft rendering here
  *
  * @param {Map} map - an instance of mapboxgl.Map
- * @param {Array<Object>} [features] - an array of geojson features
+ * @param {Array<Object>} features - an array of geojson features
  * @returns {EditStore} this
  * @private
  */
@@ -17,12 +17,12 @@ export default class EditStore {
     this.features = features || [];
 
     this._map.on('new.edit', () => {
-      this.render();
+      this._render();
     });
 
     this._map.on('finish.edit', () => {
       this.features = [];
-      this.render();
+      this._render();
     });
 
     this._map.on('edit.end', e => {
@@ -39,7 +39,7 @@ export default class EditStore {
     } else {
       this.features.push(geometry);
     }
-    this.render();
+    this._render();
   }
 
   getAll() {
@@ -63,12 +63,12 @@ export default class EditStore {
 
   endEdit(id) {
     this.features = this.features.filter(feat => feat.drawId !== id);
-    this.render();
+    this._render();
   }
 
   clear() {
     this.features = [];
-    this.render();
+    this._render();
   }
 
   inProgress() {
@@ -140,7 +140,7 @@ export default class EditStore {
     return midpoints;
   }
 
-  render() {
+  _render() {
     var geom = this.getAllGeoJSON();
     geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
     this._map.fire('edit.feature.update', {

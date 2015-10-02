@@ -12,7 +12,7 @@ function createMap() {
 
   var map = new mapboxgl.Map({
     container: 'map',
-    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+    style: 'mapbox://styles/mapbox/streets-v8'
   });
 
   return map;
@@ -46,9 +46,9 @@ test('Edit store constructor', t => {
   t.equals(typeof editStore.clear, 'function', 'clear exists');
   t.equals(typeof editStore._addVertices, 'function', '_addVertices exists');
   t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');
-  t.equals(typeof editStore.render, 'function', 'render exists');
+  t.equals(typeof editStore._render, 'function', 'render exists');
 
-  Draw.addGeometry(feature);
+  Draw.set(feature);
   var id = Draw.getAll().features[0].properties.drawId;
   Draw._edit(id);
 
