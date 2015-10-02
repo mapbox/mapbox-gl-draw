@@ -12,7 +12,7 @@ function createMap() {
 
   var map = new mapboxgl.Map({
     container: 'map',
-    style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+    style: 'mapbox://styles/mapbox/streets-v8'
   });
 
   return map;
@@ -51,8 +51,8 @@ test('Draw class test', t => {
   t.equals(typeof Draw._drawSquare, 'function', '_drawSquare method exists');
   t.equals(typeof Draw._drawPoint, 'function', '_drawPoint method exists');
   t.equals(typeof Draw._destroy, 'function', '_destroy method exists');
-  t.equals(typeof Draw.addGeometry, 'function', 'addGeometry method exists');
-  t.equals(typeof Draw.removeGeometry, 'function', 'removeGeometry method exists');
+  t.equals(typeof Draw.set, 'function', 'set method exists');
+  t.equals(typeof Draw.remove, 'function', 'removeGeometry method exists');
   t.equals(typeof Draw.get, 'function', 'get method exists');
   t.equals(typeof Draw.getAll, 'function', 'getAll method exists');
   t.equals(typeof Draw.clear, 'function', 'clear method exists');
