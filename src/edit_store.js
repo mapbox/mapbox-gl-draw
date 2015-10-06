@@ -12,22 +12,17 @@
  */
 export default class EditStore {
 
-  constructor(map/*, features*/) {
+  constructor(map) {
     this._map = map;
-    //this.features = features || [];
     this._features = {};
 
     this.drawStore = null;
-    //this.editting = false;
-    //this.drawing = false;
 
     this._map.on('new.edit', () => {
       this._render();
     });
 
     this._map.on('finish.edit', () => {
-      //this.features = [];
-      //this.features = {};
       this._render();
     });
 
@@ -41,29 +36,11 @@ export default class EditStore {
   }
 
   set(geometry) {
-    /*
-    if (geometry instanceof Array) {
-      this.features = this.features.concat(geometry);
-    } else {
-      this.features.push(geometry);
-    }
-    */
     this.features[geometry.drawId] = geometry;
-    //this.activeId = geometry.editId;
-    //this.editting = true;
     this._render();
   }
 
-  //setBatch(geoms) {
-  //  this.features = this.features.concat(geoms);
-  //  this._render();
-  //}
-
   finish() {
-    //for (var i = 0; i < this.features.length; i++) {
-    //  this.drawStore.set(this.features[i]);
-    //}
-    //this.features = [];
     for (var id in this._features) {
       this._drawStore.set(this._features[id]);
       delete this._features[id];
@@ -71,15 +48,7 @@ export default class EditStore {
     this._render();
   }
 
-  //getAll() {
-  //  return this.features;
-  //}
-
   getAllGeoJSON() {
-    //return {
-    //  type: 'FeatureCollection',
-    //  features: this.features.map(feature => feature.getGeoJSON())
-    //};
     return {
       type: 'FeatureCollection',
       features: Object.keys(this._features).map(id => this.features[id].toGeoJSON())
@@ -88,34 +57,21 @@ export default class EditStore {
   }
 
   get(id) {
-    //return this.features.filter(feat => feat.drawId === id)[0];
     return this._features[id];
   }
 
   getGeoJSON(id) {
-    //return this.features.filter(feat => feat.drawId === id)[0].getGeoJSON();
     return this._features[id].toGeoJSON();
   }
 
-  //endEdit(id) {
-  //  this.features = this.features.filter(feat => feat.drawId !== id);
-  //  this._render();
-  //}
-
   clear() {
-    //this.features = [];
     this.features = {};
     this._render();
   }
 
-  //inProgress() {
-  //  return this.features.length > 0;
-  //}
-
   _addVertices() {
     var vertices = [];
 
-    //for (var i = 0; i < this.features.length; i++) {
     for (var id in this.features) {
       var coords = this.features[id].toGeoJSON().geometry.coordinates;
       var type = this.features[id].toGeoJSON().geometry.type;
@@ -144,7 +100,6 @@ export default class EditStore {
   _addMidpoints() {
     var midpoints = [];
 
-    //for (var i = 0; i < this.features.length; i++) {
     for (var id in this.features) {
       if (this.features[id].type === 'square') continue;
 
