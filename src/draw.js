@@ -36,7 +36,6 @@ export default class Draw extends mapboxgl.Control {
 
     mapboxgl.util.setOptions(this, options);
 
-
     // event listeners
     this.drag = this._drag.bind(this);
     this.onClick = this._onClick.bind(this);
@@ -165,7 +164,7 @@ export default class Draw extends mapboxgl.Control {
     }, (err, features) => {
       if (err) throw err;
       if (features.length) { // clicked on a feature
-        if (this._editStore.drawing) return;
+        if (this._drawing) return;
         this._edit(features[0].properties.drawId);
       } else { // clicked outside all features
         this._finishEdit();
@@ -267,24 +266,28 @@ export default class Draw extends mapboxgl.Control {
     this._finishEdit();
     var polygon = new Polygon(this._map);
     polygon.startDraw();
+    this._drawing = true;
   }
 
   _drawLine() {
     this._finishEdit();
     var line = new Line(this._map);
     line.startDraw();
+    this._drawing = true;
   }
 
   _drawSquare() {
     this._finishEdit();
     var square = new Square(this._map);
     square.startDraw();
+    this._drawing = true;
   }
 
   _drawPoint() {
     this._finishEdit();
     var point = new Point(this._map);
     point.startDraw();
+    this._drawing = true;
   }
 
   _createButton(opts) {
@@ -362,6 +365,7 @@ export default class Draw extends mapboxgl.Control {
           type: 'FeatureCollection',
           features: []
         });
+        this._drawing = false;
       });
 
       this._map.on('edit.feature.update', e => {
@@ -489,15 +493,6 @@ export default class Draw extends mapboxgl.Control {
    */
   clear() {
     this._store.clear();
-    return this;
-  }
-
-  /**
-   * remove all geometries and clears the history
-   * @returns {Draw} this
-   */
-  clearAll() {
-    this._store.clearAll();
     return this;
   }
 

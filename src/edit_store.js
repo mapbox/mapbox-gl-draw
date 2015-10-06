@@ -28,7 +28,7 @@ export default class EditStore {
   }
 
   set(geometry) {
-    this.features[geometry.drawId] = geometry;
+    this._features[geometry.drawId] = geometry;
     this._render();
   }
 
@@ -43,7 +43,7 @@ export default class EditStore {
   getAllGeoJSON() {
     return {
       type: 'FeatureCollection',
-      features: Object.keys(this._features).map(id => this.features[id].toGeoJSON())
+      features: Object.keys(this._features).map(id => this._features[id].toGeoJSON())
     };
 
   }
