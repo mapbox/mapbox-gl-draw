@@ -27,6 +27,7 @@ export default class Square extends Geometry {
   }
 
   startDraw() {
+    this._map.getContainer().addEventListener('keyup', this.onKeyUp);
     this._map.fire('draw.start', { featureType: 'square' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);

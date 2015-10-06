@@ -1,7 +1,5 @@
 'use strict';
 
-//import Immutable from 'immutable';
-
 /**
  * A store for keeping track of versions of drawings
  *

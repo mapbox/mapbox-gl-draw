@@ -28,6 +28,7 @@ export default class Line extends Geometry {
   }
 
   startDraw() {
+    this._map.getContainer().addEventListener('keyup', this.onKeyUp);
     this._map.fire('draw.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addPoint);

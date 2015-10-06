@@ -195,11 +195,6 @@ export default class Draw extends mapboxgl.Control {
     }
   }
 
-  //_exitEdit() {
-  //  DOM.destroy(this.deleteBtn);
-  //  this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
-  //}
-
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
 

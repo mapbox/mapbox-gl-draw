@@ -3,8 +3,6 @@
 import hat from 'hat';
 import Immutable from 'immutable';
 import { translate } from '../util';
-import { LngLat, LngLatBounds } from 'mapbox-gl';
-import extent from 'turf-extent';
 
 /**
  * Base Geometry class from which other geometries inherit
@@ -32,6 +30,8 @@ export default class Geometry {
         coordinates: this.coordinates.toJS()
       }
     };
+
+    this.onKeyUp = this._onKeyUp.bind(this);
   }
 
   /**
@@ -75,19 +75,19 @@ export default class Geometry {
    * @private
    */
   _finishDrawing(type) {
-    //this._map.fire('finish.edit');
+    this._map.getContainer().removeEventListener('keyup', this.onKeyUp);
     this._map.fire('drawing.end', {
       geometry: this,
       featureType: type
     });
   }
 
-  /**
-   * Clear the edit drawings and render the changes to the main draw layer
-   */
-  //completeEdit() {
-  //  this._map.fire('edit.end', { geometry: this });
-  //}
+  _onKeyUp(e) {
+    const ESCAPE = 27;
+    if (e.keyCode === ESCAPE) {
+      this._completeDraw();
+    }
+  }
 
   /**
    * Translate this polygon
@@ -105,20 +105,11 @@ export default class Geometry {
           JSON.stringify(this.initGeom)), init, curr, this._map);
     this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
     if (this.coordinates.get(0).length > 1) {
-      // you should be ashamed of yourself
       this.coordinates = this.coordinates.set(
           0, Immutable.List(this.coordinates.get(0)));
     }
 
     this._map.fire('new.edit');
-  }
-
-  getExtent() {
-    var ext = extent(this.toGeoJSON());
-    return new LngLatBounds(
-      new LngLat(ext[0], ext[1]),
-      new LngLat(ext[2], ext[3])
-    );
   }
 
   _renderDrawProgress() {

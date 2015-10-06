@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     'id': 'gl-drawing-line',
     'type': 'line',

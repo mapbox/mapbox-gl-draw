@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     'id': 'gl-edit-line',
     'type': 'line',
