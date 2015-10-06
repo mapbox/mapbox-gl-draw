@@ -52,12 +52,16 @@ export default class EditStore {
     return this._features[id];
   }
 
+  inProgress() {
+    return Object.keys(this._features).length > 0;
+  }
+
   getGeoJSON(id) {
     return this._features[id].toGeoJSON();
   }
 
   clear() {
-    this.features = {};
+    this._features = {};
     this._render();
   }
 

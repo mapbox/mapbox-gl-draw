@@ -180,19 +180,23 @@ export default class Draw extends mapboxgl.Control {
     this.deleteBtn = this._createButton({
       className: 'mapboxgl-ctrl-draw-btn trash',
       title: `delete`,
-      fn: this._destroy.bind(this, drawId),
+      fn: this._destroy.bind(this),
       id: 'deleteBtn'
     });
   }
 
   _finishEdit() {
-    this._editStore.finish();
+    if (this._editStore.inProgress()) {
+      this._editStore.finish();
+      DOM.destroy(this.deleteBtn);
+      this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
+    }
   }
 
-  _exitEdit() {
-    DOM.destroy(this.deleteBtn);
-    this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
-  }
+  //_exitEdit() {
+  //  DOM.destroy(this.deleteBtn);
+  //  this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
+  //}
 
   _initiateDrag(e) {
     var coords = DOM.mousePos(e, this._map._container);
@@ -254,12 +258,9 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _destroy() {
-    this._exitEdit();
-  }
-
-  _destroyAll() {
     this._editStore.clear();
-    this._exitEdit();
+    DOM.destroy(this.deleteBtn);
+    this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
   }
 
   _drawPolygon() {
@@ -353,7 +354,7 @@ export default class Draw extends mapboxgl.Control {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      this._map.on('edit.end', this._exitEdit.bind(this));
+      //this._map.on('edit.end', this._exitEdit.bind(this));
 
       this._map.on('new.drawing.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
