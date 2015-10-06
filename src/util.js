@@ -2,7 +2,7 @@
 
 var mapboxgl = require('mapbox-gl');
 
-module.exports.DOM = {};
+var DOM = {};
 
 /**
  * Captures mouse position
@@ -11,7 +11,7 @@ module.exports.DOM = {};
  * @param {Object} el Container element.
  * @returns {Point}
  */
-module.exports.DOM.mousePos = function(e, el) {
+DOM.mousePos = function(e, el) {
   var rect = el.getBoundingClientRect();
   return new mapboxgl.Point(
     e.clientX - rect.left - el.clientLeft,
@@ -29,7 +29,7 @@ module.exports.DOM.mousePos = function(e, el) {
  * element. Attribute name corresponds to the key.
  * @returns {el} The dom element
  */
-module.exports.DOM.create = function(tag, className, container, attributes) {
+DOM.create = function(tag, className, container, attributes) {
   var el = document.createElement(tag);
   if (className) el.className = className;
   if (attributes) {
@@ -46,7 +46,7 @@ module.exports.DOM.create = function(tag, className, container, attributes) {
  *
  * @param {el} The DOM element
  */
-module.exports.DOM.destroy = function(el) {
+DOM.destroy = function(el) {
   el.parentElement.removeChild(el);
 };
 
@@ -56,7 +56,7 @@ module.exports.DOM.destroy = function(el) {
  * @param {HTMLElement} elements
  * @param {String} klass
  */
-module.exports.DOM.removeClass = function(elements, klass) {
+DOM.removeClass = function(elements, klass) {
   Array.prototype.forEach.call(elements, function(el) {
     el.classList.remove(klass);
   });
@@ -77,7 +77,7 @@ var transformProp = testProp([
   'WebkitTransform'
 ]);
 
-module.exports.DOM.setTransform = function(el, value) {
+DOM.setTransform = function(el, value) {
   el.style[transformProp] = value;
 };
 
@@ -88,17 +88,43 @@ var selectProp = testProp([
   'msUserSelect'
 ]), userSelect;
 
-module.exports.DOM.disableSelection = function () {
+DOM.disableSelection = function () {
   if (selectProp) {
     userSelect = docStyle[selectProp];
     docStyle[selectProp] = 'none';
   }
 };
 
-module.exports.DOM.enableSelection = function () {
+DOM.enableSelection = function () {
   if (selectProp) {
     docStyle[selectProp] = userSelect;
   }
+};
+
+module.exports.createButton = function(container, opts, controlClass) {
+  var attr = { title: opts.title };
+  if (opts.id) {
+    attr.id = opts.id;
+  }
+  var a = DOM.create('button', opts.className, container, attr);
+
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var el = e.target;
+
+    if (el.classList.contains('active')) {
+      el.classList.remove('active');
+    } else {
+      DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
+      el.classList.add('active');
+      opts.fn();
+    }
+
+  }, true);
+
+  return a;
 };
 
 /**
@@ -145,4 +171,6 @@ var translatePoint = function(point, dx, dy, map) {
   c = map.unproject([ c.x + dx, c.y + dy ]);
   return [ c.lng, c.lat ];
 };
+
+module.exports.DOM = DOM;
 module.exports.translatePoint = translatePoint;

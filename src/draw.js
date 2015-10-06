@@ -1,12 +1,12 @@
 'use strict';
 
 import R from 'ramda';
-import { DOM } from './util';
 import mapboxgl from 'mapbox-gl';
 import EditStore from './edit_store';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 import themeDrawing from './theme/drawing';
+import { DOM, createButton } from './util';
 
 // Data store
 import Store from './store';
@@ -59,39 +59,39 @@ export default class Draw extends mapboxgl.Control {
 
     // Build out draw controls
     if (controls.line) {
-      this.lineStringCtrl = this._createButton({
+      this.lineStringCtrl = createButton(this._container, {
         className: controlClass + ' line',
         title: `LineString tool ${this.options.keybindings && '(l)'}`,
         fn: this._drawLine.bind(this),
         id: 'lineDrawBtn'
-      });
+      }, this._controlClass);
     }
 
     if (controls.shape) {
-      this.polygonCtrl = this._createButton({
+      this.polygonCtrl = createButton(this._container, {
         className: `${controlClass} shape`,
         title: `Polygon tool ${this.options.keybindings && '(p)'}`,
         fn: this._drawPolygon.bind(this),
         id: 'polygonDrawBtn'
-      });
+      }, this._constrolClass);
     }
 
     if (controls.square) {
-      this.squareCtrl = this._createButton({
+      this.squareCtrl = createButton(this._container, {
         className: `${controlClass} square`,
         title: `Square tool ${this.options.keybindings && '(s)'}`,
         fn: this._drawSquare.bind(this),
         id: 'squareDrawBtn'
-      });
+      }, this._controlClass);
     }
 
     if (controls.marker) {
-      this.markerCtrl = this._createButton({
+      this.markerCtrl = createButton(this._container, {
         className: `${controlClass} marker`,
         title: `Marker tool ${this.options.keybindings && '(m)'}`,
         fn: this._drawPoint.bind(this),
         id: 'pointDrawBtn'
-      });
+      }, this._controlClass);
     }
 
     if (this.options.keybindings) {
@@ -128,12 +128,12 @@ export default class Draw extends mapboxgl.Control {
       this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
       if (!this._editStore.inProgress())
-        this.deleteBtn = this._createButton({
+        this.deleteBtn = createButton(this._container, {
           className: 'mapboxgl-ctrl-draw-btn trash',
           title: 'delete',
           fn: this._destroy.bind(this),
           id: 'deleteBtn'
-        });
+        }, this._controlClass);
     }
   }
 
@@ -212,12 +212,12 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
     if (!this._editStore.inProgress())
-      this.deleteBtn = this._createButton({
+      this.deleteBtn = createButton(this._container, {
         className: 'mapboxgl-ctrl-draw-btn trash',
         title: 'delete',
         fn: this._destroy.bind(this),
         id: 'deleteBtn'
-      });
+      }, this._controlClass);
 
     this._store.edit(drawId);
   }
@@ -324,32 +324,6 @@ export default class Draw extends mapboxgl.Control {
     var point = new Point(this._map);
     point.startDraw();
     this._drawing = true;
-  }
-
-  _createButton(opts) {
-    var attr = { title: opts.title };
-    if (opts.id) {
-      attr.id = opts.id;
-    }
-    var a = DOM.create('button', opts.className, this._container, attr);
-
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      var el = e.target;
-
-      if (el.classList.contains('active')) {
-        el.classList.remove('active');
-      } else {
-        DOM.removeClass(document.querySelectorAll('.' + this._controlClass), 'active');
-        el.classList.add('active');
-        opts.fn();
-      }
-
-    }, true);
-
-    return a;
   }
 
   _mapState() {
