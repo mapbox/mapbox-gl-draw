@@ -23,10 +23,6 @@ export default class Store {
     this._editStore = editStore;
   }
 
-  getAll() {
-    //return this.history[this.historyIndex];
-  }
-
   getAllGeoJSON() {
     return {
       type: 'FeatureCollection',

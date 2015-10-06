@@ -71,7 +71,7 @@ export default class Square extends Geometry {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 
-    this._finshDrawing('square');
+    this._finishDrawing('square');
   }
 
   moveVertex(init, curr, idx) {
