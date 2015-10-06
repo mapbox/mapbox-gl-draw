@@ -173,16 +173,18 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _edit(drawId) {
-    this._store.edit(drawId);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
-    this.deleteBtn = this._createButton({
-      className: 'mapboxgl-ctrl-draw-btn trash',
-      title: `delete`,
-      fn: this._destroy.bind(this),
-      id: 'deleteBtn'
-    });
+    if (!this._editStore.inProgress())
+      this.deleteBtn = this._createButton({
+        className: 'mapboxgl-ctrl-draw-btn trash',
+        title: `delete`,
+        fn: this._destroy.bind(this),
+        id: 'deleteBtn'
+      });
+
+    this._store.edit(drawId);
   }
 
   _finishEdit() {
