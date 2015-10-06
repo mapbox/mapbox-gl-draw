@@ -7,7 +7,6 @@ import EditStore from './edit_store';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 import themeDrawing from './theme/drawing';
-//import { LngLat, LngLatBounds } from 'mapbox-gl';
 
 // Data store
 import Store from './store';
@@ -37,7 +36,6 @@ export default class Draw extends mapboxgl.Control {
 
     mapboxgl.util.setOptions(this, options);
 
-    //this.editIds = [];
 
     // event listeners
     this.drag = this._drag.bind(this);
@@ -46,10 +44,6 @@ export default class Draw extends mapboxgl.Control {
     this.endDrag = this._endDrag.bind(this);
     this.initiateDrag = this._initiateDrag.bind(this);
 
-
-    //this.onKeyDown = this._onKeyDown.bind(this);
-    //this.onMouseDown = this._onMouseDown.bind(this);
-    //this.onMouseUp = this._onMouseUp.bind(this);
   }
 
   onAdd(map) {
@@ -110,13 +104,6 @@ export default class Draw extends mapboxgl.Control {
     return container;
   }
 
-  //_onKeyDown(e) {
-  //  if (e.keyCode === 16) {
-  //    this.shiftDown = true;
-  //  }
-  //}
-
-
   _onKeyUp(e) {
 
     // draw shortcuts
@@ -165,29 +152,6 @@ export default class Draw extends mapboxgl.Control {
     }
   }
 
-  //_onMouseDown(e) {
-  //  if (!this.shiftDown) return;
-  //  this.featInStart = DOM.mousePos(e, this._map.getContainer());
-  //}
-
-  //_onMouseUp(e) {
-  //  if (!this.shiftDown) return;
-  //  var end = DOM.mousePos(e, this._map.getContainer());
-
-  //  var ne = this.featInStart.x > end.x ? this.featInStart : end;
-  //  var sw = this.featInStart.x > end.x ? end : this.featInStart;
-
-  //  ne = this._map.unproject(ne);
-  //  sw = this._map.unproject(sw);
-
-  //  var bounds = new LngLatBounds(
-  //    new LngLat(sw.lng, sw.lat),
-  //    new LngLat(ne.lng, ne.lat)
-  //  );
-  //  var feats = this._store.getFeaturesIn(bounds);
-  //  this._batchEdit(feats.map(feat => feat.drawId));
-  //}
-
   /**
    * Handles clicks on the maps in a number of scenarios
    * @param {Object} e - the object passed to the callback of map.on('click', ...)
@@ -209,49 +173,7 @@ export default class Draw extends mapboxgl.Control {
     });
   }
 
-
-  //_onClick(e) {
-
-  //  this._map.featuresAt(e.point, {
-  //    radius: 10,
-  //    includeGeometry: true,
-  //    layer: 'gl-draw-polygons'
-  //  }, (err, features) => {
-  //    if (err) throw err;
-
-  //    if (features.length) { // clicked on a feature
-  //      //if (this._editStore.inProgress() && !this.editIds.length) { // clicked on a feature while in draw mode
-  //      if (this._editStore.drawing) {
-  //        return;
-  //      } else if (this._editStore.inProgress() && /*this.editIds.length*/this._editStore.editting) { // clicked on a feature while in edit mode
-  //        if (features[0].properties.drawId === /*this.editIds.length*/this._editStore.activeId) { // clicked on the feature you're editing
-  //          return;
-  //        } else { // clicked on a different feature while in edit mode
-  //          this._finish();
-  //          //this.editIds = [];
-  //          this._editStore.clear();
-  //        }
-  //      }
-  //    } else { // clicked not on a feature
-  //      if (!this._editStore.inProgress()) { // click outside features while not drawing or editing
-  //        return;
-  //      } else if (/*this._editStore.inProgress() && !this.editIds.length*/this._editStore.drawing) { // clicked outside features while drawing
-  //        return;
-  //      } else if (/*this.editIds.length*/this._editStore.editting) { // clicked outside features while editing
-  //        return this._finish();
-  //      }
-  //    }
-
-  //    // if (clicked on a feature && ((!editing this feature && !drawing))
-  //    this._edit(features[0].properties.drawId);
-  //  });
-
-  //}
-
   _edit(drawId) {
-    //this.editIds.push(drawId);
-    //var feat = this._store.edit(drawId);
-    //this._editStore.set(feat);
     this._store.edit(drawId);
 
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
@@ -264,43 +186,13 @@ export default class Draw extends mapboxgl.Control {
     });
   }
 
-  /**
-   * @param {Array<String>} features - an array of drawIds
-   * @private
-   */
-  //_batchEdit(drawIds) {
-  //  this._finish();
-  //  //this.editIds = drawIds;
-  //  //this.editIds
-  //  //  .map(id => this._store.edit(id))
-  //  //  .forEach(feat => { this._editStore.set(feat); });
-  //  this._store.editBatch(drawIds);
-
-  //  this.deleteBtn = this._createButton({
-  //    className: 'mapboxgl-ctrl-draw-btn trash',
-  //    title: 'delete all features in edit mode',
-  //    fn: this._destroyAll.bind(this),
-  //    id: 'deleteBtn'
-  //  });
-  //}
-
   _finishEdit() {
-    /*
-    if (this.editIds.length) {
-      for (var i = 0; i < this.editIds.length; i++) {
-        this._editStore.get(this.editIds[i]).completeEdit();
-      }
-    } else if (this._editStore.inProgress()) {
-      this._editStore.getAll()[0].completeDraw();
-    }
-    */
     this._editStore.finish();
   }
 
   _exitEdit() {
     DOM.destroy(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
-    //this.editIds = []; // REVISIT
   }
 
   _initiateDrag(e) {
@@ -363,9 +255,6 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _destroy() {
-    //for (var i = 0; i < this.editIds.length; i++) {
-    //  this._editStore.endEdit(this.editIds[i]);
-    //}
     this._exitEdit();
   }
 
