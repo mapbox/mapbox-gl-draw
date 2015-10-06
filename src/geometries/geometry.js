@@ -38,7 +38,7 @@ export default class Geometry {
    * @return {Object} GeoJSON feature
    * @private
    */
-  getGeoJSON() {
+  toGeoJSON() {
     this.geojson.geometry.coordinates = this.coordinates.toJS();
     return this.geojson;
   }
@@ -117,6 +117,12 @@ export default class Geometry {
       new LngLat(ext[0], ext[1]),
       new LngLat(ext[2], ext[3])
     );
+  }
+
+  _renderDrawProgress() {
+    this._map.fire('new.drawing.update', {
+      geojson: this.toGeoJSON
+    });
   }
 
 }

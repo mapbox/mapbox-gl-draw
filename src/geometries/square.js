@@ -62,7 +62,8 @@ export default class Square extends Geometry {
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 3], [ sw.lng, sw.lat ]);
 
-    this._map.fire('new.edit');
+    //this._map.fire('new.edit');
+    this._renderDrawProgress();
   }
 
   _completeDraw() {

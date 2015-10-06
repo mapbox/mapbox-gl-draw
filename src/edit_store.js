@@ -12,17 +12,22 @@
  */
 export default class EditStore {
 
-  constructor(map, features) {
+  constructor(map/*, features*/) {
     this._map = map;
-    this.features = features || [];
-    this.active = null;
+    //this.features = features || [];
+    this._features = {};
+
+    this.drawStore = null;
+    //this.editting = false;
+    //this.drawing = false;
 
     this._map.on('new.edit', () => {
       this._render();
     });
 
     this._map.on('finish.edit', () => {
-      this.features = [];
+      //this.features = [];
+      //this.features = {};
       this._render();
     });
 
@@ -31,57 +36,89 @@ export default class EditStore {
     });
   }
 
-  add(geometry) {
-    ////////////////////////////////////////////////////////
-    ///////////////// CHECK FOR DUPES!!! ///////////////////
-    ////////////////////////////////////////////////////////
+  setDrawStore(drawStore) {
+    this._drawStore = drawStore;
+  }
+
+  set(geometry) {
+    /*
     if (geometry instanceof Array) {
       this.features = this.features.concat(geometry);
     } else {
       this.features.push(geometry);
     }
+    */
+    this.features[geometry.drawId] = geometry;
+    //this.activeId = geometry.editId;
+    //this.editting = true;
     this._render();
   }
 
-  getAll() {
-    return this.features;
+  //setBatch(geoms) {
+  //  this.features = this.features.concat(geoms);
+  //  this._render();
+  //}
+
+  finish() {
+    //for (var i = 0; i < this.features.length; i++) {
+    //  this.drawStore.set(this.features[i]);
+    //}
+    //this.features = [];
+    for (var id in this._features) {
+      this._drawStore.set(this._features[id]);
+      delete this._features[id];
+    }
+    this._render();
   }
 
+  //getAll() {
+  //  return this.features;
+  //}
+
   getAllGeoJSON() {
+    //return {
+    //  type: 'FeatureCollection',
+    //  features: this.features.map(feature => feature.getGeoJSON())
+    //};
     return {
       type: 'FeatureCollection',
-      features: this.features.map(feature => feature.getGeoJSON())
+      features: Object.keys(this._features).map(id => this.features[id].toGeoJSON())
     };
+
   }
 
   get(id) {
-    return this.features.filter(feat => feat.drawId === id)[0];
+    //return this.features.filter(feat => feat.drawId === id)[0];
+    return this._features[id];
   }
 
   getGeoJSON(id) {
-    return this.features.filter(feat => feat.drawId === id)[0].getGeoJSON();
+    //return this.features.filter(feat => feat.drawId === id)[0].getGeoJSON();
+    return this._features[id].toGeoJSON();
   }
 
-  endEdit(id) {
-    this.features = this.features.filter(feat => feat.drawId !== id);
-    this._render();
-  }
+  //endEdit(id) {
+  //  this.features = this.features.filter(feat => feat.drawId !== id);
+  //  this._render();
+  //}
 
   clear() {
-    this.features = [];
+    //this.features = [];
+    this.features = {};
     this._render();
   }
 
-  inProgress() {
-    return this.features.length > 0;
-  }
+  //inProgress() {
+  //  return this.features.length > 0;
+  //}
 
   _addVertices() {
     var vertices = [];
 
-    for (var i = 0; i < this.features.length; i++) {
-      var coords = this.features[i].getGeoJSON().geometry.coordinates;
-      var type = this.features[i].getGeoJSON().geometry.type;
+    //for (var i = 0; i < this.features.length; i++) {
+    for (var id in this.features) {
+      var coords = this.features[id].toGeoJSON().geometry.coordinates;
+      var type = this.features[id].toGeoJSON().geometry.type;
       if (type === 'LineString' || type === 'Polygon') {
         coords = type === 'Polygon' ? coords[0] : coords;
         var l = type === 'LineString' ? coords.length : coords.length - 1;
@@ -107,10 +144,11 @@ export default class EditStore {
   _addMidpoints() {
     var midpoints = [];
 
-    for (var i = 0; i < this.features.length; i++) {
-      if (this.features[i].type === 'square') continue;
+    //for (var i = 0; i < this.features.length; i++) {
+    for (var id in this.features) {
+      if (this.features[id].type === 'square') continue;
 
-      var feat = this.features[i];
+      var feat = this.features[id];
       var c = feat.getGeoJSON().geometry.coordinates;
 
       if (feat.getGeoJSON().geometry.type === 'LineString' ||
