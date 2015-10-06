@@ -55,7 +55,7 @@ export default class Store {
    * @param {String} id - feature id
    */
   unset(id) {
-    delete this._feature[id];
+    delete this._features[id];
     this._render();
   }
 

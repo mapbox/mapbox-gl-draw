@@ -41,8 +41,7 @@ test('Edit store constructor', t => {
   var editStore = new EditStore(map);
 
   // are they even there?
-  t.equals(typeof editStore.get, 'function', 'getById exists');
-  t.equals(typeof editStore.getAll, 'function', 'get exists');
+  t.equals(typeof editStore.get, 'function', 'get exists');
   t.equals(typeof editStore.clear, 'function', 'clear exists');
   t.equals(typeof editStore._addVertices, 'function', '_addVertices exists');
   t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');

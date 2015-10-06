@@ -41,8 +41,7 @@ test('Draw class test', t => {
   t.equals(typeof Draw._onKeyUp,'function', '_onKeyUp method exists');
   t.equals(typeof Draw._onClick, 'function', '_onClick method exists');
   t.equals(typeof Draw._edit, 'function', '_edit method exists');
-  t.equals(typeof Draw._finish, 'function', '_finish method exists');
-  t.equals(typeof Draw._exitEdit, 'function', '_exitEdit method exists');
+  t.equals(typeof Draw._finishEdit, 'function', '_finishEdit method exists');
   t.equals(typeof Draw._initiateDrag, 'function', '_initiateDrag method exists');
   t.equals(typeof Draw._drag, 'function', '_drag method exists');
   t.equals(typeof Draw._endDrag, 'function', '_endDraw method exists');
@@ -56,7 +55,6 @@ test('Draw class test', t => {
   t.equals(typeof Draw.get, 'function', 'get method exists');
   t.equals(typeof Draw.getAll, 'function', 'getAll method exists');
   t.equals(typeof Draw.clear, 'function', 'clear method exists');
-  t.equals(typeof Draw.clearAll, 'function', 'clearAll method exists');
   t.equals(typeof Draw._createButton, 'function', '_createButton method exists');
   t.equals(typeof Draw._mapState, 'function', '_mapState method exists');
 
@@ -97,22 +95,15 @@ test('Draw class test', t => {
     document.getElementById('deleteBtn'),
     'whilst in edit mode, the delete button is added to the DOM'
   );
-  Draw._finish();
-  Draw._exitEdit();
+  Draw._finishEdit();
   t.notOk(
     document.getElementById('deleteBtn'),
     'delete button is removed on at the end of edit'
   );
-  Draw.clearAll();
+  Draw.clear();
 
   // delete feature
-  Draw.set(feature);
-  /*
-  f = Draw.getAll().features[0];
-  Draw._edit(f);
-  Draw._destroy(f.properties.drawId);
-  t.equals(Draw.getAll().features.length, 0, 'Draw._destroy removes the geometry from the store');
-  */
+  //Draw.set(feature);
 
   t.end();
 });

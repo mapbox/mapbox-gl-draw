@@ -2,7 +2,6 @@ var Store = require('../src/store');
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
-var Immutable = require('immutable');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -41,30 +40,14 @@ test('Store constructor', t => {
 
   var store = Draw._store;
 
-  t.equals(store.historyIndex, 0, 'historyIndex starts at zero');
-  t.ok(store.history, 'history exists');
-  t.equals(store.history.length, 1, 'history has one element');
-  t.ok(store.history[0] instanceof Immutable.List, 'history has a list');
-  t.equals(store.history[0].count(), 0, 'history\'s list is empty');
-
-  t.ok(store.annotations, 'annotations exists');
-  t.ok(store.annotations instanceof Immutable.List, 'annotations has a list');
-  t.equals(store.annotations.size, 0, 'annotations list is empty');
-
   // are the methods even there?
-  t.equals(typeof store._operation, 'function', '_operation exists');
-  t.equals(typeof store.getAll, 'function', 'getAll exists');
   t.equals(typeof store.get, 'function', 'get exists');
+  t.equals(typeof store.getAllGeoJSON, 'function', 'getAllGeoJSON exists');
   t.equals(typeof store.clear, 'function', 'clear exists');
-  t.equals(typeof store.clearAll, 'function', 'clearAll exists');
   t.equals(typeof store.unset, 'function', 'unset exists');
   t.equals(typeof store.set, 'function', 'set exists');
   t.equals(typeof store.edit, 'function', 'edit exists');
   t.equals(typeof store._render, 'function', '_render exists');
-  t.equals(typeof store.redo, 'function', 'redo exists');
-  t.equals(typeof store.undo, 'function', 'undo exists');
-
-  t.ok(store.getAll() instanceof Immutable.List, 'history initiates with an empty Immutable.List');
 
   // set
   var id = Draw.set(feature);
@@ -74,7 +57,7 @@ test('Store constructor', t => {
 
   // get
   var storeFeat = store.get(f.properties.drawId);
-  t.deepEqual(storeFeat.getGeoJSON().geometry, feature.geometry, 'get returns the same geometry you set');
+  t.deepEqual(storeFeat.toGeoJSON().geometry, feature.geometry, 'get returns the same geometry you set');
 
   // unset
   store.unset(f.properties.drawId);
