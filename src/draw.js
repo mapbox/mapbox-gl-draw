@@ -34,7 +34,7 @@ export default class Draw extends mapboxgl.Control {
       }
     };
 
-    mapboxgl.util.setOptions(this, options);
+    Object.assign(this, options);
 
     // event listeners
     this.drag = this._drag.bind(this);
