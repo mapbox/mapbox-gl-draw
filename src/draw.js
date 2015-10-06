@@ -41,6 +41,9 @@ export default class Draw extends mapboxgl.Control {
     this.onClick = this._onClick.bind(this);
     this.onKeyUp = this._onKeyUp.bind(this);
     this.endDrag = this._endDrag.bind(this);
+    this.onKeyDown = this._onKeyDown.bind(this);
+    this.onMouseUp = this._onMouseUp.bind(this);
+    this.onMouseDown = this._onMouseDown.bind(this);
     this.initiateDrag = this._initiateDrag.bind(this);
 
   }
@@ -103,6 +106,37 @@ export default class Draw extends mapboxgl.Control {
     return container;
   }
 
+  _onKeyDown(e) {
+    const SHIFT_KEY = 16;
+    if (e.keyCode === SHIFT_KEY) {
+      this.shiftDown = true;
+    }
+  }
+
+  _onMouseDown(e) {
+    if (this.shiftDown) {
+      this._featsInStart = DOM.mousePos(e, this._map.getContainer());
+    }
+  }
+
+  _onMouseUp(e) {
+    if (this.shiftDown) {
+      var end = DOM.mousePos(e, this._map.getContainer());
+
+      this._store.editFeaturesIn(this._featsInStart, end);
+
+      this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
+
+      if (!this._editStore.inProgress())
+        this.deleteBtn = this._createButton({
+          className: 'mapboxgl-ctrl-draw-btn trash',
+          title: 'delete',
+          fn: this._destroy.bind(this),
+          id: 'deleteBtn'
+        });
+    }
+  }
+
   _onKeyUp(e) {
 
     // draw shortcuts
@@ -112,6 +146,7 @@ export default class Draw extends mapboxgl.Control {
     const SQUARE_KEY = 83;     // (s)
     const EXIT_EDIT_KEY = 27;  // (esc)
     const DELETE_KEY = 68;     // (d)
+    const SHIFT_KEY = 16;      // (shift)
 
     var event = document.createEvent('HTMLEvents');
     event.initEvent('click', true, false);
@@ -146,7 +181,7 @@ export default class Draw extends mapboxgl.Control {
         }
         break;
     }
-    if (e.keyCode === 16) {
+    if (e.keyCode === SHIFT_KEY) {
       this.shiftDown = false;
     }
   }

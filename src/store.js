@@ -1,5 +1,8 @@
 'use strict';
 
+import bboxPoly from 'turf-bbox-polygon';
+import intersect from 'turf-intersect';
+
 /**
  * A store for keeping track of versions of drawings
  *
@@ -66,6 +69,29 @@ export default class Store {
     this._editStore.set(this._features[id]);
     delete this._features[id];
     this._render();
+  }
+
+  /**
+   * @param {Object} p1 - the pixel coordinates of the first point
+   * @param {Object} p2 - the pixel coordinates of the second point
+   */
+  editFeaturesIn(p1, p2) {
+    p1 = this._map.unproject([ p1.x, p1.y ]);
+    p2 = this._map.unproject([ p2.x, p2.y ]);
+    var latMin = p1.lat < p2.lat ? p1.lat : p2.lat;
+    var lngMin = p1.lng < p2.lng ? p1.lng : p2.lng;
+    var latMax = p1.lat > p2.lat ? p1.lat : p2.lat;
+    var lngMax = p1.lng > p2.lng ? p1.lng : p2.lng;
+    var bbox = bboxPoly([ lngMin, latMin, lngMax, latMax ]);
+    var inside = [];
+    for (var id in this._features) {
+      if (intersect(this._features[id].toGeoJSON(), bbox)) {
+        inside.push(id);
+      }
+    }
+    for (var i = 0; i < inside.length; i++) {
+      this.edit(inside[i]);
+    }
   }
 
   _render() {
