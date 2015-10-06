@@ -141,7 +141,7 @@ export default class Draw extends mapboxgl.Control {
         this._finishEdit();
         break;
       case DELETE_KEY:
-        if (this.editIds.length) {
+        if (this._editStore.inProgress()) {
           this._destroy();
         }
         break;
@@ -358,8 +358,6 @@ export default class Draw extends mapboxgl.Control {
         this._store.set(e.geometry);
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
-
-      //this._map.on('edit.end', this._exitEdit.bind(this));
 
       this._map.on('new.drawing.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
