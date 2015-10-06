@@ -62,7 +62,8 @@ export default class Square extends Geometry {
     this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
     this.coordinates = this.coordinates.setIn([0, 3], [ sw.lng, sw.lat ]);
 
-    this._map.fire('new.edit');
+    //this._map.fire('new.edit');
+    this._renderDrawProgress();
   }
 
   _completeDraw() {
@@ -70,7 +71,7 @@ export default class Square extends Geometry {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
 
-    this._done('square');
+    this._finishDrawing('square');
   }
 
   moveVertex(init, curr, idx) {

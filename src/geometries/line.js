@@ -45,7 +45,8 @@ export default class Line extends Geometry {
     }
     this.vertexIdx++;
 
-    this._map.fire('new.edit');
+    //this._map.fire('new.edit');
+    this._renderDrawProgress();
   }
 
   _onMouseMove(e) {
@@ -64,7 +65,7 @@ export default class Line extends Geometry {
 
     this.coordinates = this.coordinates.remove(this.vertexIdx);
 
-    this._done('line');
+    this._finishDrawing('line');
   }
 
   /**

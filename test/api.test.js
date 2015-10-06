@@ -47,9 +47,6 @@ test('API test', t => {
   Draw.clear();
   t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
 
-  Draw.clearAll();
-  t.equals(Draw._store.historyIndex, 0, 'Draw.clearAll resets the history index to 0');
-
   id = Draw.set(feature);
   f = Draw.get(id);
   Draw.remove(f.properties.drawId);

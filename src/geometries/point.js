@@ -31,7 +31,7 @@ export default class Point extends Geometry {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
     this.coordinates = Immutable.List([ e.lngLat.lng, e.lngLat.lat ]);
-    this._done('point');
+    this._finishDrawing('point');
   }
 
 }

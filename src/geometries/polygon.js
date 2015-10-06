@@ -16,7 +16,8 @@ export default class Polygon extends Geometry {
 
   constructor(map, data) {
     if (!data) data = { geometry: {} };
-    data.geometry.coordinates = Immutable.fromJS(data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
+    data.geometry.coordinates = Immutable.fromJS(
+        data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
     super(map, 'Polygon', data);
 
     // event handlers
@@ -61,7 +62,8 @@ export default class Polygon extends Geometry {
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates = this.coordinates.setIn([0, this.vertexIdx], [coords.lng, coords.lat]);
 
-    this._map.fire('new.edit');
+    //this._map.fire('new.edit');
+    this._renderDrawProgress();
   }
 
   _completeDraw() {
@@ -76,7 +78,7 @@ export default class Polygon extends Geometry {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
-    this._done('polygon');
+    this._finishDrawing('polygon');
   }
 
   /**

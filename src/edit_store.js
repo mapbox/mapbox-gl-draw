@@ -12,76 +12,69 @@
  */
 export default class EditStore {
 
-  constructor(map, features) {
+  constructor(map) {
     this._map = map;
-    this.features = features || [];
-    this.active = null;
+    this._features = {};
 
-    this._map.on('new.edit', () => {
-      this._render();
-    });
+    this.drawStore = null;
 
-    this._map.on('finish.edit', () => {
-      this.features = [];
-      this._render();
-    });
-
-    this._map.on('edit.end', e => {
-      this.endEdit(e.geometry.drawId);
-    });
+    this._map.on('new.edit', () => { this._render(); });
+    this._map.on('finish.edit', () => { this._render(); });
+    this._map.on('edit.end', e => { this.endEdit(e.geometry.drawId); });
   }
 
-  add(geometry) {
-    ////////////////////////////////////////////////////////
-    ///////////////// CHECK FOR DUPES!!! ///////////////////
-    ////////////////////////////////////////////////////////
-    if (geometry instanceof Array) {
-      this.features = this.features.concat(geometry);
-    } else {
-      this.features.push(geometry);
-    }
+  setDrawStore(drawStore) {
+    this._drawStore = drawStore;
+  }
+
+  set(geometry) {
+    this._features[geometry.drawId] = geometry;
     this._render();
   }
 
-  getAll() {
-    return this.features;
+  finish() {
+    for (var id in this._features) {
+      this._drawStore.set(this._features[id]);
+      delete this._features[id];
+    }
+    this._render();
   }
 
   getAllGeoJSON() {
     return {
       type: 'FeatureCollection',
-      features: this.features.map(feature => feature.getGeoJSON())
+      features: Object.keys(this._features).map(id => this._features[id].toGeoJSON())
     };
+
   }
 
   get(id) {
-    return this.features.filter(feat => feat.drawId === id)[0];
-  }
-
-  getGeoJSON(id) {
-    return this.features.filter(feat => feat.drawId === id)[0].getGeoJSON();
-  }
-
-  endEdit(id) {
-    this.features = this.features.filter(feat => feat.drawId !== id);
-    this._render();
-  }
-
-  clear() {
-    this.features = [];
-    this._render();
+    return this._features[id];
   }
 
   inProgress() {
-    return this.features.length > 0;
+    return Object.keys(this._features).length > 0;
+  }
+
+  getGeoJSON(id) {
+    return this._features[id].toGeoJSON();
+  }
+
+  getDrawIds() {
+    return Object.keys(this._features);
+  }
+
+  clear() {
+    this._features = {};
+    this._render();
   }
 
   _addVertices() {
     var vertices = [];
 
-    for (var i = 0; i < this.features.length; i++) {
-      var coords = this.features[i].getGeoJSON().geometry.coordinates;
-      var type = this.features[i].getGeoJSON().geometry.type;
+    for (var id in this._features) {
+      var coords = this._features[id].toGeoJSON().geometry.coordinates;
+      var type = this._features[id].toGeoJSON().geometry.type;
       if (type === 'LineString' || type === 'Polygon') {
         coords = type === 'Polygon' ? coords[0] : coords;
         var l = type === 'LineString' ? coords.length : coords.length - 1;
@@ -90,6 +83,7 @@ export default class EditStore {
             type: 'Feature',
             properties: {
               meta: 'vertex',
+              parent: this._features[id].drawId,
               index: j
             },
             geometry: {
@@ -107,16 +101,16 @@ export default class EditStore {
   _addMidpoints() {
     var midpoints = [];
 
-    for (var i = 0; i < this.features.length; i++) {
-      if (this.features[i].type === 'square') continue;
+    for (var id in this._features) {
+      if (this._features[id].type === 'square') continue;
 
-      var feat = this.features[i];
-      var c = feat.getGeoJSON().geometry.coordinates;
+      var feat = this._features[id];
+      var c = feat.toGeoJSON().geometry.coordinates;
 
-      if (feat.getGeoJSON().geometry.type === 'LineString' ||
-          feat.getGeoJSON().geometry.type === 'Polygon') {
+      if (feat.toGeoJSON().geometry.type === 'LineString' ||
+          feat.toGeoJSON().geometry.type === 'Polygon') {
 
-        c = feat.getGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
+        c = feat.toGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
 
         for (var j = 0; j < c.length - 1; j++) {
           var ptA = this._map.project([ c[j][0], c[j][1] ]);
@@ -126,6 +120,7 @@ export default class EditStore {
             type: 'Feature',
             properties: {
               meta: 'midpoint',
+              parent: feat.drawId,
               index: j + 1
             },
             geometry: {
