@@ -179,7 +179,7 @@ export default class Draw extends mapboxgl.Control {
     if (!this._editStore.inProgress())
       this.deleteBtn = this._createButton({
         className: 'mapboxgl-ctrl-draw-btn trash',
-        title: `delete`,
+        title: 'delete',
         fn: this._destroy.bind(this),
         id: 'deleteBtn'
       });
@@ -207,7 +207,7 @@ export default class Draw extends mapboxgl.Control {
 
       if (err) throw err;
       else if (!features.length) return;
-      else if (R.none(feat => R.contains(feat.properties.drawId, this.editIds))(features)) return;
+      else if (R.none(feat => R.contains(feat.properties.drawId, this._editStore.getDrawIds()))(features)) return;
 
       e.stopPropagation();
 
@@ -215,9 +215,11 @@ export default class Draw extends mapboxgl.Control {
         this.vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
         this.newVertex = R.find(feat => feat.properties.meta === 'midpoint')(features);
       }
+      this.activeDrawId = R.find(feat => feat.properties.drawId)(features).properties.drawId;
 
       if (this.newVertex) {
-        this._editStore.get(this.editIds[0]).editAddVertex(coords, this.newVertex.properties.index); // !!!!!!
+        this._editStore.get(this.newVertex.properties.parent)
+          .editAddVertex(coords, this.newVertex.properties.index);
         this.vertex = this.newVertex;
       }
 
@@ -239,9 +241,10 @@ export default class Draw extends mapboxgl.Control {
     var curr = DOM.mousePos(e, this._map.getContainer());
 
     if (this.vertex) {
-      this._editStore.get(this.editIds[0]).moveVertex(this.init, curr, this.vertex.properties.index);
+      this._editStore.get(this.vertex.properties.parent)
+        .moveVertex(this.init, curr, this.vertex.properties.index);
     } else {
-      this._editStore.get(this.editIds[0]).translate(this.init, curr);
+      this._editStore.get(this.activeDrawId).translate(this.init, curr);
     }
   }
 
@@ -250,12 +253,12 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
-    this._editStore.get(this.editIds[0]).translating = false;
+    this._editStore.get(this.activeDrawId).translating = false;
     this.dragging = false;
 
     if (this.vertex) {
+      this._editStore.get(this.vertex.properties.parent).movingVertex = false;
       this.vertex = false;
-      this._editStore.get(this.editIds[0]).movingVertex = false;
     }
   }
 

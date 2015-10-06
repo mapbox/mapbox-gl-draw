@@ -60,6 +60,10 @@ export default class EditStore {
     return this._features[id].toGeoJSON();
   }
 
+  getDrawIds() {
+    return Object.keys(this._features);
+  }
+
   clear() {
     this._features = {};
     this._render();
@@ -68,9 +72,9 @@ export default class EditStore {
   _addVertices() {
     var vertices = [];
 
-    for (var id in this.features) {
-      var coords = this.features[id].toGeoJSON().geometry.coordinates;
-      var type = this.features[id].toGeoJSON().geometry.type;
+    for (var id in this._features) {
+      var coords = this._features[id].toGeoJSON().geometry.coordinates;
+      var type = this._features[id].toGeoJSON().geometry.type;
       if (type === 'LineString' || type === 'Polygon') {
         coords = type === 'Polygon' ? coords[0] : coords;
         var l = type === 'LineString' ? coords.length : coords.length - 1;
@@ -79,6 +83,7 @@ export default class EditStore {
             type: 'Feature',
             properties: {
               meta: 'vertex',
+              parent: this._features[id].drawId,
               index: j
             },
             geometry: {
@@ -96,16 +101,16 @@ export default class EditStore {
   _addMidpoints() {
     var midpoints = [];
 
-    for (var id in this.features) {
-      if (this.features[id].type === 'square') continue;
+    for (var id in this._features) {
+      if (this._features[id].type === 'square') continue;
 
-      var feat = this.features[id];
-      var c = feat.getGeoJSON().geometry.coordinates;
+      var feat = this._features[id];
+      var c = feat.toGeoJSON().geometry.coordinates;
 
-      if (feat.getGeoJSON().geometry.type === 'LineString' ||
-          feat.getGeoJSON().geometry.type === 'Polygon') {
+      if (feat.toGeoJSON().geometry.type === 'LineString' ||
+          feat.toGeoJSON().geometry.type === 'Polygon') {
 
-        c = feat.getGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
+        c = feat.toGeoJSON().geometry.type === 'Polygon' ? c[0] : c;
 
         for (var j = 0; j < c.length - 1; j++) {
           var ptA = this._map.project([ c[j][0], c[j][1] ]);
@@ -115,6 +120,7 @@ export default class EditStore {
             type: 'Feature',
             properties: {
               meta: 'midpoint',
+              parent: feat.drawId,
               index: j + 1
             },
             geometry: {

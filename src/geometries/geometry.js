@@ -98,7 +98,7 @@ export default class Geometry {
   translate(init, curr) {
     if (!this.translating) {
       this.translating = true;
-      this.initGeom = JSON.parse(JSON.stringify(this.getGeoJSON()));
+      this.initGeom = JSON.parse(JSON.stringify(this.toGeoJSON()));
     }
 
     var translatedGeom = translate(JSON.parse(
@@ -114,7 +114,7 @@ export default class Geometry {
   }
 
   getExtent() {
-    var ext = extent(this.getGeoJSON());
+    var ext = extent(this.toGeoJSON());
     return new LngLatBounds(
       new LngLat(ext[0], ext[1]),
       new LngLat(ext[2], ext[3])
