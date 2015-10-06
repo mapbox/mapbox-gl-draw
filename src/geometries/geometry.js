@@ -74,9 +74,9 @@ export default class Geometry {
    * Called after a draw is done
    * @private
    */
-  _done(type) {
-    this._map.fire('finish.edit');
-    this._map.fire('draw.end', {
+  _finishDrawing(type) {
+    //this._map.fire('finish.edit');
+    this._map.fire('drawing.end', {
       geometry: this,
       featureType: type
     });
@@ -85,9 +85,9 @@ export default class Geometry {
   /**
    * Clear the edit drawings and render the changes to the main draw layer
    */
-  completeEdit() {
-    this._map.fire('edit.end', { geometry: this });
-  }
+  //completeEdit() {
+  //  this._map.fire('edit.end', { geometry: this });
+  //}
 
   /**
    * Translate this polygon
@@ -101,11 +101,13 @@ export default class Geometry {
       this.initGeom = JSON.parse(JSON.stringify(this.getGeoJSON()));
     }
 
-    var translatedGeom = translate(JSON.parse(JSON.stringify(this.initGeom)), init, curr, this._map);
+    var translatedGeom = translate(JSON.parse(
+          JSON.stringify(this.initGeom)), init, curr, this._map);
     this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
     if (this.coordinates.get(0).length > 1) {
       // you should be ashamed of yourself
-      this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
+      this.coordinates = this.coordinates.set(
+          0, Immutable.List(this.coordinates.get(0)));
     }
 
     this._map.fire('new.edit');
@@ -121,7 +123,7 @@ export default class Geometry {
 
   _renderDrawProgress() {
     this._map.fire('new.drawing.update', {
-      geojson: this.toGeoJSON
+      geojson: this.toGeoJSON()
     });
   }
 

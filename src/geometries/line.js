@@ -65,7 +65,7 @@ export default class Line extends Geometry {
 
     this.coordinates = this.coordinates.remove(this.vertexIdx);
 
-    this._done('line');
+    this._finishDrawing('line');
   }
 
   /**

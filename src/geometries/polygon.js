@@ -78,7 +78,7 @@ export default class Polygon extends Geometry {
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
 
-    this._done('polygon');
+    this._finishDrawing('polygon');
   }
 
   /**

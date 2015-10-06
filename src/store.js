@@ -14,7 +14,7 @@ export default class Store {
     this._map = map;
     this._features = {};
     this._editStore = null;
-    this._map.on('draw.end', e => {
+    this._map.on('drawing.end', e => {
       this.set(e.geometry);
     });
   }

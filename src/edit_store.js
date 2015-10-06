@@ -18,17 +18,9 @@ export default class EditStore {
 
     this.drawStore = null;
 
-    this._map.on('new.edit', () => {
-      this._render();
-    });
-
-    this._map.on('finish.edit', () => {
-      this._render();
-    });
-
-    this._map.on('edit.end', e => {
-      this.endEdit(e.geometry.drawId);
-    });
+    this._map.on('new.edit', () => { this._render(); });
+    this._map.on('finish.edit', () => { this._render(); });
+    this._map.on('edit.end', e => { this.endEdit(e.geometry.drawId); });
   }
 
   setDrawStore(drawStore) {

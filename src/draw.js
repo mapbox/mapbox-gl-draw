@@ -168,7 +168,7 @@ export default class Draw extends mapboxgl.Control {
         if (this._editStore.drawing) return;
         this._edit(features[0].properties.drawId);
       } else { // clicked outside all features
-        this.finishEdit();
+        this._finishEdit();
       }
     });
   }
@@ -318,6 +318,7 @@ export default class Draw extends mapboxgl.Control {
 
     this._map.on('load', () => {
 
+      // in progress drawing style
       this._map.addSource('drawing', {
         data: {
           type: 'FeatureCollection',
@@ -325,19 +326,16 @@ export default class Draw extends mapboxgl.Control {
         },
         type: 'geojson'
       });
-      themeDrawing.forEach(style => {
-        this._map.addLayer(style);
-      });
+      themeDrawing.forEach(style => { this._map.addLayer(style); });
 
-
+      // drawn features style
       this._map.addSource('draw', {
         data: this._store.getAllGeoJSON(),
         type: 'geojson'
       });
-      themeStyle.forEach(style => {
-        this._map.addLayer(style);
-      });
+      themeStyle.forEach(style => { this._map.addLayer(style); });
 
+      // features being editted style
       this._map.addSource('edit', {
         data: {
           type: 'FeatureCollection',
@@ -345,9 +343,7 @@ export default class Draw extends mapboxgl.Control {
         },
         type: 'geojson'
       });
-      themeEdit.forEach(style => {
-        this._map.addLayer(style);
-      });
+      themeEdit.forEach(style => { this._map.addLayer(style); });
 
       this._map.on('draw.end', e => {
         this._store.set(e.geometry);
@@ -358,6 +354,14 @@ export default class Draw extends mapboxgl.Control {
 
       this._map.on('new.drawing.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
+      });
+
+      // clear the drawing layer after a drawing is done
+      this._map.on('drawing.end', () => {
+        this._map.getSource('drawing').setData({
+          type: 'FeatureCollection',
+          features: []
+        });
       });
 
       this._map.on('edit.feature.update', e => {
@@ -376,7 +380,8 @@ export default class Draw extends mapboxgl.Control {
           layer: ['gl-edit-points', 'gl-edit-points-mid']
         }, (err, features) => {
           if (err) throw err;
-          if (!features.length) return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+          if (!features.length)
+            return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
           var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
           var midpoint = R.find(feat => feat.properties.meta === 'midpoint')(features);

@@ -1,8 +1,8 @@
 module.exports = [
   {
-    'id': 'gl-edit-line',
+    'id': 'gl-drawing-line',
     'type': 'line',
-    'source': 'edit',
+    'source': 'drawing',
     'filter': ['all', ['==', '$type', 'LineString']],
     'layout': {
       'line-cap': 'round',
@@ -15,9 +15,9 @@ module.exports = [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-polygon',
+    'id': 'gl-drawing-polygon',
     'type': 'fill',
-    'source': 'edit',
+    'source': 'drawing',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
       'fill-color': '#000000',
@@ -25,9 +25,9 @@ module.exports = [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-polygon-stroke',
+    'id': 'gl-drawing-polygon-stroke',
     'type': 'line',
-    'source': 'edit',
+    'source': 'drawing',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'layout': {
       'line-cap': 'round',
@@ -40,12 +40,10 @@ module.exports = [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-points',
+    'id': 'gl-drawing-points',
     'type': 'circle',
-    'source': 'edit',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['!=', 'meta', 'midpoint']],
+    'source': 'drawing',
+    'filter': ['all', ['==', '$type', 'Point']],
     'layout': {
       'text-anchor': 'top',
       'icon-allow-overlap': true
@@ -55,22 +53,6 @@ module.exports = [
       'icon-halo-color': '#000000',
       'icon-halo-width': 2,
       'icon-size': 1.1
-    },
-    'interactive': true
-  }, {
-    'id': 'gl-edit-points-mid',
-    'type': 'circle',
-    'source': 'edit',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'meta', 'midpoint']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
-    'paint': {
-      'icon-color': '#000000',
-      'icon-size': 1
     },
     'interactive': true
   }
