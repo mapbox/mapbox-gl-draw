@@ -66,6 +66,7 @@ class App extends React.Component { // eslint-disable-line
         <input
           placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
           type='text'
+          className='url-input'
           onChange={this.fetchURL}
         />
 
