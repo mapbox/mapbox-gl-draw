@@ -29,26 +29,16 @@ You'll also want to include [mapboxgl.draw.css](https://github.com/mapbox/gl-dra
 ### Usage
 
 ```js
-mapboxgl.accessToken = localStorage.accessToken;
+mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
 
 var map = new mapboxgl.Map({
-  container: 'map', // container id
-  style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json', //stylesheet location
-  center: [40, -74.50], // starting position
-  zoom: 9 // starting zoom
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v8',
+  center: [40, -74.50],
+  zoom: 9
 });
 
-var Draw = mapboxgl.Draw({
-  position: 'top-left',
-  keybindings: true,
-  geoJSON: [],
-  controls: {
-    marker: true,
-    line: true,
-    shape, true,
-    square: true
-  }
-});
+var Draw = mapboxgl.Draw();
 
 map.addControl(Draw)
 ```
