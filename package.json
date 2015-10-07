@@ -39,6 +39,7 @@
     "browserify": "^9.0.3",
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
+    "geojson-validation": "^0.1.6",
     "smokestack": "^3.3.0",
     "tap-closer": "^1.0.0",
     "tap-status": "^1.0.1",

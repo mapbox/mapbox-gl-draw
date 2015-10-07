@@ -1,5 +1,5 @@
-/* global React, map, Draw */
-var extent = require('turf-extent');
+/* global React, map, Draw, turf */
+import GJV from 'geojson-validation';
 
 class App extends React.Component { // eslint-disable-line
 
@@ -32,8 +32,10 @@ class App extends React.Component { // eslint-disable-line
         geojson: JSON.parse(e.target.value),
         valid: true
       }, () => {
-        Draw.clear();
-        Draw.set(this.state.geojson);
+        if (GJV.valid(this.state.geojson)) {
+          Draw.clear();
+          Draw.set(this.state.geojson);
+        }
       });
     } catch (err) {
       this.setState({
@@ -50,7 +52,7 @@ class App extends React.Component { // eslint-disable-line
       var data = JSON.parse(req.responseText);
       Draw.clear();
       Draw.set(data);
-      var ext = extent(data);
+      var ext = turf.extent(data);
       map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
     };
     req.send();
