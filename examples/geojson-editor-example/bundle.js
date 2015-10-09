@@ -92,14 +92,41 @@ var App = (function (_React$Component) {
         { className: 'side-bar' },
         React.createElement(
           'fieldset',
-          { className: 'with-icon dark col-12' },
+          { className: 'with-icon dark' },
           React.createElement('span', { className: 'icon search' }),
           React.createElement('input', {
             placeholder: 'Fetch data from URL here, write geojson below, or draw',
             type: 'text',
-            className: 'url-input col-12 stretch',
+            className: 'url-input stretch',
             onChange: this.fetchURL
           })
+        ),
+        React.createElement(
+          'div',
+          { className: 'rounded-toggle col12 inline' },
+          React.createElement('input', {
+            id: 'draw',
+            type: 'radio',
+            name: 'rtoggle',
+            value: 'draw',
+            checked: 'checked'
+          }),
+          React.createElement(
+            'label',
+            { 'for': 'draw', className: 'col6 center' },
+            'Draw'
+          ),
+          React.createElement('input', {
+            id: 'edit',
+            type: 'radio',
+            name: 'rtoggle',
+            value: 'edit'
+          }),
+          React.createElement(
+            'label',
+            { 'for': 'edit', className: 'col6 center' },
+            'Edit'
+          )
         ),
         React.createElement('textarea', {
           type: 'text',

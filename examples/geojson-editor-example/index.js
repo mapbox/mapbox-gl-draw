@@ -63,15 +63,33 @@ class App extends React.Component { // eslint-disable-line
     return (
       <div className='side-bar'>
 
-        <fieldset className='with-icon dark col-12'>
-        <span className='icon search'></span>
-        <input
-          placeholder='Fetch data from URL here, write geojson below, or draw'
-          type='text'
-          className='url-input col-12 stretch'
-          onChange={this.fetchURL}
-        />
+        <fieldset className='with-icon dark'>
+          <span className='icon search'></span>
+          <input
+            placeholder='Fetch data from URL here, write geojson below, or draw'
+            type='text'
+            className='url-input stretch'
+            onChange={this.fetchURL}
+          />
         </fieldset>
+
+        <div className='rounded-toggle col12 inline'>
+          <input
+            id='draw'
+            type='radio'
+            name='rtoggle'
+            value='draw'
+            checked='checked'
+          />
+          <label for='draw' className='col6 center'>Draw</label>
+          <input
+            id='edit'
+            type='radio'
+            name='rtoggle'
+            value='edit'
+          />
+          <label for='edit' className='col6 center'>Edit</label>
+        </div>
 
         <textarea
           type='text'
