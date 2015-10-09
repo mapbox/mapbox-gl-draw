@@ -9,7 +9,8 @@ class App extends React.Component { // eslint-disable-line
       geojson: {
         type: 'FeatureCollection',
         features: []
-      }
+      },
+      view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
@@ -22,6 +23,10 @@ class App extends React.Component { // eslint-disable-line
         geojson: e.geojson,
         input: JSON.stringify(e.geojson, null, 4)
       });
+    }.bind(this));
+
+    map.on('edit.feature.update', function() {
+      this.setState({ view: 'edit' });
     }.bind(this));
   }
 
@@ -58,8 +63,13 @@ class App extends React.Component { // eslint-disable-line
     req.send();
   }
 
+  toggleView(target) {
+    this.setState({ view: target });
+  }
+
   render() {
     var input = this.state.input;
+    var editting = JSON.stringify(Draw.getEditting(), null, 4);
     return (
       <div className='side-bar'>
 
@@ -79,24 +89,43 @@ class App extends React.Component { // eslint-disable-line
             type='radio'
             name='rtoggle'
             value='draw'
-            checked='checked'
+            checked={this.state.view === 'draw' && 'checked'}
           />
-          <label for='draw' className='col6 center'>Draw</label>
+          <label
+            for='draw'
+            className='col6 center'
+            onClick={this.toggleView.bind(this, 'draw')}
+          >
+            Drawn
+          </label>
           <input
             id='edit'
             type='radio'
             name='rtoggle'
             value='edit'
+            checked={this.state.view === 'edit' && 'checked'}
           />
-          <label for='edit' className='col6 center'>Edit</label>
+          <label
+            for='edit'
+            className='col6 center'
+            onClick={this.toggleView.bind(this, 'edit')}
+          >
+            Editting
+          </label>
         </div>
 
-        <textarea
+        {this.state.view === 'draw' && <textarea
           type='text'
           className='geojson-input fill-navy dark'
           onChange={this.setMap}
           value={input}
-        />
+        />}
+
+        {this.state.view === 'edit' && <textarea
+          type='text'
+          className='geojson-input fill-navy dark'
+          value={editting}
+        />}
 
       </div>
     );

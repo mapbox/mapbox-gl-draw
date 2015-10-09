@@ -498,6 +498,10 @@ export default class Draw extends mapboxgl.Control {
     return this._store.getAllGeoJSON();
   }
 
+  getEditting() {
+    return this._editStore.getAllGeoJSON();
+  }
+
   /**
    * remove all geometries
    * @returns {Draw} this

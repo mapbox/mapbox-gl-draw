@@ -29,7 +29,8 @@ var App = (function (_React$Component) {
       geojson: {
         type: 'FeatureCollection',
         features: []
-      }
+      },
+      view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
@@ -44,6 +45,10 @@ var App = (function (_React$Component) {
           geojson: e.geojson,
           input: JSON.stringify(e.geojson, null, 4)
         });
+      }).bind(this));
+
+      map.on('edit.feature.update', (function () {
+        this.setState({ view: 'edit' });
       }).bind(this));
     }
   }, {
@@ -84,9 +89,15 @@ var App = (function (_React$Component) {
       req.send();
     }
   }, {
+    key: 'toggleView',
+    value: function toggleView(target) {
+      this.setState({ view: target });
+    }
+  }, {
     key: 'render',
     value: function render() {
       var input = this.state.input;
+      var editting = JSON.stringify(Draw.getEditting(), null, 4);
       return React.createElement(
         'div',
         { className: 'side-bar' },
@@ -109,30 +120,44 @@ var App = (function (_React$Component) {
             type: 'radio',
             name: 'rtoggle',
             value: 'draw',
-            checked: 'checked'
+            checked: this.state.view === 'draw' && 'checked'
           }),
           React.createElement(
             'label',
-            { 'for': 'draw', className: 'col6 center' },
-            'Draw'
+            {
+              'for': 'draw',
+              className: 'col6 center',
+              onClick: this.toggleView.bind(this, 'draw')
+            },
+            'Drawn'
           ),
           React.createElement('input', {
             id: 'edit',
             type: 'radio',
             name: 'rtoggle',
-            value: 'edit'
+            value: 'edit',
+            checked: this.state.view === 'edit' && 'checked'
           }),
           React.createElement(
             'label',
-            { 'for': 'edit', className: 'col6 center' },
-            'Edit'
+            {
+              'for': 'edit',
+              className: 'col6 center',
+              onClick: this.toggleView.bind(this, 'edit')
+            },
+            'Editting'
           )
         ),
-        React.createElement('textarea', {
+        this.state.view === 'draw' && React.createElement('textarea', {
           type: 'text',
           className: 'geojson-input fill-navy dark',
           onChange: this.setMap,
           value: input
+        }),
+        this.state.view === 'edit' && React.createElement('textarea', {
+          type: 'text',
+          className: 'geojson-input fill-navy dark',
+          value: editting
         })
       );
     }
