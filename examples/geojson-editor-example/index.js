@@ -63,16 +63,19 @@ class App extends React.Component { // eslint-disable-line
     return (
       <div className='side-bar'>
 
+        <fieldset className='with-icon dark col-12'>
+        <span className='icon search'></span>
         <input
-          placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
+          placeholder='Fetch data from URL here, write geojson below, or draw'
           type='text'
-          className='url-input'
+          className='url-input col-12 stretch'
           onChange={this.fetchURL}
         />
+        </fieldset>
 
         <textarea
           type='text'
-          className='geojson-input'
+          className='geojson-input fill-navy dark'
           onChange={this.setMap}
           value={input}
         />

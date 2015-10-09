@@ -90,15 +90,20 @@ var App = (function (_React$Component) {
       return React.createElement(
         'div',
         { className: 'side-bar' },
-        React.createElement('input', {
-          placeholder: 'Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.',
-          type: 'text',
-          className: 'url-input',
-          onChange: this.fetchURL
-        }),
+        React.createElement(
+          'fieldset',
+          { className: 'with-icon dark col-12' },
+          React.createElement('span', { className: 'icon search' }),
+          React.createElement('input', {
+            placeholder: 'Fetch data from URL here, write geojson below, or draw',
+            type: 'text',
+            className: 'url-input col-12 stretch',
+            onChange: this.fetchURL
+          })
+        ),
         React.createElement('textarea', {
           type: 'text',
-          className: 'geojson-input',
+          className: 'geojson-input fill-navy dark',
           onChange: this.setMap,
           value: input
         })
