@@ -9,7 +9,7 @@ map.addControl(Draw);
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
 
-###`.set(Object) -> String`
+###`.set(Object: geojsonFeature) -> String`
 
 This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`.
 
@@ -19,63 +19,26 @@ Example:
 var feature = { type: 'Point', coordinates: [0, 0] };
 var featureId = Draw.set(feature);
 console.log(Draw.get(featureId));
-//=> { type: 'Point', coordinates: [0, 0] }
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
 ```
 
-###`.get(String) -> Object`
+###`.get(String: drawId, [Boolean]: includeDrawIdInProps) -> Object`
 
-This method takes the `drawId` of a feature and returns its GeoJSON object.
+This method takes the `drawId` of a feature and returns its GeoJSON object. If the optional second argument is set to `true`, the feature returned will include its `drawId` in its properties.
 
 Example:
 
 ```js
 var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
 console.log(Draw.get(id));
-//=> { type: 'Point', coordinates: [0, 0] }
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
 ```
 
-###`.remove(String) -> Draw`
 
-This method takes the `drawId` of feature and removes it from draw. It returns `this` to allow for method chaining.
+###`.getAll([Boolean]: includeDrawIdInProps) -> Object`
 
-Example:
+This method returns all features added to Draw in a single GeoJSON FeatureCollection. If the optional argument is set to `true`, the feature returned will include its `drawId` in its properties.
 
-```js
-Draw
-  .remove('123abc')
-  .set({ type: 'Point', coordinates: [0, 0] });
-```
-
-###`.update(String, Object) -> Draw`
-
-This method takes the `drawId` of an existing feature and a GeoJSON object and replaces that feature in draw with the new feature. It returns `this`.
-
-Example:
-
-```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
-var newFeature = Draw
-  .update(id, { type: 'Point', coordinates: [1, 1] })
-  .get(id);
-console.log(newFeature);
-//=> { type: 'Point', coordinates: [0, 0] }
-```
-
-###`.get(String) -> Object`
-
-This method takes the `drawId` of a feature and returns its GeoJSON object.
-
-Example:
-
-```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
-console.log(Draw.get(id));
-//=> { type: 'Point', coordinates: [0, 0] }
-```
-
-###`.getAll() -> Object`
-
-This method returns all features added to Draw in a single GeoJSON FeatureCollection.
 
 Example:
 
@@ -111,6 +74,34 @@ console.log(Draw.getAll());
 //  ]
 //}
 ```
+
+###`.remove(String: drawId) -> Draw`
+
+This method takes the `drawId` of feature and removes it from draw. It returns `this` to allow for method chaining.
+
+Example:
+
+```js
+Draw
+  .remove('123abc')
+  .set({ type: 'Point', coordinates: [0, 0] });
+```
+
+###`.update(String: drawId, Object: geojsonFeature) -> Draw`
+
+This method takes the `drawId` of an existing feature and a GeoJSON object and replaces that feature in draw with the new feature. It returns `this`.
+
+Example:
+
+```js
+var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+var newFeature = Draw
+  .update(id, { type: 'Point', coordinates: [1, 1] })
+  .get(id);
+console.log(newFeature);
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
+```
+
 
 ###`.clear() -> Draw`
 
