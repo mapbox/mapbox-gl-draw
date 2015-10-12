@@ -109,7 +109,7 @@ export default class Geometry {
           0, Immutable.List(this.coordinates.get(0)));
     }
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
   _renderDrawProgress() {

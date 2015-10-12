@@ -46,7 +46,6 @@ export default class Line extends Geometry {
     }
     this.vertexIdx++;
 
-    //this._map.fire('new.edit');
     this._renderDrawProgress();
   }
 
@@ -55,7 +54,7 @@ export default class Line extends Geometry {
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates = this.coordinates.set(this.vertexIdx,[ coords.lng, coords.lat ]);
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
   _completeDraw() {
@@ -88,7 +87,7 @@ export default class Line extends Geometry {
 
     this.coordinates = this.coordinates.set(idx, newPoint);
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
   /**
@@ -101,7 +100,7 @@ export default class Line extends Geometry {
     coords = this._map.unproject(coords);
     this.coordinates = this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
 }

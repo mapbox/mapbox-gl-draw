@@ -55,7 +55,7 @@ export default class Polygon extends Geometry {
       this.coordinates = this.coordinates.set(0, c.push(this.first));
     }
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
   _onMouseMove(e) {
@@ -103,7 +103,7 @@ export default class Polygon extends Geometry {
     if (idx === 0)
       this.coordinates = this.coordinates.setIn([0, -1], newPoint);
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
   /**
@@ -118,7 +118,7 @@ export default class Polygon extends Geometry {
     var newCoords = this.coordinates.get(0).splice(idx, 0, [ coords.lng, coords.lat ]);
     this.coordinates = this.coordinates.set(0, newCoords);
 
-    this._map.fire('new.edit');
+    this._map.fire('edit.new');
   }
 
 }

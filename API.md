@@ -151,14 +151,14 @@ map.on('draw.feature.update', function(e) {
 });
 ```
 
-###`draw.feature.edit`
+###`edit.new`
 
 Fired while editting when a new edit is made. Passes the new geometry to the callback.
 
 Example:
 
 ```
-map.on('edit.feature.update', function(e) {
+map.on('edit.new', function(e) {
   alert('new edit!', JSON.stringify(e.geojson));
 });
 ```
