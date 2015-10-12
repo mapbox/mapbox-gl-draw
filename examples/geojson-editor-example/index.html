@@ -6,10 +6,11 @@
   <title>Example gl-draw app</title>
   <script src='https://fb.me/react-0.13.3.min.js'></script>
   <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
-  <link href='mapboxgl.draw.css' rel='stylesheet' />
+  <link href='../../dist/mapboxgl.draw.css' rel='stylesheet' />
+  <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
   <style>
     body, div { margin:0; padding:0; }
-    html, body { height: 100%; }
+    html, body { height: 100%; font-size: Open Sans; }
     #map {
       height: 100%;
       width: 60%;
@@ -27,8 +28,15 @@
       flex-flow: column;
       align-items: stretch;
     }
+    .url-input {
+      height: 40px;
+      font-size: 15px;
+      color: #000 !important;
+    }
     .geojson-input {
       flex: 1 1 auto;
+      font-size: 15px;
+      color: #fff !important;
     }
   </style>
 </head>
@@ -36,10 +44,10 @@
   <div id='map'></div>
   <div id='geojson'></div>
   <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
-  <script src='mapboxgl.draw.js'></script>
+  <script src='../../dist/mapboxgl.draw.js'></script>
   <script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.0/turf.min.js'></script>
   <script>
-    mapboxgl.accessToken = localStorage.accessToken;
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
     // initialize map
     var map = new mapboxgl.Map({
