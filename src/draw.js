@@ -479,7 +479,6 @@ export default class Draw extends mapboxgl.Control {
     feat.setCoordinates(feature.coordinates || feature.geometry.coordinates);
     if (feature.properties) feat.setProperties(feature.properties);
     return this;
-
   }
 
   /**
@@ -496,6 +495,13 @@ export default class Draw extends mapboxgl.Control {
    */
   getAll() {
     return this._store.getAllGeoJSON();
+  }
+
+  /**
+   * get a feature collection of features being editted
+   */
+  getEditting() {
+    return this._editStore.getAllGeoJSON();
   }
 
   /**

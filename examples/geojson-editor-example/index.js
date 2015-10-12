@@ -9,11 +9,13 @@ class App extends React.Component { // eslint-disable-line
       geojson: {
         type: 'FeatureCollection',
         features: []
-      }
+      },
+      view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
+    this.fetchURL = this.fetchURL.bind(this);
   }
 
   componentWillMount() {
@@ -22,6 +24,12 @@ class App extends React.Component { // eslint-disable-line
         geojson: e.geojson,
         input: JSON.stringify(e.geojson, null, 4)
       });
+    }.bind(this));
+
+    map.on('edit.feature.update', function(e) {
+      this.setState({ editting: JSON.stringify(Draw.getEditting(), null, 4) });
+      if (e.geojson.features.length)
+        this.setState({ view: 'edit' });
     }.bind(this));
   }
 
@@ -52,10 +60,15 @@ class App extends React.Component { // eslint-disable-line
       var data = JSON.parse(req.responseText);
       Draw.clear();
       Draw.set(data);
+      this.setState({ view: 'draw' });
       var ext = turf.extent(data);
       map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
     };
     req.send();
+  }
+
+  toggleView(target) {
+    this.setState({ view: target });
   }
 
   render() {
@@ -63,18 +76,59 @@ class App extends React.Component { // eslint-disable-line
     return (
       <div className='side-bar'>
 
-        <input
-          placeholder='Fetch data from URL here, write geojson below, or draw. Whatever makes you happy.'
-          type='text'
-          onChange={this.fetchURL}
-        />
+        <fieldset className='with-icon dark'>
+          <span className='icon search'></span>
+          <input
+            placeholder='Fetch data from URL here, write geojson below, or draw'
+            type='text'
+            className='url-input stretch'
+            onChange={this.fetchURL}
+          />
+        </fieldset>
 
-        <textarea
+        <div className='rounded-toggle col12 inline'>
+          <input
+            id='draw'
+            type='radio'
+            name='rtoggle'
+            value='draw'
+            checked={this.state.view === 'draw' && 'checked'}
+          />
+          <label
+            for='draw'
+            className='col6 center'
+            onClick={this.toggleView.bind(this, 'draw')}
+          >
+            Drawn
+          </label>
+          <input
+            id='edit'
+            type='radio'
+            name='rtoggle'
+            value='edit'
+            checked={this.state.view === 'edit' && 'checked'}
+          />
+          <label
+            for='edit'
+            className='col6 center'
+            onClick={this.toggleView.bind(this, 'edit')}
+          >
+            Editting
+          </label>
+        </div>
+
+        {this.state.view === 'draw' && <textarea
           type='text'
-          className='geojson-input'
+          className='geojson-input fill-navy dark'
           onChange={this.setMap}
           value={input}
-        />
+        />}
+
+        {this.state.view === 'edit' && <textarea
+          type='text'
+          className='geojson-input fill-navy dark'
+          value={this.state.editting}
+        />}
 
       </div>
     );
