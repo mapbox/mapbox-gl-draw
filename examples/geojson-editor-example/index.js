@@ -15,6 +15,7 @@ class App extends React.Component { // eslint-disable-line
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
+    this.fetchURL = this.fetchURL.bind(this);
   }
 
   componentWillMount() {
@@ -25,8 +26,10 @@ class App extends React.Component { // eslint-disable-line
       });
     }.bind(this));
 
-    map.on('edit.feature.update', function() {
-      this.setState({ view: 'edit' });
+    map.on('edit.feature.update', function(e) {
+      this.setState({ editting: JSON.stringify(Draw.getEditting(), null, 4) });
+      if (e.geojson.features.length)
+        this.setState({ view: 'edit' });
     }.bind(this));
   }
 
@@ -57,6 +60,7 @@ class App extends React.Component { // eslint-disable-line
       var data = JSON.parse(req.responseText);
       Draw.clear();
       Draw.set(data);
+      this.setState({ view: 'draw' });
       var ext = turf.extent(data);
       map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
     };
@@ -69,7 +73,6 @@ class App extends React.Component { // eslint-disable-line
 
   render() {
     var input = this.state.input;
-    var editting = JSON.stringify(Draw.getEditting(), null, 4);
     return (
       <div className='side-bar'>
 
@@ -124,7 +127,7 @@ class App extends React.Component { // eslint-disable-line
         {this.state.view === 'edit' && <textarea
           type='text'
           className='geojson-input fill-navy dark'
-          value={editting}
+          value={this.state.editting}
         />}
 
       </div>

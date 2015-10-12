@@ -35,6 +35,7 @@ var App = (function (_React$Component) {
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
+    this.fetchURL = this.fetchURL.bind(this);
   }
 
   _createClass(App, [{
@@ -47,8 +48,9 @@ var App = (function (_React$Component) {
         });
       }).bind(this));
 
-      map.on('edit.feature.update', (function () {
-        this.setState({ view: 'edit' });
+      map.on('edit.feature.update', (function (e) {
+        this.setState({ editting: JSON.stringify(Draw.getEditting(), null, 4) });
+        if (e.geojson.features.length) this.setState({ view: 'edit' });
       }).bind(this));
     }
   }, {
@@ -77,12 +79,15 @@ var App = (function (_React$Component) {
   }, {
     key: 'fetchURL',
     value: function fetchURL(e) {
+      var _this2 = this;
+
       var req = new XMLHttpRequest();
       req.open('GET', e.target.value);
       req.onload = function () {
         var data = JSON.parse(req.responseText);
         Draw.clear();
         Draw.set(data);
+        _this2.setState({ view: 'draw' });
         var ext = turf.extent(data);
         map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       };
@@ -97,7 +102,6 @@ var App = (function (_React$Component) {
     key: 'render',
     value: function render() {
       var input = this.state.input;
-      var editting = JSON.stringify(Draw.getEditting(), null, 4);
       return React.createElement(
         'div',
         { className: 'side-bar' },
@@ -157,7 +161,7 @@ var App = (function (_React$Component) {
         this.state.view === 'edit' && React.createElement('textarea', {
           type: 'text',
           className: 'geojson-input fill-navy dark',
-          value: editting
+          value: this.state.editting
         })
       );
     }
