@@ -63,7 +63,6 @@ export default class Polygon extends Geometry {
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates = this.coordinates.setIn([0, this.vertexIdx], [coords.lng, coords.lat]);
 
-    //this._map.fire('new.edit');
     this._renderDrawProgress();
   }
 

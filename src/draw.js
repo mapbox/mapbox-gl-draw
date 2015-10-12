@@ -486,16 +486,25 @@ export default class Draw extends mapboxgl.Control {
    * get a geometry by its draw id
    * @param {String} id - the draw id of the geometry
    */
-  get(id) {
-    return this._store.getGeoJSON(id);
+  get(id, includeDrawId) {
+    var geom = this._store.getGeoJSON(id);
+    if (!includeDrawId) delete geom.properties.drawId;
+    return geom;
   }
 
   /**
    * get all draw geometries
    * @returns {Object} a GeoJSON feature collection
    */
-  getAll() {
-    return this._store.getAllGeoJSON();
+  getAll(includeDrawId) {
+    var geom = this._store.getAllGeoJSON();
+    if (!includeDrawId) {
+      geom.features = geom.features.map(feat => {
+        delete feat.properties.drawId;
+        return feat;
+      });
+    }
+    return geom;
   }
 
   /**
