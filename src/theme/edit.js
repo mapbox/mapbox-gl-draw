@@ -40,7 +40,7 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-points',
+    'id': 'gl-edit-point',
     'type': 'circle',
     'source': 'edit',
     'filter': ['all',
@@ -58,7 +58,7 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-points-mid',
+    'id': 'gl-edit-point-mid',
     'type': 'circle',
     'source': 'edit',
     'filter': ['all',

@@ -198,7 +198,7 @@ export default class Draw extends mapboxgl.Control {
     this._map.featuresAt(e.point, {
       radius: 10,
       includeGeometry: true,
-      layer: 'gl-draw-polygons'
+      layer: [ 'gl-draw-polygon', 'gl-draw-line', 'gl-draw-point' ]
     }, (err, features) => {
       if (err) throw err;
       if (features.length) { // clicked on a feature
@@ -391,7 +391,7 @@ export default class Draw extends mapboxgl.Control {
       this._map.on('mousemove', e => {
         this._map.featuresAt(e.point, {
           radius: 7,
-          layer: ['gl-edit-points', 'gl-edit-points-mid']
+          layer: ['gl-edit-point', 'gl-edit-point-mid']
         }, (err, features) => {
           if (err) throw err;
           if (!features.length)

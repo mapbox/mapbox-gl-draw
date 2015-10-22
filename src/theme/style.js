@@ -1,6 +1,6 @@
 export default [
   {
-    'id': 'gl-draw-polygons',
+    'id': 'gl-draw-polygon',
     'type': 'fill',
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Polygon']],
@@ -39,7 +39,7 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-draw-points',
+    'id': 'gl-draw-point',
     'type': 'circle',
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Point']],
