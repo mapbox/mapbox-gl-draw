@@ -365,7 +365,7 @@ export default class Draw extends mapboxgl.Control {
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
       });
 
-      this._map.on('new.drawing.update', e => {
+      this._map.on('drawing.new.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
       });
 

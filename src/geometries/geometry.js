@@ -39,7 +39,7 @@ export default class Geometry {
    */
   toGeoJSON() {
     this.geojson.geometry.coordinates = this.coordinates;
-    return this.geojson;
+    return JSON.parse(JSON.stringify(this.geojson));
   }
 
   /**
@@ -64,6 +64,7 @@ export default class Geometry {
   }
 
   setProperties(props) {
+    props = JSON.parse(JSON.stringify(props));
     props.drawId = this.drawId;
     this.geojson.properties = props;
     return this;
@@ -97,11 +98,10 @@ export default class Geometry {
   translate(init, curr) {
     if (!this.translating) {
       this.translating = true;
-      this.initGeom = JSON.parse(JSON.stringify(this.toGeoJSON()));
+      this.initGeom = this.toGeoJSON();
     }
 
-    var translatedGeom = translate(JSON.parse(
-          JSON.stringify(this.initGeom)), init, curr, this._map);
+    var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
     // why?
     //if (this.coordinates.get(0).length > 1) {
@@ -112,7 +112,7 @@ export default class Geometry {
   }
 
   _renderDrawProgress() {
-    this._map.fire('new.drawing.update', {
+    this._map.fire('drawing.new.update', {
       geojson: this.toGeoJSON()
     });
   }
