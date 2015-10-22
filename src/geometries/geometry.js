@@ -103,11 +103,10 @@ export default class Geometry {
     var translatedGeom = translate(JSON.parse(
           JSON.stringify(this.initGeom)), init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
-    //if (this.coordinates.get(0).length > 1) {
     // why?
-    if (this.coordinates[0].length > 1) {
+    //if (this.coordinates.get(0).length > 1) {
       //this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
-    }
+    //}
 
     this._map.fire('edit.new');
   }
