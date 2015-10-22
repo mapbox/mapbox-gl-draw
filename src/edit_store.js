@@ -139,6 +139,7 @@ export default class EditStore {
   _render() {
     var geom = this.getAllGeoJSON();
     geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
+    console.log(JSON.stringify(geom));
     this._map.fire('edit.feature.update', {
       geojson: geom
     });

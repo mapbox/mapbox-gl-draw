@@ -16,8 +16,6 @@ export default class Polygon extends Geometry {
 
   constructor(map, data) {
     if (!data) data = { geometry: {} };
-    //data.geometry.coordinates = Immutable.fromJS(
-        //data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]]);
     data.geometry.coordinates = data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]];
     super(map, 'Polygon', data);
 
@@ -41,20 +39,15 @@ export default class Polygon extends Geometry {
     if (typeof this.vertexIdx === 'undefined') {
       this.vertexIdx = 0;
       this.first = p;
-      //var coords = this.coordinates.get(0);
-      //this.coordinates = this.coordinates.set(0, coords.splice(0, 4, p, p, p, p));
       this.coordinates[0].splice(0, 4, p, p, p, p);
       this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
     }
 
     this.vertexIdx++;
 
-    //this.coordinates = this.coordinates.setIn([0, this.vertexIdx], p);
     this.coordinates[0][this.vertexIdx] = p;
 
     if (this.vertexIdx > 2) {
-      //var c = this.coordinates.get(0);
-      //this.coordinates = this.coordinates.set(0, c.push(this.first));
       this.coordinates[0].push(this.first);
     }
 
@@ -64,7 +57,6 @@ export default class Polygon extends Geometry {
   _onMouseMove(e) {
     var pos = DOM.mousePos(e, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    //this.coordinates = this.coordinates.setIn([0, this.vertexIdx], [coords.lng, coords.lat]);
     this.coordinates[0][this.vertexIdx] = [ coords.lng, coords.lat ];
 
     this._renderDrawProgress();
@@ -72,8 +64,6 @@ export default class Polygon extends Geometry {
 
   _completeDraw() {
     if (this.vertexIdx > 2) {
-      //var c = this.coordinates.get(0);
-      //this.coordinates = this.coordinates.set(0, c.remove(this.vertexIdx));
       this.coordinates[0].splice(this.vertexIdx, 1);
     }
 
@@ -97,7 +87,6 @@ export default class Polygon extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      //this.initCoords = this.coordinates.getIn([0, idx]);
       this.initCoords = JSON.parse(JSON.stringify(this.coordinates[0][idx]));
     }
 
@@ -105,10 +94,8 @@ export default class Polygon extends Geometry {
     var dy = curr.y - init.y;
     var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
 
-    //this.coordinates = this.coordinates.setIn([0, idx], newPoint);
     this.coordinates[0][idx] = newPoint;
     if (idx === 0)
-      //this.coordinates = this.coordinates.setIn([0, -1], newPoint);
       this.coordinates[0][this.coordinates[0].length - 1] = newPoint;
 
     this._map.fire('edit.new');
@@ -123,8 +110,6 @@ export default class Polygon extends Geometry {
    */
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    //var newCoords = this.coordinates.get(0).splice(idx, 0, [ coords.lng, coords.lat ]);
-    //this.coordinates = this.coordinates.set(0, newCoords);
     this.coordinates[0].splice(idx, 0, [ coords.lng, coords.lat ]);
 
     this._map.fire('edit.new');

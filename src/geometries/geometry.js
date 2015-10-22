@@ -27,7 +27,7 @@ export default class Geometry {
       properties: props,
       geometry: {
         type: type,
-        coordinates: this.coordinates//this.coordinates.toJS()
+        coordinates: this.coordinates
       }
     };
 
@@ -39,7 +39,7 @@ export default class Geometry {
    * @private
    */
   toGeoJSON() {
-    //this.geojson.geometry.coordinates = this.coordinates.toJS();
+    this.geojson.geometry.coordinates = this.coordinates;
     return this.geojson;
   }
 
@@ -60,7 +60,6 @@ export default class Geometry {
   }
 
   setCoordinates(coords) {
-    //this.coordinates = Immutable.List(coords);
     this.coordinates = coords;
     return this;
   }
@@ -104,7 +103,7 @@ export default class Geometry {
 
     var translatedGeom = translate(JSON.parse(
           JSON.stringify(this.initGeom)), init, curr, this._map);
-    this.coordinates = translatedGeom.geometry.coordinates;//Immutable.List(translatedGeom.geometry.coordinates);
+    this.coordinates = translatedGeom.geometry.coordinates;
     //if (this.coordinates.get(0).length > 1) {
     // why?
     if (this.coordinates[0].length > 1) {
