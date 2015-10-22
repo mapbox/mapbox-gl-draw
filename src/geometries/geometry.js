@@ -1,7 +1,7 @@
 'use strict';
 
 import hat from 'hat';
-import Immutable from 'immutable';
+//import Immutable from 'immutable';
 import { translate } from '../util';
 
 /**
@@ -27,7 +27,7 @@ export default class Geometry {
       properties: props,
       geometry: {
         type: type,
-        coordinates: this.coordinates.toJS()
+        coordinates: this.coordinates//this.coordinates.toJS()
       }
     };
 
@@ -39,7 +39,7 @@ export default class Geometry {
    * @private
    */
   toGeoJSON() {
-    this.geojson.geometry.coordinates = this.coordinates.toJS();
+    //this.geojson.geometry.coordinates = this.coordinates.toJS();
     return this.geojson;
   }
 
@@ -60,7 +60,8 @@ export default class Geometry {
   }
 
   setCoordinates(coords) {
-    this.coordinates = Immutable.List(coords);
+    //this.coordinates = Immutable.List(coords);
+    this.coordinates = coords;
     return this;
   }
 
@@ -103,10 +104,11 @@ export default class Geometry {
 
     var translatedGeom = translate(JSON.parse(
           JSON.stringify(this.initGeom)), init, curr, this._map);
-    this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
-    if (this.coordinates.get(0).length > 1) {
-      this.coordinates = this.coordinates.set(
-          0, Immutable.List(this.coordinates.get(0)));
+    this.coordinates = translatedGeom.geometry.coordinates;//Immutable.List(translatedGeom.geometry.coordinates);
+    //if (this.coordinates.get(0).length > 1) {
+    // why?
+    if (this.coordinates[0].length > 1) {
+      //this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
     }
 
     this._map.fire('edit.new');

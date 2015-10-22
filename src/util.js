@@ -152,7 +152,7 @@ module.exports.translate = function(feature, init, curr, map) {
     geom.coordinates = translatePoint(geom.coordinates, dx, dy, map);
   }
 
-  feature.geometry = geom;
+  //feature.geometry = geom;
 
   return feature;
 };
