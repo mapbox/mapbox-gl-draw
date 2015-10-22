@@ -1,6 +1,5 @@
 'use strict';
 
-//import Immutable from 'immutable';
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
 
