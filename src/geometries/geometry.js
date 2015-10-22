@@ -1,7 +1,6 @@
 'use strict';
 
 import hat from 'hat';
-import Immutable from 'immutable';
 import { translate } from '../util';
 
 /**
@@ -27,7 +26,7 @@ export default class Geometry {
       properties: props,
       geometry: {
         type: type,
-        coordinates: this.coordinates.toJS()
+        coordinates: this.coordinates
       }
     };
 
@@ -39,8 +38,8 @@ export default class Geometry {
    * @private
    */
   toGeoJSON() {
-    this.geojson.geometry.coordinates = this.coordinates.toJS();
-    return this.geojson;
+    this.geojson.geometry.coordinates = this.coordinates;
+    return JSON.parse(JSON.stringify(this.geojson));
   }
 
   /**
@@ -60,11 +59,12 @@ export default class Geometry {
   }
 
   setCoordinates(coords) {
-    this.coordinates = Immutable.List(coords);
+    this.coordinates = coords;
     return this;
   }
 
   setProperties(props) {
+    props = JSON.parse(JSON.stringify(props));
     props.drawId = this.drawId;
     this.geojson.properties = props;
     return this;
@@ -98,22 +98,21 @@ export default class Geometry {
   translate(init, curr) {
     if (!this.translating) {
       this.translating = true;
-      this.initGeom = JSON.parse(JSON.stringify(this.toGeoJSON()));
+      this.initGeom = this.toGeoJSON();
     }
 
-    var translatedGeom = translate(JSON.parse(
-          JSON.stringify(this.initGeom)), init, curr, this._map);
-    this.coordinates = Immutable.List(translatedGeom.geometry.coordinates);
-    if (this.coordinates.get(0).length > 1) {
-      this.coordinates = this.coordinates.set(
-          0, Immutable.List(this.coordinates.get(0)));
-    }
+    var translatedGeom = translate(this.initGeom, init, curr, this._map);
+    this.coordinates = translatedGeom.geometry.coordinates;
+    // why?
+    //if (this.coordinates.get(0).length > 1) {
+      //this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
+    //}
 
     this._map.fire('edit.new');
   }
 
   _renderDrawProgress() {
-    this._map.fire('new.drawing.update', {
+    this._map.fire('drawing.new.update', {
       geojson: this.toGeoJSON()
     });
   }

@@ -36,20 +36,20 @@ test('API test', t => {
   t.deepEquals(
     feature.geometry.coordinates,
     f.geometry.coordinates,
-    'the geometry added is the same returned by Draw.getAll'
+    'the geometry added is the same returned by Draw.get'
   );
+
   t.deepEquals(
     feature.geometry,
-    Draw.get(f.properties.drawId).geometry,
-    'the geometry added is the same returned by Draw.get(itsDrawId)'
+    Draw.getAll().features[0].geometry,
+    'the geometry added is the same returned by Draw.getAll'
   );
 
   Draw.clear();
   t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
 
   id = Draw.set(feature);
-  f = Draw.get(id);
-  Draw.remove(f.properties.drawId);
+  Draw.remove(id);
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
 
   t.end();

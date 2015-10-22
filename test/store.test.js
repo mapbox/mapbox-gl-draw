@@ -51,7 +51,7 @@ test('Store constructor', t => {
 
   // set
   var id = Draw.set(feature);
-  var f = Draw.get(id);
+  var f = Draw.get(id, true);
   t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
   t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
 

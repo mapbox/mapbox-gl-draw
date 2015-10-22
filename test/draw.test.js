@@ -55,7 +55,6 @@ test('Draw class test', t => {
   t.equals(typeof Draw.get, 'function', 'get method exists');
   t.equals(typeof Draw.getAll, 'function', 'getAll method exists');
   t.equals(typeof Draw.clear, 'function', 'clear method exists');
-  t.equals(typeof Draw._createButton, 'function', '_createButton method exists');
   t.equals(typeof Draw._mapState, 'function', '_mapState method exists');
 
   // check for event listeners
@@ -89,8 +88,7 @@ test('Draw class test', t => {
 
   // test edit mode
   var id = Draw.set(feature);
-  var f = Draw.get(id).properties.drawId;
-  Draw._edit(f);
+  Draw._edit(id);
   t.ok(
     document.getElementById('deleteBtn'),
     'whilst in edit mode, the delete button is added to the DOM'

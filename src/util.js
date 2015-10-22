@@ -137,22 +137,25 @@ module.exports.createButton = function(container, opts, controlClass) {
  * @returns {Object} GeoJSON feature
  */
 module.exports.translate = function(feature, init, curr, map) {
+  feature = JSON.parse(JSON.stringify(feature));
   var dx = curr.x - init.x;
   var dy = curr.y - init.y;
   var geom = feature.geometry;
 
   // iterate differently due to GeoJSON nesting
   if (geom.type === 'Polygon') {
-    geom.coordinates = geom.coordinates.map(coord =>
-      coord.map(pt => translatePoint(pt, dx, dy, map))
-    );
+    var l = geom.coordinates[0].length;
+    for (var i = 0; i < l; i++) {
+      geom.coordinates[0][i] = translatePoint(geom.coordinates[0][i], dx, dy, map);
+    }
   } else if (geom.type === 'LineString') {
-    geom.coordinates = geom.coordinates.map(pt => translatePoint(pt, dx, dy, map));
+    var l = geom.coordinates.length;
+    for (var i = 0; i < l; i++) {
+      geom.coordinates[i] = translatePoint(geom.coordinates[0][i], dx, dy, map);
+    }
   } else {
     geom.coordinates = translatePoint(geom.coordinates, dx, dy, map);
   }
-
-  feature.geometry = geom;
 
   return feature;
 };

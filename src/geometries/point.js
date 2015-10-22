@@ -1,7 +1,6 @@
 'use strict';
 
 import Geometry from './geometry';
-import Immutable from 'immutable';
 
 /**
  * Point geometry class
@@ -15,7 +14,7 @@ export default class Point extends Geometry {
 
   constructor(map, data) {
     if (!data) data = { geometry: {} };
-    data.geometry.coordinates = Immutable.List(data.geometry.coordinates || [0, 0]);
+    data.geometry.coordinates = data.geometry.coordinates || [0, 0];
     super(map, 'Point', data);
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
@@ -30,7 +29,7 @@ export default class Point extends Geometry {
   _completeDraw(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.off('click', this.completeDraw);
-    this.coordinates = Immutable.List([ e.lngLat.lng, e.lngLat.lat ]);
+    this.coordinates = [ e.lngLat.lng, e.lngLat.lat ];
     this._finishDrawing('point');
   }
 

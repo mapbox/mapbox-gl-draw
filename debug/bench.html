@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <meta charset=utf-8 />
+  <title>Mapbox GL Draw | Mapbox</title>
+  <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
+  <link href='../dist/mapboxgl.draw.css' rel='stylesheet' />
+  <style>
+    body { margin:0; padding:0; }
+    html, body, #map { height: 100%; }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
+<script src='../dist/mapboxgl.draw.js'></script>
+<script>
+  mapboxgl.accessToken = localStorage.accessToken;
+
+  var map = new mapboxgl.Map({
+    container: 'map',
+    zoom: 1,
+    center: [0, 0],
+    style: 'mapbox://styles/mapbox/streets-v8'
+  });
+
+  var p1 = [  0,  0 ],
+      p2 = [ 10,  0 ],
+      p3 = [ 10, 10 ],
+      p4 = [  0, 10 ];
+  var geom = {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[ p1, p2, p3, p4, p1 ]]
+    }
+  };
+
+  var styles = [
+    {
+      'id': 'gl-edit-line',
+      'type': 'line',
+      'source': 'edit',
+      'filter': ['all', ['==', '$type', 'LineString']],
+      'layout': {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      'paint': {
+        'line-color': '#000000',
+        'line-dasharray': [0, 2],
+        'line-width': 3
+      },
+      'interactive': true
+    }, {
+      'id': 'gl-edit-polygon',
+      'type': 'fill',
+      'source': 'edit',
+      'filter': ['all', ['==', '$type', 'Polygon']],
+      'paint': {
+        'fill-color': '#000000',
+        'fill-opacity': 0.25
+      },
+      'interactive': true
+    }, {
+      'id': 'gl-edit-polygon-stroke',
+      'type': 'line',
+      'source': 'edit',
+      'filter': ['all', ['==', '$type', 'Polygon']],
+      'layout': {
+        'line-cap': 'round',
+        'line-join': 'round'
+      },
+      'paint': {
+        'line-color': '#000000',
+        'line-dasharray': [2, 2],
+        'line-width': 3
+      },
+      'interactive': true
+    }, {
+      'id': 'gl-edit-points',
+      'type': 'circle',
+      'source': 'edit',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['!=', 'meta', 'midpoint']],
+      'layout': {
+        'text-anchor': 'top',
+        'icon-allow-overlap': true
+      },
+      'paint': {
+        'icon-color': '#ffffff',
+        'icon-halo-color': '#000000',
+        'icon-halo-width': 2,
+        'icon-size': 1.1
+      },
+      'interactive': true
+    }, {
+      'id': 'gl-edit-points-mid',
+      'type': 'circle',
+      'source': 'edit',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['==', 'meta', 'midpoint']],
+      'layout': {
+        'text-anchor': 'top',
+        'icon-allow-overlap': true
+      },
+      'paint': {
+        'icon-color': '#000000',
+        'icon-size': 1
+      },
+      'interactive': true
+    }
+  ];
+
+  map.on('load', function() {
+    map.addSource('edit', {
+      data: geom,
+      type: 'geojson'
+    });
+    styles.forEach(function(style) {
+      map.addLayer(style);
+    });
+
+    requestAnimationFrame(animate);
+  });
+
+  var x = 1;
+  function animate() {
+    var i = (Math.cos((x += 2) / 100));
+    p1[0] += i;
+    p2[0] += i;
+    p3[0] += i;
+    p4[0] += i;
+    geom = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[ p1, p2, p3, p4, p1 ]]
+      }
+    }
+    map.getSource('edit').setData(geom);
+    requestAnimationFrame(animate);
+  }
+
+</script>
+</body>
+</html>

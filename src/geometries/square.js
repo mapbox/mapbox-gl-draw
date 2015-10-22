@@ -1,7 +1,6 @@
 'use strict';
 
 import Geometry from './geometry';
-import Immutable from 'immutable';
 import { translatePoint, DOM } from '../util';
 
 /**
@@ -15,7 +14,7 @@ export default class Square extends Geometry {
 
   constructor(map) {
     var data = { geometry: {} };
-    data.geometry.coordinates = Immutable.fromJS([[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]]);
+    data.geometry.coordinates = [[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]];
     super(map, 'Polygon', data);
 
     this.type = 'square';
@@ -42,7 +41,7 @@ export default class Square extends Geometry {
     var c = this._map.unproject([pos.x, pos.y]);
     var i = -1;
     while (++i < 5) {
-      this.coordinates = this.coordinates.setIn([0, i], [ c.lng, c.lat ]);
+      this.coordinates[0][i] = [ c.lng, c.lat ];
     }
   }
 
@@ -59,9 +58,9 @@ export default class Square extends Geometry {
     var c = this._map.unproject([pos.x, pos.y]);
     var ne = this._map.unproject([this.initPos.x, pos.y]);
     var sw = this._map.unproject([pos.x, this.initPos.y]);
-    this.coordinates = this.coordinates.setIn([0, 1], [ ne.lng, ne.lat ]);
-    this.coordinates = this.coordinates.setIn([0, 2], [ c.lng, c.lat ]);
-    this.coordinates = this.coordinates.setIn([0, 3], [ sw.lng, sw.lat ]);
+    this.coordinates[0][1] = [ ne.lng, ne.lat ];
+    this.coordinates[0][2] = [ c.lng, c.lat ];
+    this.coordinates[0][3] = [ sw.lng, sw.lat ];
 
     this._renderDrawProgress();
   }
@@ -77,70 +76,47 @@ export default class Square extends Geometry {
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = this.coordinates.getIn([0, idx]);
+      this.initCoords = this.coordinates[0][idx];
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
     var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
-    this.coordinates = this.coordinates.setIn([0, idx], newPoint);
+    this.coordinates[0][idx] = newPoint;
 
     var ne, nw, se, sw;
     switch (idx) {
       case 0:
-        ne = this._getNE(newPoint, this._getV(2));
-        sw = this._getSW(newPoint, this._getV(2));
-        this.coordinates = this._setV(1, [ ne.lng, ne.lat ]);
-        this.coordinates = this._setV(3, [ sw.lng, sw.lat ]);
+        ne = this._getNE(newPoint, this.coordinates[0][2]);
+        sw = this._getSW(newPoint, this.coordinates[0][2]);
+        this.coordinates[0][1] = [ ne.lng, ne.lat ];
+        this.coordinates[0][3] = [ sw.lng, sw.lat ];
         break;
       case 1:
-        nw = this._getNW(newPoint, this._getV(3));
-        se = this._getSE(newPoint, this._getV(3));
-        this.coordinates = this._setV(0, [ nw.lng, nw.lat ]);
-        this.coordinates = this._setV(2, [ se.lng, se.lat ]);
+        nw = this._getNW(newPoint, this.coordinates[0][3]);
+        se = this._getSE(newPoint, this.coordinates[0][3]);
+        this.coordinates[0][0] = [ nw.lng, nw.lat ];
+        this.coordinates[0][2] = [ se.lng, se.lat ];
         break;
       case 2:
-        ne = this._getNE(this._getV(0), newPoint);
-        sw = this._getSW(this._getV(0), newPoint);
-        this.coordinates = this._setV(1, [ ne.lng, ne.lat ]);
-        this.coordinates = this._setV(3, [ sw.lng, sw.lat ]);
+        ne = this._getNE(this.coordinates[0][0], newPoint);
+        sw = this._getSW(this.coordinates[0][0], newPoint);
+        this.coordinates[0][1] = [ ne.lng, ne.lat ];
+        this.coordinates[0][3] = [ sw.lng, sw.lat ];
         break;
       case 3:
-        nw = this._getNW(this._getV(1), newPoint);
-        se = this._getSE(this._getV(1), newPoint);
-        this.coordinates = this._setV(0, [ nw.lng, nw.lat ]);
-        this.coordinates = this._setV(2, [ se.lng, se.lat ]);
+        nw = this._getNW(this.coordinates[0][1], newPoint);
+        se = this._getSE(this.coordinates[0][1], newPoint);
+        this.coordinates[0][0] = [ nw.lng, nw.lat ];
+        this.coordinates[0][2] = [ se.lng, se.lat ];
         break;
     }
 
     // always reset last point to equal the first point
-    this.coordinates = this._setV(4, this._getV(0));
+    this.coordinates[0][4] = this.coordinates[0][0];
 
     this._map.fire('edit.new');
-  }
-
-  /**
-   * Given and index and a val, set that vertex in `this.feature`
-   *
-   * @param {Number} idx - index
-   * @param {Array<Number>} val - new coordinates
-   * @return {Object} an Immutable Map of a GeoJSON feature
-   * @private
-   */
-  _setV(idx, val) {
-    return this.coordinates.setIn([0, idx], val);
-  }
-
-  /**
-   * Given an index, returns the vertex in the features list of coordinates
-   *
-   * @param {Number} idx - index of the vertex you want
-   * @return {Array<Number>} Immutable List
-   * @private
-   */
-  _getV(idx) {
-    return this.coordinates.getIn([0, idx]);
   }
 
   _getNE(nw, se) {
