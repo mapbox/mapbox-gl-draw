@@ -1,7 +1,6 @@
 'use strict';
 
 import hat from 'hat';
-//import Immutable from 'immutable';
 import { translate } from '../util';
 
 /**

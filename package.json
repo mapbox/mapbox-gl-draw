@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "hat": "0.0.3",
-    "immutable": "^3.7.3",
     "mapbox-gl": "^0.11.0",
     "ramda": "^0.17.1",
     "turf-bbox-polygon": "^1.0.1",

@@ -1,7 +1,6 @@
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
-var Immutable = require('immutable');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -44,9 +43,6 @@ test('Point draw class', t => {
   t.equals(typeof Point.completeDraw, 'function', 'Point.completeDraw event listener exists');
 
   t.ok(Point._map instanceof mapboxgl.Map, 'Point._map is an instance of mapboxgl.Map');
-
-  // data
-  t.ok(Point.coordinates instanceof Immutable.List, 'Point.coordinates is an Immutable.List');
 
   t.end();
 });

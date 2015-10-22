@@ -47,8 +47,7 @@ test('Edit store constructor', t => {
   t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');
   t.equals(typeof editStore._render, 'function', 'render exists');
 
-  Draw.set(feature);
-  var id = Draw.getAll().features[0].properties.drawId;
+  var id = Draw.set(feature);
   Draw._edit(id);
 
   t.deepEquals(
