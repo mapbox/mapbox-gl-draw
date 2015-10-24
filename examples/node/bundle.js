@@ -12,7 +12,7 @@ document.body.appendChild(div);
 
 var map = new mapboxgl.Map({
   container: 'map',
-  style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+  style: 'mapbox://styles/mapbox/streets-v8'
 });
 
 map.addControl(new mapboxgl.Navigation({
@@ -22,7 +22,7 @@ map.addControl(new mapboxgl.Navigation({
 var Draw = GLDraw();
 map.addControl(Draw);
 
-},{"../../index.js":2,"mapbox-gl":32}],2:[function(require,module,exports){
+},{"../../index.js":2,"mapbox-gl":27}],2:[function(require,module,exports){
 'use strict';
 
 /** A drawing component for mapboxgl
@@ -73,1050 +73,7 @@ if (window.mapboxgl) {
   module.exports = exportFn;
 }
 
-},{"./src/draw":158}],3:[function(require,module,exports){
-// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
-//
-// THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
-//
-// Originally from narwhal.js (http://narwhaljs.org)
-// Copyright (c) 2009 Thomas Robinson <280north.com>
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the 'Software'), to
-// deal in the Software without restriction, including without limitation the
-// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-// sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// when used in node, this will actually load the util module we depend on
-// versus loading the builtin util module as happens otherwise
-// this is a bug in node module loading as far as I am concerned
-var util = require('util/');
-
-var pSlice = Array.prototype.slice;
-var hasOwn = Object.prototype.hasOwnProperty;
-
-// 1. The assert module provides functions that throw
-// AssertionError's when particular conditions are not met. The
-// assert module must conform to the following interface.
-
-var assert = module.exports = ok;
-
-// 2. The AssertionError is defined in assert.
-// new assert.AssertionError({ message: message,
-//                             actual: actual,
-//                             expected: expected })
-
-assert.AssertionError = function AssertionError(options) {
-  this.name = 'AssertionError';
-  this.actual = options.actual;
-  this.expected = options.expected;
-  this.operator = options.operator;
-  if (options.message) {
-    this.message = options.message;
-    this.generatedMessage = false;
-  } else {
-    this.message = getMessage(this);
-    this.generatedMessage = true;
-  }
-  var stackStartFunction = options.stackStartFunction || fail;
-
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, stackStartFunction);
-  }
-  else {
-    // non v8 browsers so we can have a stacktrace
-    var err = new Error();
-    if (err.stack) {
-      var out = err.stack;
-
-      // try to strip useless frames
-      var fn_name = stackStartFunction.name;
-      var idx = out.indexOf('\n' + fn_name);
-      if (idx >= 0) {
-        // once we have located the function frame
-        // we need to strip out everything before it (and its line)
-        var next_line = out.indexOf('\n', idx + 1);
-        out = out.substring(next_line + 1);
-      }
-
-      this.stack = out;
-    }
-  }
-};
-
-// assert.AssertionError instanceof Error
-util.inherits(assert.AssertionError, Error);
-
-function replacer(key, value) {
-  if (util.isUndefined(value)) {
-    return '' + value;
-  }
-  if (util.isNumber(value) && !isFinite(value)) {
-    return value.toString();
-  }
-  if (util.isFunction(value) || util.isRegExp(value)) {
-    return value.toString();
-  }
-  return value;
-}
-
-function truncate(s, n) {
-  if (util.isString(s)) {
-    return s.length < n ? s : s.slice(0, n);
-  } else {
-    return s;
-  }
-}
-
-function getMessage(self) {
-  return truncate(JSON.stringify(self.actual, replacer), 128) + ' ' +
-         self.operator + ' ' +
-         truncate(JSON.stringify(self.expected, replacer), 128);
-}
-
-// At present only the three keys mentioned above are used and
-// understood by the spec. Implementations or sub modules can pass
-// other keys to the AssertionError's constructor - they will be
-// ignored.
-
-// 3. All of the following functions must throw an AssertionError
-// when a corresponding condition is not met, with a message that
-// may be undefined if not provided.  All assertion methods provide
-// both the actual and expected values to the assertion error for
-// display purposes.
-
-function fail(actual, expected, message, operator, stackStartFunction) {
-  throw new assert.AssertionError({
-    message: message,
-    actual: actual,
-    expected: expected,
-    operator: operator,
-    stackStartFunction: stackStartFunction
-  });
-}
-
-// EXTENSION! allows for well behaved errors defined elsewhere.
-assert.fail = fail;
-
-// 4. Pure assertion tests whether a value is truthy, as determined
-// by !!guard.
-// assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, !!guard,
-// message_opt);. To test strictly for the value true, use
-// assert.strictEqual(true, guard, message_opt);.
-
-function ok(value, message) {
-  if (!value) fail(value, true, message, '==', assert.ok);
-}
-assert.ok = ok;
-
-// 5. The equality assertion tests shallow, coercive equality with
-// ==.
-// assert.equal(actual, expected, message_opt);
-
-assert.equal = function equal(actual, expected, message) {
-  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
-};
-
-// 6. The non-equality assertion tests for whether two objects are not equal
-// with != assert.notEqual(actual, expected, message_opt);
-
-assert.notEqual = function notEqual(actual, expected, message) {
-  if (actual == expected) {
-    fail(actual, expected, message, '!=', assert.notEqual);
-  }
-};
-
-// 7. The equivalence assertion tests a deep equality relation.
-// assert.deepEqual(actual, expected, message_opt);
-
-assert.deepEqual = function deepEqual(actual, expected, message) {
-  if (!_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
-  }
-};
-
-function _deepEqual(actual, expected) {
-  // 7.1. All identical values are equivalent, as determined by ===.
-  if (actual === expected) {
-    return true;
-
-  } else if (util.isBuffer(actual) && util.isBuffer(expected)) {
-    if (actual.length != expected.length) return false;
-
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i] !== expected[i]) return false;
-    }
-
-    return true;
-
-  // 7.2. If the expected value is a Date object, the actual value is
-  // equivalent if it is also a Date object that refers to the same time.
-  } else if (util.isDate(actual) && util.isDate(expected)) {
-    return actual.getTime() === expected.getTime();
-
-  // 7.3 If the expected value is a RegExp object, the actual value is
-  // equivalent if it is also a RegExp object with the same source and
-  // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
-  } else if (util.isRegExp(actual) && util.isRegExp(expected)) {
-    return actual.source === expected.source &&
-           actual.global === expected.global &&
-           actual.multiline === expected.multiline &&
-           actual.lastIndex === expected.lastIndex &&
-           actual.ignoreCase === expected.ignoreCase;
-
-  // 7.4. Other pairs that do not both pass typeof value == 'object',
-  // equivalence is determined by ==.
-  } else if (!util.isObject(actual) && !util.isObject(expected)) {
-    return actual == expected;
-
-  // 7.5 For all other Object pairs, including Array objects, equivalence is
-  // determined by having the same number of owned properties (as verified
-  // with Object.prototype.hasOwnProperty.call), the same set of keys
-  // (although not necessarily the same order), equivalent values for every
-  // corresponding key, and an identical 'prototype' property. Note: this
-  // accounts for both named and indexed properties on Arrays.
-  } else {
-    return objEquiv(actual, expected);
-  }
-}
-
-function isArguments(object) {
-  return Object.prototype.toString.call(object) == '[object Arguments]';
-}
-
-function objEquiv(a, b) {
-  if (util.isNullOrUndefined(a) || util.isNullOrUndefined(b))
-    return false;
-  // an identical 'prototype' property.
-  if (a.prototype !== b.prototype) return false;
-  // if one is a primitive, the other must be same
-  if (util.isPrimitive(a) || util.isPrimitive(b)) {
-    return a === b;
-  }
-  var aIsArgs = isArguments(a),
-      bIsArgs = isArguments(b);
-  if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
-    return false;
-  if (aIsArgs) {
-    a = pSlice.call(a);
-    b = pSlice.call(b);
-    return _deepEqual(a, b);
-  }
-  var ka = objectKeys(a),
-      kb = objectKeys(b),
-      key, i;
-  // having the same number of owned properties (keys incorporates
-  // hasOwnProperty)
-  if (ka.length != kb.length)
-    return false;
-  //the same set of keys (although not necessarily the same order),
-  ka.sort();
-  kb.sort();
-  //~~~cheap key test
-  for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i])
-      return false;
-  }
-  //equivalent values for every corresponding key, and
-  //~~~possibly expensive deep test
-  for (i = ka.length - 1; i >= 0; i--) {
-    key = ka[i];
-    if (!_deepEqual(a[key], b[key])) return false;
-  }
-  return true;
-}
-
-// 8. The non-equivalence assertion tests for any deep inequality.
-// assert.notDeepEqual(actual, expected, message_opt);
-
-assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-  if (_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
-  }
-};
-
-// 9. The strict equality assertion tests strict equality, as determined by ===.
-// assert.strictEqual(actual, expected, message_opt);
-
-assert.strictEqual = function strictEqual(actual, expected, message) {
-  if (actual !== expected) {
-    fail(actual, expected, message, '===', assert.strictEqual);
-  }
-};
-
-// 10. The strict non-equality assertion tests for strict inequality, as
-// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
-
-assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
-  if (actual === expected) {
-    fail(actual, expected, message, '!==', assert.notStrictEqual);
-  }
-};
-
-function expectedException(actual, expected) {
-  if (!actual || !expected) {
-    return false;
-  }
-
-  if (Object.prototype.toString.call(expected) == '[object RegExp]') {
-    return expected.test(actual);
-  } else if (actual instanceof expected) {
-    return true;
-  } else if (expected.call({}, actual) === true) {
-    return true;
-  }
-
-  return false;
-}
-
-function _throws(shouldThrow, block, expected, message) {
-  var actual;
-
-  if (util.isString(expected)) {
-    message = expected;
-    expected = null;
-  }
-
-  try {
-    block();
-  } catch (e) {
-    actual = e;
-  }
-
-  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
-            (message ? ' ' + message : '.');
-
-  if (shouldThrow && !actual) {
-    fail(actual, expected, 'Missing expected exception' + message);
-  }
-
-  if (!shouldThrow && expectedException(actual, expected)) {
-    fail(actual, expected, 'Got unwanted exception' + message);
-  }
-
-  if ((shouldThrow && actual && expected &&
-      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
-    throw actual;
-  }
-}
-
-// 11. Expected to throw an error:
-// assert.throws(block, Error_opt, message_opt);
-
-assert.throws = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [true].concat(pSlice.call(arguments)));
-};
-
-// EXTENSION! This is annoying to write outside this module.
-assert.doesNotThrow = function(block, /*optional*/message) {
-  _throws.apply(this, [false].concat(pSlice.call(arguments)));
-};
-
-assert.ifError = function(err) { if (err) {throw err;}};
-
-var objectKeys = Object.keys || function (obj) {
-  var keys = [];
-  for (var key in obj) {
-    if (hasOwn.call(obj, key)) keys.push(key);
-  }
-  return keys;
-};
-
-},{"util/":7}],4:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],5:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    draining = true;
-    var currentQueue;
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        var i = -1;
-        while (++i < len) {
-            currentQueue[i]();
-        }
-        len = queue.length;
-    }
-    draining = false;
-}
-process.nextTick = function (fun) {
-    queue.push(fun);
-    if (!draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],6:[function(require,module,exports){
-module.exports = function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.readUInt8 === 'function';
-}
-},{}],7:[function(require,module,exports){
-(function (process,global){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (!isString(f)) {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j':
-        try {
-          return JSON.stringify(args[i++]);
-        } catch (_) {
-          return '[Circular]';
-        }
-      default:
-        return x;
-    }
-  });
-  for (var x = args[i]; i < len; x = args[++i]) {
-    if (isNull(x) || !isObject(x)) {
-      str += ' ' + x;
-    } else {
-      str += ' ' + inspect(x);
-    }
-  }
-  return str;
-};
-
-
-// Mark that a method should not be used.
-// Returns a modified function which warns once by default.
-// If --no-deprecation is set, then it is a no-op.
-exports.deprecate = function(fn, msg) {
-  // Allow for deprecating things in the process of starting up.
-  if (isUndefined(global.process)) {
-    return function() {
-      return exports.deprecate(fn, msg).apply(this, arguments);
-    };
-  }
-
-  if (process.noDeprecation === true) {
-    return fn;
-  }
-
-  var warned = false;
-  function deprecated() {
-    if (!warned) {
-      if (process.throwDeprecation) {
-        throw new Error(msg);
-      } else if (process.traceDeprecation) {
-        console.trace(msg);
-      } else {
-        console.error(msg);
-      }
-      warned = true;
-    }
-    return fn.apply(this, arguments);
-  }
-
-  return deprecated;
-};
-
-
-var debugs = {};
-var debugEnviron;
-exports.debuglog = function(set) {
-  if (isUndefined(debugEnviron))
-    debugEnviron = process.env.NODE_DEBUG || '';
-  set = set.toUpperCase();
-  if (!debugs[set]) {
-    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-      var pid = process.pid;
-      debugs[set] = function() {
-        var msg = exports.format.apply(exports, arguments);
-        console.error('%s %d: %s', set, pid, msg);
-      };
-    } else {
-      debugs[set] = function() {};
-    }
-  }
-  return debugs[set];
-};
-
-
-/**
- * Echos the value of a value. Trys to print the value out
- * in the best way possible given the different types.
- *
- * @param {Object} obj The object to print out.
- * @param {Object} opts Optional options object that alters the output.
- */
-/* legacy: obj, showHidden, depth, colors*/
-function inspect(obj, opts) {
-  // default options
-  var ctx = {
-    seen: [],
-    stylize: stylizeNoColor
-  };
-  // legacy...
-  if (arguments.length >= 3) ctx.depth = arguments[2];
-  if (arguments.length >= 4) ctx.colors = arguments[3];
-  if (isBoolean(opts)) {
-    // legacy...
-    ctx.showHidden = opts;
-  } else if (opts) {
-    // got an "options" object
-    exports._extend(ctx, opts);
-  }
-  // set default options
-  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-  if (isUndefined(ctx.depth)) ctx.depth = 2;
-  if (isUndefined(ctx.colors)) ctx.colors = false;
-  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-  if (ctx.colors) ctx.stylize = stylizeWithColor;
-  return formatValue(ctx, obj, ctx.depth);
-}
-exports.inspect = inspect;
-
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-inspect.colors = {
-  'bold' : [1, 22],
-  'italic' : [3, 23],
-  'underline' : [4, 24],
-  'inverse' : [7, 27],
-  'white' : [37, 39],
-  'grey' : [90, 39],
-  'black' : [30, 39],
-  'blue' : [34, 39],
-  'cyan' : [36, 39],
-  'green' : [32, 39],
-  'magenta' : [35, 39],
-  'red' : [31, 39],
-  'yellow' : [33, 39]
-};
-
-// Don't use 'blue' not visible on cmd.exe
-inspect.styles = {
-  'special': 'cyan',
-  'number': 'yellow',
-  'boolean': 'yellow',
-  'undefined': 'grey',
-  'null': 'bold',
-  'string': 'green',
-  'date': 'magenta',
-  // "name": intentionally not styling
-  'regexp': 'red'
-};
-
-
-function stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
-
-  if (style) {
-    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-           '\u001b[' + inspect.colors[style][1] + 'm';
-  } else {
-    return str;
-  }
-}
-
-
-function stylizeNoColor(str, styleType) {
-  return str;
-}
-
-
-function arrayToHash(array) {
-  var hash = {};
-
-  array.forEach(function(val, idx) {
-    hash[val] = true;
-  });
-
-  return hash;
-}
-
-
-function formatValue(ctx, value, recurseTimes) {
-  // Provide a hook for user-specified inspect functions.
-  // Check that value is an object with an inspect function on it
-  if (ctx.customInspect &&
-      value &&
-      isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes, ctx);
-    if (!isString(ret)) {
-      ret = formatValue(ctx, ret, recurseTimes);
-    }
-    return ret;
-  }
-
-  // Primitive types cannot have properties
-  var primitive = formatPrimitive(ctx, value);
-  if (primitive) {
-    return primitive;
-  }
-
-  // Look up the keys of the object.
-  var keys = Object.keys(value);
-  var visibleKeys = arrayToHash(keys);
-
-  if (ctx.showHidden) {
-    keys = Object.getOwnPropertyNames(value);
-  }
-
-  // IE doesn't make error fields non-enumerable
-  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
-  if (isError(value)
-      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
-    return formatError(value);
-  }
-
-  // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
-    if (isFunction(value)) {
-      var name = value.name ? ': ' + value.name : '';
-      return ctx.stylize('[Function' + name + ']', 'special');
-    }
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    }
-    if (isDate(value)) {
-      return ctx.stylize(Date.prototype.toString.call(value), 'date');
-    }
-    if (isError(value)) {
-      return formatError(value);
-    }
-  }
-
-  var base = '', array = false, braces = ['{', '}'];
-
-  // Make Array say that they are Array
-  if (isArray(value)) {
-    array = true;
-    braces = ['[', ']'];
-  }
-
-  // Make functions say that they are functions
-  if (isFunction(value)) {
-    var n = value.name ? ': ' + value.name : '';
-    base = ' [Function' + n + ']';
-  }
-
-  // Make RegExps say that they are RegExps
-  if (isRegExp(value)) {
-    base = ' ' + RegExp.prototype.toString.call(value);
-  }
-
-  // Make dates with properties first say the date
-  if (isDate(value)) {
-    base = ' ' + Date.prototype.toUTCString.call(value);
-  }
-
-  // Make error with message first say the error
-  if (isError(value)) {
-    base = ' ' + formatError(value);
-  }
-
-  if (keys.length === 0 && (!array || value.length == 0)) {
-    return braces[0] + base + braces[1];
-  }
-
-  if (recurseTimes < 0) {
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    } else {
-      return ctx.stylize('[Object]', 'special');
-    }
-  }
-
-  ctx.seen.push(value);
-
-  var output;
-  if (array) {
-    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-  } else {
-    output = keys.map(function(key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-    });
-  }
-
-  ctx.seen.pop();
-
-  return reduceToSingleString(output, base, braces);
-}
-
-
-function formatPrimitive(ctx, value) {
-  if (isUndefined(value))
-    return ctx.stylize('undefined', 'undefined');
-  if (isString(value)) {
-    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                             .replace(/'/g, "\\'")
-                                             .replace(/\\"/g, '"') + '\'';
-    return ctx.stylize(simple, 'string');
-  }
-  if (isNumber(value))
-    return ctx.stylize('' + value, 'number');
-  if (isBoolean(value))
-    return ctx.stylize('' + value, 'boolean');
-  // For some reason typeof null is "object", so special case here.
-  if (isNull(value))
-    return ctx.stylize('null', 'null');
-}
-
-
-function formatError(value) {
-  return '[' + Error.prototype.toString.call(value) + ']';
-}
-
-
-function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-  var output = [];
-  for (var i = 0, l = value.length; i < l; ++i) {
-    if (hasOwnProperty(value, String(i))) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          String(i), true));
-    } else {
-      output.push('');
-    }
-  }
-  keys.forEach(function(key) {
-    if (!key.match(/^\d+$/)) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          key, true));
-    }
-  });
-  return output;
-}
-
-
-function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-  var name, str, desc;
-  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-  if (desc.get) {
-    if (desc.set) {
-      str = ctx.stylize('[Getter/Setter]', 'special');
-    } else {
-      str = ctx.stylize('[Getter]', 'special');
-    }
-  } else {
-    if (desc.set) {
-      str = ctx.stylize('[Setter]', 'special');
-    }
-  }
-  if (!hasOwnProperty(visibleKeys, key)) {
-    name = '[' + key + ']';
-  }
-  if (!str) {
-    if (ctx.seen.indexOf(desc.value) < 0) {
-      if (isNull(recurseTimes)) {
-        str = formatValue(ctx, desc.value, null);
-      } else {
-        str = formatValue(ctx, desc.value, recurseTimes - 1);
-      }
-      if (str.indexOf('\n') > -1) {
-        if (array) {
-          str = str.split('\n').map(function(line) {
-            return '  ' + line;
-          }).join('\n').substr(2);
-        } else {
-          str = '\n' + str.split('\n').map(function(line) {
-            return '   ' + line;
-          }).join('\n');
-        }
-      }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
-    }
-  }
-  if (isUndefined(name)) {
-    if (array && key.match(/^\d+$/)) {
-      return str;
-    }
-    name = JSON.stringify('' + key);
-    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-      name = name.substr(1, name.length - 2);
-      name = ctx.stylize(name, 'name');
-    } else {
-      name = name.replace(/'/g, "\\'")
-                 .replace(/\\"/g, '"')
-                 .replace(/(^"|"$)/g, "'");
-      name = ctx.stylize(name, 'string');
-    }
-  }
-
-  return name + ': ' + str;
-}
-
-
-function reduceToSingleString(output, base, braces) {
-  var numLinesEst = 0;
-  var length = output.reduce(function(prev, cur) {
-    numLinesEst++;
-    if (cur.indexOf('\n') >= 0) numLinesEst++;
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
-
-  if (length > 60) {
-    return braces[0] +
-           (base === '' ? '' : base + '\n ') +
-           ' ' +
-           output.join(',\n  ') +
-           ' ' +
-           braces[1];
-  }
-
-  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-}
-
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = require('./support/isBuffer');
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = require('inherits');
-
-exports._extend = function(origin, add) {
-  // Don't do anything if add isn't an object
-  if (!add || !isObject(add)) return origin;
-
-  var keys = Object.keys(add);
-  var i = keys.length;
-  while (i--) {
-    origin[keys[i]] = add[keys[i]];
-  }
-  return origin;
-};
-
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":6,"_process":5,"inherits":4}],8:[function(require,module,exports){
+},{"./src/draw":153}],3:[function(require,module,exports){
 var hat = module.exports = function (bits, base) {
     if (!base) base = 16;
     if (bits === undefined) bits = 128;
@@ -1180,7 +137,7 @@ hat.rack = function (bits, base, expandBy) {
     return fn;
 };
 
-},{}],9:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 // a simple wrapper around a single arraybuffer
@@ -1260,7 +217,7 @@ Buffer.prototype = {
     }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var LineVertexBuffer = require('./line_vertex_buffer');
@@ -1294,7 +251,7 @@ module.exports = function(bufferset) {
     };
 };
 
-},{"./circle_vertex_buffer":11,"./collision_box_vertex_buffer":12,"./fill_vertex_buffer":13,"./glyph_vertex_buffer":14,"./icon_vertex_buffer":15,"./line_element_buffer":16,"./line_vertex_buffer":17,"./outline_element_buffer":18,"./triangle_element_buffer":19}],11:[function(require,module,exports){
+},{"./circle_vertex_buffer":6,"./collision_box_vertex_buffer":7,"./fill_vertex_buffer":8,"./glyph_vertex_buffer":9,"./icon_vertex_buffer":10,"./line_element_buffer":11,"./line_vertex_buffer":12,"./outline_element_buffer":13,"./triangle_element_buffer":14}],6:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1338,7 +295,7 @@ CircleVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],12:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],7:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1377,7 +334,7 @@ CollisionBoxVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],13:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],8:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1404,7 +361,7 @@ FillVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],14:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],9:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1457,7 +414,7 @@ GlyphVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],15:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],10:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1508,7 +465,7 @@ IconVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],16:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],11:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1537,7 +494,7 @@ LineElementBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],17:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],12:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1585,7 +542,7 @@ LineVertexBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],18:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],13:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1613,7 +570,7 @@ OutlineElementBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],19:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],14:[function(require,module,exports){
 'use strict';
 
 var util = require('../../util/util');
@@ -1642,7 +599,7 @@ TriangleElementBuffer.prototype = util.inherit(Buffer, {
     }
 });
 
-},{"../../util/util":114,"./buffer":9}],20:[function(require,module,exports){
+},{"../../util/util":109,"./buffer":4}],15:[function(require,module,exports){
 'use strict';
 
 var ElementGroups = require('./element_groups');
@@ -1705,7 +662,7 @@ CircleBucket.prototype.addFeatures = function() {
     }
 };
 
-},{"./element_groups":22}],21:[function(require,module,exports){
+},{"./element_groups":17}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = createBucket;
@@ -1762,7 +719,7 @@ function createBucket(layer, buffers, z, overscaling, collisionDebug) {
     return bucket;
 }
 
-},{"../style/layout_properties":61,"../style/style_declaration_set":67,"./circle_bucket":20,"./fill_bucket":24,"./line_bucket":25,"./symbol_bucket":26,"feature-filter":116}],22:[function(require,module,exports){
+},{"../style/layout_properties":56,"../style/style_declaration_set":62,"./circle_bucket":15,"./fill_bucket":19,"./line_bucket":20,"./symbol_bucket":21,"feature-filter":111}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = ElementGroups;
@@ -1794,7 +751,7 @@ function ElementGroup(vertexStartIndex, elementStartIndex, secondElementStartInd
     this.secondElementLength = 0;
 }
 
-},{}],23:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var rbush = require('rbush');
@@ -2006,7 +963,7 @@ function pointContainsPoint(rings, p, radius) {
     return false;
 }
 
-},{"../util/util":114,"point-geometry":141,"rbush":142,"vector-tile":145}],24:[function(require,module,exports){
+},{"../util/util":109,"point-geometry":136,"rbush":137,"vector-tile":140}],19:[function(require,module,exports){
 'use strict';
 
 var ElementGroups = require('./element_groups');
@@ -2081,7 +1038,7 @@ FillBucket.prototype.addFill = function(vertices) {
     }
 };
 
-},{"./element_groups":22}],25:[function(require,module,exports){
+},{"./element_groups":17}],20:[function(require,module,exports){
 'use strict';
 
 var ElementGroups = require('./element_groups');
@@ -2431,7 +1388,7 @@ LineBucket.prototype.addPieSliceVertex = function(currentVertex, flip, distance,
     }
 };
 
-},{"./element_groups":22}],26:[function(require,module,exports){
+},{"./element_groups":17}],21:[function(require,module,exports){
 'use strict';
 
 var ElementGroups = require('./element_groups');
@@ -2918,7 +1875,7 @@ function SymbolInstance(anchor, line, shapedText, shapedIcon, layout, addToBuffe
     }
 }
 
-},{"../symbol/anchor":70,"../symbol/clip_line":73,"../symbol/collision_feature":75,"../symbol/get_anchors":77,"../symbol/mergelines":80,"../symbol/quads":81,"../symbol/resolve_icons":82,"../symbol/resolve_text":83,"../symbol/shaping":84,"../util/token":113,"./element_groups":22,"point-geometry":141}],27:[function(require,module,exports){
+},{"../symbol/anchor":65,"../symbol/clip_line":68,"../symbol/collision_feature":70,"../symbol/get_anchors":72,"../symbol/mergelines":75,"../symbol/quads":76,"../symbol/resolve_icons":77,"../symbol/resolve_text":78,"../symbol/shaping":79,"../util/token":108,"./element_groups":17,"point-geometry":136}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = Coordinate;
@@ -2997,7 +1954,7 @@ Coordinate.prototype = {
     }
 };
 
-},{}],28:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = LngLat;
@@ -3067,7 +2024,7 @@ LngLat.convert = function (input) {
     return input;
 };
 
-},{"../util/util":114}],29:[function(require,module,exports){
+},{"../util/util":109}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = LngLatBounds;
@@ -3214,7 +2171,7 @@ LngLatBounds.convert = function (a) {
     return new LngLatBounds(a);
 };
 
-},{"./lng_lat":28}],30:[function(require,module,exports){
+},{"./lng_lat":23}],25:[function(require,module,exports){
 'use strict';
 
 var LngLat = require('./lng_lat'),
@@ -3591,7 +2548,7 @@ Transform.prototype = {
     }
 };
 
-},{"../util/interpolate":110,"../util/util":114,"./coordinate":27,"./lng_lat":28,"gl-matrix":123,"point-geometry":141}],31:[function(require,module,exports){
+},{"../util/interpolate":105,"../util/util":109,"./coordinate":22,"./lng_lat":23,"gl-matrix":118,"point-geometry":136}],26:[function(require,module,exports){
 'use strict';
 
 // Font data From Hershey Simplex Font
@@ -3724,7 +2681,7 @@ module.exports = function textVertices(text, left, baseline, scale) {
     return strokes;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3771,7 +2728,7 @@ Object.defineProperty(mapboxgl, 'accessToken', {
     set: function(token) { config.ACCESS_TOKEN = token; }
 });
 
-},{"./geo/lng_lat":28,"./geo/lng_lat_bounds":29,"./source/geojson_source":47,"./source/image_source":49,"./source/video_source":56,"./style/style":64,"./ui/control/attribution":87,"./ui/control/control":88,"./ui/control/navigation":89,"./ui/map":99,"./ui/popup":100,"./util/ajax":102,"./util/browser":103,"./util/config":107,"./util/evented":108,"./util/util":114,"point-geometry":141}],33:[function(require,module,exports){
+},{"./geo/lng_lat":23,"./geo/lng_lat_bounds":24,"./source/geojson_source":42,"./source/image_source":44,"./source/video_source":51,"./style/style":59,"./ui/control/attribution":82,"./ui/control/control":83,"./ui/control/navigation":84,"./ui/map":94,"./ui/popup":95,"./util/ajax":97,"./util/browser":98,"./util/config":102,"./util/evented":103,"./util/util":109,"point-geometry":136}],28:[function(require,module,exports){
 'use strict';
 
 var mat3 = require('gl-matrix').mat3;
@@ -3859,7 +2816,7 @@ function drawBackground(painter, layer, posMatrix) {
     gl.stencilFunc(gl.EQUAL, 0x80, 0x80);
 }
 
-},{"gl-matrix":123}],34:[function(require,module,exports){
+},{"gl-matrix":118}],29:[function(require,module,exports){
 'use strict';
 
 var browser = require('../util/browser.js');
@@ -3912,7 +2869,7 @@ function drawCircles(painter, layer, posMatrix, tile) {
     gl.enable(gl.STENCIL_TEST);
 }
 
-},{"../util/browser.js":103}],35:[function(require,module,exports){
+},{"../util/browser.js":98}],30:[function(require,module,exports){
 'use strict';
 
 module.exports = drawPlacementDebug;
@@ -3948,7 +2905,7 @@ function drawPlacementDebug(painter, layer, posMatrix, tile) {
     gl.disable(gl.STENCIL_TEST);
 }
 
-},{}],36:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var textVertices = require('../lib/debugtext');
@@ -3987,7 +2944,7 @@ function drawDebug(painter, tile) {
     gl.blendFunc(gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 }
 
-},{"../lib/debugtext":31,"../util/browser":103}],37:[function(require,module,exports){
+},{"../lib/debugtext":26,"../util/browser":98}],32:[function(require,module,exports){
 'use strict';
 
 var browser = require('../util/browser');
@@ -4157,7 +3114,7 @@ function drawFill(painter, layer, posMatrix, tile) {
     gl.stencilFunc(gl.EQUAL, 0x80, 0x80);
 }
 
-},{"../util/browser":103,"gl-matrix":123}],38:[function(require,module,exports){
+},{"../util/browser":98,"gl-matrix":118}],33:[function(require,module,exports){
 'use strict';
 
 var browser = require('../util/browser');
@@ -4320,7 +3277,7 @@ module.exports = function drawLine(painter, layer, posMatrix, tile) {
 
 };
 
-},{"../util/browser":103,"gl-matrix":123}],39:[function(require,module,exports){
+},{"../util/browser":98,"gl-matrix":118}],34:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -4431,7 +3388,7 @@ function getOpacities(tile, parentTile, layer, transform) {
     return opacity;
 }
 
-},{"../util/util":114}],40:[function(require,module,exports){
+},{"../util/util":109}],35:[function(require,module,exports){
 'use strict';
 
 var browser = require('../util/browser');
@@ -4610,7 +3567,7 @@ function drawSymbol(painter, layer, posMatrix, tile, elementGroups, prefix, sdf)
     }
 }
 
-},{"../util/browser":103,"./draw_collision_debug":35,"gl-matrix":123}],41:[function(require,module,exports){
+},{"../util/browser":98,"./draw_collision_debug":30,"gl-matrix":118}],36:[function(require,module,exports){
 'use strict';
 
 var browser = require('../util/browser');
@@ -4661,7 +3618,7 @@ function drawVertices(painter, layer, posMatrix, tile) {
     gl.blendFunc(gl.ONE_MINUS_DST_ALPHA, gl.ONE);
 }
 
-},{"../util/browser":103,"gl-matrix":123}],42:[function(require,module,exports){
+},{"../util/browser":98,"gl-matrix":118}],37:[function(require,module,exports){
 'use strict';
 
 module.exports = FrameHistory;
@@ -4729,7 +3686,7 @@ FrameHistory.prototype.record = function(zoom) {
     }
 };
 
-},{}],43:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 var shaders = require('./shaders');
@@ -4850,7 +3807,7 @@ exports.extend = function(context) {
     return context;
 };
 
-},{"../util/util":114,"./shaders":46}],44:[function(require,module,exports){
+},{"../util/util":109,"./shaders":41}],39:[function(require,module,exports){
 'use strict';
 
 module.exports = LineAtlas;
@@ -5022,7 +3979,7 @@ LineAtlas.prototype.debug = function() {
     ctx.putImageData(data, 0, 0);
 };
 
-},{}],45:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var glutil = require('./gl_util');
@@ -5376,7 +4333,7 @@ Painter.prototype.getTexture = function(size) {
     return textures && textures.length > 0 ? textures.pop() : null;
 };
 
-},{"../util/browser":103,"./draw_background":33,"./draw_circle":34,"./draw_debug":36,"./draw_fill":37,"./draw_line":38,"./draw_raster":39,"./draw_symbol":40,"./draw_vertices":41,"./frame_history":42,"./gl_util":43,"gl-matrix":123}],46:[function(require,module,exports){
+},{"../util/browser":98,"./draw_background":28,"./draw_circle":29,"./draw_debug":31,"./draw_fill":32,"./draw_line":33,"./draw_raster":34,"./draw_symbol":35,"./draw_vertices":36,"./frame_history":37,"./gl_util":38,"gl-matrix":118}],41:[function(require,module,exports){
 'use strict';
 
 var glify = undefined;
@@ -5397,7 +4354,7 @@ module.exports = {
     "collisionbox": {"vertex":"precision mediump float;attribute vec2 a_pos,a_extrude,a_data;uniform mat4 u_matrix;uniform float u_scale;varying float a,b;void main(){gl_Position=u_matrix*vec4(a_pos+a_extrude/u_scale,0,1);a=a_data.x;b=a_data.y;}","fragment":"precision mediump float;uniform float u_zoom,u_maxzoom;varying float a,b;void main(){float c=.5;gl_FragColor=vec4(0,1,0,1)*c;if(b>u_zoom)gl_FragColor=vec4(1,0,0,1)*c;if(u_zoom>=a)gl_FragColor=vec4(0,0,0,1)*c*.25;if(b>=u_maxzoom)gl_FragColor=vec4(0,0,1,1)*c*.2;}"}
 };
 
-},{}],47:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -5586,7 +4543,7 @@ GeoJSONSource.prototype = util.inherit(Evented, /** @lends GeoJSONSource.prototy
     }
 });
 
-},{"../util/evented":108,"../util/util":114,"./source":51,"./tile_pyramid":54,"resolve-url":143}],48:[function(require,module,exports){
+},{"../util/evented":103,"../util/util":109,"./source":46,"./tile_pyramid":49,"resolve-url":138}],43:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -5653,7 +4610,7 @@ FeatureWrapper.prototype.bbox = function() {
 
 FeatureWrapper.prototype.toGeoJSON = VectorTileFeature.prototype.toGeoJSON;
 
-},{"point-geometry":141,"vector-tile":145}],49:[function(require,module,exports){
+},{"point-geometry":136,"vector-tile":140}],44:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -5802,7 +4759,7 @@ ImageSource.prototype = util.inherit(Evented, {
     }
 });
 
-},{"../geo/lng_lat":28,"../util/ajax":102,"../util/evented":108,"../util/util":114,"./tile":52,"point-geometry":141}],50:[function(require,module,exports){
+},{"../geo/lng_lat":23,"../util/ajax":97,"../util/evented":103,"../util/util":109,"./tile":47,"point-geometry":136}],45:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -5919,7 +4876,7 @@ RasterTileSource.prototype = util.inherit(Evented, {
     }
 });
 
-},{"../util/ajax":102,"../util/evented":108,"../util/mapbox":111,"../util/util":114,"./source":51}],51:[function(require,module,exports){
+},{"../util/ajax":97,"../util/evented":103,"../util/mapbox":106,"../util/util":109,"./source":46}],46:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -6070,7 +5027,7 @@ exports.create = function(source) {
     return new sources[source.type](source);
 };
 
-},{"../util/ajax":102,"../util/browser":103,"../util/mapbox":111,"../util/util":114,"./geojson_source":47,"./image_source":49,"./raster_tile_source":50,"./tile_coord":53,"./tile_pyramid":54,"./vector_tile_source":55,"./video_source":56}],52:[function(require,module,exports){
+},{"../util/ajax":97,"../util/browser":98,"../util/mapbox":106,"../util/util":109,"./geojson_source":42,"./image_source":44,"./raster_tile_source":45,"./tile_coord":48,"./tile_pyramid":49,"./vector_tile_source":50,"./video_source":51}],47:[function(require,module,exports){
 'use strict';
 
 var glmatrix = require('gl-matrix');
@@ -6225,7 +5182,7 @@ Tile.prototype = {
     }
 };
 
-},{"../data/buffer/buffer_set":10,"../util/util":114,"gl-matrix":123}],53:[function(require,module,exports){
+},{"../data/buffer/buffer_set":5,"../util/util":109,"gl-matrix":118}],48:[function(require,module,exports){
 'use strict';
 
 var assert = require('assert');
@@ -6395,7 +5352,7 @@ TileCoord.cover = function(z, bounds, actualZ) {
     });
 };
 
-},{"assert":3}],54:[function(require,module,exports){
+},{"assert":165}],49:[function(require,module,exports){
 'use strict';
 
 var Tile = require('./tile');
@@ -6773,7 +5730,7 @@ TilePyramid.prototype = {
     }
 };
 
-},{"../util/mru_cache":112,"../util/util":114,"./tile":52,"./tile_coord":53,"point-geometry":141}],55:[function(require,module,exports){
+},{"../util/mru_cache":107,"../util/util":109,"./tile":47,"./tile_coord":48,"point-geometry":136}],50:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -6927,7 +5884,7 @@ VectorTileSource.prototype = util.inherit(Evented, {
     }
 });
 
-},{"../util/evented":108,"../util/util":114,"./source":51}],56:[function(require,module,exports){
+},{"../util/evented":103,"../util/util":109,"./source":46}],51:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -7099,7 +6056,7 @@ VideoSource.prototype = util.inherit(Evented, /** @lends VideoSource.prototype *
     }
 });
 
-},{"../geo/lng_lat":28,"../util/ajax":102,"../util/evented":108,"../util/util":114,"./tile":52,"point-geometry":141}],57:[function(require,module,exports){
+},{"../geo/lng_lat":23,"../util/ajax":97,"../util/evented":103,"../util/util":109,"./tile":47,"point-geometry":136}],52:[function(require,module,exports){
 'use strict';
 
 var Actor = require('../util/actor');
@@ -7250,7 +6207,7 @@ util.extend(Worker.prototype, {
     }
 });
 
-},{"../util/actor":101,"../util/ajax":102,"../util/util":114,"./geojson_wrapper":48,"./worker_tile":58,"geojson-vt":119,"pbf":139,"vector-tile":145}],58:[function(require,module,exports){
+},{"../util/actor":96,"../util/ajax":97,"../util/util":109,"./geojson_wrapper":43,"./worker_tile":53,"geojson-vt":114,"pbf":134,"vector-tile":140}],53:[function(require,module,exports){
 'use strict';
 
 var FeatureTree = require('../data/feature_tree');
@@ -7522,7 +6479,7 @@ WorkerTile.prototype.redoPlacement = function(angle, pitch, collisionDebug) {
 
 };
 
-},{"../data/buffer/buffer_set":10,"../data/create_bucket":21,"../data/feature_tree":23,"../symbol/collision_tile":76}],59:[function(require,module,exports){
+},{"../data/buffer/buffer_set":5,"../data/create_bucket":16,"../data/feature_tree":18,"../symbol/collision_tile":71}],54:[function(require,module,exports){
 'use strict';
 
 module.exports = AnimationLoop;
@@ -7554,7 +6511,7 @@ AnimationLoop.prototype.cancel = function(n) {
     });
 };
 
-},{}],60:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 var Evented = require('../util/evented');
@@ -7635,7 +6592,7 @@ ImageSprite.prototype.getSpritePosition = function(name) {
     return new SpritePosition();
 };
 
-},{"../util/ajax":102,"../util/browser":103,"../util/evented":108,"../util/mapbox":111}],61:[function(require,module,exports){
+},{"../util/ajax":97,"../util/browser":98,"../util/evented":103,"../util/mapbox":106}],56:[function(require,module,exports){
 'use strict';
 
 var reference = require('./reference');
@@ -7657,7 +6614,7 @@ reference.layout.forEach(function(className) {
     module.exports[className.replace('layout_', '')] = Properties;
 });
 
-},{"./reference":63}],62:[function(require,module,exports){
+},{"./reference":58}],57:[function(require,module,exports){
 'use strict';
 
 var reference = require('./reference');
@@ -7685,11 +6642,11 @@ reference.paint.forEach(function(className) {
     module.exports[className.replace('paint_', '')] = Calculated;
 });
 
-},{"./reference":63,"csscolorparser":115}],63:[function(require,module,exports){
+},{"./reference":58,"csscolorparser":110}],58:[function(require,module,exports){
 'use strict';
 module.exports = require('mapbox-gl-style-spec/reference/latest');
 
-},{"mapbox-gl-style-spec/reference/latest":136}],64:[function(require,module,exports){
+},{"mapbox-gl-style-spec/reference/latest":131}],59:[function(require,module,exports){
 'use strict';
 
 var Evented = require('../util/evented');
@@ -8167,7 +7124,7 @@ Style.prototype = util.inherit(Evented, {
     }
 });
 
-},{"../render/line_atlas":44,"../symbol/glyph_atlas":78,"../symbol/glyph_source":79,"../symbol/sprite_atlas":85,"../util/ajax":102,"../util/browser":103,"../util/dispatcher":105,"../util/evented":108,"../util/mapbox":111,"../util/util":114,"./animation_loop":59,"./image_sprite":60,"./style_batch":65,"./style_layer":68,"mapbox-gl-style-spec/lib/validate/latest":134}],65:[function(require,module,exports){
+},{"../render/line_atlas":39,"../symbol/glyph_atlas":73,"../symbol/glyph_source":74,"../symbol/sprite_atlas":80,"../util/ajax":97,"../util/browser":98,"../util/dispatcher":100,"../util/evented":103,"../util/mapbox":106,"../util/util":109,"./animation_loop":54,"./image_sprite":55,"./style_batch":60,"./style_layer":63,"mapbox-gl-style-spec/lib/validate/latest":129}],60:[function(require,module,exports){
 'use strict';
 
 var Source = require('../source/source');
@@ -8362,7 +7319,7 @@ styleBatch.prototype = {
 
 module.exports = styleBatch;
 
-},{"../source/source":51,"./style_layer":68}],66:[function(require,module,exports){
+},{"../source/source":46,"./style_layer":63}],61:[function(require,module,exports){
 'use strict';
 
 var parseCSSColor = require('csscolorparser').parseCSSColor;
@@ -8463,7 +7420,7 @@ function colorDowngrade(color) {
     return [color[0] / 255, color[1] / 255, color[2] / 255, color[3] / 1];
 }
 
-},{"../util/util":114,"csscolorparser":115,"mapbox-gl-function":133}],67:[function(require,module,exports){
+},{"../util/util":109,"csscolorparser":110,"mapbox-gl-function":128}],62:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -8547,7 +7504,7 @@ module.exports = function(renderType, layerType, properties) {
     return new lookup[renderType][layerType](properties);
 };
 
-},{"../util/util":114,"./reference":63,"./style_declaration":66}],68:[function(require,module,exports){
+},{"../util/util":109,"./reference":58,"./style_declaration":61}],63:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -8756,7 +7713,7 @@ function premultiplyLayer(layer, type) {
     }
 }
 
-},{"../util/util":114,"./layout_properties":61,"./paint_properties":62,"./style_declaration_set":67,"./style_transition":69}],69:[function(require,module,exports){
+},{"../util/util":109,"./layout_properties":56,"./paint_properties":57,"./style_declaration_set":62,"./style_transition":64}],64:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -8831,7 +7788,7 @@ function interpZoomTransitioned(from, to, t) {
     };
 }
 
-},{"../util/interpolate":110,"../util/util":114}],70:[function(require,module,exports){
+},{"../util/interpolate":105,"../util/util":109}],65:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -8854,7 +7811,7 @@ Anchor.prototype.clone = function() {
     return new Anchor(this.x, this.y, this.angle, this.segment);
 };
 
-},{"point-geometry":141}],71:[function(require,module,exports){
+},{"point-geometry":136}],66:[function(require,module,exports){
 'use strict';
 
 module.exports = BinPack;
@@ -8940,7 +7897,7 @@ BinPack.prototype.allocate = function(width, height) {
     return { x: rect.x, y: rect.y, w: width, h: height };
 };
 
-},{}],72:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 module.exports = checkMaxAngle;
@@ -9020,7 +7977,7 @@ function checkMaxAngle(line, anchor, labelLength, windowSize, maxAngle) {
     return true;
 }
 
-},{}],73:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -9094,7 +8051,7 @@ function clipLine(lines, x1, y1, x2, y2) {
     return clippedLines;
 }
 
-},{"point-geometry":141}],74:[function(require,module,exports){
+},{"point-geometry":136}],69:[function(require,module,exports){
 'use strict';
 
 module.exports = CollisionBox;
@@ -9161,7 +8118,7 @@ function CollisionBox(anchorPoint, x1, y1, x2, y2, maxScale) {
     this[0] = this[1] = this[2] = this[3] = 0;
 }
 
-},{}],75:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 'use strict';
 
 var CollisionBox = require('./collision_box');
@@ -9280,7 +8237,7 @@ CollisionFeature.prototype._addLineCollisionBoxes = function(line, anchor, label
     return bboxes;
 };
 
-},{"./collision_box":74,"point-geometry":141}],76:[function(require,module,exports){
+},{"./collision_box":69,"point-geometry":136}],71:[function(require,module,exports){
 'use strict';
 
 var rbush = require('rbush');
@@ -9410,7 +8367,7 @@ CollisionTile.prototype.insertCollisionFeature = function(collisionFeature, minP
     }
 };
 
-},{"rbush":142}],77:[function(require,module,exports){
+},{"rbush":137}],72:[function(require,module,exports){
 'use strict';
 
 var interpolate = require('../util/interpolate');
@@ -9507,7 +8464,7 @@ function resample(line, offset, spacing, angleWindowSize, maxAngle, labelLength,
     return anchors;
 }
 
-},{"../symbol/anchor":70,"../util/interpolate":110,"./check_max_angle":72}],78:[function(require,module,exports){
+},{"../symbol/anchor":65,"../util/interpolate":105,"./check_max_angle":67}],73:[function(require,module,exports){
 'use strict';
 
 var BinPack = require('./bin_pack');
@@ -9714,7 +8671,7 @@ GlyphAtlas.prototype.updateTexture = function(gl) {
     }
 };
 
-},{"./bin_pack":71}],79:[function(require,module,exports){
+},{"./bin_pack":66}],74:[function(require,module,exports){
 'use strict';
 
 var normalizeURL = require('../util/mapbox').normalizeGlyphsURL;
@@ -9847,7 +8804,7 @@ function glyphUrl(fontstack, range, url, subdomains) {
         .replace('{range}', range);
 }
 
-},{"../util/ajax":102,"../util/glyphs":109,"../util/mapbox":111,"pbf":139}],80:[function(require,module,exports){
+},{"../util/ajax":97,"../util/glyphs":104,"../util/mapbox":106,"pbf":134}],75:[function(require,module,exports){
 'use strict';
 
 module.exports = function (features, textFeatures, geometries) {
@@ -9938,7 +8895,7 @@ module.exports = function (features, textFeatures, geometries) {
     };
 };
 
-},{}],81:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -10186,7 +9143,7 @@ function getSegmentGlyphs(glyphs, anchor, offset, line, segment, forward) {
     return placementScale;
 }
 
-},{"point-geometry":141}],82:[function(require,module,exports){
+},{"point-geometry":136}],77:[function(require,module,exports){
 'use strict';
 
 var resolveTokens = require('../util/token');
@@ -10209,7 +9166,7 @@ function resolveIcons(features, layoutProperties) {
     return icons;
 }
 
-},{"../util/token":113}],83:[function(require,module,exports){
+},{"../util/token":108}],78:[function(require,module,exports){
 'use strict';
 
 var resolveTokens = require('../util/token');
@@ -10276,7 +9233,7 @@ function sortNumbers(a, b) {
     return a - b;
 }
 
-},{"../util/token":113}],84:[function(require,module,exports){
+},{"../util/token":108}],79:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -10435,7 +9392,7 @@ function PositionedIcon(image, top, bottom, left, right) {
     this.right = right;
 }
 
-},{}],85:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 'use strict';
 
 var BinPack = require('./bin_pack');
@@ -10740,7 +9697,7 @@ function AtlasImage(rect, width, height, sdf) {
     this.sdf = sdf;
 }
 
-},{"./bin_pack":71}],86:[function(require,module,exports){
+},{"./bin_pack":66}],81:[function(require,module,exports){
 'use strict';
 
 var util = require('../util/util');
@@ -11431,7 +10388,7 @@ util.extend(Camera.prototype, /** @lends Map.prototype */{
     }
 });
 
-},{"../geo/lng_lat":28,"../geo/lng_lat_bounds":29,"../util/browser":103,"../util/interpolate":110,"../util/util":114,"point-geometry":141}],87:[function(require,module,exports){
+},{"../geo/lng_lat":23,"../geo/lng_lat_bounds":24,"../util/browser":98,"../util/interpolate":105,"../util/util":109,"point-geometry":136}],82:[function(require,module,exports){
 'use strict';
 
 var Control = require('./control');
@@ -11492,7 +10449,7 @@ Attribution.prototype = util.inherit(Control, {
     }
 });
 
-},{"../../util/dom":106,"../../util/util":114,"./control":88}],88:[function(require,module,exports){
+},{"../../util/dom":101,"../../util/util":109,"./control":83}],83:[function(require,module,exports){
 'use strict';
 
 module.exports = Control;
@@ -11543,7 +10500,7 @@ Control.prototype = {
     }
 };
 
-},{}],89:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 'use strict';
 
 var Control = require('./control');
@@ -11673,7 +10630,7 @@ Navigation.prototype = util.inherit(Control, {
     }
 });
 
-},{"../../util/dom":106,"../../util/util":114,"./control":88}],90:[function(require,module,exports){
+},{"../../util/dom":101,"../../util/util":109,"./control":83}],85:[function(require,module,exports){
 'use strict';
 
 var DOM = require('../../util/dom'),
@@ -11772,7 +10729,7 @@ BoxZoom.prototype = {
     }
 };
 
-},{"../../geo/lng_lat_bounds":29,"../../util/dom":106,"../../util/util":114}],91:[function(require,module,exports){
+},{"../../geo/lng_lat_bounds":24,"../../util/dom":101,"../../util/util":109}],86:[function(require,module,exports){
 'use strict';
 
 module.exports = DoubleClickZoom;
@@ -11796,7 +10753,7 @@ DoubleClickZoom.prototype = {
     }
 };
 
-},{}],92:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 'use strict';
 
 var DOM = require('../../util/dom'),
@@ -11913,7 +10870,7 @@ DragPan.prototype = {
     }
 };
 
-},{"../../util/dom":106,"../../util/util":114}],93:[function(require,module,exports){
+},{"../../util/dom":101,"../../util/util":109}],88:[function(require,module,exports){
 'use strict';
 
 var DOM = require('../../util/dom'),
@@ -12004,7 +10961,7 @@ DragRotate.prototype = {
     }
 };
 
-},{"../../util/dom":106,"../../util/util":114,"point-geometry":141}],94:[function(require,module,exports){
+},{"../../util/dom":101,"../../util/util":109,"point-geometry":136}],89:[function(require,module,exports){
 'use strict';
 
 module.exports = Keyboard;
@@ -12093,7 +11050,7 @@ Keyboard.prototype = {
     }
 };
 
-},{}],95:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 'use strict';
 
 var DOM = require('../../util/dom'),
@@ -12161,7 +11118,7 @@ Pinch.prototype = {
     }
 };
 
-},{"../../util/dom":106,"../../util/util":114}],96:[function(require,module,exports){
+},{"../../util/dom":101,"../../util/util":109}],91:[function(require,module,exports){
 'use strict';
 
 var DOM = require('../../util/dom'),
@@ -12277,7 +11234,7 @@ ScrollZoom.prototype = {
     }
 };
 
-},{"../../util/browser":103,"../../util/dom":106,"../../util/util":114}],97:[function(require,module,exports){
+},{"../../util/browser":98,"../../util/dom":101,"../../util/util":109}],92:[function(require,module,exports){
 'use strict';
 
 /*
@@ -12349,7 +11306,7 @@ Hash.prototype = {
     }
 };
 
-},{"../util/util":114}],98:[function(require,module,exports){
+},{"../util/util":109}],93:[function(require,module,exports){
 'use strict';
 
 var handlers = {
@@ -12535,7 +11492,7 @@ Interaction.prototype = {
     }
 };
 
-},{"../util/dom":106,"../util/util":114,"./handler/box_zoom":90,"./handler/dblclick_zoom":91,"./handler/drag_pan":92,"./handler/drag_rotate":93,"./handler/keyboard":94,"./handler/pinch":95,"./handler/scroll_zoom":96}],99:[function(require,module,exports){
+},{"../util/dom":101,"../util/util":109,"./handler/box_zoom":85,"./handler/dblclick_zoom":86,"./handler/drag_pan":87,"./handler/drag_rotate":88,"./handler/keyboard":89,"./handler/pinch":90,"./handler/scroll_zoom":91}],94:[function(require,module,exports){
 'use strict';
 
 var Canvas = require('../util/canvas');
@@ -13439,7 +12396,7 @@ util.extendAll(Map.prototype, /** @lends Map.prototype */{
     set vertices(value) { this._vertices = value; this.update(); }
 });
 
-},{"../geo/lng_lat":28,"../geo/lng_lat_bounds":29,"../geo/transform":30,"../render/painter":45,"../style/animation_loop":59,"../style/style":64,"../util/browser":103,"../util/canvas":104,"../util/dom":106,"../util/evented":108,"../util/util":114,"./camera":86,"./control/attribution":87,"./hash":97,"./interaction":98,"point-geometry":141}],100:[function(require,module,exports){
+},{"../geo/lng_lat":23,"../geo/lng_lat_bounds":24,"../geo/transform":25,"../render/painter":40,"../style/animation_loop":54,"../style/style":59,"../util/browser":98,"../util/canvas":99,"../util/dom":101,"../util/evented":103,"../util/util":109,"./camera":81,"./control/attribution":82,"./hash":92,"./interaction":93,"point-geometry":136}],95:[function(require,module,exports){
 'use strict';
 
 module.exports = Popup;
@@ -13655,7 +12612,7 @@ Popup.prototype = util.inherit(Evented, /** @lends Popup.prototype */{
     }
 });
 
-},{"../geo/lng_lat":28,"../util/dom":106,"../util/evented":108,"../util/util":114}],101:[function(require,module,exports){
+},{"../geo/lng_lat":23,"../util/dom":101,"../util/evented":103,"../util/util":109}],96:[function(require,module,exports){
 'use strict';
 
 module.exports = Actor;
@@ -13724,7 +12681,7 @@ Actor.prototype.postMessage = function(message, transferList) {
     }
 };
 
-},{}],102:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 'use strict';
 
 exports.getJSON = function(url, callback) {
@@ -13814,7 +12771,7 @@ exports.getVideo = function(urls, callback) {
     return video;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 var Canvas = require('./canvas');
@@ -13933,7 +12890,7 @@ Object.defineProperty(exports, 'devicePixelRatio', {
     get: function() { return window.devicePixelRatio; }
 });
 
-},{"./canvas":104}],104:[function(require,module,exports){
+},{"./canvas":99}],99:[function(require,module,exports){
 'use strict';
 
 var util = require('../util');
@@ -13999,7 +12956,7 @@ Canvas.prototype.getElement = function() {
     return this.canvas;
 };
 
-},{"../util":114}],105:[function(require,module,exports){
+},{"../util":109}],100:[function(require,module,exports){
 'use strict';
 
 var Actor = require('../actor');
@@ -14043,7 +13000,7 @@ Dispatcher.prototype = {
     }
 };
 
-},{"../../source/worker":57,"../actor":101,"webworkify":149}],106:[function(require,module,exports){
+},{"../../source/worker":52,"../actor":96,"webworkify":144}],101:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -14105,7 +13062,7 @@ exports.mousePos = function (el, e) {
         e.clientY - rect.top - el.clientTop);
 };
 
-},{"point-geometry":141}],107:[function(require,module,exports){
+},{"point-geometry":136}],102:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -14113,7 +13070,7 @@ module.exports = {
     REQUIRE_ACCESS_TOKEN: true
 };
 
-},{}],108:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 'use strict';
 
 var util = require('./util');
@@ -14218,7 +13175,7 @@ var Evented = {
 
 module.exports = Evented;
 
-},{"./util":114}],109:[function(require,module,exports){
+},{"./util":109}],104:[function(require,module,exports){
 'use strict';
 
 module.exports = Glyphs;
@@ -14253,7 +13210,7 @@ function readGlyph(tag, glyph, pbf) {
     else if (tag === 7) glyph.advance = pbf.readVarint();
 }
 
-},{}],110:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 'use strict';
 
 module.exports = interpolate;
@@ -14294,7 +13251,7 @@ interpolate.array = function(from, to, t) {
     });
 };
 
-},{}],111:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 'use strict';
 
 var config = require('./config');
@@ -14368,7 +13325,7 @@ module.exports.normalizeTileURL = function(url, sourceUrl) {
     return url.replace(/\.((?:png|jpg)\d*)(?=$|\?)/, browser.devicePixelRatio >= 2 ? '@2x.$1' : '.$1');
 };
 
-},{"./browser":103,"./config":107}],112:[function(require,module,exports){
+},{"./browser":98,"./config":102}],107:[function(require,module,exports){
 'use strict';
 
 /**
@@ -14466,7 +13423,7 @@ MRUCache.prototype.get = function(key) {
     return data;
 };
 
-},{}],113:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 'use strict';
 
 module.exports = resolveTokens;
@@ -14485,7 +13442,7 @@ function resolveTokens(properties, text) {
     });
 }
 
-},{}],114:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 'use strict';
 
 var UnitBezier = require('unitbezier');
@@ -14891,7 +13848,7 @@ exports.getCoordinatesCenter = function(coords) {
         .zoomTo(Math.floor(-Math.log(dMax) / Math.LN2));
 };
 
-},{"../geo/coordinate":27,"unitbezier":144}],115:[function(require,module,exports){
+},{"../geo/coordinate":22,"unitbezier":139}],110:[function(require,module,exports){
 // (c) Dean McNamee <dean@gmail.com>, 2012.
 //
 // https://github.com/deanm/css-color-parser-js
@@ -15093,7 +14050,7 @@ function parseCSSColor(css_str) {
 
 try { exports.parseCSSColor = parseCSSColor } catch(e) { }
 
-},{}],116:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 'use strict';
 
 var VectorTileFeatureTypes = ['Unknown', 'Point', 'LineString', 'Polygon'];
@@ -15173,7 +14130,7 @@ module.exports = function (filter) {
     return new Function('f', filterStr);
 };
 
-},{}],117:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 'use strict';
 
 module.exports = clip;
@@ -15326,7 +14283,7 @@ function newSlice(slices, slice, area, dist) {
     return [];
 }
 
-},{}],118:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 module.exports = convert;
@@ -15472,7 +14429,7 @@ function calcRingBBox(min, max, points) {
     }
 }
 
-},{"./simplify":120}],119:[function(require,module,exports){
+},{"./simplify":115}],114:[function(require,module,exports){
 'use strict';
 
 module.exports = geojsonvt;
@@ -15739,7 +14696,7 @@ function isClippedSquare(tile, extent, buffer) {
     return true;
 }
 
-},{"./clip":117,"./convert":118,"./tile":121,"./wrap":122}],120:[function(require,module,exports){
+},{"./clip":112,"./convert":113,"./tile":116,"./wrap":117}],115:[function(require,module,exports){
 'use strict';
 
 module.exports = simplify;
@@ -15815,7 +14772,7 @@ function getSqSegDist(p, a, b) {
     return dx * dx + dy * dy;
 }
 
-},{}],121:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 'use strict';
 
 module.exports = createTile;
@@ -15902,7 +14859,7 @@ function addFeature(tile, feature, tolerance, noSimplify) {
     }
 }
 
-},{}],122:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var clip = require('./clip');
@@ -15965,7 +14922,7 @@ function shiftCoords(points, offset) {
     return newPoints;
 }
 
-},{"./clip":117}],123:[function(require,module,exports){
+},{"./clip":112}],118:[function(require,module,exports){
 /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
  * @author Brandon Jones
@@ -16003,7 +14960,7 @@ exports.quat = require("./gl-matrix/quat.js");
 exports.vec2 = require("./gl-matrix/vec2.js");
 exports.vec3 = require("./gl-matrix/vec3.js");
 exports.vec4 = require("./gl-matrix/vec4.js");
-},{"./gl-matrix/common.js":124,"./gl-matrix/mat2.js":125,"./gl-matrix/mat2d.js":126,"./gl-matrix/mat3.js":127,"./gl-matrix/mat4.js":128,"./gl-matrix/quat.js":129,"./gl-matrix/vec2.js":130,"./gl-matrix/vec3.js":131,"./gl-matrix/vec4.js":132}],124:[function(require,module,exports){
+},{"./gl-matrix/common.js":119,"./gl-matrix/mat2.js":120,"./gl-matrix/mat2d.js":121,"./gl-matrix/mat3.js":122,"./gl-matrix/mat4.js":123,"./gl-matrix/quat.js":124,"./gl-matrix/vec2.js":125,"./gl-matrix/vec3.js":126,"./gl-matrix/vec4.js":127}],119:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -16057,7 +15014,7 @@ glMatrix.toRadian = function(a){
 
 module.exports = glMatrix;
 
-},{}],125:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -16361,7 +15318,7 @@ mat2.LDU = function (L, D, U, a) {
 
 module.exports = mat2;
 
-},{"./common.js":124}],126:[function(require,module,exports){
+},{"./common.js":119}],121:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -16680,7 +15637,7 @@ mat2d.frob = function (a) {
 
 module.exports = mat2d;
 
-},{"./common.js":124}],127:[function(require,module,exports){
+},{"./common.js":119}],122:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17247,7 +16204,7 @@ mat3.frob = function (a) {
 
 module.exports = mat3;
 
-},{"./common.js":124}],128:[function(require,module,exports){
+},{"./common.js":119}],123:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18532,7 +17489,7 @@ mat4.frob = function (a) {
 
 module.exports = mat4;
 
-},{"./common.js":124}],129:[function(require,module,exports){
+},{"./common.js":119}],124:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19087,7 +18044,7 @@ quat.str = function (a) {
 
 module.exports = quat;
 
-},{"./common.js":124,"./mat3.js":127,"./vec3.js":131,"./vec4.js":132}],130:[function(require,module,exports){
+},{"./common.js":119,"./mat3.js":122,"./vec3.js":126,"./vec4.js":127}],125:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19612,7 +18569,7 @@ vec2.str = function (a) {
 
 module.exports = vec2;
 
-},{"./common.js":124}],131:[function(require,module,exports){
+},{"./common.js":119}],126:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20323,7 +19280,7 @@ vec3.str = function (a) {
 
 module.exports = vec3;
 
-},{"./common.js":124}],132:[function(require,module,exports){
+},{"./common.js":119}],127:[function(require,module,exports){
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20862,7 +19819,7 @@ vec4.str = function (a) {
 
 module.exports = vec4;
 
-},{"./common.js":124}],133:[function(require,module,exports){
+},{"./common.js":119}],128:[function(require,module,exports){
 'use strict';
 
 function constant(value) {
@@ -20946,7 +19903,7 @@ exports['piecewise-constant'] = function(f) {
     }
 };
 
-},{}],134:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 'use strict';
 
 var reference = require('../../reference/latest.js');
@@ -20956,7 +19913,7 @@ module.exports = function(style) {
     return validate(style, reference);
 };
 
-},{"../../reference/latest.js":136,"./parsed":135}],135:[function(require,module,exports){
+},{"../../reference/latest.js":131,"./parsed":130}],130:[function(require,module,exports){
 'use strict';
 
 var parseCSSColor = require('csscolorparser').parseCSSColor;
@@ -21377,10 +20334,10 @@ function unbundle(_) {
     }
 }
 
-},{"csscolorparser":115,"util":7}],136:[function(require,module,exports){
+},{"csscolorparser":110,"util":169}],131:[function(require,module,exports){
 module.exports = require('./v8.json');
 
-},{"./v8.json":137}],137:[function(require,module,exports){
+},{"./v8.json":132}],132:[function(require,module,exports){
 module.exports={
   "$version": 8,
   "$root": {
@@ -22702,7 +21659,7 @@ module.exports={
   }
 }
 
-},{}],138:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 'use strict';
 
 // lightweight Buffer shim for pbf browser build
@@ -22863,7 +21820,7 @@ function encodeString(str) {
     return bytes;
 }
 
-},{"ieee754":140}],139:[function(require,module,exports){
+},{"ieee754":135}],134:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -23293,7 +22250,7 @@ function writePackedFixed64(arr, pbf)  { for (var i = 0; i < arr.length; i++) pb
 function writePackedSFixed64(arr, pbf) { for (var i = 0; i < arr.length; i++) pbf.writeSFixed64(arr[i]); }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./buffer":138}],140:[function(require,module,exports){
+},{"./buffer":133}],135:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -23379,7 +22336,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],141:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 'use strict';
 
 module.exports = Point;
@@ -23512,7 +22469,7 @@ Point.convert = function (a) {
     return a;
 };
 
-},{}],142:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 /*
  (c) 2015, Vladimir Agafonkin
  RBush, a JavaScript library for high-performance 2D spatial indexing of points and rectangles.
@@ -24131,7 +23088,7 @@ else window.rbush = rbush;
 
 })();
 
-},{}],143:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 // Copyright 2014 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
@@ -24180,7 +23137,7 @@ void (function(root, factory) {
 
 }));
 
-},{}],144:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 /*
  * Copyright (C) 2008 Apple Inc. All Rights Reserved.
  *
@@ -24287,12 +23244,12 @@ UnitBezier.prototype.solve = function(x, epsilon) {
     return this.sampleCurveY(this.solveCurveX(x, epsilon));
 };
 
-},{}],145:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 module.exports.VectorTile = require('./lib/vectortile.js');
 module.exports.VectorTileFeature = require('./lib/vectortilefeature.js');
 module.exports.VectorTileLayer = require('./lib/vectortilelayer.js');
 
-},{"./lib/vectortile.js":146,"./lib/vectortilefeature.js":147,"./lib/vectortilelayer.js":148}],146:[function(require,module,exports){
+},{"./lib/vectortile.js":141,"./lib/vectortilefeature.js":142,"./lib/vectortilelayer.js":143}],141:[function(require,module,exports){
 'use strict';
 
 var VectorTileLayer = require('./vectortilelayer');
@@ -24311,7 +23268,7 @@ function readTile(tag, layers, pbf) {
 }
 
 
-},{"./vectortilelayer":148}],147:[function(require,module,exports){
+},{"./vectortilelayer":143}],142:[function(require,module,exports){
 'use strict';
 
 var Point = require('point-geometry');
@@ -24479,7 +23436,7 @@ VectorTileFeature.prototype.toGeoJSON = function(x, y, z) {
     };
 };
 
-},{"point-geometry":141}],148:[function(require,module,exports){
+},{"point-geometry":136}],143:[function(require,module,exports){
 'use strict';
 
 var VectorTileFeature = require('./vectortilefeature.js');
@@ -24542,7 +23499,7 @@ VectorTileLayer.prototype.feature = function(i) {
     return new VectorTileFeature(this._pbf, end, this.extent, this._keys, this._values);
 };
 
-},{"./vectortilefeature.js":147}],149:[function(require,module,exports){
+},{"./vectortilefeature.js":142}],144:[function(require,module,exports){
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -24599,7 +23556,7 @@ module.exports = function (fn) {
     ));
 };
 
-},{}],150:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 //  Ramda v0.17.1
 //  https://github.com/ramda/ramda
 //  (c) 2013-2015 Scott Sauyet, Michael Hurley, and David Chambers
@@ -32081,7 +31038,7 @@ module.exports = function (fn) {
 
 }.call(this));
 
-},{}],151:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 var polygon = require('turf-polygon');
 
 /**
@@ -32115,7 +31072,7 @@ module.exports = function(bbox){
   return poly;
 }
 
-},{"turf-polygon":152}],152:[function(require,module,exports){
+},{"turf-polygon":147}],147:[function(require,module,exports){
 /**
  * Takes an array of LinearRings and optionally an {@link Object} with properties and returns a GeoJSON {@link Polygon} feature.
  *
@@ -32170,7 +31127,7 @@ module.exports = function(coordinates, properties){
   return polygon;
 };
 
-},{}],153:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 // depend on jsts for now https://github.com/bjornharrtell/jsts/blob/master/examples/overlay.html
 var jsts = require('jsts');
 
@@ -32254,12 +31211,12 @@ module.exports = function(poly1, poly2){
   }
 };
 
-},{"jsts":154}],154:[function(require,module,exports){
+},{"jsts":149}],149:[function(require,module,exports){
 require('javascript.util');
 var jsts = require('./lib/jsts');
 module.exports = jsts
 
-},{"./lib/jsts":155,"javascript.util":157}],155:[function(require,module,exports){
+},{"./lib/jsts":150,"javascript.util":152}],150:[function(require,module,exports){
 /* The JSTS Topology Suite is a collection of JavaScript classes that
 implement the fundamental operations required to validate a given
 geo-spatial data set to a known topological specification.
@@ -33969,7 +32926,7 @@ return true;if(this.isBoundaryPoint(li,bdyNodes[1]))
 return true;return false;}else{for(var i=bdyNodes.iterator();i.hasNext();){var node=i.next();var pt=node.getCoordinate();if(li.isIntersection(pt))
 return true;}
 return false;}};})();
-},{}],156:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 (function (global){
 /*
   javascript.util is a port of selected parts of java.util to JavaScript which
@@ -34015,10 +32972,10 @@ L.prototype.iterator=L.prototype.f;function N(a){this.l=a}f("$jscomp.scope.Itera
 r,global.javascript.util.Set=x,global.javascript.util.SortedMap=A,global.javascript.util.SortedSet=B,global.javascript.util.Stack=C,global.javascript.util.TreeMap=H,global.javascript.util.TreeSet=L);}).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],157:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 require('./dist/javascript.util-node.min.js');
 
-},{"./dist/javascript.util-node.min.js":156}],158:[function(require,module,exports){
+},{"./dist/javascript.util-node.min.js":151}],153:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34277,7 +33234,7 @@ var Draw = (function (_mapboxgl$Control) {
       this._map.featuresAt(e.point, {
         radius: 10,
         includeGeometry: true,
-        layer: 'gl-draw-polygons'
+        layer: ['gl-draw-polygon', 'gl-draw-line', 'gl-draw-point']
       }, function (err, features) {
         if (err) throw err;
         if (features.length) {
@@ -34495,7 +33452,7 @@ var Draw = (function (_mapboxgl$Control) {
         _this3._map.on('mousemove', function (e) {
           _this3._map.featuresAt(e.point, {
             radius: 7,
-            layer: ['gl-edit-points', 'gl-edit-points-mid']
+            layer: ['gl-edit-point', 'gl-edit-point-mid']
           }, function (err, features) {
             if (err) throw err;
             if (!features.length) return _this3._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
@@ -34648,7 +33605,7 @@ var Draw = (function (_mapboxgl$Control) {
 exports['default'] = Draw;
 module.exports = exports['default'];
 
-},{"./edit_store":159,"./geometries/line":161,"./geometries/point":162,"./geometries/polygon":163,"./geometries/square":164,"./store":165,"./theme/drawing":166,"./theme/edit":167,"./theme/style":168,"./util":169,"mapbox-gl":32,"ramda":150}],159:[function(require,module,exports){
+},{"./edit_store":154,"./geometries/line":156,"./geometries/point":157,"./geometries/polygon":158,"./geometries/square":159,"./store":160,"./theme/drawing":161,"./theme/edit":162,"./theme/style":163,"./util":164,"mapbox-gl":27,"ramda":145}],154:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34833,7 +33790,7 @@ var EditStore = (function () {
 exports['default'] = EditStore;
 module.exports = exports['default'];
 
-},{}],160:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -34990,7 +33947,7 @@ var Geometry = (function () {
 exports['default'] = Geometry;
 module.exports = exports['default'];
 
-},{"../util":169,"hat":8}],161:[function(require,module,exports){
+},{"../util":164,"hat":3}],156:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35132,7 +34089,7 @@ var Line = (function (_Geometry) {
 exports['default'] = Line;
 module.exports = exports['default'];
 
-},{"../util":169,"./geometry":160}],162:[function(require,module,exports){
+},{"../util":164,"./geometry":155}],157:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35198,7 +34155,7 @@ var Point = (function (_Geometry) {
 exports['default'] = Point;
 module.exports = exports['default'];
 
-},{"./geometry":160}],163:[function(require,module,exports){
+},{"./geometry":155}],158:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35351,7 +34308,7 @@ var Polygon = (function (_Geometry) {
 exports['default'] = Polygon;
 module.exports = exports['default'];
 
-},{"../util":169,"./geometry":160}],164:[function(require,module,exports){
+},{"../util":164,"./geometry":155}],159:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35539,7 +34496,7 @@ var Square = (function (_Geometry) {
 exports['default'] = Square;
 module.exports = exports['default'];
 
-},{"../util":169,"./geometry":160}],165:[function(require,module,exports){
+},{"../util":164,"./geometry":155}],160:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35687,7 +34644,7 @@ var Store = (function () {
 exports['default'] = Store;
 module.exports = exports['default'];
 
-},{"turf-bbox-polygon":151,"turf-intersect":153}],166:[function(require,module,exports){
+},{"turf-bbox-polygon":146,"turf-intersect":148}],161:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35752,7 +34709,7 @@ exports['default'] = [{
 }];
 module.exports = exports['default'];
 
-},{}],167:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -35799,7 +34756,7 @@ exports['default'] = [{
   },
   'interactive': true
 }, {
-  'id': 'gl-edit-points',
+  'id': 'gl-edit-point',
   'type': 'circle',
   'source': 'edit',
   'filter': ['all', ['==', '$type', 'Point'], ['!=', 'meta', 'midpoint']],
@@ -35815,7 +34772,7 @@ exports['default'] = [{
   },
   'interactive': true
 }, {
-  'id': 'gl-edit-points-mid',
+  'id': 'gl-edit-point-mid',
   'type': 'circle',
   'source': 'edit',
   'filter': ['all', ['==', '$type', 'Point'], ['==', 'meta', 'midpoint']],
@@ -35831,14 +34788,14 @@ exports['default'] = [{
 }];
 module.exports = exports['default'];
 
-},{}],168:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
 exports['default'] = [{
-  'id': 'gl-draw-polygons',
+  'id': 'gl-draw-polygon',
   'type': 'fill',
   'source': 'draw',
   'filter': ['all', ['==', '$type', 'Polygon']],
@@ -35877,7 +34834,7 @@ exports['default'] = [{
   },
   'interactive': true
 }, {
-  'id': 'gl-draw-points',
+  'id': 'gl-draw-point',
   'type': 'circle',
   'source': 'draw',
   'filter': ['all', ['==', '$type', 'Point']],
@@ -35893,7 +34850,7 @@ exports['default'] = [{
 }];
 module.exports = exports['default'];
 
-},{}],169:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 'use strict';
 
 var mapboxgl = require('mapbox-gl');
@@ -36063,4 +35020,1079 @@ var translatePoint = function translatePoint(point, dx, dy, map) {
 module.exports.DOM = DOM;
 module.exports.translatePoint = translatePoint;
 
-},{"mapbox-gl":32}]},{},[1]);
+},{"mapbox-gl":27}],165:[function(require,module,exports){
+// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
+//
+// THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
+//
+// Originally from narwhal.js (http://narwhaljs.org)
+// Copyright (c) 2009 Thomas Robinson <280north.com>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the 'Software'), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// when used in node, this will actually load the util module we depend on
+// versus loading the builtin util module as happens otherwise
+// this is a bug in node module loading as far as I am concerned
+var util = require('util/');
+
+var pSlice = Array.prototype.slice;
+var hasOwn = Object.prototype.hasOwnProperty;
+
+// 1. The assert module provides functions that throw
+// AssertionError's when particular conditions are not met. The
+// assert module must conform to the following interface.
+
+var assert = module.exports = ok;
+
+// 2. The AssertionError is defined in assert.
+// new assert.AssertionError({ message: message,
+//                             actual: actual,
+//                             expected: expected })
+
+assert.AssertionError = function AssertionError(options) {
+  this.name = 'AssertionError';
+  this.actual = options.actual;
+  this.expected = options.expected;
+  this.operator = options.operator;
+  if (options.message) {
+    this.message = options.message;
+    this.generatedMessage = false;
+  } else {
+    this.message = getMessage(this);
+    this.generatedMessage = true;
+  }
+  var stackStartFunction = options.stackStartFunction || fail;
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, stackStartFunction);
+  }
+  else {
+    // non v8 browsers so we can have a stacktrace
+    var err = new Error();
+    if (err.stack) {
+      var out = err.stack;
+
+      // try to strip useless frames
+      var fn_name = stackStartFunction.name;
+      var idx = out.indexOf('\n' + fn_name);
+      if (idx >= 0) {
+        // once we have located the function frame
+        // we need to strip out everything before it (and its line)
+        var next_line = out.indexOf('\n', idx + 1);
+        out = out.substring(next_line + 1);
+      }
+
+      this.stack = out;
+    }
+  }
+};
+
+// assert.AssertionError instanceof Error
+util.inherits(assert.AssertionError, Error);
+
+function replacer(key, value) {
+  if (util.isUndefined(value)) {
+    return '' + value;
+  }
+  if (util.isNumber(value) && !isFinite(value)) {
+    return value.toString();
+  }
+  if (util.isFunction(value) || util.isRegExp(value)) {
+    return value.toString();
+  }
+  return value;
+}
+
+function truncate(s, n) {
+  if (util.isString(s)) {
+    return s.length < n ? s : s.slice(0, n);
+  } else {
+    return s;
+  }
+}
+
+function getMessage(self) {
+  return truncate(JSON.stringify(self.actual, replacer), 128) + ' ' +
+         self.operator + ' ' +
+         truncate(JSON.stringify(self.expected, replacer), 128);
+}
+
+// At present only the three keys mentioned above are used and
+// understood by the spec. Implementations or sub modules can pass
+// other keys to the AssertionError's constructor - they will be
+// ignored.
+
+// 3. All of the following functions must throw an AssertionError
+// when a corresponding condition is not met, with a message that
+// may be undefined if not provided.  All assertion methods provide
+// both the actual and expected values to the assertion error for
+// display purposes.
+
+function fail(actual, expected, message, operator, stackStartFunction) {
+  throw new assert.AssertionError({
+    message: message,
+    actual: actual,
+    expected: expected,
+    operator: operator,
+    stackStartFunction: stackStartFunction
+  });
+}
+
+// EXTENSION! allows for well behaved errors defined elsewhere.
+assert.fail = fail;
+
+// 4. Pure assertion tests whether a value is truthy, as determined
+// by !!guard.
+// assert.ok(guard, message_opt);
+// This statement is equivalent to assert.equal(true, !!guard,
+// message_opt);. To test strictly for the value true, use
+// assert.strictEqual(true, guard, message_opt);.
+
+function ok(value, message) {
+  if (!value) fail(value, true, message, '==', assert.ok);
+}
+assert.ok = ok;
+
+// 5. The equality assertion tests shallow, coercive equality with
+// ==.
+// assert.equal(actual, expected, message_opt);
+
+assert.equal = function equal(actual, expected, message) {
+  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
+};
+
+// 6. The non-equality assertion tests for whether two objects are not equal
+// with != assert.notEqual(actual, expected, message_opt);
+
+assert.notEqual = function notEqual(actual, expected, message) {
+  if (actual == expected) {
+    fail(actual, expected, message, '!=', assert.notEqual);
+  }
+};
+
+// 7. The equivalence assertion tests a deep equality relation.
+// assert.deepEqual(actual, expected, message_opt);
+
+assert.deepEqual = function deepEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
+  }
+};
+
+function _deepEqual(actual, expected) {
+  // 7.1. All identical values are equivalent, as determined by ===.
+  if (actual === expected) {
+    return true;
+
+  } else if (util.isBuffer(actual) && util.isBuffer(expected)) {
+    if (actual.length != expected.length) return false;
+
+    for (var i = 0; i < actual.length; i++) {
+      if (actual[i] !== expected[i]) return false;
+    }
+
+    return true;
+
+  // 7.2. If the expected value is a Date object, the actual value is
+  // equivalent if it is also a Date object that refers to the same time.
+  } else if (util.isDate(actual) && util.isDate(expected)) {
+    return actual.getTime() === expected.getTime();
+
+  // 7.3 If the expected value is a RegExp object, the actual value is
+  // equivalent if it is also a RegExp object with the same source and
+  // properties (`global`, `multiline`, `lastIndex`, `ignoreCase`).
+  } else if (util.isRegExp(actual) && util.isRegExp(expected)) {
+    return actual.source === expected.source &&
+           actual.global === expected.global &&
+           actual.multiline === expected.multiline &&
+           actual.lastIndex === expected.lastIndex &&
+           actual.ignoreCase === expected.ignoreCase;
+
+  // 7.4. Other pairs that do not both pass typeof value == 'object',
+  // equivalence is determined by ==.
+  } else if (!util.isObject(actual) && !util.isObject(expected)) {
+    return actual == expected;
+
+  // 7.5 For all other Object pairs, including Array objects, equivalence is
+  // determined by having the same number of owned properties (as verified
+  // with Object.prototype.hasOwnProperty.call), the same set of keys
+  // (although not necessarily the same order), equivalent values for every
+  // corresponding key, and an identical 'prototype' property. Note: this
+  // accounts for both named and indexed properties on Arrays.
+  } else {
+    return objEquiv(actual, expected);
+  }
+}
+
+function isArguments(object) {
+  return Object.prototype.toString.call(object) == '[object Arguments]';
+}
+
+function objEquiv(a, b) {
+  if (util.isNullOrUndefined(a) || util.isNullOrUndefined(b))
+    return false;
+  // an identical 'prototype' property.
+  if (a.prototype !== b.prototype) return false;
+  // if one is a primitive, the other must be same
+  if (util.isPrimitive(a) || util.isPrimitive(b)) {
+    return a === b;
+  }
+  var aIsArgs = isArguments(a),
+      bIsArgs = isArguments(b);
+  if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
+    return false;
+  if (aIsArgs) {
+    a = pSlice.call(a);
+    b = pSlice.call(b);
+    return _deepEqual(a, b);
+  }
+  var ka = objectKeys(a),
+      kb = objectKeys(b),
+      key, i;
+  // having the same number of owned properties (keys incorporates
+  // hasOwnProperty)
+  if (ka.length != kb.length)
+    return false;
+  //the same set of keys (although not necessarily the same order),
+  ka.sort();
+  kb.sort();
+  //~~~cheap key test
+  for (i = ka.length - 1; i >= 0; i--) {
+    if (ka[i] != kb[i])
+      return false;
+  }
+  //equivalent values for every corresponding key, and
+  //~~~possibly expensive deep test
+  for (i = ka.length - 1; i >= 0; i--) {
+    key = ka[i];
+    if (!_deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
+
+// 8. The non-equivalence assertion tests for any deep inequality.
+// assert.notDeepEqual(actual, expected, message_opt);
+
+assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
+  }
+};
+
+// 9. The strict equality assertion tests strict equality, as determined by ===.
+// assert.strictEqual(actual, expected, message_opt);
+
+assert.strictEqual = function strictEqual(actual, expected, message) {
+  if (actual !== expected) {
+    fail(actual, expected, message, '===', assert.strictEqual);
+  }
+};
+
+// 10. The strict non-equality assertion tests for strict inequality, as
+// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
+
+assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
+  if (actual === expected) {
+    fail(actual, expected, message, '!==', assert.notStrictEqual);
+  }
+};
+
+function expectedException(actual, expected) {
+  if (!actual || !expected) {
+    return false;
+  }
+
+  if (Object.prototype.toString.call(expected) == '[object RegExp]') {
+    return expected.test(actual);
+  } else if (actual instanceof expected) {
+    return true;
+  } else if (expected.call({}, actual) === true) {
+    return true;
+  }
+
+  return false;
+}
+
+function _throws(shouldThrow, block, expected, message) {
+  var actual;
+
+  if (util.isString(expected)) {
+    message = expected;
+    expected = null;
+  }
+
+  try {
+    block();
+  } catch (e) {
+    actual = e;
+  }
+
+  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+            (message ? ' ' + message : '.');
+
+  if (shouldThrow && !actual) {
+    fail(actual, expected, 'Missing expected exception' + message);
+  }
+
+  if (!shouldThrow && expectedException(actual, expected)) {
+    fail(actual, expected, 'Got unwanted exception' + message);
+  }
+
+  if ((shouldThrow && actual && expected &&
+      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+    throw actual;
+  }
+}
+
+// 11. Expected to throw an error:
+// assert.throws(block, Error_opt, message_opt);
+
+assert.throws = function(block, /*optional*/error, /*optional*/message) {
+  _throws.apply(this, [true].concat(pSlice.call(arguments)));
+};
+
+// EXTENSION! This is annoying to write outside this module.
+assert.doesNotThrow = function(block, /*optional*/message) {
+  _throws.apply(this, [false].concat(pSlice.call(arguments)));
+};
+
+assert.ifError = function(err) { if (err) {throw err;}};
+
+var objectKeys = Object.keys || function (obj) {
+  var keys = [];
+  for (var key in obj) {
+    if (hasOwn.call(obj, key)) keys.push(key);
+  }
+  return keys;
+};
+
+},{"util/":169}],166:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],167:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],168:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+},{}],169:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
+        }
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
+};
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  if (process.noDeprecation === true) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
+      }
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
+        } else {
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
+        }
+      }
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
+    }
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
+  }
+
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
+  }
+
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
+
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = require('./support/isBuffer');
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = require('inherits');
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":168,"_process":167,"inherits":166}]},{},[1]);

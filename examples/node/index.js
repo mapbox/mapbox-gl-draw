@@ -9,7 +9,7 @@ document.body.appendChild(div);
 
 var map = new mapboxgl.Map({
   container: 'map',
-  style: 'https://www.mapbox.com/mapbox-gl-styles/styles/mapbox-streets-v7.json'
+  style: 'mapbox://styles/mapbox/streets-v8'
 });
 
 map.addControl(new mapboxgl.Navigation({
