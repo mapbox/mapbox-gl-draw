@@ -4,7 +4,7 @@ import hat from 'hat';
 import { translate } from '../util';
 
 /**
- * Base Geometry class from which other geometries inherit
+ * Base Geometry class which other geometries extend
  *
  * @param {Object} map - Instance of MapboxGL Map
  * @param {String} type - Type of GeoJSON geometry
