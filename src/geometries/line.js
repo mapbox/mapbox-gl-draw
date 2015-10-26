@@ -53,7 +53,7 @@ export default class Line extends Geometry {
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates[this.vertexIdx] = [ coords.lng, coords.lat ];
 
-    this._map.fire('edit.new');
+    this._renderDrawProgress();
   }
 
   _completeDraw() {
