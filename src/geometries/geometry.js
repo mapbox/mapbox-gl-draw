@@ -4,7 +4,7 @@ import hat from 'hat';
 import { translate } from '../util';
 
 /**
- * Base Geometry class from which other geometries inherit
+ * Base Geometry class which other geometries extend
  *
  * @param {Object} map - Instance of MapboxGL Map
  * @param {String} type - Type of GeoJSON geometry
@@ -83,9 +83,14 @@ export default class Geometry {
   }
 
   _onKeyUp(e) {
+    const ENTER = 13;
     const ESCAPE = 27;
+    if (e.keyCode === ENTER) {
+      this._completeDraw();
+    }
     if (e.keyCode === ESCAPE) {
       this._completeDraw();
+      this._map.fire('drawing.cancel', { drawId: this.drawId });
     }
   }
 

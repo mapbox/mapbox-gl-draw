@@ -34,6 +34,7 @@ export default class Square extends Geometry {
 
   _onMouseDown(e) {
     this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
+    this._map.getContainer().addEventListener('mouseup', this.completeDraw, true);
     this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
 
     var pos = DOM.mousePos(e, this._map.getContainer());
@@ -51,7 +52,6 @@ export default class Square extends Geometry {
 
     if (!this.started) {
       this.started = true;
-      this._map.getContainer().addEventListener('mouseup', this.completeDraw, true);
     }
 
     var pos = DOM.mousePos(e, this._map._container);
@@ -69,6 +69,10 @@ export default class Square extends Geometry {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
     this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
     this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
+    if (!this.started) { // simply clicked, didn't draw
+      return;
+    }
+    this.started = false;
 
     this._finishDrawing('square');
   }

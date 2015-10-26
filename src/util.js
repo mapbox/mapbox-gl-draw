@@ -143,15 +143,16 @@ module.exports.translate = function(feature, init, curr, map) {
   var geom = feature.geometry;
 
   // iterate differently due to GeoJSON nesting
+  var l, i;
   if (geom.type === 'Polygon') {
-    var l = geom.coordinates[0].length;
-    for (var i = 0; i < l; i++) {
+    l = geom.coordinates[0].length;
+    for (i = 0; i < l; i++) {
       geom.coordinates[0][i] = translatePoint(geom.coordinates[0][i], dx, dy, map);
     }
   } else if (geom.type === 'LineString') {
-    var l = geom.coordinates.length;
-    for (var i = 0; i < l; i++) {
-      geom.coordinates[i] = translatePoint(geom.coordinates[0][i], dx, dy, map);
+    l = geom.coordinates.length;
+    for (i = 0; i < l; i++) {
+      geom.coordinates[i] = translatePoint(geom.coordinates[i], dx, dy, map);
     }
   } else {
     geom.coordinates = translatePoint(geom.coordinates, dx, dy, map);
