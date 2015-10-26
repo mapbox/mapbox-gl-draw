@@ -83,9 +83,14 @@ export default class Geometry {
   }
 
   _onKeyUp(e) {
+    const ENTER = 13;
     const ESCAPE = 27;
+    if (e.keyCode === ENTER) {
+      this._completeDraw();
+    }
     if (e.keyCode === ESCAPE) {
       this._completeDraw();
+      this._map.fire('drawing.cancel', { drawId: this.drawId });
     }
   }
 

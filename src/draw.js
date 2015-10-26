@@ -176,7 +176,8 @@ export default class Draw extends mapboxgl.Control {
         }
         break;
       case EXIT_EDIT_KEY:
-        this._finishEdit();
+        if (!this._drawing)
+          this._finishEdit();
         break;
       case DELETE_KEY:
         if (this._editStore.inProgress()) {
@@ -405,6 +406,10 @@ export default class Draw extends mapboxgl.Control {
             this.hoveringOnVertex = true;
           }
         });
+      });
+
+      this._map.on('drawing.cancel', e => {
+        this._store.unset(e.drawId);
       });
 
       this._map.getContainer().addEventListener('mousedown', this.onMouseDown);
