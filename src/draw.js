@@ -145,7 +145,7 @@ export default class Draw extends mapboxgl.Control {
     // draw shortcuts
     const LINESTRING_KEY = 76; // (l)
     const MARKER_KEY = 77;     // (m)
-    const POLYGON_KEY = 88;    // (p)
+    const POLYGON_KEY = 80;    // (p)
     const SQUARE_KEY = 83;     // (s)
     const EXIT_EDIT_KEY = 27;  // (esc)
     const DELETE_KEY = 68;     // (d)
@@ -155,37 +155,30 @@ export default class Draw extends mapboxgl.Control {
     var event = document.createEvent('HTMLEvents');
     event.initEvent('click', true, false);
 
-    switch (e.keyCode) {
-      case LINESTRING_KEY:
-        if (!this.lineStringCtrl.classList.contains('active')) {
+    if (!this._drawing) {
+      switch (e.keyCode) {
+        case LINESTRING_KEY:
           this.lineStringCtrl.dispatchEvent(event);
-        }
-        break;
-      case MARKER_KEY:
-        if (!this.markerCtrl.classList.contains('active')) {
+          break;
+        case MARKER_KEY:
           this.markerCtrl.dispatchEvent(event);
-        }
-        break;
-      case POLYGON_KEY:
-        if (!this.polygonCtrl.classList.contains('active')) {
+          break;
+        case POLYGON_KEY:
           this.polygonCtrl.dispatchEvent(event);
-        }
-        break;
-      case SQUARE_KEY:
-        if (!this.squareCtrl.classList.contains('active')) {
+          break;
+        case SQUARE_KEY:
           this.squareCtrl.dispatchEvent(event);
-        }
-        break;
-      case EXIT_EDIT_KEY:
-      case ENTER:
-        if (!this._drawing)
+          break;
+        case EXIT_EDIT_KEY:
+        case ENTER:
           this._finishEdit();
-        break;
-      case DELETE_KEY:
-        if (this._editStore.inProgress()) {
-          this._destroy();
-        }
-        break;
+          break;
+      }
+    }
+    if (e.keyCode === DELETE_KEY) {
+      if (this._editStore.inProgress()) {
+        this._destroy();
+      }
     }
     if (e.keyCode === SHIFT_KEY) {
       this.shiftDown = false;
@@ -379,6 +372,10 @@ export default class Draw extends mapboxgl.Control {
           features: []
         });
         this._drawing = false;
+        [ this.lineStringCtrl,
+          this.polygonCtrl,
+          this.squareCtrl,
+          this.markerCtrl ].forEach(ctrl => { ctrl.classList.remove('active'); });
       });
 
       this._map.on('edit.feature.update', e => {
