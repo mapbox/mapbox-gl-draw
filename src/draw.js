@@ -150,6 +150,7 @@ export default class Draw extends mapboxgl.Control {
     const EXIT_EDIT_KEY = 27;  // (esc)
     const DELETE_KEY = 68;     // (d)
     const SHIFT_KEY = 16;      // (shift)
+    const ENTER = 13;          // (enter)
 
     var event = document.createEvent('HTMLEvents');
     event.initEvent('click', true, false);
@@ -176,6 +177,7 @@ export default class Draw extends mapboxgl.Control {
         }
         break;
       case EXIT_EDIT_KEY:
+      case ENTER:
         if (!this._drawing)
           this._finishEdit();
         break;
