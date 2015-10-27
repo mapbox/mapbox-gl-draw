@@ -187,19 +187,14 @@ var App = (function (_React$Component) {
           this.state.mode === NORM && React.createElement(
             'div',
             null,
-            !this.state.validURL && React.createElement(
-              'div',
-              { className: 'red' },
-              'Invalid URL'
-            ),
             React.createElement(
               'fieldset',
-              { className: 'with-icon dark' },
+              { className: 'with-icon dark ' + (!this.state.validURL && 'fill-red') },
               React.createElement('span', { className: 'icon search' }),
               React.createElement('input', {
                 placeholder: 'Fetch data from URL',
                 type: 'text',
-                className: 'url-input stretch',
+                className: 'url-input stretch ' + (!this.state.validURL && 'fill-red'),
                 onChange: this.fetchURL
               })
             )

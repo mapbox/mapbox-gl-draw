@@ -141,13 +141,12 @@ class App extends React.Component { // eslint-disable-line
           </fieldset>}
 
           {this.state.mode === NORM && <div>
-            {!this.state.validURL && <div className='red'>Invalid URL</div>}
-            <fieldset className='with-icon dark'>
+            <fieldset className={`with-icon dark ${!this.state.validURL && 'fill-red'}`}>
               <span className='icon search'></span>
               <input
                 placeholder='Fetch data from URL'
                 type='text'
-                className='url-input stretch'
+                className={`url-input stretch ${!this.state.validURL && 'fill-red'}`}
                 onChange={this.fetchURL}
               />
             </fieldset>
