@@ -37,6 +37,7 @@ var App = (function (_React$Component) {
       },
       mode: MAPBOX,
       settings: true,
+      validURL: true,
       view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -88,17 +89,23 @@ var App = (function (_React$Component) {
     value: function fetchURL(e) {
       var _this2 = this;
 
-      var req = new XMLHttpRequest();
-      req.open('GET', e.target.value);
-      req.onload = function () {
-        var data = JSON.parse(req.responseText);
-        Draw.clear();
-        Draw.set(data);
-        _this2.setState({ view: 'draw' });
-        var ext = turf.extent(data);
-        map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
-      };
-      req.send();
+      fetch(e.target.value).then(function (res) {
+        try {
+          res.json().then(function (data) {
+            _this2.setState({ validURL: true });
+            Draw.clear();
+            Draw.set(data);
+            _this2.setState({ view: 'draw' });
+            var ext = turf.extent(data);
+            map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
+          });
+        } catch (err) {
+          console.log(err);
+          return _this2.setState({ validURL: false });
+        }
+      })['catch'](function (err) {
+        console.log(err);
+      });
     }
   }, {
     key: 'toggleSettings',
@@ -177,15 +184,24 @@ var App = (function (_React$Component) {
             })
           ),
           this.state.mode === NORM && React.createElement(
-            'fieldset',
-            { className: 'with-icon dark' },
-            React.createElement('span', { className: 'icon search' }),
-            React.createElement('input', {
-              placeholder: 'Fetch data from URL',
-              type: 'text',
-              className: 'url-input stretch',
-              onChange: this.fetchURL
-            })
+            'div',
+            null,
+            !this.state.validURL && React.createElement(
+              'div',
+              { className: 'red' },
+              'Invalid URL'
+            ),
+            React.createElement(
+              'fieldset',
+              { className: 'with-icon dark' },
+              React.createElement('span', { className: 'icon search' }),
+              React.createElement('input', {
+                placeholder: 'Fetch data from URL',
+                type: 'text',
+                className: 'url-input stretch',
+                onChange: this.fetchURL
+              })
+            )
           )
         ),
         React.createElement(

@@ -16,6 +16,7 @@ class App extends React.Component { // eslint-disable-line
       },
       mode: MAPBOX,
       settings: true,
+      validURL: true,
       view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -60,17 +61,24 @@ class App extends React.Component { // eslint-disable-line
   }
 
   fetchURL(e) {
-    var req = new XMLHttpRequest();
-    req.open('GET', e.target.value);
-    req.onload = () => {
-      var data = JSON.parse(req.responseText);
-      Draw.clear();
-      Draw.set(data);
-      this.setState({ view: 'draw' });
-      var ext = turf.extent(data);
-      map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
-    };
-    req.send();
+    fetch(e.target.value)
+      .then((res) => {
+        try {
+          res.json().then((data) => {
+            this.setState({ validURL: true });
+            Draw.clear();
+            Draw.set(data);
+            this.setState({ view: 'draw' });
+            var ext = turf.extent(data);
+            map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
+          });
+        } catch (err) {
+          console.log(err);
+          return this.setState({ validURL: false });
+        }
+      }).catch((err) => {
+        console.log(err);
+      });
   }
 
   toggleSettings() {
@@ -131,15 +139,18 @@ class App extends React.Component { // eslint-disable-line
             />
           </fieldset>}
 
-          {this.state.mode === NORM && <fieldset className='with-icon dark'>
-            <span className='icon search'></span>
-            <input
-              placeholder='Fetch data from URL'
-              type='text'
-              className='url-input stretch'
-              onChange={this.fetchURL}
-            />
-          </fieldset>}
+          {this.state.mode === NORM && <div>
+            {!this.state.validURL && <div className='red'>Invalid URL</div>}
+            <fieldset className='with-icon dark'>
+              <span className='icon search'></span>
+              <input
+                placeholder='Fetch data from URL'
+                type='text'
+                className='url-input stretch'
+                onChange={this.fetchURL}
+              />
+            </fieldset>
+          </div>}
 
         </div>}
 
