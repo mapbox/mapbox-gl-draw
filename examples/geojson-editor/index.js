@@ -1,5 +1,9 @@
 /* global React, map, Draw, turf */
 import GJV from 'geojson-validation';
+//import Dataset from './dataset';
+
+const MAPBOX = 1;
+const NORM = 2;
 
 class App extends React.Component { // eslint-disable-line
 
@@ -10,6 +14,8 @@ class App extends React.Component { // eslint-disable-line
         type: 'FeatureCollection',
         features: []
       },
+      mode: MAPBOX,
+      settings: true,
       view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -67,8 +73,16 @@ class App extends React.Component { // eslint-disable-line
     req.send();
   }
 
-  toggleView(target) {
-    this.setState({ view: target });
+  toggleSettings() {
+    this.setState({ settings: !this.state.settings });
+  }
+
+  toggleView(view) {
+    this.setState({ view });
+  }
+
+  setMode(mode) {
+    this.setState({ mode });
   }
 
   render() {
@@ -76,15 +90,58 @@ class App extends React.Component { // eslint-disable-line
     return (
       <div className='side-bar'>
 
-        <fieldset className='with-icon dark'>
-          <span className='icon search'></span>
-          <input
-            placeholder='Fetch data from URL here, write geojson below, or draw'
-            type='text'
-            className='url-input stretch'
-            onChange={this.fetchURL}
-          />
-        </fieldset>
+        <div className='clearfix col12 pad1' onClick={this.toggleSettings.bind(this)}>
+          <span className='col1 icon sprocket'></span>
+          <div className='col10'>Settings</div>
+          <span className={`col1 icon caret-${this.state.settings ? 'down' : 'left' }`}></span>
+        </div>
+
+        {this.state.settings && <div>
+
+          <div className='col12 clearfix'>
+            <div
+              className={`col6 center pad1 ${this.state.mode === MAPBOX && 'fill-darken1'}`}
+              onClick={this.setMode.bind(this, MAPBOX)}
+            >
+              Mapbox
+            </div>
+            <div
+              className={`col6 center pad1 ${this.state.mode === NORM && 'fill-darken1'}`}
+              onClick={this.setMode.bind(this, NORM)}
+            >
+              Fetch
+            </div>
+          </div>
+
+          {this.state.mode === MAPBOX && <fieldset className='with-icon dark'>
+            <span className='icon mapbox'></span>
+            <input
+              placeholder='Mapbox Username'
+              type='text'
+              className='stretch'
+            />
+          </fieldset>}
+
+          {this.state.mode === MAPBOX && <fieldset className='with-icon dark'>
+            <span className='icon lock'></span>
+            <input
+              placeholder='Mapbox Dataset API access token'
+              type='text'
+              className='stretch'
+            />
+          </fieldset>}
+
+          {this.state.mode === NORM && <fieldset className='with-icon dark'>
+            <span className='icon search'></span>
+            <input
+              placeholder='Fetch data from URL'
+              type='text'
+              className='url-input stretch'
+              onChange={this.fetchURL}
+            />
+          </fieldset>}
+
+        </div>}
 
         <div className='rounded-toggle col12 inline'>
           <input

@@ -16,6 +16,11 @@ var _geojsonValidation = require('geojson-validation');
 
 var _geojsonValidation2 = _interopRequireDefault(_geojsonValidation);
 
+//import Dataset from './dataset';
+
+var MAPBOX = 1;
+var NORM = 2;
+
 var App = (function (_React$Component) {
   _inherits(App, _React$Component);
 
@@ -30,6 +35,8 @@ var App = (function (_React$Component) {
         type: 'FeatureCollection',
         features: []
       },
+      mode: MAPBOX,
+      settings: true,
       view: 'draw'
     };
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -94,9 +101,19 @@ var App = (function (_React$Component) {
       req.send();
     }
   }, {
+    key: 'toggleSettings',
+    value: function toggleSettings() {
+      this.setState({ settings: !this.state.settings });
+    }
+  }, {
     key: 'toggleView',
-    value: function toggleView(target) {
-      this.setState({ view: target });
+    value: function toggleView(view) {
+      this.setState({ view: view });
+    }
+  }, {
+    key: 'setMode',
+    value: function setMode(mode) {
+      this.setState({ mode: mode });
     }
   }, {
     key: 'render',
@@ -106,15 +123,70 @@ var App = (function (_React$Component) {
         'div',
         { className: 'side-bar' },
         React.createElement(
-          'fieldset',
-          { className: 'with-icon dark' },
-          React.createElement('span', { className: 'icon search' }),
-          React.createElement('input', {
-            placeholder: 'Fetch data from URL here, write geojson below, or draw',
-            type: 'text',
-            className: 'url-input stretch',
-            onChange: this.fetchURL
-          })
+          'div',
+          { className: 'clearfix col12 pad1', onClick: this.toggleSettings.bind(this) },
+          React.createElement('span', { className: 'col1 icon sprocket' }),
+          React.createElement(
+            'div',
+            { className: 'col10' },
+            'Settings'
+          ),
+          React.createElement('span', { className: 'col1 icon caret-' + (this.state.settings ? 'down' : 'left') })
+        ),
+        this.state.settings && React.createElement(
+          'div',
+          null,
+          React.createElement(
+            'div',
+            { className: 'col12 clearfix' },
+            React.createElement(
+              'div',
+              {
+                className: 'col6 center pad1 ' + (this.state.mode === MAPBOX && 'fill-darken1'),
+                onClick: this.setMode.bind(this, MAPBOX)
+              },
+              'Mapbox'
+            ),
+            React.createElement(
+              'div',
+              {
+                className: 'col6 center pad1 ' + (this.state.mode === NORM && 'fill-darken1'),
+                onClick: this.setMode.bind(this, NORM)
+              },
+              'Fetch'
+            )
+          ),
+          this.state.mode === MAPBOX && React.createElement(
+            'fieldset',
+            { className: 'with-icon dark' },
+            React.createElement('span', { className: 'icon mapbox' }),
+            React.createElement('input', {
+              placeholder: 'Mapbox Username',
+              type: 'text',
+              className: 'stretch'
+            })
+          ),
+          this.state.mode === MAPBOX && React.createElement(
+            'fieldset',
+            { className: 'with-icon dark' },
+            React.createElement('span', { className: 'icon lock' }),
+            React.createElement('input', {
+              placeholder: 'Mapbox Dataset API access token',
+              type: 'text',
+              className: 'stretch'
+            })
+          ),
+          this.state.mode === NORM && React.createElement(
+            'fieldset',
+            { className: 'with-icon dark' },
+            React.createElement('span', { className: 'icon search' }),
+            React.createElement('input', {
+              placeholder: 'Fetch data from URL',
+              type: 'text',
+              className: 'url-input stretch',
+              onChange: this.fetchURL
+            })
+          )
         ),
         React.createElement(
           'div',
