@@ -64,20 +64,21 @@ class App extends React.Component { // eslint-disable-line
     fetch(e.target.value)
       .then((res) => {
         try {
-          res.json().then((data) => {
-            this.setState({ validURL: true });
-            Draw.clear();
-            Draw.set(data);
-            this.setState({ view: 'draw' });
-            var ext = turf.extent(data);
-            map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
-          });
+          return res.json();
         } catch (err) {
           console.log(err);
-          return this.setState({ validURL: false });
+          this.setState({ validURL: false });
         }
+      }).then((data) => {
+        this.setState({ validURL: true });
+        Draw.clear();
+        Draw.set(data);
+        this.setState({ view: 'draw' });
+        var ext = turf.extent(data);
+        map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       }).catch((err) => {
         console.log(err);
+        this.setState({ validURL: false });
       });
   }
 

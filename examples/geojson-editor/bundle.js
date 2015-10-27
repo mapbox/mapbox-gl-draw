@@ -91,20 +91,21 @@ var App = (function (_React$Component) {
 
       fetch(e.target.value).then(function (res) {
         try {
-          res.json().then(function (data) {
-            _this2.setState({ validURL: true });
-            Draw.clear();
-            Draw.set(data);
-            _this2.setState({ view: 'draw' });
-            var ext = turf.extent(data);
-            map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
-          });
+          return res.json();
         } catch (err) {
           console.log(err);
-          return _this2.setState({ validURL: false });
+          _this2.setState({ validURL: false });
         }
+      }).then(function (data) {
+        _this2.setState({ validURL: true });
+        Draw.clear();
+        Draw.set(data);
+        _this2.setState({ view: 'draw' });
+        var ext = turf.extent(data);
+        map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       })['catch'](function (err) {
         console.log(err);
+        _this2.setState({ validURL: false });
       });
     }
   }, {
