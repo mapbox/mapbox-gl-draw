@@ -281,6 +281,8 @@ export default class Draw extends mapboxgl.Control {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
+    if (!this.dragging) return;
+
     this._editStore.get(this.activeDrawId).translating = false;
     this.dragging = false;
 
