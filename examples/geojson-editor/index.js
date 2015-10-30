@@ -14,12 +14,14 @@ class App extends React.Component { // eslint-disable-line
         type: 'FeatureCollection',
         features: []
       },
+      geojsonEditPane: false,
       mode: MAPBOX,
       settings: true,
       validURL: true,
-      view: 'draw'
+      view: 'draw',
+      datasets: []
     };
-    this.client = new Client();
+    this.client = new Client(this);
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
@@ -39,6 +41,14 @@ class App extends React.Component { // eslint-disable-line
       if (e.geojson.features.length)
         this.setState({ view: 'edit' });
     }.bind(this));
+  }
+
+  setDatasets(datasets) {
+    this.setState({ datasets });
+  }
+
+  setGeoJSON(geojson) {
+    this.setState({ geojson });
   }
 
   setMap(e) {
@@ -68,14 +78,16 @@ class App extends React.Component { // eslint-disable-line
           return res.json();
         } catch (err) {
           this.setState({ validURL: false });
-          reject('could not parse json');
+          console.log('could not parse json');
         }
-      }).then((data) => {
+      })
+      .then((data) => {
         this.setState({ validURL: true, view: 'draw' });
         Draw.clear().set(data);
         var ext = turf.extent(data);
         map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         console.log(err);
         this.setState({ validURL: false });
       });
@@ -85,6 +97,10 @@ class App extends React.Component { // eslint-disable-line
     this.setState({ settings: !this.state.settings });
   }
 
+  toggleGeojsonEditPane() {
+    this.setState({ geojsonEditPane: !this.state.geojsonEditPane });
+  }
+
   toggleView(view) {
     this.setState({ view });
   }
@@ -92,17 +108,21 @@ class App extends React.Component { // eslint-disable-line
   setMode(mode) {
     this.setState({ mode });
   }
-  
+
   setToken(e) {
     this.client.setToken(e.target.value);
   }
-  
+
   setAccount(e) {
     this.client.setAccount(e.target.value);
   }
-  
-  createNewDataset() {
-    console.log('creating new dataset');
+
+  createDataset() {
+    this.client.create(this.refs['newDatasetName'].getDOMNode().value); // eslint-disable-line dot-notation
+  }
+
+  editDataset(id) {
+    this.client.get(id);
   }
 
   render() {
@@ -112,7 +132,7 @@ class App extends React.Component { // eslint-disable-line
 
         <div className='clearfix col12 pad1' onClick={this.toggleSettings.bind(this)}>
           <span className='col1 icon sprocket'></span>
-          <div className='col10'>Settings</div>
+          <h3 className='col10'>Control Panel</h3>
           <span className={`col1 icon caret-${this.state.settings ? 'down' : 'left' }`}></span>
         </div>
 
@@ -133,7 +153,7 @@ class App extends React.Component { // eslint-disable-line
             </div>
           </div>
 
-          {this.state.mode === MAPBOX && <div> 
+          {this.state.mode === MAPBOX && <div>
             <fieldset className='with-icon dark'>
               <span className='icon mapbox'></span>
               <input
@@ -143,7 +163,7 @@ class App extends React.Component { // eslint-disable-line
                 onChange={this.setAccount.bind(this)}
               />
             </fieldset>
-  
+
             <fieldset className='with-icon dark'>
               <span className='icon lock'></span>
               <input
@@ -153,12 +173,29 @@ class App extends React.Component { // eslint-disable-line
                 onChange={this.setToken.bind(this)}
               />
             </fieldset>
-            
-            <button
-              onClick={this.createNewDataset.bind(this)}
-            >
-              Create New Data Set
-            </button>
+
+            <div>
+              <h3>My Datasets</h3>
+              <div>
+                {this.state.datasets.map(set => <div className='clearfix col12 pad2x'>
+                  <div className='col11'>{set.id}</div>
+                  <span onClick={this.editDataset.bind(this, set.id)} className='col1 icon pencil'></span>
+                </div>)}
+              </div>
+            </div>
+
+            <div>
+              <h3>Create New Dataset</h3>
+              <input
+                placeholder='Data set name'
+                type='text'
+                className='stretch'
+                ref='newDatasetName'
+              />
+              <button className='button' onClick={this.createDataset.bind(this)}>
+                Create
+              </button>
+            </div>
           </div>}
 
           {this.state.mode === NORM && <div>
@@ -175,49 +212,57 @@ class App extends React.Component { // eslint-disable-line
 
         </div>}
 
-        <div className='rounded-toggle col12 inline'>
-          <input
-            id='draw'
-            type='radio'
-            name='rtoggle'
-            value='draw'
-            checked={this.state.view === 'draw' && 'checked'}
-          />
-          <label
-            for='draw'
-            className='col6 center'
-            onClick={this.toggleView.bind(this, 'draw')}
-          >
-            Drawn
-          </label>
-          <input
-            id='edit'
-            type='radio'
-            name='rtoggle'
-            value='edit'
-            checked={this.state.view === 'edit' && 'checked'}
-          />
-          <label
-            for='edit'
-            className='col6 center'
-            onClick={this.toggleView.bind(this, 'edit')}
-          >
-            Editting
-          </label>
+        <div className='clearfix col12 pad1' onClick={this.toggleGeojsonEditPane.bind(this)}>
+          <span className='col1 icon pencil'></span>
+          <h3 className='col10'>Editor</h3>
+          <span className={`col1 icon caret-${this.state.geojsonEditPane ? 'down' : 'left' }`}></span>
         </div>
 
-        {this.state.view === 'draw' && <textarea
-          type='text'
-          className='geojson-input fill-navy dark'
-          onChange={this.setMap}
-          value={input}
-        />}
+        {this.state.geojsonEditPane && <div className='clearfix'>
+          <div className='rounded-toggle col12 inline'>
+            <input
+              id='draw'
+              type='radio'
+              name='rtoggle'
+              value='draw'
+              checked={this.state.view === 'draw' && 'checked'}
+            />
+            <label
+              for='draw'
+              className='col6 center'
+              onClick={this.toggleView.bind(this, 'draw')}
+            >
+              Drawn
+            </label>
+            <input
+              id='edit'
+              type='radio'
+              name='rtoggle'
+              value='edit'
+              checked={this.state.view === 'edit' && 'checked'}
+            />
+            <label
+              for='edit'
+              className='col6 center'
+              onClick={this.toggleView.bind(this, 'edit')}
+            >
+              Editting
+            </label>
+          </div>
 
-        {this.state.view === 'edit' && <textarea
-          type='text'
-          className='geojson-input fill-navy dark'
-          value={this.state.editting}
-        />}
+          {this.state.view === 'draw' && <textarea
+            type='text'
+            className='geojson-input fill-navy dark'
+            onChange={this.setMap}
+            value={input}
+          />}
+
+          {this.state.view === 'edit' && <textarea
+            type='text'
+            className='geojson-input fill-navy dark'
+            value={this.state.editting}
+          />}
+        </div>}
 
       </div>
     );

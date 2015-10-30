@@ -1,4 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * Mapbox dataset API Client
+ */
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -9,12 +12,14 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var url = 'https://api.mapbox.com/datasets/v1/';
+var URL = 'https://api.mapbox.com/datasets/v1/';
+var POST = 'post';
 
 var Client = (function () {
-  function Client(account, token) {
+  function Client(app, account, token) {
     _classCallCheck(this, Client);
 
+    this.app = app;
     this.acct = account;
     this.token = token;
   }
@@ -48,19 +53,59 @@ var Client = (function () {
       return this.token;
     }
   }, {
+    key: 'url',
+    value: function url(params) {
+      var endpoint = '';
+      if (params) {
+        endpoint = params.endpoint || '';
+      }
+      return '' + URL + this.acct + '/' + endpoint + '?access_token=' + this.token;
+    }
+  }, {
     key: 'list',
     value: function list() {
-      fetch('' + url + this.acct + '?access_token=' + this.token).then(function (res) {
+      var _this = this;
+
+      fetch(this.url()).then(function (res) {
         return res.json();
-      }).then(function (res) {
-        console.log(res);
+      }).then(function (data) {
+        _this.app.setDatasets(data);
       })['catch'](function (err) {
         console.log(err);
       });
     }
   }, {
     key: 'create',
-    value: function create() {}
+    value: function create(name) {
+      var _this2 = this;
+
+      if (!this.acct || !this.token) return;
+      fetch(this.url(), {
+        method: POST,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: name })
+      }).then(function () {
+        _this2.list();
+      })['catch'](function (err) {
+        console.log(err);
+      });
+    }
+  }, {
+    key: 'get',
+    value: function get(id) {
+      var _this3 = this;
+
+      if (!this.acct || !this.token) return;
+      fetch(this.url({ endpoint: id + '/features' })).then(function (res) {
+        return res.json();
+      }).then(function (data) {
+        _this3.app.setFeoJSON(data);
+      })['catch'](function (err) {
+        console.log(err);
+      });
+    }
   }]);
 
   return Client;
@@ -108,12 +153,14 @@ var App = (function (_React$Component) {
         type: 'FeatureCollection',
         features: []
       },
+      geojsonEditPane: false,
       mode: MAPBOX,
       settings: true,
       validURL: true,
-      view: 'draw'
+      view: 'draw',
+      datasets: []
     };
-    this.client = new _client2['default']();
+    this.client = new _client2['default'](this);
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
@@ -134,6 +181,16 @@ var App = (function (_React$Component) {
         this.setState({ editting: JSON.stringify(Draw.getEditting(), null, 4) });
         if (e.geojson.features.length) this.setState({ view: 'edit' });
       }).bind(this));
+    }
+  }, {
+    key: 'setDatasets',
+    value: function setDatasets(datasets) {
+      this.setState({ datasets: datasets });
+    }
+  }, {
+    key: 'setGeoJSON',
+    value: function setGeoJSON(geojson) {
+      this.setState({ geojson: geojson });
     }
   }, {
     key: 'setMap',
@@ -168,7 +225,7 @@ var App = (function (_React$Component) {
           return res.json();
         } catch (err) {
           _this2.setState({ validURL: false });
-          reject('could not parse json');
+          console.log('could not parse json');
         }
       }).then(function (data) {
         _this2.setState({ validURL: true, view: 'draw' });
@@ -184,6 +241,11 @@ var App = (function (_React$Component) {
     key: 'toggleSettings',
     value: function toggleSettings() {
       this.setState({ settings: !this.state.settings });
+    }
+  }, {
+    key: 'toggleGeojsonEditPane',
+    value: function toggleGeojsonEditPane() {
+      this.setState({ geojsonEditPane: !this.state.geojsonEditPane });
     }
   }, {
     key: 'toggleView',
@@ -206,13 +268,20 @@ var App = (function (_React$Component) {
       this.client.setAccount(e.target.value);
     }
   }, {
-    key: 'createNewDataset',
-    value: function createNewDataset() {
-      console.log('creating new dataset');
+    key: 'createDataset',
+    value: function createDataset() {
+      this.client.create(this.refs['newDatasetName'].getDOMNode().value); // eslint-disable-line dot-notation
+    }
+  }, {
+    key: 'editDataset',
+    value: function editDataset(id) {
+      this.client.get(id);
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this3 = this;
+
       var input = this.state.input;
       return React.createElement(
         'div',
@@ -222,9 +291,9 @@ var App = (function (_React$Component) {
           { className: 'clearfix col12 pad1', onClick: this.toggleSettings.bind(this) },
           React.createElement('span', { className: 'col1 icon sprocket' }),
           React.createElement(
-            'div',
+            'h3',
             { className: 'col10' },
-            'Settings'
+            'Control Panel'
           ),
           React.createElement('span', { className: 'col1 icon caret-' + (this.state.settings ? 'down' : 'left') })
         ),
@@ -277,11 +346,49 @@ var App = (function (_React$Component) {
               })
             ),
             React.createElement(
-              'button',
-              {
-                onClick: this.createNewDataset.bind(this)
-              },
-              'Create New Data Set'
+              'div',
+              null,
+              React.createElement(
+                'h3',
+                null,
+                'My Datasets'
+              ),
+              React.createElement(
+                'div',
+                null,
+                this.state.datasets.map(function (set) {
+                  return React.createElement(
+                    'div',
+                    { className: 'clearfix col12 pad2x' },
+                    React.createElement(
+                      'div',
+                      { className: 'col11' },
+                      set.id
+                    ),
+                    React.createElement('span', { onClick: _this3.editDataset.bind(_this3, set.id), className: 'col1 icon pencil' })
+                  );
+                })
+              )
+            ),
+            React.createElement(
+              'div',
+              null,
+              React.createElement(
+                'h3',
+                null,
+                'Create New Dataset'
+              ),
+              React.createElement('input', {
+                placeholder: 'Data set name',
+                type: 'text',
+                className: 'stretch',
+                ref: 'newDatasetName'
+              }),
+              React.createElement(
+                'button',
+                { className: 'button', onClick: this.createDataset.bind(this) },
+                'Create'
+              )
             )
           ),
           this.state.mode === NORM && React.createElement(
@@ -302,51 +409,66 @@ var App = (function (_React$Component) {
         ),
         React.createElement(
           'div',
-          { className: 'rounded-toggle col12 inline' },
-          React.createElement('input', {
-            id: 'draw',
-            type: 'radio',
-            name: 'rtoggle',
-            value: 'draw',
-            checked: this.state.view === 'draw' && 'checked'
-          }),
+          { className: 'clearfix col12 pad1', onClick: this.toggleGeojsonEditPane.bind(this) },
+          React.createElement('span', { className: 'col1 icon pencil' }),
           React.createElement(
-            'label',
-            {
-              'for': 'draw',
-              className: 'col6 center',
-              onClick: this.toggleView.bind(this, 'draw')
-            },
-            'Drawn'
+            'h3',
+            { className: 'col10' },
+            'Editor'
           ),
-          React.createElement('input', {
-            id: 'edit',
-            type: 'radio',
-            name: 'rtoggle',
-            value: 'edit',
-            checked: this.state.view === 'edit' && 'checked'
-          }),
-          React.createElement(
-            'label',
-            {
-              'for': 'edit',
-              className: 'col6 center',
-              onClick: this.toggleView.bind(this, 'edit')
-            },
-            'Editting'
-          )
+          React.createElement('span', { className: 'col1 icon caret-' + (this.state.geojsonEditPane ? 'down' : 'left') })
         ),
-        this.state.view === 'draw' && React.createElement('textarea', {
-          type: 'text',
-          className: 'geojson-input fill-navy dark',
-          onChange: this.setMap,
-          value: input
-        }),
-        this.state.view === 'edit' && React.createElement('textarea', {
-          type: 'text',
-          className: 'geojson-input fill-navy dark',
-          value: this.state.editting
-        })
+        this.state.geojsonEditPane && React.createElement(
+          'div',
+          { className: 'clearfix' },
+          React.createElement(
+            'div',
+            { className: 'rounded-toggle col12 inline' },
+            React.createElement('input', {
+              id: 'draw',
+              type: 'radio',
+              name: 'rtoggle',
+              value: 'draw',
+              checked: this.state.view === 'draw' && 'checked'
+            }),
+            React.createElement(
+              'label',
+              {
+                'for': 'draw',
+                className: 'col6 center',
+                onClick: this.toggleView.bind(this, 'draw')
+              },
+              'Drawn'
+            ),
+            React.createElement('input', {
+              id: 'edit',
+              type: 'radio',
+              name: 'rtoggle',
+              value: 'edit',
+              checked: this.state.view === 'edit' && 'checked'
+            }),
+            React.createElement(
+              'label',
+              {
+                'for': 'edit',
+                className: 'col6 center',
+                onClick: this.toggleView.bind(this, 'edit')
+              },
+              'Editting'
+            )
+          ),
+          this.state.view === 'draw' && React.createElement('textarea', {
+            type: 'text',
+            className: 'geojson-input fill-navy dark',
+            onChange: this.setMap,
+            value: input
+          }),
+          this.state.view === 'edit' && React.createElement('textarea', {
+            type: 'text',
+            className: 'geojson-input fill-navy dark',
+            value: this.state.editting
+          })
+        )
       );
     }
   }]);
