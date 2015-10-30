@@ -1,4 +1,75 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var url = 'https://api.mapbox.com/datasets/v1/';
+
+var Client = (function () {
+  function Client(account, token) {
+    _classCallCheck(this, Client);
+
+    this.acct = account;
+    this.token = token;
+  }
+
+  _createClass(Client, [{
+    key: 'setAccount',
+    value: function setAccount(account) {
+      this.acct = account;
+      if (this.token && this.acct) {
+        this.list();
+      }
+      return this;
+    }
+  }, {
+    key: 'getAccount',
+    value: function getAccount() {
+      return this.acct;
+    }
+  }, {
+    key: 'setToken',
+    value: function setToken(token) {
+      this.token = token;
+      if (this.token && this.acct) {
+        this.list();
+      }
+      return this;
+    }
+  }, {
+    key: 'getToken',
+    value: function getToken() {
+      return this.token;
+    }
+  }, {
+    key: 'list',
+    value: function list() {
+      fetch('' + url + this.acct + '?access_token=' + this.token).then(function (res) {
+        return res.json();
+      }).then(function (res) {
+        console.log(res);
+      })['catch'](function (err) {
+        console.log(err);
+      });
+    }
+  }, {
+    key: 'create',
+    value: function create() {}
+  }]);
+
+  return Client;
+})();
+
+exports['default'] = Client;
+module.exports = exports['default'];
+
+},{}],2:[function(require,module,exports){
 /* global React, map, Draw, turf */
 'use strict';
 
@@ -16,7 +87,9 @@ var _geojsonValidation = require('geojson-validation');
 
 var _geojsonValidation2 = _interopRequireDefault(_geojsonValidation);
 
-//import Dataset from './dataset';
+var _client = require('./client');
+
+var _client2 = _interopRequireDefault(_client);
 
 var MAPBOX = 1;
 var NORM = 2;
@@ -40,6 +113,7 @@ var App = (function (_React$Component) {
       validURL: true,
       view: 'draw'
     };
+    this.client = new _client2['default']();
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
@@ -93,14 +167,12 @@ var App = (function (_React$Component) {
         try {
           return res.json();
         } catch (err) {
-          console.log(err);
           _this2.setState({ validURL: false });
+          reject('could not parse json');
         }
       }).then(function (data) {
-        _this2.setState({ validURL: true });
-        Draw.clear();
-        Draw.set(data);
-        _this2.setState({ view: 'draw' });
+        _this2.setState({ validURL: true, view: 'draw' });
+        Draw.clear().set(data);
         var ext = turf.extent(data);
         map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       })['catch'](function (err) {
@@ -122,6 +194,21 @@ var App = (function (_React$Component) {
     key: 'setMode',
     value: function setMode(mode) {
       this.setState({ mode: mode });
+    }
+  }, {
+    key: 'setToken',
+    value: function setToken(e) {
+      this.client.setToken(e.target.value);
+    }
+  }, {
+    key: 'setAccount',
+    value: function setAccount(e) {
+      this.client.setAccount(e.target.value);
+    }
+  }, {
+    key: 'createNewDataset',
+    value: function createNewDataset() {
+      console.log('creating new dataset');
     }
   }, {
     key: 'render',
@@ -165,24 +252,37 @@ var App = (function (_React$Component) {
             )
           ),
           this.state.mode === MAPBOX && React.createElement(
-            'fieldset',
-            { className: 'with-icon dark' },
-            React.createElement('span', { className: 'icon mapbox' }),
-            React.createElement('input', {
-              placeholder: 'Mapbox Username',
-              type: 'text',
-              className: 'stretch'
-            })
-          ),
-          this.state.mode === MAPBOX && React.createElement(
-            'fieldset',
-            { className: 'with-icon dark' },
-            React.createElement('span', { className: 'icon lock' }),
-            React.createElement('input', {
-              placeholder: 'Mapbox Dataset API access token',
-              type: 'text',
-              className: 'stretch'
-            })
+            'div',
+            null,
+            React.createElement(
+              'fieldset',
+              { className: 'with-icon dark' },
+              React.createElement('span', { className: 'icon mapbox' }),
+              React.createElement('input', {
+                placeholder: 'Mapbox Username',
+                type: 'text',
+                className: 'stretch',
+                onChange: this.setAccount.bind(this)
+              })
+            ),
+            React.createElement(
+              'fieldset',
+              { className: 'with-icon dark' },
+              React.createElement('span', { className: 'icon lock' }),
+              React.createElement('input', {
+                placeholder: 'Mapbox Dataset API access token',
+                type: 'text',
+                className: 'stretch',
+                onChange: this.setToken.bind(this)
+              })
+            ),
+            React.createElement(
+              'button',
+              {
+                onClick: this.createNewDataset.bind(this)
+              },
+              'Create New Data Set'
+            )
           ),
           this.state.mode === NORM && React.createElement(
             'div',
@@ -256,7 +356,7 @@ var App = (function (_React$Component) {
 
 React.render(React.createElement(App, null), document.getElementById('geojson'));
 
-},{"geojson-validation":2}],2:[function(require,module,exports){
+},{"./client":1,"geojson-validation":3}],3:[function(require,module,exports){
 /**
 * geoJSON validation according to the GeoJSON spefication Version 1
 * @module geoJSONValidation
@@ -1141,4 +1241,4 @@ React.render(React.createElement(App, null), document.getElementById('geojson'))
 
 })(typeof exports === 'undefined'? this['GJV']={}: exports);
 
-},{}]},{},[1]);
+},{}]},{},[2]);

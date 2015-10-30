@@ -1,6 +1,6 @@
 /* global React, map, Draw, turf */
 import GJV from 'geojson-validation';
-//import Dataset from './dataset';
+import Client from './client';
 
 const MAPBOX = 1;
 const NORM = 2;
@@ -19,6 +19,7 @@ class App extends React.Component { // eslint-disable-line
       validURL: true,
       view: 'draw'
     };
+    this.client = new Client();
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
     this.state.valid = true;
     this.setMap = this.setMap.bind(this);
@@ -66,14 +67,12 @@ class App extends React.Component { // eslint-disable-line
         try {
           return res.json();
         } catch (err) {
-          console.log(err);
           this.setState({ validURL: false });
+          reject('could not parse json');
         }
       }).then((data) => {
-        this.setState({ validURL: true });
-        Draw.clear();
-        Draw.set(data);
-        this.setState({ view: 'draw' });
+        this.setState({ validURL: true, view: 'draw' });
+        Draw.clear().set(data);
         var ext = turf.extent(data);
         map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       }).catch((err) => {
@@ -92,6 +91,18 @@ class App extends React.Component { // eslint-disable-line
 
   setMode(mode) {
     this.setState({ mode });
+  }
+  
+  setToken(e) {
+    this.client.setToken(e.target.value);
+  }
+  
+  setAccount(e) {
+    this.client.setAccount(e.target.value);
+  }
+  
+  createNewDataset() {
+    console.log('creating new dataset');
   }
 
   render() {
@@ -122,23 +133,33 @@ class App extends React.Component { // eslint-disable-line
             </div>
           </div>
 
-          {this.state.mode === MAPBOX && <fieldset className='with-icon dark'>
-            <span className='icon mapbox'></span>
-            <input
-              placeholder='Mapbox Username'
-              type='text'
-              className='stretch'
-            />
-          </fieldset>}
-
-          {this.state.mode === MAPBOX && <fieldset className='with-icon dark'>
-            <span className='icon lock'></span>
-            <input
-              placeholder='Mapbox Dataset API access token'
-              type='text'
-              className='stretch'
-            />
-          </fieldset>}
+          {this.state.mode === MAPBOX && <div> 
+            <fieldset className='with-icon dark'>
+              <span className='icon mapbox'></span>
+              <input
+                placeholder='Mapbox Username'
+                type='text'
+                className='stretch'
+                onChange={this.setAccount.bind(this)}
+              />
+            </fieldset>
+  
+            <fieldset className='with-icon dark'>
+              <span className='icon lock'></span>
+              <input
+                placeholder='Mapbox Dataset API access token'
+                type='text'
+                className='stretch'
+                onChange={this.setToken.bind(this)}
+              />
+            </fieldset>
+            
+            <button
+              onClick={this.createNewDataset.bind(this)}
+            >
+              Create New Data Set
+            </button>
+          </div>}
 
           {this.state.mode === NORM && <div>
             <fieldset className={`with-icon dark ${!this.state.validURL && 'fill-red'}`}>
