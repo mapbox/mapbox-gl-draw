@@ -22,7 +22,9 @@ class App extends React.Component { // eslint-disable-line
       settings: true,
       validURL: true,
       view: 'draw',
-      datasets: []
+      datasets: [],
+      datasetId: null,
+      featureId: null
     };
     this.client = new Client(this);
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -51,7 +53,11 @@ class App extends React.Component { // eslint-disable-line
   }
 
   setGeoJSON(geojson) {
-    this.setState({ geojson, input: JSON.stringify(geojson) });
+    this.setState({
+      geojson,
+      input: JSON.stringify(geojson, null, 4),
+      geojsonEditPane: true
+    });
   }
 
   setMap(e) {
@@ -120,16 +126,33 @@ class App extends React.Component { // eslint-disable-line
     this.client.setAccount(e.target.value);
   }
 
+  setDataset(datasetId) {
+    this.setState({ datasetId });
+  }
+
   createDataset() {
     this.client.create(this.refs['newDatasetName'].value); // eslint-disable-line dot-notation
   }
 
-  editDataset(id) {
-    this.client.get(id);
+  editDataset(datasetId) {
+    this.setState({ datasetId });
+    this.client.get(datasetId);
+  }
+
+  addFeature() {
+    Draw.clear();
   }
 
   deleteDataset(id) {
     this.client.destroy(id);
+  }
+
+  save() {
+    var geojson = this.state.geojson;
+    var id = geojson.features[0].properties.drawId;
+    geojson.features[0].id = id;
+    this.client.updateFeature(id, geojson.features[0]);
+    this.setState({ geojson });
   }
 
   render() {
@@ -143,7 +166,7 @@ class App extends React.Component { // eslint-disable-line
           <span className={`col1 icon caret-${this.state.settings ? 'down' : 'left' }`}></span>
         </div>
 
-        {this.state.settings && <div>
+        {this.state.settings && <div className='clearfix'>
 
           <div className='col12 clearfix'>
             <div
@@ -181,28 +204,48 @@ class App extends React.Component { // eslint-disable-line
               />
             </fieldset>
 
-            <div>
-              <h3>My Datasets</h3>
-              <div>
-                {this.state.datasets.map((set, k) => <div key={k} className='clearfix col12 pad2x'>
-                  <div className='col10'>{set.id}</div>
+            {this.state.datasets.length > 0 && <div className='keyline-bottom pad1 clearfix'>
+              <div className='keyline-bottom pad1 clearfix'>
+                <h3>My Datasets</h3>
+              </div>
+              <div className='clearfix'>
+                {this.state.datasets.map((set, k) => <div
+                  key={k}
+                  className={`clearfix col12 pad2 ${this.state.datasetId === set.id && 'fill-dark dark'}`}
+                  onClick={this.setDataset.bind(this, set.id)}
+                >
+                  <div className='col9'>{set.name}</div>
                   <span onClick={this.editDataset.bind(this, set.id)} className='col1 icon pencil'></span>
+                  <span onClick={this.addFeature.bind(this)} className='col1 icon plus'></span>
                   <span onClick={this.deleteDataset.bind(this, set.id)} className='col1 icon close'></span>
+                  {this.state.datasetId === set.id && <div>
+                    <ul>
+                      {this.state.geojson.features.map((feature, i) => <li key={i}>{feature.type}</li>)}
+                    </ul>
+                  </div>}
                 </div>)}
               </div>
-            </div>
+            </div>}
 
-            <div>
-              <h3>Create New Dataset</h3>
-              <input
-                placeholder='Dataset name'
-                type='text'
-                className='stretch'
-                ref='newDatasetName'
-              />
-              <button className='button' onClick={this.createDataset.bind(this)}>
-                Create
-              </button>
+            <div className='keyline-bottom pad1 clearfix'>
+              <div className='keyline-bottom pad1'>
+                <h3>Create New Dataset</h3>
+              </div>
+              <div className='clearfix col12'>
+                <div className='clearfix pad1 col10'>
+                  <input
+                    placeholder='Dataset name'
+                    type='text'
+                    className='stretch'
+                    ref='newDatasetName'
+                  />
+                </div>
+                <div className='pad1 clearfix col2'>
+                  <button className='button' onClick={this.createDataset.bind(this)}>
+                    Create
+                  </button>
+                </div>
+              </div>
             </div>
           </div>}
 
@@ -260,18 +303,28 @@ class App extends React.Component { // eslint-disable-line
             </label>
           </div>
 
-          {this.state.view === 'draw' && <textarea
-            type='text'
-            className='geojson-input fill-navy dark col12 row6'
-            onChange={this.setMap}
-            value={input}
-          />}
+          {this.state.view === 'draw' && <div className='clearfix'>
+            <textarea
+              type='text'
+              className='geojson-input fill-navy dark col12 row6'
+              onChange={this.setMap}
+              value={input}
+            />
+          </div>}
 
-          {this.state.view === 'edit' && <textarea
-            type='text'
-            className='geojson-input fill-navy dark col12 row6'
-            value={this.state.editting}
-          />}
+          {this.state.view === 'edit' && <div className='clearfix'>
+            <textarea
+              type='text'
+              className='geojson-input fill-navy dark col12 row6'
+              value={this.state.editting}
+            />
+          </div>}
+          <div className='clearfix'>
+            <button className='button fill-green fr' onClick={this.save.bind(this)}>
+              <span className='icon floppy'></span>
+              Save
+            </button>
+          </div>
         </div>}
 
       </div>
@@ -281,3 +334,4 @@ class App extends React.Component { // eslint-disable-line
 }
 
 ReactDOM.render(<App />, document.getElementById('geojson'));
+

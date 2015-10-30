@@ -1,9 +1,11 @@
 /**
  * Mapbox dataset API Client
  */
+
 const URL = 'https://api.mapbox.com/datasets/v1/';
 const POST = 'post';
 const DELETE = 'delete';
+const PUT = 'put';
 
 export default class Client {
 
@@ -11,6 +13,7 @@ export default class Client {
     this.app = app;
     this.acct = account;
     this.token = token;
+    this.list();
   }
 
   setAccount(account) {
@@ -40,7 +43,9 @@ export default class Client {
   url(params) {
     var endpoint = '';
     if (params) {
-      endpoint = params.endpoint || '';
+      for (var key in params) {
+        endpoint += params[key] + '/';
+      }
     }
     return `${URL}${this.acct}/${endpoint}?access_token=${this.token}`;
   }
@@ -70,9 +75,6 @@ export default class Client {
     })
       .then(() => {
         this.list();
-      })
-      .catch(err => {
-        console.log(err);
       });
     return this;
   }
@@ -85,9 +87,6 @@ export default class Client {
       })
       .then(data => {
         this.app.setGeoJSON(data);
-      })
-      .catch(err => {
-        console.log(err);
       });
     return this;
   }
@@ -97,25 +96,57 @@ export default class Client {
   }
 
   destroy(id) {
-    if (!this.acct || !this.token) return;
     fetch(this.url({ endpoint: id }), {
       method: DELETE
     })
       .then(res => {
-        if (res.ok) {
-          this.list();
-        } else {
-          return res.json();
-        }
+        if (res.ok) this.list();
+        else return res.json();
       })
-      .then(() => {
+      .then(res => {
         this.list();
+        console.log(res);
+      });
+    return this;
+  }
+
+  newFeature(dataset, geojson) {
+    fetch(this.url({ endpoint: dataset }), {
+      method: PUT,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(geojson)
+    })
+      .then(res => {
+        if (res.ok) this.list();
+        else return res.json();
       })
-      .catch(err => {
-        console.log('throwing error');
+      .then(res => {
+        this.list();
+        console.log(res);
+      });
+    return this;
+  }
+
+  updateFeature(dataset, geojson) {
+    fetch(this.url({ endpoint: dataset }), {
+      method: PUT,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(geojson)
+    })
+      .then(res => {
+        if (res.ok) this.list();
+        else return res.json();
+      })
+      .then(err => {
+        this.list();
         console.log(err);
       });
     return this;
   }
 
 }
+

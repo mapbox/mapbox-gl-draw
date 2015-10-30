@@ -2,6 +2,7 @@
 /**
  * Mapbox dataset API Client
  */
+
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15,6 +16,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var URL = 'https://api.mapbox.com/datasets/v1/';
 var POST = 'post';
 var DELETE = 'delete';
+var PUT = 'put';
 
 var Client = (function () {
   function Client(app, account, token) {
@@ -23,6 +25,7 @@ var Client = (function () {
     this.app = app;
     this.acct = account;
     this.token = token;
+    this.list();
   }
 
   _createClass(Client, [{
@@ -58,7 +61,9 @@ var Client = (function () {
     value: function url(params) {
       var endpoint = '';
       if (params) {
-        endpoint = params.endpoint || '';
+        for (var key in params) {
+          endpoint += params[key] + '/';
+        }
       }
       return '' + URL + this.acct + '/' + endpoint + '?access_token=' + this.token;
     }
@@ -90,8 +95,6 @@ var Client = (function () {
         body: JSON.stringify({ name: name })
       }).then(function () {
         _this2.list();
-      })['catch'](function (err) {
-        console.log(err);
       });
       return this;
     }
@@ -105,8 +108,6 @@ var Client = (function () {
         return res.json();
       }).then(function (data) {
         _this3.app.setGeoJSON(data);
-      })['catch'](function (err) {
-        console.log(err);
       });
       return this;
     }
@@ -118,19 +119,50 @@ var Client = (function () {
     value: function destroy(id) {
       var _this4 = this;
 
-      if (!this.acct || !this.token) return;
       fetch(this.url({ endpoint: id }), {
         method: DELETE
       }).then(function (res) {
-        if (res.ok) {
-          _this4.list();
-        } else {
-          return res.json();
-        }
-      }).then(function () {
+        if (res.ok) _this4.list();else return res.json();
+      }).then(function (res) {
         _this4.list();
-      })['catch'](function (err) {
-        console.log('throwing error');
+        console.log(res);
+      });
+      return this;
+    }
+  }, {
+    key: 'newFeature',
+    value: function newFeature(dataset, geojson) {
+      var _this5 = this;
+
+      fetch(this.url({ endpoint: dataset }), {
+        method: PUT,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(geojson)
+      }).then(function (res) {
+        if (res.ok) _this5.list();else return res.json();
+      }).then(function (res) {
+        _this5.list();
+        console.log(res);
+      });
+      return this;
+    }
+  }, {
+    key: 'updateFeature',
+    value: function updateFeature(dataset, geojson) {
+      var _this6 = this;
+
+      fetch(this.url({ endpoint: dataset }), {
+        method: PUT,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(geojson)
+      }).then(function (res) {
+        if (res.ok) _this6.list();else return res.json();
+      }).then(function (err) {
+        _this6.list();
         console.log(err);
       });
       return this;
@@ -199,7 +231,9 @@ var App = (function (_React$Component) {
       settings: true,
       validURL: true,
       view: 'draw',
-      datasets: []
+      datasets: [],
+      datasetId: null,
+      featureId: null
     };
     this.client = new _client2['default'](this);
     this.state.input = JSON.stringify(this.state.geojson, null, 4);
@@ -231,7 +265,11 @@ var App = (function (_React$Component) {
   }, {
     key: 'setGeoJSON',
     value: function setGeoJSON(geojson) {
-      this.setState({ geojson: geojson, input: JSON.stringify(geojson) });
+      this.setState({
+        geojson: geojson,
+        input: JSON.stringify(geojson, null, 4),
+        geojsonEditPane: true
+      });
     }
   }, {
     key: 'setMap',
@@ -309,19 +347,39 @@ var App = (function (_React$Component) {
       this.client.setAccount(e.target.value);
     }
   }, {
+    key: 'setDataset',
+    value: function setDataset(datasetId) {
+      this.setState({ datasetId: datasetId });
+    }
+  }, {
     key: 'createDataset',
     value: function createDataset() {
       this.client.create(this.refs['newDatasetName'].value); // eslint-disable-line dot-notation
     }
   }, {
     key: 'editDataset',
-    value: function editDataset(id) {
-      this.client.get(id);
+    value: function editDataset(datasetId) {
+      this.setState({ datasetId: datasetId });
+      this.client.get(datasetId);
+    }
+  }, {
+    key: 'addFeature',
+    value: function addFeature() {
+      Draw.clear();
     }
   }, {
     key: 'deleteDataset',
     value: function deleteDataset(id) {
       this.client.destroy(id);
+    }
+  }, {
+    key: 'save',
+    value: function save() {
+      var geojson = this.state.geojson;
+      var id = geojson.features[0].properties.drawId;
+      geojson.features[0].id = id;
+      this.client.updateFeature(id, geojson.features[0]);
+      this.setState({ geojson: geojson });
     }
   }, {
     key: 'render',
@@ -345,7 +403,7 @@ var App = (function (_React$Component) {
         ),
         this.state.settings && _react2['default'].createElement(
           'div',
-          null,
+          { className: 'clearfix' },
           _react2['default'].createElement(
             'div',
             { className: 'col12 clearfix' },
@@ -391,50 +449,90 @@ var App = (function (_React$Component) {
                 onChange: this.setToken.bind(this)
               })
             ),
-            _react2['default'].createElement(
+            this.state.datasets.length > 0 && _react2['default'].createElement(
               'div',
-              null,
+              { className: 'keyline-bottom pad1 clearfix' },
               _react2['default'].createElement(
-                'h3',
-                null,
-                'My Datasets'
+                'div',
+                { className: 'keyline-bottom pad1 clearfix' },
+                _react2['default'].createElement(
+                  'h3',
+                  null,
+                  'My Datasets'
+                )
               ),
               _react2['default'].createElement(
                 'div',
-                null,
+                { className: 'clearfix' },
                 this.state.datasets.map(function (set, k) {
                   return _react2['default'].createElement(
                     'div',
-                    { key: k, className: 'clearfix col12 pad2x' },
+                    {
+                      key: k,
+                      className: 'clearfix col12 pad2 ' + (_this3.state.datasetId === set.id && 'fill-dark dark'),
+                      onClick: _this3.setDataset.bind(_this3, set.id)
+                    },
                     _react2['default'].createElement(
                       'div',
-                      { className: 'col10' },
-                      set.id
+                      { className: 'col9' },
+                      set.name
                     ),
                     _react2['default'].createElement('span', { onClick: _this3.editDataset.bind(_this3, set.id), className: 'col1 icon pencil' }),
-                    _react2['default'].createElement('span', { onClick: _this3.deleteDataset.bind(_this3, set.id), className: 'col1 icon close' })
+                    _react2['default'].createElement('span', { onClick: _this3.addFeature.bind(_this3), className: 'col1 icon plus' }),
+                    _react2['default'].createElement('span', { onClick: _this3.deleteDataset.bind(_this3, set.id), className: 'col1 icon close' }),
+                    _this3.state.datasetId === set.id && _react2['default'].createElement(
+                      'div',
+                      null,
+                      _react2['default'].createElement(
+                        'ul',
+                        null,
+                        _this3.state.geojson.features.map(function (feature, i) {
+                          return _react2['default'].createElement(
+                            'li',
+                            { key: i },
+                            feature.type
+                          );
+                        })
+                      )
+                    )
                   );
                 })
               )
             ),
             _react2['default'].createElement(
               'div',
-              null,
+              { className: 'keyline-bottom pad1 clearfix' },
               _react2['default'].createElement(
-                'h3',
-                null,
-                'Create New Dataset'
+                'div',
+                { className: 'keyline-bottom pad1' },
+                _react2['default'].createElement(
+                  'h3',
+                  null,
+                  'Create New Dataset'
+                )
               ),
-              _react2['default'].createElement('input', {
-                placeholder: 'Dataset name',
-                type: 'text',
-                className: 'stretch',
-                ref: 'newDatasetName'
-              }),
               _react2['default'].createElement(
-                'button',
-                { className: 'button', onClick: this.createDataset.bind(this) },
-                'Create'
+                'div',
+                { className: 'clearfix col12' },
+                _react2['default'].createElement(
+                  'div',
+                  { className: 'clearfix pad1 col10' },
+                  _react2['default'].createElement('input', {
+                    placeholder: 'Dataset name',
+                    type: 'text',
+                    className: 'stretch',
+                    ref: 'newDatasetName'
+                  })
+                ),
+                _react2['default'].createElement(
+                  'div',
+                  { className: 'pad1 clearfix col2' },
+                  _react2['default'].createElement(
+                    'button',
+                    { className: 'button', onClick: this.createDataset.bind(this) },
+                    'Create'
+                  )
+                )
               )
             )
           ),
@@ -506,17 +604,35 @@ var App = (function (_React$Component) {
               'Editting'
             )
           ),
-          this.state.view === 'draw' && _react2['default'].createElement('textarea', {
-            type: 'text',
-            className: 'geojson-input fill-navy dark col12 row6',
-            onChange: this.setMap,
-            value: input
-          }),
-          this.state.view === 'edit' && _react2['default'].createElement('textarea', {
-            type: 'text',
-            className: 'geojson-input fill-navy dark col12 row6',
-            value: this.state.editting
-          })
+          this.state.view === 'draw' && _react2['default'].createElement(
+            'div',
+            { className: 'clearfix' },
+            _react2['default'].createElement('textarea', {
+              type: 'text',
+              className: 'geojson-input fill-navy dark col12 row6',
+              onChange: this.setMap,
+              value: input
+            })
+          ),
+          this.state.view === 'edit' && _react2['default'].createElement(
+            'div',
+            { className: 'clearfix' },
+            _react2['default'].createElement('textarea', {
+              type: 'text',
+              className: 'geojson-input fill-navy dark col12 row6',
+              value: this.state.editting
+            })
+          ),
+          _react2['default'].createElement(
+            'div',
+            { className: 'clearfix' },
+            _react2['default'].createElement(
+              'button',
+              { className: 'button fill-green fr', onClick: this.save.bind(this) },
+              _react2['default'].createElement('span', { className: 'icon floppy' }),
+              'Save'
+            )
+          )
         )
       );
     }
