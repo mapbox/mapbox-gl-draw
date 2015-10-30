@@ -1,4 +1,7 @@
-/* global React, map, Draw, turf */
+/* global map, Draw */
+import React from 'react';
+import ReactDOM from 'react-dom';
+import extent from 'turf-extent';
 import GJV from 'geojson-validation';
 import Client from './client';
 
@@ -48,7 +51,7 @@ class App extends React.Component { // eslint-disable-line
   }
 
   setGeoJSON(geojson) {
-    this.setState({ geojson });
+    this.setState({ geojson, input: JSON.stringify(geojson) });
   }
 
   setMap(e) {
@@ -84,7 +87,7 @@ class App extends React.Component { // eslint-disable-line
       .then((data) => {
         this.setState({ validURL: true, view: 'draw' });
         Draw.clear().set(data);
-        var ext = turf.extent(data);
+        var ext = extent(data);
         map.fitBounds([[ext[0], ext[1]], [ext[2], ext[3]]]);
       })
       .catch((err) => {
@@ -177,7 +180,7 @@ class App extends React.Component { // eslint-disable-line
             <div>
               <h3>My Datasets</h3>
               <div>
-                {this.state.datasets.map(set => <div className='clearfix col12 pad2x'>
+                {this.state.datasets.map((set, k) => <div key={k} className='clearfix col12 pad2x'>
                   <div className='col11'>{set.id}</div>
                   <span onClick={this.editDataset.bind(this, set.id)} className='col1 icon pencil'></span>
                 </div>)}
@@ -187,7 +190,7 @@ class App extends React.Component { // eslint-disable-line
             <div>
               <h3>Create New Dataset</h3>
               <input
-                placeholder='Data set name'
+                placeholder='Dataset name'
                 type='text'
                 className='stretch'
                 ref='newDatasetName'
@@ -226,9 +229,10 @@ class App extends React.Component { // eslint-disable-line
               name='rtoggle'
               value='draw'
               checked={this.state.view === 'draw' && 'checked'}
+              readOnly={true}
             />
             <label
-              for='draw'
+              htmlFor='draw'
               className='col6 center'
               onClick={this.toggleView.bind(this, 'draw')}
             >
@@ -240,9 +244,10 @@ class App extends React.Component { // eslint-disable-line
               name='rtoggle'
               value='edit'
               checked={this.state.view === 'edit' && 'checked'}
+              readOnly={true}
             />
             <label
-              for='edit'
+              htmlFor='edit'
               className='col6 center'
               onClick={this.toggleView.bind(this, 'edit')}
             >
@@ -252,14 +257,14 @@ class App extends React.Component { // eslint-disable-line
 
           {this.state.view === 'draw' && <textarea
             type='text'
-            className='geojson-input fill-navy dark'
+            className='geojson-input fill-navy dark col12 row6'
             onChange={this.setMap}
             value={input}
           />}
 
           {this.state.view === 'edit' && <textarea
             type='text'
-            className='geojson-input fill-navy dark'
+            className='geojson-input fill-navy dark col12 row6'
             value={this.state.editting}
           />}
         </div>}
@@ -270,4 +275,4 @@ class App extends React.Component { // eslint-disable-line
 
 }
 
-React.render(<App />, document.getElementById('geojson'));
+ReactDOM.render(<App />, document.getElementById('geojson'));

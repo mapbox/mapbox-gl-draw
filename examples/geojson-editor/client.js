@@ -81,7 +81,7 @@ export default class Client {
         return res.json();
       })
       .then(data => {
-        this.app.setFeoJSON(data);
+        this.app.setGeoJSON(data);
       })
       .catch(err => {
         console.log(err);
