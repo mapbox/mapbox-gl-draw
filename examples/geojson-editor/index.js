@@ -121,11 +121,15 @@ class App extends React.Component { // eslint-disable-line
   }
 
   createDataset() {
-    this.client.create(this.refs['newDatasetName'].getDOMNode().value); // eslint-disable-line dot-notation
+    this.client.create(this.refs['newDatasetName'].value); // eslint-disable-line dot-notation
   }
 
   editDataset(id) {
     this.client.get(id);
+  }
+
+  deleteDataset(id) {
+    this.client.destroy(id);
   }
 
   render() {
@@ -181,8 +185,9 @@ class App extends React.Component { // eslint-disable-line
               <h3>My Datasets</h3>
               <div>
                 {this.state.datasets.map((set, k) => <div key={k} className='clearfix col12 pad2x'>
-                  <div className='col11'>{set.id}</div>
+                  <div className='col10'>{set.id}</div>
                   <span onClick={this.editDataset.bind(this, set.id)} className='col1 icon pencil'></span>
+                  <span onClick={this.deleteDataset.bind(this, set.id)} className='col1 icon close'></span>
                 </div>)}
               </div>
             </div>

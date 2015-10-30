@@ -3,6 +3,7 @@
  */
 const URL = 'https://api.mapbox.com/datasets/v1/';
 const POST = 'post';
+const DELETE = 'delete';
 
 export default class Client {
 
@@ -55,6 +56,7 @@ export default class Client {
       .catch(err => {
         console.log(err);
       });
+    return this;
   }
 
   create(name) {
@@ -72,6 +74,7 @@ export default class Client {
       .catch(err => {
         console.log(err);
       });
+    return this;
   }
 
   get(id) {
@@ -86,6 +89,33 @@ export default class Client {
       .catch(err => {
         console.log(err);
       });
+    return this;
+  }
+
+  save(/*id, geojson*/) {
+
+  }
+
+  destroy(id) {
+    if (!this.acct || !this.token) return;
+    fetch(this.url({ endpoint: id }), {
+      method: DELETE
+    })
+      .then(res => {
+        if (res.ok) {
+          this.list();
+        } else {
+          return res.json();
+        }
+      })
+      .then(() => {
+        this.list();
+      })
+      .catch(err => {
+        console.log('throwing error');
+        console.log(err);
+      });
+    return this;
   }
 
 }

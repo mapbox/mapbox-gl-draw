@@ -14,6 +14,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var URL = 'https://api.mapbox.com/datasets/v1/';
 var POST = 'post';
+var DELETE = 'delete';
 
 var Client = (function () {
   function Client(app, account, token) {
@@ -73,6 +74,7 @@ var Client = (function () {
       })['catch'](function (err) {
         console.log(err);
       });
+      return this;
     }
   }, {
     key: 'create',
@@ -91,6 +93,7 @@ var Client = (function () {
       })['catch'](function (err) {
         console.log(err);
       });
+      return this;
     }
   }, {
     key: 'get',
@@ -105,6 +108,32 @@ var Client = (function () {
       })['catch'](function (err) {
         console.log(err);
       });
+      return this;
+    }
+  }, {
+    key: 'save',
+    value: function save() /*id, geojson*/{}
+  }, {
+    key: 'destroy',
+    value: function destroy(id) {
+      var _this4 = this;
+
+      if (!this.acct || !this.token) return;
+      fetch(this.url({ endpoint: id }), {
+        method: DELETE
+      }).then(function (res) {
+        if (res.ok) {
+          _this4.list();
+        } else {
+          return res.json();
+        }
+      }).then(function () {
+        _this4.list();
+      })['catch'](function (err) {
+        console.log('throwing error');
+        console.log(err);
+      });
+      return this;
     }
   }]);
 
@@ -282,12 +311,17 @@ var App = (function (_React$Component) {
   }, {
     key: 'createDataset',
     value: function createDataset() {
-      this.client.create(this.refs['newDatasetName'].getDOMNode().value); // eslint-disable-line dot-notation
+      this.client.create(this.refs['newDatasetName'].value); // eslint-disable-line dot-notation
     }
   }, {
     key: 'editDataset',
     value: function editDataset(id) {
       this.client.get(id);
+    }
+  }, {
+    key: 'deleteDataset',
+    value: function deleteDataset(id) {
+      this.client.destroy(id);
     }
   }, {
     key: 'render',
@@ -374,10 +408,11 @@ var App = (function (_React$Component) {
                     { key: k, className: 'clearfix col12 pad2x' },
                     _react2['default'].createElement(
                       'div',
-                      { className: 'col11' },
+                      { className: 'col10' },
                       set.id
                     ),
-                    _react2['default'].createElement('span', { onClick: _this3.editDataset.bind(_this3, set.id), className: 'col1 icon pencil' })
+                    _react2['default'].createElement('span', { onClick: _this3.editDataset.bind(_this3, set.id), className: 'col1 icon pencil' }),
+                    _react2['default'].createElement('span', { onClick: _this3.deleteDataset.bind(_this3, set.id), className: 'col1 icon close' })
                   );
                 })
               )
