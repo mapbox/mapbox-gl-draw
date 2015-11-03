@@ -427,7 +427,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    * @returns {Draw} this
    */
-  set(feature) {
+  set(feature, interactive) {
     feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
@@ -454,7 +454,11 @@ export default class Draw extends mapboxgl.Control {
           console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
           return;
       }
-      this._store.set(feature);
+      if (interactive) {
+        this._editStore.set(feature, true);
+      } else {
+        this._store.set(feature);
+      }
     }
     return feature.drawId;
   }

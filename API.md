@@ -3,9 +3,15 @@
 In order to use GL Draw you must instantiate the draw class like so:
 
 ```js
-var Draw = mapboxgl.Draw();
+var Draw = mapboxgl.Draw({ options });
 map.addControl(Draw);
 ```
+
+Options
+
+option | values
+---|---
+interactive | boolean
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
 

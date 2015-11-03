@@ -15,6 +15,7 @@ export default class EditStore {
   constructor(map) {
     this._map = map;
     this._features = {};
+    this._interactive = {};
 
     this.drawStore = null;
 
@@ -27,8 +28,12 @@ export default class EditStore {
     this._drawStore = drawStore;
   }
 
-  set(geometry) {
-    this._features[geometry.drawId] = geometry;
+  set(geometry, interactive) {
+    if (interactive) {
+      this._interactive[geometry.drawId] = geometry;
+    } else {
+      this._features[geometry.drawId] = geometry;
+    }
     this._render();
   }
 
@@ -44,6 +49,7 @@ export default class EditStore {
     return {
       type: 'FeatureCollection',
       features: Object.keys(this._features).map(id => this._features[id].toGeoJSON())
+        .concat(Object.keys(this._interactive).map(id => this._interactive[id].toGeoJSON()))
     };
 
   }
