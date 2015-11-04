@@ -15,7 +15,6 @@ export default class EditStore {
   constructor(map) {
     this._map = map;
     this._features = {};
-    this._interactive = {};
 
     this.drawStore = null;
 
@@ -28,12 +27,8 @@ export default class EditStore {
     this._drawStore = drawStore;
   }
 
-  set(geometry, interactive) {
-    if (interactive) {
-      this._interactive[geometry.drawId] = geometry;
-    } else {
-      this._features[geometry.drawId] = geometry;
-    }
+  set(geometry) {
+    this._features[geometry.drawId] = geometry;
     this._render();
   }
 
@@ -60,6 +55,10 @@ export default class EditStore {
 
   inProgress() {
     return Object.keys(this._features).length > 0;
+  }
+
+  isInteractive(id) {
+    return id in this._interactive;
   }
 
   getGeoJSON(id) {

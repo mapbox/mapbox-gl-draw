@@ -14,6 +14,7 @@ export default class Store {
   constructor(map) {
     this._map = map;
     this._features = {};
+    this._interactive = {};
     this._editStore = null;
     this._map.on('drawing.end', e => {
       this.set(e.geometry);
@@ -31,6 +32,13 @@ export default class Store {
     };
   }
 
+  getInteractiveGeoJSON() {
+    return {
+      type: 'FeatureCollection',
+      features: Object.keys(this._interactive).map(k => this._interactive[k].toGeoJSON())
+    };
+  }
+
   get(id) {
     return this._features[id];
   }
@@ -41,14 +49,19 @@ export default class Store {
 
   clear() {
     this._features = {};
+    this._interactive = {};
     this._render();
   }
 
   /**
    * @param {Object} feature - GeoJSON feature
    */
-  set(feature) {
-    this._features[feature.drawId] = feature;
+  set(feature, interactive) {
+    if (interactive) {
+      this._interactive[feature.drawId] = feature;
+    } else {
+      this._features[feature.drawId] = feature;
+    }
     this._render();
   }
 

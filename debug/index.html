@@ -15,7 +15,7 @@
 <div id='map'></div>
 <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
 <script src='../dist/mapboxgl.draw.js'></script>
-<script>
+<script type='text/javascript'>
   mapboxgl.accessToken = localStorage.accessToken;
 
   var map = new mapboxgl.Map({
@@ -34,7 +34,9 @@
   });
   map.addControl(Draw);
 
-  var id = Draw.set({ type: 'Point', coordinates: [0, 0] }, true);
+  this.map.on('load', function() {
+    var id = Draw.set({ type: 'Point', coordinates: [0, 0] }, true);
+  })
 </script>
 </body>
 </html>
