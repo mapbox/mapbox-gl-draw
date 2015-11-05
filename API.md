@@ -7,6 +7,16 @@ var Draw = mapboxgl.Draw({ options });
 map.addControl(Draw);
 ```
 
+Draw only works after the map has loaded so it is wise to perform any interactions in the `load` event callback of mapbox-gl:
+
+```js
+map.on('load', function() {
+    Draw.set({ ... });
+    console.log(Draw.getAll());
+    ...
+});
+```
+
 ### Options
 
 option | values | function
@@ -125,7 +135,7 @@ This method removes all geometries in Draw and deletes the history.
 
 Draw fires off a number of events on draw and edit actions.
 
-###`draw.start`
+###`drawing.start`
 
 Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
 
@@ -149,26 +159,15 @@ map.on('draw.end', function(e) {
 });
 ```
 
-###`draw.feature.update`
-
-Fired while drawing when a new vertex is added. Passes the geometry being drawn to the callback.
-
-Example:
-
-```
-map.on('draw.feature.update', function(e) {
-  alert('new draw edit!', JSON.stringify(e.geojson));
-});
-```
 
 ###`edit.new`
 
-Fired while editting when a new edit is made. Passes the new geometry to the callback.
+Fired while editting when a new edit is made. Passes an object with the new geometry and its drawId to the callback.
 
 Example:
 
 ```
 map.on('edit.new', function(e) {
-  alert('new edit!', JSON.stringify(e.geojson));
+  alert('new edit on', e.id, '->', JSON.stringify(e.geojson));
 });
 ```

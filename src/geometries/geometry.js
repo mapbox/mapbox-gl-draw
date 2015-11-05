@@ -113,7 +113,10 @@ export default class Geometry {
     var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
 
-    this._map.fire('edit.new');
+    this._map.fire('edit.new', {
+      id: this.drawId,
+      geojson: this.toGeoJSON()
+    });
   }
 
   _renderDrawProgress() {
