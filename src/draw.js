@@ -400,7 +400,8 @@ export default class Draw extends mapboxgl.Control {
       this._map.on('mousemove', e => {
         this._map.featuresAt(e.point, {
           radius: 7,
-          layer: [ 'gl-edit-point', 'gl-edit-point-mid' ]
+          layer: [ 'gl-edit-point', 'gl-edit-point-mid' ],
+          includeGeometry: true
         }, (err, features) => {
           if (err) throw err;
           if (!features.length)
@@ -408,8 +409,9 @@ export default class Draw extends mapboxgl.Control {
 
           var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
           var midpoint = R.find(feat => feat.properties.meta === 'midpoint')(features);
+          var marker = R.find(feat => feat.geometry.type === 'Point')(features);
 
-          if (vertex || midpoint) {
+          if (vertex || midpoint || marker) {
             this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
             this.hoveringOnVertex = true;
           }
