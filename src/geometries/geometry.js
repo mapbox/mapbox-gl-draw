@@ -109,22 +109,11 @@ export default class Geometry {
     var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
 
-    if (this.interactive) {
-      this.renderInteractive();
-    } else {
-      this._map.fire('edit.new');
-    }
+    this._map.fire('edit.new');
   }
 
   _renderDrawProgress() {
     this._map.fire('drawing.new.update', {
-      geojson: this.toGeoJSON()
-    });
-  }
-
-  renderInteractive() {
-    this._map.fire('draw.interactive.update', {
-      id: this.drawId,
       geojson: this.toGeoJSON()
     });
   }

@@ -12,11 +12,10 @@ import Geometry from './geometry';
  */
 export default class Point extends Geometry {
 
-  constructor(map, data, interactive) {
+  constructor(map, data) {
     if (!data) data = { geometry: {} };
     data.geometry.coordinates = data.geometry.coordinates || [0, 0];
     super(map, 'Point', data);
-    this.interactive = interactive;
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }

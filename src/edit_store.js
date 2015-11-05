@@ -44,7 +44,6 @@ export default class EditStore {
     return {
       type: 'FeatureCollection',
       features: Object.keys(this._features).map(id => this._features[id].toGeoJSON())
-        .concat(Object.keys(this._interactive).map(id => this._interactive[id].toGeoJSON()))
     };
 
   }
@@ -55,10 +54,6 @@ export default class EditStore {
 
   inProgress() {
     return Object.keys(this._features).length > 0;
-  }
-
-  isInteractive(id) {
-    return id in this._interactive;
   }
 
   getGeoJSON(id) {

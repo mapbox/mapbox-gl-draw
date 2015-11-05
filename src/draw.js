@@ -8,7 +8,6 @@ import { DOM, createButton } from './util';
 import themeEdit from './theme/edit';
 import themeStyle from './theme/style';
 import themeDrawing from './theme/drawing';
-import themeInteractive from './theme/interactive';
 
 // Data stores
 import Store from './store';
@@ -197,15 +196,14 @@ export default class Draw extends mapboxgl.Control {
     this._map.featuresAt(e.point, {
       radius: 10,
       includeGeometry: true,
-      layer: [ 'gl-draw-polygon', 'gl-draw-line', 'gl-draw-point', 'gl-draw-interactive' ]
+      layer: [ 'gl-draw-polygon',
+               'gl-draw-line',
+               'gl-draw-point' ]
     }, (err, features) => {
       if (err) throw err;
       if (features.length) { // clicked on a feature
         if (this._drawing) return;
-        var id = features[0].properties.drawId;
-        if (!this._editStore.isInteractive(id)) {
-          this._edit(id);
-        }
+        this._edit(features[0].properties.drawId);
       } else { // clicked outside all features
         this._finishEdit();
       }
@@ -364,16 +362,6 @@ export default class Draw extends mapboxgl.Control {
       });
       themeEdit.forEach(style => { this._map.addLayer(style); });
 
-      // interactive features style
-      this._map.addSource('interactive', {
-        data: {
-          type: 'FeatureCollection',
-          features: []
-        },
-        type: 'geojson'
-      });
-      themeInteractive.forEach(style => { this._map.addLayer(style); });
-
       this._map.on('draw.end', e => {
         this._store.set(e.geometry);
         DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
@@ -404,16 +392,12 @@ export default class Draw extends mapboxgl.Control {
         this._map.getSource('draw').setData(e.geojson);
       });
 
-      this._map.on('draw.interactive.update', () => {
-        this._map.getSource('interactive').setData(this._store.getInteractiveGeoJSON());
-      });
-
       this._map.on('click', this.onClick);
 
       this._map.on('mousemove', e => {
         this._map.featuresAt(e.point, {
           radius: 7,
-          layer: ['gl-edit-point', 'gl-edit-point-mid']
+          layer: [ 'gl-edit-point', 'gl-edit-point-mid' ]
         }, (err, features) => {
           if (err) throw err;
           if (!features.length)
@@ -447,7 +431,7 @@ export default class Draw extends mapboxgl.Control {
    * @param {Object} feature - GeoJSON feature
    * @returns {Draw} this
    */
-  set(feature, interactive) {
+  set(feature) {
     feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
@@ -461,21 +445,20 @@ export default class Draw extends mapboxgl.Control {
         };
       switch (feature.geometry.type) {
         case 'Point':
-          feature = new Point(this._map, feature, interactive);
+          feature = new Point(this._map, feature);
           break;
         case 'LineString':
-          feature = new Line(this._map, feature, interactive);
+          feature = new Line(this._map, feature);
           break;
         case 'Polygon':
-          feature = new Polygon(this._map, feature. interactive);
+          feature = new Polygon(this._map, feature);
           break;
         default:
           //throw new Error('unsupported geometry type: ' + feature.geometry.type);
           console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
           return;
       }
-      this._store.set(feature, interactive);
-      if (interactive) feature.renderInteractive();
+      this._store.set(feature);
     }
     return feature.drawId;
   }
