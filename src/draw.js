@@ -25,9 +25,10 @@ export default class Draw extends mapboxgl.Control {
     super();
 
     this.options = {
+      drawing: true,
+      interactive: false,
       position: 'top-left',
       keybindings: true,
-      geoJSON: [],
       controls: {
         marker: true,
         line: true,
@@ -36,7 +37,7 @@ export default class Draw extends mapboxgl.Control {
       }
     };
 
-    Object.assign(this, options);
+    Object.assign(this.options, options);
 
     // event listeners
     this.drag = this._drag.bind(this);
@@ -59,48 +60,50 @@ export default class Draw extends mapboxgl.Control {
     this._store.setEditStore(this._editStore);
     this._editStore.setDrawStore(this._store);
 
-    // Build draw controls
-    if (controls.line) {
-      this.lineStringCtrl = createButton(this._container, {
-        className: controlClass + ' line',
-        title: `LineString tool ${this.options.keybindings && '(l)'}`,
-        fn: this._drawLine.bind(this),
-        id: 'lineDrawBtn'
-      }, this._controlClass);
-    }
+    if (this.options.drawing) {
+      // Build draw controls
+      if (controls.line) {
+        this.lineStringCtrl = createButton(this._container, {
+          className: controlClass + ' line',
+          title: `LineString tool ${this.options.keybindings && '(l)'}`,
+          fn: this._drawLine.bind(this),
+          id: 'lineDrawBtn'
+        }, this._controlClass);
+      }
 
-    if (controls.shape) {
-      this.polygonCtrl = createButton(this._container, {
-        className: `${controlClass} shape`,
-        title: `Polygon tool ${this.options.keybindings && '(p)'}`,
-        fn: this._drawPolygon.bind(this),
-        id: 'polygonDrawBtn'
-      }, this._constrolClass);
-    }
+      if (controls.shape) {
+        this.polygonCtrl = createButton(this._container, {
+          className: `${controlClass} shape`,
+          title: `Polygon tool ${this.options.keybindings && '(p)'}`,
+          fn: this._drawPolygon.bind(this),
+          id: 'polygonDrawBtn'
+        }, this._constrolClass);
+      }
 
-    if (controls.square) {
-      this.squareCtrl = createButton(this._container, {
-        className: `${controlClass} square`,
-        title: `Square tool ${this.options.keybindings && '(s)'}`,
-        fn: this._drawSquare.bind(this),
-        id: 'squareDrawBtn'
-      }, this._controlClass);
-    }
+      if (controls.square) {
+        this.squareCtrl = createButton(this._container, {
+          className: `${controlClass} square`,
+          title: `Square tool ${this.options.keybindings && '(s)'}`,
+          fn: this._drawSquare.bind(this),
+          id: 'squareDrawBtn'
+        }, this._controlClass);
+      }
 
-    if (controls.marker) {
-      this.markerCtrl = createButton(this._container, {
-        className: `${controlClass} marker`,
-        title: `Marker tool ${this.options.keybindings && '(m)'}`,
-        fn: this._drawPoint.bind(this),
-        id: 'pointDrawBtn'
-      }, this._controlClass);
-    }
+      if (controls.marker) {
+        this.markerCtrl = createButton(this._container, {
+          className: `${controlClass} marker`,
+          title: `Marker tool ${this.options.keybindings && '(m)'}`,
+          fn: this._drawPoint.bind(this),
+          id: 'pointDrawBtn'
+        }, this._controlClass);
+      }
 
-    if (this.options.keybindings) {
-      map.getContainer().addEventListener('keyup', this.onKeyUp);
-    }
+      if (this.options.keybindings) {
+        map.getContainer().addEventListener('keyup', this.onKeyUp);
+      }
 
-    map.getContainer().addEventListener('keydown', this.onKeyDown);
+      map.getContainer().addEventListener('keydown', this.onKeyDown);
+    }
 
     this._map = map;
 
@@ -143,6 +146,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _onKeyUp(e) {
+    if (!this.drawing) return;
 
     // draw shortcuts
     const LINESTRING_KEY = 76; // (l)
@@ -205,7 +209,7 @@ export default class Draw extends mapboxgl.Control {
         if (this._drawing) return;
         this._edit(features[0].properties.drawId);
       } else { // clicked outside all features
-        if (!this.interactive)
+        if (!this.options.interactive)
           this._finishEdit();
       }
     });
@@ -214,7 +218,7 @@ export default class Draw extends mapboxgl.Control {
   _edit(drawId) {
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
-    if (!this._editStore.inProgress())
+    if (!this._editStore.inProgress() && this.options.drawing)
       this.deleteBtn = createButton(this._container, {
         className: 'mapboxgl-ctrl-draw-btn trash',
         title: 'delete',
@@ -304,7 +308,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawPolygon() {
-    if (!this.interactive)
+    if (!this.options.interactive)
       this._finishEdit();
     var polygon = new Polygon(this._map);
     polygon.startDraw();
@@ -312,7 +316,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawLine() {
-    if (!this.interactive)
+    if (!this.options.interactive)
       this._finishEdit();
     var line = new Line(this._map);
     line.startDraw();
@@ -320,7 +324,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawSquare() {
-    if (!this.interactive)
+    if (!this.options.interactive)
       this._finishEdit();
     var square = new Square(this._map);
     square.startDraw();
@@ -328,7 +332,7 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawPoint() {
-    if (!this.interactive)
+    if (!this.options.interactive)
       this._finishEdit();
     var point = new Point(this._map);
     point.startDraw();

@@ -30,13 +30,13 @@
   }));
 
   var Draw = mapboxgl.Draw({
-    interactive: true
+    interactive: true,
+    drawing: false
   });
   map.addControl(Draw);
-
-  this.map.on('load', function() {
-    var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
-  })
+  map.on('load', function() {
+    Draw.set({ type: 'Point', coordinates: [0, 0] });
+  });
 </script>
 </body>
 </html>

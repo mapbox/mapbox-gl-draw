@@ -7,11 +7,15 @@ var Draw = mapboxgl.Draw({ options });
 map.addControl(Draw);
 ```
 
-Options
+### Options
 
-option | values
----|---
-interactive | boolean
+option | values | function
+--- | --- | ---
+drawing | boolean | The ability to draw and delete features - default: `true`
+interactive | boolean | Keep all features permanently in edit mode - default: `false`
+keybindings | boolean | Keyboard shortcuts for drawing - default: true
+controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
+
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
 
@@ -133,7 +137,7 @@ map.on('draw.start', function(e) {
 });
 ```
 
-###`draw.end`
+###`drawing.end`
 
 Fired when a drawing is finished. Passes an object with the feature type and the geojson geometry to the callback.
 
