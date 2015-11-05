@@ -58,6 +58,10 @@ export default class Geometry {
     return this.geojson.geometry.type;
   }
 
+  getDrawId() {
+    return this.drawId;
+  }
+
   setCoordinates(coords) {
     this.coordinates = coords;
     return this;
@@ -108,12 +112,11 @@ export default class Geometry {
 
     var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
-    // why?
-    //if (this.coordinates.get(0).length > 1) {
-      //this.coordinates = this.coordinates.set(0, Immutable.List(this.coordinates.get(0)));
-    //}
 
-    this._map.fire('edit.new');
+    this._map.fire('edit.new', {
+      id: this.drawId,
+      geojson: this.toGeoJSON()
+    });
   }
 
   _renderDrawProgress() {

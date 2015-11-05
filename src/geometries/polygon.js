@@ -26,7 +26,7 @@ export default class Polygon extends Geometry {
 
   startDraw() {
     this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    this._map.fire('draw.start', { featureType: 'polygon' });
+    this._map.fire('drawing.start', { featureType: 'polygon' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addVertex);
     this._map.on('dblclick', this.completeDraw);
@@ -50,7 +50,10 @@ export default class Polygon extends Geometry {
       this.coordinates[0].push(this.first);
     }
 
-    this._map.fire('edit.new');
+    this._map.fire('edit.new', {
+      id: this.drawId,
+      geojson: this.toGeoJSON()
+    });
   }
 
   _onMouseMove(e) {
@@ -97,7 +100,10 @@ export default class Polygon extends Geometry {
     if (idx === 0)
       this.coordinates[0][this.coordinates[0].length - 1] = newPoint;
 
-    this._map.fire('edit.new');
+    this._map.fire('edit.new', {
+      id: this.drawId,
+      geojson: this.toGeoJSON()
+    });
   }
 
   /**
@@ -111,7 +117,10 @@ export default class Polygon extends Geometry {
     coords = this._map.unproject(coords);
     this.coordinates[0].splice(idx, 0, [ coords.lng, coords.lat ]);
 
-    this._map.fire('edit.new');
+    this._map.fire('edit.new', {
+      id: this.drawId,
+      geojson: this.toGeoJSON()
+    });
   }
 
 }

@@ -15,7 +15,7 @@
 <div id='map'></div>
 <script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
 <script src='../dist/mapboxgl.draw.js'></script>
-<script>
+<script type='text/javascript'>
   mapboxgl.accessToken = localStorage.accessToken;
 
   var map = new mapboxgl.Map({
@@ -29,7 +29,10 @@
     position: 'top-left'
   }));
 
-  var Draw = mapboxgl.Draw();
+  var Draw = mapboxgl.Draw({
+    interactive: true,
+    drawing: false
+  });
   map.addControl(Draw);
 </script>
 </body>

@@ -3,9 +3,29 @@
 In order to use GL Draw you must instantiate the draw class like so:
 
 ```js
-var Draw = mapboxgl.Draw();
+var Draw = mapboxgl.Draw({ options });
 map.addControl(Draw);
 ```
+
+Draw only works after the map has loaded so it is wise to perform any interactions in the `load` event callback of mapbox-gl:
+
+```js
+map.on('load', function() {
+    Draw.set({ ... });
+    console.log(Draw.getAll());
+    ...
+});
+```
+
+### Options
+
+option | values | function
+--- | --- | ---
+drawing | boolean | The ability to draw and delete features - default: `true`
+interactive | boolean | Keep all features permanently in edit mode - default: `false`
+keybindings | boolean | Keyboard shortcuts for drawing - default: true
+controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
+
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
 
@@ -115,7 +135,7 @@ This method removes all geometries in Draw and deletes the history.
 
 Draw fires off a number of events on draw and edit actions.
 
-###`draw.start`
+###`drawing.start`
 
 Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
 
@@ -127,7 +147,7 @@ map.on('draw.start', function(e) {
 });
 ```
 
-###`draw.end`
+###`drawing.end`
 
 Fired when a drawing is finished. Passes an object with the feature type and the geojson geometry to the callback.
 
@@ -139,26 +159,15 @@ map.on('draw.end', function(e) {
 });
 ```
 
-###`draw.feature.update`
-
-Fired while drawing when a new vertex is added. Passes the geometry being drawn to the callback.
-
-Example:
-
-```
-map.on('draw.feature.update', function(e) {
-  alert('new draw edit!', JSON.stringify(e.geojson));
-});
-```
 
 ###`edit.new`
 
-Fired while editting when a new edit is made. Passes the new geometry to the callback.
+Fired while editting when a new edit is made. Passes an object with the new geometry and its drawId to the callback.
 
 Example:
 
 ```
 map.on('edit.new', function(e) {
-  alert('new edit!', JSON.stringify(e.geojson));
+  alert('new edit on', e.id, '->', JSON.stringify(e.geojson));
 });
 ```

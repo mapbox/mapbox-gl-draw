@@ -21,7 +21,7 @@ export default class Point extends Geometry {
   }
 
   startDraw() {
-    this._map.fire('draw.start', { featureType: 'point' });
+    this._map.fire('drawing.start', { featureType: 'point' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.completeDraw);
   }
