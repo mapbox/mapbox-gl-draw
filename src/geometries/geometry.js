@@ -58,6 +58,10 @@ export default class Geometry {
     return this.geojson.geometry.type;
   }
 
+  getDrawId() {
+    return this.drawId;
+  }
+
   setCoordinates(coords) {
     this.coordinates = coords;
     return this;

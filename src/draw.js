@@ -59,7 +59,7 @@ export default class Draw extends mapboxgl.Control {
     this._store.setEditStore(this._editStore);
     this._editStore.setDrawStore(this._store);
 
-    // Build out draw controls
+    // Build draw controls
     if (controls.line) {
       this.lineStringCtrl = createButton(this._container, {
         className: controlClass + ' line',
@@ -205,7 +205,8 @@ export default class Draw extends mapboxgl.Control {
         if (this._drawing) return;
         this._edit(features[0].properties.drawId);
       } else { // clicked outside all features
-        this._finishEdit();
+        if (!this.interactive)
+          this._finishEdit();
       }
     });
   }
@@ -303,36 +304,38 @@ export default class Draw extends mapboxgl.Control {
   }
 
   _drawPolygon() {
-    this._finishEdit();
+    if (!this.interactive)
+      this._finishEdit();
     var polygon = new Polygon(this._map);
     polygon.startDraw();
     this._drawing = true;
   }
 
   _drawLine() {
-    this._finishEdit();
+    if (!this.interactive)
+      this._finishEdit();
     var line = new Line(this._map);
     line.startDraw();
     this._drawing = true;
   }
 
   _drawSquare() {
-    this._finishEdit();
+    if (!this.interactive)
+      this._finishEdit();
     var square = new Square(this._map);
     square.startDraw();
     this._drawing = true;
   }
 
   _drawPoint() {
-    this._finishEdit();
+    if (!this.interactive)
+      this._finishEdit();
     var point = new Point(this._map);
     point.startDraw();
     this._drawing = true;
   }
 
   _mapState() {
-    var controlClass = this._controlClass;
-
     this._map.on('load', () => {
 
       // in progress drawing style
@@ -362,22 +365,18 @@ export default class Draw extends mapboxgl.Control {
       });
       themeEdit.forEach(style => { this._map.addLayer(style); });
 
-      this._map.on('draw.end', e => {
-        this._store.set(e.geometry);
-        DOM.removeClass(document.querySelectorAll('.' + controlClass), 'active');
-      });
-
       this._map.on('drawing.new.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
       });
 
       // clear the drawing layer after a drawing is done
-      this._map.on('drawing.end', () => {
+      this._map.on('drawing.end', e => {
         this._map.getSource('drawing').setData({
           type: 'FeatureCollection',
           features: []
         });
         this._drawing = false;
+        this._edit(e.geometry.getDrawId());
         [ this.lineStringCtrl,
           this.polygonCtrl,
           this.squareCtrl,
@@ -459,6 +458,7 @@ export default class Draw extends mapboxgl.Control {
           return;
       }
       this._store.set(feature);
+      this._edit(feature.getDrawId());
     }
     return feature.drawId;
   }
