@@ -127,10 +127,6 @@ console.log(newFeature);
 
 This method removes all geometries in Draw.
 
-###`.clearAll() -> Draw`
-
-This method removes all geometries in Draw and deletes the history.
-
 ## Events
 
 Draw fires off a number of events on draw and edit actions.
