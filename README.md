@@ -20,7 +20,7 @@ Include [mapboxgl.draw.js](https://github.com/mapbox/gl-draw/blob/master/dist/ma
 <script src="mapboxgl.draw.js"></script>
 ```
 
-You'll also want to include [mapboxgl.draw.css](https://github.com/mapbox/gl-draw/blob/dev-pages/dist/mapboxgl.draw.css)
+Also include [mapboxgl.draw.css](https://github.com/mapbox/gl-draw/blob/dev-pages/dist/mapboxgl.draw.css)
 
 ```html
 <link href="mapboxgl.draw.css" rel="stylesheet" />
