@@ -232,7 +232,9 @@ export default class Draw extends mapboxgl.Control {
   _finishEdit() {
     if (this._editStore.inProgress()) {
       this._editStore.finish();
-      DOM.destroy(this.deleteBtn);
+      if (this.options.drawing) {
+        DOM.destroy(this.deleteBtn);
+      }
       this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     }
   }
@@ -242,9 +244,12 @@ export default class Draw extends mapboxgl.Control {
 
     this._map.featuresAt([coords.x, coords.y], { radius: 20, includeGeometry: true }, (err, features) => {
 
-      if (err) throw err;
-      else if (!features.length) return;
-      else if (R.none(feat => R.contains(feat.properties.drawId, this._editStore.getDrawIds()))(features)) return;
+      if (err)
+        throw err;
+      else if (!features.length)
+        return;
+      else if (R.none(feat => R.contains(feat.properties.drawId, this._editStore.getDrawIds()))(features))
+        return;
 
       e.stopPropagation();
 
@@ -440,33 +445,39 @@ export default class Draw extends mapboxgl.Control {
     feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
       for (var i = 0; i < feature.features.length; i++) {
-        this.set(feature.features[i]);
+        this._setFeature(feature.features[i]);
       }
     } else {
-      if (!feature.geometry)
-        feature = {
-          type: 'Feature',
-          geometry: feature
-        };
-      switch (feature.geometry.type) {
-        case 'Point':
-          feature = new Point(this._map, feature);
-          break;
-        case 'LineString':
-          feature = new Line(this._map, feature);
-          break;
-        case 'Polygon':
-          feature = new Polygon(this._map, feature);
-          break;
-        default:
-          //throw new Error('unsupported geometry type: ' + feature.geometry.type);
-          console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
-          return;
-      }
-      this._store.set(feature);
+      this._setFeature(feature);
+    }
+    this._store._render();
+    return feature.drawId;
+  }
+
+  _setFeature(feature) {
+    if (!feature.geometry)
+      feature = {
+        type: 'Feature',
+        geometry: feature
+      };
+    switch (feature.geometry.type) {
+      case 'Point':
+        feature = new Point(this._map, feature);
+        break;
+      case 'LineString':
+        feature = new Line(this._map, feature);
+        break;
+      case 'Polygon':
+        feature = new Polygon(this._map, feature);
+        break;
+      default:
+        console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
+        return;
+    }
+    this._store.set(feature, true);
+    if (this.options.interactive) {
       this._edit(feature.getDrawId());
     }
-    return feature.drawId;
   }
 
   /**

@@ -47,9 +47,11 @@ export default class Store {
   /**
    * @param {Object} feature - GeoJSON feature
    */
-  set(feature) {
+  set(feature, preventRender) {
     this._features[feature.drawId] = feature;
-    this._render();
+    if (!preventRender) {
+      this._render();
+    }
   }
 
   /**
