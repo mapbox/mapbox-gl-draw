@@ -18,15 +18,18 @@ export default class API extends mapboxgl.Control {
    */
   set(feature) {
     feature = JSON.parse(JSON.stringify(feature));
+    var id;
     if (feature.type === 'FeatureCollection') {
+      id = [];
       for (var i = 0; i < feature.features.length; i++) {
-        this._setFeature(feature.features[i]);
+        id.push(this._setFeature(feature.features[i]));
       }
     } else {
-      this._setFeature(feature);
+      id = this._setFeature(feature);
     }
     this._store._render();
-    return feature.drawId;
+    //return feature.drawId;
+    return id;
   }
 
   /**
@@ -57,6 +60,7 @@ export default class API extends mapboxgl.Control {
     if (this.options.interactive) {
       this._edit(feature.getDrawId());
     }
+    return feature.drawId;
   }
 
   /**
@@ -128,4 +132,5 @@ export default class API extends mapboxgl.Control {
     this._store.clear();
     return this;
   }
+
 }

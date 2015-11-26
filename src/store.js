@@ -39,6 +39,9 @@ export default class Store {
     return this._features[id].toGeoJSON();
   }
 
+  /**
+   * remove all features from the store
+   */
   clear() {
     this._features = {};
     this._render();
@@ -65,7 +68,6 @@ export default class Store {
   /**
    * @param {String} id - the drawId of a feature
    * @return {Object} - GeoJSON feature
-   * @private
    */
   edit(id) {
     this._editStore.set(this._features[id]);
