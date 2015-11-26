@@ -25,7 +25,7 @@ option | values | function
 --- | --- | ---
 drawing | boolean | The ability to draw and delete features - default: `true`
 interactive | boolean | Keep all features permanently in edit mode - default: `false`
-keybindings | boolean | Keyboard shortcuts for drawing - default: true
+keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
 
 
@@ -108,9 +108,12 @@ This method takes the `drawId` of feature and removes it from draw. It returns `
 Example:
 
 ```js
+var feature = { type: 'Point', coordinates: [0, 0] };
+var id = draw.set(feature)
 Draw
-  .remove('123abc')
-  .set({ type: 'Point', coordinates: [0, 0] });
+  .remove(id)
+  .getAll();
+// => { type: 'FeatureCollection', features: [] }
 ```
 
 ---
@@ -127,13 +130,23 @@ var newFeature = Draw
   .update(id, { type: 'Point', coordinates: [1, 1] })
   .get(id);
 console.log(newFeature);
-//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [1, 1] } }
 ```
 
 
 ####`.clear() -> Draw`
 
 This method removes all geometries in Draw.
+
+Example:
+
+```js
+Draw.set({ type: 'Point', coordinates: [0, 0] });
+Draw
+  .clear()
+  .getAll();
+// => { type: 'FeatureCollection', features: [] }
+```
 
 ## Events
 
