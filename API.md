@@ -31,7 +31,9 @@ controls | Object | drawable shapes - default `{ marker: true, line: true, shape
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
 
-###`.set(Object: geojsonFeature) -> String`
+## API Methods
+
+####`.set(Object: geojsonFeature) -> String`
 
 This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`.
 
@@ -44,7 +46,8 @@ console.log(Draw.get(featureId));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
 ```
 
-###`.get(String: drawId, [Boolean]: includeDrawIdInProps) -> Object`
+---
+####`.get(String: drawId, [Boolean]: includeDrawIdInProps) -> Object`
 
 This method takes the `drawId` of a feature and returns its GeoJSON object. If the optional second argument is set to `true`, the feature returned will include its `drawId` in its properties.
 
@@ -56,8 +59,8 @@ console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
 ```
 
-
-###`.getAll([Boolean]: includeDrawIdInProps) -> Object`
+---
+####`.getAll([Boolean]: includeDrawIdInProps) -> Object`
 
 This method returns all features added to Draw in a single GeoJSON FeatureCollection. If the optional argument is set to `true`, the feature returned will include its `drawId` in its properties.
 
@@ -96,8 +99,9 @@ console.log(Draw.getAll());
 //  ]
 //}
 ```
+---
 
-###`.remove(String: drawId) -> Draw`
+####`.remove(String: drawId) -> Draw`
 
 This method takes the `drawId` of feature and removes it from draw. It returns `this` to allow for method chaining.
 
@@ -109,7 +113,9 @@ Draw
   .set({ type: 'Point', coordinates: [0, 0] });
 ```
 
-###`.update(String: drawId, Object: geojsonFeature) -> Draw`
+---
+
+####`.update(String: drawId, Object: geojsonFeature) -> Draw`
 
 This method takes the `drawId` of an existing feature and a GeoJSON object and replaces that feature in draw with the new feature. It returns `this`.
 
@@ -125,7 +131,7 @@ console.log(newFeature);
 ```
 
 
-###`.clear() -> Draw`
+####`.clear() -> Draw`
 
 This method removes all geometries in Draw.
 
@@ -133,7 +139,8 @@ This method removes all geometries in Draw.
 
 Draw fires off a number of events on draw and edit actions.
 
-###`drawing.start`
+
+####`drawing.start`
 
 Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
 
@@ -145,7 +152,8 @@ map.on('draw.start', function(e) {
 });
 ```
 
-###`drawing.end`
+---
+####`drawing.end`
 
 Fired when a drawing is finished. Passes an object with the feature type and the geojson geometry to the callback.
 
@@ -157,8 +165,9 @@ map.on('draw.end', function(e) {
 });
 ```
 
+---
 
-###`edit.new`
+####`edit.new`
 
 Fired while editting when a new edit is made. Passes an object with the new geometry and its drawId to the callback.
 

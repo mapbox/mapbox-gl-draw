@@ -28,7 +28,6 @@ export default class API extends mapboxgl.Control {
       id = this._setFeature(feature);
     }
     this._store._render();
-    //return feature.drawId;
     return id;
   }
 
