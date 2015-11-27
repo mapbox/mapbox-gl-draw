@@ -160,7 +160,7 @@ Fired when a drawing is started. Passes an object with the the feature type to t
 Example:
 
 ```
-map.on('draw.start', function(e) {
+map.on('drawing.start', function(e) {
   alert('Started drawing a ', e.featureType);
 });
 ```
@@ -173,7 +173,7 @@ Fired when a drawing is finished. Passes an object with the feature type and the
 Example:
 
 ```
-map.on('draw.end', function(e) {
+map.on('drawing.end', function(e) {
   alert('Finished drawing a ', e.featureType, 'with the coordintes', JSON.stringify(e.geometry.coordinates));
 });
 ```
