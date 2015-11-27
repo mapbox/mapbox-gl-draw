@@ -4,7 +4,7 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
-  <link href='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl.css' rel='stylesheet' />
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.11.4/mapbox-gl.css' rel='stylesheet' />
   <link href='../dist/mapboxgl.draw.css' rel='stylesheet' />
   <style>
     body { margin:0; padding:0; }
@@ -13,9 +13,9 @@
 </head>
 <body>
 <div id='map'></div>
-<script src='https://mapbox.s3.amazonaws.com/mapbox-gl-js/master/mapbox-gl-dev.js'></script>
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.11.4/mapbox-gl.js'></script>
 <script src='../dist/mapboxgl.draw.js'></script>
-<script>
+<script type='text/javascript'>
   mapboxgl.accessToken = localStorage.accessToken;
 
   var map = new mapboxgl.Map({
@@ -29,8 +29,14 @@
     position: 'top-left'
   }));
 
-  var Draw = mapboxgl.Draw();
+  var Draw = mapboxgl.Draw({
+    interactive: false,
+    drawing: true
+  });
   map.addControl(Draw);
+  map.on('load', function() {
+    var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+  });
 </script>
 </body>
 </html>

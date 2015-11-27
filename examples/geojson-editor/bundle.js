@@ -19,12 +19,12 @@ var DELETE = 'delete';
 var PUT = 'put';
 
 var Client = (function () {
-  function Client(app, account, token) {
+  function Client(app /*, account, token*/) {
     _classCallCheck(this, Client);
 
     this.app = app;
-    this.acct = account;
-    this.token = token;
+    this.acct = 'kelvinabrokwa'; //account;
+    this.token = 'sk.eyJ1Ijoia2VsdmluYWJyb2t3YSIsImEiOiJjaWc5b' + 'HltdXcwcHJydWJrbXl1d24xZW41In0.UfeNrn-XK7xovoQBdwuuCw'; //token;
     this.list();
   }
 
