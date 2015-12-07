@@ -3,27 +3,27 @@ GL Draw
 
 Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) maps.
 
-[![Circle CI](https://circleci.com/gh/mapbox/gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
+[![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
 
 ### Installing
 
 ```
-git clone https://github.com/mapbox/gl-draw.git
-cd gl-draw
+git clone https://github.com/mapbox/mapbox-gl-draw.git
+cd mapbox-gl-draw
 npm install
 ```
 
-Include [mapboxgl.draw.js](https://github.com/mapbox/gl-draw/blob/master/dist/mapboxgl.draw.js) after `mapbox-gl.js`
+Include [mapbox-gl-draw.js](https://github.com/mapbox/mapbox-gl-draw/blob/master/dist/mapbox-gl-draw.js) after `mapbox-gl.js`
 
 ```html
 <script src="mapbox-gl.js"></script>
-<script src="mapboxgl.draw.js"></script>
+<script src="mapbox-gl-draw.js"></script>
 ```
 
-Also include [mapboxgl.draw.css](https://github.com/mapbox/gl-draw/blob/dev-pages/dist/mapboxgl.draw.css)
+Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/dev-pages/dist/mapbox-gl-draw.css)
 
 ```html
-<link href="mapboxgl.draw.css" rel="stylesheet" />
+<link href="mapbox-gl-draw.css" rel="stylesheet" />
 ```
 
 ### Usage
@@ -43,7 +43,7 @@ var Draw = mapboxgl.Draw();
 map.addControl(Draw)
 ```
 
-### See [API.md](https://github.com/mapbox/gl-draw/blob/master/API.md) for advanced usage.
+### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for advanced usage.
 
 ### Developing
 

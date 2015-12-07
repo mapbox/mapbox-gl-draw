@@ -155,7 +155,7 @@ Draw fires off a number of events on draw and edit actions.
 
 ####`drawing.start`
 
-Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
+Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are mapbox-gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
 
 Example:
 
