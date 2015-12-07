@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-  <meta charset="UTF-8">
-  <title>Example gl-draw app</title>
+  <meta charset='UTF-8'>
+  <title>Example mapbox-gl-draw app</title>
   <script src='https://fb.me/react-0.13.3.min.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.11.4/mapbox-gl.css' rel='stylesheet' />
-  <link href='../../dist/mapboxgl.draw.css' rel='stylesheet' />
+  <link href='../../dist/mapbox-gl-draw.css' rel='stylesheet' />
   <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
   <style>
     body, div { margin:0; padding:0; }
@@ -44,7 +44,7 @@
   <div id='map'></div>
   <div id='geojson'></div>
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.11.4/mapbox-gl.js'></script>
-  <script src='../../dist/mapboxgl.draw.js'></script>
+  <script src='../../dist/mapbox-gl-draw.js'></script>
   <script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.0/turf.min.js'></script>
   <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
@@ -57,11 +57,11 @@
       style: 'mapbox://styles/mapbox/streets-v8'
     });
 
-    // add gl-draw controls
     map.addControl(new mapboxgl.Navigation({
       position: 'top-left'
     }));
 
+    // add mapbox-gl-draw controls
     var Draw = mapboxgl.Draw();
     map.addControl(Draw);
   </script>

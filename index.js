@@ -23,7 +23,7 @@
  *
  * // or using using node and browserify
  * var mapboxgl = require('mapbox-gl');
- * var GLDraw = require('gl-draw');
+ * var GLDraw = require('mapbox-gl-draw');
  * var map = new mapboxgl.Map({
  *   container: 'map',
  *   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'

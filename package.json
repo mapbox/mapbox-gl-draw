@@ -1,8 +1,8 @@
 {
-  "name": "gl-draw",
+  "name": "mapbox-gl-draw",
   "version": "0.0.0",
   "description": "A drawing component for Mapbox GL JS",
-  "homepage": "https://github.com/mapbox/gl-draw",
+  "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
   "license": "ISC",
   "main": "index.js",
@@ -15,13 +15,13 @@
     "test": "npm run lint && npm run build",
     "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
-    "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapboxgl.draw.js",
+    "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "build-examples": "./build-examples.sh",
-    "start": "budo index.js --serve=dist/mapboxgl.draw.js --live -d | bistre"
+    "start": "budo index.js --serve=dist/mapbox-gl-draw.js --live -d | bistre"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mapbox/gl-draw.git"
+    "url": "git://github.com/mapbox/mapbox-gl-draw.git"
   },
   "keywords": [
     "webgl",
@@ -30,7 +30,7 @@
     "drawing"
   ],
   "bugs": {
-    "url": "https://github.com/mapbox/gl-draw/issues"
+    "url": "https://github.com/mapbox/mapbox-gl-draw/issues"
   },
   "devDependencies": {
     "babel-eslint": "^3.1.7",
