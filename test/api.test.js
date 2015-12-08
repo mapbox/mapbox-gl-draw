@@ -30,8 +30,11 @@ test('API test', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  // API tests
+  // set
   var id = Draw.set(feature);
+  t.true(id !== null && id !== 'undefined', 'valid string id returned on set');
+
+  // get
   var f = Draw.get(id);
   t.deepEquals(
     feature.geometry.coordinates,
@@ -39,15 +42,28 @@ test('API test', t => {
     'the geometry added is the same returned by Draw.get'
   );
 
+  // getAll
   t.deepEquals(
     feature.geometry,
     Draw.getAll().features[0].geometry,
     'the geometry added is the same returned by Draw.getAll'
   );
 
+  // update
+  feature.geometry.coordinates = [1, 1];
+  Draw.update(id, feature);
+  var f2 = Draw.get(id);
+  t.deepEquals(
+    feature.geometry,
+    f2.geometry,
+    'update updates the geometry and preservers the id'
+  );
+
+  // clear
   Draw.clear();
   t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
 
+  // remove
   id = Draw.set(feature);
   Draw.remove(id);
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');

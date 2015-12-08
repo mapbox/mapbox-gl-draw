@@ -2,6 +2,7 @@ var test = require('tape');
 var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
 var Store = require('../src/store');
+var EditStore = require('../src/edit_store');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -50,11 +51,6 @@ test('Draw class test', t => {
   t.equals(typeof Draw._drawSquare, 'function', '_drawSquare method exists');
   t.equals(typeof Draw._drawPoint, 'function', '_drawPoint method exists');
   t.equals(typeof Draw._destroy, 'function', '_destroy method exists');
-  t.equals(typeof Draw.set, 'function', 'set method exists');
-  t.equals(typeof Draw.remove, 'function', 'removeGeometry method exists');
-  t.equals(typeof Draw.get, 'function', 'get method exists');
-  t.equals(typeof Draw.getAll, 'function', 'getAll method exists');
-  t.equals(typeof Draw.clear, 'function', 'clear method exists');
   t.equals(typeof Draw._mapState, 'function', '_mapState method exists');
 
   // check for event listeners
@@ -67,6 +63,7 @@ test('Draw class test', t => {
   // class member objects are of the correct type
   t.ok(Draw._map instanceof mapboxgl.Map, 'this._map is an instance of mapboxgl.Map');
   t.ok(Draw._store instanceof Store, 'Draw._store is an instance of the store class');
+  t.ok(Draw._editStore instanceof EditStore, 'Draw._editStore is an instance of edit store class');
 
   // check for control buttons in the DOM
   t.ok(
@@ -100,8 +97,20 @@ test('Draw class test', t => {
   );
   Draw.clear();
 
-  // delete feature
-  //Draw.set(feature);
+  t.end();
+});
+
+test('Draw without handlers', t => {
+  var map = createMap();
+  GLDraw({
+    controls: {}
+  });
+
+  try {
+    map.fire('drawing.end');
+  } catch (e) {
+    t.fail('calling drawing.end without handlers throws');
+  }
 
   t.end();
 });

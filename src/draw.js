@@ -435,7 +435,7 @@ export default class Draw extends API {
         [ this.lineStringCtrl,
           this.polygonCtrl,
           this.squareCtrl,
-          this.markerCtrl ].forEach(ctrl => { ctrl.classList.remove('active'); });
+          this.markerCtrl ].forEach(ctrl => { if (ctrl) ctrl.classList.remove('active'); });
       });
 
       this._map.on('edit.feature.update', e => {
