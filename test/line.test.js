@@ -1,6 +1,7 @@
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
+var Line = require('../src/geometries/line');
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -17,6 +18,7 @@ function createMap() {
   return map;
 }
 
+/*
 var feature = {
   type: 'Feature',
   properties: {},
@@ -25,17 +27,23 @@ var feature = {
     coordinates: [[0, 0], [1, 1]]
   }
 };
+*/
 
 test('Line draw class', t => {
   var map = createMap();
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  var id = Draw.set(feature);
-  var Line = Draw._store.get(id);
+  var l = new Line(map);
 
   // methods
-  t.equals(typeof Line.constructor, 'function', 'Line.constructor exists');
+  t.equals(typeof l.constructor, 'function', 'Line.constructor exists');
+  t.equals(typeof l.startDraw, 'function', 'Line.startDraw exists');
+  t.equals(typeof l._addPoint, 'function', 'Line._addPoint exists');
+  t.equals(typeof l._onMouseMove, 'function', 'Line._onMouseMove exists');
+  t.equals(typeof l._completeDraw, 'function', 'Line._completeDraw exists');
+  t.equals(typeof l.moveVertex, 'function', 'Line.moveVertex exists');
+  t.equals(typeof l.editAddVertex, 'function', 'Line.editAddVertex exists');
 
   t.end();
 });
