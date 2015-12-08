@@ -43,7 +43,7 @@ var Draw = mapboxgl.Draw();
 map.addControl(Draw)
 ```
 
-### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for advanced usage.
+### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for complete reference.
 
 ### Developing
 
