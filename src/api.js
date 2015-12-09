@@ -14,18 +14,19 @@ export default class API extends mapboxgl.Control {
   /**
    * add a geometry
    * @param {Object} feature - GeoJSON feature
+   * @param {Object} options - add options to the geometry
    * @returns {Draw} this
    */
-  set(feature) {
+  set(feature, options) {
     feature = JSON.parse(JSON.stringify(feature));
     var id;
     if (feature.type === 'FeatureCollection') {
       id = [];
       for (var i = 0; i < feature.features.length; i++) {
-        id.push(this._setFeature(feature.features[i]));
+        id.push(this._setFeature(feature.features[i], options));
       }
     } else {
-      id = this._setFeature(feature);
+      id = this._setFeature(feature, options);
     }
     this._store._render();
     return id;
@@ -35,7 +36,7 @@ export default class API extends mapboxgl.Control {
    * a helper method of `set()` for individual features
    * @private
    */
-  _setFeature(feature) {
+  _setFeature(feature, options) {
     if (!feature.geometry)
       feature = {
         type: 'Feature',
@@ -43,13 +44,13 @@ export default class API extends mapboxgl.Control {
       };
     switch (feature.geometry.type) {
       case 'Point':
-        feature = new Point(this._map, feature);
+        feature = new Point(this._map, feature, options);
         break;
       case 'LineString':
-        feature = new Line(this._map, feature);
+        feature = new Line(this._map, feature, options);
         break;
       case 'Polygon':
-        feature = new Polygon(this._map, feature);
+        feature = new Polygon(this._map, feature, options);
         break;
       default:
         console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
