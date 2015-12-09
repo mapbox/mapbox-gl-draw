@@ -37,6 +37,17 @@ test('API test', t => {
   t.test('set', t => {
     id = Draw.set(feature);
     t.ok(id, 'valid string id returned on set');
+
+    // set permanent feature
+    id = Draw.set(feature, true);
+    var point = map.project(new mapboxgl.LngLat(...feature.geometry.coordinates));
+    map.fire('click', { point })
+    t.equals(
+      Draw._editStore.getDrawIds().indexOf(id),
+      -1,
+      'permanent feature is not inserted into edit store when clicked'
+    );
+
     t.end();
   });
 

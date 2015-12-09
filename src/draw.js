@@ -220,7 +220,10 @@ export default class Draw extends API {
       if (err) throw err;
       if (features.length) { // clicked on a feature
         if (this._drawing) return;
-        this._edit(features[0].properties.drawId);
+        // check if the object is permanent
+        var id = features[0].properties.drawId;
+        if (!this._store.get(id).getOptions().permanent)
+          this._edit(id);
       } else { // clicked outside all features
         if (!this.options.interactive)
           this._finishEdit();

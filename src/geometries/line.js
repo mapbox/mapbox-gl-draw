@@ -13,10 +13,10 @@ import { translatePoint, DOM } from '../util';
  */
 export default class Line extends Geometry {
 
-  constructor(map, data) {
+  constructor(map, data, options) {
     if (!data) data = { geometry: {} };
     data.geometry.coordinates = data.geometry.coordinates || [[0, 0], [0, 0]];
-    super(map, 'LineString', data);
+    super(map, 'LineString', data, options);
 
     this.type = 'line';
 

@@ -14,10 +14,11 @@ import { translate } from '../util';
  */
 export default class Geometry {
 
-  constructor(map, type, data) {
+  constructor(map, type, data, options) {
     this._map = map;
     this.drawId = hat();
     this.coordinates = data.geometry.coordinates;
+    this.options = options || {};
     var props = data.properties || {};
     props.drawId = this.drawId;
 
@@ -60,6 +61,10 @@ export default class Geometry {
 
   getDrawId() {
     return this.drawId;
+  }
+
+  getOptions() {
+    return this.options;
   }
 
   setCoordinates(coords) {

@@ -33,9 +33,9 @@ controls | Object | drawable shapes - default `{ marker: true, line: true, shape
 
 ## API Methods
 
-####`.set(Object: geojsonFeature) -> String`
+####`.set(Object: geojsonFeature, [Object]: options) -> String`
 
-This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`.
+This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger editing.
 
 Example:
 
