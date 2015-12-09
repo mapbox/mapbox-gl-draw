@@ -1,6 +1,7 @@
-var test = require('tape');
-var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../');
+/* eslint no-shadow:[0] */
+import test from 'tape';
+import mapboxgl from 'mapbox-gl';
+import GLDraw from '../';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -26,47 +27,63 @@ var feature = {
 };
 
 test('API test', t => {
+
   var map = createMap();
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  // set
-  var id = Draw.set(feature);
-  t.true(id !== null && id !== 'undefined', 'valid string id returned on set');
+  var id;
 
-  // get
-  var f = Draw.get(id);
-  t.deepEquals(
-    feature.geometry.coordinates,
-    f.geometry.coordinates,
-    'the geometry added is the same returned by Draw.get'
-  );
+  t.test('set', t => {
+    id = Draw.set(feature);
+    t.ok(id, 'valid string id returned on set');
+    t.end();
+  });
 
-  // getAll
-  t.deepEquals(
-    feature.geometry,
-    Draw.getAll().features[0].geometry,
-    'the geometry added is the same returned by Draw.getAll'
-  );
+  t.test('get', t => {
+    var f = Draw.get(id);
+    t.deepEquals(
+      feature.geometry.coordinates,
+      f.geometry.coordinates,
+      'the geometry added is the same returned by Draw.get'
+    );
+    t.end();
+  });
 
-  // update
-  feature.geometry.coordinates = [1, 1];
-  Draw.update(id, feature);
-  var f2 = Draw.get(id);
-  t.deepEquals(
-    feature.geometry,
-    f2.geometry,
-    'update updates the geometry and preservers the id'
-  );
+  t.test('getAll', t => {
+    t.deepEquals(
+      feature.geometry,
+      Draw.getAll().features[0].geometry,
+      'the geometry added is the same returned by Draw.getAll'
+    );
+    t.end();
+  });
 
-  // clear
-  Draw.clear();
-  t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
+  t.test('update', t => {
+    feature.geometry.coordinates = [1, 1];
+    Draw.update(id, feature);
+    var f2 = Draw.get(id);
+    t.deepEquals(
+      feature.geometry,
+      f2.geometry,
+      'update updates the geometry and preservers the id'
+    );
+    t.end();
+  });
 
-  // remove
-  id = Draw.set(feature);
-  Draw.remove(id);
-  t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
+  t.test('clear', t => {
+    Draw.clear();
+    t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
+    t.end();
+  });
+
+  t.test('remove', t => {
+    id = Draw.set(feature);
+    Draw.remove(id);
+    t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
+    t.end();
+  });
 
   t.end();
+
 });

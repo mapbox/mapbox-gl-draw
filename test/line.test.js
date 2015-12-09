@@ -1,7 +1,7 @@
-var test = require('tape');
-var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../');
-var Line = require('../src/geometries/line');
+import test from 'tape';
+import mapboxgl from 'mapbox-gl';
+import GLDraw from '../';
+import Line from '../src/geometries/line';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -23,27 +23,26 @@ var feature = {
   type: 'Feature',
   properties: {},
   geometry: {
-    type: 'LineString',
+    type: 'lString',
     coordinates: [[0, 0], [1, 1]]
   }
 };
 */
 
-test('Line draw class', t => {
+test('l draw class', t => {
   var map = createMap();
   var Draw = GLDraw();
   map.addControl(Draw);
 
   var l = new Line(map);
 
-  // methods
-  t.equals(typeof l.constructor, 'function', 'Line.constructor exists');
-  t.equals(typeof l.startDraw, 'function', 'Line.startDraw exists');
-  t.equals(typeof l._addPoint, 'function', 'Line._addPoint exists');
-  t.equals(typeof l._onMouseMove, 'function', 'Line._onMouseMove exists');
-  t.equals(typeof l._completeDraw, 'function', 'Line._completeDraw exists');
-  t.equals(typeof l.moveVertex, 'function', 'Line.moveVertex exists');
-  t.equals(typeof l.editAddVertex, 'function', 'Line.editAddVertex exists');
+  t.ok(l.constructor instanceof Function, 'l.constructor exists');
+  t.ok(l.startDraw instanceof Function, 'l.startDraw exists');
+  t.ok(l._addPoint instanceof Function, 'Line._addPoint exists');
+  t.ok(l._onMouseMove instanceof Function, 'Line._onMouseMove exists');
+  t.ok(l._completeDraw instanceof Function, 'Line._completeDraw exists');
+  t.ok(l.moveVertex instanceof Function, 'Line.moveVertex exists');
+  t.ok(l.editAddVertex instanceof Function, 'Line.editAddVertex exists');
 
   t.end();
 });

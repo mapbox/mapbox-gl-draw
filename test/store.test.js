@@ -1,7 +1,8 @@
-var Store = require('../src/store');
-var test = require('tape');
-var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../');
+/* eslint no-shadow:[0] */
+import test from 'tape';
+import Store from '../src/store';
+import mapboxgl from 'mapbox-gl';
+import GLDraw from '../';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -40,33 +41,44 @@ test('Store constructor', t => {
 
   var store = Draw._store;
 
-  // are the methods even there?
-  t.equals(typeof store.get, 'function', 'get exists');
-  t.equals(typeof store.getAllGeoJSON, 'function', 'getAllGeoJSON exists');
-  t.equals(typeof store.clear, 'function', 'clear exists');
-  t.equals(typeof store.unset, 'function', 'unset exists');
-  t.equals(typeof store.set, 'function', 'set exists');
-  t.equals(typeof store.edit, 'function', 'edit exists');
-  t.equals(typeof store._render, 'function', '_render exists');
+  t.ok(store.get instanceof Function, 'get exists');
+  t.ok(store.getAllGeoJSON instanceof Function, 'getAllGeoJSON exists');
+  t.ok(store.clear instanceof Function, 'clear exists');
+  t.ok(store.unset instanceof Function, 'unset exists');
+  t.ok(store.set instanceof Function, 'set exists');
+  t.ok(store.edit instanceof Function, 'edit exists');
+  t.ok(store._render instanceof Function, '_render exists');
 
-  // set
-  var id = Draw.set(feature);
-  var f = Draw.get(id, true);
-  t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
-  t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
+  var f;
 
-  // get
-  var storeFeat = store.get(f.properties.drawId);
-  t.deepEqual(storeFeat.toGeoJSON().geometry, feature.geometry, 'get returns the same geometry you set');
+  t.test('set', t => {
+    var id = Draw.set(feature);
+    f = Draw.get(id, true);
+    t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
+    t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
+    t.end();
+  });
 
-  // unset
-  store.unset(f.properties.drawId);
-  t.equals(store.getAllGeoJSON().features.length, 0, 'calling unset removes the feature');
+  t.test('get', t => {
+    var storeFeat = store.get(f.properties.drawId);
+    t.deepEqual(
+        storeFeat.toGeoJSON().geometry, feature.geometry,
+        'get returns the same geometry you set');
+    t.end();
+  });
 
-  // clear
-  Draw.set(feature);
-  store.clear();
-  t.equals(store.getAllGeoJSON().features.length, 0, '0 features remaining after clearing the store the store');
+  t.test('unset', t => {
+    store.unset(f.properties.drawId);
+    t.equals(store.getAllGeoJSON().features.length, 0, 'calling unset removes the feature');
+    t.end();
+  });
+
+  t.test('clear', t => {
+    Draw.set(feature);
+    store.clear();
+    t.equals(store.getAllGeoJSON().features.length, 0, '0 features remaining after clearing the store the store');
+    t.end();
+  });
 
   t.end();
 });

@@ -1,7 +1,8 @@
-var EditStore = require('../src/edit_store');
-var test = require('tape');
-var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../');
+/* eslint no-shadow:[0] */
+import test from 'tape';
+import EditStore from '../src/edit_store';
+import mapboxgl from 'mapbox-gl';
+import GLDraw from '../';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -27,12 +28,6 @@ var feature = {
   }
 };
 
-test('Edit store has correct properties', t => {
-  t.ok(EditStore, 'edit store exists');
-  t.equals(typeof EditStore, 'function', 'edit store is a function');
-  t.end();
-});
-
 test('Edit store constructor', t => {
   var map = createMap();
   var Draw = GLDraw();
@@ -41,34 +36,41 @@ test('Edit store constructor', t => {
   var editStore = new EditStore(map);
 
   // are they even there?
-  t.equals(typeof editStore.get, 'function', 'get exists');
-  t.equals(typeof editStore.clear, 'function', 'clear exists');
-  t.equals(typeof editStore._addVertices, 'function', '_addVertices exists');
-  t.equals(typeof editStore._addMidpoints, 'function', '_addMidpoints exists');
-  t.equals(typeof editStore._render, 'function', 'render exists');
+  t.ok(editStore.get instanceof Function, 'get is a function');
+  t.ok(editStore.clear instanceof Function, 'clear is a function');
+  t.ok(editStore._addVertices instanceof Function, '_addVertices is a function');
+  t.ok(editStore._addMidpoints instanceof Function, '_addMidpoints is a function');
+  t.ok(editStore._render instanceof Function, 'render is a function');
 
   var id = Draw.set(feature);
   Draw._edit(id);
 
-  t.deepEquals(
-    Draw._editStore.getAllGeoJSON().features[0].geometry,
-    feature.geometry,
-    'the geometry in the store is the same as the one with which we initiated the store'
-  );
+  t.test('getAllGeoJSON', t => {
+    t.deepEquals(
+      Draw._editStore.getAllGeoJSON().features[0].geometry,
+      feature.geometry,
+      'the geometry in the store is the same as the one with which we initiated the store'
+    );
+    t.end();
+  });
 
-  // getAll
-  t.equals(
-    Draw._editStore.getAllGeoJSON().type,
-    'FeatureCollection',
-    'getAllGeoJSON() returns a feature collection'
-  );
+  t.test('getAll', t => {
+    t.equals(
+      Draw._editStore.getAllGeoJSON().type,
+      'FeatureCollection',
+      'getAllGeoJSON() returns a feature collection'
+    );
+    t.end();
+  });
 
-  // get
-  t.deepEquals(
-    Draw._editStore.getGeoJSON(id).geometry,
-    feature.geometry,
-    'getGeoJSON returns the same geometry entered'
-  );
+  t.test('get', t => {
+    t.deepEquals(
+      Draw._editStore.getGeoJSON(id).geometry,
+      feature.geometry,
+      'getGeoJSON returns the same geometry entered'
+    );
+    t.end();
+  });
 
   t.end();
 });

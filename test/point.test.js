@@ -1,6 +1,6 @@
-var test = require('tape');
-var mapboxgl = require('mapbox-gl');
-var GLDraw = require('../');
+import test from 'tape';
+import mapboxgl from 'mapbox-gl';
+import GLDraw from '../';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
 
@@ -35,12 +35,9 @@ test('Point draw class', t => {
   var Point = Draw._store.get(id);
 
   // functions
-  t.equals(typeof Point.constructor, 'function', 'Point.constructor exists');
-  t.equals(typeof Point.startDraw, 'function', 'Point.startDraw exists');
-  t.equals(typeof Point._completeDraw, 'function', 'Point._completeDraw exists');
-
-  // event listeners
-  t.equals(typeof Point.completeDraw, 'function', 'Point.completeDraw event listener exists');
+  t.ok(Point.constructor instanceof Function, 'Point.constructor exists');
+  t.ok(Point.startDraw instanceof Function, 'Point.startDraw exists');
+  t.ok(Point._completeDraw instanceof Function, 'Point._completeDraw exists');
 
   t.ok(Point._map instanceof mapboxgl.Map, 'Point._map is an instance of mapboxgl.Map');
 
