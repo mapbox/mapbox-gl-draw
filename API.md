@@ -27,6 +27,29 @@ drawing | boolean | The ability to draw and delete features - default: `true`
 interactive | boolean | Keep all features permanently in edit mode - default: `false`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
+styles | Object | Add a style with any of the following properties: `gl-draw-polygon`, `gl-draw-polygon-stroke`, `gl-draw-line`, `gl-draw-point`, `gl-drawing-line`, `gl-drawing-polygon`, `gl-drawing-polygon-stroke`, `gl-drawing-points`, `gl-edit-line`, `gl-edit-polygon`, `gl-edit-polygon-stroke`, `gl-edit-point`, `gl-edit-point-mid`. The property should be an object with either the `layout` and/or `paint` properties as specified in the [Mapbox GL Style Reference](https://www.mapbox.com/mapbox-gl-style-spec/). It will overwrite the corresponding default  styles found in [`src/theme/`](https://github.com/mapbox/mapbox-gl-draw/tree/master/src/theme).
+
+Custom Style Example:
+
+```js
+var Draw = mapboxgl.Draw({
+  styles: {
+    'gl-draw-polygon': {
+      'paint': {
+        'fill-color': '#00ffff',
+        'fill-outline-color': '#00ffff',
+        'fill-opacity': 0.25
+      }
+    },
+    'gl-draw-polygon-stroke': {
+      'paint': {
+        'line-color': '#0000ff',
+        'line-width': 4
+      }
+    }
+  }
+});
+```
 
 
 `mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
