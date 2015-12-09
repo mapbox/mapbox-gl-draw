@@ -403,7 +403,7 @@ export default class Draw extends API {
         type: 'geojson'
       });
       themeDrawing.forEach(style => {
-        Object.assign(style, this.options.style[style.id] || {});
+        Object.assign(style, this.options.styles[style.id] || {});
         this._map.addLayer(style);
       });
 
@@ -413,7 +413,7 @@ export default class Draw extends API {
         type: 'geojson'
       });
       themeStyle.forEach(style => {
-        Object.assign(style, this.options.style[style.id] || {});
+        Object.assign(style, this.options.styles[style.id] || {});
         this._map.addLayer(style);
       });
 
@@ -426,7 +426,7 @@ export default class Draw extends API {
         type: 'geojson'
       });
       themeEdit.forEach(style => {
-        Object.assign(style, this.options.style[style.id] || {});
+        Object.assign(style, this.options.styles[style.id] || {});
         this._map.addLayer(style);
       });
 
