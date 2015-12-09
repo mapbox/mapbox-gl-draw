@@ -30,6 +30,7 @@ export default class Draw extends API {
       interactive: false,
       position: 'top-left',
       keybindings: true,
+      styles: {},
       controls: {
         marker: true,
         line: true,
@@ -401,14 +402,20 @@ export default class Draw extends API {
         },
         type: 'geojson'
       });
-      themeDrawing.forEach(style => { this._map.addLayer(style); });
+      themeDrawing.forEach(style => {
+        Object.assign(style, this.options.style[style.id] || {});
+        this._map.addLayer(style);
+      });
 
       // drawn features style
       this._map.addSource('draw', {
         data: this._store.getAllGeoJSON(),
         type: 'geojson'
       });
-      themeStyle.forEach(style => { this._map.addLayer(style); });
+      themeStyle.forEach(style => {
+        Object.assign(style, this.options.style[style.id] || {});
+        this._map.addLayer(style);
+      });
 
       // features being editted style
       this._map.addSource('edit', {
@@ -418,7 +425,10 @@ export default class Draw extends API {
         },
         type: 'geojson'
       });
-      themeEdit.forEach(style => { this._map.addLayer(style); });
+      themeEdit.forEach(style => {
+        Object.assign(style, this.options.style[style.id] || {});
+        this._map.addLayer(style);
+      });
 
       this._map.on('drawing.new.update', e => {
         this._map.getSource('drawing').setData(e.geojson);
