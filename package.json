@@ -44,11 +44,14 @@
     "tap-closer": "^1.0.0",
     "tap-status": "^1.0.1",
     "tape": "^4.0.0",
-    "uglify-js": "^2.4.23"
+    "uglify-js": "^2.4.23",
+    "mapbox-gl": "^0.12.0"
+  },
+  "peerDependencies": {
+    "mapbox-gl": "^0.12.0"
   },
   "dependencies": {
     "hat": "0.0.3",
-    "mapbox-gl": "^0.11.0",
     "ramda": "^0.17.1",
     "turf-bbox-polygon": "^1.0.1",
     "turf-intersect": "^1.4.2"
