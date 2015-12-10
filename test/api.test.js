@@ -39,9 +39,9 @@ test('API test', t => {
     t.ok(id, 'valid string id returned on set');
 
     // set permanent feature
-    id = Draw.set(feature, true);
+    id = Draw.set(feature, { permanent: true });
     var point = map.project(new mapboxgl.LngLat(...feature.geometry.coordinates));
-    map.fire('click', { point })
+    map.fire('click', { point });
     t.equals(
       Draw._editStore.getDrawIds().indexOf(id),
       -1,

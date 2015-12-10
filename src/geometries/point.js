@@ -5,17 +5,23 @@ import Geometry from './geometry';
 /**
  * Point geometry class
  *
- * @param {Object} map - Instance of MaboxGL Map
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MaboxGL Map
+ * @param {Object} [options.data] - GeoJSON feature
  * @returns {Point} this
- * @private
  */
 export default class Point extends Geometry {
 
-  constructor(map, data, options) {
-    if (!data) data = { geometry: {} };
-    data.geometry.coordinates = data.geometry.coordinates || [0, 0];
-    super(map, 'Point', data, options);
+  constructor(options) {
+    if (!options.data) {
+      options.data = {
+        geometry: {
+          coordinates: [0, 0]
+        }
+      };
+    }
+    options.type = 'Point';
+    super(options);
     this.type = 'point';
     this.completeDraw = this._completeDraw.bind(this);
   }

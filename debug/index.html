@@ -29,10 +29,8 @@
     position: 'top-left'
   }));
 
-  var Draw = mapboxgl.Draw({
-    interactive: false,
-    drawing: true
-  });
+  var Draw = mapboxgl.Draw();
+
   map.addControl(Draw);
   map.on('load', function() {
     var id = Draw.set({ type: 'Point', coordinates: [0, 0] });

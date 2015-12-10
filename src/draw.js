@@ -20,6 +20,21 @@ import Square from './geometries/square';
 import Polygon from './geometries/polygon';
 
 
+/**
+ * Draw plugin for Mapbox GL JS
+ *
+ * @param {Object} options
+ * @param {Boolean} [options.drawing=true] - The ability to draw and delete features
+ * @param {Boolean} [options.interactive=false] - Keep all features permanently in edit mode
+ * @param {Boolean} [options.keybindings=true] - Keyboard shortcuts for drawing
+ * @param {Object} [options.controls] - drawable shapes
+ * @param {Boolean} [options.controls.marker=true]
+ * @param {Boolean} [options.controls.line=true]
+ * @param {Boolean} [options.controls.shape=true]
+ * @param {Boolean} [options.controls.square=true]
+ * @param {Object} [options.styles] - Mapbox GL JS style for draw features
+ * @returns {Draw} this
+ */
 export default class Draw extends API {
 
   constructor(options) {
@@ -53,6 +68,9 @@ export default class Draw extends API {
 
   }
 
+  /**
+   * @private
+   */
   onAdd(map) {
     var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
@@ -353,7 +371,7 @@ export default class Draw extends API {
   _drawPolygon() {
     if (!this.options.interactive)
       this._finishEdit();
-    var polygon = new Polygon(this._map);
+    var polygon = new Polygon({ map: this._map });
     polygon.startDraw();
     this._drawing = true;
   }
@@ -364,7 +382,7 @@ export default class Draw extends API {
   _drawLine() {
     if (!this.options.interactive)
       this._finishEdit();
-    var line = new Line(this._map);
+    var line = new Line({ map: this._map });
     line.startDraw();
     this._drawing = true;
   }
@@ -375,7 +393,7 @@ export default class Draw extends API {
   _drawSquare() {
     if (!this.options.interactive)
       this._finishEdit();
-    var square = new Square(this._map);
+    var square = new Square({ map: this._map });
     square.startDraw();
     this._drawing = true;
   }
@@ -386,7 +404,7 @@ export default class Draw extends API {
   _drawPoint() {
     if (!this.options.interactive)
       this._finishEdit();
-    var point = new Point(this._map);
+    var point = new Point({ map: this._map });
     point.startDraw();
     this._drawing = true;
   }

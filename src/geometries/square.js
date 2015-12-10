@@ -6,16 +6,20 @@ import { translatePoint, DOM } from '../util';
 /**
  * Square geometry class
  *
- * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MapboxGL Map
  * @returns {Square} this
- * @private
  */
 export default class Square extends Geometry {
 
-  constructor(map, options) {
-    var data = { geometry: {} };
-    data.geometry.coordinates = [[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]];
-    super(map, 'Polygon', data, options);
+  constructor(options) {
+    options.data = {
+      geometry: {
+        coordinates: [[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]]
+      }
+    };
+    options.type = 'Polygon';
+    super(options);
 
     this.type = 'square';
 

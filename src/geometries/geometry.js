@@ -6,27 +6,27 @@ import { translate } from '../util';
 /**
  * Base Geometry class which other geometries extend
  *
- * @param {Object} map - Instance of MapboxGL Map
- * @param {String} type - Type of GeoJSON geometry
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Object} options.map - Instance of MapboxGL Map
+ * @param {String} options.type - Type of GeoJSON geometry
+ * @param {Object} options.data - GeoJSON feature
  * @returns {Geometry} this
- * @private
  */
 export default class Geometry {
 
-  constructor(map, type, data, options) {
-    this._map = map;
+  constructor(options) {
+    this._map = options.map;
     this.drawId = hat();
-    this.coordinates = data.geometry.coordinates;
-    this.options = options || {};
-    var props = data.properties || {};
+    this.coordinates = options.data.geometry.coordinates;
+    this.options = options;
+    var props = options.data.properties || {};
     props.drawId = this.drawId;
 
     this.geojson = {
       type: 'Feature',
       properties: props,
       geometry: {
-        type: type,
+        type: options.type,
         coordinates: this.coordinates
       }
     };
@@ -36,7 +36,6 @@ export default class Geometry {
 
   /**
    * @return {Object} GeoJSON feature
-   * @private
    */
   toGeoJSON() {
     this.geojson.geometry.coordinates = this.coordinates;
@@ -45,7 +44,6 @@ export default class Geometry {
 
   /**
    * @returns Draw type
-   * @private
    */
   getType() {
     return this.type;
@@ -53,7 +51,6 @@ export default class Geometry {
 
   /*
    * @returns GeoJSON type
-   * @private
    */
   getGeoJSONType() {
     return this.geojson.geometry.type;

@@ -7,6 +7,7 @@ import Point from './geometries/point';
 import Polygon from './geometries/polygon';
 
 export default class API extends mapboxgl.Control {
+
   constructor() {
     super();
   }
@@ -14,8 +15,10 @@ export default class API extends mapboxgl.Control {
   /**
    * add a geometry
    * @param {Object} feature - GeoJSON feature
-   * @param {Object} options - add options to the geometry
-   * @returns {Draw} this
+   * @param {Object} [options]
+   * @pata {Boolean} [options.permanent=false] - disable editing for feature
+   * @returns {Number} draw id of the set feature or an array of
+   * draw ids if a feature collection was added
    */
   set(feature, options) {
     feature = JSON.parse(JSON.stringify(feature));
@@ -37,20 +40,28 @@ export default class API extends mapboxgl.Control {
    * @private
    */
   _setFeature(feature, options) {
-    if (!feature.geometry)
+    if (!feature.geometry) {
       feature = {
         type: 'Feature',
         geometry: feature
       };
+    }
+
+    if (!options) {
+      options = {};
+    }
+    options.map = this._map;
+    options.feature = feature;
+
     switch (feature.geometry.type) {
       case 'Point':
-        feature = new Point(this._map, feature, options);
+        feature = new Point(options);
         break;
       case 'LineString':
-        feature = new Line(this._map, feature, options);
+        feature = new Line(options);
         break;
       case 'Polygon':
-        feature = new Polygon(this._map, feature, options);
+        feature = new Polygon(options);
         break;
       default:
         console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
