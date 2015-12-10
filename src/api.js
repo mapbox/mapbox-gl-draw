@@ -15,7 +15,8 @@ export default class API extends mapboxgl.Control {
   /**
    * add a geometry
    * @param {Object} feature - GeoJSON feature
-   * @param {Object} options - add options to the geometry
+   * @param {Object} [options]
+   * @pata {Boolean} [options.permanent=false] - disable editing for feature
    * @returns {Number} draw id of the set feature or an array of
    * draw ids if a feature collection was added
    */

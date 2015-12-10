@@ -5,10 +5,10 @@ import Geometry from './geometry';
 /**
  * Point geometry class
  *
- * @param {Object} map - Instance of MaboxGL Map
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MaboxGL Map
+ * @param {Object} [options.data] - GeoJSON feature
  * @returns {Point} this
- * @private
  */
 export default class Point extends Geometry {
 

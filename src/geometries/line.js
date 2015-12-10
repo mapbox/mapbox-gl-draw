@@ -6,10 +6,10 @@ import { translatePoint, DOM } from '../util';
 /**
  * Line geometry class
  *
- * @param {Object} map - Instance of MapboxGL Map
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MapboxGL Map
+ * @param {Object} [options.data] - GeoJSON feature
  * @returns {Line} this
- * @private
  */
 export default class Line extends Geometry {
 

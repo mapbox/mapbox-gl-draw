@@ -6,9 +6,9 @@ import { translatePoint, DOM } from '../util';
 /**
  * Square geometry class
  *
- * @param {Object} map - Instance of MapboxGL Map
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MapboxGL Map
  * @returns {Square} this
- * @private
  */
 export default class Square extends Geometry {
 

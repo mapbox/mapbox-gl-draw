@@ -6,10 +6,10 @@ import { translatePoint, DOM } from '../util';
 /**
  * Polygon geometry class
  *
- * @param {Object} map - Instance of MapboxGl Map
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Map} options.map - Instance of MapboxGl Map
+ * @param {Object} [options.data] - GeoJSON feature
  * @returns {Polygon} this
- * @private
  */
 export default class Polygon extends Geometry {
 

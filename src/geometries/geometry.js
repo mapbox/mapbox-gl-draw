@@ -6,11 +6,11 @@ import { translate } from '../util';
 /**
  * Base Geometry class which other geometries extend
  *
- * @param {Object} map - Instance of MapboxGL Map
- * @param {String} type - Type of GeoJSON geometry
- * @param {Object} [data] - GeoJSON feature
+ * @param {Object} options
+ * @param {Object} options.map - Instance of MapboxGL Map
+ * @param {String} options.type - Type of GeoJSON geometry
+ * @param {Object} options.data - GeoJSON feature
  * @returns {Geometry} this
- * @private
  */
 export default class Geometry {
 
