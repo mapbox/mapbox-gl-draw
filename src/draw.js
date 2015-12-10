@@ -353,7 +353,7 @@ export default class Draw extends API {
   _drawPolygon() {
     if (!this.options.interactive)
       this._finishEdit();
-    var polygon = new Polygon(this._map);
+    var polygon = new Polygon({ map: this._map });
     polygon.startDraw();
     this._drawing = true;
   }
@@ -364,7 +364,7 @@ export default class Draw extends API {
   _drawLine() {
     if (!this.options.interactive)
       this._finishEdit();
-    var line = new Line(this._map);
+    var line = new Line({ map: this._map });
     line.startDraw();
     this._drawing = true;
   }
@@ -375,7 +375,7 @@ export default class Draw extends API {
   _drawSquare() {
     if (!this.options.interactive)
       this._finishEdit();
-    var square = new Square(this._map);
+    var square = new Square({ map: this._map });
     square.startDraw();
     this._drawing = true;
   }
@@ -386,7 +386,7 @@ export default class Draw extends API {
   _drawPoint() {
     if (!this.options.interactive)
       this._finishEdit();
-    var point = new Point(this._map);
+    var point = new Point({ map: this._map });
     point.startDraw();
     this._drawing = true;
   }

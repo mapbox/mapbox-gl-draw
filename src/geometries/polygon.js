@@ -13,10 +13,16 @@ import { translatePoint, DOM } from '../util';
  */
 export default class Polygon extends Geometry {
 
-  constructor(map, data, options) {
-    if (!data) data = { geometry: {} };
-    data.geometry.coordinates = data.geometry.coordinates || [[[0, 0],[0, 0], [0, 0], [0, 0]]];
-    super(map, 'Polygon', data, options);
+  constructor(options) {
+    if (!options.data) {
+      options.data = {
+        geometry: {
+          coordinates: [[[0, 0],[0, 0], [0, 0], [0, 0]]]
+        }
+      };
+    }
+    options.type = 'Polygon';
+    super(options);
 
     // event handlers
     this.addVertex = this._addVertex.bind(this);

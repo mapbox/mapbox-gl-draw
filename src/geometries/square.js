@@ -12,10 +12,14 @@ import { translatePoint, DOM } from '../util';
  */
 export default class Square extends Geometry {
 
-  constructor(map, options) {
-    var data = { geometry: {} };
-    data.geometry.coordinates = [[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]];
-    super(map, 'Polygon', data, options);
+  constructor(options) {
+    options.data = {
+      geometry: {
+        coordinates: [[[0, 0],[0, 0], [0, 0], [0, 0], [0, 0]]]
+      }
+    };
+    options.type = 'Polygon';
+    super(options);
 
     this.type = 'square';
 
