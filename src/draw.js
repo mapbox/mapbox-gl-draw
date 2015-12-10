@@ -65,70 +65,88 @@ export default class Draw extends API {
     this.onMouseUp = this._onMouseUp.bind(this);
     this.onMouseDown = this._onMouseDown.bind(this);
     this.initiateDrag = this._initiateDrag.bind(this);
-
   }
 
   /**
    * @private
    */
   onAdd(map) {
-    var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
-    var controls = this.options.controls;
     this._store = new Store(map);
     this._editStore = new EditStore(map);
     this._store.setEditStore(this._editStore);
     this._editStore.setDrawStore(this._store);
 
-    if (this.options.drawing) {
-      // Build draw controls
-      if (controls.line) {
-        this.lineStringCtrl = createButton(this._container, {
-          className: controlClass + ' line',
-          title: `LineString tool ${this.options.keybindings && '(l)'}`,
-          fn: this._drawLine.bind(this),
-          id: 'lineDrawBtn'
-        }, this._controlClass);
-      }
-
-      if (controls.shape) {
-        this.polygonCtrl = createButton(this._container, {
-          className: `${controlClass} shape`,
-          title: `Polygon tool ${this.options.keybindings && '(p)'}`,
-          fn: this._drawPolygon.bind(this),
-          id: 'polygonDrawBtn'
-        }, this._constrolClass);
-      }
-
-      if (controls.square) {
-        this.squareCtrl = createButton(this._container, {
-          className: `${controlClass} square`,
-          title: `Square tool ${this.options.keybindings && '(s)'}`,
-          fn: this._drawSquare.bind(this),
-          id: 'squareDrawBtn'
-        }, this._controlClass);
-      }
-
-      if (controls.marker) {
-        this.markerCtrl = createButton(this._container, {
-          className: `${controlClass} marker`,
-          title: `Marker tool ${this.options.keybindings && '(m)'}`,
-          fn: this._drawPoint.bind(this),
-          id: 'pointDrawBtn'
-        }, this._controlClass);
-      }
-
-      if (this.options.keybindings) {
-        map.getContainer().addEventListener('keyup', this.onKeyUp);
-      }
-
-      map.getContainer().addEventListener('keydown', this.onKeyDown);
-    }
-
     this._map = map;
+
+    if (this.options.drawing) {
+      this.createButtons();
+    }
 
     this._mapState();
     return container;
+  }
+
+  createButtons() {
+    var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
+    var controls = this.options.controls;
+
+    if (controls.line) {
+      this.lineStringCtrl = createButton(this._container, {
+        className: controlClass + ' line',
+        title: `LineString tool ${this.options.keybindings && '(l)'}`,
+        fn: this._drawLine.bind(this),
+        id: 'lineDrawBtn'
+      }, this._controlClass);
+    }
+
+    if (controls.shape) {
+      this.polygonCtrl = createButton(this._container, {
+        className: `${controlClass} shape`,
+        title: `Polygon tool ${this.options.keybindings && '(p)'}`,
+        fn: this._drawPolygon.bind(this),
+        id: 'polygonDrawBtn'
+      }, this._constrolClass);
+    }
+
+    if (controls.square) {
+      this.squareCtrl = createButton(this._container, {
+        className: `${controlClass} square`,
+        title: `Square tool ${this.options.keybindings && '(s)'}`,
+        fn: this._drawSquare.bind(this),
+        id: 'squareDrawBtn'
+      }, this._controlClass);
+    }
+
+    if (controls.marker) {
+      this.markerCtrl = createButton(this._container, {
+        className: `${controlClass} marker`,
+        title: `Marker tool ${this.options.keybindings && '(m)'}`,
+        fn: this._drawPoint.bind(this),
+        id: 'pointDrawBtn'
+      }, this._controlClass);
+    }
+
+    this.deleteBtn = createButton(this._container, {
+      className: 'mapboxgl-ctrl-draw-btn trash',
+      title: 'delete',
+      fn: this._destroy.bind(this),
+      id: 'deleteBtn'
+    }, this._controlClass);
+
+    if (this.options.keybindings) {
+      this._map.getContainer().addEventListener('keyup', this.onKeyUp);
+    }
+
+    this._map.getContainer().addEventListener('keydown', this.onKeyDown);
+  }
+
+  _showDeleteButton() {
+    this.deleteBtn.style.display = 'block';
+  }
+
+  _hideDeleteButton() {
+    this.deleteBtn.style.display = 'none';
   }
 
   /**
@@ -162,13 +180,9 @@ export default class Draw extends API {
 
       this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
-      if (!this._editStore.inProgress())
-        this.deleteBtn = createButton(this._container, {
-          className: 'mapboxgl-ctrl-draw-btn trash',
-          title: 'delete',
-          fn: this._destroy.bind(this),
-          id: 'deleteBtn'
-        }, this._controlClass);
+      if (!this._editStore.inProgress()) {
+        this._showDeleteButton();
+      }
 
       this._store.editFeaturesIn(this._featsInStart, end);
     }
@@ -256,13 +270,9 @@ export default class Draw extends API {
   _edit(drawId) {
     this._map.getContainer().addEventListener('mousedown', this.initiateDrag, true);
 
-    if (!this._editStore.inProgress() && this.options.drawing)
-      this.deleteBtn = createButton(this._container, {
-        className: 'mapboxgl-ctrl-draw-btn trash',
-        title: 'delete',
-        fn: this._destroy.bind(this),
-        id: 'deleteBtn'
-      }, this._controlClass);
+    if (!this._editStore.inProgress() && this.options.drawing) {
+      this._showDeleteButton();
+    }
 
     this._store.edit(drawId);
   }
@@ -274,7 +284,7 @@ export default class Draw extends API {
     if (this._editStore.inProgress()) {
       this._editStore.finish();
       if (this.options.drawing) {
-        DOM.destroy(this.deleteBtn);
+        this._hideDeleteButton();
       }
       this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     }
@@ -361,7 +371,7 @@ export default class Draw extends API {
    */
   _destroy() {
     this._editStore.clear();
-    DOM.destroy(this.deleteBtn);
+    this._hideDeleteButton();
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
   }
 
