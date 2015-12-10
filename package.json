@@ -52,8 +52,6 @@
   },
   "dependencies": {
     "hat": "0.0.3",
-    "ramda": "^0.17.1",
-    "turf-bbox-polygon": "^1.0.1",
-    "turf-intersect": "^1.4.2"
+    "ramda": "^0.17.1"
   }
 }
