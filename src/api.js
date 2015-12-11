@@ -131,7 +131,7 @@ export default class API extends mapboxgl.Control {
    * get a feature collection of features being editted
    * @return {Object} a feature collection of geometries that are in edit mode
    */
-  getEditting() {
+  getEditing() {
     return this._editStore.getAllGeoJSON();
   }
 
