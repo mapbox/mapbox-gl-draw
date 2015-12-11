@@ -3,30 +3,11 @@ import test from 'tape';
 import Store from '../src/store';
 import mapboxgl from 'mapbox-gl';
 import GLDraw from '../';
+import { accessToken, createMap, features } from './utils';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
+mapboxgl.accessToken = accessToken;
 
-function createMap() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'map');
-  document.body.appendChild(div);
-
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v8'
-  });
-
-  return map;
-}
-
-var feature = {
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'Point',
-    coordinates: [0, 0]
-  }
-};
+var feature = features.point;
 
 test('Store has correct properties', t => {
   t.ok(Store, 'store exists');
@@ -54,6 +35,7 @@ test('Store constructor', t => {
   t.test('set', t => {
     var id = Draw.set(feature);
     f = Draw.get(id, true);
+    console.log(feature);
     t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
     t.equals(typeof f.properties.drawId, 'string', 'the set feature gets a drawId');
     t.end();

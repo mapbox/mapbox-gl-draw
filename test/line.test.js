@@ -18,18 +18,7 @@ function createMap() {
   return map;
 }
 
-/*
-var feature = {
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'lString',
-    coordinates: [[0, 0], [1, 1]]
-  }
-};
-*/
-
-test('l draw class', t => {
+test('Line draw class', t => {
   var map = createMap();
   var Draw = GLDraw();
   map.addControl(Draw);
