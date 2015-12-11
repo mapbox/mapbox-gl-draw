@@ -133,6 +133,7 @@ export default class Draw extends API {
       fn: this._destroy.bind(this),
       id: 'deleteBtn'
     }, this._controlClass);
+    this._hideDeleteButton();
 
     if (this.options.keybindings) {
       this._map.getContainer().addEventListener('keyup', this.onKeyUp);
