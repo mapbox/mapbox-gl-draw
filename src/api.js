@@ -51,7 +51,7 @@ export default class API extends mapboxgl.Control {
       options = {};
     }
     options.map = this._map;
-    options.feature = feature;
+    options.data = feature;
 
     switch (feature.geometry.type) {
       case 'Point':
