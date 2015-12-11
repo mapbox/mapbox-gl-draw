@@ -274,7 +274,7 @@ export default class Draw extends API {
     if (this._editStore.inProgress()) {
       this._editStore.finish();
       if (this.options.drawing) {
-        DOM.destroy(this.deleteBtn);
+        this.deleteBtn.parentElement.removeChild(this.deleteBtn);
       }
       this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
     }
@@ -361,7 +361,7 @@ export default class Draw extends API {
    */
   _destroy() {
     this._editStore.clear();
-    DOM.destroy(this.deleteBtn);
+    this.deleteBtn.parentNode.removeChild(this.deleteBtn);
     this._map.getContainer().removeEventListener('mousedown', this.initiateDrag, true);
   }
 

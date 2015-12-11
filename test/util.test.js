@@ -12,7 +12,6 @@ test('util', t => {
   t.test('DOM', t => {
     t.ok(DOM.mousePos instanceof Function, 'DOM.mousePos is a function');
     t.ok(DOM.create instanceof Function, 'DOM.create is a function');
-    t.ok(DOM.destroy instanceof Function, 'DOM.destroy is a function');
     t.ok(DOM.removeClass instanceof Function, 'DOM.removeClass is a function');
     t.ok(DOM.setTransform instanceof Function, 'DOM.setTransform is a function');
     t.ok(DOM.disableSelection instanceof Function, 'DOM.disableSelection is a function');
