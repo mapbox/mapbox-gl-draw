@@ -2,9 +2,7 @@ import test from 'tape';
 import mapboxgl from 'mapbox-gl';
 import GLDraw from '../';
 //import Geometry from '../src/geometries/geometry';
-import {
-  accessToken, createMap
-} from './utils';
+import { accessToken, createMap } from './utils';
 
 mapboxgl.accessToken = accessToken;
 

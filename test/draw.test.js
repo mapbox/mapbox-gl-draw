@@ -3,30 +3,9 @@ var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
 var Store = require('../src/store');
 var EditStore = require('../src/edit_store');
+import { accessToken, createMap } from './utils';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
-
-function createMap() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'map');
-  document.body.appendChild(div);
-
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v8'
-  });
-
-  return map;
-}
-
-var feature = {
-  type: 'Feature',
-  properties: {},
-  geometry: {
-    type: 'Point',
-    coordinates: [0, 0]
-  }
-};
+mapboxgl.accessToken = accessToken;
 
 test('Draw class test', t => {
   var map = createMap();
@@ -84,18 +63,7 @@ test('Draw class test', t => {
   );
 
   // test edit mode
-  var id = Draw.set(feature);
-  Draw._edit(id);
-  t.ok(
-    document.getElementById('deleteBtn'),
-    'whilst in edit mode, the delete button is added to the DOM'
-  );
-  Draw._finishEdit();
-  t.notOk(
-    document.getElementById('deleteBtn'),
-    'delete button is removed on at the end of edit'
-  );
-  Draw.clear();
+  // TO DO
 
   t.end();
 });

@@ -2,29 +2,11 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl';
 import GLDraw from '../';
+import { accessToken, createMap, features } from './utils';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
+mapboxgl.accessToken = accessToken;
 
-function createMap() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'map');
-  document.body.appendChild(div);
-
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v8'
-  });
-
-  return map;
-}
-
-var feature = {
-  type: 'Feature',
-  geometry: {
-    type: 'Point',
-    coordinates: [0, 0]
-  }
-};
+var feature = features.point;
 
 test('API test', t => {
 
