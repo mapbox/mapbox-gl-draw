@@ -22,7 +22,7 @@ var feature = {
   type: 'Feature',
   geometry: {
     type: 'Point',
-    coordinates: [0, 0]
+    coordinates: [5, 5]
   }
 };
 
