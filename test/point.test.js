@@ -7,7 +7,7 @@ mapboxgl.accessToken = accessToken;
 
 var feature = features.point;
 
-test('Point draw class', t => {
+test('Point geometry class', t => {
   var map = createMap();
   var Draw = GLDraw();
   map.addControl(Draw);
