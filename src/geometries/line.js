@@ -2,7 +2,6 @@
 
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
-import InternalEvents from '../internal_events';
 
 /**
  * Line geometry class
@@ -28,50 +27,39 @@ export default class Line extends Geometry {
     this.type = 'line';
 
     // event listeners
-    this.addPoint = this._addPoint.bind(this);
     this.onMouseMove = this._onMouseMove.bind(this);
-    this.completeDraw = this._completeDraw.bind(this);
   }
 
   startDraw() {
-    this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    InternalEvents.emit('drawing.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
-    this._map.on('click', this.addPoint);
-    this._map.on('dblclick', this.completeDraw);
   }
 
-  _addPoint(e) {
+  onClick(e) {
     var p = [ e.lngLat.lng, e.lngLat.lat ];
     if (typeof this.vertexIdx === 'undefined') {
       this.coordinates = [p];
-      this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
       this.vertexIdx = 0;
+      this.ready = true;
     } else {
       this.coordinates.splice(-1, 1, p, p);
     }
     this.vertexIdx++;
-
-    this._renderDrawProgress();
   }
 
   _onMouseMove(e) {
-    var pos = DOM.mousePos(e, this._map._container);
+    var pos = DOM.mousePos(e.originalEvent, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates[this.vertexIdx] = [ coords.lng, coords.lat ];
-
-    this._renderDrawProgress();
   }
 
-  _completeDraw() {
+  onStopDrawing() {
+    return this.onDoubleClick();
+  }
+
+  onDoubleClick() {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.off('click', this.addPoint);
-    this._map.off('dblclick', this.completeDraw);
-    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
-
     this.coordinates.splice(this.vertexIdx, 1);
-
-    this._finishDrawing('line');
+    this.created = true;
   }
 
   /**
@@ -92,11 +80,6 @@ export default class Line extends Geometry {
     var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
     this.coordinates[idx] = newPoint;
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
   }
 
   /**
@@ -108,8 +91,5 @@ export default class Line extends Geometry {
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
     this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
-
-    InternalEvents.emit('edit.new');
   }
-
 }

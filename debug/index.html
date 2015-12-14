@@ -29,10 +29,42 @@
     position: 'top-left'
   }));
 
-  var Draw = mapboxgl.Draw();
+  var Draw = window.Draw = mapboxgl.Draw();
 
   map.addControl(Draw);
-  map.on('load', function() {});
+  map.on('load', function() {
+    map.on('draw.set', function(playload) {
+      console.log('draw.set', playload);
+    });
+    map.on('draw.delete', function(playload) {
+      console.log('draw.delete', playload);
+    });
+    map.on('draw.edit.start', function(playload) {
+      console.log('draw.edit.start', playload);
+    });
+    map.on('draw.edit.end', function(playload) {
+      console.log('draw.edit.end', playload);
+    });
+
+    var firstId = Draw.set({ type: 'Point', coordinates: [10, 10] });
+    console.log('SET', Draw.get(firstId).geometry.coordinates, '->', 10, 10);
+    Draw.update(firstId, { type: 'Point', coordinates: [-74.0023, 40.7104] });
+    console.log('UPDATE', Draw.get(firstId).geometry.coordinates, '->', -74.0023, 40.7104);
+
+    var secondId = Draw.set({ type: 'Point', coordinates: [0, 0] }, {permanent: true});
+    var all = Draw.getAll();
+    console.log('Get All', all.features.length, '->', 2);
+    console.log('Get All has ids', all.features.filter(function(feature){
+      return feature.id === firstId || feature.id === secondId;
+    }).length === 2);
+    Draw.remove(secondId);
+    console.log('Remove', Draw.get(secondId), '-> undefined');
+
+    Draw.clear();
+    console.log(Draw.get(firstId), '-> undefined');
+  });
+
+  (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>
 </body>
 </html>

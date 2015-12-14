@@ -25,13 +25,5 @@ test('Line draw class', t => {
 
   var l = new Line(map);
 
-  t.ok(l.constructor instanceof Function, 'l.constructor exists');
-  t.ok(l.startDraw instanceof Function, 'l.startDraw exists');
-  t.ok(l._addPoint instanceof Function, 'Line._addPoint exists');
-  t.ok(l._onMouseMove instanceof Function, 'Line._onMouseMove exists');
-  t.ok(l._completeDraw instanceof Function, 'Line._completeDraw exists');
-  t.ok(l.moveVertex instanceof Function, 'Line.moveVertex exists');
-  t.ok(l.editAddVertex instanceof Function, 'Line.editAddVertex exists');
-
   t.end();
 });

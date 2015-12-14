@@ -2,7 +2,6 @@
 
 import hat from 'hat';
 import { translate } from '../util';
-import InternalEvents from '../internal_events';
 
 /**
  * Base Geometry class which other geometries extend
@@ -20,20 +19,71 @@ export default class Geometry {
     this.drawId = hat();
     this.coordinates = options.data.geometry.coordinates;
     this.options = options;
-    var props = options.data.properties || {};
-    props.drawId = this.drawId;
+    this.created = false;
+    this.ready = false;
 
     this.geojson = {
       type: 'Feature',
-      properties: props,
+      id: this.drawId,
+      properties: options.data.properties || {},
       geometry: {
         type: options.type,
         coordinates: this.coordinates
       }
     };
-
-    this.onKeyUp = this._onKeyUp.bind(this);
   }
+
+  /**
+  * default onStopDrawing handler for all Geometry objects.
+  * @return Null
+  */
+
+  onStopDrawing() {
+    this.created = true;
+  }
+
+  /**
+  * default onClick handler for all Geometry objects.
+  * @return Null
+  */
+
+  onClick() { return null; }
+
+  /**
+  * default onDoubleClick handler for all Geometry objects.
+  * @return Null
+  */
+
+  onDoubleClick() { return null; }
+
+  /**
+  * default onMouseMove handler for all Geometry objects.
+  * @return Null
+  */
+
+  onMouseMove() { return null; }
+
+  /**
+  * default onMouseDrag handler for all Geometry objects.
+  * @return Null
+  */
+
+  onMouseDrag() { return null; }
+
+  /**
+  * default onMouseDown handler for all Geometry objects.
+  * @return Null
+  */
+
+  onMouseDown() { return null; }
+
+
+  /**
+  * default onMouseUp handler for all Geometry objects.
+  * @return Null
+  */
+
+  onMouseUp() { return null; }
 
   /**
    * @return {Object} GeoJSON feature
@@ -48,17 +98,6 @@ export default class Geometry {
    */
   getType() {
     return this.type;
-  }
-
-  /*
-   * @returns GeoJSON type
-   */
-  getGeoJSONType() {
-    return this.geojson.geometry.type;
-  }
-
-  getDrawId() {
-    return this.drawId;
   }
 
   getOptions() {
@@ -78,30 +117,6 @@ export default class Geometry {
   }
 
   /**
-   * Called after a draw is done
-   * @private
-   */
-  _finishDrawing(type) {
-    this._map.getContainer().removeEventListener('keyup', this.onKeyUp);
-    InternalEvents.emit('drawing.end', {
-      geometry: this,
-      featureType: type
-    });
-  }
-
-  _onKeyUp(e) {
-    const ENTER = 13;
-    const ESCAPE = 27;
-    if (e.keyCode === ENTER) {
-      this._completeDraw();
-    }
-    if (e.keyCode === ESCAPE) {
-      this._completeDraw();
-      InternalEvents.emit('drawing.cancel', { drawId: this.drawId });
-    }
-  }
-
-  /**
    * Translate this polygon
    *
    * @param {Array<Number>} init - Mouse position at the beginining of the drag
@@ -115,17 +130,6 @@ export default class Geometry {
 
     var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
-  }
-
-  _renderDrawProgress() {
-    InternalEvents.emit('drawing.new.update', {
-      geojson: this.toGeoJSON()
-    });
   }
 
 }

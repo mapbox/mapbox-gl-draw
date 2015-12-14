@@ -2,7 +2,6 @@
 
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
-import InternalEvents from '../internal_events';
 
 /**
  * Polygon geometry class
@@ -26,27 +25,21 @@ export default class Polygon extends Geometry {
     super(options);
 
     // event handlers
-    this.addVertex = this._addVertex.bind(this);
     this.onMouseMove = this._onMouseMove.bind(this);
-    this.completeDraw = this._completeDraw.bind(this);
   }
 
   startDraw() {
-    this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    InternalEvents.emit('drawing.start', { featureType: 'polygon' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
-    this._map.on('click', this.addVertex);
-    this._map.on('dblclick', this.completeDraw);
   }
 
-  _addVertex(e) {
+  onClick(e) {
     var p = [ e.lngLat.lng, e.lngLat.lat ];
 
     if (typeof this.vertexIdx === 'undefined') {
       this.vertexIdx = 0;
       this.first = p;
       this.coordinates[0].splice(0, 4, p, p, p, p);
-      this._map.getContainer().addEventListener('mousemove', this.onMouseMove);
+      this.ready = true;
     }
 
     this.vertexIdx++;
@@ -56,33 +49,26 @@ export default class Polygon extends Geometry {
     if (this.vertexIdx > 2) {
       this.coordinates[0].push(this.first);
     }
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
   }
 
   _onMouseMove(e) {
-    var pos = DOM.mousePos(e, this._map._container);
+    var pos = DOM.mousePos(e.originalEvent, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates[0][this.vertexIdx] = [ coords.lng, coords.lat ];
-
-    this._renderDrawProgress();
   }
 
-  _completeDraw() {
+  onStopDrawing() {
+    return this.onDoubleClick();
+  }
+
+  onDoubleClick() {
     if (this.vertexIdx > 2) {
       this.coordinates[0].splice(this.vertexIdx, 1);
     }
 
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.off('click', this.addVertex);
-    this._map.off('dblclick', this.completeDraw);
-    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove);
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-
-    this._finishDrawing('polygon');
+    this.created = true;
   }
 
   /**
@@ -104,13 +90,9 @@ export default class Polygon extends Geometry {
     var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
 
     this.coordinates[0][idx] = newPoint;
-    if (idx === 0)
+    if (idx === 0) {
       this.coordinates[0][this.coordinates[0].length - 1] = newPoint;
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
+    }
   }
 
   /**
@@ -123,11 +105,6 @@ export default class Polygon extends Geometry {
   editAddVertex(coords, idx) {
     coords = this._map.unproject(coords);
     this.coordinates[0].splice(idx, 0, [ coords.lng, coords.lat ]);
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
   }
 
 }

@@ -1,7 +1,6 @@
 'use strict';
 
 import Geometry from './geometry';
-import InternalEvents from '../internal_events';
 
 /**
  * Point geometry class
@@ -24,20 +23,17 @@ export default class Point extends Geometry {
     options.type = 'Point';
     super(options);
     this.type = 'point';
-    this.completeDraw = this._completeDraw.bind(this);
   }
 
   startDraw() {
-    InternalEvents.emit('drawing.start', { featureType: 'point' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
-    this._map.on('click', this.completeDraw);
   }
 
-  _completeDraw(e) {
+  onClick(e) {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.off('click', this.completeDraw);
     this.coordinates = [ e.lngLat.lng, e.lngLat.lat ];
-    this._finishDrawing('point');
+    this.created = true;
+    this.ready = true;
   }
 
 }

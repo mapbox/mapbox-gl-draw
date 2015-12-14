@@ -25,7 +25,7 @@ test('API test', t => {
     var point = map.project(new mapboxgl.LngLat(...feature.geometry.coordinates));
     map.fire('click', { point });
     t.equals(
-      Draw._editStore.getDrawIds().indexOf(id),
+      Draw._store.getEditIds().indexOf(id),
       -1,
       'permanent feature is not inserted into edit store when clicked'
     );
