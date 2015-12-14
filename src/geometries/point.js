@@ -1,6 +1,7 @@
 'use strict';
 
 import Geometry from './geometry';
+import InternalEvents from '../internal_events';
 
 /**
  * Point geometry class
@@ -27,7 +28,7 @@ export default class Point extends Geometry {
   }
 
   startDraw() {
-    this._map.fire('drawing.start', { featureType: 'point' });
+    InternalEvents.emit('drawing.start', { featureType: 'point' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.completeDraw);
   }

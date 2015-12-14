@@ -1,5 +1,7 @@
 'use strict';
 
+import InternalEvents from './internal_events';
+
 /**
  * A store for keeping track of in progress
  * feature edits before they written into history
@@ -18,9 +20,9 @@ export default class EditStore {
 
     this.drawStore = null;
 
-    this._map.on('edit.new', () => { this._render(); });
-    this._map.on('finish.edit', () => { this._render(); });
-    this._map.on('edit.end', e => { this.endEdit(e.geometry.drawId); });
+    InternalEvents.on('edit.new', () => { this._render(); });
+    InternalEvents.on('finish.edit', () => { this._render(); });
+    InternalEvents.on('edit.end', e => { this.endEdit(e.geometry.drawId); });
   }
 
   setDrawStore(drawStore) {
@@ -139,7 +141,7 @@ export default class EditStore {
   _render() {
     var geom = this.getAllGeoJSON();
     geom.features = geom.features.concat(this._addVertices(), this._addMidpoints());
-    this._map.fire('edit.feature.update', {
+    InternalEvents.emit('edit.feature.update', {
       geojson: geom
     });
   }

@@ -1,5 +1,7 @@
 'use strict';
 
+import InternalEvents from './internal_events';
+
 /**
  * A store for keeping track of versions of drawings
  *
@@ -12,7 +14,7 @@ export default class Store {
     this._map = map;
     this._features = {};
     this._editStore = null;
-    this._map.on('drawing.end', e => {
+    InternalEvents.on('drawing.end', e => {
       this.set(e.geometry);
     });
   }
@@ -49,6 +51,12 @@ export default class Store {
    */
   set(feature, preventRender) {
     this._features[feature.drawId] = feature;
+
+    this._map.fire('draw.set', {
+      id: feature.drawId,
+      geojson: feature.geojson
+    });
+
     if (!preventRender) {
       this._render();
     }
@@ -58,6 +66,12 @@ export default class Store {
    * @param {String} id - feature id
    */
   unset(id) {
+    if (this._features[id]) {
+      this._map.fire('draw.delete', {
+        id: id,
+        geojson: this._features[id].geojson
+      });
+    }
     delete this._features[id];
     this._render();
   }
@@ -99,7 +113,7 @@ export default class Store {
   }
 
   _render() {
-    this._map.fire('draw.feature.update', {
+    InternalEvents.emit('draw.feature.update', {
       geojson: this.getAllGeoJSON()
     });
   }

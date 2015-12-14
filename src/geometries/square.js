@@ -2,6 +2,7 @@
 
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
+import InternalEvents from '../internal_events';
 
 /**
  * Square geometry class
@@ -31,7 +32,7 @@ export default class Square extends Geometry {
 
   startDraw() {
     this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    this._map.fire('drawing.start', { featureType: 'square' });
+    InternalEvents.emit('drawing.start', { featureType: 'square' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
   }
@@ -124,7 +125,7 @@ export default class Square extends Geometry {
     // always reset last point to equal the first point
     this.coordinates[0][4] = this.coordinates[0][0];
 
-    this._map.fire('edit.new', {
+    InternalEvents.emit('edit.new', {
       id: this.drawId,
       geojson: this.toGeoJSON()
     });

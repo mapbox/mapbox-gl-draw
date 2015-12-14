@@ -2,6 +2,7 @@
 
 import hat from 'hat';
 import { translate } from '../util';
+import InternalEvents from '../internal_events';
 
 /**
  * Base Geometry class which other geometries extend
@@ -82,7 +83,7 @@ export default class Geometry {
    */
   _finishDrawing(type) {
     this._map.getContainer().removeEventListener('keyup', this.onKeyUp);
-    this._map.fire('drawing.end', {
+    InternalEvents.emit('drawing.end', {
       geometry: this,
       featureType: type
     });
@@ -96,7 +97,7 @@ export default class Geometry {
     }
     if (e.keyCode === ESCAPE) {
       this._completeDraw();
-      this._map.fire('drawing.cancel', { drawId: this.drawId });
+      InternalEvents.emit('drawing.cancel', { drawId: this.drawId });
     }
   }
 
@@ -115,14 +116,14 @@ export default class Geometry {
     var translatedGeom = translate(this.initGeom, init, curr, this._map);
     this.coordinates = translatedGeom.geometry.coordinates;
 
-    this._map.fire('edit.new', {
+    InternalEvents.emit('edit.new', {
       id: this.drawId,
       geojson: this.toGeoJSON()
     });
   }
 
   _renderDrawProgress() {
-    this._map.fire('drawing.new.update', {
+    InternalEvents.emit('drawing.new.update', {
       geojson: this.toGeoJSON()
     });
   }
