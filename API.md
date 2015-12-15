@@ -177,8 +177,16 @@ Draw fires off a number of events on draw and edit actions. All of these events 
 
 #### draw.set
 
-This is fired every time a feature is commited via escape or the double click. The payload is an object with the `mapbox-gl-draw` id and the geojson representation of the feature.
+This is fired every time a feature is commited via escape or the double click. The payload is an object with the `mapbox-gl-draw` feature id and the geojson representation of the feature.
 
 #### draw.delete
 
-This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` id of the feature that was deleted and the geojson representation of the feature just before it was deleted.
+This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` feature id of the feature that was deleted and the geojson representation of the feature just before it was deleted.
+
+#### draw.edit.start
+
+Fired every time a feature is selected for edit. The payload is an object with the `mapbox-gl-draw` feature id and the geojson representation of the feature.
+
+#### draw.edit.end
+
+Fired every time a feature is unselected for edit. The payload is an object with the `mapbox-gl-draw` feature id.

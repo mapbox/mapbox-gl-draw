@@ -37,6 +37,9 @@ export default class EditStore {
   finish() {
     for (var id in this._features) {
       this._drawStore.set(this._features[id]);
+      this._map.fire('draw.edit.end', {
+        id
+      });
       delete this._features[id];
     }
     this._render();
