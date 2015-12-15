@@ -68,7 +68,7 @@ export default class Store {
   unset(id) {
     if (this._features[id]) {
       this._map.fire('draw.delete', {
-        id: id,
+        id,
         geojson: this._features[id].geojson
       });
     }
@@ -82,6 +82,10 @@ export default class Store {
    */
   edit(id) {
     this._editStore.set(this._features[id]);
+    this._map.fire('draw.edit.start', {
+      id,
+      geojson: this._features[id].geojson
+    });
     delete this._features[id];
     this._render();
   }
