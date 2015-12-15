@@ -19,6 +19,8 @@ import Point from './geometries/point';
 import Square from './geometries/square';
 import Polygon from './geometries/polygon';
 
+import InternalEvents from './internal_events';
+
 /**
  * Draw plugin for Mapbox GL JS
  *
@@ -440,12 +442,12 @@ export default class Draw extends API {
    */
   _setEventListeners() {
 
-    this._map.on('drawing.new.update', e => {
+    InternalEvents.on('drawing.new.update', e => {
       this._map.getSource('drawing').setData(e.geojson);
     });
 
     // clear the drawing layer after a drawing is done
-    this._map.on('drawing.end', e => {
+    InternalEvents.on('drawing.end', e => {
       this._map.getSource('drawing').setData({
         type: 'FeatureCollection',
         features: []
@@ -458,11 +460,11 @@ export default class Draw extends API {
         this.markerCtrl ].forEach(ctrl => { if (ctrl) ctrl.classList.remove('active'); });
     });
 
-    this._map.on('edit.feature.update', e => {
+    InternalEvents.on('edit.feature.update', e => {
       this._map.getSource('edit').setData(e.geojson);
     });
 
-    this._map.on('draw.feature.update', e => {
+    InternalEvents.on('draw.feature.update', e => {
       this._map.getSource('draw').setData(e.geojson);
     });
 
@@ -489,7 +491,7 @@ export default class Draw extends API {
       });
     });
 
-    this._map.on('drawing.cancel', e => {
+    InternalEvents.on('drawing.cancel', e => {
       this._store.unset(e.drawId);
     });
 

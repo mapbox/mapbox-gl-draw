@@ -173,44 +173,12 @@ Draw
 
 ## Events
 
-Draw fires off a number of events on draw and edit actions.
+Draw fires off a number of events on draw and edit actions. All of these events are name spaced `draw` inside of the mapboxgl event emitter.
 
+#### draw.set
 
-####`drawing.start`
+This is fired every time a feature is commited via escape or the double click. The payload is an object with the `mapbox-gl-draw` id and the geojson representation of the feature.
 
-Fired when a drawing is started. Passes an object with the the feature type to the callback (`{ featureType: <String> }`). Note that these are mapbox-gl-draw feature type, one of `point`, `line`, `polygon`, `square`.
+#### draw.delete
 
-Example:
-
-```
-map.on('drawing.start', function(e) {
-  alert('Started drawing a ', e.featureType);
-});
-```
-
----
-####`drawing.end`
-
-Fired when a drawing is finished. Passes an object with the feature type and the geojson geometry to the callback.
-
-Example:
-
-```
-map.on('drawing.end', function(e) {
-  alert('Finished drawing a ', e.featureType, 'with the coordintes', JSON.stringify(e.geometry.coordinates));
-});
-```
-
----
-
-####`edit.new`
-
-Fired while editting when a new edit is made. Passes an object with the new geometry and its drawId to the callback.
-
-Example:
-
-```
-map.on('edit.new', function(e) {
-  alert('new edit on', e.id, '->', JSON.stringify(e.geojson));
-});
-```
+This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` id of the feature that was deleted and the geojson representation of the feature just before it was deleted.

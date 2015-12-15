@@ -2,6 +2,7 @@
 
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
+import InternalEvents from '../internal_events';
 
 /**
  * Line geometry class
@@ -34,7 +35,7 @@ export default class Line extends Geometry {
 
   startDraw() {
     this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    this._map.fire('drawing.start', { featureType: 'line' });
+    InternalEvents.emit('drawing.start', { featureType: 'line' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
     this._map.on('click', this.addPoint);
     this._map.on('dblclick', this.completeDraw);
@@ -92,7 +93,7 @@ export default class Line extends Geometry {
 
     this.coordinates[idx] = newPoint;
 
-    this._map.fire('edit.new', {
+    InternalEvents.emit('edit.new', {
       id: this.drawId,
       geojson: this.toGeoJSON()
     });
@@ -108,7 +109,7 @@ export default class Line extends Geometry {
     coords = this._map.unproject(coords);
     this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
 
-    this._map.fire('edit.new');
+    InternalEvents.emit('edit.new');
   }
 
 }
