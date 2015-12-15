@@ -19,7 +19,6 @@ import Point from './geometries/point';
 import Square from './geometries/square';
 import Polygon from './geometries/polygon';
 
-
 /**
  * Draw plugin for Mapbox GL JS
  *
@@ -83,7 +82,11 @@ export default class Draw extends API {
       this.createButtons();
     }
 
-    this._mapState();
+    this._map.on('load', () => {
+      this._setEventListeners();
+      this._setStyles();
+    });
+
     return container;
   }
 
@@ -193,8 +196,6 @@ export default class Draw extends API {
    * @private
    */
   _onKeyUp(e) {
-    if (!this.drawing) return;
-
     // draw shortcuts
     const ENTER = 13;          // (enter)
     const SHIFT_KEY = 16;      // (shift)
@@ -211,16 +212,16 @@ export default class Draw extends API {
     if (!this._drawing) {
       switch (e.keyCode) {
         case LINESTRING_KEY:
-          this.lineStringCtrl.dispatchEvent(event);
+          this._drawLine();
           break;
         case MARKER_KEY:
-          this.markerCtrl.dispatchEvent(event);
+          this._drawPoint();
           break;
         case POLYGON_KEY:
-          this.polygonCtrl.dispatchEvent(event);
+          this._drawPolygon();
           break;
         case SQUARE_KEY:
-          this.squareCtrl.dispatchEvent(event);
+          this._drawSquare();
           break;
         case EXIT_EDIT_KEY:
         case ENTER:
@@ -228,11 +229,11 @@ export default class Draw extends API {
           break;
       }
     }
-    if (e.keyCode === DELETE_KEY) {
-      if (this._editStore.inProgress()) {
-        this._destroy();
-      }
+
+    if (e.keyCode === DELETE_KEY && this._editStore.inProgress()) {
+      this._destroy();
     }
+
     if (e.keyCode === SHIFT_KEY) {
       this.shiftDown = false;
     }
@@ -251,16 +252,22 @@ export default class Draw extends API {
                'gl-draw-line',
                'gl-draw-point' ]
     }, (err, features) => {
-      if (err) throw err;
+      if (err) {
+        throw err;
+      }
       if (features.length) { // clicked on a feature
-        if (this._drawing) return;
+        if (this._drawing) {
+          return;
+        }
         // check if the object is permanent
         var id = features[0].properties.drawId;
-        if (!this._store.get(id).getOptions().permanent)
+        if (this._store.get(id) && !this._store.get(id).getOptions().permanent) {
           this._edit(id);
+        }
       } else { // clicked outside all features
-        if (!this.options.interactive)
+        if (!this.options.interactive) {
           this._finishEdit();
+        }
       }
     });
   }
@@ -299,12 +306,14 @@ export default class Draw extends API {
 
     this._map.featuresAt([coords.x, coords.y], { radius: 20, includeGeometry: true }, (err, features) => {
 
-      if (err)
+      if (err) {
         throw err;
-      else if (!features.length)
+      } else if (!features.length) {
         return;
-      else if (R.none(feat => R.contains(feat.properties.drawId, this._editStore.getDrawIds()))(features))
+      } else if (R.none(feat => R.contains(
+              feat.properties.drawId, this._editStore.getDrawIds()))(features)) {
         return;
+      }
 
       e.stopPropagation();
 
@@ -356,7 +365,9 @@ export default class Draw extends API {
     this._map.getContainer().removeEventListener('mouseup', this.endDrag, true);
     this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
 
-    if (!this.dragging) return;
+    if (!this.dragging) {
+      return;
+    }
 
     this._editStore.get(this.activeDrawId).translating = false;
     this.dragging = false;
@@ -380,8 +391,9 @@ export default class Draw extends API {
    * @private
    */
   _drawPolygon() {
-    if (!this.options.interactive)
+    if (!this.options.interactive) {
       this._finishEdit();
+    }
     var polygon = new Polygon({ map: this._map });
     polygon.startDraw();
     this._drawing = true;
@@ -391,8 +403,9 @@ export default class Draw extends API {
    * @private
    */
   _drawLine() {
-    if (!this.options.interactive)
+    if (!this.options.interactive) {
       this._finishEdit();
+    }
     var line = new Line({ map: this._map });
     line.startDraw();
     this._drawing = true;
@@ -402,8 +415,9 @@ export default class Draw extends API {
    * @private
    */
   _drawSquare() {
-    if (!this.options.interactive)
+    if (!this.options.interactive) {
       this._finishEdit();
+    }
     var square = new Square({ map: this._map });
     square.startDraw();
     this._drawing = true;
@@ -413,8 +427,9 @@ export default class Draw extends API {
    * @private
    */
   _drawPoint() {
-    if (!this.options.interactive)
+    if (!this.options.interactive) {
       this._finishEdit();
+    }
     var point = new Point({ map: this._map });
     point.startDraw();
     this._drawing = true;
@@ -423,101 +438,101 @@ export default class Draw extends API {
   /**
    * @private
    */
-  _mapState() {
-    this._map.on('load', () => {
+  _setEventListeners() {
 
-      // in progress drawing style
-      this._map.addSource('drawing', {
-        data: {
-          type: 'FeatureCollection',
-          features: []
-        },
-        type: 'geojson'
-      });
-      themeDrawing.forEach(style => {
-        Object.assign(style, this.options.styles[style.id] || {});
-        this._map.addLayer(style);
-      });
-
-      // drawn features style
-      this._map.addSource('draw', {
-        data: this._store.getAllGeoJSON(),
-        type: 'geojson'
-      });
-      themeStyle.forEach(style => {
-        Object.assign(style, this.options.styles[style.id] || {});
-        this._map.addLayer(style);
-      });
-
-      // features being editted style
-      this._map.addSource('edit', {
-        data: {
-          type: 'FeatureCollection',
-          features: []
-        },
-        type: 'geojson'
-      });
-      themeEdit.forEach(style => {
-        Object.assign(style, this.options.styles[style.id] || {});
-        this._map.addLayer(style);
-      });
-
-      this._map.on('drawing.new.update', e => {
-        this._map.getSource('drawing').setData(e.geojson);
-      });
-
-      // clear the drawing layer after a drawing is done
-      this._map.on('drawing.end', e => {
-        this._map.getSource('drawing').setData({
-          type: 'FeatureCollection',
-          features: []
-        });
-        this._drawing = false;
-        this._edit(e.geometry.getDrawId());
-        [ this.lineStringCtrl,
-          this.polygonCtrl,
-          this.squareCtrl,
-          this.markerCtrl ].forEach(ctrl => { if (ctrl) ctrl.classList.remove('active'); });
-      });
-
-      this._map.on('edit.feature.update', e => {
-        this._map.getSource('edit').setData(e.geojson);
-      });
-
-      this._map.on('draw.feature.update', e => {
-        this._map.getSource('draw').setData(e.geojson);
-      });
-
-      this._map.on('click', this.onClick);
-
-      this._map.on('mousemove', e => {
-        this._map.featuresAt(e.point, {
-          radius: 7,
-          layer: [ 'gl-edit-point', 'gl-edit-point-mid' ],
-          includeGeometry: true
-        }, (err, features) => {
-          if (err) throw err;
-          if (!features.length)
-            return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
-
-          var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
-          var midpoint = R.find(feat => feat.properties.meta === 'midpoint')(features);
-          var marker = R.find(feat => feat.geometry.type === 'Point')(features);
-
-          if (vertex || midpoint || marker) {
-            this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
-            this.hoveringOnVertex = true;
-          }
-        });
-      });
-
-      this._map.on('drawing.cancel', e => {
-        this._store.unset(e.drawId);
-      });
-
-      this._map.getContainer().addEventListener('mousedown', this.onMouseDown);
+    this._map.on('drawing.new.update', e => {
+      this._map.getSource('drawing').setData(e.geojson);
     });
 
+    // clear the drawing layer after a drawing is done
+    this._map.on('drawing.end', e => {
+      this._map.getSource('drawing').setData({
+        type: 'FeatureCollection',
+        features: []
+      });
+      this._drawing = false;
+      this._edit(e.geometry.getDrawId());
+      [ this.lineStringCtrl,
+        this.polygonCtrl,
+        this.squareCtrl,
+        this.markerCtrl ].forEach(ctrl => { if (ctrl) ctrl.classList.remove('active'); });
+    });
+
+    this._map.on('edit.feature.update', e => {
+      this._map.getSource('edit').setData(e.geojson);
+    });
+
+    this._map.on('draw.feature.update', e => {
+      this._map.getSource('draw').setData(e.geojson);
+    });
+
+    this._map.on('click', this.onClick);
+
+    this._map.on('mousemove', e => {
+      this._map.featuresAt(e.point, {
+        radius: 7,
+        layer: [ 'gl-edit-point', 'gl-edit-point-mid' ],
+        includeGeometry: true
+      }, (err, features) => {
+        if (err) throw err;
+        if (!features.length)
+          return this._map.getContainer().classList.remove('mapboxgl-draw-move-activated');
+
+        var vertex = R.find(feat => feat.properties.meta === 'vertex')(features);
+        var midpoint = R.find(feat => feat.properties.meta === 'midpoint')(features);
+        var marker = R.find(feat => feat.geometry.type === 'Point')(features);
+
+        if (vertex || midpoint || marker) {
+          this._map.getContainer().classList.add('mapboxgl-draw-move-activated');
+          this.hoveringOnVertex = true;
+        }
+      });
+    });
+
+    this._map.on('drawing.cancel', e => {
+      this._store.unset(e.drawId);
+    });
+
+    this._map.getContainer().addEventListener('mousedown', this.onMouseDown);
+
+  }
+
+  _setStyles() {
+    // in progress drawing style
+    this._map.addSource('drawing', {
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      },
+      type: 'geojson'
+    });
+    themeDrawing.forEach(style => {
+      Object.assign(style, this.options.styles[style.id] || {});
+      this._map.addLayer(style);
+    });
+
+    // drawn features style
+    this._map.addSource('draw', {
+      data: this._store.getAllGeoJSON(),
+      type: 'geojson'
+    });
+    themeStyle.forEach(style => {
+      Object.assign(style, this.options.styles[style.id] || {});
+      this._map.addLayer(style);
+    });
+
+    // features being editted style
+    this._map.addSource('edit', {
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      },
+      type: 'geojson'
+    });
+    themeEdit.forEach(style => {
+      Object.assign(style, this.options.styles[style.id] || {});
+      this._map.addLayer(style);
+    });
   }
 
 }
