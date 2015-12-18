@@ -4,7 +4,7 @@ import { DOM } from './util';
 const ENTER = 13;          // (enter)
 const SHIFT_KEY = 16;      // (shift)
 const SQUARE_KEY = 83;     // (s)
-//const DELETE_KEY = 68;     // (d)
+const DELETE_KEY = 68;     // (d)
 const MARKER_KEY = 77;     // (m)
 const POLYGON_KEY = 80;    // (p)
 const EXIT_EDIT_KEY = 27;  // (esc)
@@ -78,6 +78,7 @@ export default function(ctx) {
         if(isShiftDown && activeVertex === null && activeDrawId === null) {
           var end = DOM.mousePos(e, ctx._map.getContainer());
           ctx._store.editFeaturesIn(dragStartPoint, end);
+          ctx._showDeleteButton();
         }
 
         if (activeVertex) {
@@ -168,7 +169,6 @@ export default function(ctx) {
       }
     },
     onKeyUp: function(e) {
-      console.log(e.keyCode, ENTER);
       if (e.keyCode === SHIFT_KEY) {
         isShiftDown = false;
       }
@@ -183,6 +183,8 @@ export default function(ctx) {
             return ctx._startDrawing('polygon');
           case SQUARE_KEY:
             return ctx._startDrawing('square');
+          case DELETE_KEY:
+            return ctx._destroy();
           case EXIT_EDIT_KEY:
           case ENTER:
             return ctx._handleDrawFinished();
