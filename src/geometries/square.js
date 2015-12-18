@@ -2,7 +2,6 @@
 
 import Geometry from './geometry';
 import { translatePoint, DOM } from '../util';
-import InternalEvents from '../internal_events';
 
 /**
  * Square geometry class
@@ -26,22 +25,16 @@ export default class Square extends Geometry {
 
     // event handlers
     this.onMouseDown = this._onMouseDown.bind(this);
-    this.onMouseMove = this._onMouseMove.bind(this);
-    this.completeDraw = this._completeDraw.bind(this);
+    this.onMouseDrag = this._onMouseDrag.bind(this);
+    this.onMouseUp = this._completeDraw.bind(this);
   }
 
   startDraw() {
-    this._map.getContainer().addEventListener('keyup', this.onKeyUp);
-    InternalEvents.emit('drawing.start', { featureType: 'square' });
     this._map.getContainer().classList.add('mapboxgl-draw-activated');
-    this._map.getContainer().addEventListener('mousedown', this.onMouseDown, true);
   }
 
   _onMouseDown(e) {
-    this._map.getContainer().removeEventListener('mousedown', this.onMouseDown, true);
-    this._map.getContainer().addEventListener('mouseup', this.completeDraw, true);
-    this._map.getContainer().addEventListener('mousemove', this.onMouseMove, true);
-
+    this.ready = true;
     var pos = DOM.mousePos(e, this._map.getContainer());
     this.initPos = pos;
     var c = this._map.unproject([pos.x, pos.y]);
@@ -51,35 +44,33 @@ export default class Square extends Geometry {
     }
   }
 
-  _onMouseMove(e) {
-    e.stopPropagation();
-    e.preventDefault();
+  _onMouseDrag(e) {
+    if (this.initPos) {
+      if (!this.started) {
+        this.started = true;
+      }
 
-    if (!this.started) {
-      this.started = true;
+      var pos = DOM.mousePos(e.originalEvent, this._map._container);
+      var c = this._map.unproject([pos.x, pos.y]);
+      var ne = this._map.unproject([this.initPos.x, pos.y]);
+      var sw = this._map.unproject([pos.x, this.initPos.y]);
+      this.coordinates[0][1] = [ ne.lng, ne.lat ];
+      this.coordinates[0][2] = [ c.lng, c.lat ];
+      this.coordinates[0][3] = [ sw.lng, sw.lat ];
     }
+  }
 
-    var pos = DOM.mousePos(e, this._map._container);
-    var c = this._map.unproject([pos.x, pos.y]);
-    var ne = this._map.unproject([this.initPos.x, pos.y]);
-    var sw = this._map.unproject([pos.x, this.initPos.y]);
-    this.coordinates[0][1] = [ ne.lng, ne.lat ];
-    this.coordinates[0][2] = [ c.lng, c.lat ];
-    this.coordinates[0][3] = [ sw.lng, sw.lat ];
-
-    this._renderDrawProgress();
+  onStopDrawing() {
+    return this._completeDraw();
   }
 
   _completeDraw() {
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.getContainer().removeEventListener('mousemove', this.onMouseMove, true);
-    this._map.getContainer().removeEventListener('mouseup', this.completeDraw, true);
     if (!this.started) { // simply clicked, didn't draw
       return;
     }
     this.started = false;
-
-    this._finishDrawing('square');
+    this.created = true;
   }
 
   moveVertex(init, curr, idx) {
@@ -124,11 +115,6 @@ export default class Square extends Geometry {
 
     // always reset last point to equal the first point
     this.coordinates[0][4] = this.coordinates[0][0];
-
-    InternalEvents.emit('edit.new', {
-      id: this.drawId,
-      geojson: this.toGeoJSON()
-    });
   }
 
   _getNE(nw, se) {

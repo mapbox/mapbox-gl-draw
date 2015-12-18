@@ -70,9 +70,9 @@ console.log(Draw.get(featureId));
 ```
 
 ---
-####`.get(String: drawId, [Boolean]: includeDrawIdInProps) -> Object`
+####`.get(String: drawId) -> Object`
 
-This method takes the `drawId` of a feature and returns its GeoJSON object. If the optional second argument is set to `true`, the feature returned will include its `drawId` in its properties.
+This method takes the `drawId` of a feature and returns its GeoJSON object.
 
 Example:
 
@@ -83,9 +83,9 @@ console.log(Draw.get(id));
 ```
 
 ---
-####`.getAll([Boolean]: includeDrawIdInProps) -> Object`
+####`.getAll() -> Object`
 
-This method returns all features added to Draw in a single GeoJSON FeatureCollection. If the optional argument is set to `true`, the feature returned will include its `drawId` in its properties.
+This method returns all features added to Draw in a single GeoJSON FeatureCollection. The each feature's unique id will be found on the `id` attribute of the feature.
 
 
 Example:
@@ -122,6 +122,12 @@ console.log(Draw.getAll());
 //  ]
 //}
 ```
+---
+
+####`.getEditing() -> Object`
+
+This method acts just like getAll except that will only return features that are currently being editing by the draw.
+
 ---
 
 ####`.remove(String: drawId) -> Draw`
@@ -190,3 +196,7 @@ Fired every time a feature is selected for edit. The payload is an object with t
 #### draw.edit.end
 
 Fired every time a feature is unselected for edit. The payload is an object with the `mapbox-gl-draw` feature id.
+
+## Private functions
+
+Draw uses underscore prefixed varibles to indicate that the following function is private. These functions are apt to change or be removed. If there is functionality in these functions that should be part of the public api, please open PR explaining the usecase.

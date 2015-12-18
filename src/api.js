@@ -22,24 +22,10 @@ export default class API extends mapboxgl.Control {
    */
   set(feature, options) {
     feature = JSON.parse(JSON.stringify(feature));
-    var id;
     if (feature.type === 'FeatureCollection') {
-      id = [];
-      for (var i = 0; i < feature.features.length; i++) {
-        id.push(this._setFeature(feature.features[i], options));
-      }
-    } else {
-      id = this._setFeature(feature, options);
+      return feature.features.map(subFeature => this.set(subFeature, options));
     }
-    this._store._render();
-    return id;
-  }
 
-  /**
-   * a helper method of `set()` for individual features
-   * @private
-   */
-  _setFeature(feature, options) {
     if (!feature.geometry) {
       feature = {
         type: 'Feature',
@@ -53,35 +39,27 @@ export default class API extends mapboxgl.Control {
     options.map = this._map;
     options.data = feature;
 
+    var internalFeature;
     switch (feature.geometry.type) {
       case 'Point':
-        feature = new Point(options);
+        internalFeature = new Point(options);
         break;
       case 'LineString':
-        feature = new Line(options);
+        internalFeature = new Line(options);
         break;
       case 'Polygon':
-        feature = new Polygon(options);
+        internalFeature = new Polygon(options);
         break;
       default:
-        console.log('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
-        return;
+        throw new Error('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
     }
-    this._store.set(feature, true);
-    if (this.options.interactive) {
-      this._edit(feature.getDrawId());
-    }
-    return feature.drawId;
-  }
 
-  /**
-   * remove a geometry by its draw id
-   * @param {String} id - the drawid of the geometry
-   * @returns {Draw} this
-   */
-  remove(id) {
-    this._store.unset(id);
-    return this;
+    this._store.set(internalFeature);
+    if (this.options.interactive) {
+      this._edit(internalFeature.drawId);
+    }
+
+    return internalFeature.drawId;
   }
 
   /**
@@ -94,7 +72,7 @@ export default class API extends mapboxgl.Control {
     feature = JSON.parse(JSON.stringify(feature));
     var newFeatType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
     var feat = this._store.get(drawId);
-    if (feat.getGeoJSONType() !== newFeatType || feat.getType() === 'square') {
+    if (feat.geojson.geometry.type !== newFeatType || feat.getType() === 'square') {
       throw 'Can not update feature to different type and can not update squares';
     }
     feat.setCoordinates(feature.coordinates || feature.geometry.coordinates);
@@ -106,25 +84,25 @@ export default class API extends mapboxgl.Control {
    * get a geometry by its draw id
    * @param {String} id - the draw id of the geometry
    */
-  get(id, includeDrawId) {
-    var geom = this._store.getGeoJSON(id);
-    if (!includeDrawId) delete geom.properties.drawId;
-    return geom;
+  get(id) {
+    var feature = this._store.get(id);
+    return feature && feature.toGeoJSON();
   }
 
   /**
    * get all draw geometries
    * @returns {Object} a GeoJSON feature collection
    */
-  getAll(includeDrawId) {
-    var geom = this._store.getAllGeoJSON();
-    if (!includeDrawId) {
-      geom.features = geom.features.map(feat => {
-        delete feat.properties.drawId;
-        return feat;
+  getAll() {
+    return this._store.getAllIds()
+      .map(id => this._store.get(id).toGeoJSON())
+      .reduce(function (FC, feature) {
+        FC.features.push(feature);
+        return FC;
+      }, {
+        type: 'FeatureCollection',
+        features: []
       });
-    }
-    return geom;
   }
 
   /**
@@ -132,7 +110,25 @@ export default class API extends mapboxgl.Control {
    * @return {Object} a feature collection of geometries that are in edit mode
    */
   getEditing() {
-    return this._editStore.getAllGeoJSON();
+    return this._store.getEditIds()
+      .map(id => this._store.get(id).toGeoJSON())
+      .reduce(function(FC, feature) {
+        FC.features.push(feature);
+        return FC;
+      }, {
+        type: 'FeatureCollection',
+        features: []
+      });
+  }
+
+  /**
+   * remove a geometry by its draw id
+   * @param {String} id - the drawid of the geometry
+   * @returns {Draw} this
+   */
+  remove(id) {
+    this._store.unset(id);
+    return this;
   }
 
   /**

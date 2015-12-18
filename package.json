@@ -40,12 +40,12 @@
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
     "geojson-validation": "^0.1.6",
+    "mapbox-gl": "^0.12.0",
     "smokestack": "^3.3.0",
     "tap-closer": "^1.0.0",
     "tap-status": "^1.0.1",
     "tape": "^4.0.0",
-    "uglify-js": "^2.4.23",
-    "mapbox-gl": "^0.12.0"
+    "uglify-js": "^2.4.23"
   },
   "peerDependencies": {
     "mapbox-gl": "^0.12.0"
