@@ -21,7 +21,7 @@ export default class Store {
   }
 
   /**
-   * Adds a feature
+   * add a feature
    *
    * @param {Object} feature - GeoJSON feature
    */
@@ -39,18 +39,17 @@ export default class Store {
   }
 
   /**
-   * Gets a feature
+   * get a feature
    *
    * @param {string} id - draw id
    */
 
   get(id) {
-    var feature = this._features[id];
-    return feature;
+    return this._features[id];
   }
 
   /**
-   * Gets a list of ids for all features
+   * get a list of ids for all features
    */
 
   getAllIds() {
@@ -58,19 +57,19 @@ export default class Store {
   }
 
   /**
-   * Gets a list of ids currently being edited
+   * get a list of ids currently being selected
    */
 
-  getEditIds() {
-    return Object.keys(this._features).filter(id => this._features[id].edit === true);
+  getSelectedIds() {
+    return Object.keys(this._features).filter(id => this._features[id].selected === true);
   }
 
   /**
-   * Deletes a feature
+   * delete a feature
    *
    * @param {String} id - feature id
    */
-  unset(id) {
+  delete(id) {
     if (this._features[id]) {
       this._map.fire('draw.delete', {
         id: id,
@@ -82,33 +81,33 @@ export default class Store {
   }
 
   /**
-   * removes all features being edited from the store
+   * removes all selected features from the store
    */
-  clearEditing() {
-    this.getEditIds().forEach(id => {
-      this.unset(id);
+  clearSelected() {
+    this.getSelectedIds().forEach(id => {
+      this.delete(id);
     });
   }
 
    /**
    * remove all features from the store
    */
-  clear() {
+  deleteAll() {
     Object.keys(this._features).forEach(id => {
-      this.unset(id);
+      this.delete(id);
     });
   }
 
   /**
-   * Set a feautre up for being edited
+   * select a feature
    *
    * @param {String} id - the drawId of a feature
    */
-  edit(id) {
-    if(this._features[id] && this._features[id].edit !== true) {
-      this._features[id].edit = true;
+  select(id) {
+    if (this._features[id] && !this._features[id].selected) {
+      this._features[id].selected = true;
       this._render();
-      this._map.fire('draw.edit.start', {
+      this._map.fire('draw.select.start', {
         id: id,
         geojson: this._features[id].geojson
       });
@@ -116,20 +115,20 @@ export default class Store {
   }
 
   /**
-   * Stops a feature from being edited
+   * commit changes to a feature and deselect
    *
    * @param {String} id - the drawId of a feature
    */
   commit(id) {
-    if(this._features[id] && this._features[id].edit === true) {
-      this._features[id].edit = false;
+    if (this._features[id] && this._features[id].selected) {
+      this._features[id].selected = false;
       this._render();
-      this._map.fire('draw.edit.end', {
+      this._map.fire('draw.select.end', {
         id: id,
         geojson: this._features[id].geojson
       });
 
-      // TODO: make this emmit only if there was a change
+      // TODO: make this emit only if there was a change
       this._map.fire('draw.set', {
         id: id,
         geojson: this._features[id].geojson
@@ -137,15 +136,15 @@ export default class Store {
     }
   }
 
-  isEditing() {
-    return Object.keys(this._features).some(id => this._features[id].edit === true);
+  isSelected() {
+    return Object.keys(this._features).some(id => this._features[id].selected === true);
   }
 
   /**
    * @param {Object} p1 - the pixel coordinates of the first point
    * @param {Object} p2 - the pixel coordinates of the second point
    */
-  editFeaturesIn(p1, p2) {
+  selectFeaturesIn(p1, p2) {
     var xMin = p1.x < p2.x ? p1.x : p2.x;
     var yMin = p1.y < p2.y ? p1.y : p2.y;
     var xMax = p1.x > p2.x ? p1.x : p2.x;
@@ -160,7 +159,7 @@ export default class Store {
         var id = feature.properties.drawId;
         if (this._features[id] && set[id] === undefined) {
           set[id] = 1;
-          this.edit(id);
+          this.select(id);
         }
         return set;
       }, {});
@@ -170,16 +169,16 @@ export default class Store {
   render() {
     this._needsRender = true;
     var isStillAlive = this._map.getSource('draw') !== undefined;
-    if(isStillAlive) { // checks to make sure we still have a map
-      if(this._needsRender) {
+    if (isStillAlive) { // checks to make sure we still have a map
+      if (this._needsRender) {
         this._needsRender = false;
         var featureBuckets = Object.keys(this._features).reduce((buckets, id) => {
           if (this._features[id].ready) {
-            if (this._features[id].edit === true) {
+            if (this._features[id].selected === true) {
               let geojson = this._features[id].toGeoJSON();
               geojson.properties.drawId = id;
-              buckets.edit.push(geojson);
-              buckets.edit = buckets.edit.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
+              buckets.selected.push(geojson);
+              buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
             }
             else {
               let geojson = this._features[id].toGeoJSON();
@@ -188,7 +187,7 @@ export default class Store {
             }
           }
           return buckets;
-        }, {'draw': [], 'edit': []});
+        }, { draw: [], selected: [] });
 
         // currently we are updating both of these sources
         // even if only one of them is changing. This is an
@@ -199,9 +198,9 @@ export default class Store {
           features: featureBuckets.draw
         });
 
-        this._map.getSource('edit').setData({
+        this._map.getSource('draw-selected').setData({
           type: 'FeatureCollection',
-          features: featureBuckets.edit
+          features: featureBuckets.selected
         });
       }
     }

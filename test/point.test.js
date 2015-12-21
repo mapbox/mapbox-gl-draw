@@ -12,7 +12,7 @@ test('Point geometry class', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  var id = Draw.set(feature);
+  var id = Draw.add(feature);
   var Point = Draw._store.get(id);
 
   t.end();

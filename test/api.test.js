@@ -16,18 +16,18 @@ test('API test', t => {
 
   var id;
 
-  t.test('set', t => {
-    id = Draw.set(feature);
+  t.test('add', t => {
+    id = Draw.add(feature);
     t.ok(id, 'valid string id returned on set');
 
     // set permanent feature
-    id = Draw.set(feature, { permanent: true });
+    id = Draw.add(feature, { permanent: true });
     var point = map.project(new mapboxgl.LngLat(...feature.geometry.coordinates));
     map.fire('click', { point });
     t.equals(
-      Draw._store.getEditIds().indexOf(id),
+      Draw._store.getSelectedIds().indexOf(id),
       -1,
-      'permanent feature is not inserted into edit store when clicked'
+      'permanent feature is not inserted into selected store when clicked'
     );
 
     t.end();
@@ -64,6 +64,26 @@ test('API test', t => {
     t.end();
   });
 
+  t.test('select', t => {
+    t.deepEquals(
+      Draw.getSelected(),
+      { features: [], type: 'FeatureCollection' },
+      'no features selected');
+    Draw.select(id);
+    t.deepEquals(
+      Draw.getSelected(),
+      { features: [
+        { geometry: { coordinates: [ 1, 1 ], type: 'Point' }, id, properties: {}, type: 'Feature' }
+      ], type: 'FeatureCollection' },
+      '1 feature selected');
+    Draw.deselect(id);
+    t.deepEquals(
+      Draw.getSelected(),
+      { features: [], type: 'FeatureCollection' },
+      'no features selected');
+    t.end();
+  });
+
   t.test('clear', t => {
     Draw.clear();
     t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
@@ -71,7 +91,7 @@ test('API test', t => {
   });
 
   t.test('remove', t => {
-    id = Draw.set(feature);
+    id = Draw.add(feature);
     Draw.remove(id);
     t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
     t.end();

@@ -24,10 +24,10 @@ map.on('load', function() {
 option | values | function
 --- | --- | ---
 drawing | boolean | The ability to draw and delete features - default: `true`
-interactive | boolean | Keep all features permanently in edit mode - default: `false`
+interactive | boolean | Keep all features permanently in selected mode - default: `false`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
-styles | Object | Add a style with any of the following properties: <li>`gl-draw-polygon`</li><li>`gl-draw-polygon-stroke`</li><li> `gl-draw-line`</li><li> `gl-draw-point`</li><li> `gl-drawing-line`</li><li> `gl-drawing-polygon`</li><li> `gl-drawing-polygon-stroke`</li><li> `gl-drawing-points`</li><li> `gl-edit-line`</li><li> `gl-edit-polygon`</li><li> `gl-edit-polygon-stroke`</li><li> `gl-edit-point`</li><li> `gl-edit-point-mid`</li>The property should be an object with either the `layout` and/or `paint` properties as specified in the [Mapbox GL Style Reference](https://www.mapbox.com/mapbox-gl-style-spec/). It will overwrite the corresponding default  styles found in [`src/theme/`](https://github.com/mapbox/mapbox-gl-draw/tree/master/src/theme).
+styles | Object | Add a style with any of the following properties: <li>`gl-draw-polygon`</li><li>`gl-draw-polygon-stroke`</li><li> `gl-draw-line`</li><li> `gl-draw-point`</li><li> `gl-drawing-line`</li><li> `gl-drawing-polygon`</li><li> `gl-drawing-polygon-stroke`</li><li> `gl-drawing-points`</li><li> `gl-draw-selected-line`</li><li> `gl-draw-selected-polygon`</li><li> `gl-draw-selected-polygon-stroke`</li><li> `gl-draw-selected-point`</li><li> `gl-draw-selected-point-mid`</li>The property should be an object with either the `layout` and/or `paint` properties as specified in the [Mapbox GL Style Reference](https://www.mapbox.com/mapbox-gl-style-spec/). It will overwrite the corresponding default  styles found in [`src/theme/`](https://github.com/mapbox/mapbox-gl-draw/tree/master/src/theme).
 
 Custom Style Example:
 
@@ -56,15 +56,15 @@ var Draw = mapboxgl.Draw({
 
 ## API Methods
 
-####`.set(Object: geojsonFeature, [Object]: options) -> String`
+####`.add(Object: GeoJSONFeature, [Object]: options) -> String`
 
-This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger editing.
+This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger selection.
 
 Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
-var featureId = Draw.set(feature);
+var featureId = Draw.add(feature);
 console.log(Draw.get(featureId));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
 ```
@@ -102,21 +102,21 @@ console.log(Draw.getAll());
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
-//        coordintates: [0, 0]
+//        coordinates: [0, 0]
 //      }
 //    },
 //    {
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
-//        coordintates: [1, 1]
+//        coordinates: [1, 1]
 //      }
 //    },
 //        {
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
-//        coordintates: [2, 2]
+//        coordinates: [2, 2]
 //      }
 //    }
 //  ]
@@ -124,9 +124,33 @@ console.log(Draw.getAll());
 ```
 ---
 
-####`.getEditing() -> Object`
+####`.getSelected() -> Object`
 
-This method acts just like getAll except that will only return features that are currently being editing by the draw.
+Get all selected features.
+
+---
+
+####`.select(String: drawId) -> Draw`
+
+This method takes the `drawId` of a feature and selects it. It returns `this` to allow for method chaining.
+
+---
+
+####`.selectAll() -> Draw`
+
+This method selects all features. It returns `this` to allow for method chaining.
+
+---
+
+####`.deselect(String: drawId) -> Draw`
+
+This method takes the `drawId` of a feature and deselects it if selected. It returns `this` to allow for method chaining.
+
+---
+
+####`.deselectAll() -> Draw`
+
+This method deselects all features. It returns `this` to allow for method chaining.
 
 ---
 
@@ -147,7 +171,7 @@ Draw
 
 ---
 
-####`.update(String: drawId, Object: geojsonFeature) -> Draw`
+####`.update(String: drawId, Object: GeoJSONFeature) -> Draw`
 
 This method takes the `drawId` of an existing feature and a GeoJSON object and replaces that feature in draw with the new feature. It returns `this`.
 
@@ -179,24 +203,24 @@ Draw
 
 ## Events
 
-Draw fires off a number of events on draw and edit actions. All of these events are name spaced `draw` inside of the mapboxgl event emitter.
+Draw fires off a number of events on draw and select actions. All of these events are name spaced `draw` inside of the mapboxgl event emitter.
 
 #### draw.set
 
-This is fired every time a feature is commited via escape or the double click. The payload is an object with the `mapbox-gl-draw` feature id and the geojson representation of the feature.
+This is fired every time a feature is committed via escape or the double click. The payload is an object with the `mapbox-gl-draw` feature id and the GeoJSON representation of the feature.
 
 #### draw.delete
 
-This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` feature id of the feature that was deleted and the geojson representation of the feature just before it was deleted.
+This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` feature id of the feature that was deleted and the GeoJSON representation of the feature just before it was deleted.
 
-#### draw.edit.start
+#### draw.select.start
 
-Fired every time a feature is selected for edit. The payload is an object with the `mapbox-gl-draw` feature id and the geojson representation of the feature.
+Fired every time a feature is selected. The payload is an object with the `mapbox-gl-draw` feature id and the GeoJSON representation of the feature.
 
-#### draw.edit.end
+#### draw.select.end
 
-Fired every time a feature is unselected for edit. The payload is an object with the `mapbox-gl-draw` feature id.
+Fired every time a feature is deselected. The payload is an object with the `mapbox-gl-draw` feature id.
 
 ## Private functions
 
-Draw uses underscore prefixed varibles to indicate that the following function is private. These functions are apt to change or be removed. If there is functionality in these functions that should be part of the public api, please open PR explaining the usecase.
+Draw uses underscore prefixed variables to indicate that the following function is private. These functions are apt to change or be removed. If there is functionality in these functions that should be part of the public api, please open PR explaining the use case.

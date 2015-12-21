@@ -4,8 +4,8 @@ import API from './api';
 import { DOM, createButton } from './util';
 
 // GL Styles
-import themeEdit from './theme/edit';
-import themeStyle from './theme/style';
+import drawSelectedTheme from './theme/draw-selected';
+import drawTheme from './theme/draw';
 
 // Data stores
 import Store from './store';
@@ -23,7 +23,7 @@ import DrawEvents from './draw_events';
  *
  * @param {Object} options
  * @param {Boolean} [options.drawing=true] - The ability to draw and delete features
- * @param {Boolean} [options.interactive=false] - Keep all features permanently in edit mode
+ * @param {Boolean} [options.interactive=false] - Keep all features permanently in selected mode
  * @param {Boolean} [options.keybindings=true] - Keyboard shortcuts for drawing
  * @param {Object} [options.controls] - drawable shapes
  * @param {Boolean} [options.controls.marker=true]
@@ -138,16 +138,16 @@ export default class Draw extends API {
   /**
    * @private
    */
-  _edit(drawId) {
+  _select(drawId) {
     this._showDeleteButton();
-    this._store.edit(drawId);
+    this._store.select(drawId);
   }
 
   /**
    * @private
    */
   _destroy() {
-    this._store.clearEditing();
+    this._store.clearSelected();
     this._handleDrawFinished();
   }
 
@@ -174,11 +174,11 @@ export default class Draw extends API {
     obj.startDraw();
     this._events.setNewFeature(obj);
     var id = this._store.set(obj);
-    this._edit(id);
+    this._select(id);
   }
 
   _handleDrawFinished() {
-    this._store.getEditIds().forEach(id => this._store.commit(id));
+    this._store.getSelectedIds().forEach(id => this._store.commit(id));
     this._hideDeleteButton();
     [ this.lineStringCtrl,
         this.polygonCtrl,
@@ -214,20 +214,20 @@ export default class Draw extends API {
       },
       type: 'geojson'
     });
-    themeStyle.forEach(style => {
+    drawTheme.forEach(style => {
       Object.assign(style, this.options.styles[style.id] || {});
       this._map.addLayer(style);
     });
 
-    // features being editted style
-    this._map.addSource('edit', {
+    // selected features style
+    this._map.addSource('draw-selected', {
       data: {
         type: 'FeatureCollection',
         features: []
       },
       type: 'geojson'
     });
-    themeEdit.forEach(style => {
+    drawSelectedTheme.forEach(style => {
       Object.assign(style, this.options.styles[style.id] || {});
       this._map.addLayer(style);
     });

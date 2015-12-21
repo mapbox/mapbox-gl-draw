@@ -13,14 +13,14 @@ export default class API extends mapboxgl.Control {
   }
 
   /**
-   * add a geometry
+   * add a feature
    * @param {Object} feature - GeoJSON feature
    * @param {Object} [options]
-   * @pata {Boolean} [options.permanent=false] - disable editing for feature
+   * @pata {Boolean} [options.permanent=false] - disable selection for feature
    * @returns {Number} draw id of the set feature or an array of
    * draw ids if a feature collection was added
    */
-  set(feature, options) {
+  add(feature, options) {
     feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
       return feature.features.map(subFeature => this.set(subFeature, options));
@@ -56,7 +56,7 @@ export default class API extends mapboxgl.Control {
 
     this._store.set(internalFeature);
     if (this.options.interactive) {
-      this._edit(internalFeature.drawId);
+      this._select(internalFeature.drawId);
     }
 
     return internalFeature.drawId;
@@ -64,19 +64,19 @@ export default class API extends mapboxgl.Control {
 
   /**
    * Updates an existing feature
-   * @param {String} drawId - the drawId of the feature to update
+   * @param {String} id - the drawId of the feature to update
    * @param {Object} feature - a GeoJSON feature
    * @returns {Draw} this
    */
-  update(drawId, feature) {
+  update(id, feature) {
     feature = JSON.parse(JSON.stringify(feature));
-    var newFeatType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
-    var feat = this._store.get(drawId);
-    if (feat.geojson.geometry.type !== newFeatType || feat.getType() === 'square') {
+    var newFeatureType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
+    var _feature = this._store.get(id);
+    if (_feature.geojson.geometry.type !== newFeatureType || _feature.getType() === 'square') {
       throw 'Can not update feature to different type and can not update squares';
     }
-    feat.setCoordinates(feature.coordinates || feature.geometry.coordinates);
-    if (feature.properties) feat.setProperties(feature.properties);
+    _feature.setCoordinates(feature.coordinates || feature.geometry.coordinates);
+    if (feature.properties) _feature.setProperties(feature.properties);
     return this;
   }
 
@@ -96,9 +96,9 @@ export default class API extends mapboxgl.Control {
   getAll() {
     return this._store.getAllIds()
       .map(id => this._store.get(id).toGeoJSON())
-      .reduce(function (FC, feature) {
-        FC.features.push(feature);
-        return FC;
+      .reduce(function(featureCollection, feature) {
+        featureCollection.features.push(feature);
+        return featureCollection;
       }, {
         type: 'FeatureCollection',
         features: []
@@ -106,15 +106,57 @@ export default class API extends mapboxgl.Control {
   }
 
   /**
-   * get a feature collection of features being editted
-   * @return {Object} a feature collection of geometries that are in edit mode
+   * select a feature
+   * @param {String} id - the drawId of the feature
+   * @returns {Draw} this
    */
-  getEditing() {
-    return this._store.getEditIds()
+  select(id) {
+    this._store.select(id);
+    return this;
+  }
+
+  /**
+   * select all features
+   * @param {String} id - the drawId of the feature
+   * @returns {Draw} this
+   */
+  selectAll() {
+    this._store.getAllIds()
+      .forEach(id => this.select(id));
+    return this;
+  }
+
+  /**
+   * deselect a feature
+   * @param {String} id - the drawId of the feature
+   * @returns {Draw} this
+   */
+  deselect(id) {
+    this._store.commit(id);
+    return this;
+  }
+
+  /**
+   * deselect all features
+   * @param {String} id - the drawId of the feature
+   * @returns {Draw} this
+   */
+  deselectAll() {
+    this._store.getSelectedIds()
+      .forEach(id => this.commit(id));
+    return this;
+  }
+
+  /**
+   * get selected feature collection of features
+   * @return {Object} a feature collection of geometries that are selected
+   */
+  getSelected() {
+    return this._store.getSelectedIds()
       .map(id => this._store.get(id).toGeoJSON())
-      .reduce(function(FC, feature) {
-        FC.features.push(feature);
-        return FC;
+      .reduce(function(featureCollection, feature) {
+        featureCollection.features.push(feature);
+        return featureCollection;
       }, {
         type: 'FeatureCollection',
         features: []
@@ -127,7 +169,7 @@ export default class API extends mapboxgl.Control {
    * @returns {Draw} this
    */
   remove(id) {
-    this._store.unset(id);
+    this._store.delete(id);
     return this;
   }
 
@@ -136,7 +178,7 @@ export default class API extends mapboxgl.Control {
    * @returns {Draw} this
    */
   clear() {
-    this._store.clear();
+    this._store.deleteAll();
     return this;
   }
 
