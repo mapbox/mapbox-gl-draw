@@ -83,12 +83,12 @@ export default class Line extends Geometry {
   }
 
   /**
-   * Add a new vertex to a polygon in edit mode
+   * Add a new vertex to a polygon in selected mode
    *
    * @param {Object} coords - The coordinates of the new vertex in the for { lng: <Number>, lat: <Number> }
    * @param {Number} idx - the index at which the new point will be placed in `feature.geometry.coordinates`
    */
-  editAddVertex(coords, idx) {
+  addVertex(coords, idx) {
     coords = this._map.unproject(coords);
     this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
   }

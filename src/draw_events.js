@@ -7,7 +7,7 @@ const SQUARE_KEY = 83;     // (s)
 const DELETE_KEY = 68;     // (d)
 const MARKER_KEY = 77;     // (m)
 const POLYGON_KEY = 80;    // (p)
-const EXIT_EDIT_KEY = 27;  // (esc)
+const DESELECT_KEY = 27;  // (esc)
 const LINESTRING_KEY = 76; // (l)
 
 export default function(ctx) {
@@ -39,7 +39,7 @@ export default function(ctx) {
       else {
         dragStartPoint = DOM.mousePos(e, ctx._map._container);
 
-        var drawIds = ctx._store.getEditIds();
+        var drawIds = ctx._store.getSelectedIds();
         if (newFeature === null && drawIds.length > 0) {
           var coords = DOM.mousePos(e, ctx._map._container);
           ctx._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
@@ -50,7 +50,7 @@ export default function(ctx) {
 
               if(tempVertex) {
                 ctx._store.get(tempVertex.properties.parent)
-                  .editAddVertex(coords, tempVertex.properties.index);
+                  .addVertex(coords, tempVertex.properties.index);
                 activeVertex = tempVertex;
                 ctx._store._render();
               }
@@ -77,7 +77,7 @@ export default function(ctx) {
 
         if(isShiftDown && activeVertex === null && activeDrawId === null) {
           var end = DOM.mousePos(e, ctx._map.getContainer());
-          ctx._store.editFeaturesIn(dragStartPoint, end);
+          ctx._store.selectFeaturesIn(dragStartPoint, end);
           ctx._showDeleteButton();
         }
 
@@ -152,7 +152,7 @@ export default function(ctx) {
                 if(isShiftDown === false) {
                   ctx._handleDrawFinished();
                 }
-                return ctx._edit(features[0].properties.drawId);
+                return ctx._select(features[0].properties.drawId);
           }
 
           if(features.length === 0) {
@@ -185,12 +185,12 @@ export default function(ctx) {
             return ctx._startDrawing('square');
           case DELETE_KEY:
             return ctx._destroy();
-          case EXIT_EDIT_KEY:
+          case DESELECT_KEY:
           case ENTER:
             return ctx._handleDrawFinished();
         }
       }
-      else if((e.keyCode === EXIT_EDIT_KEY || e.keyCode === ENTER) && newFeature) {
+      else if((e.keyCode === DESELECT_KEY || e.keyCode === ENTER) && newFeature) {
         newFeature.onStopDrawing(e);
         cleanupNewFeatureIfNeeded();
       }

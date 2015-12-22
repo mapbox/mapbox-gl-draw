@@ -33,7 +33,7 @@ test('Draw class test', t => {
     'point draw button is in the DOM'
   );
 
-  // test edit mode
+  // test selected mode
   // TO DO
 
   t.end();

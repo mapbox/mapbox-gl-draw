@@ -1,8 +1,8 @@
 export default [
   {
-    'id': 'gl-edit-line',
+    'id': 'gl-draw-selected-line',
     'type': 'line',
-    'source': 'edit',
+    'source': 'draw-selected',
     'filter': ['all', ['==', '$type', 'LineString']],
     'layout': {
       'line-cap': 'round',
@@ -15,9 +15,9 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-polygon',
+    'id': 'gl-draw-selected-polygon',
     'type': 'fill',
-    'source': 'edit',
+    'source': 'draw-selected',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'paint': {
       'fill-color': '#000000',
@@ -25,9 +25,9 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-polygon-stroke',
+    'id': 'gl-draw-selected-polygon-stroke',
     'type': 'line',
-    'source': 'edit',
+    'source': 'draw-selected',
     'filter': ['all', ['==', '$type', 'Polygon']],
     'layout': {
       'line-cap': 'round',
@@ -40,9 +40,9 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-point',
+    'id': 'gl-draw-selected-point',
     'type': 'circle',
-    'source': 'edit',
+    'source': 'draw-selected',
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['!=', 'meta', 'midpoint']],
@@ -58,9 +58,9 @@ export default [
     },
     'interactive': true
   }, {
-    'id': 'gl-edit-point-mid',
+    'id': 'gl-draw-selected-point-mid',
     'type': 'circle',
-    'source': 'edit',
+    'source': 'draw-selected',
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
