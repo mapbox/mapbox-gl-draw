@@ -39,11 +39,11 @@
     map.on('draw.delete', function(playload) {
       console.log('draw.delete', playload);
     });
-    map.on('draw.edit.start', function(playload) {
-      console.log('draw.edit.start', playload);
+    map.on('draw.select', function(playload) {
+      console.log('draw.select', playload);
     });
-    map.on('draw.edit.end', function(playload) {
-      console.log('draw.edit.end', playload);
+    map.on('draw.deselect', function(playload) {
+      console.log('draw.deselect', playload);
     });
 
     var firstId = Draw.set({ type: 'Point', coordinates: [10, 10] });
