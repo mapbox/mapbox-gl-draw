@@ -5,8 +5,8 @@
 * Renamed style theme for selected features. Was `gl-edit-{feature}`, now `gl-draw-selected-{feature}`.
 * Renamed `Draw.set` method to `Draw.add`.
 * Renamed `Draw.getEditing` method to `Draw.getSelected`.
-* Renamed `draw.select` event to `draw.select`.
-* Renamed `draw.deselect` event to `draw.deselect`.
+* Renamed `draw.select` event to `draw.select.start`.
+* Renamed `draw.deselect` event to `draw.select.end`.
 
 #### API Improvements
 
