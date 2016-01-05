@@ -11,3 +11,4 @@
 #### API Improvements
 
 * Added 4 selection methods: `Draw.select`, `Draw.selectAll`, `Draw.deselect`, and `Draw.deselectAll`.
+* Draw.add treats feature.id as its internal id so you can use external ids with Draw.get
