@@ -13,7 +13,7 @@ Draw only works after the map has loaded so it is wise to perform any interactio
 
 ```js
 map.on('load', function() {
-    Draw.set({ ... });
+    Draw.add({ ... });
     console.log(Draw.getAll());
     ...
 });
@@ -58,7 +58,13 @@ var Draw = mapboxgl.Draw({
 
 ####`.add(Object: GeoJSONFeature, [Object]: options) -> String`
 
-This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger selection.
+This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. If an id is provided with the feature that ID will be used.
+
+The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger selection.
+
+Draw does not enforce unique IDs to be passed to `.add`, but it does enforce unique ids inside of it. This means that if you provide an id for a feature that is not unqiue, Draw will override the exhisting feature with your new feature. You can think of this like PUT in http verbs.
+
+If a FeatureCollection is provided to `.add` Draw will break it up into many features as if you looped through the features in the collection and added them one at a time. This is good for bulk adding, though it is no faster than looping yourself.
 
 Example:
 
@@ -69,6 +75,16 @@ console.log(Draw.get(featureId));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
 ```
 
+Example with ID:
+
+```js
+var feature = { type: 'Point', coordinates: [0, 0], id: 'unique-id' };
+var featureId = Draw.add(feature);
+console.log(featureId) //=> unique-id
+console.log(Draw.get('unique-id'));
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0], id: 'unique-id' }
+```
+
 ---
 ####`.get(String: drawId) -> Object`
 
@@ -77,7 +93,7 @@ This method takes the `drawId` of a feature and returns its GeoJSON object.
 Example:
 
 ```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
 ```
@@ -162,7 +178,7 @@ Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
-var id = draw.set(feature)
+var id = draw.add(feature)
 Draw
   .remove(id)
   .getAll();
@@ -178,7 +194,7 @@ This method takes the `drawId` of an existing feature and a GeoJSON object and r
 Example:
 
 ```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 var newFeature = Draw
   .update(id, { type: 'Point', coordinates: [1, 1] })
   .get(id);
@@ -194,7 +210,7 @@ This method removes all geometries in Draw.
 Example:
 
 ```js
-Draw.set({ type: 'Point', coordinates: [0, 0] });
+Draw.add({ type: 'Point', coordinates: [0, 0] });
 Draw
   .clear()
   .getAll();

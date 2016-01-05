@@ -29,6 +29,7 @@ export default class API extends mapboxgl.Control {
     if (!feature.geometry) {
       feature = {
         type: 'Feature',
+        id: feature.id,
         geometry: feature
       };
     }
