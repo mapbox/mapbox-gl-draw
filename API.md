@@ -213,11 +213,11 @@ This is fired every time a feature is committed via escape or the double click. 
 
 This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` feature id of the feature that was deleted and the GeoJSON representation of the feature just before it was deleted.
 
-#### draw.select
+#### draw.select.start
 
 Fired every time a feature is selected. The payload is an object with the `mapbox-gl-draw` feature id and the GeoJSON representation of the feature.
 
-#### draw.deslect
+#### draw.select.end
 
 Fired every time a feature is deselected. The payload is an object with the `mapbox-gl-draw` feature id.
 
