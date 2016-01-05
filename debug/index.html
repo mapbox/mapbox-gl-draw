@@ -60,6 +60,12 @@
     Draw.remove(secondId);
     console.log('Remove', Draw.get(secondId), '-> undefined');
 
+    var currentId = 'this-is-a-test';
+    var thridId = Draw.add({type: 'Point', coordinates: [0, 0], id:currentId});
+    console.log('provided ids are used', currentId, '->', thridId);
+    var getWithCurrent = Draw.get(currentId);
+    console.log('and can get features', getWithCurrent.id, '->', thridId);
+
     Draw.clear();
     console.log(Draw.get(firstId), '-> undefined');
   });

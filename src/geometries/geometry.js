@@ -16,7 +16,7 @@ export default class Geometry {
 
   constructor(options) {
     this._map = options.map;
-    this.drawId = hat();
+    this.drawId = options.data.id || hat();
     this.coordinates = options.data.geometry.coordinates;
     this.options = options;
     this.created = false;

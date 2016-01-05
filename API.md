@@ -58,7 +58,13 @@ var Draw = mapboxgl.Draw({
 
 ####`.add(Object: GeoJSONFeature, [Object]: options) -> String`
 
-This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger selection.
+This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. If an id is provided with the feature that ID will be used.
+
+The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events which would normally trigger selection.
+
+Draw does not enforce unique IDs to be passed to `.add`, but it does enforce unique ids inside of it. This means that if you provide an id for a feature that is not unqiue, Draw will override the exhisting feature with your new feature. You can think of this like PUT in http verbs.
+
+If a FeatureCollection is provided to `.add` Draw will break it up into many features as if you looped through the features in the collection and added them one at a time. This is good for bulk adding, though it is no faster than looping yourself.
 
 Example:
 
@@ -67,6 +73,16 @@ var feature = { type: 'Point', coordinates: [0, 0] };
 var featureId = Draw.add(feature);
 console.log(Draw.get(featureId));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
+```
+
+Example with ID:
+
+```js
+var feature = { type: 'Point', coordinates: [0, 0], id: 'unique-id' };
+var featureId = Draw.add(feature);
+console.log(featureId) //=> unique-id
+console.log(Draw.get('unique-id'));
+//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0], id: 'unique-id' }
 ```
 
 ---
