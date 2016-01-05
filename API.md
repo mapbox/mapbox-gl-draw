@@ -13,7 +13,7 @@ Draw only works after the map has loaded so it is wise to perform any interactio
 
 ```js
 map.on('load', function() {
-    Draw.set({ ... });
+    Draw.add({ ... });
     console.log(Draw.getAll());
     ...
 });
@@ -77,7 +77,7 @@ This method takes the `drawId` of a feature and returns its GeoJSON object.
 Example:
 
 ```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
 ```
@@ -162,7 +162,7 @@ Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
-var id = draw.set(feature)
+var id = draw.add(feature)
 Draw
   .remove(id)
   .getAll();
@@ -178,7 +178,7 @@ This method takes the `drawId` of an existing feature and a GeoJSON object and r
 Example:
 
 ```js
-var id = Draw.set({ type: 'Point', coordinates: [0, 0] });
+var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 var newFeature = Draw
   .update(id, { type: 'Point', coordinates: [1, 1] })
   .get(id);
@@ -194,7 +194,7 @@ This method removes all geometries in Draw.
 Example:
 
 ```js
-Draw.set({ type: 'Point', coordinates: [0, 0] });
+Draw.add({ type: 'Point', coordinates: [0, 0] });
 Draw
   .clear()
   .getAll();

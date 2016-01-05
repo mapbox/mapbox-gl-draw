@@ -46,12 +46,12 @@
       console.log('draw.select.end', playload);
     });
 
-    var firstId = Draw.set({ type: 'Point', coordinates: [10, 10] });
+    var firstId = Draw.add({ type: 'Point', coordinates: [10, 10] });
     console.log('SET', Draw.get(firstId).geometry.coordinates, '->', 10, 10);
     Draw.update(firstId, { type: 'Point', coordinates: [-74.0023, 40.7104] });
     console.log('UPDATE', Draw.get(firstId).geometry.coordinates, '->', -74.0023, 40.7104);
 
-    var secondId = Draw.set({ type: 'Point', coordinates: [0, 0] }, {permanent: true});
+    var secondId = Draw.add({ type: 'Point', coordinates: [0, 0] }, {permanent: true});
     var all = Draw.getAll();
     console.log('Get All', all.features.length, '->', 2);
     console.log('Get All has ids', all.features.filter(function(feature){
