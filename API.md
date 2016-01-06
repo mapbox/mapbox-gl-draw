@@ -7,8 +7,6 @@ var Draw = mapboxgl.Draw({ options });
 map.addControl(Draw);
 ```
 
-**Note: make sure to instantiate `Draw` before any calls to `map.on('load')`**
-
 Draw only works after the map has loaded so it is wise to perform any interactions in the `load` event callback of mapbox-gl:
 
 ```js

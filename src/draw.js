@@ -70,10 +70,15 @@ export default class Draw extends API {
       this._createButtons();
     }
 
-    this._map.on('load', () => {
+    if (this._map.loaded()) {
       this._setEventListeners();
       this._setStyles();
-    });
+    } else {
+      this._map.on('load', () => {
+        this._setEventListeners();
+        this._setStyles();
+      });
+    }
 
     return container;
   }
