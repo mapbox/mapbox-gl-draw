@@ -55,6 +55,8 @@ export default class API extends mapboxgl.Control {
         throw new Error('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
     }
 
+    internalFeature.ready = true;
+
     this._store.set(internalFeature);
     if (this.options.interactive) {
       this._select(internalFeature.drawId);
