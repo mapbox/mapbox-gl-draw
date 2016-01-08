@@ -1,3 +1,11 @@
+## 0.1.5
+
+Fixes publish process so the distribution is kept up to date
+
+## 0.1.4
+
+Fixes bug with Draw.add that was making new features not render
+
 ## 0.1.3
 
 #### Breaking changes

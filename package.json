@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -15,7 +15,7 @@
     "test": "npm run lint && npm run build",
     "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
-    "build": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "build-examples": "./build-examples.sh",
     "start": "budo index.js --serve=dist/mapbox-gl-draw.js --live -d | bistre"
   },
