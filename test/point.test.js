@@ -7,13 +7,20 @@ mapboxgl.accessToken = accessToken;
 
 var feature = features.point;
 
-test('Point geometry class', t => {
-  var map = createMap();
-  var Draw = GLDraw();
-  map.addControl(Draw);
+var map = createMap();
 
-  var id = Draw.add(feature);
-  var Point = Draw._store.get(id);
+map.on('load', () => {
 
-  t.end();
+  test('Point geometry class', t => {
+    var Draw = GLDraw();
+    map.addControl(Draw);
+
+    var id = Draw.add(feature);
+    var point = Draw._store.get(id);
+
+    console.log(point);
+
+    t.end();
+  });
+
 });

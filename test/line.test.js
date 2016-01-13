@@ -18,12 +18,17 @@ function createMap() {
   return map;
 }
 
-test('Line draw class', t => {
-  var map = createMap();
-  var Draw = GLDraw();
-  map.addControl(Draw);
+var map = createMap();
 
-  var l = new Line(map);
+map.on('load', () => {
 
-  t.end();
+  test('Line draw class', t => {
+    var Draw = GLDraw();
+    map.addControl(Draw);
+
+    //var l = new Line(map);
+
+    t.end();
+  });
+
 });

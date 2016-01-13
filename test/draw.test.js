@@ -1,55 +1,58 @@
 var test = require('tape');
 var mapboxgl = require('mapbox-gl');
 var GLDraw = require('../');
-var Store = require('../src/store');
 import { accessToken, createMap } from './utils';
 
 mapboxgl.accessToken = accessToken;
 
-test('Draw class test', t => {
-  var map = createMap();
-  var Draw = GLDraw();
-  map.addControl(Draw);
+var map = createMap();
 
-  t.ok(Draw, 'Draw class exists');
+map.on('load', () => {
 
-  t.ok(Draw.options, 'Draw.options is defined');
+  test('Draw class test', t => {
+    var Draw = GLDraw();
+    map.addControl(Draw);
 
-  // check for control buttons in the DOM
-  t.ok(
-    document.getElementById('lineDrawBtn'),
-    'line draw button is in the DOM'
-  );
-  t.ok(
-    document.getElementById('polygonDrawBtn'),
-    'polygon draw button is in the DOM'
-  );
-  t.ok(
-    document.getElementById('squareDrawBtn'),
-    'square draw button is in the DOM'
-  );
-  t.ok(
-    document.getElementById('pointDrawBtn'),
-    'point draw button is in the DOM'
-  );
+    t.ok(Draw, 'Draw class exists');
 
-  // test selected mode
-  // TO DO
+    t.ok(Draw.options, 'Draw.options is defined');
 
-  t.end();
-});
+    // check for control buttons in the DOM
+    t.ok(
+      document.getElementById('lineDrawBtn'),
+      'line draw button is in the DOM'
+    );
+    t.ok(
+      document.getElementById('polygonDrawBtn'),
+      'polygon draw button is in the DOM'
+    );
+    t.ok(
+      document.getElementById('squareDrawBtn'),
+      'square draw button is in the DOM'
+    );
+    t.ok(
+      document.getElementById('pointDrawBtn'),
+      'point draw button is in the DOM'
+    );
 
-test('Draw without handlers', t => {
-  var map = createMap();
-  GLDraw({
-    controls: {}
+    // test selected mode
+    // TO DO
+
+    t.end();
   });
 
-  try {
-    map.fire('drawing.end');
-  } catch (e) {
-    t.fail('calling drawing.end without handlers throws');
-  }
+  test('Draw without handlers', t => {
+    GLDraw({
+      controls: {}
+    });
 
-  t.end();
+    try {
+      map.fire('drawing.end');
+    } catch (e) {
+      t.fail('calling drawing.end without handlers throws');
+    }
+
+    t.end();
+  });
+
 });
