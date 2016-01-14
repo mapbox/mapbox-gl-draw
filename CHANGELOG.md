@@ -1,3 +1,13 @@
+## 0.1.7
+
+#### Breaking changes
+
+* Renamed `Draw.remove` to `Draw.destroy`
+
+#### API Improvements
+
+* `Draw.remove` now removes Mapbox-GL-Draw from your map
+
 ## 0.1.5
 
 Fixes publish process so the distribution is kept up to date
