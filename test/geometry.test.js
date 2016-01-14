@@ -6,10 +6,15 @@ import { accessToken, createMap } from './utils';
 
 mapboxgl.accessToken = accessToken;
 
-test('Geometry class tests', t => {
-  var map = createMap();
-  var Draw = GLDraw();
-  map.addControl(Draw);
+var map = createMap();
 
-  t.end();
+map.on('load', () => {
+
+  test('Geometry class tests', t => {
+    var Draw = GLDraw();
+    map.addControl(Draw);
+
+    t.end();
+  });
+
 });

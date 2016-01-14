@@ -171,7 +171,7 @@ export default class API extends mapboxgl.Control {
    * @param {String} id - the drawid of the geometry
    * @returns {Draw} this
    */
-  remove(id) {
+  destroy(id) {
     this._store.delete(id);
     return this;
   }

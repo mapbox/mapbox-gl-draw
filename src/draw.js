@@ -70,11 +70,11 @@ export default class Draw extends API {
       this._createButtons();
     }
 
-    if (this._map.loaded()) {
+    if (map.style.loaded()) {
       this._setEventListeners();
       this._setStyles();
     } else {
-      this._map.on('load', () => {
+      map.on('load', () => {
         this._setEventListeners();
         this._setStyles();
       });
@@ -219,10 +219,12 @@ export default class Draw extends API {
       },
       type: 'geojson'
     });
-    drawTheme.forEach(style => {
+
+    for (let i = 0; i < drawTheme.length; i++) {
+      let style = drawTheme[i];
       Object.assign(style, this.options.styles[style.id] || {});
       this._map.addLayer(style);
-    });
+    }
 
     // selected features style
     this._map.addSource('draw-selected', {
@@ -232,12 +234,48 @@ export default class Draw extends API {
       },
       type: 'geojson'
     });
-    drawSelectedTheme.forEach(style => {
+
+    for (let i = 0; i < drawSelectedTheme.length; i++) {
+      let style = drawSelectedTheme[i];
       Object.assign(style, this.options.styles[style.id] || {});
       this._map.addLayer(style);
-    });
+    }
 
     this._store._render();
+  }
+
+  _removeLayers() {
+    for (let i = 0; i < drawTheme.length; i++) {
+      let { id } = drawTheme[i];
+      this._map.removeLayer(id);
+    }
+
+    for (let i = 0; i < drawSelectedTheme.length; i++) {
+      let { id } = drawSelectedTheme[i];
+      this._map.removeLayer(id);
+    }
+
+    this._map.removeSource('draw');
+    this._map.removeSource('draw-selected');
+  }
+
+  _removeButtons() {
+    if (!this.options.drawing) {
+      return;
+    }
+    var controls = this.options.controls;
+
+    this.deleteBtn.parentNode.removeChild(this.deleteBtn);
+    if (controls.square) this.squareCtrl.parentNode.removeChild(this.squareCtrl);
+    if (controls.line) this.lineStringCtrl.parentNode.removeChild(this.lineStringCtrl);
+    if (controls.shape) this.polygonCtrl.parentNode.removeChild(this.polygonCtrl);
+    if (controls.marker) this.markerCtrl.parentNode.removeChild(this.markerCtrl);
+  }
+
+  remove() {
+    this._removeLayers();
+    this._removeButtons();
+    super.remove();
   }
 
 }

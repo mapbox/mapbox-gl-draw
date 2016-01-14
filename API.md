@@ -168,7 +168,7 @@ This method deselects all features. It returns `this` to allow for method chaini
 
 ---
 
-####`.remove(String: drawId) -> Draw`
+####`.destroy(String: drawId) -> Draw`
 
 This method takes the `drawId` of feature and removes it from draw. It returns `this` to allow for method chaining.
 
@@ -178,7 +178,7 @@ Example:
 var feature = { type: 'Point', coordinates: [0, 0] };
 var id = draw.add(feature)
 Draw
-  .remove(id)
+  .destroy(id)
   .getAll();
 // => { type: 'FeatureCollection', features: [] }
 ```
