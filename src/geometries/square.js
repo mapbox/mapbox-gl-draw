@@ -38,10 +38,8 @@ export default class Square extends Geometry {
     var pos = DOM.mousePos(e, this._map.getContainer());
     this.initPos = pos;
     var c = this._map.unproject([pos.x, pos.y]);
-    var i = -1;
-    while (++i < 5) {
-      this.coordinates[0][i] = [ c.lng, c.lat ];
-    }
+    var p = [ c.lng, c.lat ];
+    this.coordinates = [[ p, p, p, p, p ]];
   }
 
   _onMouseDrag(e) {

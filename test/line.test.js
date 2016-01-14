@@ -1,22 +1,12 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl';
+import happen from 'happen';
 import GLDraw from '../';
-import Line from '../src/geometries/line';
+import { accessToken, createMap, features } from './utils';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q';
+var feature = features.line;
 
-function createMap() {
-  var div = document.createElement('div');
-  div.setAttribute('id', 'map');
-  document.body.appendChild(div);
-
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v8'
-  });
-
-  return map;
-}
+mapboxgl.accessToken = accessToken;
 
 var map = createMap();
 
@@ -26,7 +16,35 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    //var l = new Line(map);
+    Draw._startDrawing('line');
+
+    let coords = feature.geometry.coordinates;
+
+    for (var i = 0; i < coords.length; i++) {
+      let c = coords[i];
+      console.log(c);
+      let pt = map.project(mapboxgl.LngLat.convert(c));
+      console.log(pt);
+      happen.click(map.getCanvas(), {
+        clientX: pt.x,
+        clientY: pt.y
+      });
+    }
+
+    // complete drawing
+    happen.once(map.getCanvas(), {
+      type: 'keyup',
+      keyCode: 13
+    });
+
+    var feats = Draw._store._features;
+    var ids = Object.keys(feats);
+    var line = feats[ids[0]];
+
+    line.onStopDrawing();
+
+    // to do: fix floating point error and make this pass
+    //t.deepEquals(line.coordinates, coords);
 
     t.end();
   });
