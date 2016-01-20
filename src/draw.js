@@ -176,7 +176,7 @@ export default class Draw extends API {
         return;
     }
 
-    obj.startDraw();
+    obj.startDrawing();
     this._events.setNewFeature(obj);
     var id = this._store.set(obj);
     this._select(id);

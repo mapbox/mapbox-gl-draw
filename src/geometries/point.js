@@ -22,11 +22,6 @@ export default class Point extends Geometry {
     }
     options.type = 'Point';
     super(options);
-    this.type = 'point';
-  }
-
-  startDraw() {
-    this._map.getContainer().classList.add('mapboxgl-draw-activated');
   }
 
   onClick(e) {

@@ -18,7 +18,7 @@
 <script type='text/javascript'>
   mapboxgl.accessToken = localStorage.accessToken;
 
-  var map = new mapboxgl.Map({
+  var map = window.themap = new mapboxgl.Map({
     container: 'map',
     zoom: 1,
     center: [0, 0],

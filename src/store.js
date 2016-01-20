@@ -15,9 +15,11 @@ export default class Store {
   constructor(map) {
     this._map = map;
     this._features = {};
-    this._needsRender = false;
-    this._isRunning = false;
-    this._render = debounce(this.render, 10, false);
+    this._render = debounce(this.render, 16, false);
+    this.lastRenderInfo = {
+      numUnselected: 0,
+      numSelected: 0
+    };
   }
 
   /**
@@ -27,13 +29,6 @@ export default class Store {
    */
   set(feature) {
     this._features[feature.drawId] = feature;
-    this._needsRender = true;
-
-    this._map.fire('draw.set', {
-      id: feature.drawId,
-      geojson: feature.geojson
-    });
-
     this._render();
     return feature.drawId;
   }
@@ -73,11 +68,11 @@ export default class Store {
     if (this._features[id]) {
       this._map.fire('draw.delete', {
         id: id,
-        geojson: this._features[id].geojson
+        geojson: this._features[id].toGeoJSON()
       });
+      delete this._features[id];
+      this._render();
     }
-    delete this._features[id];
-    this._render();
   }
 
   /**
@@ -109,7 +104,7 @@ export default class Store {
       this._render();
       this._map.fire('draw.select.start', {
         id: id,
-        geojson: this._features[id].geojson
+        geojson: this._features[id].toGeoJSON()
       });
     }
   }
@@ -125,13 +120,13 @@ export default class Store {
       this._render();
       this._map.fire('draw.select.end', {
         id: id,
-        geojson: this._features[id].geojson
+        geojson: this._features[id].toGeoJSON()
       });
 
       // TODO: make this emit only if there was a change
       this._map.fire('draw.set', {
         id: id,
-        geojson: this._features[id].geojson
+        geojson: this._features[id].toGeoJSON()
       });
     }
   }
@@ -167,42 +162,46 @@ export default class Store {
   }
 
   render() {
-    this._needsRender = true;
     var isStillAlive = this._map.getSource('draw') !== undefined;
     if (isStillAlive) { // checks to make sure we still have a map
-      if (this._needsRender) {
-        this._needsRender = false;
-        var featureBuckets = Object.keys(this._features).reduce((buckets, id) => {
-          if (this._features[id].ready) {
-            if (this._features[id].selected === true) {
-              let geojson = this._features[id].toGeoJSON();
-              geojson.properties.drawId = id;
-              buckets.selected.push(geojson);
-              buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
-            }
-            else {
-              let geojson = this._features[id].toGeoJSON();
-              geojson.properties.drawId = id;
-              buckets.draw.push(geojson);
-            }
+      var featureBuckets = Object.keys(this._features).reduce((buckets, id) => {
+        if (this._features[id].ready) {
+          if (this._features[id].selected === true) {
+            let geojson = this._features[id].toGeoJSON();
+            geojson.properties.drawId = id;
+            buckets.selected.push(geojson);
+            buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
           }
-          return buckets;
-        }, { draw: [], selected: [] });
+          else {
+            let geojson = this._features[id].toGeoJSON();
+            geojson.properties.drawId = id;
+            buckets.unselected.push(geojson);
+          }
+        }
+        return buckets;
+      }, { unselected: [], selected: [] });
 
-        // currently we are updating both of these sources
-        // even if only one of them is changing. This is an
-        // optimization we need to figure out soon
+      var renderUnselected = this.lastRenderInfo.numUnselected !== featureBuckets.unselected.length;
+      var renderSelected = renderUnselected === false ? true : this.lastRenderInfo.numSelected !== featureBuckets.selected.length;
 
+      if (renderUnselected) {
         this._map.getSource('draw').setData({
           type: 'FeatureCollection',
-          features: featureBuckets.draw
+          features: featureBuckets.unselected
         });
+      }
 
+      if (renderSelected) {
         this._map.getSource('draw-selected').setData({
           type: 'FeatureCollection',
           features: featureBuckets.selected
         });
       }
+
+      this.lastRenderInfo = {
+        numUnselected: featureBuckets.unselected.length,
+        numSelected: featureBuckets.selected.length
+      };
     }
   }
 }
