@@ -24,14 +24,8 @@ export default class Line extends Geometry {
     options.type = 'LineString';
     super(options);
 
-    this.type = 'line';
-
     // event listeners
     this.onMouseMove = this._onMouseMove.bind(this);
-  }
-
-  startDraw() {
-    this._map.getContainer().classList.add('mapboxgl-draw-activated');
   }
 
   onClick(e) {
@@ -52,14 +46,15 @@ export default class Line extends Geometry {
     this.coordinates[this.vertexIdx] = [ coords.lng, coords.lat ];
   }
 
-  onStopDrawing() {
-    return this.onDoubleClick();
+  onStopDrawing(e) {
+    return this.onDoubleClick(e);
   }
 
-  onDoubleClick() {
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this.coordinates.splice(this.vertexIdx, 1);
-    this.created = true;
+  onDoubleClick(e) {
+    const ENTER = 13;
+    var subtract = e.keyCode === ENTER ? 1 : 2;
+    this.coordinates = this.coordinates.slice(0, this.coordinates.length - subtract);
+    super.onStopDrawing(e);
   }
 
   /**

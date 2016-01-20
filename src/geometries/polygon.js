@@ -28,10 +28,6 @@ export default class Polygon extends Geometry {
     this.onMouseMove = this._onMouseMove.bind(this);
   }
 
-  startDraw() {
-    this._map.getContainer().classList.add('mapboxgl-draw-activated');
-  }
-
   onClick(e) {
     var p = [ e.lngLat.lng, e.lngLat.lat ];
 
@@ -68,10 +64,7 @@ export default class Polygon extends Geometry {
       var remove = e.keyCode === ENTER ? 1 : 2;
       this.coordinates[0].splice(idx, remove);
     }
-
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
-    this.created = true;
+    super.onStopDrawing(e);
   }
 
   /**

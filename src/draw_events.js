@@ -49,6 +49,7 @@ export default function(ctx) {
               var tempVertex = R.find(feat => feat.properties.meta === 'midpoint')(features);
 
               if(tempVertex) {
+                console.log(tempVertex.properties.parent);
                 ctx._store.get(tempVertex.properties.parent)
                   .addVertex(coords, tempVertex.properties.index);
                 activeVertex = tempVertex;

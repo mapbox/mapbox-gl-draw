@@ -18,19 +18,22 @@ export default class Geometry {
     this._map = options.map;
     this.drawId = options.data.id || hat();
     this.coordinates = options.data.geometry.coordinates;
-    this.options = options;
+    this.properties = options.data.properties || {};
+    this.type = options.type;
+
+    this.options = {
+      permanent: options.permanent
+    };
+
     this.created = false;
     this.ready = false;
+  }
 
-    this.geojson = {
-      type: 'Feature',
-      id: this.drawId,
-      properties: options.data.properties || {},
-      geometry: {
-        type: options.type,
-        coordinates: this.coordinates
-      }
-    };
+  startDrawing() {
+    this._map.getContainer().classList.add('mapboxgl-draw-activated');
+    if(this._map.options.doubleClickZoom) {
+      this._map.doubleClickZoom.disable();
+    }
   }
 
   /**
@@ -40,6 +43,10 @@ export default class Geometry {
 
   onStopDrawing() {
     this.created = true;
+    if(this._map.options.doubleClickZoom) {
+      this._map.doubleClickZoom.enable();
+    }
+    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
   }
 
   /**
@@ -89,8 +96,15 @@ export default class Geometry {
    * @return {Object} GeoJSON feature
    */
   toGeoJSON() {
-    this.geojson.geometry.coordinates = this.coordinates;
-    return JSON.parse(JSON.stringify(this.geojson));
+    return {
+      type: 'Feature',
+      id: this.drawId,
+      properties: this.properties,
+      geometry: {
+        type: this.type,
+        coordinates: this.coordinates
+      }
+    };
   }
 
   /**
@@ -112,7 +126,7 @@ export default class Geometry {
   setProperties(props) {
     props = JSON.parse(JSON.stringify(props));
     props.drawId = this.drawId;
-    this.geojson.properties = props;
+    this.properties = props;
     return this;
   }
 

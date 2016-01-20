@@ -73,11 +73,7 @@ export default class API extends mapboxgl.Control {
    */
   update(id, feature) {
     feature = JSON.parse(JSON.stringify(feature));
-    var newFeatureType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
     var _feature = this._store.get(id);
-    if (_feature.geojson.geometry.type !== newFeatureType || _feature.getType() === 'square') {
-      throw 'Can not update feature to different type and can not update squares';
-    }
     _feature.setCoordinates(feature.coordinates || feature.geometry.coordinates);
     if (feature.properties) _feature.setProperties(feature.properties);
     return this;
