@@ -70,7 +70,7 @@ export default class Draw extends API {
       this._createButtons();
     }
 
-    if (map.style.loaded()) {
+    if (map.style.loaded()) { // not public
       this._setEventListeners();
       this._setStyles();
     } else {

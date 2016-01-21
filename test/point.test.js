@@ -1,11 +1,9 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './utils';
+import { accessToken, createMap } from './utils';
 
 mapboxgl.accessToken = accessToken;
-
-var feature = features.point;
 
 var map = createMap();
 
@@ -15,10 +13,17 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    var id = Draw.add(feature);
-    var point = Draw._store.get(id);
+    Draw._startDrawing('point');
+    map.fire('click', {
+      lngLat: {
+        lng: 10,
+        lat: 10
+      }
+    });
 
-    console.log(point);
+    var feats = Draw._store._features;
+    var ids = Object.keys(feats);
+    t.deepEquals(feats[ids[0]].coordinates, [10, 10]);
 
     t.end();
   });

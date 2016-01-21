@@ -38,17 +38,17 @@ export default class Polygon extends Geometry {
     if (typeof this.vertexIdx === 'undefined') {
       this.vertexIdx = 0;
       this.first = p;
-      this.coordinates[0].splice(0, 4, p, p, p, p);
+      this.coordinates = [[p, p, p, p]];
       this.ready = true;
     }
 
-    this.vertexIdx++;
+    if (this.vertexIdx > 1) {
+      this.coordinates[0].push(this.first);
+    }
 
     this.coordinates[0][this.vertexIdx] = p;
 
-    if (this.vertexIdx > 2) {
-      this.coordinates[0].push(this.first);
-    }
+    this.vertexIdx++;
   }
 
   _onMouseMove(e) {
@@ -57,13 +57,16 @@ export default class Polygon extends Geometry {
     this.coordinates[0][this.vertexIdx] = [ coords.lng, coords.lat ];
   }
 
-  onStopDrawing() {
-    return this.onDoubleClick();
+  onStopDrawing(e) {
+    return this.onDoubleClick(e);
   }
 
-  onDoubleClick() {
+  onDoubleClick(e) {
+    const ENTER = 13;
     if (this.vertexIdx > 2) {
-      this.coordinates[0].splice(this.vertexIdx, 1);
+      var idx = this.vertexIdx - (e.keyCode === ENTER ? 0 : 1);
+      var remove = e.keyCode === ENTER ? 1 : 2;
+      this.coordinates[0].splice(idx, remove);
     }
 
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');
