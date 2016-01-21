@@ -71,13 +71,6 @@ export default class Geometry {
   onMouseMove() { return null; }
 
   /**
-  * default onMouseDrag handler for all Geometry objects.
-  * @return Null
-  */
-
-  onMouseDrag() { return null; }
-
-  /**
   * default onMouseDown handler for all Geometry objects.
   * @return Null
   */
