@@ -1,5 +1,8 @@
 'use strict';
 
+import Polyfill from './lib/polyfills';
+Polyfill();
+
 import API from './api';
 import { DOM, createButton } from './util';
 
