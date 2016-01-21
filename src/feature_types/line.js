@@ -1,56 +1,49 @@
 'use strict';
 
-import Geometry from './geometry';
+import Feature from './feature';
 import { translatePoint, DOM } from '../util';
 
 /**
- * Polygon geometry class
+ * Line geometry class
  *
  * @param {Object} options
- * @param {Map} options.map - Instance of MapboxGl Map
+ * @param {Map} options.map - Instance of MapboxGL Map
  * @param {Object} [options.data] - GeoJSON feature
- * @returns {Polygon} this
+ * @returns {Line} this
  */
-export default class Polygon extends Geometry {
+export default class Line extends Feature {
 
   constructor(options) {
     if (!options.data) {
       options.data = {
         geometry: {
-          coordinates: [[[0, 0],[0, 0], [0, 0], [0, 0]]]
+          coordinates: [[0, 0], [0, 0]]
         }
       };
     }
-    options.type = 'Polygon';
+    options.type = 'LineString';
     super(options);
 
-    // event handlers
+    // event listeners
     this.onMouseMove = this._onMouseMove.bind(this);
   }
 
   onClick(e) {
     var p = [ e.lngLat.lng, e.lngLat.lat ];
-
     if (typeof this.vertexIdx === 'undefined') {
+      this.coordinates = [p];
       this.vertexIdx = 0;
-      this.first = p;
-      this.coordinates = [[p, p, p, p]];
       this.ready = true;
+    } else {
+      this.coordinates.splice(-1, 1, p, p);
     }
-
-    if (this.vertexIdx > 1) {
-      this.coordinates[0].push(this.first);
-    }
-
-    this.coordinates[0][this.vertexIdx] = p;
-
     this.vertexIdx++;
   }
 
   _onMouseMove(e) {
     var pos = DOM.mousePos(e.originalEvent, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
-    this.coordinates[0][this.vertexIdx] = [ coords.lng, coords.lat ];
+    this.coordinates[this.vertexIdx] = [ coords.lng, coords.lat ];
   }
 
   onStopDrawing(e) {
@@ -59,11 +52,8 @@ export default class Polygon extends Geometry {
 
   onDoubleClick(e) {
     const ENTER = 13;
-    if (this.vertexIdx > 2) {
-      var idx = this.vertexIdx - (e.keyCode === ENTER ? 0 : 1);
-      var remove = e.keyCode === ENTER ? 1 : 2;
-      this.coordinates[0].splice(idx, remove);
-    }
+    var subtract = e.keyCode === ENTER ? 1 : 2;
+    this.coordinates = this.coordinates.slice(0, this.coordinates.length - subtract);
     super.onStopDrawing(e);
   }
 
@@ -73,22 +63,18 @@ export default class Polygon extends Geometry {
    * @param {Array<Number>} init - the position of the mouse at the start of the drag
    * @param {Array<Number>} curr - the current position of the mouse
    * @param {Number} idx - the index of the point being updated in `feature.geometry.coordinates`
-   * @private
    */
   moveVertex(init, curr, idx) {
     if (!this.movingVertex) {
       this.movingVertex = true;
-      this.initCoords = JSON.parse(JSON.stringify(this.coordinates[0][idx]));
+      this.initCoords = this.coordinates[idx];
     }
 
     var dx = curr.x - init.x;
     var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
+    var newPoint = translatePoint(JSON.parse(JSON.stringify(this.initCoords)), dx, dy, this._map);
 
-    this.coordinates[0][idx] = newPoint;
-    if (idx === 0) {
-      this.coordinates[0][this.coordinates[0].length - 1] = newPoint;
-    }
+    this.coordinates[idx] = newPoint;
   }
 
   /**
@@ -96,11 +82,9 @@ export default class Polygon extends Geometry {
    *
    * @param {Object} coords - The coordinates of the new vertex in the for { lng: <Number>, lat: <Number> }
    * @param {Number} idx - the index at which the new point will be placed in `feature.geometry.coordinates`
-   * @private
    */
   addVertex(coords, idx) {
     coords = this._map.unproject(coords);
-    this.coordinates[0].splice(idx, 0, [ coords.lng, coords.lat ]);
+    this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
   }
-
 }

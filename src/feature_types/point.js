@@ -1,6 +1,6 @@
 'use strict';
 
-import Geometry from './geometry';
+import Feature from './feature';
 
 /**
  * Point geometry class
@@ -10,7 +10,7 @@ import Geometry from './geometry';
  * @param {Object} [options.data] - GeoJSON feature
  * @returns {Point} this
  */
-export default class Point extends Geometry {
+export default class Point extends Feature {
 
   constructor(options) {
     if (!options.data) {
