@@ -11,10 +11,10 @@ import drawTheme from './theme/draw';
 import Store from './store';
 
 // Control handlers
-import Line from './geometries/line';
-import Point from './geometries/point';
-import Square from './geometries/square';
-import Polygon from './geometries/polygon';
+import Line from './feature_types/line';
+import Point from './feature_types/point';
+import Square from './feature_types/square';
+import Polygon from './feature_types/polygon';
 
 import DrawEvents from './draw_events';
 

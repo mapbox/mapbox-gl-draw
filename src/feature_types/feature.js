@@ -4,7 +4,7 @@ import hat from 'hat';
 import { translate } from '../util';
 
 /**
- * Base Geometry class which other geometries extend
+ * Base Feature class which other features extend
  *
  * @param {Object} options
  * @param {Object} options.map - Instance of MapboxGL Map
@@ -131,7 +131,7 @@ export default class Geometry {
   }
 
   /**
-   * Translate this polygon
+   * Translate this feature
    *
    * @param {Array<Number>} init - Mouse position at the beginining of the drag
    * @param {Array<Number>} curr - Current mouse position
