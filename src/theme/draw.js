@@ -43,13 +43,8 @@ export default [
     'type': 'circle',
     'source': 'draw',
     'filter': ['all', ['==', '$type', 'Point']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
     'paint': {
-      'icon-color': '#ff00ff',
-      'icon-size': 1
+      'circle-color': '#ff00ff'
     },
     'interactive': true
   }

@@ -46,15 +46,9 @@ export default [
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['!=', 'meta', 'midpoint']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
+    'layout': {},
     'paint': {
-      'icon-color': '#ffffff',
-      'icon-halo-color': '#000000',
-      'icon-halo-width': 2,
-      'icon-size': 1.1
+      'circle-color': '#000'
     },
     'interactive': true
   }, {
@@ -64,13 +58,9 @@ export default [
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
+    'layout': {},
     'paint': {
-      'icon-color': '#000000',
-      'icon-size': 1
+      'circle-color': '#000'
     },
     'interactive': true
   }

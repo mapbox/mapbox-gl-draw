@@ -33,7 +33,7 @@ export default function(ctx) {
       isMouseDown = true;
       if (newFeature) {
         newFeature.onMouseDown(e);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
       else {
@@ -52,7 +52,7 @@ export default function(ctx) {
                 ctx._store.get(tempVertex.properties.parent)
                   .addVertex(coords, tempVertex.properties.index);
                 activeVertex = tempVertex;
-                ctx._store._render();
+                ctx._store.renderSelected();
               }
               else {
                 activeVertex = R.find(feat => feat.properties.meta === 'vertex')(features) || null;
@@ -70,7 +70,7 @@ export default function(ctx) {
       isMouseDown = false;
       if (newFeature) {
         newFeature.onMouseUp(e);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
       else {
@@ -103,7 +103,7 @@ export default function(ctx) {
       else if (newFeature) {
         e.originalEvent.stopPropagation();
         newFeature.onMouseMove(e);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
     },
@@ -111,7 +111,7 @@ export default function(ctx) {
       if(newFeature) {
         e.originalEvent.stopPropagation();
         newFeature.onMouseDrag(e, dragStartPoint);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
       else {
@@ -120,19 +120,19 @@ export default function(ctx) {
           e.originalEvent.stopPropagation();
           ctx._store.get(activeVertex.properties.parent)
             .moveVertex(dragStartPoint, curr, activeVertex.properties.index);
-          ctx._store._render();
+          ctx._store.renderSelected();
         }
         else if (activeDrawId) {
           e.originalEvent.stopPropagation();
           ctx._store.get(activeDrawId).translate(dragStartPoint, curr);
-          ctx._store._render();
+          ctx._store.renderSelected();
         }
       }
     },
     onClick: function(e) {
       if (newFeature) {
         newFeature.onClick(e);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
       else {
@@ -164,7 +164,7 @@ export default function(ctx) {
     onDoubleClick: function(e) {
       if (newFeature) {
         newFeature.onDoubleClick(e);
-        ctx._store._render();
+        ctx._store.renderSelected();
         cleanupNewFeatureIfNeeded();
       }
     },

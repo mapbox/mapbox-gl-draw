@@ -232,7 +232,8 @@ export default class Draw extends API {
         type: 'FeatureCollection',
         features: []
       },
-      type: 'geojson'
+      type: 'geojson',
+      skipWorker: true
     });
 
     for (let i = 0; i < drawSelectedTheme.length; i++) {
@@ -241,7 +242,7 @@ export default class Draw extends API {
       this._map.addLayer(style);
     }
 
-    this._store._render();
+    this._store.render();
   }
 
   _removeLayers() {
