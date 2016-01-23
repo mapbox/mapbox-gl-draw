@@ -242,7 +242,7 @@ export default class Draw extends API {
       this._map.addLayer(style);
     }
 
-    this._store._render();
+    this._store.render();
   }
 
   _removeLayers() {
