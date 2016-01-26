@@ -80,6 +80,9 @@ export default class Store {
    */
   clearSelected() {
     this.getSelectedIds().forEach(id => {
+      if(this.get(id).created === false) {
+        this.get(id).onStopDrawing({});
+      }
       this.delete(id);
     });
   }
