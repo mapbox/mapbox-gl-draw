@@ -23,9 +23,6 @@ export default class Line extends Feature {
     }
     options.type = 'LineString';
     super(options);
-
-    // event listeners
-    this.onMouseMove = this._onMouseMove.bind(this);
   }
 
   onClick(e) {
@@ -40,7 +37,7 @@ export default class Line extends Feature {
     this.vertexIdx++;
   }
 
-  _onMouseMove(e) {
+  onMouseMove(e) {
     var pos = DOM.mousePos(e.originalEvent, this._map._container);
     var coords = this._map.unproject([pos.x, pos.y]);
     this.coordinates[this.vertexIdx] = [ coords.lng, coords.lat ];

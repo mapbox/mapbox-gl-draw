@@ -16,10 +16,6 @@ export default class Store {
     this._map = map;
     this._features = {};
     this._render = debounce(this.render, 16, false);
-    this.lastRenderInfo = {
-      numUnselected: 0,
-      numSelected: 0
-    };
   }
 
   /**
@@ -192,27 +188,15 @@ export default class Store {
         return buckets;
       }, { unselected: [], selected: [] });
 
-      var renderUnselected = this.lastRenderInfo.numUnselected !== featureBuckets.unselected.length;
-      var renderSelected = renderUnselected === false ? true : this.lastRenderInfo.numSelected !== featureBuckets.selected.length;
+      this._map.getSource('draw').setData({
+        type: 'FeatureCollection',
+        features: featureBuckets.unselected
+      });
 
-      if (renderUnselected) {
-        this._map.getSource('draw').setData({
-          type: 'FeatureCollection',
-          features: featureBuckets.unselected
-        });
-      }
-
-      if (renderSelected) {
-        this._map.getSource('draw-selected').setData({
-          type: 'FeatureCollection',
-          features: featureBuckets.selected
-        });
-      }
-
-      this.lastRenderInfo = {
-        numUnselected: featureBuckets.unselected.length,
-        numSelected: featureBuckets.selected.length
-      };
+      this._map.getSource('draw-selected').setData({
+        type: 'FeatureCollection',
+        features: featureBuckets.selected
+      });
     }
   }
 }

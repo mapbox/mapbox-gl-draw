@@ -1,7 +1,7 @@
 'use strict';
 
 import Feature from './feature';
-import { translatePoint, DOM } from '../util';
+import { translatePoint } from '../util';
 
 /**
  * Polygon geometry class
@@ -23,9 +23,6 @@ export default class Polygon extends Feature {
     }
     options.type = 'Polygon';
     super(options);
-
-    // event handlers
-    this.onMouseMove = this._onMouseMove.bind(this);
   }
 
   onClick(e) {
@@ -47,10 +44,8 @@ export default class Polygon extends Feature {
     this.vertexIdx++;
   }
 
-  _onMouseMove(e) {
-    var pos = DOM.mousePos(e.originalEvent, this._map._container);
-    var coords = this._map.unproject([pos.x, pos.y]);
-    this.coordinates[0][this.vertexIdx] = [ coords.lng, coords.lat ];
+  onMouseMove(e) {
+    this.coordinates[0][this.vertexIdx] = [ e.lngLat.lng, e.lngLat.lat ];
   }
 
   onStopDrawing(e) {
