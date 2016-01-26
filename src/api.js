@@ -2,9 +2,9 @@
 
 import mapboxgl from 'mapbox-gl';
 
-import Line from './geometries/line';
-import Point from './geometries/point';
-import Polygon from './geometries/polygon';
+import Line from './feature_types/line';
+import Point from './feature_types/point';
+import Polygon from './feature_types/polygon';
 
 export default class API extends mapboxgl.Control {
 
@@ -73,11 +73,7 @@ export default class API extends mapboxgl.Control {
    */
   update(id, feature) {
     feature = JSON.parse(JSON.stringify(feature));
-    var newFeatureType = feature.type === 'Feature' ? feature.geometry.type : feature.type;
     var _feature = this._store.get(id);
-    if (_feature.geojson.geometry.type !== newFeatureType || _feature.getType() === 'square') {
-      throw 'Can not update feature to different type and can not update squares';
-    }
     _feature.setCoordinates(feature.coordinates || feature.geometry.coordinates);
     if (feature.properties) _feature.setProperties(feature.properties);
     return this;
@@ -93,7 +89,7 @@ export default class API extends mapboxgl.Control {
   }
 
   /**
-   * get all draw geometries
+   * get all draw features
    * @returns {Object} a GeoJSON feature collection
    */
   getAll() {
@@ -152,7 +148,7 @@ export default class API extends mapboxgl.Control {
 
   /**
    * get selected feature collection of features
-   * @return {Object} a feature collection of geometries that are selected
+   * @return {Object} a feature collection of features that are selected
    */
   getSelected() {
     return this._store.getSelectedIds()
@@ -177,7 +173,7 @@ export default class API extends mapboxgl.Control {
   }
 
   /**
-   * remove all geometries
+   * remove all features
    * @returns {Draw} this
    */
   clear() {

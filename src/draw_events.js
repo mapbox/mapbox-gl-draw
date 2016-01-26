@@ -108,25 +108,17 @@ export default function(ctx) {
       }
     },
     onMouseDrag: function(e) {
-      if(newFeature) {
+      var curr = DOM.mousePos(e.originalEvent, ctx._map.getContainer());
+      if (activeVertex) {
         e.originalEvent.stopPropagation();
-        newFeature.onMouseDrag(e, dragStartPoint);
+        ctx._store.get(activeVertex.properties.parent)
+          .moveVertex(dragStartPoint, curr, activeVertex.properties.index);
         ctx._store._render();
-        cleanupNewFeatureIfNeeded();
       }
-      else {
-        var curr = DOM.mousePos(e.originalEvent, ctx._map.getContainer());
-        if (activeVertex) {
-          e.originalEvent.stopPropagation();
-          ctx._store.get(activeVertex.properties.parent)
-            .moveVertex(dragStartPoint, curr, activeVertex.properties.index);
-          ctx._store._render();
-        }
-        else if (activeDrawId) {
-          e.originalEvent.stopPropagation();
-          ctx._store.get(activeDrawId).translate(dragStartPoint, curr);
-          ctx._store._render();
-        }
+      else if (activeDrawId) {
+        e.originalEvent.stopPropagation();
+        ctx._store.get(activeDrawId).translate(dragStartPoint, curr);
+        ctx._store._render();
       }
     },
     onClick: function(e) {

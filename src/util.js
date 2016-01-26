@@ -119,7 +119,7 @@ module.exports.createButton = function(container, opts, controlClass) {
 };
 
 /**
- * Translates geometries based on mouse location
+ * Translates features based on mouse location
  *
  * @param {Object} feature - A GeoJSON feature
  * @param {Array<Number>} init - Initial position of the mouse
