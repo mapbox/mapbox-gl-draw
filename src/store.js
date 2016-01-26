@@ -66,10 +66,12 @@ export default class Store {
    */
   delete(id) {
     if (this._features[id]) {
-      this._map.fire('draw.delete', {
-        id: id,
-        geojson: this._features[id].toGeoJSON()
-      });
+      if (this._features[id].created) {
+        this._map.fire('draw.delete', {
+          id: id,
+          geojson: this._features[id].toGeoJSON()
+        });
+      }
       delete this._features[id];
       this._render();
     }
@@ -105,10 +107,12 @@ export default class Store {
     if (this._features[id] && !this._features[id].selected) {
       this._features[id].selected = true;
       this._render();
-      this._map.fire('draw.select.start', {
-        id: id,
-        geojson: this._features[id].toGeoJSON()
-      });
+      if (this._features[id].created) {
+        this._map.fire('draw.select.start', {
+          id: id,
+          geojson: this._features[id].toGeoJSON()
+        });
+      }
     }
   }
 
@@ -121,11 +125,15 @@ export default class Store {
     if (this._features[id] && this._features[id].selected) {
       this._features[id].selected = false;
       this._render();
-      this._map.fire('draw.select.end', {
-        id: id,
-        geojson: this._features[id].toGeoJSON()
-      });
-
+      if (this._features[id].commited) {
+        this._map.fire('draw.select.end', {
+          id: id,
+          geojson: this._features[id].toGeoJSON()
+        });
+      }
+      else {
+        this._features[id].commited = true;
+      }
       // TODO: make this emit only if there was a change
       this._map.fire('draw.set', {
         id: id,
