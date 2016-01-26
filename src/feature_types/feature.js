@@ -27,6 +27,7 @@ export default class Geometry {
 
     this.created = false;
     this.ready = false;
+    this.commited = false;
   }
 
   startDrawing() {
