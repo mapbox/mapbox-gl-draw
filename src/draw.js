@@ -185,10 +185,7 @@ export default class Draw extends API {
   _handleDrawFinished() {
     this._store.getSelectedIds().forEach(id => this._store.commit(id));
     this._hideDeleteButton();
-    [ this.lineStringCtrl,
-        this.polygonCtrl,
-        this.squareCtrl,
-        this.markerCtrl ].forEach(ctrl => { if (ctrl) ctrl.classList.remove('active'); });
+    DOM.removeClass([ this.lineStringCtrl, this.polygonCtrl, this.squareCtrl, this.markerCtrl ], 'active');
   }
 
   /**
