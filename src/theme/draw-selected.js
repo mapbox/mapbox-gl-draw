@@ -46,16 +46,7 @@ export default [
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['!=', 'meta', 'midpoint']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
-    'paint': {
-      'icon-color': '#ffffff',
-      'icon-halo-color': '#000000',
-      'icon-halo-width': 2,
-      'icon-size': 1.1
-    },
+    'layout': {},
     'interactive': true
   }, {
     'id': 'gl-draw-selected-point-mid',
@@ -64,13 +55,9 @@ export default [
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
-    'layout': {
-      'text-anchor': 'top',
-      'icon-allow-overlap': true
-    },
     'paint': {
-      'icon-color': '#000000',
-      'icon-size': 1
+      'circle-radius': 5,
+      'circle-color': '#000000'
     },
     'interactive': true
   }
