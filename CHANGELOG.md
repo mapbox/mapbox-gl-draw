@@ -1,3 +1,20 @@
+## 0.2.0
+
+#### Drawing Changes
+
+* Square now acts as a macro for square polygons. Before a square feature had to always be a square feature while it was in side of draw, but could be edited outside.
+* Square now works as a two click tool, dropping support for click-drag-release.
+* draw.select.start and draw.select.end don't fire in the creation phase of a feature
+* draw.set is only fired when the feature has been completed
+
+#### Bug Fixes
+
+* Default draw styles, conform to the [mapbox-gl-style-spec](https://www.mapbox.com/mapbox-gl-style-spec/)
+* Points now appear pink when selected using the default style
+* Clicking the trash can while creating a feature, concludes the drawing
+* Users are able to drag the under lying map while drawing
+* Works with mapbox-gl-js@0.13.1
+
 ## 0.1.7
 
 #### Breaking changes
