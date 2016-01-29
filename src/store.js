@@ -173,15 +173,14 @@ export default class Store {
     if (isStillAlive) { // checks to make sure we still have a map
       var featureBuckets = Object.keys(this._features).reduce((buckets, id) => {
         if (this._features[id].ready) {
+          let geojson = this._features[id].toGeoJSON();
+          geojson.properties.drawId = id;
+
           if (this._features[id].selected === true) {
-            let geojson = this._features[id].toGeoJSON();
-            geojson.properties.drawId = id;
             buckets.selected.push(geojson);
             buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
           }
           else {
-            let geojson = this._features[id].toGeoJSON();
-            geojson.properties.drawId = id;
             buckets.unselected.push(geojson);
           }
         }
