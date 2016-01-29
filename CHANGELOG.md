@@ -1,3 +1,10 @@
+## 0.2.3
+
+#### Bug Fixes
+
+* drawId was leaked to props in the minor bump, this was a mistake
+* Features added via Draw.add had to be selected twice
+
 ## 0.2.2
 
 #### Drawing Changes
