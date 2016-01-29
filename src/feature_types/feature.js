@@ -90,7 +90,7 @@ export default class Geometry {
    * @return {Object} GeoJSON feature
    */
   toGeoJSON() {
-    return {
+    return JSON.parse(JSON.stringify({
       type: 'Feature',
       id: this.drawId,
       properties: this.properties,
@@ -98,7 +98,7 @@ export default class Geometry {
         type: this.type,
         coordinates: this.coordinates
       }
-    };
+    }));
   }
 
   /**
@@ -119,7 +119,6 @@ export default class Geometry {
 
   setProperties(props) {
     props = JSON.parse(JSON.stringify(props));
-    props.drawId = this.drawId;
     this.properties = props;
     return this;
   }
