@@ -144,7 +144,7 @@ export default function(ctx) {
                 if(isShiftDown === false) {
                   ctx._handleDrawFinished();
                 }
-                return ctx._select(features[0].properties.drawId);
+                return ctx.select(features[0].properties.drawId);
           }
 
           if(features.length === 0) {

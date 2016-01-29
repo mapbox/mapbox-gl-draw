@@ -146,14 +146,6 @@ export default class Draw extends API {
   /**
    * @private
    */
-  _select(drawId) {
-    this._showDeleteButton();
-    this._store.select(drawId);
-  }
-
-  /**
-   * @private
-   */
   _destroy() {
     this._store.clearSelected();
     this._handleDrawFinished();
@@ -182,7 +174,7 @@ export default class Draw extends API {
     obj.startDrawing();
     this._events.setNewFeature(obj);
     var id = this._store.set(obj);
-    this._select(id);
+    this.select(id);
   }
 
   _handleDrawFinished() {

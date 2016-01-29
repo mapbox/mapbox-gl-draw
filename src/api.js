@@ -57,9 +57,10 @@ export default class API extends mapboxgl.Control {
 
     internalFeature.ready = true;
 
-    this._store.set(internalFeature);
+    var id = this._store.set(internalFeature);
+    this._store._features[id].commited = true;
     if (this.options.interactive) {
-      this._select(internalFeature.drawId);
+      this.select(internalFeature.drawId);
     }
 
     return internalFeature.drawId;
@@ -111,6 +112,7 @@ export default class API extends mapboxgl.Control {
    */
   select(id) {
     this._store.select(id);
+    this._showDeleteButton();
     return this;
   }
 

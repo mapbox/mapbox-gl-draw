@@ -12,7 +12,7 @@
     ]
   },
   "scripts": {
-    "test": "npm run lint && npm run prepublish",
+    "test": "npm run lint && npm run test-unit",
     "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
@@ -40,7 +40,6 @@
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
     "geojson-validation": "^0.1.6",
-    "happen": "^0.2.0",
     "mapbox-gl": "^0.13.1",
     "smokestack": "^3.3.0",
     "tap-closer": "^1.0.0",
