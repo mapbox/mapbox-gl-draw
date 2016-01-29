@@ -25,6 +25,7 @@ export default class Store {
    */
   set(feature) {
     this._features[feature.drawId] = feature;
+    this._features[feature.drawId].commited = true;
     this._render();
     return feature.drawId;
   }
@@ -103,7 +104,7 @@ export default class Store {
     if (this._features[id] && !this._features[id].selected) {
       this._features[id].selected = true;
       this._render();
-      if (this._features[id].created) {
+      if (this._features[id].commited) {
         this._map.fire('draw.select.start', {
           id: id,
           geojson: this._features[id].toGeoJSON()
