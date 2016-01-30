@@ -37,7 +37,7 @@ export const features = {
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: [0, 0]
+      coordinates: [1, 1]
     }
   },
 
@@ -70,3 +70,8 @@ export const features = {
   }
 
 };
+
+export function closeEnough(a, b, margin) {
+  margin = margin || 0.000001;
+  return Math.abs(a - b) < margin;
+}

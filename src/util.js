@@ -44,7 +44,7 @@ DOM.create = function(tag, className, container, attributes) {
 /**
  * Removes classes from an array of DOM elements
  *
- * @param {HTMLElement} elements
+ * @param {Array<HTMLElement>} elements
  * @param {String} klass
  */
 DOM.removeClass = function(elements, klass) {
@@ -105,6 +105,7 @@ module.exports.createButton = function(container, opts, controlClass) {
 
     var el = e.target;
 
+    console.log(el.classList, el.classList.contains('active'));
     if (el.classList.contains('active')) {
       el.classList.remove('active');
     } else {
