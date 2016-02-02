@@ -111,12 +111,7 @@ export default class API extends mapboxgl.Control {
       });
   }
 
-  startDrawing(type) {
-    this._startDrawing(type);
-  }
-
-  _startDrawing() {
-    // implemented in draw.js
+  startDrawing() {
     return null;
   }
 

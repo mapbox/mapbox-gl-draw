@@ -94,7 +94,7 @@ export default class Draw extends API {
       this.lineStringCtrl = createButton(this._container, {
         className: controlClass + ' line',
         title: `LineString tool ${this.options.keybindings && '(l)'}`,
-        fn: this._startDrawing.bind(this, this.types.LINE),
+        fn: this.startDrawing.bind(this, this.types.LINE),
         id: 'lineDrawBtn'
       }, this._controlClass);
     }
@@ -103,7 +103,7 @@ export default class Draw extends API {
       this.polygonCtrl = createButton(this._container, {
         className: `${controlClass} shape`,
         title: `Polygon tool ${this.options.keybindings && '(p)'}`,
-        fn: this._startDrawing.bind(this, this.types.POLYGON),
+        fn: this.startDrawing.bind(this, this.types.POLYGON),
         id: 'polygonDrawBtn'
       }, this._controlClass);
     }
@@ -112,7 +112,7 @@ export default class Draw extends API {
       this.squareCtrl = createButton(this._container, {
         className: `${controlClass} square`,
         title: `Square tool ${this.options.keybindings && '(s)'}`,
-        fn: this._startDrawing.bind(this, this.types.SQUARE),
+        fn: this.startDrawing.bind(this, this.types.SQUARE),
         id: 'squareDrawBtn'
       }, this._controlClass);
     }
@@ -121,7 +121,7 @@ export default class Draw extends API {
       this.markerCtrl = createButton(this._container, {
         className: `${controlClass} marker`,
         title: `Marker tool ${this.options.keybindings && '(m)'}`,
-        fn: this._startDrawing.bind(this, this.types.POINT),
+        fn: this.startDrawing.bind(this, this.types.POINT),
         id: 'pointDrawBtn'
       }, this._controlClass);
     }
@@ -151,7 +151,7 @@ export default class Draw extends API {
     this._handleDrawFinished();
   }
 
-  _startDrawing(type) {
+  startDrawing(type) {
     this._handleDrawFinished();
     var obj = null;
     switch (type) {
