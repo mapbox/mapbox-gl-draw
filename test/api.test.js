@@ -55,6 +55,22 @@ map.on('load', () => {
       t.end();
     });
 
+    t.test('startDrawing1', t => {
+      map.once('draw.set', () => {
+        Draw._handleDrawFinished(); // stop drawing
+        t.pass('startDrawing sets a feature');
+        t.end();
+      });
+      Draw.startDrawing(Draw.types.LINE);
+    });
+
+    t.test('startDrawing2', t => {
+      let id = Draw.startDrawing(Draw.types.LINE);
+      Draw._handleDrawFinished(); // stop drawing
+      t.ok(id, 'Draw.startDrawing returns a drawId');
+      t.end();
+    });
+
     t.test('update', t => {
       feature.geometry.coordinates = [1, 1];
       Draw.update(id, feature);

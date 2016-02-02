@@ -26,8 +26,8 @@ test('Events test', t => {
           t.deepEquals(e.geojson.geometry, feature.geometry, 'geojson in payload is the same as set');
           t.end();
         }
-      }
-      map.once('draw.set',  handler);
+      };
+      map.once('draw.set', handler);
       var id = Draw.add(feature);
       Draw.select(id);
 
