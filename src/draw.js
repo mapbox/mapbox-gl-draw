@@ -94,7 +94,7 @@ export default class Draw extends API {
       this.lineStringCtrl = createButton(this._container, {
         className: controlClass + ' line',
         title: `LineString tool ${this.options.keybindings && '(l)'}`,
-        fn: this._startDrawing.bind(this, 'line'),
+        fn: this._startDrawing.bind(this, this.types.LINE),
         id: 'lineDrawBtn'
       }, this._controlClass);
     }
@@ -103,7 +103,7 @@ export default class Draw extends API {
       this.polygonCtrl = createButton(this._container, {
         className: `${controlClass} shape`,
         title: `Polygon tool ${this.options.keybindings && '(p)'}`,
-        fn: this._startDrawing.bind(this, 'polygon'),
+        fn: this._startDrawing.bind(this, this.types.POLYGON),
         id: 'polygonDrawBtn'
       }, this._controlClass);
     }
@@ -112,7 +112,7 @@ export default class Draw extends API {
       this.squareCtrl = createButton(this._container, {
         className: `${controlClass} square`,
         title: `Square tool ${this.options.keybindings && '(s)'}`,
-        fn: this._startDrawing.bind(this, 'square'),
+        fn: this._startDrawing.bind(this, this.types.SQUARE),
         id: 'squareDrawBtn'
       }, this._controlClass);
     }
@@ -121,7 +121,7 @@ export default class Draw extends API {
       this.markerCtrl = createButton(this._container, {
         className: `${controlClass} marker`,
         title: `Marker tool ${this.options.keybindings && '(m)'}`,
-        fn: this._startDrawing.bind(this, 'point'),
+        fn: this._startDrawing.bind(this, this.types.POINT),
         id: 'pointDrawBtn'
       }, this._controlClass);
     }
@@ -155,16 +155,16 @@ export default class Draw extends API {
     this._handleDrawFinished();
     var obj = null;
     switch (type) {
-      case 'polygon':
+      case this.types.POLYGON:
         obj = new Polygon({map: this._map});
         break;
-      case 'line':
+      case this.types.LINE:
         obj = new Line({ map: this._map });
         break;
-      case 'square':
+      case this.types.SQUARE:
         obj = new Square({ map: this._map });
         break;
-      case 'point':
+      case this.types.POINT:
         obj = new Point({ map: this._map });
         break;
       default:

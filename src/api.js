@@ -10,6 +10,12 @@ export default class API extends mapboxgl.Control {
 
   constructor() {
     super();
+    this.types = {
+      SQUARE: 'square',
+      POLYGON: 'polygon',
+      LINE: 'line',
+      POINT: 'point'
+    };
   }
 
   /**
@@ -103,6 +109,15 @@ export default class API extends mapboxgl.Control {
         type: 'FeatureCollection',
         features: []
       });
+  }
+
+  startDrawing(type) {
+    this._startDrawing(type);
+  }
+
+  _startDrawing() {
+    // implemented in draw.js
+    return null;
   }
 
   /**
