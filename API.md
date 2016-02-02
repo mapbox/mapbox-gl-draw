@@ -218,7 +218,7 @@ Draw
 
 ---
 
-####`.startDrawing(Enum: { Draw.types.POINT | Draw.types.LINE | Draw.types.POLYGON | Draw.types.SQUARE }) -> String`
+####`.startDrawing(Enum: { Draw.types.POINT | Draw.types.LINE | Draw.types.POLYGON | Draw.types.SQUARE })`
 
 This method initiates drawing the specified type. The types are defined in constants in draw under `Draw.types.*`. The argument should be one of
 
@@ -226,8 +226,6 @@ This method initiates drawing the specified type. The types are defined in const
 - `Draw.types.LINE`
 - `Draw.types.POLYGON`
 - `Draw.types.SQUARE`
-
-Returns the `drawId` or the new feature.
 
 Example:
 
