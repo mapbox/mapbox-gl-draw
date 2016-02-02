@@ -200,6 +200,7 @@ console.log(newFeature);
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [1, 1] } }
 ```
 
+---
 
 ####`.clear() -> Draw`
 
@@ -213,6 +214,23 @@ Draw
   .clear()
   .getAll();
 // => { type: 'FeatureCollection', features: [] }
+```
+
+---
+
+####`.startDrawing(Enum: { Draw.types.POINT | Draw.types.LINE | Draw.types.POLYGON | Draw.types.SQUARE })`
+
+This method initiates drawing the specified type. The types are defined in constants in draw under `Draw.types.*`. The argument should be one of
+
+- `Draw.types.POINT`
+- `Draw.types.LINE`
+- `Draw.types.POLYGON`
+- `Draw.types.SQUARE`
+
+Example:
+
+```js
+Draw.startDrawing(Draw.types.LINE);
 ```
 
 ## Events
