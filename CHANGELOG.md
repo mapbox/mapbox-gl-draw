@@ -1,3 +1,7 @@
+## 0.2.4
+
+Ships `dist/mapbox-gl-draw.js` to npm even though it is not commited.
+
 ## 0.2.3
 
 #### Bug Fixes
