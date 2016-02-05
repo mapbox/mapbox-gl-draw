@@ -30,19 +30,25 @@ export default class Geometry {
     this.commited = false;
     this.toRemove = false;
     this.selected = false;
+    this.lastCoords = null;
   }
 
   select() {
     this.selected = true;
-    this.lastCoords = JSON.stringify(this.coordinates);
+    if (this.lastCoords === null) {
+      this.lastCoords = JSON.stringify(this.coordinates);
+    }
   }
 
   deselect() {
     this.selected = false;
+    this.lastCoords = null;
   }
 
   revert() {
-    this.coordinates = JSON.parse(this.lastCoords);
+    if (this.lastCoords !== null) {
+      this.coordinates = JSON.parse(this.lastCoords);
+    }
   }
 
   startDrawing() {

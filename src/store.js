@@ -96,6 +96,17 @@ export default class Store {
   }
 
   /**
+   * revert all features from the store
+   */
+  revertSelected() {
+    this.getSelectedIds().forEach(id => {
+      this.get(id).revert();
+      this.get(id).deselect();
+    });
+    this.render();
+  }
+
+  /**
    * select a feature
    *
    * @param {String} id - the drawId of a feature

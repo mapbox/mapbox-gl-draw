@@ -200,7 +200,7 @@ export default function(ctx) {
             ctx._startDrawing('square');
             break;
           case ESCAPE_KEY:
-            ctx._destroy();
+            ctx._store.revertSelected();
             e.preventDefault();
             break;
           case ENTER:
