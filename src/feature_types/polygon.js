@@ -59,6 +59,9 @@ export default class Polygon extends Feature {
       var remove = e.keyCode === ENTER ? 1 : 2;
       this.coordinates[0].splice(idx, remove);
     }
+    if (this.vertexIdx < 3 || this.coordinates[0].length < 4) {
+      this.toRemove = true;
+    }
     super.onStopDrawing(e);
   }
 

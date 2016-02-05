@@ -28,6 +28,7 @@ export default class Geometry {
     this.created = false;
     this.ready = false;
     this.commited = false;
+    this.toRemove = false;
   }
 
   startDrawing() {
@@ -43,8 +44,9 @@ export default class Geometry {
   */
 
   onStopDrawing() {
-    this.created = true;
+    this.created = !this.toRemove;
     if(this._map.options.doubleClickZoom) {
+      this._map.doubleClickZoom.disable();
       this._map.doubleClickZoom.enable();
     }
     this._map.getContainer().classList.remove('mapboxgl-draw-activated');

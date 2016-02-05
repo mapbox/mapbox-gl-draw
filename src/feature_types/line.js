@@ -51,6 +51,9 @@ export default class Line extends Feature {
     const ENTER = 13;
     var subtract = e.keyCode === ENTER ? 1 : 2;
     this.coordinates = this.coordinates.slice(0, this.coordinates.length - subtract);
+    if (this.coordinates.length === 1) {
+      this.toRemove = true;
+    }
     super.onStopDrawing(e);
   }
 
