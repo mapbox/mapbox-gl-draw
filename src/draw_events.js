@@ -78,7 +78,6 @@ export default function(ctx) {
         if(isShiftDown && activeVertex === null && activeDrawId === null) {
           var end = DOM.mousePos(e, ctx._map.getContainer());
           ctx._store.selectFeaturesIn(dragStartPoint, end);
-          ctx._showDeleteButton();
         }
 
         if (activeVertex) {

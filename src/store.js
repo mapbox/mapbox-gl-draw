@@ -12,8 +12,9 @@ import debounce from './lib/debounce';
  */
 export default class Store {
 
-  constructor(map) {
+  constructor(map, draw) {
     this._map = map;
+    this._draw = draw;
     this._features = {};
     this._render = debounce(this.render, 16, false);
   }
@@ -161,6 +162,7 @@ export default class Store {
         var id = feature.properties.drawId;
         if (this._features[id] && set[id] === undefined) {
           set[id] = 1;
+          this._draw._showDeleteButton();
           this.select(id);
         }
         return set;

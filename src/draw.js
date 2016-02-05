@@ -65,7 +65,7 @@ export default class Draw extends API {
    */
   onAdd(map) {
     var container = this._container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
-    this._store = new Store(map);
+    this._store = new Store(map, this);
 
     this._map = map;
 
