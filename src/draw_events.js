@@ -4,10 +4,9 @@ import { DOM } from './util';
 const ENTER = 13;          // (enter)
 const SHIFT_KEY = 16;      // (shift)
 const SQUARE_KEY = 83;     // (s)
-const DELETE_KEY = 68;     // (d)
 const MARKER_KEY = 77;     // (m)
 const POLYGON_KEY = 80;    // (p)
-const DESELECT_KEY = 27;  // (esc)
+const ESCAPE_KEY = 27;  // (esc)
 const LINESTRING_KEY = 76; // (l)
 
 export default function(ctx) {
@@ -21,6 +20,10 @@ export default function(ctx) {
   var cleanupNewFeatureIfNeeded = function() {
      if (newFeature.created) {
         ctx._handleDrawFinished();
+        newFeature = null;
+      }
+      else if (newFeature.toRemove) {
+        ctx._destroy();
         newFeature = null;
       }
   };
@@ -167,23 +170,38 @@ export default function(ctx) {
       if (newFeature === null) {
         switch (e.keyCode) {
           case LINESTRING_KEY:
-             return ctx._startDrawing('line');
+            ctx._startDrawing('line');
+            break;
           case MARKER_KEY:
-            return ctx._startDrawing('point');
+            ctx._startDrawing('point');
+            break;
           case POLYGON_KEY:
-            return ctx._startDrawing('polygon');
+            ctx._startDrawing('polygon');
+            break;
           case SQUARE_KEY:
-            return ctx._startDrawing('square');
-          case DELETE_KEY:
-            return ctx._destroy();
-          case DESELECT_KEY:
+            ctx._startDrawing('square');
+            break;
+          case ESCAPE_KEY:
+            ctx._destroy();
+            e.preventDefault();
+            break;
           case ENTER:
-            return ctx._handleDrawFinished();
+            ctx._handleDrawFinished();
+            break;
         }
       }
-      else if((e.keyCode === DESELECT_KEY || e.keyCode === ENTER) && newFeature) {
-        newFeature.onStopDrawing(e);
-        cleanupNewFeatureIfNeeded();
+      else {
+        switch(e.keyCode) {
+          case ENTER:
+            newFeature.onStopDrawing(e);
+            cleanupNewFeatureIfNeeded();
+            break;
+          case ESCAPE_KEY:
+            newFeature.toRemove = true;
+            ctx._destroy();
+            newFeature = null;
+            break;
+        }
       }
     },
     onKeyDown: function(e) {
