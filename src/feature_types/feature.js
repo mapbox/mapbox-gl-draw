@@ -29,6 +29,20 @@ export default class Geometry {
     this.ready = false;
     this.commited = false;
     this.toRemove = false;
+    this.selected = false;
+  }
+
+  select() {
+    this.selected = true;
+    this.lastCoords = JSON.stringify(this.coordinates);
+  }
+
+  deselect() {
+    this.selected = false;
+  }
+
+  revert() {
+    this.coordinates = JSON.parse(this.lastCoords);
   }
 
   startDrawing() {

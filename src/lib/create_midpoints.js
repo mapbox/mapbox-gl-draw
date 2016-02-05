@@ -21,7 +21,9 @@ export default function(features, map) {
             properties: {
               meta: 'midpoint',
               parent: feat.drawId,
-              index: j + 1
+              index: j + 1,
+              lng: mid.lng,
+              lat: mid.lat
             },
             geometry: {
               type: 'Point',

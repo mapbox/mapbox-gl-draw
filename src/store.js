@@ -102,7 +102,7 @@ export default class Store {
    */
   select(id) {
     if (this._features[id] && !this._features[id].selected) {
-      this._features[id].selected = true;
+      this._features[id].select();
       this._render();
       if (this._features[id].commited && this._features[id].ready) {
         this._map.fire('draw.select.start', {
@@ -120,7 +120,7 @@ export default class Store {
    */
   commit(id) {
     if (this._features[id] && this._features[id].selected) {
-      this._features[id].selected = false;
+      this._features[id].deselect();
       this._render();
       if (this._features[id].commited) {
         this._map.fire('draw.select.end', {
@@ -183,15 +183,15 @@ export default class Store {
             buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
           }
           else {
-            buckets.unselected.push(geojson);
+            buckets.deselected.push(geojson);
           }
         }
         return buckets;
-      }, { unselected: [], selected: [] });
+      }, { deselected: [], selected: [] });
 
       this._map.getSource('draw').setData({
         type: 'FeatureCollection',
-        features: featureBuckets.unselected
+        features: featureBuckets.deselected
       });
 
       this._map.getSource('draw-selected').setData({

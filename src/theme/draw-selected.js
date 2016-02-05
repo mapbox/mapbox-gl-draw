@@ -56,7 +56,7 @@ export default [
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
     'paint': {
-      'circle-radius': 5,
+      'circle-radius': 4,
       'circle-color': '#000000'
     },
     'interactive': true
