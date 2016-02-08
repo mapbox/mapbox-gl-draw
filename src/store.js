@@ -173,7 +173,6 @@ export default class Store {
         var id = feature.properties.drawId;
         if (this._features[id] && set[id] === undefined) {
           set[id] = 1;
-          this._draw._showDeleteButton();
           this.select(id);
         }
         return set;
@@ -199,6 +198,13 @@ export default class Store {
         }
         return buckets;
       }, { deselected: [], selected: [] });
+
+      if(featureBuckets.selected.length > 0) {
+        this._draw._showDeleteButton();
+      }
+      else {
+        this._draw._hideDeleteButton();
+      }
 
       this._map.getSource('draw').setData({
         type: 'FeatureCollection',

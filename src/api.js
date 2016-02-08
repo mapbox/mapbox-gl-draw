@@ -112,7 +112,6 @@ export default class API extends mapboxgl.Control {
    */
   select(id) {
     this._store.select(id);
-    this._showDeleteButton();
     return this;
   }
 
