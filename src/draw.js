@@ -41,23 +41,28 @@ export default class Draw extends API {
   constructor(options) {
     super();
 
+    // We should handle this merge more elegently
+    options = options || {};
+    options.controls = options.controls || {};
+    options.controls.marker = options.controls.marker === false ? false : true;
+    options.controls.line = options.controls.line === false ? false : true;
+    options.controls.shape = options.controls.shape === false ? false : true;
+    options.controls.square = options.controls.square === false ? false : true;
+    options.controls.trash = options.controls.trash === false ? false : true;
+
     this.options = {
       drawing: true,
       interactive: false,
       position: 'top-left',
       keybindings: true,
       styles: {},
-      controls: {
-        marker: true,
-        line: true,
-        shape: true,
-        square: true
-      }
+      controls: {}
     };
 
     this._events = DrawEvents(this);
 
     Object.assign(this.options, options);
+
   }
 
   /**
@@ -126,21 +131,27 @@ export default class Draw extends API {
       }, this._controlClass);
     }
 
-    this.deleteBtn = createButton(this._container, {
-      className: 'mapboxgl-ctrl-draw-btn trash',
-      title: 'delete',
-      fn: this._destroy.bind(this),
-      id: 'deleteBtn'
-    }, this._controlClass);
-    this._hideDeleteButton();
+    if (controls.trash) {
+      this.deleteBtn = createButton(this._container, {
+        className: 'mapboxgl-ctrl-draw-btn trash',
+        title: 'delete',
+        fn: this._destroy.bind(this),
+        id: 'deleteBtn'
+      }, this._controlClass);
+      this._hideDeleteButton();
+    }
   }
 
   _showDeleteButton() {
-    this.deleteBtn.style.display = 'block';
+    if (this.options.controls.trash) {
+      this.deleteBtn.style.display = 'block';
+    }
   }
 
   _hideDeleteButton() {
-    this.deleteBtn.style.display = 'none';
+    if (this.options.controls.trash) {
+      this.deleteBtn.style.display = 'none';
+    }
   }
 
   /**
@@ -260,7 +271,7 @@ export default class Draw extends API {
     }
     var controls = this.options.controls;
 
-    this.deleteBtn.parentNode.removeChild(this.deleteBtn);
+    if (controls.trash) this.deleteBtn.parentNode.removeChild(this.deleteBtn);
     if (controls.square) this.squareCtrl.parentNode.removeChild(this.squareCtrl);
     if (controls.line) this.lineStringCtrl.parentNode.removeChild(this.lineStringCtrl);
     if (controls.shape) this.polygonCtrl.parentNode.removeChild(this.polygonCtrl);
