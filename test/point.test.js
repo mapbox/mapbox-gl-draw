@@ -13,7 +13,7 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    Draw._startDrawing('point');
+    Draw.startDrawing(Draw.types.POINT);
     map.fire('click', {
       lngLat: {
         lng: 10,

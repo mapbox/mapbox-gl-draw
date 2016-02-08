@@ -15,7 +15,7 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    Draw._startDrawing('square');
+    Draw.startDrawing(Draw.types.SQUARE);
 
     let coords = feature.geometry.coordinates;
 

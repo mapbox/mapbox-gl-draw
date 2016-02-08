@@ -195,16 +195,16 @@ export default function(ctx) {
       if (newFeature === null) {
         switch (e.keyCode) {
           case LINESTRING_KEY:
-            ctx._startDrawing('line');
+            ctx.startDrawing(ctx.types.LINE);
             break;
           case MARKER_KEY:
-            ctx._startDrawing('point');
+            ctx.startDrawing(ctx.types.POINT);
             break;
           case POLYGON_KEY:
-            ctx._startDrawing('polygon');
+            ctx.startDrawing(ctx.types.POLYGON);
             break;
           case SQUARE_KEY:
-            ctx._startDrawing('square');
+            ctx.startDrawing(ctx.types.SQUARE);
             break;
           case ESCAPE_KEY:
             ctx._store.revertSelected();
