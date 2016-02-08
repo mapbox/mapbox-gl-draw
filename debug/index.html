@@ -9,10 +9,31 @@
   <style>
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
+    .start-draw {
+      width: 330px;
+      position: absolute;
+      left :10px;
+      bottom: 10px;
+      background: #efefef;
+    }
+    .start-draw div {
+      float: right;
+      border: 1px solid #ccc;
+      background: #ddd;
+      padding: 5px;
+      margin: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 <div id='map'></div>
+<div class='start-draw' >
+  <div id='start-point'>POINT</div>
+  <div id='start-line'>LINE</div>
+  <div id='start-polygon'>POLYGON</div>
+  <div id='start-square'>SQUARE</div>
+</div>
 <script src='../node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
 <script src='../dist/mapbox-gl-draw.js'></script>
 <script type='text/javascript'>
@@ -33,6 +54,29 @@
 
   map.addControl(Draw);
   map.on('load', function() {
+
+    var startPoint = document.getElementById('start-point');
+    var startLine = document.getElementById('start-line');
+    var startPolygon = document.getElementById('start-polygon');
+    var startSquare = document.getElementById('start-square');
+
+    startPoint.onclick = function() {
+      Draw.startDrawing(Draw.types.POINT);
+    };
+
+    startLine.onclick = function() {
+      Draw.startDrawing(Draw.types.LINE);
+    };
+
+    startPolygon.onclick = function() {
+      Draw.startDrawing(Draw.types.POLYGON);
+    };
+
+    startSquare.onclick = function() {
+      Draw.startDrawing(Draw.types.SQUARE);
+    };
+
+
     map.on('draw.set', function(playload) {
       console.log('draw.set', playload);
     });

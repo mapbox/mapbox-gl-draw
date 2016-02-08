@@ -15,7 +15,7 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    Draw._startDrawing('polygon');
+    Draw.startDrawing(Draw.types.POLYGON);
     let coords = feature.geometry.coordinates[0];
     for (var i = 0; i < coords.length; i++) {
       let c = coords[i];

@@ -15,7 +15,7 @@ map.on('load', () => {
     var Draw = GLDraw();
     map.addControl(Draw);
 
-    Draw._startDrawing('line');
+    Draw.startDrawing(Draw.types.LINE);
 
     let coords = feature.geometry.coordinates;
 
