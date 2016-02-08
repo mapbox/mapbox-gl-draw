@@ -32,6 +32,13 @@ export default function(ctx) {
     setNewFeature: function(value) {
       newFeature = value;
     },
+    destroyNewFeature: function() {
+      if(newFeature) {
+        newFeature.toRemove = true;
+        newFeature = null;
+        ctx._destroy();
+      }
+    },
     onMouseDown: function(e) {
       isMouseDown = true;
       if (newFeature) {

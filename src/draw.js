@@ -152,6 +152,7 @@ export default class Draw extends API {
   }
 
   startDrawing(type) {
+    this._events.destroyNewFeature();
     this._handleDrawFinished();
     var obj = null;
     switch (type) {
