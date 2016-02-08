@@ -29,6 +29,26 @@ export default class Geometry {
     this.ready = false;
     this.commited = false;
     this.toRemove = false;
+    this.selected = false;
+    this.lastCoords = null;
+  }
+
+  select() {
+    this.selected = true;
+    if (this.lastCoords === null) {
+      this.lastCoords = JSON.stringify(this.coordinates);
+    }
+  }
+
+  deselect() {
+    this.selected = false;
+    this.lastCoords = null;
+  }
+
+  revert() {
+    if (this.lastCoords !== null) {
+      this.coordinates = JSON.parse(this.lastCoords);
+    }
   }
 
   startDrawing() {

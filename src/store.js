@@ -96,13 +96,24 @@ export default class Store {
   }
 
   /**
+   * revert all features from the store
+   */
+  revertSelected() {
+    this.getSelectedIds().forEach(id => {
+      this.get(id).revert();
+      this.get(id).deselect();
+    });
+    this.render();
+  }
+
+  /**
    * select a feature
    *
    * @param {String} id - the drawId of a feature
    */
   select(id) {
     if (this._features[id] && !this._features[id].selected) {
-      this._features[id].selected = true;
+      this._features[id].select();
       this._render();
       if (this._features[id].commited && this._features[id].ready) {
         this._map.fire('draw.select.start', {
@@ -120,7 +131,7 @@ export default class Store {
    */
   commit(id) {
     if (this._features[id] && this._features[id].selected) {
-      this._features[id].selected = false;
+      this._features[id].deselect();
       this._render();
       if (this._features[id].commited) {
         this._map.fire('draw.select.end', {
@@ -162,7 +173,6 @@ export default class Store {
         var id = feature.properties.drawId;
         if (this._features[id] && set[id] === undefined) {
           set[id] = 1;
-          this._draw._showDeleteButton();
           this.select(id);
         }
         return set;
@@ -183,15 +193,22 @@ export default class Store {
             buckets.selected = buckets.selected.concat(createMidpoints([this._features[id]], this._map), createVertices([this._features[id]]));
           }
           else {
-            buckets.unselected.push(geojson);
+            buckets.deselected.push(geojson);
           }
         }
         return buckets;
-      }, { unselected: [], selected: [] });
+      }, { deselected: [], selected: [] });
+
+      if(featureBuckets.selected.length > 0) {
+        this._draw._showDeleteButton();
+      }
+      else {
+        this._draw._hideDeleteButton();
+      }
 
       this._map.getSource('draw').setData({
         type: 'FeatureCollection',
-        features: featureBuckets.unselected
+        features: featureBuckets.deselected
       });
 
       this._map.getSource('draw-selected').setData({

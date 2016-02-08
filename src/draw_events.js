@@ -50,15 +50,13 @@ export default function(ctx) {
             features = features.filter(feature => drawIds.indexOf(feature.properties.drawId || feature.properties.parent) > -1);
             if (features.length > 0) {
               var tempVertex = R.find(feat => feat.properties.meta === 'midpoint')(features);
+              activeVertex = R.find(feat => feat.properties.meta === 'vertex')(features) || null;
 
-              if(tempVertex) {
+              if(tempVertex && activeVertex === null) {
                 ctx._store.get(tempVertex.properties.parent)
-                  .addVertex(coords, tempVertex.properties.index);
+                  .addVertex([tempVertex.properties.lng, tempVertex.properties.lat], tempVertex.properties.index);
                 activeVertex = tempVertex;
                 ctx._store._render();
-              }
-              else {
-                activeVertex = R.find(feat => feat.properties.meta === 'vertex')(features) || null;
               }
 
               if (activeVertex === null) {
@@ -132,24 +130,44 @@ export default function(ctx) {
       else {
         ctx._map.featuresAt(e.point, {
           radius: 10,
-          layer: [ 'gl-draw-polygon',
-                   'gl-draw-line',
-                   'gl-draw-point' ]
-        }, (err, features) => {
+          layer: [ 'gl-draw-polygon', 'gl-draw-line', 'gl-draw-point',
+          'gl-draw-selected-polygon', 'gl-draw-selected-line', 'gl-draw-selected-point' ]
+        }, (err, results) => {
           if (err) {
             throw err;
           }
 
-          if (features.length
-              && ctx._store.get(features[0].properties.drawId)
-              && !ctx._store.get(features[0].properties.drawId).getOptions().permanent) {
-                if(isShiftDown === false) {
-                  ctx._handleDrawFinished();
-                }
-                return ctx.select(features[0].properties.drawId);
-          }
+          var features = [];
+          var vertices = [];
 
-          if(features.length === 0) {
+          results.forEach(result => {
+            var featureId = result.properties.drawId || result.properties.parent;
+            var feature = ctx._store.get(featureId);
+
+            if (feature && result.properties.meta === 'vertex') {
+              vertices.push([feature, result.properties.index]);
+            }
+            else if (feature
+              && result.properties.drawId
+              && feature.getOptions().permanent !== true
+              && !feature.selected) {
+              features.push(feature);
+            }
+          });
+
+          if(features.length > 0) {
+            if(isShiftDown === false) {
+              ctx._handleDrawFinished();
+            }
+            ctx.select(features[0].drawId);
+          }
+          else if(vertices.length > 0) {
+            if (vertices[0][0].removeVertex(vertices[0][1])) {
+              ctx._store.delete(vertices[0][0].drawId);
+            }
+            ctx._store._render();
+          }
+          else {
             ctx._handleDrawFinished();
           }
         });
@@ -182,7 +200,7 @@ export default function(ctx) {
             ctx._startDrawing('square');
             break;
           case ESCAPE_KEY:
-            ctx._destroy();
+            ctx._store.revertSelected();
             e.preventDefault();
             break;
           case ENTER:

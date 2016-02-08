@@ -97,8 +97,17 @@ export default class Polygon extends Feature {
    * @private
    */
   addVertex(coords, idx) {
-    coords = this._map.unproject(coords);
-    this.coordinates[0].splice(idx, 0, [ coords.lng, coords.lat ]);
+    this.coordinates[0].splice(idx, 0, coords);
+  }
+
+  removeVertex(idx) {
+    this.coordinates[0].splice(idx, 1);
+    this.coordinates[0][this.coordinates[0].length - 1] = this.coordinates[0][0];
+    if (this.coordinates[0].length <= 3) {
+      this.ready = false;
+      return true;
+    }
+    return false;
   }
 
 }

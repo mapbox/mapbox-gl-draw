@@ -78,13 +78,25 @@ export default class Line extends Feature {
   }
 
   /**
-   * Add a new vertex to a polygon in selected mode
+   * Add a new vertex to a line in selected mode
    *
-   * @param {Object} coords - The coordinates of the new vertex in the for { lng: <Number>, lat: <Number> }
+   * @param {Object} coords - The coordinates of the new vertex in the for [lng, lat]
    * @param {Number} idx - the index at which the new point will be placed in `feature.geometry.coordinates`
    */
   addVertex(coords, idx) {
-    coords = this._map.unproject(coords);
-    this.coordinates.splice(idx, 0, [ coords.lng, coords.lat ]);
+    this.coordinates.splice(idx, 0, coords);
+  }
+
+  /**
+   * Remove a vertex from the line
+   *
+   */
+  removeVertex(idx) {
+    this.coordinates.splice(idx, 1);
+    if (this.coordinates.length <= 1) {
+      this.ready = false;
+      return true;
+    }
+    return false;
   }
 }
