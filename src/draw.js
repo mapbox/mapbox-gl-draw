@@ -131,21 +131,27 @@ export default class Draw extends API {
       }, this._controlClass);
     }
 
-    this.deleteBtn = createButton(this._container, {
-      className: 'mapboxgl-ctrl-draw-btn trash',
-      title: 'delete',
-      fn: this._destroy.bind(this),
-      id: 'deleteBtn'
-    }, this._controlClass);
-    this._hideDeleteButton();
+    if (controls.trash) {
+      this.deleteBtn = createButton(this._container, {
+        className: 'mapboxgl-ctrl-draw-btn trash',
+        title: 'delete',
+        fn: this._destroy.bind(this),
+        id: 'deleteBtn'
+      }, this._controlClass);
+      this._hideDeleteButton();
+    }
   }
 
   _showDeleteButton() {
-    this.deleteBtn.style.display = 'block';
+    if (this.options.controls.trash) {
+      this.deleteBtn.style.display = 'block';
+    }
   }
 
   _hideDeleteButton() {
-    this.deleteBtn.style.display = 'none';
+    if (this.options.controls.trash) {
+      this.deleteBtn.style.display = 'none';
+    }
   }
 
   /**
@@ -264,7 +270,7 @@ export default class Draw extends API {
     }
     var controls = this.options.controls;
 
-    this.deleteBtn.parentNode.removeChild(this.deleteBtn);
+    if (controls.trash) this.deleteBtn.parentNode.removeChild(this.deleteBtn);
     if (controls.square) this.squareCtrl.parentNode.removeChild(this.squareCtrl);
     if (controls.line) this.lineStringCtrl.parentNode.removeChild(this.lineStringCtrl);
     if (controls.shape) this.polygonCtrl.parentNode.removeChild(this.polygonCtrl);
