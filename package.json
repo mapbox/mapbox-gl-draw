@@ -16,7 +16,6 @@
     "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
-    "build-examples": "./build-examples.sh",
     "start": "budo index.js --serve=dist/mapbox-gl-draw.js --live -d | bistre"
   },
   "repository": {
