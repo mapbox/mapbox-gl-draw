@@ -1,3 +1,7 @@
+## 0.3.1
+
+Expands support to [mapbox-gl@0.14.0](https://github.com/mapbox/mapbox-gl-js/releases/tag/v0.14.0)
+
 ## 0.3.0
 
 #### Drawing changes
