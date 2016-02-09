@@ -53,14 +53,6 @@ Install dependencies, build the source files and crank up a server via:
 npm start & open http://localhost:9966/debug
 ```
 
-To run the example apps
-
-```
-npm run-script build-examples
-npm start
-open http://localhost:9966/examples/geojson-editor/ && open http://localhost:9966/examples/node/
-```
-
 ### Testing
 
 ```
