@@ -1,6 +1,24 @@
+## 0.3.0
+
+#### Drawing changes
+
+* When editing a feature, clicking on a node will delete it
+* When creating a feature, escape ends drawing and deletes the features. No events are fired.
+* When editing a feature, escape reverts changes to what the feature looked like when editing started
+
+#### Bug fixes
+
+* Fixed bug where the trash can would show up when zooming via the zoom box.
+* Fixed bug where starting a new feature before finishing an old feature would save the old feature even if it was invalid
+
+#### Api enhancements
+
+* `startDrawing` lets you initiate drawing with your controls.
+* The controls object now accepts `trash` letting you hide the trash control
+
 ## 0.2.4
 
-Ships `dist/mapbox-gl-draw.js` to npm even though it is not commited.
+Ships `dist/mapbox-gl-draw.js` to npm even though it is not committed.
 
 ## 0.2.3
 
