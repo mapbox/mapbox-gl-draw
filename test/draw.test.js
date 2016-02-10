@@ -9,8 +9,10 @@ var map = createMap();
 
 map.on('load', () => {
 
+  var Draw;
+
   test('Draw class test', t => {
-    var Draw = GLDraw();
+    Draw = GLDraw();
     map.addControl(Draw);
 
     t.ok(Draw, 'Draw class exists');
@@ -51,6 +53,17 @@ map.on('load', () => {
     } catch (e) {
       t.fail('calling drawing.end without handlers throws');
     }
+
+    t.end();
+  });
+
+  test('Draw without drawing', t => {
+    Draw = GLDraw({
+      drawing: false
+    });
+
+    t.doesNotThrow(Draw._hideDeleteButton.bind(Draw),
+    'calling _hideDeleteButton with drawing disabled does not throw an error');
 
     t.end();
   });
