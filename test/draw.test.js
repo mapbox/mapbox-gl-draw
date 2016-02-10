@@ -62,6 +62,9 @@ map.on('load', () => {
       drawing: false
     });
 
+    t.doesNotThrow(Draw._showDeleteButton.bind(Draw),
+    'calling _showDeleteButton with drawing disabled does not throw an error');
+
     t.doesNotThrow(Draw._hideDeleteButton.bind(Draw),
     'calling _hideDeleteButton with drawing disabled does not throw an error');
 
