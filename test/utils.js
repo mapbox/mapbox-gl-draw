@@ -67,6 +67,26 @@ export const features = {
         [1, 1]
       ]]
     }
+  },
+
+  featureCollection: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [1, 1],
+            [2, 2],
+            [3, 3],
+            [4, 4],
+            [1, 1]
+          ]]
+        }
+      }
+    ]
   }
 
 };

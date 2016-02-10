@@ -21,7 +21,7 @@ map.on('load', () => {
 
     t.test('add', t => {
       id = Draw.add(feature);
-      t.ok(id, 'valid string id returned on set');
+      t.ok(id, 'valid string id returned on add');
 
       // set permanent feature
       id = Draw.add(feature, { permanent: true });
@@ -32,6 +32,10 @@ map.on('load', () => {
         -1,
         'permanent feature is not inserted into selected store when clicked'
       );
+
+      // add featureCollection
+      var anotherId = Draw.add(features.featureCollection);
+      t.ok(id, 'valid string id returned when adding a featureCollection');
 
       t.end();
     });
