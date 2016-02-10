@@ -21,6 +21,17 @@ import Polygon from './feature_types/polygon';
 
 import DrawEvents from './draw_events';
 
+// default options for Draw
+const defaultOptions = {
+  controls: {
+    marker: true,
+    line: true,
+    shape: true,
+    square: true,
+    trash: true
+  }
+};
+
 /**
  * Draw plugin for Mapbox GL JS
  *
@@ -38,17 +49,8 @@ import DrawEvents from './draw_events';
  */
 export default class Draw extends API {
 
-  constructor(options) {
+  constructor(options = defaultOptions) {
     super();
-
-    // We should handle this merge more elegently
-    options = options || {};
-    options.controls = options.controls || {};
-    options.controls.marker = options.controls.marker === false ? false : true;
-    options.controls.line = options.controls.line === false ? false : true;
-    options.controls.shape = options.controls.shape === false ? false : true;
-    options.controls.square = options.controls.square === false ? false : true;
-    options.controls.trash = options.controls.trash === false ? false : true;
 
     this.options = {
       drawing: true,
