@@ -1,3 +1,7 @@
+## 0.3.2
+
+Fixes bug where `drawing: false` in the config would throw an error in the trash can control logic.
+
 ## 0.3.1
 
 Expands support to [mapbox-gl@0.14.0](https://github.com/mapbox/mapbox-gl-js/releases/tag/v0.14.0)
