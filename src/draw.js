@@ -143,13 +143,13 @@ export default class Draw extends API {
   }
 
   _showDeleteButton() {
-    if (this.options.controls.trash) {
+    if (this.options.controls.trash && this.options.drawing) {
       this.deleteBtn.style.display = 'block';
     }
   }
 
   _hideDeleteButton() {
-    if (this.options.controls.trash) {
+    if (this.options.controls.trash && this.options.drawing) {
       this.deleteBtn.style.display = 'none';
     }
   }
