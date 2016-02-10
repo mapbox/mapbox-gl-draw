@@ -35,7 +35,7 @@ map.on('load', () => {
 
       // add featureCollection
       var anotherId = Draw.add(features.featureCollection);
-      t.ok(id, 'valid string id returned when adding a featureCollection');
+      t.ok(anotherId, 'valid string id returned when adding a featureCollection');
 
       t.end();
     });
