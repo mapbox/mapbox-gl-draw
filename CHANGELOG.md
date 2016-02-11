@@ -1,3 +1,7 @@
+## 0.3.3
+
+Fixes a bug where calling `Draw.deselect` in a `draw.delete` event handler would emit a `draw.set` event even though the feature had been removed fom Draw.
+
 ## 0.3.2
 
 Fixes bug where `drawing: false` in the config would throw an error in the trash can control logic.
