@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -52,6 +52,7 @@
   "dependencies": {
     "babel-preset-es2015": "^6.3.13",
     "hat": "0.0.3",
+    "mapbox-gl": "^0.14.1",
     "ramda": "^0.17.1"
   }
 }
