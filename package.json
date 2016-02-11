@@ -52,6 +52,7 @@
   "dependencies": {
     "babel-preset-es2015": "^6.3.13",
     "hat": "0.0.3",
+    "mapbox-gl": "^0.14.1",
     "ramda": "^0.17.1"
   }
 }

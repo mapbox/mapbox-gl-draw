@@ -63,13 +63,14 @@ export default class Store {
    */
   delete(id) {
     if (this._features[id]) {
-      if (this._features[id].created) {
+      var geojson = this._features[id].created ? this._features[id].toGeoJSON() : null;
+      delete this._features[id];
+      if (geojson) {
         this._map.fire('draw.delete', {
           id: id,
-          geojson: this._features[id].toGeoJSON()
+          geojson: geojson
         });
       }
-      delete this._features[id];
       this._render();
     }
   }
