@@ -1,24 +1,16 @@
-GL Draw
----
+# mapbox-gl-draw.js
 
-Adds support for drawing and editing features on [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) maps.
+Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps.
 
 [![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
 
 ### Installing
 
 ```
-git clone https://github.com/mapbox/mapbox-gl-draw.git
-cd mapbox-gl-draw
-npm install
+npm install mapbox-gl-js
 ```
 
-Include [mapbox-gl-draw.js](https://github.com/mapbox/mapbox-gl-draw/blob/master/dist/mapbox-gl-draw.js) after `mapbox-gl.js`
-
-```html
-<script src="mapbox-gl.js"></script>
-<script src="mapbox-gl-draw.js"></script>
-```
+Require or include `mapbox-gl-draw` after you `mapbox-gl`.
 
 Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/dev-pages/dist/mapbox-gl-draw.css)
 
@@ -50,6 +42,8 @@ map.addControl(Draw)
 Install dependencies, build the source files and crank up a server via:
 
 ```
+git clone git@github.com:mapbox/mapbox-gl-draw.git
+npm install
 npm start & open http://localhost:9966/debug
 ```
 
