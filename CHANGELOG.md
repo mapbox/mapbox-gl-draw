@@ -1,3 +1,7 @@
+## 0.3.4
+
+Fixes a bug where calling `Draw.add` on a `FeatureCollection` resulted in an error.
+
 ## 0.3.3
 
 Fixes a bug where calling `Draw.deselect` in a `draw.delete` event handler would emit a `draw.set` event even though the feature had been removed fom Draw.
