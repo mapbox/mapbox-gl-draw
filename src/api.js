@@ -29,7 +29,7 @@ export default class API extends mapboxgl.Control {
   add(feature, options) {
     feature = JSON.parse(JSON.stringify(feature));
     if (feature.type === 'FeatureCollection') {
-      return feature.features.map(subFeature => this.set(subFeature, options));
+      return feature.features.map(subFeature => this.add(subFeature, options));
     }
 
     if (!feature.geometry) {
