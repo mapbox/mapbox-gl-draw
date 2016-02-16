@@ -7,10 +7,10 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 ### Installing
 
 ```
-npm install mapbox-gl-js
+npm install mapbox-gl-draw
 ```
 
-Require or include `mapbox-gl-draw` after you `mapbox-gl`.
+Require or include `mapbox-gl-draw` after `mapbox-gl`.
 
 Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/dev-pages/dist/mapbox-gl-draw.css)
 
