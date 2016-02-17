@@ -83,8 +83,8 @@ export default function(ctx) {
       }
       else {
 
-        if(isShiftDown && activeVertex === null && activeDrawId === null) {
-          var end = DOM.mousePos(e, ctx._map.getContainer());
+        var end = DOM.mousePos(e, ctx._map.getContainer());
+        if(isShiftDown && activeVertex === null && activeDrawId === null && dragStartPoint.x !== end.x && dragStartPoint.y !== end.y) {
           ctx._store.selectFeaturesIn(dragStartPoint, end);
         }
 
@@ -163,6 +163,7 @@ export default function(ctx) {
           });
 
           if(features.length > 0) {
+            console.log('isShiftDown', isShiftDown);
             if(isShiftDown === false) {
               ctx._handleDrawFinished();
             }
