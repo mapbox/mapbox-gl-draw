@@ -1,3 +1,7 @@
+## 0.3.5
+
+Lets shift select work again
+
 ## 0.3.4
 
 Fixes a bug where calling `Draw.add` on a `FeatureCollection` resulted in an error.
