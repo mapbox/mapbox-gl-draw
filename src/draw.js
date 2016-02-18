@@ -278,9 +278,22 @@ export default class Draw extends API {
     if (controls.marker) this.markerCtrl.parentNode.removeChild(this.markerCtrl);
   }
 
+  _removeEventListeners() {
+    this._map.off('click', this._events.onClick);
+    this._map.off('dblclick', this._events.onDoubleClick);
+    this._map.off('mousemove', this._events.onMouseMove);
+    this._map.getContainer().removeEventListener('mousedown', this._events.onMouseDown);
+    this._map.getContainer().removeEventListener('mouseup', this._events.onMouseUp);
+    this._map.getContainer().removeEventListener('keydown', this._events.onKeyDown);
+    if (this.options.keybindings) {
+      this._map.getContainer().removeEventListener('keyup', this._events.onKeyUp);
+    }
+  }
+
   remove() {
     this._removeLayers();
     this._removeButtons();
+    this._removeEventListeners();
     super.remove();
   }
 
