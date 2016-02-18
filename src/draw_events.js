@@ -163,7 +163,6 @@ export default function(ctx) {
           });
 
           if(features.length > 0) {
-            console.log('isShiftDown', isShiftDown);
             if(isShiftDown === false) {
               ctx._handleDrawFinished();
             }

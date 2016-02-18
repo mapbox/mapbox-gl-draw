@@ -24,6 +24,11 @@
       margin: 5px;
       cursor: pointer;
     }
+    .toggle {
+      position: absolute;
+      bottom: 20px;
+      right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -33,6 +38,10 @@
   <div id='start-line'>LINE</div>
   <div id='start-polygon'>POLYGON</div>
   <div id='start-square'>SQUARE</div>
+</div>
+<div class='toggle'>
+  <button id='addBtn'>add draw</button>
+  <button id='removeBtn'>remove draw</button>
 </div>
 <script src='../node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
 <script src='../dist/mapbox-gl-draw.js'></script>
@@ -51,9 +60,23 @@
   }));
 
   var Draw = window.Draw = mapboxgl.Draw();
-
   map.addControl(Draw);
+
   map.on('load', function() {
+
+    // toggle
+    var addButton = document.getElementById('addBtn');
+    var removeButton = document.getElementById('removeBtn');
+    addButton.onclick = function() {
+      if (Draw) return;
+      Draw = mapboxgl.Draw();
+      map.addControl(Draw);
+    }
+    removeButton.onclick = function() {
+      if (!Draw) return;
+      Draw.remove();
+      Draw = null;
+    }
 
     var startPoint = document.getElementById('start-point');
     var startLine = document.getElementById('start-line');
