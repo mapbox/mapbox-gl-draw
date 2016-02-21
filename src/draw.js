@@ -248,8 +248,8 @@ export default class Draw extends API {
         Object.assign(style, self.options.styles[style.id] || {});
         batch.addLayer(style);
       }
+      self._store._render();
     });
-    self._store._render();
   }
 
   _removeLayers() {
