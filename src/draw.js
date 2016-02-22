@@ -217,8 +217,7 @@ export default class Draw extends API {
   }
 
   _setStyles() {
-    var self = this;
-    self._map.batch(function (batch) {
+    this._map.batch((batch) => {
       // drawn features style
       batch.addSource('draw', {
         data: {
@@ -230,7 +229,7 @@ export default class Draw extends API {
 
       for (let i = 0; i < drawTheme.length; i++) {
         let style = drawTheme[i];
-        Object.assign(style, self.options.styles[style.id] || {});
+        Object.assign(style, this.options.styles[style.id] || {});
         batch.addLayer(style);
       }
 
@@ -245,10 +244,10 @@ export default class Draw extends API {
 
       for (let i = 0; i < drawSelectedTheme.length; i++) {
         let style = drawSelectedTheme[i];
-        Object.assign(style, self.options.styles[style.id] || {});
+        Object.assign(style, this.options.styles[style.id] || {});
         batch.addLayer(style);
       }
-      self._store._render();
+      this._store._render();
     });
   }
 
