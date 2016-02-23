@@ -217,52 +217,55 @@ export default class Draw extends API {
   }
 
   _setStyles() {
-    // drawn features style
-    this._map.addSource('draw', {
-      data: {
-        type: 'FeatureCollection',
-        features: []
-      },
-      type: 'geojson'
+    this._map.batch((batch) => {
+      // drawn features style
+      batch.addSource('draw', {
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        },
+        type: 'geojson'
+      });
+
+      for (let i = 0; i < drawTheme.length; i++) {
+        let style = drawTheme[i];
+        Object.assign(style, this.options.styles[style.id] || {});
+        batch.addLayer(style);
+      }
+
+      // selected features style
+      batch.addSource('draw-selected', {
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        },
+        type: 'geojson'
+      });
+
+      for (let i = 0; i < drawSelectedTheme.length; i++) {
+        let style = drawSelectedTheme[i];
+        Object.assign(style, this.options.styles[style.id] || {});
+        batch.addLayer(style);
+      }
+      this._store._render();
     });
-
-    for (let i = 0; i < drawTheme.length; i++) {
-      let style = drawTheme[i];
-      Object.assign(style, this.options.styles[style.id] || {});
-      this._map.addLayer(style);
-    }
-
-    // selected features style
-    this._map.addSource('draw-selected', {
-      data: {
-        type: 'FeatureCollection',
-        features: []
-      },
-      type: 'geojson'
-    });
-
-    for (let i = 0; i < drawSelectedTheme.length; i++) {
-      let style = drawSelectedTheme[i];
-      Object.assign(style, this.options.styles[style.id] || {});
-      this._map.addLayer(style);
-    }
-
-    this._store._render();
   }
 
   _removeLayers() {
-    for (let i = 0; i < drawTheme.length; i++) {
-      let { id } = drawTheme[i];
-      this._map.removeLayer(id);
-    }
+    this._map.batch(function (batch) {
+      for (let i = 0; i < drawTheme.length; i++) {
+        let { id } = drawTheme[i];
+        batch.removeLayer(id);
+      }
 
-    for (let i = 0; i < drawSelectedTheme.length; i++) {
-      let { id } = drawSelectedTheme[i];
-      this._map.removeLayer(id);
-    }
+      for (let i = 0; i < drawSelectedTheme.length; i++) {
+        let { id } = drawSelectedTheme[i];
+        batch.removeLayer(id);
+      }
 
-    this._map.removeSource('draw');
-    this._map.removeSource('draw-selected');
+      batch.removeSource('draw');
+      batch.removeSource('draw-selected');
+    });
   }
 
   _removeButtons() {
