@@ -167,5 +167,44 @@ var translatePoint = function(point, dx, dy, map) {
   return [ c.lng, c.lat ];
 };
 
+/**
+ * Create a version of `fn` that only fires once every `time` millseconds.
+ *
+ * @param {Function} fn the function to be throttled
+ * @param {number} time millseconds required between function calls
+ * @param {*} context the value of `this` with which the function is called
+ * @returns {Function} debounced function
+ * @private
+ */
+
+function throttle(fn, time, context) {
+  var lock, args, wrapperFn, later;
+
+  later = function () {
+    // reset lock and call if queued
+    lock = false;
+    if (args) {
+      wrapperFn.apply(context, args);
+      args = false;
+    }
+  };
+
+  wrapperFn = function () {
+    if (lock) {
+      // called too soon, queue to call later
+      args = arguments;
+
+    } else {
+      // call and lock until later
+      fn.apply(context, arguments);
+      setTimeout(later, time);
+      lock = true;
+    }
+  };
+
+  return wrapperFn;
+}
+
+module.exports.throttle = throttle;
 module.exports.DOM = DOM;
 module.exports.translatePoint = translatePoint;

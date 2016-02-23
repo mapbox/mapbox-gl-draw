@@ -2,7 +2,7 @@
 
 import createMidpoints from './lib/create_midpoints';
 import createVertices from './lib/create_vertices';
-import debounce from './lib/debounce';
+import {throttle} from './util';
 
 /**
  * A store for keeping track of versions of drawings
@@ -16,7 +16,7 @@ export default class Store {
     this._map = map;
     this._draw = draw;
     this._features = {};
-    this._render = debounce(this.render, 16, false);
+    this._render = throttle(this.render, 16, this);
   }
 
   /**
