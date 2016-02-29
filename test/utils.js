@@ -1,18 +1,6 @@
-import mapboxgl from 'mapbox-gl';
-
-export const accessToken = 'pk.eyJ1IjoiamZpcmUiLCJhIjoiZTFlNmQ3N2MzYmM2YzVjMzhkOTM2NTRhYzNiNGZiNGYifQ.1W47kmoEUpTJa3YIFefxUQ';
+import mapboxgl from 'mapbox-gl-js-mock';
 
 export function createMap() {
-
-  var div = document.createElement('div');
-  div.setAttribute('id', 'map');
-  document.body.appendChild(div);
-
-  document.body.style.margin = '0';
-  document.body.style.padding = '0';
-  document.body.style.height = '100%';
-  document.getElementsByTagName('html')[0].style.height = '100%';
-  document.getElementById('map').style.height = '100%';
 
   var map = new mapboxgl.Map({
     container: 'map',
@@ -37,7 +25,7 @@ export const features = {
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: [0, 0]
+      coordinates: [10, 10]
     }
   },
 
@@ -58,12 +46,12 @@ export const features = {
   square: {
     type: 'Feature',
     geometry: {
-      type: 'Pol',
+      type: 'Polygon',
       coordinates: [[
         [1, 1],
-        [2, 1],
-        [2, 2],
         [1, 2],
+        [2, 2],
+        [2, 1],
         [1, 1]
       ]]
     }

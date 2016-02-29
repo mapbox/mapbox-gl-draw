@@ -1,7 +1,7 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import Store from '../src/store';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
 import { accessToken, createMap, features } from './utils';
 
@@ -17,64 +17,60 @@ test('Store has correct properties', t => {
 
 var map = createMap();
 
-map.on('load', () => {
+test('Store constructor', t => {
+  var Draw = GLDraw();
+  map.addControl(Draw);
 
-  test('Store constructor', t => {
-    var Draw = GLDraw();
-    map.addControl(Draw);
+  var store = Draw._store;
 
-    var store = Draw._store;
+  var f;
 
-    var f;
-
-    t.test('set', t => {
-      var id = Draw.add(feature);
-      f = Draw.get(id, true);
-      t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
-      t.equals(typeof f.id, 'string', 'the set feature gets a drawId');
-      t.end();
-    });
-
-    t.test('get', t => {
-      var storeFeat = store.get(f.id);
-      t.deepEqual(
-        storeFeat.toGeoJSON().geometry, feature.geometry,
-        'get returns the same geometry you set');
-      t.end();
-    });
-
-    t.test('getAllIds', t => {
-      t.deepEqual(
-        store.getAllIds(), [ f.id ],
-        'getAllIds returns an array of drawIds');
-      t.end();
-    });
-
-    t.test('select', t => {
-      t.deepEqual(
-        store.getSelectedIds(), [],
-        'getSelectedIds is empty');
-      store.select(f.id);
-      t.deepEqual(
-        store.getSelectedIds(), [ f.id ],
-        'getSelectedIds includes selected drawId');
-      t.end();
-    });
-
-    t.test('delete', t => {
-      store.delete(f.id);
-      t.equals(store.getAllIds().length, 0, 'calling delete removes the feature');
-      t.end();
-    });
-
-    t.test('clear', t => {
-      Draw.add(feature);
-      store.deleteAll();
-      t.equals(store.getAllIds().length, 0, '0 features remaining after clearing the store the store');
-      t.end();
-    });
-
+  t.test('set', t => {
+    var id = Draw.add(feature);
+    f = Draw.get(id, true);
+    t.deepEquals(f.geometry, feature.geometry, 'you can set a feature');
+    t.equals(typeof f.id, 'string', 'the set feature gets a drawId');
     t.end();
   });
 
+  t.test('get', t => {
+    var storeFeat = store.get(f.id);
+    t.deepEqual(
+      storeFeat.toGeoJSON().geometry, feature.geometry,
+      'get returns the same geometry you set');
+    t.end();
+  });
+
+  t.test('getAllIds', t => {
+    t.deepEqual(
+      store.getAllIds(), [ f.id ],
+      'getAllIds returns an array of drawIds');
+    t.end();
+  });
+
+  t.test('select', t => {
+    t.deepEqual(
+      store.getSelectedIds(), [],
+      'getSelectedIds is empty');
+    store.select(f.id);
+    t.deepEqual(
+      store.getSelectedIds(), [ f.id ],
+      'getSelectedIds includes selected drawId');
+    t.end();
+  });
+
+  t.test('delete', t => {
+    store.delete(f.id);
+    t.equals(store.getAllIds().length, 0, 'calling delete removes the feature');
+    t.end();
+  });
+
+  t.test('clear', t => {
+    Draw.add(feature);
+    store.deleteAll();
+    t.equals(store.getAllIds().length, 0, '0 features remaining after clearing the store the store');
+    t.end();
+  });
+
+  t.end();
 });
