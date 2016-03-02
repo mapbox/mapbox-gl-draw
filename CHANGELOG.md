@@ -1,3 +1,9 @@
+## 0.3.6
+
+* Performence improvements
+* Supports mapbox-gl@0.15.0
+* Cleans up event listeners on Draw.remove
+
 ## 0.3.5
 
 Lets shift select work again
