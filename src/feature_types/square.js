@@ -38,6 +38,7 @@ export default class Square extends Polygon {
       this.coordinates = [[ p, p, p, p, p ]];
     }
     else {
+      this.onMouseMove(e);
       this.onStopDrawing(e);
     }
   }

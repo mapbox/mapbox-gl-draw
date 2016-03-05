@@ -1,18 +1,14 @@
 import test from 'tape';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap } from './utils';
+import { createMap } from './utils';
 
-mapboxgl.accessToken = accessToken;
+test('Point geometry class', t => {
+  var map = createMap();
+  var Draw = GLDraw();
+  map.addControl(Draw);
 
-var map = createMap();
-
-map.on('load', () => {
-
-  test('Point geometry class', t => {
-    var Draw = GLDraw();
-    map.addControl(Draw);
-
+  map.on('load', function() {
     Draw.startDrawing(Draw.types.POINT);
     map.fire('click', {
       lngLat: {
@@ -21,9 +17,10 @@ map.on('load', () => {
       }
     });
 
-    var feats = Draw._store._features;
-    var ids = Object.keys(feats);
-    t.deepEquals(feats[ids[0]].coordinates, [10, 10]);
+    var feats = Draw.getAll().features;
+    t.equals(1, feats.length, 'only one');
+    t.equals('Point', feats[0].geometry.type, 'of the right type');
+    t.deepEquals([10, 10], feats[0].geometry.coordinates, 'in the right spot');
 
     t.end();
   });

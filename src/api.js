@@ -1,12 +1,11 @@
 'use strict';
 
-import mapboxgl from 'mapbox-gl';
-
 import Line from './feature_types/line';
 import Point from './feature_types/point';
 import Polygon from './feature_types/polygon';
+import Control from './control';
 
-export default class API extends mapboxgl.Control {
+export default class API extends Control {
 
   constructor() {
     super();
@@ -62,6 +61,7 @@ export default class API extends mapboxgl.Control {
     }
 
     internalFeature.ready = true;
+    internalFeature.created = true;
 
     var id = this._store.set(internalFeature);
     this._store._features[id].commited = true;
@@ -121,7 +121,9 @@ export default class API extends mapboxgl.Control {
    * @returns {Draw} this
    */
   select(id) {
-    this._store.select(id);
+    if (this._store.get(id).options.permanent !== true) {
+      this._store.select(id);
+    }
     return this;
   }
 
@@ -132,6 +134,7 @@ export default class API extends mapboxgl.Control {
    */
   selectAll() {
     this._store.getAllIds()
+      .filter(id => this._store.get(id).options.permanent !== true)
       .forEach(id => this.select(id));
     return this;
   }

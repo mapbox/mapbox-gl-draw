@@ -12,8 +12,7 @@
     ]
   },
   "scripts": {
-    "test": "npm run lint && npm run prepublish",
-    "test-unit": "browserify test/*.test.js | tap-closer | smokestack | tap-status",
+    "test": "npm run lint && tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "budo index.js --serve=dist/mapbox-gl-draw.js --live -d | bistre"
@@ -33,16 +32,13 @@
   },
   "devDependencies": {
     "babel-eslint": "4.1.7",
-    "babelify": "^7.2.0",
+    "babel-register": "^6.5.2",
     "bistre": "^1.0.1",
-    "browserify": "^9.0.3",
     "budo": "^4.0.0",
     "eslint": "^0.21.2",
     "geojson-validation": "^0.1.6",
-    "mapbox-gl": "^0.14.0",
-    "smokestack": "^3.3.0",
-    "tap-closer": "^1.0.0",
-    "tap-status": "^1.0.1",
+    "mapbox-gl-js-mock": "^0.15.0",
+    "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23"
   },
@@ -51,7 +47,9 @@
   },
   "dependencies": {
     "babel-preset-es2015": "^6.3.13",
+    "browserify": "^13.0.0",
     "hat": "0.0.3",
+    "point-geometry": "0.0.0",
     "ramda": "^0.17.1"
   }
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-var mapboxgl = require('mapbox-gl');
+var Point = require('point-geometry');
 
 var DOM = {};
 
@@ -13,7 +13,7 @@ var DOM = {};
  */
 DOM.mousePos = function(e, el) {
   var rect = el.getBoundingClientRect();
-  return new mapboxgl.Point(
+  return new Point(
     e.clientX - rect.left - el.clientLeft,
     e.clientY - rect.top - el.clientTop
   );
