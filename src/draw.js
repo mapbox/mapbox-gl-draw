@@ -22,12 +22,19 @@ import Polygon from './feature_types/polygon';
 import DrawEvents from './draw_events';
 
 // default control options for Draw constructor
-const defaultControls = {
+const showControls = {
   marker: true,
   line: true,
   shape: true,
   square: true,
   trash: true
+};
+const hideControls = {
+  marker: false,
+  line: false,
+  shape: false,
+  square: false,
+  trash: false
 };
 
 /**
@@ -49,15 +56,22 @@ export default class Draw extends API {
 
   constructor(options = {controls: {}}) {
     super();
-    options.controls = Object.assign(defaultControls, options.controls);
+
     this.options = {
       drawing: true,
       interactive: false,
       position: 'top-left',
       keybindings: true,
+      displayControlsDefault: true,
       styles: {},
       controls: {}
     };
+
+    if (options.displayControlsDefault === false) {
+      options.controls = Object.assign(hideControls, options.controls);
+    } else {
+      options.controls = Object.assign(showControls, options.controls);
+    }
 
     this._events = DrawEvents(this);
 
