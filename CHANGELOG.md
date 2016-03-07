@@ -1,6 +1,8 @@
 ## 0.4.0 (next)
 
 * Namesapce css. If you are not using the provided CSS, update your own css to match the new naming schemes.
+* displayControlsDefault lets a change the default option for displaying controls from true to false
+* needs docs update before release
 
 ## 0.3.6
 
