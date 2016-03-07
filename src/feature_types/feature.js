@@ -52,7 +52,7 @@ export default class Geometry {
   }
 
   startDrawing() {
-    this._map.getContainer().classList.add('mapboxgl-draw-activated');
+    this._map.getContainer().classList.add('mapbox-gl-draw_activated');
     if(this._map.options.doubleClickZoom) {
       this._map.doubleClickZoom.disable();
     }
@@ -69,7 +69,7 @@ export default class Geometry {
       this._map.doubleClickZoom.disable();
       this._map.doubleClickZoom.enable();
     }
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+    this._map.getContainer().classList.remove('mapbox-gl-draw_activated');
   }
 
   /**

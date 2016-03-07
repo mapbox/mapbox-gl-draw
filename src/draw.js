@@ -106,12 +106,12 @@ export default class Draw extends API {
   }
 
   _createButtons() {
-    var controlClass = this._controlClass = 'mapboxgl-ctrl-draw-btn';
+    var controlClass = this._controlClass = 'mapbox-gl-draw_ctrl-draw-btn';
     var controls = this.options.controls;
 
     if (controls.line) {
       this.lineStringCtrl = createButton(this._container, {
-        className: controlClass + ' line',
+        className: `${controlClass} mapbox-gl-draw_line`,
         title: `LineString tool ${this.options.keybindings && '(l)'}`,
         fn: this.startDrawing.bind(this, this.types.LINE),
         id: 'lineDrawBtn'
@@ -120,7 +120,7 @@ export default class Draw extends API {
 
     if (controls.shape) {
       this.polygonCtrl = createButton(this._container, {
-        className: `${controlClass} shape`,
+        className: `${controlClass} mapbox-gl-draw_shape`,
         title: `Polygon tool ${this.options.keybindings && '(p)'}`,
         fn: this.startDrawing.bind(this, this.types.POLYGON),
         id: 'polygonDrawBtn'
@@ -129,7 +129,7 @@ export default class Draw extends API {
 
     if (controls.square) {
       this.squareCtrl = createButton(this._container, {
-        className: `${controlClass} square`,
+        className: `${controlClass} mapbox-gl-draw_square`,
         title: `Square tool ${this.options.keybindings && '(s)'}`,
         fn: this.startDrawing.bind(this, this.types.SQUARE),
         id: 'squareDrawBtn'
@@ -138,7 +138,7 @@ export default class Draw extends API {
 
     if (controls.marker) {
       this.markerCtrl = createButton(this._container, {
-        className: `${controlClass} marker`,
+        className: `${controlClass} mapbox-gl-draw_marker`,
         title: `Marker tool ${this.options.keybindings && '(m)'}`,
         fn: this.startDrawing.bind(this, this.types.POINT),
         id: 'pointDrawBtn'
@@ -147,7 +147,7 @@ export default class Draw extends API {
 
     if (controls.trash) {
       this.deleteBtn = createButton(this._container, {
-        className: 'mapboxgl-ctrl-draw-btn trash',
+        className: `${controlClass} mapbox-gl-draw_trash`,
         title: 'delete',
         fn: this._destroy.bind(this),
         id: 'deleteBtn'

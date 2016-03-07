@@ -25,10 +25,9 @@ export default class Point extends Feature {
   }
 
   onClick(e) {
-    this._map.getContainer().classList.remove('mapboxgl-draw-activated');
+    this._map.getContainer().classList.remove('mapbox-gl-draw_activated');
     this.coordinates = [ e.lngLat.lng, e.lngLat.lat ];
     this.created = true;
     this.ready = true;
   }
-
 }
