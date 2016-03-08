@@ -18,8 +18,7 @@ Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/
 <link href="mapbox-gl-draw.css" rel="stylesheet" />
 ```
 
-### Usage
-Either adjust this `open http://localhost:9966/debug/?access_token=<token>#13/37.76/-122.42` or use something like:
+### Usage in your application
 
 ```js
 mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
@@ -38,14 +37,14 @@ map.addControl(Draw)
 
 ### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for complete reference.
 
-### Developing
+### Developing and testing
 
 Install dependencies, build the source files and crank up a server via:
 
 ```
 git clone git@github.com:mapbox/mapbox-gl-draw.git
 npm install
-npm start & open http://localhost:9966/debug
+npm start & open http://localhost:9966/debug/?access_token=<token>
 ```
 
 ### Testing
