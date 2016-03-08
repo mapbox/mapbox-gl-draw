@@ -19,6 +19,7 @@ Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/
 ```
 
 ### Usage
+Either adjust this `open http://localhost:9966/debug/?access_token=<token>#13/37.76/-122.42` or use something like:
 
 ```js
 mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';

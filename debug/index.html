@@ -46,12 +46,27 @@
 <script src='../node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
 <script src='../dist/mapbox-gl-draw.js'></script>
 <script type='text/javascript'>
-  mapboxgl.accessToken = localStorage.accessToken;
+	// making run more like github.com/mapbox/mapbox-gl-js
+	//eg http://127.0.0.1:9966/debug/?access_token=<the-token>##13/37.76/-122.42
+	var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
+	mapboxgl.accessToken = args.access_token;
+	// could work this further but going off the above example
+	location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
+		switch(i){
+		case 0: args.zoom = val; break;
+		case 1: args.latitude = val; break;
+		case 2:
+			args.longitude = val;
+			if(args.latitude) args.latlng = [val, args.latitude];
+		break;
+		};
+		return args;
+	}, args);
 
   var map = new mapboxgl.Map({
     container: 'map',
-    zoom: 1,
-    center: [0, 0],
+    zoom: args.zoom || 1,
+    center: args.latlng || [0, 0],
     style: 'mapbox://styles/mapbox/streets-v8'
   });
 
