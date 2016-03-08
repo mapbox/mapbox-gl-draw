@@ -47,7 +47,7 @@
 <script src='../dist/mapbox-gl-draw.js'></script>
 <script type='text/javascript'>
 	// making run more like github.com/mapbox/mapbox-gl-js
-	//eg http://127.0.0.1:9966/debug/?access_token=<the-token>##13/37.76/-122.42
+	//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
 	var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
 	mapboxgl.accessToken = args.access_token;
 	// could work this further but going off the above example
