@@ -1,4 +1,16 @@
-const types = require('./types');
+var hat = require('hat');
+
+var featureTypes = {
+  "Polygon": require('./feature_types/polygon'),
+  "LineString": require('./feature_types/line_string'),
+  "Point": require('./feature_types/point')
+}
+
+var typeMap = {
+  'point': 'Point',
+  'line': 'LineString',
+  'polygon': 'Polygon'
+}
 
 var API = module.exports = function(ctx) {
   this.ctx = ctx;
@@ -19,7 +31,29 @@ var API = module.exports = function(ctx) {
   //   return this;
   // }
 API.prototype.add = function (geojson, opts) {
-  this.ctx.store.add(geojson, opts);
+  var geojson = JSON.parse(JSON.stringify(geojson));
+  if (geojson.type === 'FeatureCollection') {
+    return geojson.features.map(feature => this.add(feature, options));
+  }
+
+  if (!geojson.geometry) {
+    geojson = {
+      type: 'Feature',
+      id: geojson.id,
+      properties: geojson.properties || {},
+      geometry: geojson
+    };
+  }
+
+  geojson.id = geojson.id || hat();
+  var model = featureTypes[geojson.geometry.type];
+
+  if(model === undefined) {
+    throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+  }
+
+  var feature = new model(this.ctx, geojson);
+  return this.ctx.store.add(feature);
 }
 
 API.prototype.get = function (id) {
@@ -30,13 +64,19 @@ API.prototype.get = function (id) {
 }
 
 API.prototype.getAll = function() {
-  return this.ctx.store.getAll().map(feature => feature.toGeoJSON());
+  return {
+    type: 'FeatureCollection',
+    features: this.ctx.store.getAll().map(feature => feature.toGeoJSON())
+  }
 }
 
 API.prototype.getSelected = function() {
-  return this.ctx.store.getAll()
+  return {
+    type: 'FeatureCollection',
+    features: this.ctx.store.getAll()
     .filter(feature => feature.isSelected())
-    .map(feature => feature.toGeoJSON());
+    .map(feature => feature.toGeoJSON())
+  }
 }
 
 API.prototype.select = function (id) {
@@ -64,7 +104,7 @@ API.prototype.unselectAll = function () {
 API.prototype.update = function(id, geojson) {
   var feature = this.ctx.store.get(id);
   if (feature) {
-    feature.update(geojson);
+    feature.update(JSON.parse(JSON.stringify(geojson)));
   }
 }
 
@@ -76,30 +116,12 @@ API.prototype.deleteAll = function() {
   this.ctx.store.getAll().forEach(feature => this.ctx.store.delete(feature.id));
 }
 
-API.prototype.startDrawing = function () {
-  this.ctx.events.reset();
+API.prototype.startDrawing = function (type) {
+  var model = featureTypes[typeMap[type]];
 
-  // this._handleDrawFinished();
-  // var obj = null;
-  // switch (type) {
-  //   case this.types.POLYGON:
-  //     obj = new Polygon({map: this._map});
-  //     break;
-  //   case this.types.LINE:
-  //     obj = new Line({ map: this._map });
-  //     break;
-  //   case this.types.SQUARE:
-  //     obj = new Square({ map: this._map });
-  //     break;
-  //   case this.types.POINT:
-  //     obj = new Point({ map: this._map });
-  //     break;
-  //   default:
-  //     return;
-  // }
+  if(model === undefined) {
+    throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+  }
 
-  // obj.startDrawing();
-  // this._events.setNewFeature(obj);
-  // var id = this._store.set(obj);
-  // this.select(id)
+  model.startDrawing(this.ctx);
 }

@@ -10,7 +10,7 @@
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
     .start-draw {
-      width: 330px;
+      width: 237px;
       position: absolute;
       left :10px;
       bottom: 10px;
@@ -37,7 +37,6 @@
   <div id='start-point'>POINT</div>
   <div id='start-line'>LINE</div>
   <div id='start-polygon'>POLYGON</div>
-  <div id='start-square'>SQUARE</div>
 </div>
 <div class='toggle'>
   <button id='addBtn'>add draw</button>
@@ -46,22 +45,22 @@
 <script src='../node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
 <script src='../dist/mapbox-gl-draw.js'></script>
 <script type='text/javascript'>
-	// making run more like github.com/mapbox/mapbox-gl-js
-	//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
-	var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
-	mapboxgl.accessToken = args.access_token || localStorage.accessToken;
-	// could work this further but going off the above example
-	location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
-		switch(i){
-		case 0: args.zoom = val; break;
-		case 1: args.latitude = val; break;
-		case 2:
-			args.longitude = val;
-			if(args.latitude) args.latlng = [val, args.latitude];
-		break;
-		};
-		return args;
-	}, args);
+// making run more like github.com/mapbox/mapbox-gl-js
+//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
+var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
+mapboxgl.accessToken = args.access_token || localStorage.accessToken;
+// could work this further but going off the above example
+location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
+  switch(i){
+  case 0: args.zoom = val; break;
+  case 1: args.latitude = val; break;
+  case 2:
+    args.longitude = val;
+    if(args.latitude) args.latlng = [val, args.latitude];
+  break;
+  };
+  return args;
+}, args);
 
   var map = new mapboxgl.Map({
     container: 'map',
@@ -96,7 +95,7 @@
     var startPoint = document.getElementById('start-point');
     var startLine = document.getElementById('start-line');
     var startPolygon = document.getElementById('start-polygon');
-    var startSquare = document.getElementById('start-square');
+
 
     startPoint.onclick = function() {
       Draw.startDrawing(Draw.types.POINT);
@@ -108,10 +107,6 @@
 
     startPolygon.onclick = function() {
       Draw.startDrawing(Draw.types.POLYGON);
-    };
-
-    startSquare.onclick = function() {
-      Draw.startDrawing(Draw.types.SQUARE);
     };
 
 
@@ -135,11 +130,12 @@
 
     var secondId = Draw.add({ type: 'Point', coordinates: [0, 0] }, {permanent: true});
     var all = Draw.getAll();
+    console.log(all);
     console.log('Get All', all.features.length, '->', 2);
     console.log('Get All has ids', all.features.filter(function(feature){
       return feature.id === firstId || feature.id === secondId;
     }).length === 2);
-    Draw.destroy(secondId);
+    Draw.delete(secondId);
     console.log('Destroy', Draw.get(secondId), '-> undefined');
 
     var currentId = 'this-is-a-test';
@@ -148,7 +144,7 @@
     var getWithCurrent = Draw.get(currentId);
     console.log('and can get features', getWithCurrent.id, '->', thridId);
 
-    Draw.clear();
+    Draw.deleteAll();
     console.log(Draw.get(firstId), '-> undefined');
   });
 

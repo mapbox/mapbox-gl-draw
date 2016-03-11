@@ -1,6 +1,7 @@
 var events = require('./events');
-var store = require('./store');
+var Store = require('./store');
 var ui = require('./ui');
+var DOM = require('./util').DOM;
 
 var drawSelectedTheme =  require('./theme/draw-selected');
 var drawTheme =  require('./theme/draw');
@@ -8,39 +9,29 @@ var drawTheme =  require('./theme/draw');
 module.exports = function(ctx) {
 
   ctx.events = events(ctx);
+
   ctx.map = null;
   ctx.container = null;
   ctx.store = null;
-  ctx.ui = ui(ctx);
+  ui(ctx);
 
   var buttons = {};
 
   var setup = {
     addTo: function(map) {
         ctx.map = map;
-        ctx.container = setup.onAdd(map);
-        if (this.options && this.options.position) {
-            var pos = this.options.position;
-            var corner = map._controlCorners[pos];
-            container.className += ' mapboxgl-ctrl';
-            if (pos.indexOf('bottom') !== -1) {
-                corner.insertBefore(container, corner.firstChild);
-            } else {
-                corner.appendChild(container);
-            }
-        }
+        setup.onAdd(map);
         return this;
     },
     remove: function() {
-        ctx.container.parentNode.removeChild(ctx.container);
-        if (this.onRemove) this.onRemove(ctx.map);
-        ctx.map = null;
-        ctx.container = null;
-        ctx.store = null;
-        return this;
+      setup.onRemove();
+      ctx.map = null;
+      ctx.container = null;
+      ctx.store = null;
+      return this;
     },
     onAdd: function(map) {
-      var container = DOM.create('div', 'mapboxgl-ctrl-group', map.getContainer());
+      ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
 
       if (ctx.options.drawing) {
@@ -48,23 +39,22 @@ module.exports = function(ctx) {
       }
 
       if (map.style.loaded()) { // not public
-        setup.addEventListeners();
+        ctx.events.addEventListeners();
         setup.addLayers();
       } else {
         map.on('load', () => {
-          setup.addEventListeners();
+          ctx.events.addEventListeners();
           setup.addLayers();
         });
       }
-
-      return container;
     },
-    remove: function() {
+    onRemove: function() {
       setup.removeLayers();
       ctx.ui.removeButtons();
-      setup.removeEventListeners();
+      ctx.events.removeEventListeners();
     },
     addLayers: function() {
+      console.log('addLayers', drawTheme.length);
       ctx.map.batch((batch) => {
         // drawn features style
         batch.addSource('draw', {
@@ -77,7 +67,7 @@ module.exports = function(ctx) {
 
         for (let i = 0; i < drawTheme.length; i++) {
           let style = drawTheme[i];
-          Object.assign(style, this.options.styles[style.id] || {});
+          Object.assign(style, ctx.options.styles[style.id] || {});
           batch.addLayer(style);
         }
 
@@ -92,7 +82,7 @@ module.exports = function(ctx) {
 
         for (let i = 0; i < drawSelectedTheme.length; i++) {
           let style = drawSelectedTheme[i];
-          Object.assign(style, this.options.styles[style.id] || {});
+          Object.assign(style, ctx.options.styles[style.id] || {});
           batch.addLayer(style);
         }
         ctx.store.render();

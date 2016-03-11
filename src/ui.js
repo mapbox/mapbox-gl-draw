@@ -1,59 +1,70 @@
-const types = require('./types');
+const types = require('./lib/types');
+var {createButton, DOM} = require('./lib/util');
 
 module.exports = function(ctx) {
 
   var buttons = {};
 
-  var api = {
+  var lastClass = undefined;
+
+  ctx.ui = {
+    setClass: function(nextClass) {
+      if(lastClass !== undefined) {
+        ctx.container.classList.remove(lastClass);
+      }
+
+      if(nextClass !== undefined) {
+        ctx.container.classList.add(nextClass);
+      }
+
+      lastClass = nextClass;
+    },
+    clearClass: function() {
+      ctx.ui.setClass();
+    },
     addButtons: function() {
       var controlClass = 'mapbox-gl-draw_ctrl-draw-btn';
       var controls = ctx.options.controls;
+      var ctrlPos = 'mapboxgl-ctrl-top-left';
+
+      let controlContainer = ctx.container.getElementsByClassName(ctrlPos)[0].getElementsByClassName('mapboxgl-ctrl-group')[0];
 
       if (controls.line) {
-        buttons[types.LINE] = createButton(ctx.container, {
+        buttons[types.LINE] = createButton(controlContainer, {
           className: `${controlClass} mapbox-gl-draw_line`,
           title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-          fn: ctx.api.startDrawing.bind(this, types.LINE),
-          id: 'lineDrawBtn'
+          fn: () => ctx.api.startDrawing(types.LINE)
         }, controlClass);
       }
 
       if (controls[types.POLYGON]) {
-        buttons[types.POLYGON] = createButton(ctx.container, {
-          className: `${controlClass} mapbox-gl-draw_shape`,
+        buttons[types.POLYGON] = createButton(controlContainer, {
+          className: `${controlClass} mapbox-gl-draw_polygon`,
           title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
-          fn: ctx.api.startDrawing.bind(this, types.POLYGON),
-          id: 'polygonDrawBtn'
-        }, controlClass);
-      }
-
-      if (controls[types.SQUARE]) {
-        buttons[types.SQUARE] = createButton(ctx.container, {
-          className: `${controlClass} mapbox-gl-draw_square`,
-          title: `Square tool ${ctx.options.keybindings && '(s)'}`,
-          fn: ctx.api.startDrawing.bind(this, types.SQUARE),
-          id: 'squareDrawBtn'
+          fn: () => ctx.api.startDrawing(types.POLYGON)
         }, controlClass);
       }
 
       if (controls[types.POINT]) {
-        buttons[types.POINT] = createButton(ctx.container, {
-          className: `${controlClass} mapbox-gl-draw_marker`,
+        buttons[types.POINT] = createButton(controlContainer, {
+          className: `${controlClass} mapbox-gl-draw_point`,
           title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
-          fn: ctx.api.startDrawing.bind(this, types.POINT),
-          id: 'pointDrawBtn'
+          fn: () => ctx.api.startDrawing(types.POINT)
         }, controlClass);
       }
 
       if (controls.trash) {
-        buttons.trash = createButton(ctx.container, {
+        buttons.trash = createButton(controlContainer, {
           className: `${controlClass} mapbox-gl-draw_trash`,
           title: 'delete',
-          fn: ctx.api.destroy.bind(this),
-          id: 'deleteBtn'
+          fn: function() {
+            ctx.store.getAll()
+              .filter(feature => feature.isSelected())
+              .forEach(feature => ctx.store.delete(feature.id));
+          },
         }, controlClass);
 
-        setup.hideButton('trash');
+        ctx.ui.hideButton('trash');
       }
     },
     hideButton: function(id) {
@@ -91,6 +102,4 @@ module.exports = function(ctx) {
       });
     }
   }
-
-  return api;
 }

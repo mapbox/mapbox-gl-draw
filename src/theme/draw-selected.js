@@ -1,4 +1,4 @@
-export default [
+module.exports = [
   {
     'id': 'gl-draw-selected-line',
     'type': 'line',

@@ -9,18 +9,16 @@ const defaultOptions = {
 }
 
 const showControls = {
-  marker: true,
+  point: true,
   line: true,
-  shape: true,
-  square: true,
+  polygon: true,
   trash: true
 };
 
 const hideControls = {
-  marker: false,
+  point: false,
   line: false,
-  shape: false,
-  square: false,
+  polygon: false,
   trash: false
 };
 
@@ -32,7 +30,5 @@ module.exports = function(options = {controls: {}}) {
     options.controls = Object.assign(showControls, options.controls);
   }
 
-  Object.assign(defaultOptions, options);
-
-  return options;
+  return Object.assign(defaultOptions, options);
 }

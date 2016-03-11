@@ -1,4 +1,4 @@
-export default [
+module.exports = [
   {
     'id': 'gl-draw-polygon',
     'type': 'fill',
