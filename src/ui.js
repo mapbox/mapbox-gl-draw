@@ -58,9 +58,7 @@ module.exports = function(ctx) {
           className: `${controlClass} mapbox-gl-draw_trash`,
           title: 'delete',
           fn: function() {
-            ctx.store.getAll()
-              .filter(feature => feature.isSelected())
-              .forEach(feature => ctx.store.delete(feature.id));
+            ctx.api.deleteSelected();
           },
         }, controlClass);
 

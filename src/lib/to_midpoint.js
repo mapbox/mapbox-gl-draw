@@ -1,4 +1,4 @@
-module.exports = function(startVertex, endVertex, map) {
+module.exports = function(parent, startVertex, endVertex, map) {
   var startCoord = startVertex.geometry.coordinates;
   var endCoord = endVertex.geometry.coordinates;
 
@@ -10,10 +10,10 @@ module.exports = function(startVertex, endVertex, map) {
     type: 'Feature',
     properties: {
       meta: 'midpoint',
+      parent: parent,
       lng: mid.lng,
       lat: mid.lat,
-      start: startVertex.properties.path,
-      end: endVertex.properties.path
+      path: endVertex.properties.path
     },
     geometry: {
       type: 'Point',

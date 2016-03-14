@@ -1,7 +1,7 @@
 var events = require('./events');
 var Store = require('./store');
 var ui = require('./ui');
-var DOM = require('./util').DOM;
+var DOM = require('./lib/util').DOM;
 
 var drawSelectedTheme =  require('./theme/draw-selected');
 var drawTheme =  require('./theme/draw');

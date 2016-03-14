@@ -1,95 +1,117 @@
 var ModeHandler = require('./modes/mode_handler');
-var browse = require('./modes/browse');
-var findTaragetAt = require('./lib/find_target_at');
+console.log('events require manySelect', typeof manySelect);
+var findTargetAt = require('./lib/find_target_at');
+
+var modes = {
+  'many_select': require('./modes/many_features/select'),
+  'many_drag': require('./modes/many_features/drag'),
+  'draw_line_string': require('./modes/draw_feature/line_string'),
+  'draw_point': require('./modes/draw_feature/point'),
+  'draw_polygon': require('./modes/draw_feature/polygon'),
+  'one_select': require('./modes/one_feature/select'),
+  'one_drag': require('./modes/one_feature/drag')
+}
 
 module.exports = function(ctx) {
 
   var isDown = false;
 
   var events = {};
-  var currentMode = ModeHandler(browse(ctx));
+  var currentMode = ModeHandler(modes['many_select'](ctx));
 
-  events.onDrag = function(event) {
-    currentMode.onDrag(event);
+  events.drag = function(event) {
+    currentMode.drag(event);
   };
 
-  events.onClick = function(event) {
-    findTaragetAt(event, ctx, function(target) {
-      event.target = target;
-      currentMode.onClick(event);
+  events.click = function(event) {
+    findTargetAt(event, ctx, function(target) {
+      event.featureTarget = target;
+      currentMode.click(event);
     });
   };
 
-  events.onDoubleClick = function(event) {
-    findTaragetAt(event, ctx, function(target) {
-      event.target = target;
-      currentMode.onDoubleClick(event);
+  events.doubleclick = function(event) {
+    findTargetAt(event, ctx, function(target) {
+      event.featureTarget = target;
+      currentMode.doubleclick(event);
     });
   };
 
-  events.onMouseMove  = function(event) {
+  events.mousemove  = function(event) {
     if (isDown) {
-      events.onDrag(event);
+      events.drag(event);
     }
     else {
-      findTaragetAt(event, ctx, function(target) {
-        event.target = target;
-        currentMode.onMouseMove(event);
+      findTargetAt(event, ctx, function(target) {
+        event.featureTarget = target;
+        currentMode.mousemove(event);
       });
     }
   };
 
-  events.onMouseDown  = function(event) {
+  events.mousedown  = function(event) {
     isDown = true;
-    findTaragetAt(event, ctx, function(target) {
-      event.target = target;
-      currentMode.onMouseDown(event);
+    findTargetAt(event, ctx, function(target) {
+      event.featureTarget = target;
+      currentMode.mousedown(event);
     });
   };
 
-  events.onMouseUp  = function(event) {
+  events.mouseup  = function(event) {
     isDown = false;
-    findTaragetAt(event, ctx, function(target) {
-      event.target = target;
-      currentMode.onMouseUp(event);
+    findTargetAt(event, ctx, function(target) {
+      event.featureTarget = target;
+      currentMode.mouseup(event);
     });
   };
 
-  events.onKeyDown  = function(event) {
-    currentMode.onKeyDown(event);
+  events.delete = function(event) {
+    currentMode.delete(event);
+  }
+
+  events.keydown  = function(event) {
+    currentMode.keydown(event);
   };
 
-  events.onKeyUp  = function(event) {
-    currentMode.onKeyUp(event);
+  events.keyup  = function(event) {
+    currentMode.keyup(event);
   }
 
   var api = {
-    startMode: function(mode) {
+    startMode: function(modename, opts) {
       currentMode.stop();
+      var modebuilder = modes[modename];
+      if (modebuilder === undefined) {
+        throw new Error(`${modename} is not valid`);
+      }
+      var mode = modebuilder(ctx, opts);
       currentMode = ModeHandler(mode);
+      ctx.store.render();
     },
-    stopMode: function() {
-      api.startMode(browse(ctx));
+    fire: function(name, event) {
+      if (events[name]) {
+        events[name](event);
+      }
     },
     addEventListeners: function() {
-      ctx.map.on('click', events.onClick);
-      ctx.map.on('dblclick', events.onDoubleClick);
-      ctx.map.on('mousemove', events.onMouseMove);
+      ctx.map.on('click', events.click);
+      ctx.map.on('dblclick', events.doubleclick);
+      ctx.map.on('mousemove', events.mousemove);
 
-      ctx.container.addEventListener('mousedown', events.onMouseDown);
-      ctx.container.addEventListener('mouseup', events.onMouseUp);
+      ctx.map.on('mousedown', events.mousedown);
+      ctx.map.on('mouseup', events.mouseup);
 
-      ctx.container.addEventListener('keydown', events.onKeyDown);
-      ctx.container.addEventListener('keyup', events.onKeyUp);
+      ctx.container.addEventListener('keydown', events.keydown);
+      ctx.container.addEventListener('keyup', events.keyup);
     },
     removeEventListeners: function() {
-      ctx.map.off('click', events.onClick);
-      ctx.map.off('dblclick', events.onDoubleClick);
-      ctx.map.off('mousemove', events.onMouseMove);
-      ctx.container.removeEventListener('mousedown', events.onMouseDown);
-      ctx.container.removeEventListener('mouseup', events.onMouseUp);
-      ctx.container.removeEventListener('keydown', events.onKeyDown);
-      ctx.container.removeEventListener('keyup', events.onKeyUp);
+      ctx.map.off('click', events.click);
+      ctx.map.off('dblclick', events.doubleclick);
+      ctx.map.off('mousemove', events.mousemove);
+      ctx.container.removeEventListener('mousedown', events.mousedown);
+      ctx.container.removeEventListener('mouseup', events.mouseup);
+      ctx.container.removeEventListener('keydown', events.keydown);
+      ctx.container.removeEventListener('keyup', events.keyup);
     }
   }
 

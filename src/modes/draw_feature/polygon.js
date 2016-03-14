@@ -1,19 +1,21 @@
-var selectAll = function() {
-  return true;
-}
+var {isEnterKey, isEscapeKey} = require('../common_selectors');
+var Polygon = require('../../feature_types/polygon');
 
-var isEscapeKey = function(e) {
-  return e.keyCode === 27;
-}
+module.exports = function(ctx) {
 
-var isEnterKey = function(e) {
-  return e.keyCode === 13;
-}
+  var geojson = {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[0,0], [0, 0],[0, 0]]]
+    }
+  }
 
-module.exports = function(ctx, feature) {
+  var feature = new Polygon(ctx, geojson);
 
   var stopDrawingAndRemove = function() {
-    ctx.events.stopMode();
+    ctx.events.startMode('many_select');
     ctx.store.delete(feature.id);
   }
 
@@ -36,21 +38,23 @@ module.exports = function(ctx, feature) {
   }
 
   var onFinish = function(e) {
-    if(pos < 3) {
+    feature.removeCoordinate(`0.${pos}`);
+    pos--;
+    if(pos < 2) {
       stopDrawingAndRemove();
     }
     else {
-      ctx.events.stopMode();
+      ctx.events.startMode('many_select');
     }
   }
 
   return {
     start: function() {
       ctx.ui.setClass('mapbox-gl-draw_mouse-add');
-      this.on('onMouseMove', selectAll, onMouseMove);
-      this.on('onClick', selectAll, onClick);
-      this.on('onKeyUp', isEscapeKey, stopDrawingAndRemove);
-      this.on('onKeyUp', isEnterKey, onFinish);
+      this.on('mousemove', () => true, onMouseMove);
+      this.on('click', () => true, onClick);
+      this.on('keyup', isEscapeKey, stopDrawingAndRemove);
+      this.on('keyup', isEnterKey, onFinish);
     },
     stop: function() {
       ctx.ui.clearClass();

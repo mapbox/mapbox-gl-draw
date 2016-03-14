@@ -4,7 +4,7 @@ require('./src/lib/polyfills');
 var Setup = require('./src/setup');
 var Options = require('./src/options');
 var API = require('./src/api');
-const types = require('./src/types');
+const types = require('./src/lib/types');
 
 var Draw = function(options) {
   options = Options(options);
@@ -13,7 +13,7 @@ var Draw = function(options) {
     options: options
   };
 
-  var api = new API(ctx);
+  var api = API(ctx);
   ctx.api = api;
 
   var setup = Setup(ctx);

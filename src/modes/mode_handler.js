@@ -1,15 +1,15 @@
-var ModeHandler = function(mode) {
+var ModeHandler = function(mode, onStop) {
 
   var handlers = {
-    onDrag: [],
-    onClick: [],
-    onDoubleClick: [],
-    onMouseMove: [],
-    onMouseDown: [],
-    onMouseUp: [],
-    onKeyDown: [],
-    onKeyUp: [],
-    reset: []
+    drag: [],
+    click: [],
+    doubleclick: [],
+    mousemove: [],
+    mousedown: [],
+    mouseup: [],
+    keydown: [],
+    keyup: [],
+    delete: []
   };
 
   var lastClass = '';
@@ -44,29 +44,32 @@ var ModeHandler = function(mode) {
 
   return {
     stop: mode.stop || function() {},
-    onDrag: function(event) {
-      delegate('onDrag', event);
+    drag: function(event) {
+      delegate('drag', event);
     },
-    onClick: function(event) {
-      delegate('onClick', event);
+    click: function(event) {
+      delegate('click', event);
     },
-    onDoubleClick: function(event) {
-      delegate('onDoubleClick', event);
+    doubleclick: function(event) {
+      delegate('doubleclick', event);
     },
-    onMouseMove: function(event) {
-      delegate('onMouseMove', event);
+    mousemove: function(event) {
+      delegate('mousemove', event);
     },
-    onMouseDown: function(event) {
-      delegate('onMouseDown', event);
+    mousedown: function(event) {
+      delegate('mousedown', event);
     },
-    onMouseUp: function(event) {
-      delegate('onMouseUp', event);
+    mouseup: function(event) {
+      delegate('mouseup', event);
     },
-    onKeyDown: function(event) {
-      delegate('onKeyDown', event);
+    keydown: function(event) {
+      delegate('keydown', event);
     },
-    onKeyUp: function(event) {
-      delegate('onKeyUp', event);
+    keyup: function(event) {
+      delegate('keyup', event);
+    },
+    delete: function(event) {
+      delegate('delete', event);
     }
   }
 }

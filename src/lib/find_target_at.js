@@ -2,9 +2,9 @@
 var metas = ['feature', 'midpoint', 'vertex'];
 
 var priorities = {
-  'feature': 0,
-  'midpoint': 1,
-  'vertex': 1
+  'feature': 2,
+  'midpoint': 0,
+  'vertex': 0
 }
 
 var dist = function(a, b) {
@@ -29,7 +29,7 @@ module.exports = function(event, ctx, cb) {
     else {
       var aDist = dist(event.lngLat, a.properties);
       var bDist = dist(event.lngLat, b.properties);
-      return aDist - bDist;
+      return bDist - aDist;
     }
   }
 

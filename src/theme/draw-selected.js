@@ -40,13 +40,30 @@ module.exports = [
     },
     'interactive': true
   }, {
+    'id': 'gl-draw-selected-point-selected',
+    'type': 'circle',
+    'source': 'draw-selected',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['!=', 'meta', 'midpoint'],
+      ['==', 'selected', 'true']],
+    'paint': {
+      'circle-radius': 7,
+      'circle-color': '#ff0000'
+    },
+    'interactive': true
+  }, {
     'id': 'gl-draw-selected-point',
     'type': 'circle',
     'source': 'draw-selected',
     'filter': ['all',
       ['==', '$type', 'Point'],
-      ['!=', 'meta', 'midpoint']],
-    'layout': {},
+      ['!=', 'meta', 'midpoint']
+    ],
+    'paint': {
+      'circle-radius': 5,
+      'circle-color': '#000000'
+    },
     'interactive': true
   }, {
     'id': 'gl-draw-selected-point-mid',

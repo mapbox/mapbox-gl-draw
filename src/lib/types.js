@@ -1,6 +1,6 @@
 const types = {
   POLYGON: 'polygon',
-  LINE: 'line',
+  LINE: 'line_string',
   POINT: 'point'
 }
 
