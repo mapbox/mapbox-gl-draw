@@ -83,6 +83,7 @@ export default class API extends Control {
     var _feature = this._store.get(id);
     _feature.setCoordinates(feature.coordinates || feature.geometry.coordinates);
     if (feature.properties) _feature.setProperties(feature.properties);
+    this._store._render();
     return this;
   }
 
