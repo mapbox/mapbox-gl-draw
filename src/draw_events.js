@@ -16,6 +16,7 @@ export default function(ctx) {
   var newFeature = null;
   var activeVertex = null;
   var activeDrawId = null;
+  var featuresAtProgress = false;
 
   var cleanupNewFeatureIfNeeded = function() {
      if (newFeature.created) {
@@ -52,6 +53,7 @@ export default function(ctx) {
         var drawIds = ctx._store.getSelectedIds();
         if (newFeature === null && drawIds.length > 0) {
           var coords = DOM.mousePos(e, ctx._map._container);
+          featuresAtProgress = true;
           ctx._map.featuresAt([coords.x, coords.y], { radius: 20 }, (err, features) => {
             if(err) throw err;
             features = features.filter(feature => drawIds.indexOf(feature.properties.drawId || feature.properties.parent) > -1);
@@ -70,6 +72,7 @@ export default function(ctx) {
                 activeDrawId = R.find(feat => feat.properties.drawId)(features).properties.drawId;
               }
             }
+            featuresAtProgress = false;
           });
         }
       }
@@ -104,7 +107,8 @@ export default function(ctx) {
       dragStartPoint = null;
     },
     onMouseMove: function(e) {
-      if(isMouseDown) {
+      if (isMouseDown) {
+        featuresAtProgress && e.originalEvent.stopPropagation();
         return api.onMouseDrag(e);
       }
       else if (newFeature) {
