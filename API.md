@@ -24,7 +24,8 @@ option | values | function
 drawing | boolean | The ability to draw and delete features - default: `true`
 interactive | boolean | Keep all features permanently in selected mode - default: `false`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
-controls | Object | drawable shapes - default `{ marker: true, line: true, shape: true, square: true }`
+displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
+controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: marker, line, shape, square and trash.
 styles | Object | Add a style with any of the following properties: <li>`gl-draw-polygon`</li><li>`gl-draw-polygon-stroke`</li><li> `gl-draw-line`</li><li> `gl-draw-point`</li><li> `gl-draw-selected-line`</li><li> `gl-draw-selected-polygon`</li><li> `gl-draw-selected-polygon-stroke`</li><li> `gl-draw-selected-point`</li><li> `gl-draw-selected-point-mid`</li>The property should be an object with either the `layout` and/or `paint` properties as specified in the [Mapbox GL Style Reference](https://www.mapbox.com/mapbox-gl-style-spec/). It will overwrite the corresponding default  styles found in [`src/theme/`](https://github.com/mapbox/mapbox-gl-draw/tree/master/src/theme).
 
 Custom Style Example:

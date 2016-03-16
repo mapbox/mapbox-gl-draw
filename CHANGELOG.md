@@ -1,8 +1,9 @@
-## 0.4.0 (next)
+## 0.4.0
 
 * Namesapce css. If you are not using the provided CSS, update your own css to match the new naming schemes.
-* displayControlsDefault lets a change the default option for displaying controls from true to false
-* needs docs update before release
+* displayControlsDefault lets a you change the default option for displaying controls from true to false
+* fixed bug where `update` didn't render changes
+* fixed bug where drag events that shouldn't drag the map still would due to a featuresAt race condition
 
 ## 0.3.6
 
