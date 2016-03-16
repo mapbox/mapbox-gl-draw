@@ -108,7 +108,9 @@ export default function(ctx) {
     },
     onMouseMove: function(e) {
       if (isMouseDown) {
-        featuresAtProgress && e.originalEvent.stopPropagation();
+        if (featuresAtProgress) {
+          e.originalEvent.stopPropagation();
+        }
         return api.onMouseDrag(e);
       }
       else if (newFeature) {
