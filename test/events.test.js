@@ -38,66 +38,16 @@ var timeout = function(t, time, msg) {
 var Draw = GLDraw();
 map.addControl(Draw);
 
-test('draw.set event', t => {
-  t = timeout(t, 100, 'draw.set not fired when drawing is done');
-  map.on('draw.set', function(e) {
-    if (t.notDone()) {
-      t.pass('draw.set fired when drawing is done');
-      t.deepEquals(e.geojson.geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.end();
-    }
-  });
-  Draw.startDrawing(Draw.types.POINT);
-
-  map.fire('click', {
-    lngLat: {
-      lng: 10,
-      lat: 10
-    }
-  });
-});
-
-test('draw.delete event', t => {
-  t = timeout(t, 100, 'failed to fire draw.delete');
-  map.once('draw.delete', e => {
+test('draw.deleted event', t => {
+  t = timeout(t, 100, 'failed to fire draw.deleted');
+  map.once('draw.deleted', e => {
     if(t.notDone()) {
-      t.pass('draw.delete fired on delete');
-      t.deepEquals(e.geojson.geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.equals(e.geojson.id, id, 'draw id in payload is correct');
-      Draw.deselect();
+      t.pass('draw.deleted fired on deleted');
+      t.deepEquals(e[0].geometry, feature.geometry, 'geojson in payload is the same as set');
+      t.equals(e[0].id, id, 'draw id in payload is correct');
       t.end();
     }
   });
   let id = Draw.add(feature);
-  Draw.destroy(id);
-});
-
-test('draw.select.start event', t => {
-  t = timeout(t, 100, 'failed to fire draw.select.start');
-  map.once('draw.select.start', e => {
-    if(t.notDone()) {
-      t.pass('draw.select.start fired on select');
-      t.deepEquals(e.geojson.geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.equals(e.geojson.id, id, 'draw id in payload is correct');
-      Draw.deselect();
-      t.end();
-    }
-  });
-  let id = Draw.add(feature);
-  Draw.select(id);
-});
-
-test('draw.select.end event', t => {
-  t = timeout(t, 100, 'failed to fire draw.select.end');
-  map.once('draw.select.end', e => {
-    if(t.notDone()) {
-      t.pass('draw.select.end fired on select end');
-      t.deepEquals(e.geojson.geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.equals(e.geojson.id, id, 'draw id in payload is correct');
-      t.end();
-    }
-  });
-  let id = Draw.add(feature);
-  Draw.select(id);
-  Draw.deselect(id);
+  Draw.delete(id);
 });

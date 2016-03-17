@@ -13,7 +13,7 @@ test('Line draw class', function lineDrawClass(t){
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  Draw.startDrawing(Draw.types.LINE);
+  Draw.changeMode('draw_line_string');
 
   let coords = feature.geometry.coordinates;
 

@@ -1,6 +1,6 @@
 # API Reference
 
-In order to use GL Draw you must instantiate the draw class like so:
+To use Draw
 
 ```js
 var Draw = mapboxgl.Draw({ options });
@@ -17,61 +17,35 @@ map.on('load', function() {
 });
 ```
 
-### Options
+## Options
 
 option | values | function
 --- | --- | ---
 drawing | boolean | The ability to draw and delete features - default: `true`
-interactive | boolean | Keep all features permanently in selected mode - default: `false`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
-controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: marker, line, shape, square and trash.
-styles | Object | Add a style with any of the following properties: <li>`gl-draw-polygon`</li><li>`gl-draw-polygon-stroke`</li><li> `gl-draw-line`</li><li> `gl-draw-point`</li><li> `gl-draw-selected-line`</li><li> `gl-draw-selected-polygon`</li><li> `gl-draw-selected-polygon-stroke`</li><li> `gl-draw-selected-point`</li><li> `gl-draw-selected-point-mid`</li>The property should be an object with either the `layout` and/or `paint` properties as specified in the [Mapbox GL Style Reference](https://www.mapbox.com/mapbox-gl-style-spec/). It will overwrite the corresponding default  styles found in [`src/theme/`](https://github.com/mapbox/mapbox-gl-draw/tree/master/src/theme).
-
-Custom Style Example:
-
-```js
-var Draw = mapboxgl.Draw({
-  styles: {
-    'gl-draw-polygon': {
-      'paint': {
-        'fill-color': '#00ffff',
-        'fill-outline-color': '#00ffff',
-        'fill-opacity': 0.25
-      }
-    },
-    'gl-draw-polygon-stroke': {
-      'paint': {
-        'line-color': '#0000ff',
-        'line-width': 4
-      }
-    }
-  }
-});
-```
-
-
-`mapboxgl.Draw()` returns an instance of the `Draw` class which has the following public API methods for getting and setting data:
+controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
+style | Object | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
 ## API Methods
 
-####`.add(Object: GeoJSONFeature, [Object]: options) -> String`
+`mapboxgl.Draw()` returns an instance of `Draw` which has the following API for working with your data:
 
-This method takes any valid GeoJSON and adds it to Draw. The object will be turned into a GeoJSON feature and will be assigned a unique `drawId` that can be used to identify it. This method return the new feature's `drawId`. If an id is provided with the feature that ID will be used.
+###`.add(Object: GeoJSON) -> String || [String]`
 
-The second argument is an optional options object to add information to the geometry when creating the new element. Currently the only used option is `permanent`, which, if set to true, will cause the element to ignore click events, `Draw.select(:id:)` and `Draw.selectAll()`.
+This method takes either a Feature or a FeatureCollection and adds it to Draw. It returns an id for interacting with the added feature. When a FeatureCollection is provided an array of ids is returned. If there is no ID on the feature, a random ID will be genearted.
 
-Draw does not enforce unique IDs to be passed to `.add`, but it does enforce unique ids inside of it. This means that if you provide an id for a feature that is not unqiue, Draw will override the exhisting feature with your new feature. You can think of this like PUT in http verbs.
+Currently the only supoorted GeoJSON feature types are `Point`, `LineString` and `Polygon`.
 
-If a FeatureCollection is provided to `.add` Draw will break it up into many features as if you looped through the features in the collection and added them one at a time. This is good for bulk adding, though it is no faster than looping yourself.
+Adding a feature with the same id as another feature in Draw forces an update.
 
 Example:
 
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
 var featureId = Draw.add(feature);
-console.log(Draw.get(featureId));
-//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }
+console.log(featureId);
+//=> 'random-string'
 ```
 
 Example with ID:
@@ -79,15 +53,14 @@ Example with ID:
 ```js
 var feature = { type: 'Point', coordinates: [0, 0], id: 'unique-id' };
 var featureId = Draw.add(feature);
-console.log(featureId) //=> unique-id
-console.log(Draw.get('unique-id'));
-//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0], id: 'unique-id' }
+console.log(featureId)
+//=> unique-id
 ```
 
 ---
-####`.get(String: drawId) -> Object`
+###`.get(String: feature.id) -> Object`
 
-This method takes the `drawId` of a feature and returns its GeoJSON object.
+This method takes an ID returns a GeoJSON feature.
 
 Example:
 
@@ -98,10 +71,9 @@ console.log(Draw.get(id));
 ```
 
 ---
-####`.getAll() -> Object`
+###`.getAll() -> Object`
 
-This method returns all features added to Draw in a single GeoJSON FeatureCollection. The each feature's unique id will be found on the `id` attribute of the feature.
-
+This method returns all features added to Draw in a single GeoJSON FeatureCollection.
 
 Example:
 
@@ -114,6 +86,7 @@ console.log(Draw.getAll());
 //  type: 'FeatureCollection',
 //  features: [
 //    {
+//      id: 'random-0'
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
@@ -121,13 +94,15 @@ console.log(Draw.getAll());
 //      }
 //    },
 //    {
+//      id: 'random-1'
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
 //        coordinates: [1, 1]
 //      }
 //    },
-//        {
+//    {
+//      id: 'random-2'
 //      type: 'Feature',
 //      geometry: {
 //        type: 'Point',
@@ -139,39 +114,11 @@ console.log(Draw.getAll());
 ```
 ---
 
-####`.getSelected() -> Object`
+###`.delete(String: id) -> Draw`
 
-Get all selected features.
+This method takes an id removes the coorisponding feature from Draw.
 
----
-
-####`.select(String: drawId) -> Draw`
-
-This method takes the `drawId` of a feature and selects it. It returns `this` to allow for method chaining.
-
----
-
-####`.selectAll() -> Draw`
-
-This method selects all features. It returns `this` to allow for method chaining.
-
----
-
-####`.deselect(String: drawId) -> Draw`
-
-This method takes the `drawId` of a feature and deselects it if selected. It returns `this` to allow for method chaining.
-
----
-
-####`.deselectAll() -> Draw`
-
-This method deselects all features. It returns `this` to allow for method chaining.
-
----
-
-####`.destroy(String: drawId) -> Draw`
-
-This method takes the `drawId` of feature and removes it from draw. It returns `this` to allow for method chaining.
+In `direct_select` mode, deleting the active feature will stop the mode and revert to the `simple_select` mode.
 
 Example:
 
@@ -179,31 +126,14 @@ Example:
 var feature = { type: 'Point', coordinates: [0, 0] };
 var id = draw.add(feature)
 Draw
-  .destroy(id)
+  .delete(id)
   .getAll();
 // => { type: 'FeatureCollection', features: [] }
 ```
 
 ---
 
-####`.update(String: drawId, Object: GeoJSONFeature) -> Draw`
-
-This method takes the `drawId` of an existing feature and a GeoJSON object and replaces that feature in draw with the new feature. It returns `this`.
-
-Example:
-
-```js
-var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
-var newFeature = Draw
-  .update(id, { type: 'Point', coordinates: [1, 1] })
-  .get(id);
-console.log(newFeature);
-//=> { type: 'Feature', geometry: { type: 'Point', coordinates: [1, 1] } }
-```
-
----
-
-####`.clear() -> Draw`
+###`.deleteAll() -> Draw`
 
 This method removes all geometries in Draw.
 
@@ -212,48 +142,142 @@ Example:
 ```js
 Draw.add({ type: 'Point', coordinates: [0, 0] });
 Draw
-  .clear()
+  .deleteAll()
   .getAll();
 // => { type: 'FeatureCollection', features: [] }
 ```
 
 ---
 
-####`.startDrawing(Enum: { Draw.types.POINT | Draw.types.LINE | Draw.types.POLYGON | Draw.types.SQUARE })`
+### `.trash() -> Draw`
 
-This method initiates drawing the specified type. The types are defined in constants in draw under `Draw.types.*`. The argument should be one of
+This envokes the current modes trash event. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, these cancel the current process.
 
-- `Draw.types.POINT`
-- `Draw.types.LINE`
-- `Draw.types.POLYGON`
-- `Draw.types.SQUARE`
+This is different from `delete` or `deleteAlll` in that it follows rules described by the current mode.
 
-Example:
+---
 
-```js
-Draw.startDrawing(Draw.types.LINE);
-```
+### `.changeMode(String: mode, ?Any: options) -> Draw`
+
+`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own arguments. They are descibed in detail below.
+
+#### Mode: `simple_select`
+
+Lets you select, delete and drag features.
+
+For `simple_select` options is an array of ids. It is optional. If provided, these features will be active at the start of the mode. In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+
+#### Mode: `direct_select`
+
+Lets you select, delete and drag vertices.
+
+For `direct_select`options is a single featureId. It is required. This feature will be active for the duration of the mode.
+
+#### Drawing modes:
+
+The three drawing modes work identically. They do not take an options argument.
+
+- `draw_line_string`: Draws a LineString feature.
+- `draw_polygon`: Draws a Polygon feature.
+- `draw_point`: Draws a Point feature.
 
 ## Events
 
-Draw fires off a number of events on draw and select actions. All of these events are name spaced `draw` inside of the mapboxgl event emitter.
+Draw fires off a number of events. All of these events are name spaced `draw.` and are emitted via map object.
 
-#### draw.set
+### draw.modechange
 
-This is fired every time a feature is committed via escape or the double click. The payload is an object with the `mapbox-gl-draw` feature id and the GeoJSON representation of the feature.
+This event is fired just after the current mode is stopped and just before the next mode is started. A render will not happen until after all event handlers have been triggered. This means you can force a mode redirect by calling `changeMode` inside of a `draw.modechange` handler.
 
-#### draw.delete
+This is not fired when the first mode is started.
 
-This is fired every time a feature is deleted inside of `mapbox-gl-draw`. The payload is an object with the `mapbox-gl-draw` feature id of the feature that was deleted and the GeoJSON representation of the feature just before it was deleted.
+Here is an example payload.
 
-#### draw.select.start
+```js
+{
+  mode: `direct_select`
+  opts: '123123123'
+}
+```
 
-Fired every time a feature is selected. The payload is an object with the `mapbox-gl-draw` feature id and the GeoJSON representation of the feature.
+### draw.deleted
 
-#### draw.select.end
+This is fired every time a feature is deleted. The payload is a list GeoJSON features just before they were deleted.
 
-Fired every time a feature is deselected. The payload is an object with the `mapbox-gl-draw` feature id.
+### draw.changed
 
-## Private functions
+This is fired when feature coordinates are changed. It is fired just after the changes have been sent to be rendered. The payload is the GeoJSON of all changed features. Deleted features will not show up here.
 
-Draw uses underscore prefixed variables to indicate that the following function is private. These functions are apt to change or be removed. If there is functionality in these functions that should be part of the public api, please open PR explaining the use case.
+### draw.mode.default.selected.start
+
+This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
+
+### draw.mode.default.selected.end
+
+This is fired every time a feature is unselected in the default mode. The payload is an array of feature ids being unselected. This is **NOT** fired when the mode stops, as this can be assumed via the `draw.modechange` event.
+
+## Styling Draw
+
+Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-style-spec/) with a preset list of properties.
+
+The `GL Style Spec` requires each layer to have a source. **DO NOT PROVIDE THIS** for styling draw.
+
+Draw moves features between sources for performance gains, because of this it is recommeneded that you **DO NOT** provide a source for a style despite the fact the `GL Style Spec` requires a source. **Draw will provide the source for you automatically**.
+
+If you need to style gl-draw for debugging sources the source names are `mapbox-gl-draw-hot` and `mapbox-gl-draw-cold`.
+
+property | values | function
+--- | --- | ---
+meta | feature, midpoint, vertex, too-small | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user. `too-small` is used to indicate a point that represents the center of a collection of features that are too small at the current zoom level to be seen.
+active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
+mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
+hover | true, false | `true` and `false` are strings. `hover` is true when the mouse is over the feature.
+
+Draw also provides a few more properties, but they should not be used for styling. For details on them, see `Using Draw with map.queryRenderFeatures`.
+
+### Example Custom Style
+
+With this style all Point features are blue and have a black halo when active. No other features are rendered, even if they are present.
+
+```js
+mapbox.Draw({
+  style: [
+    {
+      'id': 'highlight-active-points',
+      'type': 'circle',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['==', 'meta', 'feature'],
+        ['==', 'active', 'true']],
+      'paint': {
+        'circle-radius': 7,
+        'circle-color': '#000000'
+      },
+      'interactive': true
+    },
+    {
+      'id': 'points-are-blue',
+      'type': 'circle',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['==', 'meta', 'feature'],
+        ['==', 'active', 'true']],
+      'paint': {
+        'circle-radius': 5,
+        'circle-color': '#000088'
+      },
+      'interactive': true
+    }
+  ]
+});
+```
+
+## Using Draw with `map.queryRenderFeatures`
+
+property | values | function
+--- | --- | ---
+id | string | only available when `meta` is `feature`
+parent | string | only avaible when `meta` is not `feature`
+coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates
+lon | number | the longitude value of a handle. Only available when `meta` is `midpoint`.
+lat | number | the latitude value of a handle. Only available when `meta` is `midpoint`.

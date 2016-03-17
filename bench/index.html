@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Draw Benchmark</title>
+
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+    <link rel='stylesheet' href='/mapbox-gl.css'/>
+
+    <style>
+        #meter {
+            width: 100%;
+        }
+        #progress {
+            width: 0%;
+            height: 3px;
+            background-color: #2222aa;
+        }
+        #tests {
+            width: 250px;
+            float: right;
+            margin-right: 3px;
+        }
+        .log {
+            padding: 15px 20px;
+        }
+        #map {
+            display: block;
+            float: left;
+            width: 1024px;
+            height: 512px;
+        }
+    </style>
+</head>
+
+<body class="prose">
+    <div id="meter">
+        <div id="progress"></div>
+    </div>
+    <div id="map"></div>
+    <div id="tests">
+        <div id="logs"></div>
+    </div>
+    <script src="/mapbox-gl.js"></script>
+    <script src="/mapbox-gl-draw.js"></script>
+    <script src="/bench/index.js"></script>
+</body>
+
+</html>

@@ -1,13 +1,21 @@
+## 0.6.0-rc1
+
+This is a preview release of the work being done in the [0.6.0](https://github.com/mapbox/mapbox-gl-draw/milestones/0.6.0) milestone.
+
+We are skipping 0.5.0 as this change is very large and breaks much of the Draw API functionality.
+
+To preview this release please take a look API.md to get started. Feedback is very welcome and is generally [being collected here](https://github.com/mapbox/mapbox-gl-draw/issues/264).
+
 ## 0.4.0
 
-* Namesapce css. If you are not using the provided CSS, update your own css to match the new naming schemes.
+* Name space css. If you are not using the provided CSS, update your own css to match the new naming schemes.
 * displayControlsDefault lets a you change the default option for displaying controls from true to false
 * fixed bug where `update` didn't render changes
 * fixed bug where drag events that shouldn't drag the map still would due to a featuresAt race condition
 
 ## 0.3.6
 
-* Performence improvements
+* Performance improvements
 * Supports mapbox-gl@0.15.0
 * Cleans up event listeners on Draw.remove
 
@@ -21,7 +29,7 @@ Fixes a bug where calling `Draw.add` on a `FeatureCollection` resulted in an err
 
 ## 0.3.3
 
-Fixes a bug where calling `Draw.deselect` in a `draw.delete` event handler would emit a `draw.set` event even though the feature had been removed fom Draw.
+Fixes a bug where calling `Draw.deselect` in a `draw.delete` event handler would emit a `draw.set` event even though the feature had been removed from Draw.
 
 ## 0.3.2
 
@@ -44,7 +52,7 @@ Expands support to [mapbox-gl@0.14.0](https://github.com/mapbox/mapbox-gl-js/rel
 * Fixed bug where the trash can would show up when zooming via the zoom box.
 * Fixed bug where starting a new feature before finishing an old feature would save the old feature even if it was invalid
 
-#### Api enhancements
+#### API enhancements
 
 * `startDrawing` lets you initiate drawing with your controls.
 * The controls object now accepts `trash` letting you hide the trash control

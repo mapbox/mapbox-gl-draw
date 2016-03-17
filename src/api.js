@@ -1,18 +1,18 @@
 var hat = require('hat');
 
 var featureTypes = {
-  "Polygon": require('./feature_types/polygon'),
-  "LineString": require('./feature_types/line_string'),
-  "Point": require('./feature_types/point')
-}
+  'Polygon': require('./feature_types/polygon'),
+  'LineString': require('./feature_types/line_string'),
+  'Point': require('./feature_types/point')
+};
 
-var API = module.exports = function(ctx) {
+module.exports = function(ctx) {
 
   return {
-    add: function (geojson, opts) {
-      var geojson = JSON.parse(JSON.stringify(geojson));
+    add: function (geojson) {
+      geojson = JSON.parse(JSON.stringify(geojson));
       if (geojson.type === 'FeatureCollection') {
-        return geojson.features.map(feature => this.add(feature, options));
+        return geojson.features.map(feature => this.add(feature));
       }
 
       if (!geojson.geometry) {
@@ -31,8 +31,10 @@ var API = module.exports = function(ctx) {
         throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
       }
 
-      var feature = new model(ctx, geojson);
-      return ctx.store.add(feature);
+      var internalFeature = new model(ctx, geojson);
+      var id = ctx.store.add(internalFeature);
+      ctx.store.render();
+      return id;
     },
     get: function (id) {
       var feature = ctx.store.get(id);
@@ -44,59 +46,21 @@ var API = module.exports = function(ctx) {
       return {
         type: 'FeatureCollection',
         features: ctx.store.getAll().map(feature => feature.toGeoJSON())
-      }
-    },
-    getSelected: function() {
-      return {
-        type: 'FeatureCollection',
-        features: ctx.store.getAll()
-        .filter(feature => feature.isSelected())
-        .map(feature => feature.toGeoJSON())
-      }
-    },
-    select: function (id) {
-    var feature = ctx.store.get(id);
-      if (feature) {
-        feature.select();
-      }
-    },
-    selectAll: function () {
-      ctx.store.getAll().forEach(feature => feature.select());
-    },
-    unselect: function (id) {
-      var feature = ctx.store.get(id);
-      if (feature) {
-        feature.unselect();
-      }
-    },
-    unselectAll: function () {
-      ctx.store.getAll().forEach(feature => feature.unselect());
-    },
-    update: function(id, geojson) {
-      var feature = ctx.store.get(id);
-      if (feature) {
-        feature.update(JSON.parse(JSON.stringify(geojson)));
-      }
+      };
     },
     delete: function(id) {
-      ctx.store.delete(id);
+      ctx.store.delete([id]);
+      ctx.store.render();
     },
     deleteAll: function() {
-      ctx.store.getAll().forEach(feature => ctx.store.delete(feature.id));
+      ctx.store.delete(ctx.store.getAll().map(feature => feature.id));
+      ctx.store.render();
     },
-    deleteSelected: function() {
-      ctx.store.getAll().forEach(feature => {
-        if (feature.isSelected() ) {
-          ctx.store.delete(feature.id);
-        }
-        else if (feature.deleteSelectedCoords) {
-          feature.deleteSelectedCoords();
-        }
-      });
+    changeMode: function(mode, opts) {
+      ctx.events.changeMode(mode, opts);
     },
-    startDrawing: function (type) {
-      ctx.events.startMode(`draw_${type}`);
+    trash: function() {
+      ctx.events.fire('trash');
     }
-
-  }
-}
+  };
+};

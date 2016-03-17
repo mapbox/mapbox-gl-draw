@@ -1,4 +1,4 @@
-var Feature =  require('./feature');
+var Feature = require('./feature');
 
 var Point = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
@@ -6,12 +6,12 @@ var Point = function(ctx, geojson) {
 
 Point.prototype = Object.create(Feature.prototype);
 
-Point.prototype.addCoordinate = function() {
-  throw new Error('addCoordinate cannot be called on a Point');
-}
+Point.prototype.isValid = function() {
+  return typeof this.coordinates[0] === 'number';
+};
 
-Point.prototype.selectCoordinate = function() {
-  this.select();
-}
+Point.prototype.updateCoordinate = function(path, lng, lat) {
+  this.coordinates = [lng, lat];
+};
 
 module.exports = Point;

@@ -1,34 +1,82 @@
-module.exports = function() {
-  var isStillAlive = this.ctx.map.getSource('draw') !== undefined;
-  if (isStillAlive) { // checks to make sure we still have a map
-    var featureBuckets = Object.keys(this.features).reduce((buckets, id) => {
-      let sourceFeatures = this.features[id].getSourceFeatures();
 
-      if (true) {
-        buckets.selected = buckets.selected.concat(sourceFeatures)
+module.exports = function render() {
+  var isStillAlive = this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
+  if (isStillAlive) { // checks to make sure we still have a map
+    var mode = this.ctx.events.currentModeName();
+
+    var features = {
+      hot: [],
+      cold: []
+    };
+
+    var renderCold = this.isDirty;
+
+    var nextHistory = {};
+
+    var pusher = (geojson) => {
+      var about = geojson.properties;
+      var key = about.id + '.' + about.parent + '.' + about.coord_path + '.' + about.meta;
+      var value = JSON.stringify(geojson);
+
+      var past = this.renderHistory[key];
+
+      if (past === undefined) {
+        past = { changed: 4};
+      }
+
+      var next = {
+        value: value,
+        changed: past.changed
+      };
+
+      if (past.value !== value && next.changed < 4) {
+        next.changed ++;
+      }
+      else if (past.value === value && next.changed > 0) {
+        next.changed--;
+      }
+
+      if (next.changed < 2) {
+        features.cold.push(geojson);
+        renderCold = renderCold ? true : next.changed !== past.changed;
       }
       else {
-        buckets.deselected = buckets.deselected.concat(sourceFeatures)
+        renderCold = renderCold ? true : past.changed < 2;
+        features.hot.push(geojson);
       }
-      return buckets;
-    }, { deselected: [], selected: [] });
+      nextHistory[key] = next;
+    };
 
-    if(featureBuckets.selected.length > 0) {
-      this.ctx.ui.showButton('trash');
-    }
-    else {
-      this.ctx.ui.hideButton('trash');
-    }
+    var changed = [];
 
+    this.featureIds.forEach((id) => {
+      let featureInternal = this.features[id].internal(mode);
+      var coords = JSON.stringify(featureInternal.geometry.coordinates);
+      this.featureHistory[id] = this.featureHistory[id] || '';
 
-    this.ctx.map.getSource('draw').setData({
-      type: 'FeatureCollection',
-      features: featureBuckets.deselected
+      if (this.featureHistory[id] !== coords) {
+        this.featureHistory[id] = coords;
+        changed.push(this.features[id].toGeoJSON());
+      }
+
+      this.ctx.events.currentModeRender(featureInternal, pusher);
     });
 
-    this.ctx.map.getSource('draw-selected').setData({
+    this.renderHistory = nextHistory;
+
+    if (renderCold) {
+      this.ctx.map.getSource('mapbox-gl-draw-cold').setData({
+        type: 'FeatureCollection',
+        features: features.cold
+      });
+    }
+
+    this.ctx.map.getSource('mapbox-gl-draw-hot').setData({
       type: 'FeatureCollection',
-      features: featureBuckets.selected
+      features: features.hot
     });
+
+    this.ctx.map.fire('draw.changed', changed);
   }
-}
+  this.isDirty = false;
+};

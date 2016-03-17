@@ -20,9 +20,10 @@ var Draw = function(options) {
   api.addTo = setup.addTo;
   api.remove = setup.remove;
   api.types = types;
+  api.options = options;
 
   return api;
-}
+};
 
 if (window.mapboxgl) {
   mapboxgl.Draw = Draw;

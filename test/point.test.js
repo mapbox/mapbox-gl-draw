@@ -9,11 +9,15 @@ test('Point geometry class', t => {
   map.addControl(Draw);
 
   map.on('load', function() {
-    Draw.startDrawing(Draw.types.POINT);
+    Draw.changeMode('draw_point');
     map.fire('click', {
       lngLat: {
         lng: 10,
         lat: 10
+      },
+      point: {
+        x: 0,
+        y: 0
       }
     });
 

@@ -5,12 +5,12 @@ module.exports = function(parent, coord, path, selected) {
       properties: {
         meta: 'vertex',
         parent: parent,
-        path: path,
-        selected: ''+selected
+        coord_path: path,
+        active: `${selected}`
       },
       geometry: {
         type: 'Point',
         coordinates: coord
       }
-    }
-}
+    };
+};

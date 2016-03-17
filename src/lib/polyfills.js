@@ -1,4 +1,4 @@
-export default function() {
+module.exports = function() {
   if (typeof Object.assign !== 'function') {
     (function () {
       Object.assign = function (target) {
@@ -21,4 +21,4 @@ export default function() {
       };
     })();
   }
-}
+};

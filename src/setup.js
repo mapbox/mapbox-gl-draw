@@ -1,10 +1,9 @@
 var events = require('./events');
 var Store = require('./store');
 var ui = require('./ui');
-var DOM = require('./lib/util').DOM;
+var hat = require('hat');
 
-var drawSelectedTheme =  require('./theme/draw-selected');
-var drawTheme =  require('./theme/draw');
+var theme = require('./lib/theme');
 
 module.exports = function(ctx) {
 
@@ -15,8 +14,6 @@ module.exports = function(ctx) {
   ctx.store = null;
   ui(ctx);
 
-  var buttons = {};
-
   var setup = {
     addTo: function(map) {
         ctx.map = map;
@@ -24,7 +21,9 @@ module.exports = function(ctx) {
         return this;
     },
     remove: function() {
-      setup.onRemove();
+      setup.removeLayers();
+      ctx.ui.removeButtons();
+      ctx.events.removeEventListeners();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
@@ -34,9 +33,7 @@ module.exports = function(ctx) {
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
 
-      if (ctx.options.drawing) {
-        ctx.ui.addButtons();
-      }
+      ctx.ui.addButtons();
 
       if (map.style.loaded()) { // not public
         ctx.events.addEventListeners();
@@ -48,16 +45,10 @@ module.exports = function(ctx) {
         });
       }
     },
-    onRemove: function() {
-      setup.removeLayers();
-      ctx.ui.removeButtons();
-      ctx.events.removeEventListeners();
-    },
     addLayers: function() {
-      console.log('addLayers', drawTheme.length);
       ctx.map.batch((batch) => {
         // drawn features style
-        batch.addSource('draw', {
+        batch.addSource('mapbox-gl-draw-cold', {
           data: {
             type: 'FeatureCollection',
             features: []
@@ -65,14 +56,8 @@ module.exports = function(ctx) {
           type: 'geojson'
         });
 
-        for (let i = 0; i < drawTheme.length; i++) {
-          let style = drawTheme[i];
-          Object.assign(style, ctx.options.styles[style.id] || {});
-          batch.addLayer(style);
-        }
-
-        // selected features style
-        batch.addSource('draw-selected', {
+        // hot features style
+        batch.addSource('mapbox-gl-draw-hot', {
           data: {
             type: 'FeatureCollection',
             features: []
@@ -80,31 +65,46 @@ module.exports = function(ctx) {
           type: 'geojson'
         });
 
-        for (let i = 0; i < drawSelectedTheme.length; i++) {
-          let style = drawSelectedTheme[i];
-          Object.assign(style, ctx.options.styles[style.id] || {});
-          batch.addLayer(style);
+        for (let i = 0; i < theme.length; i++) {
+          if (theme[i].id === undefined) theme[i] = hat();
+
+          let style = JSON.parse(JSON.stringify(theme[i]));
+          var id = style.id;
+
+          if (style.source) {
+            batch.addLayer(style);
+          }
+          else {
+            style.id = `${id}.hot`;
+            style.source = 'mapbox-gl-draw-hot';
+            batch.addLayer(style);
+
+            style.id = `${id}.cold`;
+            style.source = 'mapbox-gl-draw-cold';
+            batch.addLayer(style);
+          }
         }
         ctx.store.render();
       });
     },
     removeLayers: function() {
       ctx.map.batch(function (batch) {
-        for (let i = 0; i < drawTheme.length; i++) {
-          let { id } = drawTheme[i];
-          batch.removeLayer(id);
+        for (let i = 0; i < theme.length; i++) {
+          let { id, source } = theme[i];
+          if (source) {
+            batch.removeLayer(id);
+          }
+          else {
+            batch.removeLayer(`${id}.hot`);
+            batch.removeLayer(`${id}.cold`);
+          }
         }
 
-        for (let i = 0; i < drawSelectedTheme.length; i++) {
-          let { id } = drawSelectedTheme[i];
-          batch.removeLayer(id);
-        }
-
-        batch.removeSource('draw');
-        batch.removeSource('draw-selected');
+        batch.removeSource('mapbox-gl-draw-cold');
+        batch.removeSource('mapbox-gl-draw-hot');
       });
     }
-  }
+  };
 
   return setup;
-}
+};

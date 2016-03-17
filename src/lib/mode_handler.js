@@ -1,4 +1,4 @@
-var ModeHandler = function(mode, onStop) {
+var ModeHandler = function(mode, DrawContext) {
 
   var handlers = {
     drag: [],
@@ -9,13 +9,14 @@ var ModeHandler = function(mode, onStop) {
     mouseup: [],
     keydown: [],
     keyup: [],
-    delete: []
+    trash: []
   };
-
-  var lastClass = '';
 
   var ctx = {
     on: function(event, selector, fn) {
+      if (handlers[event] === undefined) {
+        throw new Error(`Invalid event type: ${event}`);
+      }
       handlers[event].push({
         selector: selector,
         fn: fn
@@ -25,24 +26,30 @@ var ModeHandler = function(mode, onStop) {
       handlers[event] = handlers[event].filter(handler => {
         return handler.selector !== selector || handler.fn !== fn;
       });
+    },
+    fire: function(event, payload) {
+      var modename = DrawContext.events.currentModeName();
+      DrawContext.map.fire(`draw.${modename}.${event}`, payload);
     }
-  }
+  };
 
-  function delegate(eventName, event) {
+  var delegate = function (eventName, event) {
     var handles = handlers[eventName];
     var iHandle = handles.length;
     while (iHandle--) {
       var handle = handles[iHandle];
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
+        DrawContext.store.render();
         break;
       }
     }
-  }
+  };
 
   mode.start.call(ctx);
 
   return {
+    render: mode.render || function(geojson) {return geojson; },
     stop: mode.stop || function() {},
     drag: function(event) {
       delegate('drag', event);
@@ -68,10 +75,10 @@ var ModeHandler = function(mode, onStop) {
     keyup: function(event) {
       delegate('keyup', event);
     },
-    delete: function(event) {
-      delegate('delete', event);
+    trash: function(event) {
+      delegate('trash', event);
     }
-  }
-}
+  };
+};
 
-module.exports  = ModeHandler;
+module.exports = ModeHandler;

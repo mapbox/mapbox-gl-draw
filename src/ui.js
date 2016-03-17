@@ -1,11 +1,11 @@
 const types = require('./lib/types');
-var {createButton, DOM} = require('./lib/util');
+var {createButton} = require('./lib/util');
 
 module.exports = function(ctx) {
 
   var buttons = {};
 
-  var lastClass = undefined;
+  var lastClass;
 
   ctx.ui = {
     setClass: function(nextClass) {
@@ -29,11 +29,11 @@ module.exports = function(ctx) {
 
       let controlContainer = ctx.container.getElementsByClassName(ctrlPos)[0].getElementsByClassName('mapboxgl-ctrl-group')[0];
 
-      if (controls.line) {
+      if (controls.line_string) {
         buttons[types.LINE] = createButton(controlContainer, {
           className: `${controlClass} mapbox-gl-draw_line`,
           title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-          fn: () => ctx.api.startDrawing(types.LINE)
+          fn: () => ctx.api.changeMode('draw_line_string')
         }, controlClass);
       }
 
@@ -41,7 +41,7 @@ module.exports = function(ctx) {
         buttons[types.POLYGON] = createButton(controlContainer, {
           className: `${controlClass} mapbox-gl-draw_polygon`,
           title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
-          fn: () => ctx.api.startDrawing(types.POLYGON)
+          fn: () => ctx.api.changeMode('draw_polygon')
         }, controlClass);
       }
 
@@ -49,7 +49,7 @@ module.exports = function(ctx) {
         buttons[types.POINT] = createButton(controlContainer, {
           className: `${controlClass} mapbox-gl-draw_point`,
           title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
-          fn: () => ctx.api.startDrawing(types.POINT)
+          fn: () => ctx.api.changeMode('draw_point')
         }, controlClass);
       }
 
@@ -58,21 +58,10 @@ module.exports = function(ctx) {
           className: `${controlClass} mapbox-gl-draw_trash`,
           title: 'delete',
           fn: function() {
-            ctx.api.deleteSelected();
-          },
+            ctx.api.trash();
+            ctx.ui.setButtonInactive('trash');
+          }
         }, controlClass);
-
-        ctx.ui.hideButton('trash');
-      }
-    },
-    hideButton: function(id) {
-      if (buttons[id]) {
-        buttons[id].style.display = 'none';
-      }
-    },
-    showButton: function (id) {
-      if (buttons[id]) {
-        buttons[id].style.display = 'block';
       }
     },
     setButtonActive: function(id) {
@@ -80,7 +69,12 @@ module.exports = function(ctx) {
         buttons[id].classList.add('active');
       }
     },
-    setAllInactive: function(id) {
+    setButtonInactive: function(id) {
+      if (buttons[id]) {
+        buttons[id].classList.remove('active');
+      }
+    },
+    setAllInactive: function() {
       var buttonIds = Object.keys(buttons);
 
       buttonIds.forEach(buttonId => {
@@ -99,5 +93,5 @@ module.exports = function(ctx) {
         buttons[buttonId] = null;
       });
     }
-  }
-}
+  };
+};

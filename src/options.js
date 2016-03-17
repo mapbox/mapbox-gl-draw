@@ -1,23 +1,22 @@
 const defaultOptions = {
-  drawing: true,
-  interactive: false,
+  defaultMode: 'simple_select',
   position: 'top-left',
   keybindings: true,
   displayControlsDefault: true,
   styles: {},
   controls: {}
-}
+};
 
 const showControls = {
   point: true,
-  line: true,
+  line_string: true,
   polygon: true,
   trash: true
 };
 
 const hideControls = {
   point: false,
-  line: false,
+  line_string: false,
   polygon: false,
   trash: false
 };
@@ -31,4 +30,4 @@ module.exports = function(options = {controls: {}}) {
   }
 
   return Object.assign(defaultOptions, options);
-}
+};

@@ -1,91 +1,121 @@
-var ModeHandler = require('./modes/mode_handler');
-console.log('events require manySelect', typeof manySelect);
+var ModeHandler = require('./lib/mode_handler');
 var findTargetAt = require('./lib/find_target_at');
 
 var modes = {
-  'many_select': require('./modes/many_features/select'),
-  'many_drag': require('./modes/many_features/drag'),
-  'draw_line_string': require('./modes/draw_feature/line_string'),
-  'draw_point': require('./modes/draw_feature/point'),
-  'draw_polygon': require('./modes/draw_feature/polygon'),
-  'one_select': require('./modes/one_feature/select'),
-  'one_drag': require('./modes/one_feature/drag')
-}
+  'simple_select': require('./modes/simple_select'),
+  'direct_select': require('./modes/direct_select'),
+  'draw_point': require('./modes/draw_point'),
+  'draw_line_string': require('./modes/draw_line_string'),
+  'draw_polygon': require('./modes/draw_polygon')
+};
 
 module.exports = function(ctx) {
 
   var isDown = false;
 
   var events = {};
-  var currentMode = ModeHandler(modes['many_select'](ctx));
+  var currentModeName = 'simple_select';
+  var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
   events.drag = function(event) {
     currentMode.drag(event);
   };
 
   events.click = function(event) {
-    findTargetAt(event, ctx, function(target) {
-      event.featureTarget = target;
-      currentMode.click(event);
-    });
+    var target = findTargetAt(event, ctx);
+    event.featureTarget = target;
+    currentMode.click(event);
   };
 
   events.doubleclick = function(event) {
-    findTargetAt(event, ctx, function(target) {
-      event.featureTarget = target;
-      currentMode.doubleclick(event);
-    });
+    var target = findTargetAt(event, ctx);
+    event.featureTarget = target;
+    currentMode.doubleclick(event);
   };
 
-  events.mousemove  = function(event) {
+  events.mousemove = function(event) {
     if (isDown) {
       events.drag(event);
     }
     else {
-      findTargetAt(event, ctx, function(target) {
-        event.featureTarget = target;
-        currentMode.mousemove(event);
-      });
+      var target = findTargetAt(event, ctx);
+      event.featureTarget = target;
+      currentMode.mousemove(event);
     }
   };
 
-  events.mousedown  = function(event) {
+  events.mousedown = function(event) {
     isDown = true;
-    findTargetAt(event, ctx, function(target) {
-      event.featureTarget = target;
-      currentMode.mousedown(event);
-    });
+    var target = findTargetAt(event, ctx);
+    event.featureTarget = target;
+    currentMode.mousedown(event);
   };
 
-  events.mouseup  = function(event) {
+  events.mouseup = function(event) {
     isDown = false;
-    findTargetAt(event, ctx, function(target) {
-      event.featureTarget = target;
-      currentMode.mouseup(event);
-    });
+    var target = findTargetAt(event, ctx);
+    event.featureTarget = target;
+    currentMode.mouseup(event);
   };
 
-  events.delete = function(event) {
-    currentMode.delete(event);
-  }
-
-  events.keydown  = function(event) {
-    currentMode.keydown(event);
+  events.trash = function() {
+    currentMode.trash();
   };
 
-  events.keyup  = function(event) {
-    currentMode.keyup(event);
-  }
+
+  var isKeyModeValid = (code) => !(code === 8 || (code >= 48 && code <= 57));
+
+  events.keydown = function(event) {
+    if (event.keyCode === 8) {
+      event.preventDefault();
+      api.fire('trash');
+    }
+    else if (isKeyModeValid(event.keyCode)) {
+      currentMode.keydown(event);
+    }
+    else if (event.keyCode === 49) {
+      ctx.api.changeMode('draw_point');
+    }
+    else if (event.keyCode === 50) {
+      ctx.api.changeMode('draw_line_string');
+    }
+    else if (event.keyCode === 51) {
+      ctx.api.changeMode('draw_polygon');
+    }
+  };
+
+  events.keyup = function(event) {
+    if (isKeyModeValid(event.keyCode)) {
+      currentMode.keyup(event);
+    }
+  };
+
+  events.deleted = function() {
+    ctx.store.setDirty();
+  };
 
   var api = {
-    startMode: function(modename, opts) {
+    currentModeName: function() {
+      return currentModeName;
+    },
+    currentModeRender: function(geojson, push) {
+      return currentMode.render(geojson, push);
+    },
+    changeMode: function(modename, opts) {
       currentMode.stop();
       var modebuilder = modes[modename];
       if (modebuilder === undefined) {
         throw new Error(`${modename} is not valid`);
       }
+      currentModeName = modename;
       var mode = modebuilder(ctx, opts);
-      currentMode = ModeHandler(mode);
+      currentMode = ModeHandler(mode, ctx);
+
+      ctx.map.fire('draw.modechange', {
+        mode: modename,
+        opts: opts
+      });
+
       ctx.store.render();
     },
     fire: function(name, event) {
@@ -103,17 +133,23 @@ module.exports = function(ctx) {
 
       ctx.container.addEventListener('keydown', events.keydown);
       ctx.container.addEventListener('keyup', events.keyup);
+
+      ctx.map.on('draw.deleted', events.deleted);
     },
     removeEventListeners: function() {
       ctx.map.off('click', events.click);
       ctx.map.off('dblclick', events.doubleclick);
       ctx.map.off('mousemove', events.mousemove);
-      ctx.container.removeEventListener('mousedown', events.mousedown);
-      ctx.container.removeEventListener('mouseup', events.mouseup);
+
+      ctx.map.off('mousedown', events.mousedown);
+      ctx.map.off('mouseup', events.mouseup);
+
       ctx.container.removeEventListener('keydown', events.keydown);
       ctx.container.removeEventListener('keyup', events.keyup);
+
+      ctx.map.off('draw.deleted', events.deleted);
     }
-  }
+  };
 
   return api;
-}
+};
