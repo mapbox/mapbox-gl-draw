@@ -12,17 +12,15 @@ test('Options test', t => {
   t.test('no options', t => {
     var Draw = GLDraw();
     var defaultOptions = {
-      drawing: true,
-      interactive: false,
+      defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: true,
       styles: {},
       controls: {
-        marker: true,
-        line: true,
-        shape: true,
-        square: true,
+        point: true,
+        line_string: true,
+        polygon: true,
         trash: true
       }
     };
@@ -33,17 +31,15 @@ test('Options test', t => {
   t.test('hide all controls', t => {
     var Draw = GLDraw({displayControlsDefault: false});
     var defaultOptions = {
-      drawing: true,
-      interactive: false,
+      defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: false,
       styles: {},
       controls: {
-        marker: false,
-        line: false,
-        shape: false,
-        square: false,
+        point: false,
+        line_string: false,
+        polygon: false,
         trash: false
       }
     };
@@ -51,20 +47,18 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('hide all controls by default and show marker', t => {
-    var Draw = GLDraw({displayControlsDefault: false, controls: {marker:true}});
+  t.test('hide all controls by default and show point', t => {
+    var Draw = GLDraw({displayControlsDefault: false, controls: {point:true}});
     var defaultOptions = {
-      drawing: true,
-      interactive: false,
+      defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: false,
       styles: {},
       controls: {
-        marker: true,
-        line: false,
-        shape: false,
-        square: false,
+        point: true,
+        line_string: false,
+        polygon: false,
         trash: false
       }
     };
@@ -72,20 +66,18 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('show all controls by default and hide marker', t => {
-    var Draw = GLDraw({displayControlsDefault: true, controls: {marker:false}});
+  t.test('show all controls by default and hide point', t => {
+    var Draw = GLDraw({displayControlsDefault: true, controls: {point:false}});
     var defaultOptions = {
-      drawing: true,
-      interactive: false,
+      defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: true,
       styles: {},
       controls: {
-        marker: false,
-        line: true,
-        shape: true,
-        square: true,
+        point: false,
+        line_string: true,
+        polygon: true,
         trash: true
       }
     };

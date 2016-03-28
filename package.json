@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.4.0",
+  "version": "0.6.0-rc1",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -14,8 +14,9 @@
   "scripts": {
     "test": "npm run lint && tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
+    "build": "NODE_ENV=production browserify index.js > dist/mapbox-gl-draw.js",
     "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
-    "start": "budo index.js --serve=dist/mapbox-gl-draw.js --live -d | bistre"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -35,20 +36,26 @@
     "babel-register": "^6.5.2",
     "babelify": "^7.2.0",
     "bistre": "^1.0.1",
+    "browserify": "^13.0.0",
+    "browserify-middleware": "^7.0.0",
+    "babel-preset-es2015": "^6.3.13",
     "budo": "^4.0.0",
+    "envify": "^3.4.0",
+    "es2015": "0.0.1",
     "eslint": "^0.21.2",
+    "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
-    "mapbox-gl-js-mock": "^0.15.0",
+    "mapbox-gl": "^0.16.0",
+    "mapbox-gl-js-mock": "^0.16.0",
     "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
-    "uglify-js": "^2.4.23"
+    "uglify-js": "^2.4.23",
+    "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.13.1 || ^0.14.0 || ^0.15.0"
+    "mapbox-gl": "^0.16.0"
   },
   "dependencies": {
-    "babel-preset-es2015": "^6.3.13",
-    "browserify": "^13.0.0",
     "hat": "0.0.3",
     "point-geometry": "0.0.0",
     "ramda": "^0.17.1"

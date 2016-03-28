@@ -1,114 +1,58 @@
-'use strict';
+var Feature = require('./feature');
 
-import Feature from './feature';
-import { translatePoint } from '../util';
+var Polygon = function(ctx, geojson) {
+  Feature.call(this, ctx, geojson);
+  this.coordinates = this.coordinates.map(coords => coords.slice(0, -1));
+};
 
-/**
- * Polygon geometry class
- *
- * @param {Object} options
- * @param {Map} options.map - Instance of MapboxGl Map
- * @param {Object} [options.data] - GeoJSON feature
- * @returns {Polygon} this
- */
-export default class Polygon extends Feature {
+Polygon.prototype = Object.create(Feature.prototype);
 
-  constructor(options) {
-    if (!options.data) {
-      options.data = {
-        geometry: {
-          coordinates: [[[0, 0],[0, 0], [0, 0], [0, 0]]]
-        }
-      };
-    }
-    options.type = 'Polygon';
-    super(options);
-  }
+Polygon.prototype.isValid = function() {
+  return this.coordinates.every(function(ring) {
+    return ring.length > 2;
+  });
+};
 
-  onClick(e) {
-    var p = [ e.lngLat.lng, e.lngLat.lat ];
+Polygon.prototype.addCoordinate = function(path, lng, lat) {
+  var ids = path.split('.').map(x => parseInt(x, 10));
 
-    if (typeof this.vertexIdx === 'undefined') {
-      this.vertexIdx = 0;
-      this.first = p;
-      this.coordinates = [[p, p, p, p]];
-      this.ready = true;
-    }
+  var ring = this.coordinates[ids[0]];
 
-    if (this.vertexIdx > 1) {
-      this.coordinates[0].push(this.first);
-    }
+  ring.splice(ids[1], 0, [lng, lat]);
+};
 
-    this.coordinates[0][this.vertexIdx] = p;
-
-    this.vertexIdx++;
-  }
-
-  onMouseMove(e) {
-    this.coordinates[0][this.vertexIdx] = [ e.lngLat.lng, e.lngLat.lat ];
-  }
-
-  onStopDrawing(e) {
-    return this.onDoubleClick(e);
-  }
-
-  onDoubleClick(e) {
-    const ENTER = 13;
-    if (this.vertexIdx > 2) {
-      var idx = this.vertexIdx - (e.keyCode === ENTER ? 0 : 1);
-      var remove = e.keyCode === ENTER ? 1 : 2;
-      this.coordinates[0].splice(idx, remove);
-      this.created = true;
-    }
-    if (this.vertexIdx < 3 || this.coordinates[0].length < 4) {
-      this.toRemove = true;
-    }
-    super.onStopDrawing(e);
-  }
-
-  /**
-   * Update the position of a vertex in the polygon
-   *
-   * @param {Array<Number>} init - the position of the mouse at the start of the drag
-   * @param {Array<Number>} curr - the current position of the mouse
-   * @param {Number} idx - the index of the point being updated in `feature.geometry.coordinates`
-   * @private
-   */
-  moveVertex(init, curr, idx) {
-    if (!this.movingVertex) {
-      this.movingVertex = true;
-      this.initCoords = JSON.parse(JSON.stringify(this.coordinates[0][idx]));
-    }
-
-    var dx = curr.x - init.x;
-    var dy = curr.y - init.y;
-    var newPoint = translatePoint(this.initCoords, dx, dy, this._map);
-
-    this.coordinates[0][idx] = newPoint;
-    if (idx === 0) {
-      this.coordinates[0][this.coordinates[0].length - 1] = newPoint;
+Polygon.prototype.removeCoordinate = function(path) {
+  var ids = path.split('.').map(x => parseInt(x, 10));
+  var ring = this.coordinates[ids[0]];
+  if (ring) {
+    ring.splice(ids[1], 1);
+    if (ring.length < 3) {
+      this.coordinates.splice(ids[0], 1);
     }
   }
+};
 
-  /**
-   * Add a new vertex to a polygon in selected mode
-   *
-   * @param {Object} coords - The coordinates of the new vertex in the for { lng: <Number>, lat: <Number> }
-   * @param {Number} idx - the index at which the new point will be placed in `feature.geometry.coordinates`
-   * @private
-   */
-  addVertex(coords, idx) {
-    this.coordinates[0].splice(idx, 0, coords);
+Polygon.prototype.getCoordinate = function(path) {
+  var ids = path.split('.').map(x => parseInt(x, 10));
+  var ring = this.coordinates[ids[0]];
+  return JSON.parse(JSON.stringify(ring[ids[1]]));
+};
+
+Polygon.prototype.getCoordinates = function() {
+  return this.coordinates.map(coords => coords.concat([coords[0]]));
+};
+
+Polygon.prototype.updateCoordinate = function(path, lng, lat) {
+  var parts = path.split('.');
+  var ringId = parseInt(parts[0], 10);
+  var coordId = parseInt(parts[1], 10);
+
+  if (this.coordinates[ringId] === undefined) {
+    this.coordinates[ringId] = [];
   }
 
-  removeVertex(idx) {
-    this.coordinates[0].splice(idx, 1);
-    this.coordinates[0][this.coordinates[0].length - 1] = this.coordinates[0][0];
-    if (this.coordinates[0].length <= 3) {
-      this.ready = false;
-      return true;
-    }
-    return false;
-  }
+  this.coordinates[ringId][coordId] = [lng, lat];
+};
 
-}
+module.exports = Polygon;
+

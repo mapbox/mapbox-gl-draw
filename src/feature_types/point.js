@@ -1,33 +1,17 @@
-'use strict';
+var Feature = require('./feature');
 
-import Feature from './feature';
+var Point = function(ctx, geojson) {
+  Feature.call(this, ctx, geojson);
+};
 
-/**
- * Point geometry class
- *
- * @param {Object} options
- * @param {Map} options.map - Instance of MaboxGL Map
- * @param {Object} [options.data] - GeoJSON feature
- * @returns {Point} this
- */
-export default class Point extends Feature {
+Point.prototype = Object.create(Feature.prototype);
 
-  constructor(options) {
-    if (!options.data) {
-      options.data = {
-        geometry: {
-          coordinates: [0, 0]
-        }
-      };
-    }
-    options.type = 'Point';
-    super(options);
-  }
+Point.prototype.isValid = function() {
+  return typeof this.coordinates[0] === 'number';
+};
 
-  onClick(e) {
-    this._map.getContainer().classList.remove('mapbox-gl-draw_activated');
-    this.coordinates = [ e.lngLat.lng, e.lngLat.lat ];
-    this.created = true;
-    this.ready = true;
-  }
-}
+Point.prototype.updateCoordinate = function(path, lng, lat) {
+  this.coordinates = [lng, lat];
+};
+
+module.exports = Point;

@@ -4,7 +4,7 @@ import {
   createButton,
   translate,
   translatePoint
-} from '../src/util';
+} from '../src/lib/util';
 import test from 'tape';
 
 test('util', t => {

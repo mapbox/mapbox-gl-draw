@@ -4,13 +4,13 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
-  <link href='../node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet' />
-  <link href='../dist/mapbox-gl-draw.css' rel='stylesheet' />
+  <link href='/mapbox-gl.css' rel='stylesheet' />
+  <link href='/dist/mapbox-gl-draw.css' rel='stylesheet' />
   <style>
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
     .start-draw {
-      width: 330px;
+      width: 237px;
       position: absolute;
       left :10px;
       bottom: 10px;
@@ -37,31 +37,30 @@
   <div id='start-point'>POINT</div>
   <div id='start-line'>LINE</div>
   <div id='start-polygon'>POLYGON</div>
-  <div id='start-square'>SQUARE</div>
 </div>
 <div class='toggle'>
   <button id='addBtn'>add draw</button>
   <button id='removeBtn'>remove draw</button>
 </div>
-<script src='../node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
-<script src='../dist/mapbox-gl-draw.js'></script>
+<script src='/mapbox-gl.js'></script>
+<script src='/mapbox-gl-draw.js'></script>
 <script type='text/javascript'>
-	// making run more like github.com/mapbox/mapbox-gl-js
-	//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
-	var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
-	mapboxgl.accessToken = args.access_token || localStorage.accessToken;
-	// could work this further but going off the above example
-	location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
-		switch(i){
-		case 0: args.zoom = val; break;
-		case 1: args.latitude = val; break;
-		case 2:
-			args.longitude = val;
-			if(args.latitude) args.latlng = [val, args.latitude];
-		break;
-		};
-		return args;
-	}, args);
+// making run more like github.com/mapbox/mapbox-gl-js
+//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
+var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
+mapboxgl.accessToken = args.access_token || localStorage.accessToken;
+// could work this further but going off the above example
+location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
+  switch(i){
+  case 0: args.zoom = val; break;
+  case 1: args.latitude = val; break;
+  case 2:
+    args.longitude = val;
+    if(args.latitude) args.latlng = [val, args.latitude];
+  break;
+  };
+  return args;
+}, args);
 
   var map = new mapboxgl.Map({
     container: 'map',
@@ -96,60 +95,20 @@
     var startPoint = document.getElementById('start-point');
     var startLine = document.getElementById('start-line');
     var startPolygon = document.getElementById('start-polygon');
-    var startSquare = document.getElementById('start-square');
+
 
     startPoint.onclick = function() {
-      Draw.startDrawing(Draw.types.POINT);
+      Draw.changeMode('draw_point');
     };
 
     startLine.onclick = function() {
-      Draw.startDrawing(Draw.types.LINE);
+      Draw.changeMode('draw_line_string');
     };
 
     startPolygon.onclick = function() {
-      Draw.startDrawing(Draw.types.POLYGON);
+      Draw.changeMode('draw_polygon');
     };
 
-    startSquare.onclick = function() {
-      Draw.startDrawing(Draw.types.SQUARE);
-    };
-
-
-    map.on('draw.set', function(playload) {
-      console.log('draw.set', playload);
-    });
-    map.on('draw.delete', function(playload) {
-      console.log('draw.delete', playload);
-    });
-    map.on('draw.select.start', function(playload) {
-      console.log('draw.select.start', playload);
-    });
-    map.on('draw.select.end', function(playload) {
-      console.log('draw.select.end', playload);
-    });
-
-    var firstId = Draw.add({ type: 'Point', coordinates: [10, 10] });
-    console.log('SET', Draw.get(firstId).geometry.coordinates, '->', 10, 10);
-    Draw.update(firstId, { type: 'Point', coordinates: [-74.0023, 40.7104] });
-    console.log('UPDATE', Draw.get(firstId).geometry.coordinates, '->', -74.0023, 40.7104);
-
-    var secondId = Draw.add({ type: 'Point', coordinates: [0, 0] }, {permanent: true});
-    var all = Draw.getAll();
-    console.log('Get All', all.features.length, '->', 2);
-    console.log('Get All has ids', all.features.filter(function(feature){
-      return feature.id === firstId || feature.id === secondId;
-    }).length === 2);
-    Draw.destroy(secondId);
-    console.log('Destroy', Draw.get(secondId), '-> undefined');
-
-    var currentId = 'this-is-a-test';
-    var thridId = Draw.add({type: 'Point', coordinates: [0, 0], id:currentId});
-    console.log('provided ids are used', currentId, '->', thridId);
-    var getWithCurrent = Draw.get(currentId);
-    console.log('and can get features', getWithCurrent.id, '->', thridId);
-
-    Draw.clear();
-    console.log(Draw.get(firstId), '-> undefined');
   });
 
   (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();

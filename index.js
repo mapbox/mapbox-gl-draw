@@ -1,44 +1,32 @@
 'use strict';
 
-/** A drawing component for mapboxgl
- * @class mapboxgl.Draw
- *
- * @param {Object} options
- * @param {String} [options.position=top-left] A string indicating the control's position on the map. Options are `topright`, `topleft`, `bottomright`, `bottomleft`
- * @param {Boolean} [options.keybindings=true]
- * @param {Array<Object>} [options.geoJSON=[]] - an array of GeoJSON objects
- * @param {Boolean} [options.controls.marker=true]
- * @param {Boolean} [options.controls.line=true]
- * @param {Boolean} [options.controls.shape=true]
- * @param {Boolean} [options.controls.square=true]
- * @return {Draw} `this`
- * @example
- * // in the browser
- * var map = new mapboxgl.Map({
- *   container: 'map',
- *   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
- * });
- * var Draw = mapboxgl.Draw();
- * map.addControl(Draw);
- *
- * // or using using node and browserify
- * var mapboxgl = require('mapbox-gl');
- * var GLDraw = require('mapbox-gl-draw');
- * var map = new mapboxgl.Map({
- *   container: 'map',
- *   style: 'https://www.mapbox.com/mapbox-gl-styles/styles/outdoors-v7.json'
- * });
- * var Draw = GLDraw();
- * mapboxgl.addControl(Draw);
- */
-import Draw from './src/draw';
+require('./src/lib/polyfills');
+var Setup = require('./src/setup');
+var Options = require('./src/options');
+var API = require('./src/api');
+const types = require('./src/lib/types');
 
-function exportFn(options) {
-  return new Draw(options);
-}
+var Draw = function(options) {
+  options = Options(options);
+
+  var ctx = {
+    options: options
+  };
+
+  var api = API(ctx);
+  ctx.api = api;
+
+  var setup = Setup(ctx);
+  api.addTo = setup.addTo;
+  api.remove = setup.remove;
+  api.types = types;
+  api.options = options;
+
+  return api;
+};
 
 if (window.mapboxgl) {
-  mapboxgl.Draw = exportFn;
+  mapboxgl.Draw = Draw;
 } else if (typeof module !== 'undefined') {
-  module.exports = exportFn;
+  module.exports = Draw;
 }

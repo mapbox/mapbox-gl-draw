@@ -15,52 +15,41 @@ test('API test', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
-  t.test('clear', t => {
+  t.test('deleteAll', t => {
     Draw.add(feature);
-    Draw.clear();
-    t.equals(Draw.getAll().features.length, 0, 'Draw.clear removes all geometries');
+    Draw.deleteAll();
+    t.equals(Draw.getAll().features.length, 0, 'Draw.deleteAll removes all geometries');
     t.end();
   });
 
-  t.test('startDrawing', t => {
-    Draw.startDrawing(Draw.types.SQUARE);
-    var featureCollection = Draw.getAll();
-    t.equals(featureCollection.features[0].geometry.type, 'Polygon', 'Square');
+  t.test('changeMode', t => {
 
-    Draw.startDrawing(Draw.types.POLYGON);
+    Draw.changeMode('draw_'+Draw.types.POLYGON);
     var featureCollection = Draw.getAll();
     t.equals(featureCollection.features[0].geometry.type, 'Polygon', 'Polygon');
 
-    Draw.startDrawing(Draw.types.POINT);
+    Draw.changeMode('draw_'+Draw.types.POINT);
     var featureCollection = Draw.getAll();
     t.equals(featureCollection.features[0].geometry.type, 'Point', 'Point');
 
-    Draw.startDrawing(Draw.types.LINE);
+    Draw.changeMode('draw_'+Draw.types.LINE);
     var featureCollection = Draw.getAll();
     t.equals(featureCollection.features[0].geometry.type, 'LineString', 'Line');
+    Draw.deleteAll();
 
-    Draw.clear();
     t.end();
   });
 
   t.test('add', t => {
     var id = Draw.add(feature);
-    t.ok(id, 'valid string id returned on add');
-
-    // set permanent feature
-    id = Draw.add(feature, { permanent: true });
-    Draw.select(id);
-    t.equals(
-      Draw._store.getSelectedIds().indexOf(id),
-      -1,
-      'permanent feature is not inserted into selected store when clicked'
-    );
+    t.equals(typeof id, 'string', 'valid string id returned on add');
 
     // add featureCollection
-    var anotherId = Draw.add(features.featureCollection);
-    t.ok(anotherId, 'valid string id returned when adding a featureCollection');
+    var listOfIds = Draw.add(features.featureCollection);
+    t.equals(listOfIds.length, features.featureCollection.features.length,
+      'valid string id returned when adding a featureCollection');
 
-    Draw.clear();
+    Draw.deleteAll();
     t.end();
   });
 
@@ -73,7 +62,7 @@ test('API test', t => {
       'the geometry added is the same returned by Draw.get'
     );
 
-    Draw.clear();
+    Draw.deleteAll();
     t.end();
   });
 
@@ -84,47 +73,13 @@ test('API test', t => {
       Draw.getAll().features[0].geometry,
       'the geometry added is the same returned by Draw.getAll'
     );
-    Draw.clear();
+    Draw.deleteAll();
     t.end();
   });
 
-  t.test('update', t => {
-    var fff = JSON.parse(JSON.stringify(feature));
-    var id = Draw.add(fff);
-    fff.geometry.coordinates = [1, 1];
-    Draw.update(id, fff);
-    var f2 = Draw.get(id);
-    t.deepEquals(
-      fff.geometry,
-      f2.geometry,
-      'update updates the geometry and preservers the id'
-    );
-    Draw.clear();
-    t.end();
-  });
-
-  t.test('select', t => {
+  t.test('delete', t => {
     var id = Draw.add(feature);
-    t.deepEquals(
-      Draw.getSelected(),
-      { features: [], type: 'FeatureCollection' },
-      'no features selected');
-    Draw.select(id);
-    var selected = Draw.getSelected().features;
-    t.equals(selected.length, 1, '1 feature selected');
-    t.deepEquals(selected[0].geometry, feature.geometry);
-    Draw.deselect(id);
-    t.deepEquals(
-      Draw.getSelected(),
-      { features: [], type: 'FeatureCollection' },
-      'no features selected');
-    Draw.clear();
-    t.end();
-  });
-
-  t.test('destroy', t => {
-    var id = Draw.add(feature);
-    Draw.destroy(id);
+    Draw.delete(id);
     t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
     t.end();
   });

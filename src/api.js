@@ -1,199 +1,66 @@
-'use strict';
+var hat = require('hat');
 
-import Line from './feature_types/line';
-import Point from './feature_types/point';
-import Polygon from './feature_types/polygon';
-import Control from './control';
+var featureTypes = {
+  'Polygon': require('./feature_types/polygon'),
+  'LineString': require('./feature_types/line_string'),
+  'Point': require('./feature_types/point')
+};
 
-export default class API extends Control {
+module.exports = function(ctx) {
 
-  constructor() {
-    super();
-    this.types = {
-      SQUARE: 'square',
-      POLYGON: 'polygon',
-      LINE: 'line',
-      POINT: 'point'
-    };
-  }
+  return {
+    add: function (geojson) {
+      geojson = JSON.parse(JSON.stringify(geojson));
+      if (geojson.type === 'FeatureCollection') {
+        return geojson.features.map(feature => this.add(feature));
+      }
 
-  /**
-   * add a feature
-   * @param {Object} feature - GeoJSON feature
-   * @param {Object} [options]
-   * @pata {Boolean} [options.permanent=false] - disable selection for feature
-   * @returns {Number} draw id of the set feature or an array of
-   * draw ids if a feature collection was added
-   */
-  add(feature, options) {
-    feature = JSON.parse(JSON.stringify(feature));
-    if (feature.type === 'FeatureCollection') {
-      return feature.features.map(subFeature => this.add(subFeature, options));
-    }
+      if (!geojson.geometry) {
+        geojson = {
+          type: 'Feature',
+          id: geojson.id,
+          properties: geojson.properties || {},
+          geometry: geojson
+        };
+      }
 
-    if (!feature.geometry) {
-      feature = {
-        type: 'Feature',
-        id: feature.id,
-        geometry: feature
+      geojson.id = geojson.id || hat();
+      var model = featureTypes[geojson.geometry.type];
+
+      if(model === undefined) {
+        throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+      }
+
+      var internalFeature = new model(ctx, geojson);
+      var id = ctx.store.add(internalFeature);
+      ctx.store.render();
+      return id;
+    },
+    get: function (id) {
+      var feature = ctx.store.get(id);
+      if (feature) {
+        return feature.toGeoJSON();
+      }
+    },
+    getAll: function() {
+      return {
+        type: 'FeatureCollection',
+        features: ctx.store.getAll().map(feature => feature.toGeoJSON())
       };
+    },
+    delete: function(id) {
+      ctx.store.delete([id]);
+      ctx.store.render();
+    },
+    deleteAll: function() {
+      ctx.store.delete(ctx.store.getAll().map(feature => feature.id));
+      ctx.store.render();
+    },
+    changeMode: function(mode, opts) {
+      ctx.events.changeMode(mode, opts);
+    },
+    trash: function() {
+      ctx.events.fire('trash');
     }
-
-    if (!options) {
-      options = {};
-    }
-    options.map = this._map;
-    options.data = feature;
-
-    var internalFeature;
-    switch (feature.geometry.type) {
-      case 'Point':
-        internalFeature = new Point(options);
-        break;
-      case 'LineString':
-        internalFeature = new Line(options);
-        break;
-      case 'Polygon':
-        internalFeature = new Polygon(options);
-        break;
-      default:
-        throw new Error('MapboxGL Draw: Unsupported geometry type "' + feature.geometry.type + '"');
-    }
-
-    internalFeature.ready = true;
-    internalFeature.created = true;
-
-    var id = this._store.set(internalFeature);
-    this._store._features[id].commited = true;
-    if (this.options.interactive) {
-      this.select(internalFeature.drawId);
-    }
-
-    return internalFeature.drawId;
-  }
-
-  /**
-   * Updates an existing feature
-   * @param {String} id - the drawId of the feature to update
-   * @param {Object} feature - a GeoJSON feature
-   * @returns {Draw} this
-   */
-  update(id, feature) {
-    feature = JSON.parse(JSON.stringify(feature));
-    var _feature = this._store.get(id);
-    _feature.setCoordinates(feature.coordinates || feature.geometry.coordinates);
-    if (feature.properties) _feature.setProperties(feature.properties);
-    this._store._render();
-    return this;
-  }
-
-  /**
-   * get a geometry by its draw id
-   * @param {String} id - the draw id of the geometry
-   */
-  get(id) {
-    var feature = this._store.get(id);
-    return feature && feature.toGeoJSON();
-  }
-
-  /**
-   * get all draw features
-   * @returns {Object} a GeoJSON feature collection
-   */
-  getAll() {
-    return this._store.getAllIds()
-      .map(id => this._store.get(id).toGeoJSON())
-      .reduce(function(featureCollection, feature) {
-        featureCollection.features.push(feature);
-        return featureCollection;
-      }, {
-        type: 'FeatureCollection',
-        features: []
-      });
-  }
-
-  startDrawing() {
-    return null;
-  }
-
-  /**
-   * select a feature
-   * @param {String} id - the drawId of the feature
-   * @returns {Draw} this
-   */
-  select(id) {
-    if (this._store.get(id).options.permanent !== true) {
-      this._store.select(id);
-    }
-    return this;
-  }
-
-  /**
-   * select all features
-   * @param {String} id - the drawId of the feature
-   * @returns {Draw} this
-   */
-  selectAll() {
-    this._store.getAllIds()
-      .filter(id => this._store.get(id).options.permanent !== true)
-      .forEach(id => this.select(id));
-    return this;
-  }
-
-  /**
-   * deselect a feature
-   * @param {String} id - the drawId of the feature
-   * @returns {Draw} this
-   */
-  deselect(id) {
-    this._store.commit(id);
-    return this;
-  }
-
-  /**
-   * deselect all features
-   * @param {String} id - the drawId of the feature
-   * @returns {Draw} this
-   */
-  deselectAll() {
-    this._store.getSelectedIds()
-      .forEach(id => this.commit(id));
-    return this;
-  }
-
-  /**
-   * get selected feature collection of features
-   * @return {Object} a feature collection of features that are selected
-   */
-  getSelected() {
-    return this._store.getSelectedIds()
-      .map(id => this._store.get(id).toGeoJSON())
-      .reduce(function(featureCollection, feature) {
-        featureCollection.features.push(feature);
-        return featureCollection;
-      }, {
-        type: 'FeatureCollection',
-        features: []
-      });
-  }
-
-  /**
-   * remove a geometry by its draw id
-   * @param {String} id - the drawid of the geometry
-   * @returns {Draw} this
-   */
-  destroy(id) {
-    this._store.delete(id);
-    return this;
-  }
-
-  /**
-   * remove all features
-   * @returns {Draw} this
-   */
-  clear() {
-    this._store.deleteAll();
-    return this;
-  }
-
-}
+  };
+};
