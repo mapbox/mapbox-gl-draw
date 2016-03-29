@@ -9,6 +9,8 @@ var Store = module.exports = function(ctx) {
   this.featureHistory = {};
   this.render = throttle(render, 16, this);
   this.isDirty = false;
+  this.zoomLevel = ctx.map.getZoom();
+  this.zoomRender = this.zoomLevel;
 };
 
 Store.prototype.needsUpdate = function(geojson) {
@@ -19,6 +21,13 @@ Store.prototype.needsUpdate = function(geojson) {
 
 Store.prototype.setDirty = function() {
   this.isDirty = true;
+};
+
+Store.prototype.changeZoom = function() {
+  this.zoomLevel = this.ctx.map.getZoom();
+  if (Math.abs(this.zoomRender - this.zoomLevel) > 1) {
+    this.render();
+  }
 };
 
 Store.prototype.add = function(feature) {

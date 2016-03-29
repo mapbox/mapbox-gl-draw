@@ -52,6 +52,11 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         });
       });
 
+      this.on('mousedown', isOfMetaType('too-small'), function(e) {
+        var bounds = JSON.parse(e.featureTarget.properties.bounds, {padding: 100});
+        ctx.map.fitBounds(bounds);
+      });
+
       this.on('mousedown', isFeature, function(e) {
         dragging = true;
         startPos = e.lngLat;
