@@ -11,9 +11,9 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#000000',
-      'line-dasharray': [0, 2],
-      'line-width': 3
+      'line-color': '#FF9800',
+      'line-dasharray': [0.2, 2],
+      'line-width': 4
     },
     'interactive': true
   },
@@ -22,7 +22,7 @@ module.exports = [
     'type': 'fill',
     'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
     'paint': {
-      'fill-color': '#000000',
+      'fill-color': '#FF9800',
       'fill-opacity': 0.25
     },
     'interactive': true
@@ -36,48 +36,37 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#000000',
-      'line-dasharray': [2, 2],
-      'line-width': 3
+      'line-color': '#FF9800',
+      'line-dasharray': [0.2, 2],
+      'line-width': 4
     },
     'interactive': true
   },
+
+
   {
-    'id': 'gl-draw-active-point-highlight',
+    'id': 'gl-draw-point-mid-outline',
     'type': 'circle',
     'filter': ['all',
       ['==', '$type', 'Point'],
-      ['!=', 'meta', 'midpoint'],
-      ['==', 'active', 'true']],
+      ['==', 'meta', 'midpoint']],
     'paint': {
       'circle-radius': 7,
-      'circle-color': '#ff0000'
+      'circle-opacity': 0.65,
+      'circle-color': '#fff'
     },
     'interactive': true
   },
-  {
-    'id': 'gl-draw-active-point',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'active', 'true'],
-      ['!=', 'meta', 'midpoint']
-    ],
-    'paint': {
-      'circle-radius': 5,
-      'circle-color': '#000000'
-    },
-    'interactive': true
-  },
-  {
+    {
     'id': 'gl-draw-point-mid',
     'type': 'circle',
     'filter': ['all',
       ['==', '$type', 'Point'],
       ['==', 'meta', 'midpoint']],
     'paint': {
-      'circle-radius': 4,
-      'circle-color': '#000000'
+      'circle-radius': 6,
+      'circle-opacity': 0.65,
+      'circle-color': '#FF9800'
     },
     'interactive': true
   },
@@ -86,8 +75,8 @@ module.exports = [
     'type': 'fill',
     'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon']],
     'paint': {
-      'fill-color': '#ff00ff',
-      'fill-outline-color': '#ff00ff',
+      'fill-color': '#03A9F4',
+      'fill-outline-color': '#03A9F4',
       'fill-opacity': 0.25
     },
     'interactive': true
@@ -101,8 +90,8 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#ff00ff',
-      'line-width': 2
+      'line-color': '#03A9F4',
+      'line-width': 3
     },
     'interactive': true
   },
@@ -115,18 +104,75 @@ module.exports = [
       'line-join': 'round'
     },
     'paint': {
-      'line-color': '#ff00ff',
-      'line-width': 2
+      'line-color': '#03A9F4',
+      'line-width': 3
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-active-point',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['==', 'active', 'true'],
+      ['!=', 'meta', 'midpoint']
+    ],
+    'paint': {
+      'circle-radius': 9,
+      'circle-color': '#fff'
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-active-point-highlight',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['!=', 'meta', 'midpoint'],
+      ['==', 'active', 'true']],
+    'paint': {
+      'circle-radius': 7,
+      'circle-color': '#EF6C00'
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-polygon-point-outline',
+    'type': 'circle',
+    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'vertex']],
+    'paint': {
+      'circle-radius': 9,
+      'circle-color': '#fff'
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-polygon-point',
+    'type': 'circle',
+    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'vertex']],
+    'paint': {
+      'circle-radius': 7,
+      'circle-color': '#FF9800'
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-point-point-outline',
+    'type': 'circle',
+    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature']],
+    'paint': {
+      'circle-radius': 9,
+      'circle-color': '#fff'
     },
     'interactive': true
   },
   {
     'id': 'gl-draw-point',
     'type': 'circle',
-    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point']],
+    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature']],
     'paint': {
-      'circle-radius': 5,
-      'circle-color': '#ff00ff'
+      'circle-radius': 7,
+      'circle-color': '#03A9F4'
     },
     'interactive': true
   }
