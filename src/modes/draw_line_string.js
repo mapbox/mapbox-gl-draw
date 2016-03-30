@@ -69,20 +69,8 @@ module.exports = function(ctx) {
       }
     },
     render: function(geojson, push) {
-      geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
-
-      if (geojson.properties.active === 'true' && pos === 0 && geojson.geometry.coordinates[0] !== undefined) {
-        var coords = [geojson.geometry.coordinates[0][0], geojson.geometry.coordinates[0][1]];
-        push({
-          'type': 'Feature',
-          'properties': geojson.properties,
-          'geometry': {
-            'coordinates': coords,
-            'type': 'Point'
-          }
-        });
-      }
-      else if (geojson.geometry.coordinates[0] !== undefined) {
+      if (geojson.geometry.coordinates[0] !== undefined) {
+        geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
         push(geojson);
       }
     }
