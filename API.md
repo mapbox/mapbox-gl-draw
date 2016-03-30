@@ -208,6 +208,12 @@ This is fired every time a feature is deleted. The payload is a list GeoJSON fea
 
 This is fired when feature coordinates are changed. It is fired just after the changes have been sent to be rendered. The payload is the GeoJSON of all changed features. Deleted features will not show up here.
 
+```js
+{
+  "features": [{ ... }]
+}
+```
+
 ### draw.mode.default.selected.start
 
 This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.

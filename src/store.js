@@ -11,6 +11,12 @@ var Store = module.exports = function(ctx) {
   this.isDirty = false;
 };
 
+Store.prototype.needsUpdate = function(geojson) {
+  var feature = this.features[geojson.id];
+  var coords = JSON.stringify(geojson.geometry.coordinates);
+  return !(feature && this.featureHistory[geojson.id] === coords);
+};
+
 Store.prototype.setDirty = function() {
   this.isDirty = true;
 };

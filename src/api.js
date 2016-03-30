@@ -25,15 +25,17 @@ module.exports = function(ctx) {
       }
 
       geojson.id = geojson.id || hat();
-      var model = featureTypes[geojson.geometry.type];
+      if (ctx.store.needsUpdate(geojson)) {
+        var model = featureTypes[geojson.geometry.type];
 
-      if(model === undefined) {
-        throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+        if(model === undefined) {
+          throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+        }
+
+        var internalFeature = new model(ctx, geojson);
+        var id = ctx.store.add(internalFeature);
+        ctx.store.render();
       }
-
-      var internalFeature = new model(ctx, geojson);
-      var id = ctx.store.add(internalFeature);
-      ctx.store.render();
       return id;
     },
     get: function (id) {
