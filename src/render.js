@@ -52,11 +52,12 @@ module.exports = function render() {
     this.featureIds.forEach((id) => {
       let featureInternal = this.features[id].internal(mode);
       var coords = JSON.stringify(featureInternal.geometry.coordinates);
-      this.featureHistory[id] = this.featureHistory[id] || '';
 
-      if (this.featureHistory[id] !== coords) {
+      if (this.ctx.store.needsUpdate(featureInternal)) {
         this.featureHistory[id] = coords;
-        changed.push(this.features[id].toGeoJSON());
+        if (this.features[id].isValid()) {
+          changed.push(this.features[id].toGeoJSON());
+        }
       }
 
       this.ctx.events.currentModeRender(featureInternal, pusher);
@@ -76,7 +77,10 @@ module.exports = function render() {
       features: features.hot
     });
 
-    this.ctx.map.fire('draw.changed', changed);
+    if (changed.length) {
+      this.ctx.map.fire('draw.changed', {features: changed});
+    }
+
   }
   this.isDirty = false;
 };
