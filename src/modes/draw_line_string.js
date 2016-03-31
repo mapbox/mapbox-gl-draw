@@ -30,10 +30,19 @@ module.exports = function(ctx) {
     }
   };
 
-  var onClick = function() {
-    // did we click on the last point
-    // did we click on the first point
-    pos++;
+  var onClick = function(e) {
+     if (pos > 0 && feature.coordinates[0][0] === e.lngLat.lng && feature.coordinates[0][1] === e.lngLat.lat) {
+      // did we click on the first point
+      onFinish();
+    }
+    else if (pos > 0 && feature.coordinates[pos - 1][0] === e.lngLat.lng && feature.coordinates[pos - 1][1] === e.lngLat.lat) {
+      // click on the last point
+      onFinish();
+    }
+    else {
+      feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
+      pos++;
+    }
   };
 
   var onFinish = function() {

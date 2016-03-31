@@ -33,7 +33,8 @@ module.exports = function(event, ctx) {
     }
   };
 
-  var features = ctx.map.queryRenderedFeatures([event.point.x, event.point.y], {});
+  var grabSize = .5;
+  var features = ctx.map.queryRenderedFeatures([[event.point.x - grabSize, event.point.y - grabSize], [event.point.x + grabSize, event.point.y + grabSize]], {});
 
   features = features.filter(function(feature) {
     var meta = feature.properties.meta;
