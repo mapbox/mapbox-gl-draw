@@ -1,3 +1,9 @@
+## 0.6.0-rc2
+
+Fresh new style. Better selection ability for lines. Double click to end drawing a line.
+
+`draw.changed` has been updated to emit an object `{features: []}` and to only emit when something has changed and is in a valid state.
+
 ## 0.6.0-rc1
 
 This is a preview release of the work being done in the [0.6.0](https://github.com/mapbox/mapbox-gl-draw/milestones/0.6.0) milestone.
