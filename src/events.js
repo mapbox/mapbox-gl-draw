@@ -18,6 +18,7 @@ module.exports = function(ctx) {
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
   events.drag = function(event) {
+    ctx.ui.setClass({mouse: 'drag'});
     currentMode.drag(event);
   };
 
@@ -116,6 +117,7 @@ module.exports = function(ctx) {
         opts: opts
       });
 
+      ctx.store.setDirty();
       ctx.store.render();
     },
     fire: function(name, event) {
