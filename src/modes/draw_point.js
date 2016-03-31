@@ -48,7 +48,7 @@ module.exports = function(ctx) {
     },
     render: function(geojson, push) {
       geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
-      if (geojson.properties.active !== 'true' || geojson.geometry.coordinates.length !== 0) {
+      if (geojson.properties.active === 'false') {
         push(geojson);
       }
     }

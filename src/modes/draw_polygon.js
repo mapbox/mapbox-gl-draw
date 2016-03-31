@@ -66,18 +66,7 @@ module.exports = function(ctx) {
     render: function(geojson, push) {
       geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
 
-      if (geojson.geometry.coordinates[0][0] !== undefined && geojson.properties.active === 'true' && pos === 0) {
-        let coords = [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]];
-         push({
-          'type': 'Feature',
-          'properties': geojson.properties,
-          'geometry': {
-            'coordinates': coords,
-            'type': 'Point'
-          }
-        });
-      }
-      else if (geojson.properties.active === 'true' && pos === 1) {
+      if (geojson.properties.active === 'true' && pos === 1) {
         let coords = [[geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]];
         push({
           'type': 'Feature',
@@ -88,7 +77,7 @@ module.exports = function(ctx) {
           }
         });
       }
-      else if (geojson.properties.active === 'false' || geojson.geometry.coordinates[0][0] !== undefined) {
+      else if (geojson.properties.active === 'false' || pos > 1) {
         push(geojson);
       }
     }
