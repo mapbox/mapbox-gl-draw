@@ -25,7 +25,18 @@ module.exports = function(ctx) {
     addButtons: function() {
       var controlClass = 'mapbox-gl-draw_ctrl-draw-btn';
       var controls = ctx.options.controls;
-      var ctrlPos = 'mapboxgl-ctrl-top-left';
+
+      var ctrlPos = 'mapboxgl-ctrl-';        
+      switch (ctx.options.position) {
+          case 'top-left':
+          case 'top-right':
+          case 'bottom-left':
+          case 'bottom-right':
+              ctrlPost += ctx.options.position;
+              break;
+          default:
+              ctrlPos += 'top-left';
+      }        
 
       let controlContainer = ctx.container.getElementsByClassName(ctrlPos)[0].getElementsByClassName('mapboxgl-ctrl-group')[0];
 
