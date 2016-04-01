@@ -26,17 +26,17 @@ module.exports = function(ctx) {
       var controlClass = 'mapbox-gl-draw_ctrl-draw-btn';
       var controls = ctx.options.controls;
 
-      var ctrlPos = 'mapboxgl-ctrl-';        
+      var ctrlPos = 'mapboxgl-ctrl-';
       switch (ctx.options.position) {
           case 'top-left':
           case 'top-right':
           case 'bottom-left':
           case 'bottom-right':
-              ctrlPost += ctx.options.position;
+              ctrlPos += ctx.options.position;
               break;
           default:
               ctrlPos += 'top-left';
-      }        
+      }
 
       let controlContainer = ctx.container.getElementsByClassName(ctrlPos)[0].getElementsByClassName('mapboxgl-ctrl-group')[0];
 
