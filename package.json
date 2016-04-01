@@ -15,7 +15,7 @@
     "test": "npm run lint && tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "build": "NODE_ENV=production browserify index.js > dist/mapbox-gl-draw.js",
-    "prepublish": "set NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "node server.js"
   },
   "repository": {
