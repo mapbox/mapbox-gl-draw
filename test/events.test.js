@@ -50,4 +50,5 @@ test('draw.deleted event', t => {
   });
   let id = Draw.add(feature);
   Draw.delete(id);
+  Draw.remove();
 });

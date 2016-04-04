@@ -37,4 +37,4 @@ module.exports = function(geojson, doMidpoints, push, map, selectedCoordPaths) {
       twoVertex = oneVertex;
     }
   }
-}
+};

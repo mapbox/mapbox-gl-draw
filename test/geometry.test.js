@@ -12,5 +12,6 @@ test('Geometry class tests', t => {
   var Draw = GLDraw();
   map.addControl(Draw);
 
+  Draw.remove();
   t.end();
 });

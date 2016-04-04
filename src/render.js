@@ -1,6 +1,6 @@
 
 module.exports = function render() {
-  var isStillAlive = this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
+  var isStillAlive = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
   if (isStillAlive) { // checks to make sure we still have a map
     var mode = this.ctx.events.currentModeName();
     this.ctx.ui.setClass({

@@ -9,13 +9,13 @@ module.exports = function(ctx) {
     mode: null,
     feature: null,
     mouse: null
-  }
+  };
 
   var nextClass = {
     mode: null,
     feature: null,
     mouse: null
-  }
+  };
 
   var classIsDirty = false;
 
@@ -33,14 +33,14 @@ module.exports = function(ctx) {
 
         var className = [];
 
-        nextClass.feature = nextClass.mouse === 'none' ? null :  nextClass.feature;
+        nextClass.feature = nextClass.mouse === 'none' ? null : nextClass.feature;
 
         classTypes.forEach(function(type) {
-          className.push(type+'-'+nextClass[type]);
+          className.push(type + '-' + nextClass[type]);
           if (nextClass[type] !== currentClass[type]) {
-            remove.push(type+'-'+currentClass[type]);
+            remove.push(type + '-' + currentClass[type]);
             if (nextClass[type] !== null) {
-              add.push(type+'-'+nextClass[type]);
+              add.push(type + '-' + nextClass[type]);
             }
           }
         });
@@ -162,9 +162,11 @@ module.exports = function(ctx) {
         var buttonIds = Object.keys(buttons);
 
         buttonIds.forEach(buttonId => {
-            var button = buttons[buttonId];
+          var button = buttons[buttonId];
+          if (button.parentNode) {
             button.parentNode.removeChild(button);
-            buttons[buttonId] = null;
+          }
+          buttons[buttonId] = null;
         });
       }
     };

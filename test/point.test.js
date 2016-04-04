@@ -26,6 +26,7 @@ test('Point geometry class', t => {
     t.equals('Point', feats[0].geometry.type, 'of the right type');
     t.deepEquals([10, 10], feats[0].geometry.coordinates, 'in the right spot');
 
+    Draw.remove();
     t.end();
   });
 
