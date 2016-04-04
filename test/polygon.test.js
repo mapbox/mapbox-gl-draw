@@ -41,9 +41,9 @@ test('Polygon geometry class', t => {
     var feats = Draw.getAll().features;
     t.equals(1, feats.length, 'only one');
     t.equals('Polygon', feats[0].geometry.type, 'of the right type');
-    console.log(feature.geometry.coordinates[0].length);
     t.equals(feature.geometry.coordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
     t.deepEquals(feature.geometry.coordinates,    feats[0].geometry.coordinates, 'in the right spot');
+    Draw.remove();
     t.end();
   });
 });

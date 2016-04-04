@@ -33,5 +33,6 @@ test('Line draw class', function lineDrawClass(t){
     keyCode: 13
   });
 
+  Draw.remove();
   t.end();
 });

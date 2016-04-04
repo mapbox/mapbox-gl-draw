@@ -45,7 +45,7 @@
     "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
     "mapbox-gl": "^0.16.0",
-    "mapbox-gl-js-mock": "^0.16.0",
+    "mapbox-gl-js-mock": "^0.16.1",
     "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23",

@@ -21,10 +21,12 @@ module.exports = function(ctx) {
   var pos = 0;
 
   var onMouseMove = function(e) {
+    ctx.ui.setClass({mouse:'add'});
     feature.updateCoordinate(`0.${pos}`, e.lngLat.lng, e.lngLat.lat);
   };
 
   var onClick = function(e) {
+    ctx.ui.setClass({mouse:'add'});
     if (pos > 0 && feature.coordinates[0][0][0] === e.lngLat.lng && feature.coordinates[0][0][1] === e.lngLat.lat) {
       // did we click on the first point
       onFinish();
@@ -48,8 +50,8 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
+      ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POLYGON);
-      ctx.ui.setClass('mapbox-gl-draw_mouse-add');
       this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
@@ -58,7 +60,6 @@ module.exports = function(ctx) {
     },
     stop: function() {
       ctx.ui.setButtonInactive(types.POLYGON);
-      ctx.ui.clearClass();
       if (!feature.isValid()) {
         ctx.store.delete([feature.id]);
       }

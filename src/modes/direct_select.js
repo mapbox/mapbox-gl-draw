@@ -1,17 +1,16 @@
 var {noFeature, isOfMetaType, isShiftDown} = require('../lib/common_selectors');
+var addCoords = require('../lib/add_coords');
 
-var toMidpoint = require('../lib/to_midpoint');
-var toVertex = require('../lib/to_vertex');
-
-module.exports = function(ctx, featureId) {
+module.exports = function(ctx, opts) {
+  var featureId = opts.featureId;
   var feature = ctx.store.get(featureId);
 
-  var dragging = false;
-  var startPos = null;
+  var dragging = opts.isDragging || false;
+  var startPos = opts.startPos || null;
   var coordPos = null;
   var numCoords = null;
 
-  var selectedCoordPaths = [];
+  var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
   var onVertex = function(e) {
     dragging = true;
@@ -41,7 +40,6 @@ module.exports = function(ctx, featureId) {
 
   return {
     start: function() {
-      ctx.ui.setClass('mapbox-gl-draw_mouse-direct-select');
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
       this.on('drag', () => {
@@ -68,12 +66,9 @@ module.exports = function(ctx, featureId) {
         numCoords = null;
         startPos = null;
       });
-      this.on('click', (e) => noFeature(e) && selectedCoordPaths.length === 0, function(e) {
+      this.on('click', noFeature, function(e) {
         e.originalEvent.stopPropagation();
-        ctx.events.changeMode('simple_select', [featureId]);
-      });
-      this.on('click', e => noFeature(e) && selectedCoordPaths.length > 0, function() {
-        selectedCoordPaths = [];
+        ctx.events.changeMode('simple_select');
       });
       this.on('trash', () => selectedCoordPaths.length > 0, function() {
         selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
@@ -87,46 +82,12 @@ module.exports = function(ctx, featureId) {
         ctx.events.changeMode('simple_select', [featureId]);
       });
     },
-    stop: function() {
-      ctx.ui.clearClass();
-    },
+    stop: function() {},
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
         geojson.properties.active = 'true';
         push(geojson);
-        var oneVertex = null;
-        var twoVertex = null;
-        var startVertex = null;
-        for (let i = 0; i < geojson.geometry.coordinates.length; i++) {
-          if (feature.type === 'Polygon') {
-            let ring = geojson.geometry.coordinates[i];
-            for (let j = 0; j < ring.length - 1; j++) {
-              let coord = ring[j];
-              let coord_path = `${i}.${j}`;
-
-              oneVertex = toVertex(feature.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
-              startVertex = startVertex ? startVertex : oneVertex;
-              push(oneVertex);
-
-              if (j > 0) {
-                push(toMidpoint(feature.id, twoVertex, oneVertex, ctx.map));
-              }
-
-              twoVertex = oneVertex;
-            }
-            push(toMidpoint(feature.id, oneVertex, startVertex, ctx.map));
-          }
-          else {
-            let coord = geojson.geometry.coordinates[i];
-            let coord_path = `${i}`;
-            oneVertex = toVertex(feature.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
-            push(oneVertex);
-            if (i > 0) {
-              push(toMidpoint(feature.id, twoVertex, oneVertex, ctx.map));
-            }
-            twoVertex = oneVertex;
-          }
-        }
+        addCoords(geojson, true, push, ctx.map, selectedCoordPaths);
       }
       else {
         geojson.properties.active = 'false';

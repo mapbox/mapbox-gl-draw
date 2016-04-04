@@ -84,4 +84,10 @@ test('API test', t => {
     t.end();
   });
 
+
+  t.test('done', t => {
+    Draw.remove();
+    t.end();
+  });
+
 });

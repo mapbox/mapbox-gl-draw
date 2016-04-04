@@ -1,4 +1,5 @@
-var {noFeature, isShiftDown, isFeature} = require('../lib/common_selectors');
+var {noFeature, isShiftDown, isFeature, isOfMetaType} = require('../lib/common_selectors');
+var addCoords = require('../lib/add_coords');
 
 module.exports = function(ctx, startingSelectedFeatureIds) {
 
@@ -29,7 +30,9 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   };
 
   var directSelect = function(e) {
-    ctx.api.changeMode('direct_select', e.featureTarget.properties.id);
+    ctx.api.changeMode('direct_select', {
+      featureId: e.featureTarget.properties.id
+    });
   };
 
   return {
@@ -38,6 +41,15 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
         this.fire('selected.end', wasSelected);
+      });
+
+      this.on('mousedown', isOfMetaType('vertex'), function(e) {
+        ctx.api.changeMode('direct_select', {
+          featureId: e.featureTarget.properties.parent,
+          coordPath: e.featureTarget.properties.coord_path,
+          isDragging: true,
+          startPos: e.lngLat
+        });
       });
 
       this.on('mousedown', isFeature, function(e) {
@@ -115,6 +127,9 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     },
     render: function(geojson, push) {
       geojson.properties.active = selectedFeaturesById[geojson.properties.id] ? 'true' : 'false';
+      if (geojson.properties.active === 'true') {
+        addCoords(geojson, false, push, ctx.map, []);
+      }
       push(geojson);
     }
   };

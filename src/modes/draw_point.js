@@ -19,11 +19,13 @@ module.exports = function(ctx) {
   };
 
   var onMouseMove = function(e) {
+    ctx.ui.setClass({mouse:'add'});
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
   };
 
   var done = false;
   var onClick = function(e) {
+    ctx.ui.setClass({mouse:'add'});
     done = true;
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
     ctx.events.changeMode('simple_select');
@@ -31,8 +33,8 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
+      ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POINT);
-      ctx.ui.setClass('mapbox-gl-draw_mouse-add');
       this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
@@ -41,7 +43,6 @@ module.exports = function(ctx) {
     },
     stop: function() {
       ctx.ui.setButtonInactive(types.POINT);
-      ctx.ui.clearClass();
       if (done === false) {
         ctx.store.delete([feature.id]);
       }
