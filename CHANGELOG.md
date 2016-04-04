@@ -1,3 +1,11 @@
+## 0.6.0-rc3
+
+Cursors can now be set via css classes. Default cursor options have been added. This restores the long standing issue of hover cursors not working.
+
+Moving from simple_select to direct_select can now be done by selecting a vertex in simple_select mode.
+
+Bug fix for control position options thanks to @nsamala.
+
 ## 0.6.0-rc2
 
 Fresh new style. Better selection ability for lines. Double click to end drawing a line.
