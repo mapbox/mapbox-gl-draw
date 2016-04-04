@@ -25,8 +25,7 @@ var Draw = function(options) {
   return api;
 };
 
-if (window.mapboxgl) {
-  mapboxgl.Draw = Draw;
-} else if (typeof module !== 'undefined') {
-  module.exports = Draw;
-}
+module.exports = Draw;
+
+window.mapboxgl = window.mapboxgl || {};
+window.mapboxgl.Draw = Draw;
