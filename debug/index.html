@@ -73,7 +73,7 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     position: 'top-left'
   }));
 
-  var Draw = window.Draw = mapboxgl.Draw();
+  var Draw = window.Draw = mapboxgl.Draw({ position: 'bottom-right' });
   map.addControl(Draw);
 
   map.on('load', function() {
