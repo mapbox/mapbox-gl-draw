@@ -65,14 +65,13 @@ module.exports = function render() {
     var changed = [];
 
     this.featureIds.forEach((id) => {
-      let featureInternal = this.features[id].internal(mode);
+      let feature = this.features[id];
+      let featureInternal = feature.internal(mode);
       var coords = JSON.stringify(featureInternal.geometry.coordinates);
 
-      if (this.ctx.store.needsUpdate(featureInternal)) {
+      if (feature.isValid() && this.ctx.store.needsUpdate(feature.toGeoJSON())) {
         this.featureHistory[id] = coords;
-        if (this.features[id].isValid()) {
-          changed.push(this.features[id].toGeoJSON());
-        }
+        changed.push(feature.toGeoJSON());
       }
 
       if (featureInternal.geometry.type !== 'Point' && this.features[id].isValid()) {
