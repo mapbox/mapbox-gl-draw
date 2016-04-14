@@ -46,63 +46,59 @@ module.exports = function(ctx) {
       }
     },
     addLayers: function() {
-      ctx.map.batch((batch) => {
-        // drawn features style
-        batch.addSource('mapbox-gl-draw-cold', {
-          data: {
-            type: 'FeatureCollection',
-            features: []
-          },
-          type: 'geojson'
-        });
-
-        // hot features style
-        batch.addSource('mapbox-gl-draw-hot', {
-          data: {
-            type: 'FeatureCollection',
-            features: []
-          },
-          type: 'geojson'
-        });
-
-        for (let i = 0; i < theme.length; i++) {
-          if (theme[i].id === undefined) theme[i] = hat();
-
-          let style = JSON.parse(JSON.stringify(theme[i]));
-          var id = style.id;
-
-          if (style.source) {
-            batch.addLayer(style);
-          }
-          else {
-            style.id = `${id}.hot`;
-            style.source = 'mapbox-gl-draw-hot';
-            batch.addLayer(style);
-
-            style.id = `${id}.cold`;
-            style.source = 'mapbox-gl-draw-cold';
-            batch.addLayer(style);
-          }
-        }
-        ctx.store.render();
+      // drawn features style
+      ctx.map.addSource('mapbox-gl-draw-cold', {
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        },
+        type: 'geojson'
       });
+
+      // hot features style
+      ctx.map.addSource('mapbox-gl-draw-hot', {
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        },
+        type: 'geojson'
+      });
+
+      for (let i = 0; i < theme.length; i++) {
+        if (theme[i].id === undefined) theme[i] = hat();
+
+        let style = JSON.parse(JSON.stringify(theme[i]));
+        var id = style.id;
+
+        if (style.source) {
+          ctx.map.addLayer(style);
+        }
+        else {
+          style.id = `${id}.hot`;
+          style.source = 'mapbox-gl-draw-hot';
+          ctx.map.addLayer(style);
+
+          style.id = `${id}.cold`;
+          style.source = 'mapbox-gl-draw-cold';
+          ctx.map.addLayer(style);
+        }
+      }
+      ctx.store.render();
     },
     removeLayers: function() {
-      ctx.map.batch(function (batch) {
-        for (let i = 0; i < theme.length; i++) {
-          let { id, source } = theme[i];
-          if (source) {
-            batch.removeLayer(id);
-          }
-          else {
-            batch.removeLayer(`${id}.hot`);
-            batch.removeLayer(`${id}.cold`);
-          }
+      for (let i = 0; i < theme.length; i++) {
+        let { id, source } = theme[i];
+        if (source) {
+          ctx.map.removeLayer(id);
         }
+        else {
+          ctx.map.removeLayer(`${id}.hot`);
+          ctx.map.removeLayer(`${id}.cold`);
+        }
+      }
 
-        batch.removeSource('mapbox-gl-draw-cold');
-        batch.removeSource('mapbox-gl-draw-hot');
-      });
+      ctx.map.removeSource('mapbox-gl-draw-cold');
+      ctx.map.removeSource('mapbox-gl-draw-hot');
     }
   };
 

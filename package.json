@@ -44,15 +44,15 @@
     "eslint": "^0.21.2",
     "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
-    "mapbox-gl": "^0.16.0",
-    "mapbox-gl-js-mock": "^0.16.1",
+    "mapbox-gl": "^0.17.0",
+    "mapbox-gl-js-mock": "^0.17.1",
     "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23",
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.16.0"
+    "mapbox-gl": "^0.17.0"
   },
   "dependencies": {
     "hat": "0.0.3",
