@@ -1,3 +1,7 @@
+## 0.6.0-rc4
+
+Upgrade to Mapbox GL JS v0.17
+
 ## 0.6.0-rc3
 
 Cursors can now be set via css classes. Default cursor options have been added. This restores the long standing issue of hover cursors not working.
