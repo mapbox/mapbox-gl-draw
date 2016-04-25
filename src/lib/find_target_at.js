@@ -2,33 +2,38 @@
 var metas = ['feature', 'midpoint', 'vertex'];
 
 var priorities = {
-  'feature': 2,
+  'Point': 3,
+  'LineString': 2,
+  'Polygon': 1,
   'midpoint': 0,
   'vertex': 0
 };
 
-var dist = function(a, b) {
-  var dLng = Math.abs(a.lng - b.lng);
-  var dLat = Math.abs(a.lat - b.lat);
-
-  return Math.pow((dLng * dLng) + (dLat * dLat), .5);
+var dist = function(pos, coords) {
+  if (Array.isArray(coords[0])) {
+    return coords.reduce((memo, coord) => {
+      return memo.concat(dist(pos, coord));
+    }, []).sort()[0];
+  }
+  else {
+    var dLng = Math.abs(pos.lng - coords[0]);
+    var dLat = Math.abs(pos.lat - coords[1]);
+    return Math.pow((dLng * dLng) + (dLat * dLat), .5);
+  }
 };
 
 module.exports = function(event, ctx) {
 
   var sort = function(a, b) {
-    var aPri = priorities[a.properties.meta];
-    var bPri = priorities[b.properties.meta];
+    var aPri = a.properties.meta === 'feature' ? priorities[a.properties.meta] : priorities[a.properties['meta:type']];
+    var bPri = a.properties.meta === 'feature' ? priorities[b.properties.meta] : priorities[b.properties['meta:type']];
 
     if (aPri !== bPri) {
       return aPri - bPri;
     }
-    else if(a.properties.meta === 'feature') {
-      return 1;
-    }
     else {
-      var aDist = dist(event.lngLat, a.properties);
-      var bDist = dist(event.lngLat, b.properties);
+      var aDist = dist(event.lngLat, a.geometry.coordinates);
+      var bDist = dist(event.lngLat, b.geometry.coordinates);
       return bDist - aDist;
     }
   };
