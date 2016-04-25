@@ -31,6 +31,7 @@ Feature.prototype.internal = function(mode) {
     'properties': {
       'id': this.id,
       'meta': 'feature',
+      'meta:type': this.type,
       'active': 'false',
       mode: mode
     },
