@@ -1,3 +1,5 @@
+var turfEnvelope = require('turf-envelope');
+var turfCentroid = require('turf-centroid');
 
 module.exports = function render() {
   var isStillAlive = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
@@ -17,8 +19,18 @@ module.exports = function render() {
     var nextHistory = {};
 
     var pusher = (geojson) => {
+
       var about = geojson.properties;
-      var key = about.id + '.' + about.parent + '.' + about.coord_path + '.' + about.meta;
+
+      if (about.meta === 'too-small') {
+        geojson.geometry = about.point.geometry;
+      }
+
+      delete about.point;
+
+      geojson.properties = about;
+
+      var key = about.id + '.' + about.parent + '.' + about.coord_path + '.' + (about.meta === 'too-small' ? 'feature' : about.meta);
       var value = JSON.stringify(geojson);
 
       var past = this.renderHistory[key];
@@ -63,6 +75,40 @@ module.exports = function render() {
         }
       }
 
+      if (featureInternal.geometry.type !== 'Point' && this.features[id].isValid()) {
+        var envelope = turfEnvelope({
+          type: 'FeatureCollection',
+          features: [featureInternal]
+        });
+
+        var topLeftCoord = envelope.geometry.coordinates[0][0];
+        var bottomRightCoord = envelope.geometry.coordinates[0][2];
+
+        var topLeftPixels = this.ctx.map.project({
+          lng: topLeftCoord[0],
+          lat: topLeftCoord[1]
+        });
+
+        var bottomRightPixels = this.ctx.map.project({
+          lng: bottomRightCoord[0],
+          lat: bottomRightCoord[1]
+        });
+
+        var dx = Math.abs(topLeftPixels.x - bottomRightPixels.x);
+        var dy = Math.abs(topLeftPixels.y - bottomRightPixels.y);
+
+        var distance = Math.pow((dx * dx) + (dy * dy), .5);
+
+        if (distance < 10) {
+          featureInternal.properties.meta = 'too-small';
+          featureInternal.properties.bounds = JSON.stringify([topLeftCoord, bottomRightCoord]);
+          featureInternal.properties.point = turfCentroid({
+            type: 'FeatureCollection',
+            features: [featureInternal]
+          });
+        }
+      }
+
       this.ctx.events.currentModeRender(featureInternal, pusher);
     });
 
@@ -86,4 +132,5 @@ module.exports = function render() {
 
   }
   this.isDirty = false;
+  this.zoomRender = this.zoomLevel;
 };

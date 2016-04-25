@@ -1,12 +1,13 @@
 
-var metas = ['feature', 'midpoint', 'vertex'];
+var metas = ['feature', 'midpoint', 'vertex', 'too-small'];
 
 var priorities = {
   'Point': 3,
   'LineString': 2,
   'Polygon': 1,
   'midpoint': 0,
-  'vertex': 0
+  'vertex': 0,
+  'too-small': 0
 };
 
 var dist = function(pos, coords) {

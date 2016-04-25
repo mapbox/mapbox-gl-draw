@@ -72,6 +72,7 @@ module.exports = function(ctx) {
     render: function(geojson, push) {
       if (geojson.geometry.coordinates[0] !== undefined) {
         geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
+        geojson.properties.meta = geojson.properties.active === 'true' ? 'feature' : geojson.properties.meta;
         push(geojson);
       }
     }

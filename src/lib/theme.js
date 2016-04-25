@@ -175,5 +175,15 @@ module.exports = [
       'circle-color': '#03A9F4'
     },
     'interactive': true
+  },
+  {
+    'id': 'gl-draw-too-small',
+    'type': 'circle',
+    'filter': ['all', ['==', '$type', 'Point'], ['==', 'meta', 'too-small']],
+    'paint': {
+      'circle-radius': 5,
+      'circle-color': '#037994'
+    },
+    'interactive': true
   }
 ];

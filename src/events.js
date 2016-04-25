@@ -63,7 +63,6 @@ module.exports = function(ctx) {
     currentMode.trash();
   };
 
-
   var isKeyModeValid = (code) => !(code === 8 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
@@ -93,6 +92,10 @@ module.exports = function(ctx) {
 
   events.deleted = function() {
     ctx.store.setDirty();
+  };
+
+  events.zoomend = function() {
+    ctx.store.changeZoom();
   };
 
   var api = {
@@ -137,6 +140,8 @@ module.exports = function(ctx) {
       ctx.container.addEventListener('keyup', events.keyup);
 
       ctx.map.on('draw.deleted', events.deleted);
+
+      ctx.map.on('zoomend', events.zoomend);
     },
     removeEventListeners: function() {
       ctx.map.off('click', events.click);
@@ -150,6 +155,8 @@ module.exports = function(ctx) {
       ctx.container.removeEventListener('keyup', events.keyup);
 
       ctx.map.off('draw.deleted', events.deleted);
+
+      ctx.map.off('zoomend', events.zoomend);
     }
   };
 
