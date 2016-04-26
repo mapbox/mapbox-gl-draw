@@ -53,6 +53,21 @@ test('API test', t => {
     t.end();
   });
 
+  t.test('add exhisting feature with changed properties', t => {
+    var id = Draw.add(feature);
+    var point = Draw.get(id);
+
+    setTimeout(function() {
+      point.properties = {'testing': 123};
+      Draw.add(point);
+      point = Draw.get(id);
+      t.equals('testing', Object.keys(point.properties)[0]);
+      t.equals(123, point.properties.testing);
+      Draw.deleteAll();
+      t.end();
+    }, 32);
+  });
+
   t.test('get', t => {
     var id = Draw.add(feature);
     var f = Draw.get(id);
