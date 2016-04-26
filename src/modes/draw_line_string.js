@@ -22,13 +22,7 @@ module.exports = function(ctx) {
 
   var onMouseMove = function(e) {
     ctx.ui.setClass({mouse:'add'});
-    if(pos === 0) {
-      feature.updateCoordinate(0, e.lngLat.lng, e.lngLat.lat);
-      feature.updateCoordinate(1, e.lngLat.lng, e.lngLat.lat);
-    }
-    else {
-      feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
-    }
+    feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
   };
 
   var onClick = function(e) {

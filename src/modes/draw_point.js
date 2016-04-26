@@ -18,9 +18,8 @@ module.exports = function(ctx) {
     ctx.store.delete([feature.id]);
   };
 
-  var onMouseMove = function(e) {
+  var onMouseMove = function() {
     ctx.ui.setClass({mouse:'add'});
-    feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
   };
 
   var done = false;
