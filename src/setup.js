@@ -1,9 +1,6 @@
 var events = require('./events');
 var Store = require('./store');
 var ui = require('./ui');
-var hat = require('hat');
-
-var theme = require('./lib/theme');
 
 module.exports = function(ctx) {
 
@@ -64,38 +61,16 @@ module.exports = function(ctx) {
         type: 'geojson'
       });
 
-      for (let i = 0; i < theme.length; i++) {
-        if (theme[i].id === undefined) theme[i] = hat();
+      ctx.options.styles.forEach(style => {
+        ctx.map.addLayer(style);
+      });
 
-        let style = JSON.parse(JSON.stringify(theme[i]));
-        var id = style.id;
-
-        if (style.source) {
-          ctx.map.addLayer(style);
-        }
-        else {
-          style.id = `${id}.hot`;
-          style.source = 'mapbox-gl-draw-hot';
-          ctx.map.addLayer(style);
-
-          style.id = `${id}.cold`;
-          style.source = 'mapbox-gl-draw-cold';
-          ctx.map.addLayer(style);
-        }
-      }
       ctx.store.render();
     },
     removeLayers: function() {
-      for (let i = 0; i < theme.length; i++) {
-        let { id, source } = theme[i];
-        if (source) {
-          ctx.map.removeLayer(id);
-        }
-        else {
-          ctx.map.removeLayer(`${id}.hot`);
-          ctx.map.removeLayer(`${id}.cold`);
-        }
-      }
+      ctx.options.styles.forEach(style => {
+        ctx.map.removeLayer(style.id);
+      });
 
       ctx.map.removeSource('mapbox-gl-draw-cold');
       ctx.map.removeSource('mapbox-gl-draw-hot');
