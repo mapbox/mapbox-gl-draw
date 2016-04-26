@@ -10,10 +10,11 @@ module.exports = function(ctx) {
 
   return {
     add: function (geojson) {
-      geojson = JSON.parse(JSON.stringify(geojson));
       if (geojson.type === 'FeatureCollection') {
         return geojson.features.map(feature => this.add(feature));
       }
+
+      geojson = JSON.parse(JSON.stringify(geojson));
 
       if (!geojson.geometry) {
         geojson = {
@@ -32,11 +33,15 @@ module.exports = function(ctx) {
           throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
         }
 
-        var internalFeature = new model(ctx, geojson);
-        var id = ctx.store.add(internalFeature);
+        let internalFeature = new model(ctx, geojson);
+        ctx.store.add(internalFeature);
         ctx.store.render();
       }
-      return id;
+      else {
+        let internalFeature = ctx.store.get(geojson.id);
+        internalFeature.properties = geojson.properties;
+      }
+      return geojson.id;
     },
     get: function (id) {
       var feature = ctx.store.get(id);

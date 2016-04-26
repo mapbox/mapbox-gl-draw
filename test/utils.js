@@ -23,6 +23,7 @@ export const features = {
 
   point: {
     type: 'Feature',
+    properties: {},
     geometry: {
       type: 'Point',
       coordinates: [10, 10]
@@ -31,6 +32,7 @@ export const features = {
 
   polygon: {
     type: 'Feature',
+    properties: {},
     geometry: {
       type: 'Polygon',
       coordinates: [[
@@ -45,6 +47,7 @@ export const features = {
 
   square: {
     type: 'Feature',
+    properties: {},
     geometry: {
       type: 'Polygon',
       coordinates: [[
