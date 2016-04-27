@@ -1,3 +1,13 @@
+## 0.6.0-rc6
+
+* Fix custom styling
+* Draw.add now updates the stored properties of a feature
+* Draw no longer emits features that are invalid as changed
+
+## 0.6.0-rc5
+
+* polygons and lines that are too small to see now show up as points
+
 ## 0.6.0-rc4
 
 Upgrade to Mapbox GL JS v0.17
