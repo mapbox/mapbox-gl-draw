@@ -249,7 +249,7 @@ With this style all Point features are blue and have a black halo when active. N
 
 ```js
 mapbox.Draw({
-  style: [
+  styles: [
     {
       'id': 'highlight-active-points',
       'type': 'circle',
