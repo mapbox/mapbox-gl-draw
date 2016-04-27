@@ -1,9 +1,11 @@
+var hat = require('hat');
+
 const defaultOptions = {
   defaultMode: 'simple_select',
   position: 'top-left',
   keybindings: true,
   displayControlsDefault: true,
-  styles: {},
+  styles: require('./lib/theme'),
   controls: {}
 };
 
@@ -29,5 +31,26 @@ module.exports = function(options = {controls: {}}) {
     options.controls = Object.assign(showControls, options.controls);
   }
 
-  return Object.assign(defaultOptions, options);
+  options = Object.assign(defaultOptions, options);
+
+  options.styles = options.styles.reduce((memo, style) => {
+    style.id = style.id || hat();
+    if (style.source) {
+      memo.push(style);
+    }
+    else {
+      var id = style.id;
+      style.id = `${id}.hot`;
+      style.source = 'mapbox-gl-draw-hot';
+      memo.push(JSON.parse(JSON.stringify(style)));
+
+      style.id = `${id}.cold`;
+      style.source = 'mapbox-gl-draw-cold';
+      memo.push(JSON.parse(JSON.stringify(style)));
+    }
+
+    return memo;
+  }, []);
+
+  return options;
 };

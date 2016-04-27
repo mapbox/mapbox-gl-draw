@@ -25,7 +25,7 @@ drawing | boolean | The ability to draw and delete features - default: `true`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
-style | Object | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
+styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
 ## API Methods
 
@@ -227,6 +227,8 @@ This is fired every time a feature is unselected in the default mode. The payloa
 Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-style-spec/) with a preset list of properties.
 
 The `GL Style Spec` requires each layer to have a source. **DO NOT PROVIDE THIS** for styling draw.
+
+The `GL Style Spec` also requires an id. Draw will provide this for you. If you wish to set this id to interact with draw layers, know that Draw will add `hot` and `cold` if no source is provided.
 
 Draw moves features between sources for performance gains, because of this it is recommeneded that you **DO NOT** provide a source for a style despite the fact the `GL Style Spec` requires a source. **Draw will provide the source for you automatically**.
 
