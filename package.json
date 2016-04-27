@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.6.0-rc6",
+  "version": "0.6.0-rc7",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
