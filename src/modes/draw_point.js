@@ -27,7 +27,7 @@ module.exports = function(ctx) {
     ctx.ui.setClass({mouse:'add'});
     done = true;
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-    ctx.events.changeMode('simple_select');
+    ctx.events.changeMode('simple_select', [feature.id]);
   };
 
   return {

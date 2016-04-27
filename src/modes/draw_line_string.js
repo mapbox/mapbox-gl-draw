@@ -44,7 +44,7 @@ module.exports = function(ctx) {
   var onFinish = function() {
     feature.removeCoordinate(`${pos}`);
     pos--;
-    ctx.events.changeMode('simple_select');
+    ctx.events.changeMode('simple_select', [feature.id]);
   };
 
   return {
