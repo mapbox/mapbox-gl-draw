@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.6.0-rc8",
+  "version": "0.6.0-rc9",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -45,7 +45,7 @@
     "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
     "mapbox-gl": "^0.18.0",
-    "mapbox-gl-js-mock": "^0.17.3",
+    "mapbox-gl-js-mock": "^0.18.0",
     "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23",

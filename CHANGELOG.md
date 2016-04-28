@@ -1,3 +1,7 @@
+## 0.6.0-rc9
+
+* Upgrade to mapbox-gl-js-mock v0.18
+
 ## 0.6.0-rc8
 
 * Upgrade to Mapbox GL JS v0.18
