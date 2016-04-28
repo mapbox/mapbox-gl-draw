@@ -1,3 +1,7 @@
+## 0.6.0-rc8
+
+* Upgrade to Mapbox GL JS v0.18
+
 ## 0.6.0-rc7
 
 * When moving from a drawing mode to simple select, select the new feature
