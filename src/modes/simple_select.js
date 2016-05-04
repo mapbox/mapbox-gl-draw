@@ -65,7 +65,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         var isSelected = selectedFeaturesById[id] !== undefined;
 
         if (isSelected && !isShiftDown(e)) {
-          this.on('mouseup', readyForDirectSelect, directSelect);
+          this.on('click', readyForDirectSelect, directSelect);
         }
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
@@ -94,7 +94,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       });
 
       this.on('drag', () => dragging, function(e) {
-        this.off('mouseup', readyForDirectSelect, directSelect);
+        this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
         if (featureCoords === null) {
           buildFeatureCoords();

@@ -1,7 +1,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { createMap } from './utils';
+import { createMap, click } from './utils';
 
 test('Point geometry class', t => {
   var map = createMap();
@@ -10,7 +10,7 @@ test('Point geometry class', t => {
 
   map.on('load', function() {
     Draw.changeMode('draw_point');
-    map.fire('click', {
+    click(map, {
       lngLat: {
         lng: 10,
         lat: 10

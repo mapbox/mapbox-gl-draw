@@ -1,5 +1,6 @@
 var ModeHandler = require('./lib/mode_handler');
 var findTargetAt = require('./lib/find_target_at');
+var euclideanDistance = require('./lib/euclidean_distance');
 
 var modes = {
   'simple_select': require('./modes/simple_select'),
@@ -8,6 +9,9 @@ var modes = {
   'draw_line_string': require('./modes/draw_line_string'),
   'draw_polygon': require('./modes/draw_polygon')
 };
+
+const closeTolerance = 4;
+const tolerance = 12;
 
 module.exports = function(ctx) {
 
@@ -22,18 +26,6 @@ module.exports = function(ctx) {
     currentMode.drag(event);
   };
 
-  events.click = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.click(event);
-  };
-
-  events.doubleclick = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.doubleclick(event);
-  };
-
   events.mousemove = function(event) {
     if (isDown) {
       events.drag(event);
@@ -45,7 +37,13 @@ module.exports = function(ctx) {
     }
   };
 
+  var mouseDownStart = {};
   events.mousedown = function(event) {
+    mouseDownStart = {
+      time: new Date().getTime(),
+      point: event.point
+    };
+
     isDown = true;
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
@@ -56,7 +54,18 @@ module.exports = function(ctx) {
     isDown = false;
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
-    currentMode.mouseup(event);
+
+    var endTime = new Date().getTime();
+
+    var moveDistance = mouseDownStart.point ? euclideanDistance(mouseDownStart.point, event.point) : false;
+
+    if (moveDistance !== false && (moveDistance < closeTolerance || (moveDistance < tolerance && (endTime - mouseDownStart.time) < 500))) {
+      currentMode.click(event);
+    }
+    else {
+      currentMode.mouseup(event);
+    }
+
   };
 
   events.trash = function() {
@@ -129,8 +138,6 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
-      ctx.map.on('click', events.click);
-      ctx.map.on('dblclick', events.doubleclick);
       ctx.map.on('mousemove', events.mousemove);
 
       ctx.map.on('mousedown', events.mousedown);
@@ -144,8 +151,6 @@ module.exports = function(ctx) {
       ctx.map.on('zoomend', events.zoomend);
     },
     removeEventListeners: function() {
-      ctx.map.off('click', events.click);
-      ctx.map.off('dblclick', events.doubleclick);
       ctx.map.off('mousemove', events.mousemove);
 
       ctx.map.off('mousedown', events.mousedown);
