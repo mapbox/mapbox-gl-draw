@@ -1,7 +1,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './utils';
+import { accessToken, createMap, features, click } from './utils';
 
 var feature = features.line;
 
@@ -20,7 +20,7 @@ test('Line draw class', function lineDrawClass(t){
   for (var i = 0; i < coords.length; i++) {
     let c = coords[i];
 
-    map.fire('click', {
+    click(map, {
       lngLat: {
         lng: c[0],
         lat: c[1]

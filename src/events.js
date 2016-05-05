@@ -1,5 +1,6 @@
 var ModeHandler = require('./lib/mode_handler');
 var findTargetAt = require('./lib/find_target_at');
+var euclideanDistance = require('./lib/euclidean_distance');
 
 var modes = {
   'simple_select': require('./modes/simple_select'),
@@ -9,33 +10,41 @@ var modes = {
   'draw_polygon': require('./modes/draw_polygon')
 };
 
+const closeTolerance = 4;
+const tolerance = 12;
+
+const isClick = (start, end) => {
+  start.point = start.point || end.point;
+  start.time = start.time || end.time;
+  var moveDistance = euclideanDistance(start.point, end.point);
+  return moveDistance < closeTolerance || (moveDistance < tolerance && (end.time - start.time) < 500);
+};
+
 module.exports = function(ctx) {
 
-  var isDown = false;
+  var mouseDownInfo = {
+    isDown: false
+  };
 
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
   events.drag = function(event) {
-    ctx.ui.setClass({mouse: 'drag'});
-    currentMode.drag(event);
-  };
-
-  events.click = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.click(event);
-  };
-
-  events.doubleclick = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.doubleclick(event);
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
+      event.originalEvent.stopPropagation();
+    }
+    else {
+      ctx.ui.setClass({mouse: 'drag'});
+      currentMode.drag(event);
+    }
   };
 
   events.mousemove = function(event) {
-    if (isDown) {
+    if (mouseDownInfo.isDown) {
       events.drag(event);
     }
     else {
@@ -46,17 +55,32 @@ module.exports = function(ctx) {
   };
 
   events.mousedown = function(event) {
-    isDown = true;
+    mouseDownInfo = {
+      isDown: true,
+      time: new Date().getTime(),
+      point: event.point
+    };
+
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
-    isDown = false;
+    mouseDownInfo.isDown = false;
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
-    currentMode.mouseup(event);
+
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
+      currentMode.click(event);
+    }
+    else {
+      currentMode.mouseup(event);
+    }
+
   };
 
   events.trash = function() {
@@ -129,8 +153,6 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
-      ctx.map.on('click', events.click);
-      ctx.map.on('dblclick', events.doubleclick);
       ctx.map.on('mousemove', events.mousemove);
 
       ctx.map.on('mousedown', events.mousedown);
@@ -144,8 +166,6 @@ module.exports = function(ctx) {
       ctx.map.on('zoomend', events.zoomend);
     },
     removeEventListeners: function() {
-      ctx.map.off('click', events.click);
-      ctx.map.off('dblclick', events.doubleclick);
       ctx.map.off('mousemove', events.mousemove);
 
       ctx.map.off('mousedown', events.mousedown);

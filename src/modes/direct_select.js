@@ -42,9 +42,7 @@ module.exports = function(ctx, opts) {
     start: function() {
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
-      this.on('drag', () => {
-        return dragging;
-      }, function(e) {
+      this.on('drag', () => dragging, function(e) {
         e.originalEvent.stopPropagation();
         if (coordPos === null) {
           setupCoordPos();
@@ -66,8 +64,7 @@ module.exports = function(ctx, opts) {
         numCoords = null;
         startPos = null;
       });
-      this.on('click', noFeature, function(e) {
-        e.originalEvent.stopPropagation();
+      this.on('click', noFeature, function() {
         ctx.events.changeMode('simple_select');
       });
       this.on('trash', () => selectedCoordPaths.length > 0, function() {

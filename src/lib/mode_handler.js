@@ -57,9 +57,6 @@ var ModeHandler = function(mode, DrawContext) {
     click: function(event) {
       delegate('click', event);
     },
-    doubleclick: function(event) {
-      delegate('doubleclick', event);
-    },
     mousemove: function(event) {
       delegate('mousemove', event);
     },
