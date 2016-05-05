@@ -1,41 +1,23 @@
+var area = require('turf-area');
 
 var metas = ['feature', 'midpoint', 'vertex', 'too-small'];
 
-var priorities = {
-  'Point': 3,
-  'LineString': 2,
-  'Polygon': 1,
-  'midpoint': 0,
-  'vertex': 0,
-  'too-small': 0
-};
-
-var dist = function(pos, coords) {
-  if (Array.isArray(coords[0])) {
-    return coords.reduce((memo, coord) => {
-      return memo.concat(dist(pos, coord));
-    }, []).sort()[0];
-  }
-  else {
-    var dLng = Math.abs(pos.lng - coords[0]);
-    var dLat = Math.abs(pos.lat - coords[1]);
-    return Math.pow((dLng * dLng) + (dLat * dLat), .5);
-  }
+var geometryTypeValues = {
+  'Polygon': 2,
+  'Point': 0,
+  'LineString': 1
 };
 
 module.exports = function(event, ctx) {
 
   var sort = function(a, b) {
-    var aPri = a.properties.meta === 'feature' ? priorities[a.properties.meta] : priorities[a.properties['meta:type']];
-    var bPri = a.properties.meta === 'feature' ? priorities[b.properties.meta] : priorities[b.properties['meta:type']];
+    var score = geometryTypeValues[a.geometry.type] - geometryTypeValues[b.geometry.type];
 
-    if (aPri !== bPri) {
-      return aPri - bPri;
+    if (score === 0 && a.geometry.type === 'Polygon') {
+      return a.area - b.area;
     }
     else {
-      var aDist = dist(event.lngLat, a.geometry.coordinates);
-      var bDist = dist(event.lngLat, b.geometry.coordinates);
-      return bDist - aDist;
+      return score;
     }
   };
 
@@ -45,24 +27,21 @@ module.exports = function(event, ctx) {
   features = features.filter(function(feature) {
     var meta = feature.properties.meta;
     return metas.indexOf(meta) !== -1;
+  }).map(function(feature) {
+    if (feature.geometry.type === 'Polygon') {
+      feature.area = area({
+        type: 'Feature',
+        property: {},
+        geometry: feature.geometry
+      });
+    }
+    return feature;
   });
 
   features.sort(sort);
 
-  if (event.dropPoint === true) {
-    var lngLat = ctx.map.unproject(event.point);
-    ctx.api.add({
-      'id': 'testing',
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Point',
-        coordinates: [lngLat.lng, lngLat.lat]
-      }
-    });
-  }
-
   if (features[0]) {
+    console.log(features[0]);
     ctx.ui.setClass({
       feature: features[0].properties.meta,
       mouse: 'hover'
