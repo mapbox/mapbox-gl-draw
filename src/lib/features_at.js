@@ -8,18 +8,18 @@ var geometryTypeValues = {
   'LineString': 1
 };
 
+const sort = (a, b) => {
+  var score = geometryTypeValues[a.geometry.type] - geometryTypeValues[b.geometry.type];
+
+  if (score === 0 && a.geometry.type === 'Polygon') {
+    return a.area - b.area;
+  }
+  else {
+    return score;
+  }
+};
+
 module.exports = function(event, ctx) {
-
-  var sort = function(a, b) {
-    var score = geometryTypeValues[a.geometry.type] - geometryTypeValues[b.geometry.type];
-
-    if (score === 0 && a.geometry.type === 'Polygon') {
-      return a.area - b.area;
-    }
-    else {
-      return score;
-    }
-  };
 
   var grabSize = .5;
   var features = ctx.map.queryRenderedFeatures([[event.point.x - grabSize, event.point.y - grabSize], [event.point.x + grabSize, event.point.y + grabSize]], {});
@@ -40,18 +40,5 @@ module.exports = function(event, ctx) {
 
   features.sort(sort);
 
-  if (features[0]) {
-    console.log(features[0]);
-    ctx.ui.setClass({
-      feature: features[0].properties.meta,
-      mouse: 'hover'
-    });
-  }
-  else {
-    ctx.ui.setClass({
-      mouse: 'none'
-    });
-  }
-
-  return features[0];
+  return features;
 };

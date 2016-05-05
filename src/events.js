@@ -1,6 +1,6 @@
 var ModeHandler = require('./lib/mode_handler');
-var findTargetAt = require('./lib/find_target_at');
-var euclideanDistance = require('./lib/euclidean_distance');
+var getFeatureAtAndSetCursors = require('./lib/get_features_and_set_cursor');
+var isClick = require('./lib/is_click');
 
 var modes = {
   'simple_select': require('./modes/simple_select'),
@@ -8,16 +8,6 @@ var modes = {
   'draw_point': require('./modes/draw_point'),
   'draw_line_string': require('./modes/draw_line_string'),
   'draw_polygon': require('./modes/draw_polygon')
-};
-
-const closeTolerance = 4;
-const tolerance = 12;
-
-const isClick = (start, end) => {
-  start.point = start.point || end.point;
-  start.time = start.time || end.time;
-  var moveDistance = euclideanDistance(start.point, end.point);
-  return moveDistance < closeTolerance || (moveDistance < tolerance && (end.time - start.time) < 500);
 };
 
 module.exports = function(ctx) {
@@ -48,7 +38,7 @@ module.exports = function(ctx) {
       events.drag(event);
     }
     else {
-      var target = findTargetAt(event, ctx);
+      var target = getFeatureAtAndSetCursors(event, ctx);
       event.featureTarget = target;
       currentMode.mousemove(event);
     }
@@ -61,14 +51,14 @@ module.exports = function(ctx) {
       point: event.point
     };
 
-    var target = findTargetAt(event, ctx);
+    var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
     mouseDownInfo.isDown = false;
-    var target = findTargetAt(event, ctx);
+    var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
 
     if (isClick(mouseDownInfo, {

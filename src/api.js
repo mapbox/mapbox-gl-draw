@@ -1,4 +1,5 @@
 var hat = require('hat');
+var featuresAt = require('./lib/features_at');
 
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
@@ -9,6 +10,10 @@ var featureTypes = {
 module.exports = function(ctx) {
 
   return {
+    getFeatureIdsAt: function(x, y) {
+      var features = featuresAt({point: {x, y}}, ctx);
+      return features.map(feature => feature.properties.id);
+    },
     add: function (geojson) {
       if (geojson.type === 'FeatureCollection') {
         return geojson.features.map(feature => this.add(feature));
