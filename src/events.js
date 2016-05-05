@@ -13,21 +13,38 @@ var modes = {
 const closeTolerance = 4;
 const tolerance = 12;
 
+const isClick = (start, end) => {
+  start.point = start.point || end.point;
+  start.time = start.time || end.time;
+  var moveDistance = euclideanDistance(start.point, end.point);
+  return moveDistance < closeTolerance || (moveDistance < tolerance && (end.time - start.time) < 500);
+};
+
 module.exports = function(ctx) {
 
-  var isDown = false;
+  var mouseDownInfo = {
+    isDown: false
+  };
 
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
   events.drag = function(event) {
-    ctx.ui.setClass({mouse: 'drag'});
-    currentMode.drag(event);
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
+      event.originalEvent.stopPropagation();
+    }
+    else {
+      ctx.ui.setClass({mouse: 'drag'});
+      currentMode.drag(event);
+    }
   };
 
   events.mousemove = function(event) {
-    if (isDown) {
+    if (mouseDownInfo.isDown) {
       events.drag(event);
     }
     else {
@@ -37,29 +54,27 @@ module.exports = function(ctx) {
     }
   };
 
-  var mouseDownStart = {};
   events.mousedown = function(event) {
-    mouseDownStart = {
+    mouseDownInfo = {
+      isDown: true,
       time: new Date().getTime(),
       point: event.point
     };
 
-    isDown = true;
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
-    isDown = false;
+    mouseDownInfo.isDown = false;
     var target = findTargetAt(event, ctx);
     event.featureTarget = target;
 
-    var endTime = new Date().getTime();
-
-    var moveDistance = mouseDownStart.point ? euclideanDistance(mouseDownStart.point, event.point) : false;
-
-    if (moveDistance !== false && (moveDistance < closeTolerance || (moveDistance < tolerance && (endTime - mouseDownStart.time) < 500))) {
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
       currentMode.click(event);
     }
     else {
