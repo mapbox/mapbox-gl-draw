@@ -4,6 +4,8 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 [![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
 
+**All versions below 0.6.0 are no longer supported**
+
 ### Installing
 
 ```
