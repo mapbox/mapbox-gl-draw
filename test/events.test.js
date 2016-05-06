@@ -43,8 +43,8 @@ test('draw.deleted event', t => {
   map.once('draw.deleted', e => {
     if(t.notDone()) {
       t.pass('draw.deleted fired on deleted');
-      t.deepEquals(e[0].geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.equals(e[0].id, id, 'draw id in payload is correct');
+      t.deepEquals(e.featureIds[0].geometry, feature.geometry, 'geojson in payload is the same as set');
+      t.equals(e.featureIds[0].id, id, 'draw id in payload is correct');
       t.end();
     }
   });

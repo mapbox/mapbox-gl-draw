@@ -40,7 +40,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       this.on('click', noFeature, function() {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
-        this.fire('selected.end', wasSelected);
+        this.fire('selected.end', {featureIds: wasSelected});
       });
 
       this.on('mousedown', isOfMetaType('vertex'), function(e) {
@@ -69,20 +69,20 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         }
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
-          this.fire('selected.end', [id]);
+          this.fire('selected.end', {featureIds:[id]});
         }
         else if (!isSelected && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.start', [id]);
+          this.fire('selected.start', {featureIds:[id]});
         }
         else {
           //make selected
           var wasSelected = Object.keys(selectedFeaturesById);
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.end', wasSelected);
-          this.fire('selected.start', [id]);
+          this.fire('selected.end', {featureIds:wasSelected});
+          this.fire('selected.start', {featureIds:[id]});
         }
       });
 

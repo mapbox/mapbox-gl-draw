@@ -60,6 +60,6 @@ Store.prototype.delete = function (ids) {
   });
 
   if (deleted.length > 0) {
-    this.ctx.map.fire('draw.deleted', deleted);
+    this.ctx.map.fire('draw.deleted', {featureIds:deleted});
   }
 };
