@@ -58,7 +58,7 @@ console.log(featureId)
 ```
 
 ---
-###`.get(String: feature.id) -> Object`
+###`.get(String: featureId) -> Object`
 
 This method takes an ID returns a GeoJSON feature.
 
@@ -68,6 +68,20 @@ Example:
 var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
+```
+
+---
+### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]
+
+This method takes an x and y from pixel space and returns a list of
+features currently rendered by draws at that spot.
+
+This is good for using mouse events to get information out of draw.
+
+```js
+var featureIds = Draw.getFeatureIdsAt(20, 20);
+console.log(featureIds)
+//=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
 
 ---
