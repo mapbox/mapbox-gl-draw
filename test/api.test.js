@@ -53,6 +53,18 @@ test('API test', t => {
     t.end();
   });
 
+  t.test('add will error when handed non-geojson', t => {
+    t.throws(function() {
+      Draw.add({});
+    }, 'when an empty object is passed');
+
+    t.throws(function() {
+      Draw.add(features.multiPolygon);
+    }, 'when an multi polygon is passed');
+
+    t.end();
+  });
+
   t.test('add exhisting feature with changed properties', t => {
     var id = Draw.add(feature);
     var point = Draw.get(id);
