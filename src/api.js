@@ -1,5 +1,6 @@
 var hat = require('hat');
 var featuresAt = require('./lib/features_at');
+var geojsonhint = require('geojsonhint');
 
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
@@ -14,14 +15,9 @@ module.exports = function(ctx) {
       var features = featuresAt({point: {x, y}}, ctx);
       return features.map(feature => feature.properties.id);
     },
-    add: function (geojson) {
-      if (geojson.type === 'FeatureCollection') {
-        return geojson.features.map(feature => this.add(feature));
-      }
+    add: function (geojson, validateGeoJSON=true) {
 
-      geojson = JSON.parse(JSON.stringify(geojson));
-
-      if (!geojson.geometry) {
+       if (geojson.type !== 'FeatureCollection' && !geojson.geometry) {
         geojson = {
           type: 'Feature',
           id: geojson.id,
@@ -30,13 +26,28 @@ module.exports = function(ctx) {
         };
       }
 
+      if (validateGeoJSON) {
+        var errors = geojsonhint.hint(geojson);
+        if (errors.length) {
+          throw new Error(errors[0].message);
+        }
+
+        (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(feature => {
+          if (featureTypes[feature.geometry.type] === undefined) {
+            throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+          }
+        });
+      }
+
+      if (geojson.type === 'FeatureCollection') {
+        return geojson.features.map(feature => this.add(feature, false));
+      }
+
+      geojson = JSON.parse(JSON.stringify(geojson));
+
       geojson.id = geojson.id || hat();
       if (ctx.store.needsUpdate(geojson)) {
         var model = featureTypes[geojson.geometry.type];
-
-        if(model === undefined) {
-          throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
-        }
 
         let internalFeature = new model(ctx, geojson);
         ctx.store.add(internalFeature);
