@@ -1,3 +1,6 @@
+var pointOnLine = require('turf-point-on-line');
+var distance = require('turf-distance');
+
 var {noFeature, isOfMetaType, isShiftDown} = require('../lib/common_selectors');
 var addCoords = require('../lib/add_coords');
 
@@ -28,9 +31,45 @@ module.exports = function(ctx, opts) {
   var onMidpoint = function(e) {
     dragging = true;
     startPos = e.lngLat;
-    var about = e.featureTarget.properties;
-    feature.addCoordinate(about.coord_path, about.lng, about.lat);
-    selectedCoordPaths = [about.coord_path];
+    var coords = e.featureTarget.geometry.coordinates;
+
+    var pt = pointOnLine(e.featureTarget.geometry, );
+
+    var lines = [];
+
+    for(var i=0; i<coords.length-2; i++) {
+      lines.push({
+        type: 'Feature',
+        property: {
+          coord_path: (e.featureTarget.properties.ring_num ? e.featureTarget.properties.ring_num + '.' : '') + i
+        },
+        geometry: {
+          type: 'LineString',
+          coordinates: [coords[i], coords[i+1]]
+        }
+      })
+    }
+
+    var clickPoint = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Point',
+        coordinates: [e.lngLat.lng, e.lngLat.lat]
+      }
+    };
+
+    lines.map(function(line) {
+      var point = pointOnLine(line, clickPoint);
+      line.properties.distance = distance(point, clickPoint, 'kilometers');
+    }).sort(function(a, b) {
+      return a.properties.distance - b.properties.distance;
+    });
+
+    console.log(lines);
+
+    feature.addCoordinate(lines[0].properties.coord_path, startPos.lng, startPos.lat);
+    selectedCoordPaths = [lines[0].properties.coord_path];
   };
 
   var setupCoordPos = function() {
@@ -41,7 +80,7 @@ module.exports = function(ctx, opts) {
   return {
     start: function() {
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
-      this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
+      this.on('mousedown', isOfMetaType('border'), onMidpoint);
       this.on('drag', () => dragging, function(e) {
         e.originalEvent.stopPropagation();
         if (coordPos === null) {
@@ -83,8 +122,31 @@ module.exports = function(ctx, opts) {
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
         geojson.properties.active = 'true';
+        if (geojson.geometry.type === 'LineString') {
+          geojson.properties.meta = 'border';
+          geojson.geometry.parent = geojson.id;
+        }
+        else if (geojson.geometry.type === 'Polygon') {
+          geojson.properties['has-border'] = 'true';
+          geojson.geometry.coordinates.forEach((ring, i) => {
+            push({
+              type: 'Feature',
+              properties: {
+                meta: 'border',
+                parent: geojson.id,
+                ring_num: i
+              },
+              geometry: {
+                type: 'LineString',
+                coordinates: ring
+              }
+            });
+          });
+        }
         push(geojson);
-        addCoords(geojson, true, push, ctx.map, selectedCoordPaths);
+
+        addCoords(geojson, push, ctx.map, selectedCoordPaths);
+
       }
       else {
         geojson.properties.active = 'false';

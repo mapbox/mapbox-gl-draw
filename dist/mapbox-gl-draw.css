@@ -52,7 +52,7 @@
 .mapboxgl-map.mode-direct_select.feature-vertex.mouse-hover .mapboxgl-canvas-container.mapboxgl-interactive
 { cursor: pointer; }
 
-.mapboxgl-map.mode-direct_select.feature-midpoint.mouse-hover .mapboxgl-canvas-container.mapboxgl-interactive
+.mapboxgl-map.mode-direct_select.feature-border.mouse-hover .mapboxgl-canvas-container.mapboxgl-interactive
 { cursor: cell; }
 
 .mapboxgl-map.mode-draw_point .mapboxgl-canvas-container.mapboxgl-interactive,

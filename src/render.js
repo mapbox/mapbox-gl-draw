@@ -22,7 +22,10 @@ module.exports = function render() {
 
       var about = geojson.properties;
 
-      if (about.meta === 'too-small') {
+      if (about.meta === 'feature' && geojson.geometry.type === 'Polygon') {
+        about['has-border'] = about['has-border'] || 'false';
+      }
+      else if (about.meta === 'too-small') {
         geojson.geometry = about.point.geometry;
       }
 
