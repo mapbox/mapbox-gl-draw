@@ -52,7 +52,7 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.18.0"
+    "mapbox-gl": "^0.18.0 || ^0.17.0"
   },
   "dependencies": {
     "geojsonhint": "^1.2.0",
