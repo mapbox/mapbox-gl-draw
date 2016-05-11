@@ -26,7 +26,10 @@
         .log {
             padding: 15px 20px;
         }
-        #map {
+        #map, #backmap {
+            position: absolute;
+            top: 0;
+            left: 0;
             display: block;
             float: left;
             width: 1024px;
@@ -39,6 +42,7 @@
     <div id="meter">
         <div id="progress"></div>
     </div>
+    <div id="backmap"></div>
     <div id="map"></div>
     <div id="tests">
         <div id="logs"></div>
