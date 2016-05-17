@@ -6,8 +6,7 @@ module.exports = function(ctx, opts) {
   var feature = ctx.store.get(featureId);
 
   if (feature.type === 'Point') {
-    throw new TypeError('Mapbox GL Draw direct_select mode doesn\'t handle ' +
-    'point features (https://github.com/mapbox/mapbox-gl-draw/issues/310)');
+    throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
   var dragging = opts.isDragging || false;

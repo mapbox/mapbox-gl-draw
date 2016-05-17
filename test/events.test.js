@@ -40,7 +40,7 @@ map.addControl(Draw);
 
 test('draw.direct_select event', t => {
   let id = Draw.add(feature);
-  t.throws(() => Draw.changeMode('direct_select', {featureId: id}));
+  t.throws(() => Draw.changeMode('direct_select', {featureId: id}), 'should throw on a point');
   t.end();
 });
 
