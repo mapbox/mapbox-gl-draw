@@ -38,6 +38,12 @@ var timeout = function(t, time, msg) {
 var Draw = GLDraw();
 map.addControl(Draw);
 
+test('draw.direct_select event', t => {
+  let id = Draw.add(feature);
+  t.throws(() => Draw.changeMode('direct_select', {featureId: id}));
+  t.end();
+});
+
 test('draw.deleted event', t => {
   t = timeout(t, 100, 'failed to fire draw.deleted');
   map.once('draw.deleted', e => {

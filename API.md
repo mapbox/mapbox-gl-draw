@@ -185,7 +185,9 @@ For `simple_select` options is an array of ids. It is optional. If provided, the
 
 Lets you select, delete and drag vertices.
 
-For `direct_select`options is a single featureId. It is required. This feature will be active for the duration of the mode.
+For `direct_select` options is a single featureId. It is required. This feature will be active for the duration of the mode.
+
+`direct_select` mode doesn't handle point features.
 
 #### Drawing modes:
 

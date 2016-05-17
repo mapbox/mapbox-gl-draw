@@ -5,6 +5,11 @@ module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
   var feature = ctx.store.get(featureId);
 
+  if (feature.type === 'Point') {
+    throw new TypeError('Mapbox GL Draw direct_select mode doesn\'t handle ' +
+    'point features (https://github.com/mapbox/mapbox-gl-draw/issues/310)');
+  }
+
   var dragging = opts.isDragging || false;
   var startPos = opts.startPos || null;
   var coordPos = null;
