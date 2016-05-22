@@ -4,6 +4,7 @@ module.exports = [
     'type': 'line',
     'filter': ['all',
       ['==', '$type', 'LineString'],
+      ['!=', 'meta', 'border'],
       ['==', 'active', 'true']
     ],
     'layout': {
@@ -12,6 +13,24 @@ module.exports = [
     },
     'paint': {
       'line-color': '#FF9800',
+      'line-dasharray': [0.2, 2],
+      'line-width': 4
+    },
+    'interactive': true
+  },
+  {
+    'id': 'gl-draw-border',
+    'type': 'line',
+    'filter': ['all',
+      ['==', '$type', 'LineString'],
+      ['==', 'meta', 'border']
+    ],
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#888888',
       'line-dasharray': [0.2, 2],
       'line-width': 4
     },
@@ -30,7 +49,7 @@ module.exports = [
   {
     'id': 'gl-draw-active-polygon-stroke',
     'type': 'line',
-    'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+    'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon'], ['==', 'has-border', 'false']],
     'layout': {
       'line-cap': 'round',
       'line-join': 'round'
@@ -44,32 +63,6 @@ module.exports = [
   },
 
 
-  {
-    'id': 'gl-draw-point-mid-outline',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'meta', 'midpoint']],
-    'paint': {
-      'circle-radius': 7,
-      'circle-opacity': 0.65,
-      'circle-color': '#fff'
-    },
-    'interactive': true
-  },
-    {
-    'id': 'gl-draw-point-mid',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'meta', 'midpoint']],
-    'paint': {
-      'circle-radius': 6,
-      'circle-opacity': 0.65,
-      'circle-color': '#FF9800'
-    },
-    'interactive': true
-  },
   {
     'id': 'gl-draw-polygon',
     'type': 'fill',
@@ -98,7 +91,7 @@ module.exports = [
   {
     'id': 'gl-draw-line',
     'type': 'line',
-    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'LineString']],
+    'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'LineString'], ['!=', 'meta', 'border']],
     'layout': {
       'line-cap': 'round',
       'line-join': 'round'
@@ -114,8 +107,7 @@ module.exports = [
     'type': 'circle',
     'filter': ['all',
       ['==', '$type', 'Point'],
-      ['==', 'active', 'true'],
-      ['!=', 'meta', 'midpoint']
+      ['==', 'active', 'true']
     ],
     'paint': {
       'circle-radius': 9,
@@ -128,8 +120,8 @@ module.exports = [
     'type': 'circle',
     'filter': ['all',
       ['==', '$type', 'Point'],
-      ['!=', 'meta', 'midpoint'],
-      ['==', 'active', 'true']],
+      ['==', 'active', 'true']
+    ],
     'paint': {
       'circle-radius': 7,
       'circle-color': '#EF6C00'

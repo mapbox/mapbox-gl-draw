@@ -1,7 +1,18 @@
-var toMidpoint = require('./to_midpoint');
-var toVertex = require('./to_vertex');
+const toVertex = (parent, coord, path, selected) => ({
+  type: 'Feature',
+  properties: {
+    meta: 'vertex',
+    parent: parent,
+    coord_path: path,
+    active: `${selected}`
+  },
+  geometry: {
+    type: 'Point',
+    coordinates: coord
+  }
+});
 
-module.exports = function(geojson, doMidpoints, push, map, selectedCoordPaths) {
+module.exports = function(geojson, push, map, selectedCoordPaths) {
   var oneVertex = null;
   var twoVertex = null;
   var startVertex = null;
@@ -16,14 +27,7 @@ module.exports = function(geojson, doMidpoints, push, map, selectedCoordPaths) {
         startVertex = startVertex ? startVertex : oneVertex;
         push(oneVertex);
 
-        if (j > 0 && doMidpoints) {
-          push(toMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
-        }
-
         twoVertex = oneVertex;
-      }
-      if (doMidpoints) {
-        push(toMidpoint(geojson.properties.id, oneVertex, startVertex, map));
       }
     }
     else {
@@ -31,9 +35,6 @@ module.exports = function(geojson, doMidpoints, push, map, selectedCoordPaths) {
       let coord_path = `${i}`;
       oneVertex = toVertex(geojson.properties.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
       push(oneVertex);
-      if (i > 0 && doMidpoints) {
-        push(toMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
-      }
       twoVertex = oneVertex;
     }
   }

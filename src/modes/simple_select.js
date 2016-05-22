@@ -133,7 +133,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     render: function(geojson, push) {
       geojson.properties.active = selectedFeaturesById[geojson.properties.id] ? 'true' : 'false';
       if (geojson.properties.active === 'true') {
-        addCoords(geojson, false, push, ctx.map, []);
+        addCoords(geojson, push, ctx.map, []);
       }
       push(geojson);
     }

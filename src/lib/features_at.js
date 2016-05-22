@@ -1,6 +1,6 @@
 var area = require('turf-area');
 
-var metas = ['feature', 'midpoint', 'vertex', 'too-small'];
+var metas = ['feature', 'midpoint', 'vertex', 'too-small', 'border'];
 
 var geometryTypeValues = {
   'Polygon': 2,
