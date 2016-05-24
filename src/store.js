@@ -7,16 +7,16 @@ var Store = module.exports = function(ctx) {
   this.featureIds = [];
   this.renderHistory = {};
   this.featureHistory = {};
+  this.featureHistoryJSON = {};
   this.render = throttle(render, 16, this);
   this.isDirty = false;
   this.zoomLevel = ctx.map.getZoom();
   this.zoomRender = this.zoomLevel;
 };
 
-Store.prototype.needsUpdate = function(geojson) {
-  var feature = this.features[geojson.id];
-  var coords = JSON.stringify(geojson.geometry.coordinates);
-  return !(feature && this.featureHistory[geojson.id] === coords);
+Store.prototype.needsUpdate = function(id, coordString) {
+  var feature = this.features[id];
+  return !(feature && this.featureHistory[id] === coordString);
 };
 
 Store.prototype.setDirty = function() {

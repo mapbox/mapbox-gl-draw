@@ -22,7 +22,7 @@ module.exports = function render() {
 
       var about = geojson.properties;
 
-      if (about.meta === 'too-small') {
+      if (about.meta === 'too-small' && about.point) {
         geojson.geometry = about.point.geometry;
       }
 
@@ -63,18 +63,23 @@ module.exports = function render() {
     };
 
     var changed = [];
+    var zoomUpdate = Math.abs(this.zoomRender - this.zoomLevel) > 1;
 
-    this.featureIds.forEach((id) => {
+    this.featureIds.forEach(function processFeatures(id) {
+      id = id + '';
       let feature = this.features[id];
       let featureInternal = feature.internal(mode);
-      var coords = JSON.stringify(featureInternal.geometry.coordinates);
+      var coordString = featureInternal.geometry.coordinates.join('|');
 
-      if (feature.isValid() && this.ctx.store.needsUpdate(feature.toGeoJSON())) {
-        this.featureHistory[id] = coords;
+      let needsUpdate = feature.isValid() && this.ctx.store.needsUpdate(id, coordString);
+
+      if (needsUpdate) {
+        this.featureHistory[id] = coordString;
         changed.push(feature.toGeoJSON());
+        this.featureHistoryJSON[id] = featureInternal;
       }
 
-      if (featureInternal.geometry.type !== 'Point' && this.features[id].isValid()) {
+      if (featureInternal.geometry.type !== 'Point' && (needsUpdate || zoomUpdate)) {
         var envelope = turfEnvelope({
           type: 'FeatureCollection',
           features: [featureInternal]
@@ -106,10 +111,11 @@ module.exports = function render() {
             features: [featureInternal]
           });
         }
+        this.featureHistoryJSON[id] = featureInternal;
       }
 
-      this.ctx.events.currentModeRender(featureInternal, pusher);
-    });
+      this.ctx.events.currentModeRender(this.featureHistoryJSON[id] || featureInternal, pusher);
+    }.bind(this));
 
     this.renderHistory = nextHistory;
 
