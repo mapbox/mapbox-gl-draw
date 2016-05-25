@@ -104,10 +104,6 @@ module.exports = function(ctx) {
     }
   };
 
-  events.deleted = function() {
-    ctx.store.setDirty();
-  };
-
   events.zoomend = function() {
     ctx.store.changeZoom();
   };
@@ -150,10 +146,6 @@ module.exports = function(ctx) {
 
       ctx.container.addEventListener('keydown', events.keydown);
       ctx.container.addEventListener('keyup', events.keyup);
-
-      ctx.map.on('draw.deleted', events.deleted);
-
-      ctx.map.on('zoomend', events.zoomend);
     },
     removeEventListeners: function() {
       ctx.map.off('mousemove', events.mousemove);
@@ -163,10 +155,6 @@ module.exports = function(ctx) {
 
       ctx.container.removeEventListener('keydown', events.keydown);
       ctx.container.removeEventListener('keyup', events.keyup);
-
-      ctx.map.off('draw.deleted', events.deleted);
-
-      ctx.map.off('zoomend', events.zoomend);
     }
   };
 

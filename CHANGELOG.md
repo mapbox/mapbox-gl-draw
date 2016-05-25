@@ -1,3 +1,8 @@
+## 0.6.4
+
+* Major speed improvement while drawing
+* Removes displaying polygons and lines as points when they are very small
+
 ## 0.6.0
 
 * Draw.add now runs geojsonhint on provided features to confirm they are valid geojson

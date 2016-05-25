@@ -40,6 +40,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       this.on('click', noFeature, function() {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
+        wasSelected.forEach(id => this.render(id));
         this.fire('selected.end', {featureIds: wasSelected});
       });
 
@@ -50,11 +51,6 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
           isDragging: true,
           startPos: e.lngLat
         });
-      });
-
-      this.on('mousedown', isOfMetaType('too-small'), function(e) {
-        var bounds = JSON.parse(e.featureTarget.properties.bounds, {padding: 100});
-        ctx.map.fitBounds(bounds);
       });
 
       this.on('mousedown', isFeature, function(e) {
@@ -70,19 +66,23 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
           this.fire('selected.end', {featureIds:[id]});
+          this.render(id);
         }
         else if (!isSelected && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.start', {featureIds:[id]});
+          this.render(id);
         }
         else {
           //make selected
           var wasSelected = Object.keys(selectedFeaturesById);
+          wasSelected.forEach(wereId => this.render(wereId));
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.end', {featureIds:wasSelected});
           this.fire('selected.start', {featureIds:[id]});
+          this.render(id);
         }
       });
 
@@ -109,14 +109,16 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         for (var i = 0; i < numFeatures; i++) {
           var feature = features[i];
           if (feature.type === 'Point') {
-            feature.coordinates[0] = featureCoords[i][0] + lngD;
-            feature.coordinates[1] = featureCoords[i][1] + latD;
+            feature.setCoordinates([
+              featureCoords[i][0] + lngD,
+              featureCoords[i][1] + latD
+            ]);
           }
           else if (feature.type === 'LineString') {
-            feature.coordinates = featureCoords[i].map(coordMap);
+            feature.setCoordinates(featureCoords[i].map(coordMap));
           }
           else if (feature.type === 'Polygon') {
-            feature.coordinates = featureCoords[i].map(ringMap);
+            feature.setCoordinates(featureCoords[i].map(ringMap));
           }
         }
       });

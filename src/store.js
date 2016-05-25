@@ -5,32 +5,28 @@ var Store = module.exports = function(ctx) {
   this.ctx = ctx;
   this.features = {};
   this.featureIds = [];
-  this.renderHistory = {};
-  this.featureHistory = {};
+  this.sources = {
+    hot: [],
+    cold: []
+  };
   this.render = throttle(render, 16, this);
-  this.isDirty = false;
-  this.zoomLevel = ctx.map.getZoom();
-  this.zoomRender = this.zoomLevel;
-};
 
-Store.prototype.needsUpdate = function(geojson) {
-  var feature = this.features[geojson.id];
-  var coords = JSON.stringify(geojson.geometry.coordinates);
-  return !(feature && this.featureHistory[geojson.id] === coords);
+  this.isDirty = false;
+  this.changedIds = [];
 };
 
 Store.prototype.setDirty = function() {
   this.isDirty = true;
 };
 
-Store.prototype.changeZoom = function() {
-  this.zoomLevel = this.ctx.map.getZoom();
-  if (Math.abs(this.zoomRender - this.zoomLevel) > 1) {
-    this.render();
+Store.prototype.featureChanged = function(id) {
+  if (this.changedIds.indexOf(id) === -1) {
+    this.changedIds.push(id);
   }
 };
 
 Store.prototype.add = function(feature) {
+  this.featureChanged(feature.id);
   this.features[feature.id] = feature;
   if (this.featureIds.indexOf(feature.id) === -1) {
     this.featureIds.push(feature.id);
@@ -54,12 +50,12 @@ Store.prototype.delete = function (ids) {
       var feature = this.get(id);
       deleted.push(feature.toGeoJSON());
       delete this.features[id];
-      delete this.featureHistory[id];
       this.featureIds.splice(idx, 1);
     }
   });
 
   if (deleted.length > 0) {
+    this.isDirty = true;
     this.ctx.map.fire('draw.deleted', {featureIds:deleted});
   }
 };
