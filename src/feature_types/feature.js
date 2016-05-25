@@ -12,12 +12,12 @@ var Feature = function(ctx, geojson) {
 
 Feature.prototype.changed = function() {
   this.ctx.store.featureChanged(this.id);
-}
+};
 
 Feature.prototype.setCoordinates = function(coords) {
   this.coordinates = coords;
   this.changed();
-}
+};
 
 Feature.prototype.getCoordinates = function() {
   return JSON.parse(JSON.stringify(this.coordinates));

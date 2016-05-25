@@ -15,13 +15,15 @@ var Store = module.exports = function(ctx) {
   this.changedIds = [];
 };
 
-Store.prototype.setDirty = function() { this.isDirty = true; }
+Store.prototype.setDirty = function() {
+  this.isDirty = true;
+};
 
 Store.prototype.featureChanged = function(id) {
   if (this.changedIds.indexOf(id) === -1) {
     this.changedIds.push(id);
   }
-}
+};
 
 Store.prototype.add = function(feature) {
   this.featureChanged(feature.id);

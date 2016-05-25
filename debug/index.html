@@ -109,35 +109,32 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
       Draw.changeMode('draw_polygon');
     };
 
-    var counter = 0;
-
-    var loadData = function(uri) {
-      var req = new XMLHttpRequest();
-      req.onerror = function() {
-        throw new FriendlyError('Network Error');
-      };
-      req.onload = () => {
-        counter++;
-        console.log('counter', counter);
-        var fc = JSON.parse(req.response);
-        fc.features.forEach(feature => {
-          if(feature.geometry.type.startsWith('Multi') === false) {
-            Draw.add(feature);
-          }
-        });
-
-      };
-      req.open('GET', uri);
-      req.send();
-    }
-
-    loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson');
-
-    loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_rivers_north_america.geojson');
-
-    // loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_admin_1_label_points.geojson');
-
   });
+
+  var loadData = function(uri) {
+  var req = new XMLHttpRequest();
+  req.onerror = function() {
+    throw new FriendlyError('Network Error');
+  };
+  req.onload = () => {
+    var fc = JSON.parse(req.response);
+    fc.features.forEach(feature => {
+      if(feature.geometry.type.startsWith('Multi') === false) {
+        Draw.add(feature);
+      }
+    });
+
+  };
+  req.open('GET', uri);
+  req.send();
+}
+
+console.log('use `loadData(url)` to load in FeatureCollections to Draw via url');
+console.log('5.51MB Polygons - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson');
+
+console.log('4.99MB LineStirings - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_rivers_north_america.geojson');
+
+console.log('4.03MB Points - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_admin_1_label_points.geojson');
 
   (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>

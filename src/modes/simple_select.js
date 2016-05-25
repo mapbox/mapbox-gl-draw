@@ -77,7 +77,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         else {
           //make selected
           var wasSelected = Object.keys(selectedFeaturesById);
-          wasSelected.forEach(id => this.render(id));
+          wasSelected.forEach(wereId => this.render(wereId));
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.end', {featureIds:wasSelected});

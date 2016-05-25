@@ -252,7 +252,7 @@ If you need to style gl-draw for debugging sources the source names are `mapbox-
 
 property | values | function
 --- | --- | ---
-meta | feature, midpoint, vertex, too-small | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user. `too-small` is used to indicate a point that represents the center of a collection of features that are too small at the current zoom level to be seen.
+meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user.
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
 hover | true, false | `true` and `false` are strings. `hover` is true when the mouse is over the feature.

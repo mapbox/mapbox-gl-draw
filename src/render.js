@@ -1,6 +1,3 @@
-var turfEnvelope = require('turf-envelope');
-var turfCentroid = require('turf-centroid');
-
 module.exports = function render() {
   var isStillAlive = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
   if (isStillAlive) { // checks to make sure we still have a map
@@ -29,8 +26,6 @@ module.exports = function render() {
       return newHotIds.indexOf(id) === -1;
     });
 
-    console.log('change', this.isDirty, newHotIds.length, newColdIds.length, this.changedIds.length);
-
     let changed = [];
     newHotIds.concat(newColdIds).map(function prepForViewUpdates(id) {
       if (newHotIds.indexOf(id) > -1) {
@@ -53,7 +48,7 @@ module.exports = function render() {
       }.bind(this));
     }.bind(this));
 
-    if (lastColdCount != this.sources.cold.length) {
+    if (lastColdCount !== this.sources.cold.length) {
       this.ctx.map.getSource('mapbox-gl-draw-cold').setData({
         type: 'FeatureCollection',
         features: this.sources.cold
