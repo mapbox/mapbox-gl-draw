@@ -10,12 +10,13 @@ var Feature = function(ctx, geojson) {
   ctx.store.add(this);
 };
 
-Feature.prototype.needsUpdate = function() {
-  return this.coordinates.join(' ') !== this.atLastRender;
+Feature.prototype.changed = function() {
+  this.ctx.store.featureChanged(this.id);
 }
 
-Feature.prototype.pegCoords = function() {
-   this.atLastRender = this.coordinates.join(' ');
+Feature.prototype.setCoordinates = function(coords) {
+  this.coordinates = coords;
+  this.changed();
 }
 
 Feature.prototype.getCoordinates = function() {

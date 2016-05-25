@@ -30,6 +30,10 @@ var ModeHandler = function(mode, DrawContext) {
     fire: function(event, payload) {
       var modename = DrawContext.events.currentModeName();
       DrawContext.map.fire(`draw.${modename}.${event}`, payload);
+    },
+    render: function(id) {
+      console.log('will update', id);
+      DrawContext.store.featureChanged(id)
     }
   };
 

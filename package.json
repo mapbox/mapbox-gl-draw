@@ -57,7 +57,6 @@
   "dependencies": {
     "geojsonhint": "^1.2.0",
     "hat": "0.0.3",
-    "immutable": "^3.8.1",
     "point-geometry": "0.0.0",
     "ramda": "^0.17.1",
     "turf-area": "^1.1.1",

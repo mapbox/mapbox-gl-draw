@@ -109,22 +109,33 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
       Draw.changeMode('draw_polygon');
     };
 
-    var req = new XMLHttpRequest();
-    req.onerror = function() {
-      throw new FriendlyError('Network Error');
-    };
-    req.onload = () => {
-      var fc = JSON.parse(req.response);
-      fc.features.forEach(feature => {
-        if(feature.geometry.type.startsWith('Multi') === false) {
-          Draw.add(feature);
-        }
-      });
+    var counter = 0;
 
-    };
-    var uri = 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson';
-    req.open('GET', uri);
-    req.send();
+    var loadData = function(uri) {
+      var req = new XMLHttpRequest();
+      req.onerror = function() {
+        throw new FriendlyError('Network Error');
+      };
+      req.onload = () => {
+        counter++;
+        console.log('counter', counter);
+        var fc = JSON.parse(req.response);
+        fc.features.forEach(feature => {
+          if(feature.geometry.type.startsWith('Multi') === false) {
+            Draw.add(feature);
+          }
+        });
+
+      };
+      req.open('GET', uri);
+      req.send();
+    }
+
+    loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson');
+
+    loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_rivers_north_america.geojson');
+
+    // loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_admin_1_label_points.geojson');
 
   });
 

@@ -1,6 +1,5 @@
 var {throttle} = require('./lib/util');
 var render = require('./render');
-var Immutable = require('immutable');
 
 var Store = module.exports = function(ctx) {
   this.ctx = ctx;
@@ -11,28 +10,21 @@ var Store = module.exports = function(ctx) {
     cold: []
   };
   this.render = throttle(render, 16, this);
+
   this.isDirty = false;
-  this.zoomLevel = ctx.map.getZoom();
-  this.zoomRender = this.zoomLevel;
+  this.changedIds = [];
 };
 
-Store.prototype.needsUpdate = function(id, coordString) {
-  var feature = this.features[id];
-  return !(feature && this.featureHistory.get(id) === coordString);
-};
+Store.prototype.setDirty = function() { this.isDirty = true; }
 
-Store.prototype.setDirty = function() {
-  this.isDirty = true;
-};
-
-Store.prototype.changeZoom = function() {
-  this.zoomLevel = this.ctx.map.getZoom();
-  if (Math.abs(this.zoomRender - this.zoomLevel) > 1) {
-    this.render();
+Store.prototype.featureChanged = function(id) {
+  if (this.changedIds.indexOf(id) === -1) {
+    this.changedIds.push(id);
   }
-};
+}
 
 Store.prototype.add = function(feature) {
+  this.featureChanged(feature.id);
   this.features[feature.id] = feature;
   if (this.featureIds.indexOf(feature.id) === -1) {
     this.featureIds.push(feature.id);
@@ -56,13 +48,12 @@ Store.prototype.delete = function (ids) {
       var feature = this.get(id);
       deleted.push(feature.toGeoJSON());
       delete this.features[id];
-      this.featureHistory = this.featureHistory.delete(id);
-      this.featureHistoryJSON = this.featureHistoryJSON.delete(id);
       this.featureIds.splice(idx, 1);
     }
   });
 
   if (deleted.length > 0) {
+    this.isDirty = true;
     this.ctx.map.fire('draw.deleted', {featureIds:deleted});
   }
 };

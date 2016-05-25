@@ -14,6 +14,7 @@ Polygon.prototype.isValid = function() {
 };
 
 Polygon.prototype.addCoordinate = function(path, lng, lat) {
+  this.changed();
   var ids = path.split('.').map(x => parseInt(x, 10));
 
   var ring = this.coordinates[ids[0]];
@@ -22,6 +23,7 @@ Polygon.prototype.addCoordinate = function(path, lng, lat) {
 };
 
 Polygon.prototype.removeCoordinate = function(path) {
+  this.changed();
   var ids = path.split('.').map(x => parseInt(x, 10));
   var ring = this.coordinates[ids[0]];
   if (ring) {
@@ -43,6 +45,7 @@ Polygon.prototype.getCoordinates = function() {
 };
 
 Polygon.prototype.updateCoordinate = function(path, lng, lat) {
+  this.changed();
   var parts = path.split('.');
   var ringId = parseInt(parts[0], 10);
   var coordId = parseInt(parts[1], 10);

@@ -11,6 +11,7 @@ Point.prototype.isValid = function() {
 };
 
 Point.prototype.updateCoordinate = function(path, lng, lat) {
+  this.changed();
   this.coordinates = [lng, lat];
 };
 
