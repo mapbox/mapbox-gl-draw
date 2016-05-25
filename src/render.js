@@ -74,7 +74,7 @@ module.exports = function render() {
       let needsUpdate = feature.isValid() && this.ctx.store.needsUpdate(id, coordString);
 
       if (needsUpdate) {
-        this.featureHistory[id] = coordString;
+        this.featureHistory = this.featureHistory.set(id, coordString)
         changed.push(feature.toGeoJSON());
         this.featureHistoryJSON[id] = featureInternal;
       }

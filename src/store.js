@@ -1,12 +1,13 @@
 var {throttle} = require('./lib/util');
 var render = require('./render');
+var Immutable = require('immutable');
 
 var Store = module.exports = function(ctx) {
   this.ctx = ctx;
   this.features = {};
   this.featureIds = [];
   this.renderHistory = {};
-  this.featureHistory = {};
+  this.featureHistory = Immutable.Map();
   this.featureHistoryJSON = {};
   this.render = throttle(render, 16, this);
   this.isDirty = false;
@@ -16,7 +17,7 @@ var Store = module.exports = function(ctx) {
 
 Store.prototype.needsUpdate = function(id, coordString) {
   var feature = this.features[id];
-  return !(feature && this.featureHistory[id] === coordString);
+  return !(feature && this.featureHistory.get(id) === coordString);
 };
 
 Store.prototype.setDirty = function() {
@@ -54,7 +55,7 @@ Store.prototype.delete = function (ids) {
       var feature = this.get(id);
       deleted.push(feature.toGeoJSON());
       delete this.features[id];
-      delete this.featureHistory[id];
+      this.featureHistory = this.featureHistory.delete(id);
       this.featureIds.splice(idx, 1);
     }
   });
