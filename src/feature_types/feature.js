@@ -4,10 +4,19 @@ var Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
+  this.atLastRender = null;
   this.id = geojson.id || hat();
   this.type = geojson.geometry.type;
   ctx.store.add(this);
 };
+
+Feature.prototype.needsUpdate = function() {
+  return this.coordinates.join(' ') !== this.atLastRender;
+}
+
+Feature.prototype.pegCoords = function() {
+   this.atLastRender = this.coordinates.join(' ');
+}
 
 Feature.prototype.getCoordinates = function() {
   return JSON.parse(JSON.stringify(this.coordinates));

@@ -1,5 +1,6 @@
 var turfEnvelope = require('turf-envelope');
 var turfCentroid = require('turf-centroid');
+var Immutable = require('immutable');
 
 module.exports = function render() {
   var isStillAlive = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
@@ -9,77 +10,54 @@ module.exports = function render() {
       mode: mode
     });
 
-    var features = {
-      hot: [],
-      cold: []
-    };
+    var zoomUpdate = Math.abs(this.zoomRender - this.zoomLevel) > 1 || this.isDirty;
 
-    var renderCold = this.isDirty;
+    var newHotIds = [];
+    var newColdIds = [];
 
-    var nextHistory = {};
+    if (zoomUpdate) {
+      this.featureIds.forEach(id => {
+        if (this.features[id].needsUpdate()) {
+          newHotIds.push(id);
+        }
+        else {
+          newColdIds.push(id);
+        }
+      })
+    }
+    else {
+      newHotIds = this.featureIds.filter(id => this.features[id].needsUpdate());
+      newColdIds = this.sources.hot.filter(geojson => {
+        return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1
+      }).map(geojson => geojson.properties.id);
+    }
 
-    var pusher = (geojson) => {
+    this.sources.hot = [];
+    this.sources.cold = zoomUpdate ? [] : this.sources.cold.filter(geojson => {
+      var id = geojson.properties.id || geojson.properties.parent;
+      return newHotIds.indexOf(id) === -1;
+    });
 
-      var about = geojson.properties;
+    let changed = [];
 
-      if (about.meta === 'too-small' && about.point) {
-        geojson.geometry = about.point.geometry;
-      }
-
-      delete about.point;
-
-      geojson.properties = about;
-
-      var key = about.id + '.' + about.parent + '.' + about.coord_path + '.' + (about.meta === 'too-small' ? 'feature' : about.meta);
-      var value = JSON.stringify(geojson);
-
-      var past = this.renderHistory[key];
-
-      if (past === undefined) {
-        past = { changed: 4};
-      }
-
-      var next = {
-        value: value,
-        changed: past.changed
-      };
-
-      if (past.value !== value && next.changed < 4) {
-        next.changed ++;
-      }
-      else if (past.value === value && next.changed > 0) {
-        next.changed--;
-      }
-
-      if (next.changed < 2) {
-        features.cold.push(geojson);
-        renderCold = renderCold ? true : next.changed !== past.changed;
+    newHotIds.concat(newColdIds).map(id => {
+      if (newHotIds.indexOf(id) > -1) {
+        return {source: 'hot', 'id': id};
       }
       else {
-        renderCold = renderCold ? true : past.changed < 2;
-        features.hot.push(geojson);
+        return {source: 'cold', 'id': id};
       }
-      nextHistory[key] = next;
-    };
-
-    var changed = [];
-    var zoomUpdate = Math.abs(this.zoomRender - this.zoomLevel) > 1;
-
-    this.featureIds.forEach(function processFeatures(id) {
-      id = id + '';
+    }).forEach(change => {
+      let {id, source} = change;
       let feature = this.features[id];
       let featureInternal = feature.internal(mode);
-      var coordString = featureInternal.geometry.coordinates.join('|');
 
-      let needsUpdate = feature.isValid() && this.ctx.store.needsUpdate(id, coordString);
-
-      if (needsUpdate) {
-        this.featureHistory = this.featureHistory.set(id, coordString)
+      if (source === 'hot' && feature.isValid()) {
         changed.push(feature.toGeoJSON());
-        this.featureHistoryJSON[id] = featureInternal;
+        feature.pegCoords();
       }
 
-      if (featureInternal.geometry.type !== 'Point' && (needsUpdate || zoomUpdate)) {
+      if (featureInternal.geometry.type !== 'Point') {
         var envelope = turfEnvelope({
           type: 'FeatureCollection',
           features: [featureInternal]
@@ -111,24 +89,33 @@ module.exports = function render() {
             features: [featureInternal]
           });
         }
-        this.featureHistoryJSON[id] = featureInternal;
       }
 
-      this.ctx.events.currentModeRender(this.featureHistoryJSON[id] || featureInternal, pusher);
-    }.bind(this));
+      this.ctx.events.currentModeRender(featureInternal, (geojson => {
+        var about = geojson.properties;
 
-    this.renderHistory = nextHistory;
+        if (about.meta === 'too-small' && about.point) {
+          geojson.geometry = about.point.geometry;
+        }
 
-    if (renderCold) {
+        delete about.point;
+
+        geojson.properties = about;
+
+        this.sources[source].push(geojson);
+      }));
+    });
+
+    if (newColdIds.length > 0) {
       this.ctx.map.getSource('mapbox-gl-draw-cold').setData({
         type: 'FeatureCollection',
-        features: features.cold
+        features: this.sources.cold
       });
     }
 
     this.ctx.map.getSource('mapbox-gl-draw-hot').setData({
       type: 'FeatureCollection',
-      features: features.hot
+      features: this.sources.hot
     });
 
     if (changed.length) {

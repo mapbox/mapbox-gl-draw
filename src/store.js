@@ -6,9 +6,10 @@ var Store = module.exports = function(ctx) {
   this.ctx = ctx;
   this.features = {};
   this.featureIds = [];
-  this.renderHistory = {};
-  this.featureHistory = Immutable.Map();
-  this.featureHistoryJSON = {};
+  this.sources = {
+    hot: [],
+    cold: []
+  };
   this.render = throttle(render, 16, this);
   this.isDirty = false;
   this.zoomLevel = ctx.map.getZoom();
@@ -56,6 +57,7 @@ Store.prototype.delete = function (ids) {
       deleted.push(feature.toGeoJSON());
       delete this.features[id];
       this.featureHistory = this.featureHistory.delete(id);
+      this.featureHistoryJSON = this.featureHistoryJSON.delete(id);
       this.featureIds.splice(idx, 1);
     }
   });
