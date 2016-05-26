@@ -144,8 +144,10 @@ module.exports = function(ctx) {
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
 
-      ctx.container.addEventListener('keydown', events.keydown);
-      ctx.container.addEventListener('keyup', events.keyup);
+      if (ctx.options.keybindings) {
+        ctx.container.addEventListener('keydown', events.keydown);
+        ctx.container.addEventListener('keyup', events.keyup);
+      }
     },
     removeEventListeners: function() {
       ctx.map.off('mousemove', events.mousemove);
@@ -153,8 +155,10 @@ module.exports = function(ctx) {
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
 
-      ctx.container.removeEventListener('keydown', events.keydown);
-      ctx.container.removeEventListener('keyup', events.keyup);
+      if (ctx.options.keybindings) {
+        ctx.container.removeEventListener('keydown', events.keydown);
+        ctx.container.removeEventListener('keyup', events.keyup);
+      }
     }
   };
 
