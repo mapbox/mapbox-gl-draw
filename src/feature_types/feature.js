@@ -4,9 +4,19 @@ var Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
+  this.atLastRender = null;
   this.id = geojson.id || hat();
   this.type = geojson.geometry.type;
   ctx.store.add(this);
+};
+
+Feature.prototype.changed = function() {
+  this.ctx.store.featureChanged(this.id);
+};
+
+Feature.prototype.setCoordinates = function(coords) {
+  this.coordinates = coords;
+  this.changed();
 };
 
 Feature.prototype.getCoordinates = function() {
@@ -31,6 +41,7 @@ Feature.prototype.internal = function(mode) {
     'properties': {
       'id': this.id,
       'meta': 'feature',
+      'meta:type': this.type,
       'active': 'false',
       mode: mode
     },

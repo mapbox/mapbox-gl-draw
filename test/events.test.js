@@ -38,13 +38,19 @@ var timeout = function(t, time, msg) {
 var Draw = GLDraw();
 map.addControl(Draw);
 
+test('draw.direct_select event', t => {
+  let id = Draw.add(feature);
+  t.throws(() => Draw.changeMode('direct_select', {featureId: id}), 'should throw on a point');
+  t.end();
+});
+
 test('draw.deleted event', t => {
   t = timeout(t, 100, 'failed to fire draw.deleted');
   map.once('draw.deleted', e => {
     if(t.notDone()) {
       t.pass('draw.deleted fired on deleted');
-      t.deepEquals(e[0].geometry, feature.geometry, 'geojson in payload is the same as set');
-      t.equals(e[0].id, id, 'draw id in payload is correct');
+      t.deepEquals(e.featureIds[0].geometry, feature.geometry, 'geojson in payload is the same as set');
+      t.equals(e.featureIds[0].id, id, 'draw id in payload is correct');
       t.end();
     }
   });

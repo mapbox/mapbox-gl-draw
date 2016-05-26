@@ -1,3 +1,41 @@
+## 0.6.4
+
+* Major speed improvement while drawing
+* Removes displaying polygons and lines as points when they are very small
+
+## 0.6.0
+
+* Draw.add now runs geojsonhint on provided features to confirm they are valid geojson
+* Draw.add now doesn't add any features to the map if one provided has an error
+* It used to be possible to trick Draw into thinking you were dragging when you meant to be clicking. This also helps not move the map while clicking rather than dragging.
+* Moved to size bassed selection. This means the smallest feature is selected first. Points, than LineStrings, than Polygons where polygons are selected in order of their area.
+
+## 0.6.0-rc9
+
+* Upgrade to mapbox-gl-js-mock v0.18
+
+## 0.6.0-rc8
+
+* Upgrade to Mapbox GL JS v0.18
+
+## 0.6.0-rc7
+
+* When moving from a drawing mode to simple select, select the new feature
+
+## 0.6.0-rc6
+
+* Fix custom styling
+* Draw.add now updates the stored properties of a feature
+* Draw no longer emits features that are invalid as changed
+
+## 0.6.0-rc5
+
+* polygons and lines that are too small to see now show up as points
+
+## 0.6.0-rc4
+
+Upgrade to Mapbox GL JS v0.17
+
 ## 0.6.0-rc3
 
 Cursors can now be set via css classes. Default cursor options have been added. This restores the long standing issue of hover cursors not working.

@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.6.0-rc3",
+  "version": "0.6.4",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -44,19 +44,21 @@
     "eslint": "^0.21.2",
     "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
-    "mapbox-gl": "^0.16.0",
-    "mapbox-gl-js-mock": "^0.16.1",
+    "mapbox-gl": "^0.18.0",
+    "mapbox-gl-js-mock": "^0.18.0",
     "mock-browser": "^0.92.10",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23",
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.16.0"
+    "mapbox-gl": "^0.18.0 || ^0.17.0"
   },
   "dependencies": {
+    "geojsonhint": "^1.2.0",
     "hat": "0.0.3",
     "point-geometry": "0.0.0",
-    "ramda": "^0.17.1"
+    "ramda": "^0.17.1",
+    "turf-area": "^1.1.1"
   }
 }

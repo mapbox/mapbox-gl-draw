@@ -1,7 +1,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import {createMap, features } from './utils';
+import {createMap, features, click } from './utils';
 
 var feature = features.polygon;
 
@@ -15,7 +15,7 @@ test('Polygon geometry class', t => {
     let coords = feature.geometry.coordinates[0];
     for (var i = 0; i < coords.length-1; i++) {
       var c = coords[i];
-      map.fire('click',{
+      click(map, {
         lngLat: {
           lng: c[0],
           lat: c[1]
@@ -27,7 +27,7 @@ test('Polygon geometry class', t => {
       });
     }
 
-    map.fire('click', {
+    click(map, {
       lngLat: {
         lng: coords[coords.length - 2][0],
         lat: coords[coords.length - 2][1]

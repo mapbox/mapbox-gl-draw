@@ -45,7 +45,7 @@ module.exports = function(ctx) {
   var onFinish = function() {
     feature.removeCoordinate(`0.${pos}`);
     pos--;
-    ctx.events.changeMode('simple_select');
+    ctx.events.changeMode('simple_select', [feature.id]);
   };
 
   return {
@@ -66,6 +66,7 @@ module.exports = function(ctx) {
     },
     render: function(geojson, push) {
       geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
+      geojson.properties.meta = geojson.properties.active === 'true' ? 'feature' : geojson.properties.meta;
 
       if (geojson.properties.active === 'true' && pos === 1) {
         let coords = [[geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]];

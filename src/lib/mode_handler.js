@@ -30,6 +30,9 @@ var ModeHandler = function(mode, DrawContext) {
     fire: function(event, payload) {
       var modename = DrawContext.events.currentModeName();
       DrawContext.map.fire(`draw.${modename}.${event}`, payload);
+    },
+    render: function(id) {
+      DrawContext.store.featureChanged(id);
     }
   };
 
@@ -56,9 +59,6 @@ var ModeHandler = function(mode, DrawContext) {
     },
     click: function(event) {
       delegate('click', event);
-    },
-    doubleclick: function(event) {
-      delegate('doubleclick', event);
     },
     mousemove: function(event) {
       delegate('mousemove', event);

@@ -13,6 +13,7 @@ function main() {
     var benchmarks = {
         simple_select_small: require('./tests/simple_select_small'),
         simple_select_large: require('./tests/simple_select_large'),
+        simple_select_large_two_maps: require('./tests/simple_select_large_two_maps'),
         simple_select_large_zoomed: require('./tests/simple_select_large_zoomed'),
 
         direct_select_small: require('./tests/direct_select_small'),

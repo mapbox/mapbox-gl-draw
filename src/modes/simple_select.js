@@ -40,7 +40,8 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       this.on('click', noFeature, function() {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
-        this.fire('selected.end', wasSelected);
+        wasSelected.forEach(id => this.render(id));
+        this.fire('selected.end', {featureIds: wasSelected});
       });
 
       this.on('mousedown', isOfMetaType('vertex'), function(e) {
@@ -60,24 +61,28 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         var isSelected = selectedFeaturesById[id] !== undefined;
 
         if (isSelected && !isShiftDown(e)) {
-          this.on('mouseup', readyForDirectSelect, directSelect);
+          this.on('click', readyForDirectSelect, directSelect);
         }
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
-          this.fire('selected.end', [id]);
+          this.fire('selected.end', {featureIds:[id]});
+          this.render(id);
         }
         else if (!isSelected && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.start', [id]);
+          this.fire('selected.start', {featureIds:[id]});
+          this.render(id);
         }
         else {
           //make selected
           var wasSelected = Object.keys(selectedFeaturesById);
+          wasSelected.forEach(wereId => this.render(wereId));
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.end', wasSelected);
-          this.fire('selected.start', [id]);
+          this.fire('selected.end', {featureIds:wasSelected});
+          this.fire('selected.start', {featureIds:[id]});
+          this.render(id);
         }
       });
 
@@ -89,7 +94,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       });
 
       this.on('drag', () => dragging, function(e) {
-        this.off('mouseup', readyForDirectSelect, directSelect);
+        this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
         if (featureCoords === null) {
           buildFeatureCoords();
@@ -104,14 +109,16 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         for (var i = 0; i < numFeatures; i++) {
           var feature = features[i];
           if (feature.type === 'Point') {
-            feature.coordinates[0] = featureCoords[i][0] + lngD;
-            feature.coordinates[1] = featureCoords[i][1] + latD;
+            feature.setCoordinates([
+              featureCoords[i][0] + lngD,
+              featureCoords[i][1] + latD
+            ]);
           }
           else if (feature.type === 'LineString') {
-            feature.coordinates = featureCoords[i].map(coordMap);
+            feature.setCoordinates(featureCoords[i].map(coordMap));
           }
           else if (feature.type === 'Polygon') {
-            feature.coordinates = featureCoords[i].map(ringMap);
+            feature.setCoordinates(featureCoords[i].map(ringMap));
           }
         }
       });

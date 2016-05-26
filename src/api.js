@@ -1,4 +1,6 @@
 var hat = require('hat');
+var featuresAt = require('./lib/features_at');
+var geojsonhint = require('geojsonhint');
 
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
@@ -9,13 +11,13 @@ var featureTypes = {
 module.exports = function(ctx) {
 
   return {
-    add: function (geojson) {
-      geojson = JSON.parse(JSON.stringify(geojson));
-      if (geojson.type === 'FeatureCollection') {
-        return geojson.features.map(feature => this.add(feature));
-      }
+    getFeatureIdsAt: function(x, y) {
+      var features = featuresAt({point: {x, y}}, ctx);
+      return features.map(feature => feature.properties.id);
+    },
+    add: function (geojson, validateGeoJSON=true) {
 
-      if (!geojson.geometry) {
+       if (geojson.type !== 'FeatureCollection' && !geojson.geometry) {
         geojson = {
           type: 'Feature',
           id: geojson.id,
@@ -24,19 +26,34 @@ module.exports = function(ctx) {
         };
       }
 
-      geojson.id = geojson.id || hat();
-      if (ctx.store.needsUpdate(geojson)) {
-        var model = featureTypes[geojson.geometry.type];
-
-        if(model === undefined) {
-          throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+      if (validateGeoJSON) {
+        var errors = geojsonhint.hint(geojson);
+        if (errors.length) {
+          throw new Error(errors[0].message);
         }
 
-        var internalFeature = new model(ctx, geojson);
-        var id = ctx.store.add(internalFeature);
-        ctx.store.render();
+        (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(feature => {
+          if (featureTypes[feature.geometry.type] === undefined) {
+            throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+          }
+        });
       }
-      return id;
+
+      if (geojson.type === 'FeatureCollection') {
+        return geojson.features.map(feature => this.add(feature, false));
+      }
+
+      geojson = JSON.parse(JSON.stringify(geojson));
+
+      geojson.id = geojson.id || hat();
+
+      var model = featureTypes[geojson.geometry.type];
+
+      let internalFeature = new model(ctx, geojson);
+      ctx.store.add(internalFeature);
+      ctx.store.render();
+
+      return geojson.id;
     },
     get: function (id) {
       var feature = ctx.store.get(id);

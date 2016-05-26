@@ -25,7 +25,7 @@ drawing | boolean | The ability to draw and delete features - default: `true`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
-style | Object | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
+styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
 ## API Methods
 
@@ -58,7 +58,7 @@ console.log(featureId)
 ```
 
 ---
-###`.get(String: feature.id) -> Object`
+###`.get(String: featureId) -> Object`
 
 This method takes an ID returns a GeoJSON feature.
 
@@ -68,6 +68,20 @@ Example:
 var id = Draw.add({ type: 'Point', coordinates: [0, 0] });
 console.log(Draw.get(id));
 //=> { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] } }
+```
+
+---
+### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]
+
+This method takes an x and y from pixel space and returns a list of
+features currently rendered by draws at that spot.
+
+This is good for using mouse events to get information out of draw.
+
+```js
+var featureIds = Draw.getFeatureIdsAt(20, 20);
+console.log(featureIds)
+//=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
 
 ---
@@ -171,7 +185,9 @@ For `simple_select` options is an array of ids. It is optional. If provided, the
 
 Lets you select, delete and drag vertices.
 
-For `direct_select`options is a single featureId. It is required. This feature will be active for the duration of the mode.
+For `direct_select` options is a single featureId. It is required. This feature will be active for the duration of the mode.
+
+`direct_select` mode doesn't handle point features.
 
 #### Drawing modes:
 
@@ -214,11 +230,11 @@ This is fired when feature coordinates are changed. It is fired just after the c
 }
 ```
 
-### draw.mode.default.selected.start
+### draw.mode.simple_select.selected.start
 
 This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
 
-### draw.mode.default.selected.end
+### draw.mode.simple_select.selected.end
 
 This is fired every time a feature is unselected in the default mode. The payload is an array of feature ids being unselected. This is **NOT** fired when the mode stops, as this can be assumed via the `draw.modechange` event.
 
@@ -228,13 +244,15 @@ Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-st
 
 The `GL Style Spec` requires each layer to have a source. **DO NOT PROVIDE THIS** for styling draw.
 
+The `GL Style Spec` also requires an id. Draw will provide this for you. If you wish to set this id to interact with draw layers, know that Draw will add `hot` and `cold` if no source is provided.
+
 Draw moves features between sources for performance gains, because of this it is recommeneded that you **DO NOT** provide a source for a style despite the fact the `GL Style Spec` requires a source. **Draw will provide the source for you automatically**.
 
 If you need to style gl-draw for debugging sources the source names are `mapbox-gl-draw-hot` and `mapbox-gl-draw-cold`.
 
 property | values | function
 --- | --- | ---
-meta | feature, midpoint, vertex, too-small | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user. `too-small` is used to indicate a point that represents the center of a collection of features that are too small at the current zoom level to be seen.
+meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user.
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
 hover | true, false | `true` and `false` are strings. `hover` is true when the mouse is over the feature.
@@ -247,7 +265,7 @@ With this style all Point features are blue and have a black halo when active. N
 
 ```js
 mapbox.Draw({
-  style: [
+  styles: [
     {
       'id': 'highlight-active-points',
       'type': 'circle',

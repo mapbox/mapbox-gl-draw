@@ -22,13 +22,7 @@ module.exports = function(ctx) {
 
   var onMouseMove = function(e) {
     ctx.ui.setClass({mouse:'add'});
-    if(pos === 0) {
-      feature.updateCoordinate(0, e.lngLat.lng, e.lngLat.lat);
-      feature.updateCoordinate(1, e.lngLat.lng, e.lngLat.lat);
-    }
-    else {
-      feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
-    }
+    feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
   };
 
   var onClick = function(e) {
@@ -50,7 +44,7 @@ module.exports = function(ctx) {
   var onFinish = function() {
     feature.removeCoordinate(`${pos}`);
     pos--;
-    ctx.events.changeMode('simple_select');
+    ctx.events.changeMode('simple_select', [feature.id]);
   };
 
   return {
@@ -72,6 +66,7 @@ module.exports = function(ctx) {
     render: function(geojson, push) {
       if (geojson.geometry.coordinates[0] !== undefined) {
         geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
+        geojson.properties.meta = geojson.properties.active === 'true' ? 'feature' : geojson.properties.meta;
         push(geojson);
       }
     }

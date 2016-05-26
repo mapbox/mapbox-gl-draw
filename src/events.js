@@ -1,5 +1,6 @@
 var ModeHandler = require('./lib/mode_handler');
-var findTargetAt = require('./lib/find_target_at');
+var getFeatureAtAndSetCursors = require('./lib/get_features_and_set_cursor');
+var isClick = require('./lib/is_click');
 
 var modes = {
   'simple_select': require('./modes/simple_select'),
@@ -11,58 +12,70 @@ var modes = {
 
 module.exports = function(ctx) {
 
-  var isDown = false;
+  var mouseDownInfo = {
+    isDown: false
+  };
 
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
   events.drag = function(event) {
-    ctx.ui.setClass({mouse: 'drag'});
-    currentMode.drag(event);
-  };
-
-  events.click = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.click(event);
-  };
-
-  events.doubleclick = function(event) {
-    var target = findTargetAt(event, ctx);
-    event.featureTarget = target;
-    currentMode.doubleclick(event);
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
+      event.originalEvent.stopPropagation();
+    }
+    else {
+      ctx.ui.setClass({mouse: 'drag'});
+      currentMode.drag(event);
+    }
   };
 
   events.mousemove = function(event) {
-    if (isDown) {
+    if (mouseDownInfo.isDown) {
       events.drag(event);
     }
     else {
-      var target = findTargetAt(event, ctx);
+      var target = getFeatureAtAndSetCursors(event, ctx);
       event.featureTarget = target;
       currentMode.mousemove(event);
     }
   };
 
   events.mousedown = function(event) {
-    isDown = true;
-    var target = findTargetAt(event, ctx);
+    mouseDownInfo = {
+      isDown: true,
+      time: new Date().getTime(),
+      point: event.point
+    };
+
+    var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
-    isDown = false;
-    var target = findTargetAt(event, ctx);
+    mouseDownInfo.isDown = false;
+    var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
-    currentMode.mouseup(event);
+
+    if (isClick(mouseDownInfo, {
+      point: event.point,
+      time: new Date().getTime()
+    })) {
+      currentMode.click(event);
+    }
+    else {
+      currentMode.mouseup(event);
+    }
+
   };
 
   events.trash = function() {
     currentMode.trash();
   };
-
 
   var isKeyModeValid = (code) => !(code === 8 || (code >= 48 && code <= 57));
 
@@ -91,8 +104,8 @@ module.exports = function(ctx) {
     }
   };
 
-  events.deleted = function() {
-    ctx.store.setDirty();
+  events.zoomend = function() {
+    ctx.store.changeZoom();
   };
 
   var api = {
@@ -126,8 +139,6 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
-      ctx.map.on('click', events.click);
-      ctx.map.on('dblclick', events.doubleclick);
       ctx.map.on('mousemove', events.mousemove);
 
       ctx.map.on('mousedown', events.mousedown);
@@ -135,12 +146,8 @@ module.exports = function(ctx) {
 
       ctx.container.addEventListener('keydown', events.keydown);
       ctx.container.addEventListener('keyup', events.keyup);
-
-      ctx.map.on('draw.deleted', events.deleted);
     },
     removeEventListeners: function() {
-      ctx.map.off('click', events.click);
-      ctx.map.off('dblclick', events.doubleclick);
       ctx.map.off('mousemove', events.mousemove);
 
       ctx.map.off('mousedown', events.mousedown);
@@ -148,8 +155,6 @@ module.exports = function(ctx) {
 
       ctx.container.removeEventListener('keydown', events.keydown);
       ctx.container.removeEventListener('keyup', events.keyup);
-
-      ctx.map.off('draw.deleted', events.deleted);
     }
   };
 
