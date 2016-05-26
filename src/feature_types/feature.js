@@ -7,7 +7,6 @@ var Feature = function(ctx, geojson) {
   this.atLastRender = null;
   this.id = geojson.id || hat();
   this.type = geojson.geometry.type;
-  ctx.store.add(this);
 };
 
 Feature.prototype.changed = function() {

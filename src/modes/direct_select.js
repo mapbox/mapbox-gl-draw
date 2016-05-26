@@ -27,6 +27,7 @@ module.exports = function(ctx, opts) {
     else if (isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths.push(about.coord_path);
     }
+    feature.changed();
   };
 
   var onMidpoint = function(e) {
@@ -57,6 +58,7 @@ module.exports = function(ctx, opts) {
         for (var i = 0; i < numCoords; i++) {
           var coord_path = selectedCoordPaths[i];
           var pos = coordPos[i];
+
           var lng = pos[0] + lngChange;
           var lat = pos[1] + latChange;
           feature.updateCoordinate(coord_path, lng, lat);

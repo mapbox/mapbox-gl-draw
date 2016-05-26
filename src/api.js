@@ -5,8 +5,13 @@ var geojsonhint = require('geojsonhint');
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
   'LineString': require('./feature_types/line_string'),
-  'Point': require('./feature_types/point')
+  'Point': require('./feature_types/point'),
+  'MultiPolygon': require('./feature_types/multi_feature'),
+  'MultiLineString': require('./feature_types/multi_feature'),
+  'MultiPoint': require('./feature_types/multi_feature')
 };
+
+var featureTypeStr = Object.keys(featureTypes).join(', ');
 
 module.exports = function(ctx) {
 
@@ -34,7 +39,7 @@ module.exports = function(ctx) {
 
         (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(feature => {
           if (featureTypes[feature.geometry.type] === undefined) {
-            throw new Error('Invalid feature type. Must be Point, Polygon or LineString');
+            throw new Error(`Invalid feature type. Must be ${featureTypeStr}`);
           }
         });
       }

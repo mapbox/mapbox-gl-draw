@@ -104,21 +104,22 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         var latD = e.lngLat.lat - startPos.lat;
 
         var coordMap = (coord) => [coord[0] + lngD, coord[1] + latD];
-        var ringMap = (ring) => ring.map(coord => [coord[0] + lngD, coord[1] + latD]);
+        var ringMap = (ring) => ring.map(coord => coordMap(coord));
+        var mutliMap = (multi) => multi.map(ring => ringMap(ring));
 
         for (var i = 0; i < numFeatures; i++) {
           var feature = features[i];
           if (feature.type === 'Point') {
-            feature.setCoordinates([
-              featureCoords[i][0] + lngD,
-              featureCoords[i][1] + latD
-            ]);
+            feature.setCoordinates(coordMap(featureCoords[i]));
           }
-          else if (feature.type === 'LineString') {
+          else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
             feature.setCoordinates(featureCoords[i].map(coordMap));
           }
-          else if (feature.type === 'Polygon') {
+          else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
             feature.setCoordinates(featureCoords[i].map(ringMap));
+          }
+          else if (feature.type === 'MultiPolygon') {
+            feature.setCoordinates(featureCoords[i].map(mutliMap));
           }
         }
       });
@@ -134,7 +135,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     },
     render: function(geojson, push) {
       geojson.properties.active = selectedFeaturesById[geojson.properties.id] ? 'true' : 'false';
-      if (geojson.properties.active === 'true') {
+      if (geojson.properties.active === 'true' && geojson.geometry.type !== 'Point') {
         addCoords(geojson, false, push, ctx.map, []);
       }
       push(geojson);

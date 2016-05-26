@@ -13,6 +13,8 @@ module.exports = function(ctx) {
     }
   });
 
+  ctx.store.add(feature);
+
   var stopDrawingAndRemove = function() {
     ctx.events.changeMode('simple_select');
     ctx.store.delete([feature.id]);
