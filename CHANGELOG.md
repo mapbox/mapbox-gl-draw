@@ -1,3 +1,7 @@
+## 0.6.5
+
+* Ensure keybindings option is enforced
+
 ## 0.6.4
 
 * Major speed improvement while drawing
