@@ -1,3 +1,7 @@
+## 0.6.7
+
+* Allow use of mapbox-gl@0.19
+
 ## 0.6.6
 
 * Fix mouse cursors when Draw is created before the map is available
