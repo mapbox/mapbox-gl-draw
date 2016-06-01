@@ -48,7 +48,7 @@ module.exports = function(ctx) {
         currentClass[type] = nextClass[type];
       });
     }
-  }
+  };
 
   ctx.ui = {
     setClass: function(opts) {
