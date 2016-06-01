@@ -33,12 +33,12 @@ module.exports = function(ctx) {
       ctx.ui.addButtons();
 
       if (map.style.loaded()) { // not public
-        ctx.events.addEventListeners();
         setup.addLayers();
+        ctx.events.addEventListeners();
       } else {
         map.on('load', () => {
-          ctx.events.addEventListeners();
           setup.addLayers();
+          ctx.events.addEventListeners();
         });
       }
     },

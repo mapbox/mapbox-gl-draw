@@ -26,7 +26,6 @@ module.exports = function render() {
       return newHotIds.indexOf(id) === -1;
     });
 
-    let changed = [];
     newHotIds.concat(newColdIds).map(function prepForViewUpdates(id) {
       if (newHotIds.indexOf(id) > -1) {
         return {source: 'hot', 'id': id};
@@ -38,10 +37,6 @@ module.exports = function render() {
       let {id, source} = change;
       let feature = this.features[id];
       let featureInternal = feature.internal(mode);
-
-      if (source === 'hot' && feature.isValid()) {
-        changed.push(feature.toGeoJSON());
-      }
 
       this.ctx.events.currentModeRender(featureInternal, function addGeoJsonToView(geojson) {
         this.sources[source].push(geojson);
@@ -59,6 +54,11 @@ module.exports = function render() {
       type: 'FeatureCollection',
       features: this.sources.hot
     });
+
+    let changed = this.changedIds.map(id => this.features[id])
+      .filter(feature => feature !== undefined)
+      .filter(feature => feature.isValid())
+      .map(feature => feature.toGeoJSON());
 
     if (changed.length) {
       this.ctx.map.fire('draw.changed', {features: changed});

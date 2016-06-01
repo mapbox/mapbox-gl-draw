@@ -9,10 +9,11 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   });
 
   var startPos = null;
-  var dragging = false;
+  var dragging = null;
   var featureCoords = null;
   var features = null;
   var numFeatures = null;
+
 
   var readyForDirectSelect = function(e) {
     if (isFeature(e)) {
@@ -37,11 +38,12 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
 
   return {
     start: function() {
+      dragging = false;
       this.on('click', noFeature, function() {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
-        wasSelected.forEach(id => this.render(id));
         this.fire('selected.end', {featureIds: wasSelected});
+        wasSelected.forEach(id => this.render(id));
       });
 
       this.on('mousedown', isOfMetaType('vertex'), function(e) {
@@ -93,7 +95,11 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         numFeatures = null;
       });
 
-      this.on('drag', () => dragging, function(e) {
+      var isDragging = function() {
+        return dragging;
+      };
+
+      this.on('drag', isDragging, function(e) {
         this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
         if (featureCoords === null) {
