@@ -47,12 +47,18 @@ module.exports = function(ctx) {
 
       geojson.id = geojson.id || hat();
 
-      var model = featureTypes[geojson.geometry.type];
+      if (ctx.store.get(geojson.id) === undefined) {
+        var model = featureTypes[geojson.geometry.type];
 
-      let internalFeature = new model(ctx, geojson);
-      ctx.store.add(internalFeature);
+        let internalFeature = new model(ctx, geojson);
+        ctx.store.add(internalFeature);
+      }
+      else {
+        let internalFeature = ctx.store.get(geojson.id);
+        internalFeature.properties = geojson.properties;
+      }
+
       ctx.store.render();
-
       return geojson.id;
     },
     get: function (id) {
