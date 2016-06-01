@@ -1,3 +1,7 @@
+## 0.7.0
+
+* Draw now supports MultiPoint, MultiLineString and MultiPolygon geojson feature types.
+
 ## 0.6.7
 
 * Allow use of mapbox-gl@0.19
