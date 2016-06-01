@@ -1,3 +1,8 @@
+## 0.6.6
+
+* Fix mouse cursors when Draw is created before the map is available
+* Fix Draw.add when adding a feature that already exhists
+
 ## 0.6.5
 
 * Ensure keybindings option is enforced
