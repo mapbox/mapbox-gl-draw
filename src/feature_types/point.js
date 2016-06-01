@@ -11,8 +11,12 @@ Point.prototype.isValid = function() {
 };
 
 Point.prototype.updateCoordinate = function(path, lng, lat) {
-  this.changed();
   this.coordinates = [lng, lat];
+  this.changed();
+};
+
+Point.prototype.getCoordinate = function() {
+  return this.getCoordinates();
 };
 
 module.exports = Point;

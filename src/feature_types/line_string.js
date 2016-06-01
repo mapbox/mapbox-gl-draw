@@ -28,9 +28,9 @@ LineString.prototype.removeCoordinate = function(path) {
 };
 
 LineString.prototype.updateCoordinate = function(path, lng, lat) {
-  this.changed();
   var id = parseInt(path, 10);
   this.coordinates[id] = [lng, lat];
+  this.changed();
 };
 
 module.exports = LineString;

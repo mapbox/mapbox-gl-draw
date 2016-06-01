@@ -48,8 +48,11 @@ test('API test', t => {
     var listOfIds = Draw.add(features.featureCollection);
     t.equals(listOfIds.length, features.featureCollection.features.length,
       'valid string id returned when adding a featureCollection');
-
     Draw.deleteAll();
+
+    var multiId = Draw.add(features.multiPolygon);
+    t.equals('string', typeof multiId, 'accepts multi features');
+
     t.end();
   });
 
@@ -57,10 +60,6 @@ test('API test', t => {
     t.throws(function() {
       Draw.add({});
     }, 'when an empty object is passed');
-
-    t.throws(function() {
-      Draw.add(features.multiPolygon);
-    }, 'when an multi polygon is passed');
 
     t.end();
   });
