@@ -17,50 +17,38 @@ module.exports = function(ctx) {
     mouse: null
   };
 
-  var classIsDirty = false;
-
   var classTypes = ['mode', 'feature', 'mouse'];
 
-  window.usedClasses = {};
-
-  requestAnimationFrame(function showClass() {
+  let update = () => {
     if (ctx.container) {
 
-      if (classIsDirty) {
+      var remove = [];
+      var add = [];
 
-        var remove = [];
-        var add = [];
+      var className = [];
 
-        var className = [];
+      nextClass.feature = nextClass.mouse === 'none' ? null : nextClass.feature;
 
-        nextClass.feature = nextClass.mouse === 'none' ? null : nextClass.feature;
-
-        classTypes.forEach(function(type) {
-          className.push(type + '-' + nextClass[type]);
-          if (nextClass[type] !== currentClass[type]) {
-            remove.push(type + '-' + currentClass[type]);
-            if (nextClass[type] !== null) {
-              add.push(type + '-' + nextClass[type]);
-            }
+      classTypes.forEach(function(type) {
+        className.push(type + '-' + nextClass[type]);
+        if (nextClass[type] !== currentClass[type]) {
+          remove.push(type + '-' + currentClass[type]);
+          if (nextClass[type] !== null) {
+            add.push(type + '-' + nextClass[type]);
           }
-        });
-
-        window.usedClasses[className.join(',')] = true;
-
-        if (remove.length) {
-          ctx.container.classList.remove.apply(ctx.container.classList, remove);
-          ctx.container.classList.add.apply(ctx.container.classList, add);
         }
+      });
 
-        classTypes.forEach(type => {
-          currentClass[type] = nextClass[type];
-        });
-        classIsDirty = false;
+      if (remove.length) {
+        ctx.container.classList.remove.apply(ctx.container.classList, remove);
+        ctx.container.classList.add.apply(ctx.container.classList, add);
       }
 
-      requestAnimationFrame(showClass);
+      classTypes.forEach(type => {
+        currentClass[type] = nextClass[type];
+      });
     }
-  });
+  }
 
   ctx.ui = {
     setClass: function(opts) {
@@ -68,7 +56,7 @@ module.exports = function(ctx) {
         if (opts[type]) {
           nextClass[type] = opts[type];
           if (nextClass[type] !== currentClass[type]) {
-            classIsDirty = true;
+            update();
           }
         }
       });
