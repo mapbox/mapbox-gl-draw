@@ -232,11 +232,11 @@ This is fired when feature coordinates are changed. It is fired just after the c
 
 ### draw.mode.simple_select.selected.start
 
-This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
+This is fired every time a feature is selected in the default mode. The payload is an object containing the `featureIds` being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
 
 ### draw.mode.simple_select.selected.end
 
-This is fired every time a feature is unselected in the default mode. The payload is an array of feature ids being unselected. This is **NOT** fired when the mode stops, as this can be assumed via the `draw.modechange` event.
+This is fired every time a feature is unselected in the default mode. The payload is an object containing the `featureIds` being unselected. This is **NOT** fired when the mode stops, as this can be assumed via the `draw.modechange` event.
 
 ## Styling Draw
 
