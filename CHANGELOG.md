@@ -1,3 +1,8 @@
+## 0.7.1
+
+- Waits for mouse events until the map has loaded
+- Emits all changes to feautres all valid
+
 ## 0.7.0
 
 * Draw now supports MultiPoint, MultiLineString and MultiPolygon geojson feature types.
