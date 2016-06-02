@@ -43,6 +43,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         var wasSelected = Object.keys(selectedFeaturesById);
         selectedFeaturesById = {};
         this.fire('selected.end', {featureIds: wasSelected});
+        ctx.map.fire('draw.mode.simple_select.selected.end', {featureIds: wasSelected});
         wasSelected.forEach(id => this.render(id));
       });
 
@@ -68,12 +69,14 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
           this.fire('selected.end', {featureIds:[id]});
+          ctx.map.fire('draw.mode.simple_select.selected.end', {featureIds:[id]});
           this.render(id);
         }
         else if (!isSelected && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.start', {featureIds:[id]});
+          ctx.map.fire('draw.mode.simple_select.selected.start', {featureIds:[id]});
           this.render(id);
         }
         else {
@@ -83,7 +86,9 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.end', {featureIds:wasSelected});
+          ctx.map.fire('draw.mode.simple_select.selected.end', {featureIds:wasSelected});
           this.fire('selected.start', {featureIds:[id]});
+          ctx.map.fire('draw.mode.simple_select.selected.start', {featureIds:[id]});
           this.render(id);
         }
       });
