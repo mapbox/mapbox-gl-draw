@@ -1,6 +1,6 @@
 module.exports = function render() {
-  var isStillAlive = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
-  if (isStillAlive) { // checks to make sure we still have a map
+  var mapExists = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
+  if (mapExists) {
     var mode = this.ctx.events.currentModeName();
     this.ctx.ui.setClass({
       mode: mode
@@ -26,6 +26,8 @@ module.exports = function render() {
       return newHotIds.indexOf(id) === -1;
     });
 
+    var coldChanged = lastColdCount !== this.sources.cold.length || newColdIds.length > 0;
+
     newHotIds.concat(newColdIds).map(function prepForViewUpdates(id) {
       if (newHotIds.indexOf(id) > -1) {
         return {source: 'hot', 'id': id};
@@ -43,7 +45,7 @@ module.exports = function render() {
       }.bind(this));
     }.bind(this));
 
-    if (lastColdCount !== this.sources.cold.length) {
+    if (coldChanged) {
       this.ctx.map.getSource('mapbox-gl-draw-cold').setData({
         type: 'FeatureCollection',
         features: this.sources.cold
