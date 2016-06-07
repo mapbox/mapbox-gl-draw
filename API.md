@@ -23,6 +23,7 @@ option | values | function
 --- | --- | ---
 drawing | boolean | The ability to draw and delete features - default: `true`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
+clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.

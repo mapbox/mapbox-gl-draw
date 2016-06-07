@@ -15,6 +15,7 @@ test('Options test', t => {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      clickBuffer: 2,
       displayControlsDefault: true,
       styles: Draw.options.styles,
       controls: {
@@ -28,12 +29,34 @@ test('Options test', t => {
     t.end();
   });
 
+  t.test('use custom clickBuffer', t => {
+    var Draw = GLDraw({ clickBuffer: 10 });
+    var defaultOptions = {
+      defaultMode: 'simple_select',
+      position: 'top-left',
+      keybindings: true,
+      clickBuffer: 10,
+      displayControlsDefault: true,
+      styles: Draw.options.styles,
+      controls: {
+        point: true,
+        line_string: true,
+        polygon: true,
+        trash: true
+      }
+    };
+
+    t.deepEquals(defaultOptions, Draw.options);
+    t.end();
+  });
+
   t.test('hide all controls', t => {
     var Draw = GLDraw({displayControlsDefault: false});
     var defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      clickBuffer: 2,
       displayControlsDefault: false,
       styles: Draw.options.styles,
       controls: {
@@ -47,13 +70,14 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('hide all controls by default and show point', t => {
+  t.test('hide controls but show point', t => {
     var Draw = GLDraw({displayControlsDefault: false, controls: {point:true}});
     var defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: false,
+      clickBuffer: 2,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -67,13 +91,14 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('show all controls by default and hide point', t => {
-    var Draw = GLDraw({displayControlsDefault: true, controls: {point:false}});
+  t.test('hide only point control', t => {
+    var Draw = GLDraw({ controls: {point:false}});
     var defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
       displayControlsDefault: true,
+      clickBuffer: 2,
       styles: Draw.options.styles,
       controls: {
         point: false,

@@ -4,6 +4,7 @@ const defaultOptions = {
   defaultMode: 'simple_select',
   position: 'top-left',
   keybindings: true,
+  clickBuffer: 2,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
   controls: {}
@@ -23,17 +24,23 @@ const hideControls = {
   trash: false
 };
 
-module.exports = function(options = {controls: {}}) {
 
-  if (options.displayControlsDefault === false) {
-    options.controls = Object.assign(hideControls, options.controls);
-  } else {
-    options.controls = Object.assign(showControls, options.controls);
+module.exports = function(options = {}) {
+  var opts = Object.assign({}, options);
+
+  if (!opts.controls) {
+    opts.controls = {};
   }
 
-  options = Object.assign(defaultOptions, options);
+  if (opts.displayControlsDefault === false) {
+    opts.controls = Object.assign({}, hideControls, opts.controls);
+  } else {
+    opts.controls = Object.assign({}, showControls, opts.controls);
+  }
 
-  options.styles = options.styles.reduce((memo, style) => {
+  opts = Object.assign({}, defaultOptions, opts);
+
+  opts.styles = opts.styles.reduce((memo, style) => {
     style.id = style.id || hat();
     if (style.source) {
       memo.push(style);
@@ -52,5 +59,5 @@ module.exports = function(options = {controls: {}}) {
     return memo;
   }, []);
 
-  return options;
+  return opts;
 };
