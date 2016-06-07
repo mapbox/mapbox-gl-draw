@@ -114,7 +114,7 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
   var loadData = function(uri) {
   var req = new XMLHttpRequest();
   req.onerror = function() {
-    throw new FriendlyError('Network Error');
+    throw new Error('Network Error');
   };
   req.onload = () => {
     var fc = JSON.parse(req.response);
