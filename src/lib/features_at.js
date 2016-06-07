@@ -20,8 +20,9 @@ const sort = (a, b) => {
 };
 
 module.exports = function(event, ctx) {
-  if (ctx.map === null) return [];
+  if (ctx.map === null || !ctx.map.loaded()) return [];
   var clickBuffer = ctx.options.clickBuffer;
+
   var features = ctx.map.queryRenderedFeatures([
       [event.point.x - clickBuffer, event.point.y - clickBuffer],
       [event.point.x + clickBuffer, event.point.y + clickBuffer]
