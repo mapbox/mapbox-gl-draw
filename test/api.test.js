@@ -64,7 +64,7 @@ test('API test', t => {
     t.end();
   });
 
-  t.test('add exhisting feature with changed properties', t => {
+  t.test('add existing feature with changed properties', t => {
     var id = Draw.add(feature);
     var point = Draw.get(id);
 

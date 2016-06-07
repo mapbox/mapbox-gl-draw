@@ -21,8 +21,11 @@ const sort = (a, b) => {
 
 module.exports = function(event, ctx) {
   if (ctx.map === null) return [];
-  var grabSize = .5;
-  var features = ctx.map.queryRenderedFeatures([[event.point.x - grabSize, event.point.y - grabSize], [event.point.x + grabSize, event.point.y + grabSize]], {});
+  var clickBuffer = ctx.options.clickBuffer;
+  var features = ctx.map.queryRenderedFeatures([
+      [event.point.x - clickBuffer, event.point.y - clickBuffer],
+      [event.point.x + clickBuffer, event.point.y + clickBuffer]
+    ], {});
 
   features = features.filter(function(feature) {
     var meta = feature.properties.meta;
