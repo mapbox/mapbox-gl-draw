@@ -1,3 +1,7 @@
+## 0.7.2
+
+- Update default theme
+
 ## 0.7.1
 
 - Waits for mouse events until the map has loaded
