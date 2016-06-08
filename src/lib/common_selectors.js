@@ -10,6 +10,11 @@ module.exports = {
       }
     };
   },
+  isActiveFeature: function(e) {
+    return e.featureTarget !== undefined &&
+      e.featureTarget.properties.active === 'true' &&
+      e.featureTarget.properties.meta === 'feature';
+  },
   noFeature: function(e) {
     return e.featureTarget === undefined;
   },

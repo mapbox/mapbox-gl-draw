@@ -1,4 +1,4 @@
-var {noFeature, isShiftDown, isFeature, isOfMetaType} = require('../lib/common_selectors');
+var {noFeature, isShiftDown, isFeature, isOfMetaType, isActiveFeature} = require('../lib/common_selectors');
 var addCoords = require('../lib/add_coords');
 
 module.exports = function(ctx, startingSelectedFeatureIds) {
@@ -13,7 +13,6 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   var featureCoords = null;
   var features = null;
   var numFeatures = null;
-
 
   var readyForDirectSelect = function(e) {
     if (isFeature(e)) {
@@ -36,6 +35,10 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     });
   };
 
+  var isSelected = function(id) {
+    return selectedFeaturesById[id] !== undefined;
+  };
+
   return {
     start: function() {
       dragging = false;
@@ -46,44 +49,51 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         wasSelected.forEach(id => this.render(id));
       });
 
-      this.on('mousedown', isOfMetaType('vertex'), function(e) {
+      this.on('click', isOfMetaType('vertex'), function(e) {
         ctx.api.changeMode('direct_select', {
           featureId: e.featureTarget.properties.parent,
           coordPath: e.featureTarget.properties.coord_path,
           isDragging: true,
           startPos: e.lngLat
         });
+        ctx.ui.setClass({mouse:'move'});
       });
 
-      this.on('mousedown', isFeature, function(e) {
-        dragging = true;
+      this.on('mousedown', isActiveFeature, function(e) {
         startPos = e.lngLat;
+        dragging = true;
+      });
+
+      this.on('click', isFeature, function(e) {
         var id = e.featureTarget.properties.id;
         var featureIds = Object.keys(selectedFeaturesById);
-        var isSelected = selectedFeaturesById[id] !== undefined;
 
-        if (isSelected && !isShiftDown(e)) {
+        if (isSelected(id) && !isShiftDown(e)) {
           if (featureIds.length > 1) {
             this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
           }
           this.on('click', readyForDirectSelect, directSelect);
+          ctx.ui.setClass({mouse:'pointer'});
         }
-        else if (isSelected && isShiftDown(e)) {
+        else if (isSelected(id) && isShiftDown(e)) {
           delete selectedFeaturesById[id];
           this.fire('selected.end', {featureIds: [id]});
+          ctx.ui.setClass({mouse:'pointer'});
           this.render(id);
         }
-        else if (!isSelected && isShiftDown(e)) {
+        else if (!isSelected(id) && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
           this.fire('selected.start', {featureIds: [id]});
+          ctx.ui.setClass({mouse:'move'});
           this.render(id);
         }
-        else {
+        else if (!isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
+          ctx.ui.setClass({mouse:'move'});
           this.fire('selected.end', {featureIds: featureIds});
           this.fire('selected.start', {featureIds: [id]});
           this.render(id);
