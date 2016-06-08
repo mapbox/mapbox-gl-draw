@@ -6,7 +6,7 @@ module.exports = function getFeatureAtAndSetCursors(event, ctx) {
   if (features[0]) {
     ctx.ui.setClass({
       feature: features[0].properties.meta,
-      mouse: 'hover'
+      mouse: features[0].properties.active === 'true' ? 'move' : 'pointer'
     });
   }
   else {
