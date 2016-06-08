@@ -20,7 +20,7 @@ const sort = (a, b) => {
 };
 
 module.exports = function(event, ctx) {
-  if (ctx.map === null || !ctx.map.loaded()) return [];
+  if (ctx.map === null) return [];
   var clickBuffer = ctx.options.clickBuffer;
 
   var features = ctx.map.queryRenderedFeatures([
