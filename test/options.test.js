@@ -2,11 +2,10 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './utils';
+import styleWithSourcesFixture from './fixtures/style_with_sources.json';
+import { accessToken } from './utils';
 
 mapboxgl.accessToken = accessToken;
-
-var feature = features.point;
 
 test('Options test', t => {
   t.test('no options', t => {
@@ -26,6 +25,7 @@ test('Options test', t => {
       }
     };
     t.deepEquals(defaultOptions, Draw.options);
+    t.deepEquals(styleWithSourcesFixture, Draw.options.styles);
     t.end();
   });
 
@@ -118,27 +118,52 @@ test('Options test', t => {
       'type': 'fill',
       'filter': ['all', ['==', '$type', 'Polygon']],
       'paint': {
-        'fill-color': '#f16852'
+        'fill-color': '#fff'
+      }
+    }, {
+      'id': 'custom-point',
+      'type': 'circle',
+      'filter': ['all', ['==', '$type', 'Point']],
+      'paint': {
+        'circle-color': '#fff'
       }
     }]});
 
     var styles = [
-      {
-        'id': 'custom-polygon.hot',
-        'source': 'mapbox-gl-draw-hot',
-        'type': 'fill',
-        'filter': ['all', ['==', '$type', 'Polygon']],
-        'paint': {
-          'fill-color': '#f16852'
-        }
-      },
       {
         'id': 'custom-polygon.cold',
         'source': 'mapbox-gl-draw-cold',
         'type': 'fill',
         'filter': ['all', ['==', '$type', 'Polygon']],
         'paint': {
-          'fill-color': '#f16852'
+          'fill-color': '#fff'
+        }
+      },
+      {
+        'id': 'custom-point.cold',
+        'source': 'mapbox-gl-draw-cold',
+        'type': 'circle',
+        'filter': ['all', ['==', '$type', 'Point']],
+        'paint': {
+          'circle-color': '#fff'
+        }
+      },
+      {
+        'id': 'custom-polygon.hot',
+        'source': 'mapbox-gl-draw-hot',
+        'type': 'fill',
+        'filter': ['all', ['==', '$type', 'Polygon']],
+        'paint': {
+          'fill-color': '#fff'
+        }
+      },
+      {
+        'id': 'custom-point.hot',
+        'source': 'mapbox-gl-draw-hot',
+        'type': 'circle',
+        'filter': ['all', ['==', '$type', 'Point']],
+        'paint': {
+          'circle-color': '#fff'
         }
       }
     ];
