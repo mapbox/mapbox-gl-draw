@@ -59,31 +59,33 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         dragging = true;
         startPos = e.lngLat;
         var id = e.featureTarget.properties.id;
-
+        var featureIds = Object.keys(selectedFeaturesById);
         var isSelected = selectedFeaturesById[id] !== undefined;
 
         if (isSelected && !isShiftDown(e)) {
+          if (featureIds.length > 1) {
+            this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
+          }
           this.on('click', readyForDirectSelect, directSelect);
         }
         else if (isSelected && isShiftDown(e)) {
           delete selectedFeaturesById[id];
-          this.fire('selected.end', {featureIds:[id]});
+          this.fire('selected.end', {featureIds: [id]});
           this.render(id);
         }
         else if (!isSelected && isShiftDown(e)) {
           // add to selected
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.start', {featureIds:[id]});
+          this.fire('selected.start', {featureIds: [id]});
           this.render(id);
         }
         else {
-          //make selected
-          var wasSelected = Object.keys(selectedFeaturesById);
-          wasSelected.forEach(wereId => this.render(wereId));
+          // make selected
+          featureIds.forEach(formerId => this.render(formerId));
           selectedFeaturesById = {};
           selectedFeaturesById[id] = ctx.store.get(id);
-          this.fire('selected.end', {featureIds:wasSelected});
-          this.fire('selected.start', {featureIds:[id]});
+          this.fire('selected.end', {featureIds: featureIds});
+          this.fire('selected.start', {featureIds: [id]});
           this.render(id);
         }
       });
