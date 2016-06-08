@@ -1,5 +1,3 @@
-var hat = require('hat');
-
 const defaultOptions = {
   defaultMode: 'simple_select',
   position: 'top-left',
@@ -24,6 +22,15 @@ const hideControls = {
   trash: false
 };
 
+function addSources(styles, sourceBucket) {
+  return styles.map(style => {
+    var s = Object.assign({}, style);
+    if (s.source) return style;
+    s.id = `${s.id}.${sourceBucket}`;
+    s.source = `mapbox-gl-draw-${sourceBucket}`;
+    return s;
+  });
+}
 
 module.exports = function(options = {}) {
   var opts = Object.assign({}, options);
@@ -40,24 +47,7 @@ module.exports = function(options = {}) {
 
   opts = Object.assign({}, defaultOptions, opts);
 
-  opts.styles = opts.styles.reduce((memo, style) => {
-    style.id = style.id || hat();
-    if (style.source) {
-      memo.push(style);
-    }
-    else {
-      var id = style.id;
-      style.id = `${id}.hot`;
-      style.source = 'mapbox-gl-draw-hot';
-      memo.push(JSON.parse(JSON.stringify(style)));
-
-      style.id = `${id}.cold`;
-      style.source = 'mapbox-gl-draw-cold';
-      memo.push(JSON.parse(JSON.stringify(style)));
-    }
-
-    return memo;
-  }, []);
-
+  // Layers with a shared source should be adjacent for performance reasons
+  opts.styles = addSources(opts.styles, 'cold').concat(addSources(opts.styles, 'hot'));
   return opts;
 };
