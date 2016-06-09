@@ -51,22 +51,18 @@
 .mapboxgl-map.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: move;
 }
+.mapboxgl-map.mouse-add .mapboxgl-canvas-container.mapboxgl-interactive {
+  cursor: crosshair;
+}
 .mapboxgl-map.mouse-move.mode-direct_select .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: grab;
   cursor: -moz-grab;
   cursor: -webkit-grab;
 }
-
 .mapboxgl-map.mode-direct_select.feature-vertex .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: move;
 }
-
 .mapboxgl-map.mode-direct_select.feature-midpoint.mouse-pointer .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: cell;
-}
-.mapboxgl-map.mode-draw_point .mapboxgl-canvas-container.mapboxgl-interactive,
-.mapboxgl-map.mode-draw_line_string .mapboxgl-canvas-container.mapboxgl-interactive,
-.mapboxgl-map.mode-draw_polygon .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: crosshair;
 }
 
