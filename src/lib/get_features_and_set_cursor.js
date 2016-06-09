@@ -2,18 +2,18 @@ var featuresAt = require('./features_at');
 
 module.exports = function getFeatureAtAndSetCursors(event, ctx) {
   var features = featuresAt(event, ctx);
+  var classes = { mouse: 'none' };
 
   if (features[0]) {
-    ctx.ui.setClass({
-      feature: features[0].properties.meta,
-      mouse: features[0].properties.active === 'true' ? 'move' : 'pointer'
-    });
+    classes.mouse = features[0].properties.active === 'true' ? 'move' : 'pointer';
+    classes.feature = features[0].properties.meta;
   }
-  else {
-    ctx.ui.setClass({
-      mouse: 'none'
-    });
+
+  if (ctx.events.currentModeName().includes('draw')) {
+    classes.mouse = 'draw';
   }
+
+  ctx.ui.setClass(classes);
 
   return features[0];
 };

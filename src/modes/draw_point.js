@@ -20,10 +20,6 @@ module.exports = function(ctx) {
     ctx.store.delete([feature.id]);
   };
 
-  var onMouseMove = function() {
-    ctx.ui.setClass({mouse:'add'});
-  };
-
   var done = false;
   var onClick = function(e) {
     ctx.ui.setClass({mouse:'add'});
@@ -36,7 +32,6 @@ module.exports = function(ctx) {
     start: function() {
       ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POINT);
-      this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', isEnterKey, stopDrawingAndRemove);
