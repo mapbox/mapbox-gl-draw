@@ -22,7 +22,7 @@ module.exports = function(ctx) {
 
   var done = false;
   var onClick = function(e) {
-    ctx.ui.setClass({mouse:'add'});
+    ctx.ui.setClass({mouse:'move'});
     done = true;
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
     ctx.events.changeMode('simple_select', [feature.id]);

@@ -10,7 +10,7 @@ module.exports = function getFeatureAtAndSetCursors(event, ctx) {
   }
 
   if (ctx.events.currentModeName().includes('draw')) {
-    classes.mouse = 'draw';
+    classes.mouse = 'add';
   }
 
   ctx.ui.setClass(classes);
