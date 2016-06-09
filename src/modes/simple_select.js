@@ -40,6 +40,9 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   };
 
   return {
+    stop: function() {
+      ctx.map.doubleClickZoom.enable();
+    },
     start: function() {
       dragging = false;
       this.on('click', noFeature, function() {
@@ -47,6 +50,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         selectedFeaturesById = {};
         this.fire('selected.end', {featureIds: wasSelected});
         wasSelected.forEach(id => this.render(id));
+        ctx.map.doubleClickZoom.enable();
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
@@ -65,6 +69,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       });
 
       this.on('click', isFeature, function(e) {
+        ctx.map.doubleClickZoom.disable();
         var id = e.featureTarget.properties.id;
         var featureIds = Object.keys(selectedFeaturesById);
 
@@ -80,6 +85,9 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
           this.fire('selected.end', {featureIds: [id]});
           ctx.ui.setClass({mouse:'pointer'});
           this.render(id);
+          if (featureIds.length === 1 ) {
+            ctx.map.doubleClickZoom.enable();
+          }
         }
         else if (!isSelected(id) && isShiftDown(e)) {
           // add to selected

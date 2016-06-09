@@ -1,4 +1,4 @@
-var {noFeature, isOfMetaType, isShiftDown} = require('../lib/common_selectors');
+var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var addCoords = require('../lib/add_coords');
 
 module.exports = function(ctx, opts) {
@@ -45,6 +45,7 @@ module.exports = function(ctx, opts) {
 
   return {
     start: function() {
+      ctx.map.doubleClickZoom.disable();
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
       this.on('drag', () => dragging, function(e) {
@@ -73,6 +74,9 @@ module.exports = function(ctx, opts) {
       this.on('click', noFeature, function() {
         ctx.events.changeMode('simple_select');
       });
+      this.on('click', isInactiveFeature, function() {
+        ctx.events.changeMode('simple_select');
+      });
       this.on('trash', () => selectedCoordPaths.length > 0, function() {
         selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
         selectedCoordPaths = [];
@@ -85,7 +89,9 @@ module.exports = function(ctx, opts) {
         ctx.events.changeMode('simple_select', [featureId]);
       });
     },
-    stop: function() {},
+    stop: function() {
+      ctx.map.doubleClickZoom.enable();
+    },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
         geojson.properties.active = 'true';
