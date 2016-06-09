@@ -23,7 +23,6 @@ module.exports = function(ctx) {
   var pos = 0;
 
   var onMouseMove = function(e) {
-    ctx.ui.setClass({mouse:'add'});
     feature.updateCoordinate(`0.${pos}`, e.lngLat.lng, e.lngLat.lat);
   };
 
