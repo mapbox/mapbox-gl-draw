@@ -15,6 +15,11 @@ module.exports = {
       e.featureTarget.properties.active === 'true' &&
       e.featureTarget.properties.meta === 'feature';
   },
+  isInactiveFeature: function(e) {
+    return e.featureTarget !== undefined &&
+      e.featureTarget.properties.active === 'false' &&
+      e.featureTarget.properties.meta === 'feature';
+  },
   noFeature: function(e) {
     return e.featureTarget === undefined;
   },
