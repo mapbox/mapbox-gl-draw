@@ -24,7 +24,6 @@ module.exports = function(ctx) {
 
       var remove = [];
       var add = [];
-
       var className = [];
 
       nextClass.feature = nextClass.mouse === 'none' ? null : nextClass.feature;

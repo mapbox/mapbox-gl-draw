@@ -50,7 +50,6 @@ module.exports = function(ctx) {
       time: new Date().getTime(),
       point: event.point
     };
-
     var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);

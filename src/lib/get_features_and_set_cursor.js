@@ -1,7 +1,7 @@
 var featuresAt = require('./features_at');
 
 module.exports = function getFeatureAtAndSetCursors(event, ctx) {
-  var features = featuresAt(event, ctx);
+  var features = featuresAt(event, null, ctx);
   var classes = { mouse: 'none' };
 
   if (features[0]) {

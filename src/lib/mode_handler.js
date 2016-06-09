@@ -3,7 +3,6 @@ var ModeHandler = function(mode, DrawContext) {
   var handlers = {
     drag: [],
     click: [],
-    doubleclick: [],
     mousemove: [],
     mousedown: [],
     mouseup: [],

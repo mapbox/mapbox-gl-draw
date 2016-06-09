@@ -10,6 +10,9 @@ module.exports = {
       }
     };
   },
+  isBoxSelecting(e) {
+    return e.originalEvent.shiftKey && e.originalEvent.button === 0;
+  },
   isActiveFeature: function(e) {
     return e.featureTarget !== undefined &&
       e.featureTarget.properties.active === 'true' &&

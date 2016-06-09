@@ -1,5 +1,4 @@
 var area = require('turf-area');
-
 var metas = ['feature', 'midpoint', 'vertex'];
 
 var geometryTypeValues = {
@@ -8,7 +7,7 @@ var geometryTypeValues = {
   'LineString': 1
 };
 
-const sort = (a, b) => {
+function sort(a, b) {
   var score = geometryTypeValues[a.geometry.type] - geometryTypeValues[b.geometry.type];
 
   if (score === 0 && a.geometry.type === 'Polygon') {
@@ -17,16 +16,36 @@ const sort = (a, b) => {
   else {
     return score;
   }
-};
+}
 
-module.exports = function(event, ctx) {
+function getUnique(features) {
+  if (!features.length) return [];
+  var sorted = features.sort(sort);
+  var uniqueIds = sorted.map(s => s.properties.id).filter(function(item, pos, ary) {
+    return !pos || item !== ary[pos - 1];
+  });
+  return uniqueIds.map(id => sorted.find(s => s.properties.id === id));
+}
+
+// Requires either event or bbox
+module.exports = function(event, bbox, ctx) {
   if (ctx.map === null) return [];
-  var clickBuffer = ctx.options.clickBuffer;
 
-  var features = ctx.map.queryRenderedFeatures([
+  var box;
+  if (event) {
+    var clickBuffer = ctx.options.clickBuffer;
+    box = [
       [event.point.x - clickBuffer, event.point.y - clickBuffer],
       [event.point.x + clickBuffer, event.point.y + clickBuffer]
-    ], {});
+    ];
+  }
+  else if (bbox) {
+    box = bbox;
+  }
+
+  var features = ctx.map.queryRenderedFeatures(box, {
+    layers: ctx.options.styles.map(s => s.id)
+  });
 
   features = features.filter(function(feature) {
     var meta = feature.properties.meta;
@@ -42,7 +61,5 @@ module.exports = function(event, ctx) {
     return feature;
   });
 
-  features.sort(sort);
-
-  return features;
+  return getUnique(features);
 };

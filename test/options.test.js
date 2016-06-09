@@ -16,6 +16,7 @@ test('Options test', t => {
       keybindings: true,
       clickBuffer: 2,
       displayControlsDefault: true,
+      boxSelect: true,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -36,6 +37,7 @@ test('Options test', t => {
       position: 'top-left',
       keybindings: true,
       clickBuffer: 10,
+      boxSelect: true,
       displayControlsDefault: true,
       styles: Draw.options.styles,
       controls: {
@@ -57,6 +59,7 @@ test('Options test', t => {
       position: 'top-left',
       keybindings: true,
       clickBuffer: 2,
+      boxSelect: true,
       displayControlsDefault: false,
       styles: Draw.options.styles,
       controls: {
@@ -78,6 +81,7 @@ test('Options test', t => {
       keybindings: true,
       displayControlsDefault: false,
       clickBuffer: 2,
+      boxSelect: true,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -99,6 +103,7 @@ test('Options test', t => {
       keybindings: true,
       displayControlsDefault: true,
       clickBuffer: 2,
+      boxSelect: true,
       styles: Draw.options.styles,
       controls: {
         point: false,

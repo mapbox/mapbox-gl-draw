@@ -1,6 +1,7 @@
-var {noFeature, isShiftDown, isFeature, isOfMetaType, isActiveFeature} = require('../lib/common_selectors');
+var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFeature} = require('../lib/common_selectors');
+var { DOM } = require('../lib/util');
+var featuresAt = require('../lib/features_at');
 var addCoords = require('../lib/add_coords');
-
 module.exports = function(ctx, startingSelectedFeatureIds) {
 
   var selectedFeaturesById = {};
@@ -11,8 +12,37 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   var startPos = null;
   var dragging = null;
   var featureCoords = null;
+  var startCoordinates = null;
   var features = null;
   var numFeatures = null;
+  var box;
+  var boxSelecting = false;
+
+  var finishBoxSelect = function(bbox, context) {
+    if (box) {
+      box.parentNode.removeChild(box);
+      box = null;
+    }
+
+    // If bbox exists, use to select features
+    if (bbox) {
+      var featuresInBox = featuresAt(null, bbox, ctx);
+      if (featuresInBox.length >= 1000) return ctx.map.dragPan.enable();
+      var ids = featuresInBox.map(f => f.properties.id);
+
+      ids.forEach(id => {
+        selectedFeaturesById[id] = ctx.store.get(id);
+      });
+
+      context.fire('selected.start', {featureIds: ids});
+      ids.forEach(id => context.render(id));
+      ctx.ui.setClass({mouse:'move'});
+    }
+    boxSelecting = false;
+    setTimeout(() => {
+      ctx.map.dragPan.enable();
+    }, 0);
+  };
 
   var readyForDirectSelect = function(e) {
     if (isFeature(e)) {
@@ -63,6 +93,15 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         ctx.ui.setClass({mouse:'move'});
       });
 
+      if (ctx.options.boxSelect) {
+        this.on('mousedown', isBoxSelecting, function(e) {
+          ctx.map.dragPan.disable();
+          startCoordinates = DOM.mousePos(e.originalEvent, ctx.container);
+          boxSelecting = true;
+          ctx.ui.setClass({mouse:'add'});
+        });
+      }
+
       this.on('mousedown', isActiveFeature, function(e) {
         startPos = e.lngLat;
         dragging = true;
@@ -72,7 +111,6 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         ctx.map.doubleClickZoom.disable();
         var id = e.featureTarget.properties.id;
         var featureIds = Object.keys(selectedFeaturesById);
-
         if (isSelected(id) && !isShiftDown(e)) {
           if (featureIds.length > 1) {
             this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
@@ -108,18 +146,41 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         }
       });
 
-      this.on('mouseup', () => true, function() {
+      this.on('drag', () => boxSelecting, function(e) {
+        ctx.ui.setClass({mouse:'add'});
+        if (!box) {
+          box = document.createElement('div');
+          box.classList.add('mapbox-gl-draw_boxselect');
+          ctx.container.appendChild(box);
+        }
+        var current = DOM.mousePos(e.originalEvent, ctx.container);
+        var minX = Math.min(startCoordinates.x, current.x),
+          maxX = Math.max(startCoordinates.x, current.x),
+          minY = Math.min(startCoordinates.y, current.y),
+          maxY = Math.max(startCoordinates.y, current.y);
+
+        // Adjust width and xy position of the box element ongoing
+        var pos = 'translate(' + minX + 'px,' + minY + 'px)';
+        box.style.transform = pos;
+        box.style.WebkitTransform = pos;
+        box.style.width = maxX - minX + 'px';
+        box.style.height = maxY - minY + 'px';
+      });
+
+      this.on('mouseup', () => true, function(e) {
         dragging = false;
         featureCoords = null;
         features = null;
         numFeatures = null;
+        if (boxSelecting) {
+          finishBoxSelect([
+            startCoordinates,
+            DOM.mousePos(e.originalEvent, ctx.container)
+          ], this);
+        }
       });
 
-      var isDragging = function() {
-        return dragging;
-      };
-
-      this.on('drag', isDragging, function(e) {
+      this.on('drag', () => dragging, function(e) {
         this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
         if (featureCoords === null) {
