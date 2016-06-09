@@ -44,6 +44,8 @@ module.exports = function(ctx) {
   };
 
   var onFinish = function() {
+    // Prevent finishing if invalid
+    if (!feature.isValid()) return;
     feature.removeCoordinate(`0.${pos}`);
     pos--;
     ctx.events.changeMode('simple_select', [feature.id]);
@@ -62,7 +64,9 @@ module.exports = function(ctx) {
     },
     stop: function() {
       setTimeout(() => {
-        ctx.map.doubleClickZoom.enable();
+        if (ctx.map && ctx.map.doubleClickZoom) {
+          ctx.map.doubleClickZoom.enable();
+        }
       }, 0);
       ctx.ui.setButtonInactive(types.POLYGON);
       if (!feature.isValid()) {
