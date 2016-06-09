@@ -51,6 +51,7 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
+      ctx.map.doubleClickZoom.disable();
       ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POLYGON);
       this.on('mousemove', () => true, onMouseMove);
@@ -60,6 +61,9 @@ module.exports = function(ctx) {
       this.on('trash', () => true, stopDrawingAndRemove);
     },
     stop: function() {
+      setTimeout(() => {
+        ctx.map.doubleClickZoom.enable();
+      }, 0);
       ctx.ui.setButtonInactive(types.POLYGON);
       if (!feature.isValid()) {
         ctx.store.delete([feature.id]);
