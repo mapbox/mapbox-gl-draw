@@ -18,6 +18,13 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   var box;
   var boxSelecting = false;
 
+  function getUniqueIds(allFeatures) {
+    if (!allFeatures.length) return [];
+    return allFeatures.map(s => s.properties.id).filter(function(item, pos, ary) {
+      return item && (!pos || item !== ary[pos - 1]);
+    });
+  }
+
   var finishBoxSelect = function(bbox, context) {
     if (box) {
       box.parentNode.removeChild(box);
@@ -28,15 +35,17 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     if (bbox) {
       var featuresInBox = featuresAt(null, bbox, ctx);
       if (featuresInBox.length >= 1000) return ctx.map.dragPan.enable();
-      var ids = featuresInBox.map(f => f.properties.id);
+      var ids = getUniqueIds(featuresInBox)
+        .filter(id => !isSelected(id));
 
-      ids.forEach(id => {
-        selectedFeaturesById[id] = ctx.store.get(id);
-      });
-
-      context.fire('selected.start', {featureIds: ids});
-      ids.forEach(id => context.render(id));
-      ctx.ui.setClass({mouse:'move'});
+      if (ids.length) {
+        ids.forEach(id => {
+          selectedFeaturesById[id] = ctx.store.get(id);
+          context.render(id);
+        });
+        context.fire('selected.start', {featureIds: ids});
+        ctx.ui.setClass({mouse:'move'});
+      }
     }
     boxSelecting = false;
     setTimeout(() => {
@@ -98,7 +107,6 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
           ctx.map.dragPan.disable();
           startCoordinates = DOM.mousePos(e.originalEvent, ctx.container);
           boxSelecting = true;
-          ctx.ui.setClass({mouse:'add'});
         });
       }
 

@@ -18,15 +18,6 @@ function sort(a, b) {
   }
 }
 
-function getUnique(features) {
-  if (!features.length) return [];
-  var sorted = features.sort(sort);
-  var uniqueIds = sorted.map(s => s.properties.id).filter(function(item, pos, ary) {
-    return !pos || item !== ary[pos - 1];
-  });
-  return uniqueIds.map(id => sorted.find(s => s.properties.id === id));
-}
-
 // Requires either event or bbox
 module.exports = function(event, bbox, ctx) {
   if (ctx.map === null) return [];
@@ -60,6 +51,5 @@ module.exports = function(event, bbox, ctx) {
     }
     return feature;
   });
-
-  return getUnique(features);
+  return features.sort(sort);
 };

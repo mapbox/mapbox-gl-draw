@@ -69,7 +69,6 @@ module.exports = function(ctx) {
     else {
       currentMode.mouseup(event);
     }
-
   };
 
   events.trash = function() {
