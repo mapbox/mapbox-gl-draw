@@ -17,7 +17,7 @@ module.exports = function(ctx) {
 
   return {
     getFeatureIdsAt: function(x, y) {
-      var features = featuresAt({point: {x, y}}, ctx);
+      var features = featuresAt({point: {x, y}}, null, ctx);
       return features.map(feature => feature.properties.id);
     },
     add: function (geojson, validateGeoJSON=true) {

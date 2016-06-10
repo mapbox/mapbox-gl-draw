@@ -3,6 +3,7 @@ const defaultOptions = {
   position: 'top-left',
   keybindings: true,
   clickBuffer: 2,
+  boxSelect: true,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
   controls: {}

@@ -38,7 +38,6 @@ module.exports = function(ctx) {
           }
         }
       });
-
       if (remove.length) {
         ctx.container.classList.remove.apply(ctx.container.classList, remove);
         ctx.container.classList.add.apply(ctx.container.classList, add);
@@ -55,11 +54,17 @@ module.exports = function(ctx) {
         classTypes.forEach(type => {
         if (opts[type]) {
           nextClass[type] = opts[type];
-          if (nextClass[type] !== currentClass[type]) {
-            update();
-          }
         }
       });
+    },
+    fireClassUpdate: function() {
+      var equal = Object.keys(nextClass).some(k => {
+        return currentClass[k] !== nextClass[k];
+      });
+
+      if (equal) {
+        update();
+      }
     },
     addButtons: function() {
       var controlClass = 'mapbox-gl-draw_ctrl-draw-btn';

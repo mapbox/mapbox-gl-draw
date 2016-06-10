@@ -1,3 +1,4 @@
+
 /* Override default control style */
 .mapbox-gl-draw_ctrl-bottom-left,
 .mapbox-gl-draw_ctrl-top-left {
@@ -66,3 +67,14 @@
   cursor: cell;
 }
 
+.mapbox-gl-draw_boxselect {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    background: rgba(0,0,0,.1);
+    border: 2px dotted #fff;
+    opacity: 0.5;
+}

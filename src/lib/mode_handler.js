@@ -3,7 +3,6 @@ var ModeHandler = function(mode, DrawContext) {
   var handlers = {
     drag: [],
     click: [],
-    doubleclick: [],
     mousemove: [],
     mousedown: [],
     mouseup: [],
@@ -47,6 +46,7 @@ var ModeHandler = function(mode, DrawContext) {
         break;
       }
     }
+    DrawContext.ui.fireClassUpdate();
   };
 
   mode.start.call(ctx);
