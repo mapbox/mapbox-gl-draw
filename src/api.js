@@ -21,7 +21,6 @@ module.exports = function(ctx) {
       return features.map(feature => feature.properties.id);
     },
     add: function (geojson, validateGeoJSON=true) {
-
        if (geojson.type !== 'FeatureCollection' && !geojson.geometry) {
         geojson = {
           type: 'Feature',
@@ -61,8 +60,8 @@ module.exports = function(ctx) {
       else {
         let internalFeature = ctx.store.get(geojson.id);
         internalFeature.properties = geojson.properties;
+        internalFeature.coordinates = geojson.geometry.coordinates;
       }
-
       ctx.store.render();
       return geojson.id;
     },
