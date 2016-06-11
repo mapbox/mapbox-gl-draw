@@ -13,6 +13,10 @@ Feature.prototype.changed = function() {
   this.ctx.store.featureChanged(this.id);
 };
 
+Feature.prototype.incomingCoords = function(coords) {
+  this.setCoordinates(coords);
+}
+
 Feature.prototype.setCoordinates = function(coords) {
   this.coordinates = coords;
   this.changed();
