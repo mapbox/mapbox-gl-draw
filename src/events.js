@@ -19,6 +19,7 @@ module.exports = function(ctx) {
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
+  var featuresChanged = [];
 
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
@@ -55,10 +56,16 @@ module.exports = function(ctx) {
     currentMode.mousedown(event);
   };
 
+  events.drawChanged = function(event) {
+    featuresChanged = event.features;
+  }
+
   events.mouseup = function(event) {
     mouseDownInfo.isDown = false;
     var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
+
+    ctx.map.fire('draw.modifiedFeature', {features: featuresChanged});
 
     if (isClick(mouseDownInfo, {
       point: event.point,
@@ -142,6 +149,8 @@ module.exports = function(ctx) {
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
 
+      ctx.map.on('draw.changed', events.drawChanged);
+
       if (ctx.options.keybindings) {
         ctx.container.addEventListener('keydown', events.keydown);
         ctx.container.addEventListener('keyup', events.keyup);
@@ -152,6 +161,8 @@ module.exports = function(ctx) {
 
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
+
+      ctx.map.off('draw.changed', events.drawChanged);
 
       if (ctx.options.keybindings) {
         ctx.container.removeEventListener('keydown', events.keydown);
