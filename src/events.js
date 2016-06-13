@@ -78,20 +78,20 @@ module.exports = function(ctx) {
   var isKeyModeValid = (code) => !(code === 8 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    if (event.keyCode === 8) {
+    if (event.keyCode === 8 && ctx.options.controls.trash) {
       event.preventDefault();
       api.fire('trash');
     }
     else if (isKeyModeValid(event.keyCode)) {
       currentMode.keydown(event);
     }
-    else if (event.keyCode === 49) {
+    else if (event.keyCode === 49 && ctx.options.controls.point) {
       ctx.api.changeMode('draw_point');
     }
-    else if (event.keyCode === 50) {
+    else if (event.keyCode === 50 && ctx.options.controls.line_string) {
       ctx.api.changeMode('draw_line_string');
     }
-    else if (event.keyCode === 51) {
+    else if (event.keyCode === 51 && ctx.options.controls.polygon) {
       ctx.api.changeMode('draw_polygon');
     }
   };
