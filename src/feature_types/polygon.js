@@ -2,7 +2,7 @@ var Feature = require('./feature');
 
 var Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
-  this.coordinates = this.coordinates.map(coords => coords.slice(0, -1));
+  this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
 };
 
 Polygon.prototype = Object.create(Feature.prototype);
@@ -11,6 +11,11 @@ Polygon.prototype.isValid = function() {
   return this.coordinates.every(function(ring) {
     return ring.length > 2;
   });
+};
+
+Polygon.prototype.incomingCoords = function(coords) {
+  this.coordinates = coords.map(ring => ring.slice(0, -1));
+  this.changed();
 };
 
 Polygon.prototype.addCoordinate = function(path, lng, lat) {
