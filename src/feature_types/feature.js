@@ -15,7 +15,7 @@ Feature.prototype.changed = function() {
 
 Feature.prototype.incomingCoords = function(coords) {
   this.setCoordinates(coords);
-}
+};
 
 Feature.prototype.setCoordinates = function(coords) {
   this.coordinates = coords;

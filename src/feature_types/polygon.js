@@ -16,7 +16,7 @@ Polygon.prototype.isValid = function() {
 Polygon.prototype.incomingCoords = function(coords) {
   this.coordinates = coords.map(ring => ring.slice(0, -1));
   this.changed();
-}
+};
 
 Polygon.prototype.addCoordinate = function(path, lng, lat) {
   this.changed();
