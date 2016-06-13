@@ -50,7 +50,11 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
-      ctx.map.doubleClickZoom.disable();
+      setTimeout(() => {
+        if (ctx.map && ctx.map.doubleClickZoom) {
+          ctx.map.doubleClickZoom.disable();
+        }
+      });
       ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.LINE);
       this.on('mousemove', () => true, onMouseMove);
@@ -61,7 +65,9 @@ module.exports = function(ctx) {
     },
     stop: function() {
       setTimeout(() => {
-        ctx.map.doubleClickZoom.enable();
+        if (ctx.map && ctx.map.doubleClickZoom) {
+          ctx.map.doubleClickZoom.enable();
+        }
       }, 0);
       ctx.ui.setButtonInactive(types.LINE);
       if (!feature.isValid()) {

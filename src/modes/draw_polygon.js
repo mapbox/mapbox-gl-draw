@@ -53,7 +53,11 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
-      ctx.map.doubleClickZoom.disable();
+      setTimeout(() => {
+        if (ctx.map && ctx.map.doubleClickZoom) {
+          ctx.map.doubleClickZoom.disable();
+        }
+      }, 0);
       ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POLYGON);
       this.on('mousemove', () => true, onMouseMove);
