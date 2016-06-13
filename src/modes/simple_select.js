@@ -63,7 +63,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
 
   var buildFeatureCoords = function() {
     var featureIds = Object.keys(selectedFeaturesById);
-    featureCoords = featureIds.map(id => selectedFeaturesById[id].getCoordinates());
+    featureCoords = featureIds.map(id => selectedFeaturesById[id].coordinates);
     features = featureIds.map(id => selectedFeaturesById[id]);
     numFeatures = featureIds.length;
   };
@@ -191,6 +191,7 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       this.on('drag', () => dragging, function(e) {
         this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
+
         if (featureCoords === null) {
           buildFeatureCoords();
         }

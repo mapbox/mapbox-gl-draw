@@ -43,6 +43,8 @@ module.exports = function(ctx) {
   };
 
   var onFinish = function() {
+    // Prevent finishing if invalid
+    if (!feature.isValid()) return ctx.store.delete([feature.id]);
     feature.removeCoordinate(`${pos}`);
     pos--;
     ctx.events.changeMode('simple_select', [feature.id]);

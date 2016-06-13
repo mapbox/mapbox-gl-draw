@@ -1,5 +1,11 @@
 var Feature = require('./feature');
 
+function firstMatchesLast(coords) {
+  return coords.every(coord => coord[0].every((el, i) => {
+    return el === coord[coord.length - 1][i];
+  }));
+}
+
 var Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
   this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
@@ -14,7 +20,14 @@ Polygon.prototype.isValid = function() {
 };
 
 Polygon.prototype.incomingCoords = function(coords) {
+  if (!firstMatchesLast(coords)) throw new Error('First and last positions must be equivalent. Use setCoordinates method.');
   this.coordinates = coords.map(ring => ring.slice(0, -1));
+  this.changed();
+};
+
+Polygon.prototype.setCoordinates = function(coords) {
+  if (firstMatchesLast(coords)) throw new Error('First and last positions must not be equivalent. Use incomingCoords method.');
+  this.coordinates = coords;
   this.changed();
 };
 
