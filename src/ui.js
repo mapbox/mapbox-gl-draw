@@ -96,7 +96,7 @@ module.exports = function(ctx) {
           }
         }
 
-        if (controls.line_string) {
+        if (controls[types.LINE]) {
           buttons[types.LINE] = createButton(controlGroup, {
             className: `${controlClass} mapbox-gl-draw_line`,
             title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
