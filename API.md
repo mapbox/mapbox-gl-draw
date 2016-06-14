@@ -232,6 +232,16 @@ This is fired when feature coordinates are changed. It is fired just after the c
 }
 ```
 
+### draw.modified
+
+This is fired when feature coordinates are changed, and there is a mouse click action (specifically mouseUp). It listens for draw.changed, and stores the most recent features changed. The payload is the GeoJSON of all changed features, at the moment of mouseUp. Deleted features will not show up here.
+
+```js
+{
+  "features": [{ ... }]
+}
+```
+
 ### draw.mode.simple_select.selected.start
 
 This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
