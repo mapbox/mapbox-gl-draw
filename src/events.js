@@ -65,7 +65,8 @@ module.exports = function(ctx) {
     var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
 
-    ctx.map.fire('draw.modifiedFeature', {features: featuresChanged});
+    if (featuresChanged.length > 0) ctx.map.fire('draw.modified', {features: featuresChanged});
+    featuresChanged = [];
 
     if (isClick(mouseDownInfo, {
       point: event.point,
