@@ -2,13 +2,7 @@ var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFe
 var { DOM } = require('../lib/util');
 var featuresAt = require('../lib/features_at');
 var addCoords = require('../lib/add_coords');
-module.exports = function(ctx, startingSelectedFeatureIds) {
-
-  var selectedFeaturesById = {};
-  (startingSelectedFeatureIds || []).forEach(id => {
-    selectedFeaturesById[id] = ctx.store.get(id);
-  });
-
+module.exports = function(ctx, startingSelectedIds) {
   var startPos = null;
   var dragging = null;
   var featureCoords = null;
@@ -36,11 +30,11 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       var featuresInBox = featuresAt(null, bbox, ctx);
       if (featuresInBox.length >= 1000) return ctx.map.dragPan.enable();
       var ids = getUniqueIds(featuresInBox)
-        .filter(id => !isSelected(id));
+        .filter(id => !ctx.store.isSelected(id));
 
       if (ids.length) {
         ids.forEach(id => {
-          selectedFeaturesById[id] = ctx.store.get(id);
+          ctx.store.select(id);
           context.render(id);
         });
         context.fire('selected.start', {featureIds: ids});
@@ -56,15 +50,16 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
   var readyForDirectSelect = function(e) {
     if (isFeature(e)) {
       var about = e.featureTarget.properties;
-      return selectedFeaturesById[about.id] !== undefined && selectedFeaturesById[about.id].type !== 'Point';
+      return ctx.store.isSelected(about.id)
+        && ctx.store.get(about.id).type !== 'Point';
     }
     return false;
   };
 
   var buildFeatureCoords = function() {
-    var featureIds = Object.keys(selectedFeaturesById);
-    featureCoords = featureIds.map(id => selectedFeaturesById[id].coordinates);
-    features = featureIds.map(id => selectedFeaturesById[id]);
+    var featureIds = ctx.store.getSelectedIds();
+    featureCoords = featureIds.map(id => ctx.store.get(id).coordinates);
+    features = featureIds.map(id => ctx.store.get(id));
     numFeatures = featureIds.length;
   };
 
@@ -74,19 +69,19 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
     });
   };
 
-  var isSelected = function(id) {
-    return selectedFeaturesById[id] !== undefined;
-  };
-
   return {
     stop: function() {
       ctx.map.doubleClickZoom.enable();
     },
     start: function() {
+      if (ctx.store) {
+        ctx.store.setSelected(startingSelectedIds);
+      }
+
       dragging = false;
       this.on('click', noFeature, function() {
-        var wasSelected = Object.keys(selectedFeaturesById);
-        selectedFeaturesById = {};
+        var wasSelected = ctx.store.getSelectedIds();
+        ctx.store.clearSelected();
         this.fire('selected.end', {featureIds: wasSelected});
         wasSelected.forEach(id => this.render(id));
         ctx.map.doubleClickZoom.enable();
@@ -118,16 +113,16 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
       this.on('click', isFeature, function(e) {
         ctx.map.doubleClickZoom.disable();
         var id = e.featureTarget.properties.id;
-        var featureIds = Object.keys(selectedFeaturesById);
-        if (isSelected(id) && !isShiftDown(e)) {
+        var featureIds = ctx.store.getSelectedIds();
+        if (ctx.store.isSelected(id) && !isShiftDown(e)) {
           if (featureIds.length > 1) {
             this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
           }
           this.on('click', readyForDirectSelect, directSelect);
           ctx.ui.setClass({mouse:'pointer'});
         }
-        else if (isSelected(id) && isShiftDown(e)) {
-          delete selectedFeaturesById[id];
+        else if (ctx.store.isSelected(id) && isShiftDown(e)) {
+          ctx.store.deselect(id);
           this.fire('selected.end', {featureIds: [id]});
           ctx.ui.setClass({mouse:'pointer'});
           this.render(id);
@@ -135,18 +130,18 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
             ctx.map.doubleClickZoom.enable();
           }
         }
-        else if (!isSelected(id) && isShiftDown(e)) {
+        else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
           // add to selected
-          selectedFeaturesById[id] = ctx.store.get(id);
+          ctx.store.select(id);
           this.fire('selected.start', {featureIds: [id]});
           ctx.ui.setClass({mouse:'move'});
           this.render(id);
         }
-        else if (!isSelected(id) && !isShiftDown(e)) {
+        else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
-          selectedFeaturesById = {};
-          selectedFeaturesById[id] = ctx.store.get(id);
+          ctx.store.clearSelected();
+          ctx.store.select(id);
           ctx.ui.setClass({mouse:'move'});
           this.fire('selected.end', {featureIds: featureIds});
           this.fire('selected.start', {featureIds: [id]});
@@ -225,12 +220,11 @@ module.exports = function(ctx, startingSelectedFeatureIds) {
         featureCoords = null;
         features = null;
         numFeatures = null;
-        ctx.store.delete(Object.keys(selectedFeaturesById));
-        selectedFeaturesById = {};
+        ctx.store.delete(ctx.store.getSelectedIds());
       });
     },
     render: function(geojson, push) {
-      geojson.properties.active = selectedFeaturesById[geojson.properties.id] ? 'true' : 'false';
+      geojson.properties.active = ctx.store.isSelected(geojson.properties.id) ? 'true' : 'false';
       if (geojson.properties.active === 'true' && geojson.geometry.type !== 'Point') {
         addCoords(geojson, false, push, ctx.map, []);
       }

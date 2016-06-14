@@ -53,7 +53,10 @@ var ModeHandler = function(mode, DrawContext) {
 
   return {
     render: mode.render || function(geojson) {return geojson; },
-    stop: mode.stop || function() {},
+    stop: function() {
+      DrawContext.store.clearSelected();
+      if (mode.stop) mode.stop();
+    },
     drag: function(event) {
       delegate('drag', event);
     },

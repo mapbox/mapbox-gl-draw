@@ -53,6 +53,7 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
+      ctx.store.setSelected(feature.id);
       setTimeout(() => {
         if (ctx.map && ctx.map.doubleClickZoom) {
           ctx.map.doubleClickZoom.disable();

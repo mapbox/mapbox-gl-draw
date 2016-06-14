@@ -10,12 +10,12 @@ module.exports = function render() {
     var newColdIds = [];
 
     if (this.isDirty) {
-      newColdIds = this.featureIds;
+      newColdIds = this.getAllIds();
     }
     else {
-      newHotIds = this.changedIds.filter(id => this.features[id] !== undefined);
+      newHotIds = this.getChangedIds().filter(id => this.get(id) !== undefined);
       newColdIds = this.sources.hot.filter(function getColdIds(geojson) {
-        return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && this.features[geojson.properties.id] !== undefined;
+        return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && this.get(geojson.properties.id) !== undefined;
       }.bind(this)).map(geojson => geojson.properties.id);
     }
 
@@ -37,7 +37,7 @@ module.exports = function render() {
       }
     }).forEach(function calculateViewUpdate(change) {
       let {id, source} = change;
-      let feature = this.features[id];
+      let feature = this.get(id);
       let featureInternal = feature.internal(mode);
 
       this.ctx.events.currentModeRender(featureInternal, function addGeoJsonToView(geojson) {
@@ -57,7 +57,7 @@ module.exports = function render() {
       features: this.sources.hot
     });
 
-    let changed = this.changedIds.map(id => this.features[id])
+    let changed = this.getChangedIds().map(id => this.get(id))
       .filter(feature => feature !== undefined)
       .filter(feature => feature.isValid())
       .map(feature => feature.toGeoJSON());
@@ -68,5 +68,5 @@ module.exports = function render() {
 
   }
   this.isDirty = false;
-  this.changedIds = [];
+  this.clearChangedIds();
 };
