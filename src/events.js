@@ -45,6 +45,10 @@ module.exports = function(ctx) {
     }
   };
 
+  events.drawChanged = function(event) {
+    featuresChanged = event.features;
+  };
+
   events.mousedown = function(event) {
     mouseDownInfo = {
       isDown: true,
@@ -55,10 +59,6 @@ module.exports = function(ctx) {
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
-
-  events.drawChanged = function(event) {
-    featuresChanged = event.features;
-  }
 
   events.mouseup = function(event) {
     mouseDownInfo.isDown = false;
