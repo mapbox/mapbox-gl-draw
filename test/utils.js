@@ -1,4 +1,5 @@
 import mapboxgl from 'mapbox-gl-js-mock';
+import hat from 'hat';
 
 export function createMap() {
 
@@ -76,3 +77,10 @@ export const features = {
   }
 
 };
+
+export function createFeature(featureType) {
+  const feature = features[featureType];
+  feature.id = hat();
+  feature.toGeoJSON = () => feature;
+  return feature;
+}
