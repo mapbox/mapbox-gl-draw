@@ -1,6 +1,7 @@
 var ModeHandler = require('./lib/mode_handler');
 var getFeatureAtAndSetCursors = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
+var SimpleSet = require('./lib/simple_set');
 
 var modes = {
   'simple_select': require('./modes/simple_select'),
@@ -19,7 +20,18 @@ module.exports = function(ctx) {
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
-  var featuresChanged = [];
+  var changedFeatureIds = new SimpleSet();
+
+  const emitModifiedFeatures = () => {
+    ctx.store.getChangedIds().forEach(id => changedFeatureIds.add(id));
+
+    let features = changedFeatureIds.values().map(id => ctx.store.get(id))
+      .filter(f => f !== undefined)
+      .map(f => f.toGeoJSON());
+
+    if (features.length > 0) ctx.map.fire('draw.modified', {features: features});
+    changedFeatureIds.clear();
+  };
 
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
@@ -46,7 +58,7 @@ module.exports = function(ctx) {
   };
 
   events.drawChanged = function(event) {
-    featuresChanged = event.features;
+    event.features.forEach(f => changedFeatureIds.add(f.id));
   };
 
   events.mousedown = function(event) {
@@ -65,9 +77,6 @@ module.exports = function(ctx) {
     var target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
 
-    if (featuresChanged.length > 0) ctx.map.fire('draw.modified', {features: featuresChanged});
-    featuresChanged = [];
-
     if (isClick(mouseDownInfo, {
       point: event.point,
       time: new Date().getTime()
@@ -77,6 +86,8 @@ module.exports = function(ctx) {
     else {
       currentMode.mouseup(event);
     }
+
+    emitModifiedFeatures();
   };
 
   events.trash = function() {
@@ -108,6 +119,7 @@ module.exports = function(ctx) {
     if (isKeyModeValid(event.keyCode)) {
       currentMode.keyup(event);
     }
+    emitModifiedFeatures();
   };
 
   events.zoomend = function() {
@@ -138,6 +150,7 @@ module.exports = function(ctx) {
 
       ctx.store.setDirty();
       ctx.store.render();
+      emitModifiedFeatures();
     },
     fire: function(name, event) {
       if (events[name]) {

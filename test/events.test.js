@@ -2,7 +2,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './utils';
+import { accessToken, createMap, features, click } from './utils';
 
 mapboxgl.accessToken = accessToken;
 
@@ -41,6 +41,7 @@ map.addControl(Draw);
 test('draw.direct_select event', t => {
   let id = Draw.add(feature);
   t.throws(() => Draw.changeMode('direct_select', {featureId: id}), 'should throw on a point');
+  Draw.delete(id);
   t.end();
 });
 
