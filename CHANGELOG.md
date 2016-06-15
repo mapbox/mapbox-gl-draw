@@ -1,3 +1,9 @@
+## 0.9.1
+
+- Fix bug causing deleted features to not always be deselected.
+
+## ...
+
 ## 0.7.2
 
 - Update default theme
