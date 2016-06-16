@@ -1,3 +1,8 @@
+## 0.9.2
+
+- Fixes bug with `draw.modified` and point creation
+- Prevents `draw.modifed` from emitting deleted features
+
 ## 0.9.1
 
 - Fix bug causing deleted features to not always be deselected.
