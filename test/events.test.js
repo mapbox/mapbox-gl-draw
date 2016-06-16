@@ -2,7 +2,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features, click } from './utils';
+import { click, accessToken, createMap, features } from './test_utils';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
 mapboxgl.accessToken = accessToken;

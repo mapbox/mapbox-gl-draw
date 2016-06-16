@@ -12,7 +12,6 @@ LineString.prototype.isValid = function() {
 
 LineString.prototype.addCoordinate = function(path, lng, lat) {
   this.changed();
-  this.selectedCoords = {};
   var id = parseInt(path, 10);
   this.coordinates.splice(id, 0, [lng, lat]);
 };
@@ -34,4 +33,3 @@ LineString.prototype.updateCoordinate = function(path, lng, lat) {
 };
 
 module.exports = LineString;
-

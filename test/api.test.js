@@ -2,7 +2,7 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './utils';
+import { accessToken, createMap, features } from './test_utils';
 
 mapboxgl.accessToken = accessToken;
 

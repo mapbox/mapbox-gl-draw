@@ -9,7 +9,7 @@ var models = {
 let takeAction = (features, action, path, lng, lat) => {
   var parts = path.split('.');
   var idx = parseInt(parts[0], 10);
-  var tail = parts.slice(1).join('.');
+  var tail = (!parts[1]) ? null : parts.slice(1).join('.');
   return features[idx][action](tail, lng, lat);
 };
 
@@ -19,12 +19,12 @@ var MultiFeature = function(ctx, geojson) {
   delete this.coordinates;
   this.model = models[geojson.geometry.type];
   if (this.model === undefined) throw new TypeError(`${geojson.geometry.type} is not a valid type`);
-  this.features = this.coordinatesToFeatures(geojson.geometry.coordinates);
+  this.features = this._coordinatesToFeatures(geojson.geometry.coordinates);
 };
 
 MultiFeature.prototype = Object.create(Feature.prototype);
 
-MultiFeature.prototype.coordinatesToFeatures = function(coordinates) {
+MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
   return coordinates.map(coords => new this.model(this.ctx, {
     id: this.id,
     type: 'Feature',
@@ -41,7 +41,7 @@ MultiFeature.prototype.isValid = function() {
 };
 
 MultiFeature.prototype.setCoordinates = function(coords) {
-  this.features = this.coordinatesToFeatures(coords);
+  this.features = this._coordinatesToFeatures(coords);
   this.changed();
 };
 

@@ -1,7 +1,7 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import Store from '../src/store';
-import { createMap, createFeature } from './utils';
+import { createMap, createFeature, getPublicMemberKeys } from './test_utils';
 
 function createStore() {
   const map = createMap();
@@ -29,7 +29,7 @@ test('Store constructor and public API', t => {
   t.equal(store.isDirty, false, 'exposes store.isDirty');
   t.equal(typeof store.render, 'function', 'exposes store.render');
 
-  t.equal(Object.keys(store).filter(k => k[0] !== '_').length, 4, 'no unexpected instance members');
+  t.equal(getPublicMemberKeys(store).length, 4, 'no unexpected instance members');
 
   // prototype members
   t.equal(typeof Store.prototype.setDirty, 'function', 'exposes store.setDirty');
@@ -48,7 +48,7 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
 
-  t.equal(Object.keys(Store.prototype).filter(k => k[0] !== '_').length, 15, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 15, 'no untested prototype members');
 
   t.end();
 });
