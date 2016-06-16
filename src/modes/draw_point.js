@@ -30,7 +30,6 @@ module.exports = function(ctx) {
 
   return {
     start: function() {
-      ctx.store.setSelected(feature.id);
       ctx.ui.setClass({mouse:'add'});
       ctx.ui.setButtonActive(types.POINT);
       this.on('click', () => true, onClick);

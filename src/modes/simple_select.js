@@ -34,11 +34,10 @@ module.exports = function(ctx, startingSelectedIds) {
         .filter(id => !ctx.store.isSelected(id));
 
       if (ids.length) {
+        ctx.store.select(ids);
         ids.forEach(id => {
-          ctx.store.select(id);
           context.render(id);
         });
-        context.fire('selected.start', {featureIds: ids});
         ctx.ui.setClass({mouse:'move'});
       }
     }
@@ -75,15 +74,19 @@ module.exports = function(ctx, startingSelectedIds) {
       ctx.map.doubleClickZoom.enable();
     },
     start: function() {
-      if (ctx.store) {
-        ctx.store.setSelected(startingSelectedIds);
-      }
-
       dragging = false;
+
+      // Select features that should start selected,
+      // probably passed in from a `draw_*` mode
+      if (ctx.store) ctx.store.setSelected(startingSelectedIds);
+
+      // When a click falls outside any features,
+      // - clear the selection
+      // - re-render the deselected features
+      // - enable double-click zoom
       this.on('click', noFeature, function() {
         var wasSelected = ctx.store.getSelectedIds();
         ctx.store.clearSelected();
-        this.fire('selected.end', {featureIds: wasSelected});
         wasSelected.forEach(id => this.render(id));
         ctx.map.doubleClickZoom.enable();
       });
@@ -116,15 +119,11 @@ module.exports = function(ctx, startingSelectedIds) {
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (ctx.store.isSelected(id) && !isShiftDown(e)) {
-          if (featureIds.length > 1) {
-            this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
-          }
           this.on('click', readyForDirectSelect, directSelect);
           ctx.ui.setClass({mouse:'pointer'});
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
-          this.fire('selected.end', {featureIds: [id]});
           ctx.ui.setClass({mouse:'pointer'});
           this.render(id);
           if (featureIds.length === 1 ) {
@@ -134,7 +133,6 @@ module.exports = function(ctx, startingSelectedIds) {
         else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
           // add to selected
           ctx.store.select(id);
-          this.fire('selected.start', {featureIds: [id]});
           ctx.ui.setClass({mouse:'move'});
           this.render(id);
         }
@@ -144,8 +142,6 @@ module.exports = function(ctx, startingSelectedIds) {
           ctx.store.clearSelected();
           ctx.store.select(id);
           ctx.ui.setClass({mouse:'move'});
-          this.fire('selected.end', {featureIds: featureIds});
-          this.fire('selected.start', {featureIds: [id]});
           this.render(id);
         }
       });

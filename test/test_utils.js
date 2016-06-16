@@ -2,6 +2,8 @@ import mapboxgl from 'mapbox-gl-js-mock';
 import hat from 'hat';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
+const hatRack = hat.rack();
+
 export function createMap() {
 
   var map = new mapboxgl.Map({
@@ -83,8 +85,9 @@ export const features = {
 };
 
 export function createFeature(featureType) {
-  const feature = features[featureType];
-  feature.id = hat();
+  const feature = Object.assign({
+    id: hatRack()
+  }, features[featureType]);
   feature.toGeoJSON = () => feature;
   return feature;
 }

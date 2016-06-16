@@ -1,10 +1,12 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
+import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Store from '../src/store';
 import { createMap, createFeature, getPublicMemberKeys } from './test_utils';
 
 function createStore() {
   const map = createMap();
+  spy(map, 'fire');
   const ctx = { map };
   return new Store(ctx);
 }
@@ -47,8 +49,9 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.isSelected, 'function', 'exposes store.isSelected');
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
+  t.equal(typeof Store.prototype.flushSelected, 'function', 'exposes store.flushSelected');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 15, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 16, 'no untested prototype members');
 
   t.end();
 });
@@ -95,26 +98,106 @@ test('Store#add, Store#get, Store#getAll', t => {
   t.end();
 });
 
-test('Store#select, Store#deselect, Store#getSelectedIds, Store#isSelected, Store#isSelected', t => {
+test('selection methods', t => {
   const store = createStore();
+  const f1 = createFeature('point');
+  const f2 = createFeature('point');
+  const f3 = createFeature('point');
+  const f4 = createFeature('point');
+
   t.deepEqual(store.getSelectedIds(), []);
-  store.select(1);
-  t.deepEqual(store.getSelectedIds(), [1]);
-  t.equal(store.isSelected(1), true);
-  t.equal(store.isSelected(2), false);
-  store.select(2);
-  t.deepEqual(store.getSelectedIds(), [1, 2]);
-  t.equal(store.isSelected(1), true);
-  t.equal(store.isSelected(2), true);
-  store.select(1);
-  t.deepEqual(store.getSelectedIds(), [1, 2]);
-  store.deselect(1);
-  t.deepEqual(store.getSelectedIds(), [2]);
-  store.select(3);
-  store.select(4);
-  t.deepEqual(store.getSelectedIds(), [2, 3, 4]);
-  store.clearSelected();
-  t.deepEqual(store.getSelectedIds(), []);
+
+  t.test('select one feature', st => {
+    store.select(f1.id);
+    st.deepEqual(store.getSelectedIds(), [f1.id], 'f1 returns in selected array');
+    st.equal(store.isSelected(f1.id), true, 'isSelected affirms f1');
+    st.equal(store.isSelected(f2.id), false, 'isSelected rejects f2');
+    st.deepEqual(store.flushSelected(), {
+      deselected: [],
+      selected: [f1.id]
+    });
+    st.end();
+  });
+
+  t.test('select a second feature', st => {
+    store.ctx.map.fire.reset();
+    store.select(f2.id);
+    st.deepEqual(store.getSelectedIds(), [f1.id, f2.id], 'f1 and f2 return in selected array');
+    st.equal(store.isSelected(f1.id), true, 'isSelected affirms f1');
+    st.equal(store.isSelected(f2.id), true, 'isSelected affirms f2');
+    st.deepEqual(store.flushSelected(), {
+      deselected: [],
+      selected: [f2.id]
+    });
+    st.end();
+  });
+
+  t.test('try to re-select first feature', st => {
+    store.ctx.map.fire.reset();
+    store.select(f1.id);
+    st.deepEqual(store.flushSelected(), {
+      deselected: [],
+      selected: []
+    });
+    st.end();
+  });
+
+  t.test('deselect a feature', st => {
+    store.ctx.map.fire.reset();
+    store.deselect(f1.id);
+    st.deepEqual(store.getSelectedIds(), [f2.id], 'deselection of f1 clears it from selected array');
+    st.deepEqual(store.flushSelected(), {
+      deselected: [f1.id],
+      selected: []
+    });
+    st.end();
+  });
+
+  t.test('serially select more features', st => {
+    store.ctx.map.fire.reset();
+    store.select(f3.id);
+    store.select(f4.id);
+    st.deepEqual(store.getSelectedIds(), [f2.id, f3.id, f4.id], 'serial selection of f3 and f4 reflected in selected array');
+    st.deepEqual(store.flushSelected(), {
+      deselected: [],
+      selected: [f3.id, f4.id]
+    });
+    st.end();
+  });
+
+  t.test('clear selection', st => {
+    store.ctx.map.fire.reset();
+    store.clearSelected();
+    st.deepEqual(store.getSelectedIds(), []);
+    st.deepEqual(store.flushSelected(), {
+      deselected: [f2.id, f3.id, f4.id],
+      selected: []
+    });
+    st.end();
+  });
+
+  t.test('select an array of features', st => {
+    store.ctx.map.fire.reset();
+    store.select([f1.id, f3.id, f4.id]);
+    st.deepEqual(store.getSelectedIds(), [f1.id, f3.id, f4.id]);
+    st.deepEqual(store.flushSelected(), {
+      deselected: [],
+      selected: [f1.id, f3.id, f4.id]
+    });
+    st.end();
+  });
+
+  t.test('deselect an array of features', st => {
+    store.ctx.map.fire.reset();
+    store.deselect([f1.id, f4.id]);
+    st.deepEqual(store.getSelectedIds(), [f3.id]);
+    st.deepEqual(store.flushSelected(), {
+      deselected: [f1.id, f4.id],
+      selected: []
+    });
+    st.end();
+  });
+
   t.end();
 });
 
@@ -134,18 +217,16 @@ test('Store#delete', t => {
   store.select(line.id);
   t.deepEqual(store.getSelectedIds(), [line.id]);
 
-  let deletedFeatureIdsReported = [];
-  store.ctx.map.on('draw.deleted', data => {
-    deletedFeatureIdsReported = data.featureIds;
-  });
-
+  store.ctx.map.fire.reset();
   store.delete(line.id);
   t.deepEqual(store.getAll(), [point, polygon]);
   t.deepEqual(store.getAllIds(), [point.id, polygon.id]);
   t.deepEqual(store.getSelectedIds(), []);
-
+  t.equal(store.ctx.map.fire.callCount, 1);
+  t.deepEqual(store.ctx.map.fire.getCall(0).args, ['draw.deleted', {
+    featureIds: [line]
+  }]);
   t.equal(store.isDirty, true, 'after deletion store is dirty');
-  t.deepEqual(deletedFeatureIdsReported, [line], 'draw.deleted event fires with data');
 
   t.end();
 });
