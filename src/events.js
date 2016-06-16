@@ -30,7 +30,9 @@ module.exports = function(ctx) {
       .filter(f => f.isValid())
       .map(f => f.toGeoJSON());
 
-    if (features.length > 0) ctx.map.fire('draw.modified', {features: features});
+    if (features.length > 0) {
+      ctx.map.fire('draw.modified', {features: features, stack: (new Error('hi')).stack});
+    }
     recentlyUpdatedFeatureIds.clear();
   };
 
@@ -136,6 +138,7 @@ module.exports = function(ctx) {
     },
     changeMode: function(modename, opts) {
       currentMode.stop();
+
       var modebuilder = modes[modename];
       if (modebuilder === undefined) {
         throw new Error(`${modename} is not valid`);
@@ -151,7 +154,7 @@ module.exports = function(ctx) {
 
       ctx.store.setDirty();
       ctx.store.render();
-      emitModifiedFeatures();
+
     },
     fire: function(name, event) {
       if (events[name]) {
