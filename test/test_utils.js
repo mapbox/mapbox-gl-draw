@@ -1,5 +1,6 @@
 import mapboxgl from 'mapbox-gl-js-mock';
 import hat from 'hat';
+import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
 export function createMap() {
 
@@ -83,4 +84,29 @@ export function createFeature(featureType) {
   feature.id = hat();
   feature.toGeoJSON = () => feature;
   return feature;
+}
+
+/**
+ * Returns an array of an object's own property keys that are
+ * not prefixed with `_`, indicating pseudo-privacy.
+ *
+ * @param {Object} instance
+ * @return {Array<string>} Public members
+ */
+export function getPublicMemberKeys(instance) {
+  return Object.keys(instance).filter(k => k[0] !== '_');
+}
+
+/**
+ * Returns an mock ctx object with just those properties a Feature
+ * requires.
+ *
+ * @return {Object}
+ */
+export function createMockCtx() {
+  return {
+    store: {
+      featureChanged: spy()
+    }
+  };
 }

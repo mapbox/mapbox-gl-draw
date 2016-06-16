@@ -4,7 +4,6 @@ var Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
-  this.atLastRender = null;
   this.id = geojson.id || hat();
   this.type = geojson.geometry.type;
 };

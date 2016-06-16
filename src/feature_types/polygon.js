@@ -1,11 +1,5 @@
 var Feature = require('./feature');
 
-function firstMatchesLast(coords) {
-  return coords.every(coord => coord[0].every((el, i) => {
-    return el === coord[coord.length - 1][i];
-  }));
-}
-
 var Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
   this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
@@ -14,19 +8,15 @@ var Polygon = function(ctx, geojson) {
 Polygon.prototype = Object.create(Feature.prototype);
 
 Polygon.prototype.isValid = function() {
-  return this.coordinates.every(function(ring) {
-    return ring.length > 2;
-  });
+  return this.coordinates.every(ring => ring.length > 2);
 };
 
 Polygon.prototype.incomingCoords = function(coords) {
-  if (!firstMatchesLast(coords)) throw new Error('First and last positions must be equivalent. Use setCoordinates method.');
   this.coordinates = coords.map(ring => ring.slice(0, -1));
   this.changed();
 };
 
 Polygon.prototype.setCoordinates = function(coords) {
-  if (firstMatchesLast(coords)) throw new Error('First and last positions must not be equivalent. Use incomingCoords method.');
   this.coordinates = coords;
   this.changed();
 };
@@ -76,4 +66,3 @@ Polygon.prototype.updateCoordinate = function(path, lng, lat) {
 };
 
 module.exports = Polygon;
-
