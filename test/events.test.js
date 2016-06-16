@@ -30,6 +30,7 @@ test('draw.modified is fired when placing a point', t => {
       lngLat: {lng: 0, lat: 0}
   });
 
+  t.equal(4, map.fire.callCount, '4 events expected to be fired');
   t.equal('mousedown', map.fire.getCall(0).args[0], 'mousedown was emitted');
   t.equal('mouseup', map.fire.getCall(1).args[0], 'moseup was emitted');
   t.equal('draw.modechange', map.fire.getCall(2).args[0], 'change mode was emitted');
