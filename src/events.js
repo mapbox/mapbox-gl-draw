@@ -20,17 +20,18 @@ module.exports = function(ctx) {
   var events = {};
   var currentModeName = 'simple_select';
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
-  var changedFeatureIds = new SimpleSet();
+  var recentlyUpdatedFeatureIds = new SimpleSet();
 
   const emitModifiedFeatures = () => {
-    ctx.store.getChangedIds().forEach(id => changedFeatureIds.add(id));
+    ctx.store.getChangedIds().forEach(id => recentlyUpdatedFeatureIds.add(id));
 
-    let features = changedFeatureIds.values().map(id => ctx.store.get(id))
+    let features = recentlyUpdatedFeatureIds.values().map(id => ctx.store.get(id))
       .filter(f => f !== undefined)
+      .filter(f => f.isValid())
       .map(f => f.toGeoJSON());
 
     if (features.length > 0) ctx.map.fire('draw.modified', {features: features});
-    changedFeatureIds.clear();
+    recentlyUpdatedFeatureIds.clear();
   };
 
   events.drag = function(event) {
@@ -58,7 +59,7 @@ module.exports = function(ctx) {
   };
 
   events.drawChanged = function(event) {
-    event.features.forEach(f => changedFeatureIds.add(f.id));
+    event.features.forEach(f => recentlyUpdatedFeatureIds.add(f.id));
   };
 
   events.mousedown = function(event) {
