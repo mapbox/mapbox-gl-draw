@@ -4,8 +4,7 @@ module.exports = {
       var featureTarget = e.featureTarget;
       if (featureTarget) {
         return featureTarget.properties.meta === type;
-      }
-      else {
+      } else {
         return false;
       }
     };
