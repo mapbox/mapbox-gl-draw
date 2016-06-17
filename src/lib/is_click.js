@@ -4,7 +4,7 @@ const FINE_TOLERANCE = 4;
 const GROSS_TOLERANCE = 12;
 const INTERVAL = 500;
 
-module.exports = function isClick(start, end, options) {
+module.exports = function isClick(start, end, options = {}) {
   const fineTolerance = (options.fineTolerance != null) ? options.fineTolerance : FINE_TOLERANCE;
   const grossTolerance = (options.grossTolerance != null) ? options.grossTolerance : GROSS_TOLERANCE;
   const interval = (options.interval != null) ? options.interval : INTERVAL;
