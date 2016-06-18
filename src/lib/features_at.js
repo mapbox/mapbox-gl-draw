@@ -1,55 +1,30 @@
-var area = require('turf-area');
-var metas = ['feature', 'midpoint', 'vertex'];
+var sortFeatures = require('./sort_features');
+var mapEventToBoundingBox = require('./map_event_to_bounding_box');
 
-var geometryTypeValues = {
-  'Polygon': 2,
-  'Point': 0,
-  'LineString': 1
-};
-
-function sort(a, b) {
-  var score = geometryTypeValues[a.geometry.type] - geometryTypeValues[b.geometry.type];
-
-  if (score === 0 && a.geometry.type === 'Polygon') {
-    return a.area - b.area;
-  }
-  else {
-    return score;
-  }
-}
+var RETURN_TYPES = [
+  'feature',
+  'midpoint',
+  'vertex'
+];
 
 // Requires either event or bbox
 module.exports = function(event, bbox, ctx) {
   if (ctx.map === null) return [];
 
-  var box;
-  if (event) {
-    var clickBuffer = ctx.options.clickBuffer;
-    box = [
-      [event.point.x - clickBuffer, event.point.y - clickBuffer],
-      [event.point.x + clickBuffer, event.point.y + clickBuffer]
-    ];
-  }
-  else if (bbox) {
-    box = bbox;
-  }
+  var box = (event)
+    ? mapEventToBoundingBox(event, ctx.options.clickBuffer)
+    : bbox;
 
-  var features = ctx.map.queryRenderedFeatures(box, {
-    layers: ctx.options.styles.map(s => s.id)
-  });
+  var queryParams = {};
+  if (!ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
 
-  features = features.filter(function(feature) {
-    var meta = feature.properties.meta;
-    return metas.indexOf(meta) !== -1;
-  }).map(function(feature) {
-    if (feature.geometry.type === 'Polygon') {
-      feature.area = area({
-        type: 'Feature',
-        property: {},
-        geometry: feature.geometry
-      });
-    }
-    return feature;
-  });
-  return features.sort(sort);
+  var features = ctx.map.queryRenderedFeatures(box, queryParams)
+    .filter(function(feature) {
+      return RETURN_TYPES.indexOf(feature.properties.meta) !== -1;
+    });
+
+  return sortFeatures(features);
 };
+
+// Not unit tested because of complications with testing `map.queryRenderedFeatures`.
+// So the constituent functions are separated out and tested.

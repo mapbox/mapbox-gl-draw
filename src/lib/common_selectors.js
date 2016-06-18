@@ -10,7 +10,9 @@ module.exports = {
     };
   },
   isBoxSelecting(e) {
-    return e.originalEvent.shiftKey && e.originalEvent.button === 0;
+    return e.originalEvent &&
+      e.originalEvent.shiftKey &&
+      e.originalEvent.button === 0;
   },
   isActiveFeature: function(e) {
     return e.featureTarget !== undefined &&
@@ -29,7 +31,7 @@ module.exports = {
     return e.featureTarget !== undefined && e.featureTarget.properties.meta === 'feature';
   },
   isShiftDown: function(e) {
-    return e.originalEvent.shiftKey === true;
+    return e.originalEvent && e.originalEvent.shiftKey === true;
   },
   isEscapeKey: function(e) {
     return e.keyCode === 27;

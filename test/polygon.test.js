@@ -157,10 +157,7 @@ test('Polygon integration', t => {
           lng: c[0],
           lat: c[1]
         },
-        point: {
-          x: 0,
-          y: 0
-        }
+        point: { x: 0, y: 0 }
       });
     }
 
@@ -169,10 +166,7 @@ test('Polygon integration', t => {
         lng: coords[coords.length - 2][0],
         lat: coords[coords.length - 2][1]
       },
-      point: {
-          x: 0,
-          y: 0
-        }
+      point: { x: 0, y: 0 }
     });
 
     var feats = Draw.getAll().features;
