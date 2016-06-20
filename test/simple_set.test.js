@@ -32,7 +32,8 @@ test('SimpleSet#add', t => {
 });
 
 test('SimpleSet#delete', t => {
-  const set = new SimpleSet([1, 2]);
+  const subject = [1, 2];
+  const set = new SimpleSet(subject);
   set.delete(1);
   t.deepEqual(set.values(), [2]);
   set.delete(1);
@@ -41,6 +42,7 @@ test('SimpleSet#delete', t => {
   t.deepEqual(set.values(), [2]);
   set.delete(2);
   t.deepEqual(set.values(), []);
+  t.deepEqual(subject, [1, 2], 'source array not mutated');
   t.end();
 });
 
@@ -53,8 +55,10 @@ test('SimpleSet#has', t => {
 });
 
 test('SimpleSet#values', t => {
-  const set = new SimpleSet([1, 2]);
+  const subject = [1, 2];
+  const set = new SimpleSet(subject);
   t.deepEqual(set.values(), [1, 2]);
+  t.doesNotEqual(set.values(), subject, 'array is copied, so source array is not mutable');
   t.end();
 });
 
