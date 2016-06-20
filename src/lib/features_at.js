@@ -1,7 +1,7 @@
 var sortFeatures = require('./sort_features');
 var mapEventToBoundingBox = require('./map_event_to_bounding_box');
 
-var RETURN_TYPES = [
+var META_TYPES = [
   'feature',
   'midpoint',
   'vertex'
@@ -16,15 +16,12 @@ module.exports = function(event, bbox, ctx) {
     : bbox;
 
   var queryParams = {};
-  if (!ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
+  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
 
   var features = ctx.map.queryRenderedFeatures(box, queryParams)
     .filter(function(feature) {
-      return RETURN_TYPES.indexOf(feature.properties.meta) !== -1;
+      return META_TYPES.indexOf(feature.properties.meta) !== -1;
     });
 
   return sortFeatures(features);
 };
-
-// Not unit tested because of complications with testing `map.queryRenderedFeatures`.
-// So the constituent functions are separated out and tested.
