@@ -20,6 +20,13 @@ export function click(map, payload) {
   map.fire('mouseup', payload);
 }
 
+export function drag(map, payloadDown, payloadUp) {
+  map.fire('mousedown', payloadDown);
+  map.fire('mousemove', payloadDown);
+  map.fire('mousemove', payloadUp);
+  map.fire('mouseup', payloadUp);
+}
+
 export const features = {
   multiPolygon: {
     type: 'Feature',
@@ -62,7 +69,7 @@ export const features = {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[1, 1], [1, 2], [2, 2], [2, 1], [1, 1]]]
+      coordinates: [[[0,0], [0, 90], [90, 90], [90, 0], [0, 0]]]
     }
   },
 
