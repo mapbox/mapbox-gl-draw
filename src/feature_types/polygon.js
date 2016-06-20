@@ -11,11 +11,13 @@ Polygon.prototype.isValid = function() {
   return this.coordinates.every(ring => ring.length > 2);
 };
 
+// Expects valid geoJSON polygon geometry: first and last positions must be equivalent.
 Polygon.prototype.incomingCoords = function(coords) {
   this.coordinates = coords.map(ring => ring.slice(0, -1));
   this.changed();
 };
 
+// Does NOT expect valid geoJSON polygon geometry: first and last positions should not be equivalent.
 Polygon.prototype.setCoordinates = function(coords) {
   this.coordinates = coords;
   this.changed();
