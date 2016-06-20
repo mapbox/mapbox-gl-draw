@@ -2,15 +2,15 @@
  * This file could do with a nice refactor...
  */
 
-var toMidpoint = require('./to_midpoint');
-var toVertex = require('./to_vertex');
+var createMidpoint = require('./create_midpoint');
+var createVertex = require('./create_vertex');
 
 var addCoords = module.exports = function(geojson, doMidpoints, push, map, selectedCoordPaths, basePath = null) {
 
-  if (geojson.geometry.type.startsWith('Multi')) {
+  if (geojson.geometry.type.indexOf('Multi') === 0) {
     let type = geojson.geometry.type.replace('Multi', '');
     return geojson.geometry.coordinates.forEach((coords, i) => {
-      let f = {
+      let newFeature = {
         type: 'Feature',
         properties: geojson.properties,
         geometry: {
@@ -18,11 +18,10 @@ var addCoords = module.exports = function(geojson, doMidpoints, push, map, selec
           coordinates: coords
         }
       };
-      addCoords(f, doMidpoints, push, map, selectedCoordPaths, `${i}`);
+      addCoords(newFeature, doMidpoints, push, map, selectedCoordPaths, `${i}`);
     });
-  }
-  else if (geojson.geometry.type === 'Point') {
-    return push(toVertex(geojson.properties.id, geojson.geometry.coordinates, basePath, selectedCoordPaths.indexOf(basePath) > -1));
+  } else if (geojson.geometry.type === 'Point') {
+    return push(createVertex(geojson.properties.id, geojson.geometry.coordinates, basePath, selectedCoordPaths.indexOf(basePath) > -1));
   }
 
   var oneVertex = null;
@@ -35,27 +34,27 @@ var addCoords = module.exports = function(geojson, doMidpoints, push, map, selec
         let coord = ring[j];
         let coord_path = basePath ? `${basePath}.${i}.${j}` : `${i}.${j}`;
 
-        oneVertex = toVertex(geojson.properties.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
+        oneVertex = createVertex(geojson.properties.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
         startVertex = startVertex ? startVertex : oneVertex;
         push(oneVertex);
 
         if (j > 0 && doMidpoints) {
-          push(toMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
+          push(createMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
         }
 
         twoVertex = oneVertex;
       }
       if (doMidpoints) {
-        push(toMidpoint(geojson.properties.id, oneVertex, startVertex, map));
+        push(createMidpoint(geojson.properties.id, oneVertex, startVertex, map));
       }
     }
     else {
       let coord = geojson.geometry.coordinates[i];
       let coord_path = basePath ? basePath + '.' + i : '' + i;
-      oneVertex = toVertex(geojson.properties.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
+      oneVertex = createVertex(geojson.properties.id, coord, coord_path, selectedCoordPaths.indexOf(coord_path) > -1);
       push(oneVertex);
       if (i > 0 && doMidpoints) {
-        push(toMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
+        push(createMidpoint(geojson.properties.id, twoVertex, oneVertex, map));
       }
       twoVertex = oneVertex;
     }

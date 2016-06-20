@@ -1,8 +1,8 @@
 import test from 'tape';
-import toVertex from '../src/lib/to_vertex';
+import createVertex from '../src/lib/create_vertex';
 
-test('toVertex', t => {
-  t.deepEqual(toVertex('foo', [1, 2], '3.4.5', true), {
+test('createVertex', t => {
+  t.deepEqual(createVertex('foo', [1, 2], '3.4.5', true), {
     type: 'Feature',
     properties: {
       meta: 'vertex',
@@ -16,7 +16,7 @@ test('toVertex', t => {
     }
   });
 
-  t.deepEqual(toVertex('bar', [99, 199], '1', false), {
+  t.deepEqual(createVertex('bar', [99, 199], '1', false), {
     type: 'Feature',
     properties: {
       meta: 'vertex',

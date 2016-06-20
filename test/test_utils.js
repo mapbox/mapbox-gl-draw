@@ -8,6 +8,9 @@ export function createMap() {
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v8'
   });
+  // Some mock project/unproject functions
+  map.project = ([y, x]) => ({ x, y });
+  map.unproject = ([x, y]) => ({ lng: y, lat: x });
 
   return map;
 }
