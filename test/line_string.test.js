@@ -10,7 +10,7 @@ import {
   createFeature,
   getPublicMemberKeys,
   createMockCtx,
-  click
+  drawGeometry
 } from './test_utils';
 
 test('LineString constructor and API', t => {
@@ -112,49 +112,19 @@ test('LineString#updateCoordinate', t => {
 });
 
 test('LineString integration', function lineDrawClass(t){
-  var feature = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'LineString',
-      coordinates: [[0, 0], [1, 1], [2, 2]]
-    }
-  };
+  const lineStringCoordinates = [[0, 0], [1, 1], [2, 2]];
   mapboxgl.accessToken = accessToken;
-  var map = createMap();
-  var Draw = GLDraw();
+  const map = createMap();
+  const Draw = GLDraw();
   map.addControl(Draw);
 
   map.on('load', function() {
-    Draw.changeMode('draw_line_string');
-
-    let coords = feature.geometry.coordinates;
-
-    for (var i = 0; i < coords.length; i++) {
-      let c = coords[i];
-
-      click(map, {
-        lngLat: {
-          lng: c[0],
-          lat: c[1]
-        },
-        point: {
-          x: 0,
-          y: 0
-        }
-      });
-    }
-
-    // complete drawing
-    map.fire('keyup', {
-      keyCode: 13
-    });
-
-    var feats = Draw.getAll().features;
+    drawGeometry(map, Draw, 'LineString', lineStringCoordinates);
+    const feats = Draw.getAll().features;
     t.equals(1, feats.length, 'only one');
     t.equals('LineString', feats[0].geometry.type, 'of the right type');
-    t.equals(feature.geometry.coordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
-    t.deepEquals(feature.geometry.coordinates, feats[0].geometry.coordinates, 'in the right spot');
+    t.equals(lineStringCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
+    t.deepEquals(lineStringCoordinates, feats[0].geometry.coordinates, 'in the right spot');
     Draw.remove();
   });
   t.plan(4);

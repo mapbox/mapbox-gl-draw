@@ -1,5 +1,5 @@
 const types = require('./lib/types');
-var {createButton} = require('./lib/util');
+const createControlButton = require('./lib/create_control_button');
 
 module.exports = function(ctx) {
 
@@ -67,7 +67,6 @@ module.exports = function(ctx) {
       }
     },
     addButtons: function() {
-      var controlClass = 'mapbox-gl-draw_ctrl-draw-btn';
       var controls = ctx.options.controls;
       var ctrlPos = 'mapboxgl-ctrl-';
         switch (ctx.options.position) {
@@ -97,38 +96,42 @@ module.exports = function(ctx) {
         }
 
         if (controls[types.LINE]) {
-          buttons[types.LINE] = createButton(controlGroup, {
-            className: `${controlClass} mapbox-gl-draw_line`,
+          buttons[types.LINE] = createControlButton({
+            container: controlGroup,
+            className: 'mapbox-gl-draw_line',
             title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-            fn: () => ctx.api.changeMode('draw_line_string')
-          }, controlClass);
+            onActivate: () => ctx.api.changeMode('draw_line_string')
+          });
         }
 
         if (controls[types.POLYGON]) {
-          buttons[types.POLYGON] = createButton(controlGroup, {
-            className: `${controlClass} mapbox-gl-draw_polygon`,
+          buttons[types.POLYGON] = createControlButton({
+            container: controlGroup,
+            className: 'mapbox-gl-draw_polygon',
             title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
-            fn: () => ctx.api.changeMode('draw_polygon')
-          }, controlClass);
+            onActivate: () => ctx.api.changeMode('draw_polygon')
+          });
         }
 
         if (controls[types.POINT]) {
-          buttons[types.POINT] = createButton(controlGroup, {
-            className: `${controlClass} mapbox-gl-draw_point`,
+          buttons[types.POINT] = createControlButton({
+            container: controlGroup,
+            className: 'mapbox-gl-draw_point',
             title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
-            fn: () => ctx.api.changeMode('draw_point')
-          }, controlClass);
+            onActivate: () => ctx.api.changeMode('draw_point')
+          });
         }
 
         if (controls.trash) {
-          buttons.trash = createButton(controlGroup, {
-            className: `${controlClass} mapbox-gl-draw_trash`,
-            title: 'delete',
-            fn: function() {
+          buttons.trash = createControlButton({
+            container: controlGroup,
+            className: 'mapbox-gl-draw_trash',
+            title: 'Delete',
+            onActivate: () => {
               ctx.api.trash();
               ctx.ui.setButtonInactive('trash');
             }
-          }, controlClass);
+          });
         }
       },
       setButtonActive: function(id) {

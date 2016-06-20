@@ -5,10 +5,10 @@ import Polygon from '../src/feature_types/polygon';
 import GLDraw from '../';
 import {
   createMap,
-  click,
   createFeature,
   getPublicMemberKeys,
-  createMockCtx
+  createMockCtx,
+  drawGeometry
 } from './test_utils';
 
 test('Polygon constructor and API', t => {
@@ -134,52 +134,19 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
 });
 
 test('Polygon integration', t => {
-  var feature = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]]]
-    }
-  };
-  var map = createMap();
-  var Draw = GLDraw();
+  const polygonCoordinates = [[[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]]];
+  const map = createMap();
+  const Draw = GLDraw();
   map.addControl(Draw);
 
   map.on('load', function() {
-    Draw.changeMode('draw_polygon');
-    let coords = feature.geometry.coordinates[0];
+    drawGeometry(map, Draw, 'Polygon', polygonCoordinates);
 
-    for (var i = 0; i < coords.length - 1; i++) {
-      var c = coords[i];
-      click(map, {
-        lngLat: {
-          lng: c[0],
-          lat: c[1]
-        },
-        point: {
-          x: 0,
-          y: 0
-        }
-      });
-    }
-
-    click(map, {
-      lngLat: {
-        lng: coords[coords.length - 2][0],
-        lat: coords[coords.length - 2][1]
-      },
-      point: {
-          x: 0,
-          y: 0
-        }
-    });
-
-    var feats = Draw.getAll().features;
+    const feats = Draw.getAll().features;
     t.equals(1, feats.length, 'only one');
     t.equals('Polygon', feats[0].geometry.type, 'of the right type');
-    t.equals(feature.geometry.coordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
-    t.deepEquals(feature.geometry.coordinates, feats[0].geometry.coordinates, 'in the right spot');
+    t.equals(polygonCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
+    t.deepEquals(polygonCoordinates, feats[0].geometry.coordinates, 'in the right spot');
     Draw.remove();
   });
   t.plan(4);

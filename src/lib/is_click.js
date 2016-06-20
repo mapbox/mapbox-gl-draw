@@ -1,11 +1,18 @@
-var euclideanDistance = require('./euclidean_distance');
+const euclideanDistance = require('./euclidean_distance');
 
-const closeTolerance = 4;
-const tolerance = 12;
+const FINE_TOLERANCE = 4;
+const GROSS_TOLERANCE = 12;
+const INTERVAL = 500;
 
-module.exports = function isClick(start, end){
+module.exports = function isClick(start, end, options = {}) {
+  const fineTolerance = (options.fineTolerance != null) ? options.fineTolerance : FINE_TOLERANCE;
+  const grossTolerance = (options.grossTolerance != null) ? options.grossTolerance : GROSS_TOLERANCE;
+  const interval = (options.interval != null) ? options.interval : INTERVAL;
+
   start.point = start.point || end.point;
   start.time = start.time || end.time;
-  var moveDistance = euclideanDistance(start.point, end.point);
-  return moveDistance < closeTolerance || (moveDistance < tolerance && (end.time - start.time) < 500);
+  const moveDistance = euclideanDistance(start.point, end.point);
+
+  return moveDistance < fineTolerance
+    || (moveDistance < grossTolerance && (end.time - start.time) < interval);
 };

@@ -1,5 +1,5 @@
 function SimpleSet(items) {
-  this._items = items || [];
+  this._items = (items) ? items.slice() : [];
 }
 
 SimpleSet.prototype.add = function(item) {
@@ -20,7 +20,7 @@ SimpleSet.prototype.has = function(item) {
 };
 
 SimpleSet.prototype.values = function() {
-  return this._items;
+  return this._items.slice();
 };
 
 SimpleSet.prototype.clear = function() {

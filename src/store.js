@@ -1,4 +1,4 @@
-var {throttle} = require('./lib/util');
+var throttle = require('./lib/throttle');
 var SimpleSet = require('./lib/simple_set');
 var render = require('./render');
 
