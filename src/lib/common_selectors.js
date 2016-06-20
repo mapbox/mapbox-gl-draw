@@ -2,36 +2,39 @@ module.exports = {
   isOfMetaType: function(type) {
     return function(e) {
       var featureTarget = e.featureTarget;
-      if (featureTarget) {
-        return featureTarget.properties.meta === type;
-      } else {
-        return false;
-      }
+      if (!featureTarget) return false;
+      if (!featureTarget.properties) return false;
+      return featureTarget.properties.meta === type;
     };
   },
   isBoxSelecting(e) {
-    return e.originalEvent &&
-      e.originalEvent.shiftKey &&
-      e.originalEvent.button === 0;
+    if (!e.originalEvent) return false;
+    if (!e.originalEvent.shiftKey) return false;
+    return e.originalEvent.button === 0;
   },
   isActiveFeature: function(e) {
-    return e.featureTarget !== undefined &&
-      e.featureTarget.properties.active === 'true' &&
+    if (!e.featureTarget) return false;
+    if (!e.featureTarget.properties) return false;
+    return e.featureTarget.properties.active === 'true' &&
       e.featureTarget.properties.meta === 'feature';
   },
   isInactiveFeature: function(e) {
-    return e.featureTarget !== undefined &&
-      e.featureTarget.properties.active === 'false' &&
+    if (!e.featureTarget) return false;
+    if (!e.featureTarget.properties) return false;
+    return e.featureTarget.properties.active === 'false' &&
       e.featureTarget.properties.meta === 'feature';
   },
   noFeature: function(e) {
     return e.featureTarget === undefined;
   },
   isFeature: function(e) {
-    return e.featureTarget !== undefined && e.featureTarget.properties.meta === 'feature';
+    if (!e.featureTarget) return false;
+    if (!e.featureTarget.properties) return false;
+    return e.featureTarget.properties.meta === 'feature';
   },
   isShiftDown: function(e) {
-    return e.originalEvent && e.originalEvent.shiftKey === true;
+    if (!e.originalEvent) return false;
+    return e.originalEvent.shiftKey === true;
   },
   isEscapeKey: function(e) {
     return e.keyCode === 27;

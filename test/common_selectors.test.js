@@ -45,6 +45,10 @@ test('commonSelectors.isBoxSelecting', t => {
     }
   }));
 
+  t.notOk(commonSelectors.isBoxSelecting({
+    nothing: false
+  }));
+
   t.end();
 });
 
@@ -87,6 +91,14 @@ test('commonSelectors.isActiveFeature', t => {
         meta: 'Feature'
       }
     }
+  }));
+
+  t.notOk(commonSelectors.isActiveFeature({
+    nothing: false
+  }));
+
+  t.notOk(commonSelectors.isActiveFeature({
+    featureTarget: {}
   }));
 
   t.end();
@@ -133,6 +145,14 @@ test('commonSelectors.isInactiveFeature', t => {
     }
   }));
 
+  t.notOk(commonSelectors.isInactiveFeature({
+    nothing: false
+  }));
+
+  t.notOk(commonSelectors.isInactiveFeature({
+    featureTarget: {}
+  }));
+
   t.end();
 });
 
@@ -177,6 +197,14 @@ test('commonSelectors.isFeature', t => {
     }
   }));
 
+  t.notOk(commonSelectors.isFeature({
+    nothing: false
+  }));
+
+  t.notOk(commonSelectors.isFeature({
+    featureTarget: {}
+  }));
+
   t.end();
 });
 
@@ -195,6 +223,10 @@ test('commonSelectors.isShiftDown', t => {
 
   t.notOk(commonSelectors.isShiftDown({
     originalEvent: {}
+  }));
+
+  t.notOk(commonSelectors.isShiftDown({
+    nothing: true
   }));
 
   t.end();

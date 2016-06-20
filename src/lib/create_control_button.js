@@ -28,7 +28,7 @@ function createControlButton(options) {
     if (el.classList.contains('active')) {
       el.classList.remove('active');
     } else {
-      domUtils.removeClass(document.querySelectorAll(`.${Constants.CCONTROL_BUTTON_CLASS}`), 'active');
+      domUtils.removeClass(document.querySelectorAll(`.${Constants.CONTROL_BUTTON_CLASS}`), 'active');
       el.classList.add('active');
       options.onActivate();
     }

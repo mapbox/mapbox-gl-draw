@@ -18,20 +18,21 @@ function comparator(a, b) {
 
 // Sort in the order above, then sort polygons by area ascending.
 function sortFeatures(features) {
-  const featuresWithAreas = features.map(function(feature) {
-    if (feature.geometry.type === 'Polygon') {
-      feature.area = area({
-        type: 'Feature',
-        property: {},
-        geometry: feature.geometry
-      });
-    }
-    return feature;
-  });
-  return featuresWithAreas.sort(comparator).map(function(feature) {
-    delete feature.area;
-    return feature;
-  });
+  return features.map(feature => {
+      if (feature.geometry.type === 'Polygon') {
+        feature.area = area({
+          type: 'Feature',
+          property: {},
+          geometry: feature.geometry
+        });
+      }
+      return feature;
+    })
+    .sort(comparator)
+    .map(feature => {
+      delete feature.area;
+      return feature;
+    });
 }
 
 module.exports = sortFeatures;
