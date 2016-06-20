@@ -256,7 +256,7 @@ test('addCoords as in direct_select with polygon', t => {
   const features = [line];
   const map = createMap();
 
-  addCoords(line, true, x => features.push(x), map, '1.1');
+  addCoords(line, true, x => features.push(x), map, '0.1');
 
   t.deepEqual(features, [{
     type: 'Feature',

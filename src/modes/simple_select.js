@@ -1,5 +1,5 @@
 var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFeature} = require('../lib/common_selectors');
-var { DOM } = require('../lib/util');
+var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var addCoords = require('../lib/add_coords');
 module.exports = function(ctx, startingSelectedIds) {
@@ -100,7 +100,7 @@ module.exports = function(ctx, startingSelectedIds) {
       if (ctx.options.boxSelect) {
         this.on('mousedown', isBoxSelecting, function(e) {
           ctx.map.dragPan.disable();
-          startCoordinates = DOM.mousePos(e.originalEvent, ctx.container);
+          startCoordinates = mouseEventPoint(e.originalEvent, ctx.container);
           boxSelecting = true;
         });
       }
@@ -156,7 +156,7 @@ module.exports = function(ctx, startingSelectedIds) {
           box.classList.add('mapbox-gl-draw_boxselect');
           ctx.container.appendChild(box);
         }
-        var current = DOM.mousePos(e.originalEvent, ctx.container);
+        var current = mouseEventPoint(e.originalEvent, ctx.container);
         var minX = Math.min(startCoordinates.x, current.x),
           maxX = Math.max(startCoordinates.x, current.x),
           minY = Math.min(startCoordinates.y, current.y),
@@ -178,7 +178,7 @@ module.exports = function(ctx, startingSelectedIds) {
         if (boxSelecting) {
           finishBoxSelect([
             startCoordinates,
-            DOM.mousePos(e.originalEvent, ctx.container)
+            mouseEventPoint(e.originalEvent, ctx.container)
           ], this);
         }
       });
