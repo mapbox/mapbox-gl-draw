@@ -18,81 +18,143 @@ spy(map, 'fire');
 var Draw = GLDraw();
 map.addControl(Draw);
 
-map.on('load', function() {
-  test('simple_select box select', t => {
-    Draw.add(features.negitivePoint);
-    var id = Draw.add(features.point);
-    map.fire.reset();
+var afterNextRender = function(cb) {
+  setTimeout(cb, 32);
+}
 
-    map.on('log', function(e) {
-      throw new Error('no mas logs');
+var cleanUp = function(cb) {
+  Draw.deleteAll();
+  map.fire.reset();
+  afterNextRender(cb);
+}
+
+var getFireArgs = function() {
+  var args = [];
+  for (var i=0; i<map.fire.callCount; i++) {
+    args.push(map.fire.getCall(i).args);
+  }
+  return args;
+}
+
+var makeMouseEvent = function(lng, lat, shiftKey = false) {
+  var e = {
+    originalEvent: {
+      shiftKey: shiftKey,
+      stopPropagation: function() {},
+      button: 0,
+      clientX: lng,
+      clientY: lat
+    },
+    point: {x: lng, y:lat},
+    lngLat: {lng: lng, lat: lat}
+  };
+
+  e.featureTarget = Draw.getFeatureIdsAt(lng, lat)[0];
+
+  return e;
+}
+
+test('simple_select - setup', t => {
+  var donedone = false;
+  var done = function() {
+    if (donedone === false) {
+      t.pass('map loaded');
+      t.end();
+      donedone = true;
+    }
+  };
+  if (map.loaded()) {
+    done();
+  }
+  map.on('load', done);
+});
+
+
+test('simple_select box select', t => {
+  Draw.add(features.negitivePoint);
+  var id = Draw.add(features.point);
+  map.fire.reset();
+
+  afterNextRender(() => {
+    map.fire('mousedown', makeMouseEvent(0, 0, true));
+    map.fire('mousemove', makeMouseEvent(7, 7, true));
+    map.fire('mousemove', makeMouseEvent(15, 15, true));
+    map.fire('mouseup', makeMouseEvent(15, 15, true));
+
+    afterNextRender(() => {
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.simple_select.selected.start');
+      t.equal(args.length, 1, 'should have one and only one selected start event');
+      if (args.length > 0) {
+        t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
+        t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+      }
+      cleanUp(() => t.end());
     });
-
-    setTimeout(function() {
-      map.fire('mousedown', {
-        originalEvent: {
-            shiftKey: true,
-            stopPropagation: function() {},
-            button: 0,
-            clientX: 0,
-            clientY: 0
-          },
-          point: {x: 0, y:0},
-          lngLat: {lng: 0, lat: 0}
-      });
-
-      map.fire('mousemove', {
-        originalEvent: {
-            shiftKey: true,
-            stopPropagation: function() {},
-            button: 0,
-            clientX: 7,
-            clientY: 7
-          },
-          point: {x: 7, y:7},
-          lngLat: {lng: 7, lat: 7}
-      });
-
-      map.fire('mousemove', {
-        originalEvent: {
-            shiftKey: true,
-            stopPropagation: function() {},
-            button: 0,
-            clientX: 15,
-            clientY: 15
-          },
-          point: {x: 15, y:15},
-          lngLat: {lng: 15, lat: 15}
-      });
-
-      map.fire('mouseup', {
-        originalEvent: {
-            shiftKey: true,
-            stopPropagation: function() {},
-            button: 0,
-            clientX: 15,
-            clientY: 15
-          },
-          point: {x: 15, y:15},
-          lngLat: {lng: 15, lat: 15}
-      });
-
-      setTimeout(function() {
-        var args = [];
-        for (var i=0; i<map.fire.callCount; i++) {
-          args.push(map.fire.getCall(i).args);
-        }
-        args = args.filter(arg => arg[0] === 'draw.simple_select.selected.start');
-        t.equal(args.length, 1, 'should have one and only one selected start event');
-        if (args.length > 0) {
-          t.equal('draw.simple_select.selected.start', args[0][0], 'should fire select event');
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
-        }
-        t.end();
-      }, 32);
-    }, 32);
-
   });
 });
 
+test('simple_select - unselect', t => {
+  var id = Draw.add(features.point);
+  Draw.changeMode('simple_select', [id]);
+  map.fire.reset();
+
+  afterNextRender(() => {
+    map.fire('mousedown', makeMouseEvent(15, 15));
+    map.fire('mouseup', makeMouseEvent(15, 15));
+
+    afterNextRender(() => {
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.simple_select.selected.end');
+      t.equal(args.length, 1, 'should have one and only one selected end event');
+      if (args.length > 0) {
+        t.equal(args[0][1].featureIds.length, 1, 'should unselect only one feautre');
+        t.equal(args[0][1].featureIds[0], id, 'should unselect the feature we expect it to select');
+      }
+      cleanUp(() => t.end());
+    });
+  });
+});
+
+test('simple_select - click on an unselected feature', t => {
+  var id = Draw.add(features.polygon);
+  Draw.changeMode('simple_select');
+  map.fire.reset();
+
+  afterNextRender(() => {
+    map.fire('mousedown', makeMouseEvent(2, 3));
+    map.fire('mouseup', makeMouseEvent(2, 3));
+
+    afterNextRender(() => {
+      var args = getFireArgs();
+      args = args.filter(arg => arg[0] === 'draw.simple_select.selected.start');
+      t.equal(args.length, 1, 'should have one and only one selected start event');
+      if (args.length > 0) {
+        t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
+        t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+      }
+      cleanUp(() => t.end());
+    });
+  });
+});
+
+// test('simple_select - click on an selected feature with shift down', t => {
+//   var id = Draw.add(features.polygon);
+//   Draw.changeMode('simple_select', [id]);
+//   map.fire.reset();
+
+//   afterNextRender(() => {
+//     map.fire('mousedown', makeMouseEvent(3, 3, true));
+//     map.fire('mouseup', makeMouseEvent(3, 3, true));
+
+//     afterNextRender(() => {
+//       var args = getFireArgs();
+//       console.log(args);
+//       // args = args.filter(arg => arg[0] === 'draw.simple_select.selected.end');
+//       // t.equal(args.length, 1, 'should have one and only one selected end event');
+//       // if (args.length > 0) {
+//       //   t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
+//       //   t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+//       // }
+//       cleanUp(() => t.end());
+//     });
+//   });
+// });
