@@ -4,7 +4,7 @@ module.exports = function render() {
   if (!mapExists) return cleanup();
 
   var mode = store.ctx.events.currentModeName();
-  store.ctx.ui.setClass({
+  store.ctx.ui.queueContainerClasses({
     mode: mode
   });
 

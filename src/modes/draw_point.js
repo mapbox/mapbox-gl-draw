@@ -1,6 +1,6 @@
 var {isEnterKey, isEscapeKey} = require('../lib/common_selectors');
 var Point = require('../feature_types/point');
-const types = require('../lib/types');
+const Constants = require('../constants');
 
 module.exports = function(ctx) {
 
@@ -22,7 +22,7 @@ module.exports = function(ctx) {
 
   var done = false;
   var onClick = function(e) {
-    ctx.ui.setClass({mouse:'move'});
+    ctx.ui.queueContainerClasses({mouse:'move'});
     done = true;
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
     ctx.events.changeMode('simple_select', [feature.id]);
@@ -31,15 +31,15 @@ module.exports = function(ctx) {
   return {
     start: function() {
       ctx.store.clearSelected();
-      ctx.ui.setClass({mouse:'add'});
-      ctx.ui.setButtonActive(types.POINT);
+      ctx.ui.queueContainerClasses({mouse:'add'});
+      ctx.ui.setButtonActive(Constants.types.POINT);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', isEnterKey, stopDrawingAndRemove);
       this.on('trash', () => true, stopDrawingAndRemove);
     },
     stop: function() {
-      ctx.ui.setButtonInactive(types.POINT);
+      ctx.ui.deactivateButtons();
       if (done === false) {
         ctx.store.delete([feature.id]);
       }
