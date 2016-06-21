@@ -32,14 +32,14 @@ module.exports = function(ctx) {
     start: function() {
       ctx.store.setSelected(feature.id);
       ctx.ui.queueContainerClasses({mouse:'add'});
-      ctx.ui.setButtonActive(Constants.types.POINT);
+      ctx.ui.setActiveButton(Constants.types.POINT);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', isEnterKey, stopDrawingAndRemove);
       this.on('trash', () => true, stopDrawingAndRemove);
     },
     stop: function() {
-      ctx.ui.deactivateButtons();
+      ctx.ui.setActiveButton();
       if (done === false) {
         ctx.store.delete([feature.id]);
       }

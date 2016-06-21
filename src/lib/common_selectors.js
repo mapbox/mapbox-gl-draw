@@ -41,5 +41,8 @@ module.exports = {
   },
   isEnterKey: function(e) {
     return e.keyCode === 13;
+  },
+  true: function() {
+    return true;
   }
 };

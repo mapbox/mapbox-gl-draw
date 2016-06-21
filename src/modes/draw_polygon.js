@@ -60,7 +60,7 @@ module.exports = function(ctx) {
         }
       }, 0);
       ctx.ui.queueContainerClasses({mouse:'add'});
-      ctx.ui.setButtonActive(Constants.types.POLYGON);
+      ctx.ui.setActiveButton(Constants.types.POLYGON);
       this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
@@ -73,7 +73,7 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.enable();
         }
       }, 0);
-      ctx.ui.deactivateButtons();
+      ctx.ui.setActiveButton();
       if (!feature.isValid()) {
         ctx.store.delete([feature.id]);
       }

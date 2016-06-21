@@ -60,7 +60,7 @@ module.exports = function(ctx) {
         return;
       }
 
-      setButtonActive(id);
+      setActiveButton(id);
       options.onActivate();
     }, true);
 
@@ -73,11 +73,12 @@ module.exports = function(ctx) {
     activeButton = null;
   }
 
-  function setButtonActive(id) {
+  function setActiveButton(id) {
+    deactivateButtons();
+
     const button = buttonElements[id];
     if (!button) return;
 
-    deactivateButtons();
     if (button && id !== 'trash') {
       button.classList.add('active');
       activeButton = button;
@@ -109,7 +110,7 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.CONTROL_BUTTON_LINE_CLASS,
         title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_STRING)
+        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_LINE)
       });
     }
 
@@ -154,8 +155,7 @@ module.exports = function(ctx) {
   }
 
   return {
-    setButtonActive,
-    deactivateButtons,
+    setActiveButton,
     queueContainerClasses,
     updateContainerClasses,
     addButtons,
