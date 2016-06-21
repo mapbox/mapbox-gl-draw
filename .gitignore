@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log
 .vscode/
 dist/mapbox-gl-draw.js
+coverage/
+.nyc_output/
