@@ -165,8 +165,18 @@ Store.prototype.clearSelected = function() {
  * @return {Store} this
  */
 Store.prototype.setSelected = function(featureIds) {
-  this.clearSelected();
-  this.select(featureIds);
+  featureIds = toDenseArray(featureIds);
+
+  // Deselect any features not in the new selection
+  this.deselect(this._selectedFeatureIds.values().filter(id => {
+    return featureIds.indexOf(id) === -1;
+  }));
+
+  // Select any features in the new selection that were not already selected
+  this.select(featureIds.filter(id => {
+    return !this._selectedFeatureIds.has(id);
+  }));
+
   return this;
 };
 

@@ -45,6 +45,7 @@ module.exports = function(ctx, opts) {
 
   return {
     start: function() {
+      ctx.store.setSelected(featureId);
       ctx.map.doubleClickZoom.disable();
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);

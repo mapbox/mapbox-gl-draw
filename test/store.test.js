@@ -233,12 +233,37 @@ test('Store#delete', t => {
 
 test('Store#setSelected', t => {
   const store = createStore();
-  t.deepEqual(store.getSelectedIds(), []);
-  store.setSelected(1);
-  t.deepEqual(store.getSelectedIds(), [1]);
-  store.setSelected([3, 4]);
-  t.deepEqual(store.getSelectedIds(), [3, 4]);
+  const point = createFeature('point');
+  const line = createFeature('line');
+  const polygon = createFeature('polygon');
+
+  store.setSelected(point.id);
+  t.deepEqual(store.getSelectedIds(), [point.id]);
+  t.deepEqual(store.flushSelected(), {
+    deselected: [],
+    selected: [point.id]
+  });
+
+  store.setSelected([line.id, polygon.id]);
+  t.deepEqual(store.getSelectedIds(), [line.id, polygon.id]);
+  t.deepEqual(store.flushSelected(), {
+    deselected: [point.id],
+    selected: [line.id, polygon.id]
+  });
+
+  store.setSelected(line.id);
+  t.deepEqual(store.getSelectedIds(), [line.id]);
+  t.deepEqual(store.flushSelected(), {
+    deselected: [polygon.id],
+    selected: []
+  });
+
   store.setSelected();
   t.deepEqual(store.getSelectedIds(), []);
+  t.deepEqual(store.flushSelected(), {
+    deselected: [line.id],
+    selected: []
+  });
+
   t.end();
 });
