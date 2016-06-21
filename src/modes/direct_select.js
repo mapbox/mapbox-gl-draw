@@ -1,5 +1,5 @@
 var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
-var addCoords = require('../lib/add_coords');
+var createSupplementaryPoints = require('../lib/create_supplementary_points');
 
 module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
@@ -97,7 +97,11 @@ module.exports = function(ctx, opts) {
       if (featureId === geojson.properties.id) {
         geojson.properties.active = 'true';
         push(geojson);
-        addCoords(geojson, true, push, ctx.map, selectedCoordPaths);
+        createSupplementaryPoints(geojson, {
+          map: ctx.map,
+          midpoints: true,
+          selectedPaths: selectedCoordPaths
+        }).forEach(push);
       }
       else {
         geojson.properties.active = 'false';

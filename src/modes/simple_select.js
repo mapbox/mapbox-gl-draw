@@ -1,7 +1,8 @@
 var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFeature} = require('../lib/common_selectors');
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
-var addCoords = require('../lib/add_coords');
+var createSupplementaryPoints = require('../lib/create_supplementary_points');
+
 module.exports = function(ctx, startingSelectedIds) {
   var startPos = null;
   var dragging = null;
@@ -225,10 +226,9 @@ module.exports = function(ctx, startingSelectedIds) {
     },
     render: function(geojson, push) {
       geojson.properties.active = ctx.store.isSelected(geojson.properties.id) ? 'true' : 'false';
-      if (geojson.properties.active === 'true' && geojson.geometry.type !== 'Point') {
-        addCoords(geojson, false, push, ctx.map, []);
-      }
       push(geojson);
+      if (geojson.properties.active !== 'true' || geojson.geometry.type === 'Point') return;
+      createSupplementaryPoints(geojson).forEach(push);
     }
   };
 };
