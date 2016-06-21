@@ -241,7 +241,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
   });
 
   t.test('programmatically activate point button, then programmatically deactivate', st => {
-    testUi.setButtonActive('point');
+    testUi.setActiveButton('point');
 
     st.notOk(lineButton.classList.contains('active'), 'line button is inactive');
     st.notOk(polygonButton.classList.contains('active'), 'polygon button is inactive');
@@ -249,7 +249,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
     st.equal(context.api.changeMode.callCount, 0, 'changeMode not called');
 
-    testUi.deactivateButtons();
+    testUi.setActiveButton();
 
     st.notOk(lineButton.classList.contains('active'), 'line button is inactive');
     st.notOk(polygonButton.classList.contains('active'), 'polygon button is inactive');

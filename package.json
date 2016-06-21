@@ -58,6 +58,7 @@
     "nyc": "^6.6.1",
     "opener": "^1.4.1",
     "sinon": "^1.17.4",
+    "synthetic-dom-events": "^0.3.0",
     "tape": "^4.0.0",
     "uglify-js": "^2.4.23",
     "unassertify": "^2.0.3"
