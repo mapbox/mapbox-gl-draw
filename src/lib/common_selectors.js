@@ -8,8 +8,12 @@ module.exports = {
     };
   },
   isBoxSelecting(e) {
-    if (!e.originalEvent) return false;
-    if (!e.originalEvent.shiftKey) return false;
+    if (!e.originalEvent) {
+      return false;
+    }
+    if (!e.originalEvent.shiftKey) {
+      return false;
+    }
     return e.originalEvent.button === 0;
   },
   isActiveFeature: function(e) {

@@ -17,6 +17,22 @@ export function createMap(mapOptions = {}) {
     map.getContainer = () => mapOptions.container;
   }
 
+
+  let getContainer = map.getContainer.bind(map);
+
+  map.getContainer = function() {
+    var container = getContainer();
+    container.clientLeft = 0;
+    container.clientTop = 0;
+    container.getBoundingClientRect = function() {
+      return {
+        left: 0,
+        top: 0
+      }
+    };
+    return container;
+  }
+
   return map;
 }
 
@@ -50,6 +66,15 @@ export const features = {
     geometry: {
       type: 'Point',
       coordinates: [10, 10]
+    }
+  },
+
+  negitivePoint: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [-10, -10]
     }
   },
 

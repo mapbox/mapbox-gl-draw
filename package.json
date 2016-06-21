@@ -15,7 +15,9 @@
     "test": "npm run lint && npm run tape",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
+    "tss": "tape -r ./test/mock-browser.js -r babel-register test/simple_select.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
+    "css": "NODE_ENV=test nyc --reporter html npm run tss && opener coverage/index.html",
     "build": "NODE_ENV=production browserify index.js > dist/mapbox-gl-draw.js",
     "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "node server.js"
@@ -72,6 +74,7 @@
     "point-geometry": "0.0.0",
     "ramda": "^0.17.1",
     "sinon": "^1.17.4",
-    "turf-area": "^1.1.1"
+    "turf-area": "^1.1.1",
+    "webgl-mock": "^0.1.6"
   }
 }

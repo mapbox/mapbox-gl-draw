@@ -22,7 +22,7 @@ module.exports = function(ctx, startingSelectedIds) {
 
   var finishBoxSelect = function(bbox, context) {
     if (box) {
-      box.parentNode.removeChild(box);
+      box.parentNode && box.parentNode.removeChild(box);
       box = null;
     }
 

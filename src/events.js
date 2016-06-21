@@ -31,7 +31,7 @@ module.exports = function(ctx) {
       .map(f => f.toGeoJSON());
 
     if (features.length > 0) {
-      ctx.map.fire('draw.modified', {features: features, stack: (new Error('hi')).stack});
+      ctx.map.fire('draw.modified', {features: features});
     }
     recentlyUpdatedFeatureIds.clear();
   };
