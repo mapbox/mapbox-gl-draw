@@ -9,7 +9,7 @@ module.exports = function(ctx) {
   ctx.map = null;
   ctx.container = null;
   ctx.store = null;
-  ui(ctx);
+  ctx.ui = ui(ctx);
 
   var setup = {
     addTo: function(map) {

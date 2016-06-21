@@ -39,7 +39,7 @@ module.exports = function(ctx, startingSelectedIds) {
           context.render(id);
         });
         context.fire('selected.start', {featureIds: ids});
-        ctx.ui.setClass({mouse:'move'});
+        ctx.ui.queueContainerClasses({mouse:'move'});
       }
     }
     boxSelecting = false;
@@ -95,7 +95,7 @@ module.exports = function(ctx, startingSelectedIds) {
           isDragging: true,
           startPos: e.lngLat
         });
-        ctx.ui.setClass({mouse:'move'});
+        ctx.ui.queueContainerClasses({mouse:'move'});
       });
 
       if (ctx.options.boxSelect) {
@@ -120,12 +120,12 @@ module.exports = function(ctx, startingSelectedIds) {
             this.fire('selected.end', {featureIds: featureIds.filter(f => f !== id)});
           }
           this.on('click', readyForDirectSelect, directSelect);
-          ctx.ui.setClass({mouse:'pointer'});
+          ctx.ui.queueContainerClasses({mouse:'pointer'});
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
           this.fire('selected.end', {featureIds: [id]});
-          ctx.ui.setClass({mouse:'pointer'});
+          ctx.ui.queueContainerClasses({mouse:'pointer'});
           this.render(id);
           if (featureIds.length === 1 ) {
             ctx.map.doubleClickZoom.enable();
@@ -135,7 +135,7 @@ module.exports = function(ctx, startingSelectedIds) {
           // add to selected
           ctx.store.select(id);
           this.fire('selected.start', {featureIds: [id]});
-          ctx.ui.setClass({mouse:'move'});
+          ctx.ui.queueContainerClasses({mouse:'move'});
           this.render(id);
         }
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
@@ -143,7 +143,7 @@ module.exports = function(ctx, startingSelectedIds) {
           featureIds.forEach(formerId => this.render(formerId));
           ctx.store.clearSelected();
           ctx.store.select(id);
-          ctx.ui.setClass({mouse:'move'});
+          ctx.ui.queueContainerClasses({mouse:'move'});
           this.fire('selected.end', {featureIds: featureIds});
           this.fire('selected.start', {featureIds: [id]});
           this.render(id);
@@ -151,7 +151,7 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('drag', () => boxSelecting, function(e) {
-        ctx.ui.setClass({mouse:'add'});
+        ctx.ui.queueContainerClasses({mouse:'add'});
         if (!box) {
           box = document.createElement('div');
           box.classList.add('mapbox-gl-draw_boxselect');
