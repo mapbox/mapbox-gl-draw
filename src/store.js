@@ -1,4 +1,5 @@
 var throttle = require('./lib/throttle');
+var toDenseArray = require('./lib/to_dense_array');
 var SimpleSet = require('./lib/simple_set');
 var render = require('./render');
 
@@ -6,6 +7,8 @@ var Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new SimpleSet();
   this._selectedFeatureIds = new SimpleSet();
+  this._selectedSinceLastFlush = new SimpleSet();
+  this._deselectedSinceLastFlush = new SimpleSet();
   this._changedIds = new SimpleSet();
   this.ctx = ctx;
   this.sources = {
@@ -82,19 +85,20 @@ Store.prototype.add = function(feature) {
  */
 Store.prototype.delete = function(featureIds) {
   var deleted = [];
-  [].concat(featureIds).forEach((id) => {
+  toDenseArray(featureIds).forEach(id => {
     if (!this._featureIds.has(id)) return;
-    var feature = this.get(id);
-    deleted.push(feature.toGeoJSON());
-    // Must deselect the feature as well as delete it
-    this.deselect(id);
+    deleted.push(this.get(id).toGeoJSON());
+
     delete this._features[id];
     this._featureIds.delete(id);
+    this._selectedFeatureIds.delete(id);
+    this._selectedSinceLastFlush.delete(id);
+    this._deselectedSinceLastFlush.delete(id);
   });
 
   if (deleted.length > 0) {
     this.isDirty = true;
-    this.ctx.map.fire('draw.deleted', {featureIds:deleted});
+    this.ctx.map.fire('draw.deleted', { featureIds: deleted });
   }
   return this;
 };
@@ -116,22 +120,32 @@ Store.prototype.getAll = function() {
 };
 
 /**
- * Adds a feature to the current selection.
- * @param {string} featureId
+ * Adds features to the current selection.
+ * @param {string | Array<string>} featureIds
  * @return {Store} this
  */
-Store.prototype.select = function(featureId) {
-  this._selectedFeatureIds.add(featureId);
+Store.prototype.select = function(featureIds) {
+  toDenseArray(featureIds).forEach(id => {
+    if (this._selectedFeatureIds.has(id)) return;
+    this._selectedFeatureIds.add(id);
+    this._selectedSinceLastFlush.add(id);
+    this._deselectedSinceLastFlush.delete(id);
+  });
   return this;
 };
 
 /**
- * Deletes a feature from the current selection.
- * @param {string} featureId
+ * Deletes features from the current selection.
+ * @param {string | Array<string>} featureIds
  * @return {Store} this
  */
-Store.prototype.deselect = function(featureId) {
-  this._selectedFeatureIds.delete(featureId);
+Store.prototype.deselect = function(featureIds) {
+  toDenseArray(featureIds).forEach(id => {
+    if (!this._selectedFeatureIds.has(id)) return;
+    this._selectedFeatureIds.delete(id);
+    this._selectedSinceLastFlush.delete(id);
+    this._deselectedSinceLastFlush.add(id);
+  });
   return this;
 };
 
@@ -140,7 +154,7 @@ Store.prototype.deselect = function(featureId) {
  * @return {Store} this
  */
 Store.prototype.clearSelected = function() {
-  this._selectedFeatureIds.clear();
+  this.deselect(this._selectedFeatureIds.values());
   return this;
 };
 
@@ -151,11 +165,18 @@ Store.prototype.clearSelected = function() {
  * @return {Store} this
  */
 Store.prototype.setSelected = function(featureIds) {
-  this.clearSelected();
-  if (!featureIds) return;
-  [].concat(featureIds).forEach(id => {
-    this.select(id);
-  });
+  featureIds = toDenseArray(featureIds);
+
+  // Deselect any features not in the new selection
+  this.deselect(this._selectedFeatureIds.values().filter(id => {
+    return featureIds.indexOf(id) === -1;
+  }));
+
+  // Select any features in the new selection that were not already selected
+  this.select(featureIds.filter(id => {
+    return !this._selectedFeatureIds.has(id);
+  }));
+
   return this;
 };
 
@@ -170,8 +191,25 @@ Store.prototype.getSelectedIds = function() {
 /**
  * Indicates whether a feature is selected.
  * @param {string} featureId
- * @return {boolean} `true` if the feature is selected, `false` if not
+ * @return {boolean} `true` if the feature is selected, `false` if not.
  */
 Store.prototype.isSelected = function(featureId) {
   return this._selectedFeatureIds.has(featureId);
+};
+
+/**
+ * Get the sets of selected and deselected
+ * feature ids since the last flush, and clear those sets.
+ *
+ * @return {Object} The flushed sets.
+ */
+Store.prototype.flushSelected = function() {
+  const wereSelected = this._selectedSinceLastFlush.values();
+  const wereDeselected = this._deselectedSinceLastFlush.values();
+  this._selectedSinceLastFlush.clear();
+  this._deselectedSinceLastFlush.clear();
+  return {
+    selected: wereSelected,
+    deselected: wereDeselected
+  };
 };

@@ -73,7 +73,7 @@ console.log(Draw.get(id));
 ```
 
 ---
-### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]
+### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]`
 
 This method takes an x and y from pixel space and returns a list of
 features currently rendered by draws at that spot.
@@ -85,6 +85,10 @@ var featureIds = Draw.getFeatureIdsAt(20, 20);
 console.log(featureIds)
 //=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
+---
+### `.getSelectedIds() -> [featureId, featuresId]`
+
+This method returns the feature ids for all features currently in a selected state. If no features are currently selected than it will return an empty array.
 
 ---
 ###`.getAll() -> Object`
@@ -242,13 +246,35 @@ This is fired when feature coordinates are changed, and there is a mouse click a
 }
 ```
 
-### draw.mode.simple_select.selected.start
+### draw.select
 
-This is fired every time a feature is selected in the default mode. The payload is an array of feature ids being selected. This is **NOT** fired when the mode starts as this information is in the `draw.modechange` event.
+Fired when a feature is selected. The payload is the GeoJSON of the feature that was selected.
 
-### draw.mode.simple_select.selected.end
+The `select` event will fire in the following contexts:
 
-This is fired every time a feature is unselected in the default mode. The payload is an array of feature ids being unselected. This is **NOT** fired when the mode stops, as this can be assumed via the `draw.modechange` event.
+- When a new feature is created (because it is selected on creation).
+- When a feature is added to an existing selection with `shift+click`.
+- When a feature is included within a box selection.
+
+```js
+{
+  "features": [{ ... }]
+}
+```
+
+### draw.deselect
+
+Fired when a feature is deselected. The payload is the GeoJSON of the feature that was deselected.
+
+The `deselect` event will fire when there is a click outside a selected feature, whether that click is on no features or on another feature (without using `shift+click` to add something else to the existing selection).
+
+(The event does not fire when a feature is delete.)
+
+```js
+{
+  "features": [{ ... }]
+}
+```
 
 ## Styling Draw
 

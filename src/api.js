@@ -20,6 +20,9 @@ module.exports = function(ctx) {
       var features = featuresAt({point: {x, y}}, null, ctx);
       return features.map(feature => feature.properties.id);
     },
+    getSelectedIds: function () {
+      return ctx.store.getSelectedIds();
+    },
     add: function (geojson, validateGeoJSON=true) {
        if (geojson.type !== 'FeatureCollection' && !geojson.geometry) {
         geojson = {
