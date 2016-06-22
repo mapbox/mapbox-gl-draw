@@ -1,4 +1,4 @@
-## Head
+## 0.10.0
 
 - Add `draw.select` and `draw.deselect`, replacing `draw.mode.simple_select.selected.*` events.
 - Add `Draw.getSelectedIds()`.
