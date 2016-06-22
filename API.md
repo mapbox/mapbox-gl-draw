@@ -268,7 +268,7 @@ Fired when a feature is deselected. The payload is the GeoJSON of the feature th
 
 The `deselect` event will fire when there is a click outside a selected feature, whether that click is on no features or on another feature (without using `shift+click` to add something else to the existing selection).
 
-(The event does not fire when a feature is delete.)
+(The event does not fire when a feature is deleted.)
 
 ```js
 {

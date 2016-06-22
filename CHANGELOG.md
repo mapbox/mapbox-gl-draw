@@ -1,3 +1,8 @@
+## Head
+
+- Add `draw.select` and `draw.deselect`, replacing `draw.mode.simple_select.selected.*` events.
+- Add `Draw.getSelectedIds()`.
+
 ## 0.9.2
 
 - Fixes bug with `draw.modified` and point creation
