@@ -5,6 +5,8 @@ import GLDraw from '../';
 import { click, accessToken, createMap, features } from './test_utils';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import stub from 'sinon/lib/sinon/stub'; // avoid babel-register-related error by importing only stub
+import AfterNextRender from './utils/after_next_render';
+import makeMouseEvent from './utils/make_mouse_event';
 
 mapboxgl.accessToken = accessToken;
 
@@ -18,9 +20,7 @@ spy(map, 'fire');
 var Draw = GLDraw();
 map.addControl(Draw);
 
-var afterNextRender = function(cb) {
-  setTimeout(cb, 32);
-}
+var afterNextRender = AfterNextRender(map);
 
 var cleanUp = function(cb) {
   Draw.deleteAll();
@@ -36,23 +36,23 @@ var getFireArgs = function() {
   return args;
 }
 
-var makeMouseEvent = function(lng, lat, shiftKey = false) {
-  var e = {
-    originalEvent: {
-      shiftKey: shiftKey,
-      stopPropagation: function() {},
-      button: 0,
-      clientX: lng,
-      clientY: lat
-    },
-    point: {x: lng, y:lat},
-    lngLat: {lng: lng, lat: lat}
-  };
+// var makeMouseEvent = function(lng, lat, shiftKey = false) {
+//   var e = {
+//     originalEvent: {
+//       shiftKey: shiftKey,
+//       stopPropagation: function() {},
+//       button: 0,
+//       clientX: lng,
+//       clientY: lat
+//     },
+//     point: {x: lng, y:lat},
+//     lngLat: {lng: lng, lat: lat}
+//   };
 
-  e.featureTarget = Draw.getFeatureIdsAt(lng, lat)[0];
+//   e.featureTarget = Draw.getFeatureIdsAt(lng, lat)[0];
 
-  return e;
-}
+//   return e;
+// }
 
 test('simple_select - setup', t => {
   var donedone = false;
