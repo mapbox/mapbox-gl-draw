@@ -63,12 +63,6 @@ module.exports = function(ctx, startingSelectedIds) {
     numFeatures = featureIds.length;
   };
 
-  var directSelect = function(e) {
-    ctx.api.changeMode('direct_select', {
-      featureId: e.featureTarget.properties.id
-    });
-  };
-
   return {
     stop: function() {
       ctx.map.doubleClickZoom.enable();
@@ -118,9 +112,10 @@ module.exports = function(ctx, startingSelectedIds) {
         ctx.map.doubleClickZoom.disable();
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
-        if (ctx.store.isSelected(id) && !isShiftDown(e)) {
-          this.on('click', readyForDirectSelect, directSelect);
-          ctx.ui.queueMapClasses({mouse:'pointer'});
+        if (readyForDirectSelect(e) && !isShiftDown(e)) {
+          ctx.api.changeMode('direct_select', {
+            featureId: e.featureTarget.properties.id
+          });
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
@@ -181,7 +176,6 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('drag', () => dragging, function(e) {
-        this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
 
         if (featureCoords === null) {

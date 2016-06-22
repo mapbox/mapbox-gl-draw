@@ -79,11 +79,11 @@ export const features = {
   },
 
   polygon: {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[[1, 1], [2, 2], [4, 3], [2, 4], [1, 1]]]
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
     }
   },
 
