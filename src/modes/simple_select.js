@@ -69,6 +69,10 @@ module.exports = function(ctx, startingSelectedIds) {
     });
   };
 
+  var emitModify = function() {
+    ctx.map.fire('draw.modified', { features });
+  };
+
   return {
     stop: function() {
       ctx.map.doubleClickZoom.enable();
@@ -168,6 +172,7 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('mouseup', () => true, function(e) {
+        if (dragging) emitModify();
         dragging = false;
         featureCoords = null;
         features = null;
