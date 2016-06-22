@@ -36,24 +36,6 @@ var getFireArgs = function() {
   return args;
 }
 
-// var makeMouseEvent = function(lng, lat, shiftKey = false) {
-//   var e = {
-//     originalEvent: {
-//       shiftKey: shiftKey,
-//       stopPropagation: function() {},
-//       button: 0,
-//       clientX: lng,
-//       clientY: lat
-//     },
-//     point: {x: lng, y:lat},
-//     lngLat: {lng: lng, lat: lat}
-//   };
-
-//   e.featureTarget = Draw.getFeatureIdsAt(lng, lat)[0];
-
-//   return e;
-// }
-
 test('simple_select - setup', t => {
   var donedone = false;
   var done = function() {
@@ -82,7 +64,7 @@ test('simple_select box select', t => {
     map.fire('mouseup', makeMouseEvent(15, 15, true));
 
     afterNextRender(() => {
-      var args = getFireArgs().filter(arg => arg[0] === 'draw.simple_select.selected.start');
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.select');
       t.equal(args.length, 1, 'should have one and only one selected start event');
       if (args.length > 0) {
         t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
@@ -103,7 +85,7 @@ test('simple_select - unselect', t => {
     map.fire('mouseup', makeMouseEvent(15, 15));
 
     afterNextRender(() => {
-      var args = getFireArgs().filter(arg => arg[0] === 'draw.simple_select.selected.end');
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.deselect');
       t.equal(args.length, 1, 'should have one and only one selected end event');
       if (args.length > 0) {
         t.equal(args[0][1].featureIds.length, 1, 'should unselect only one feautre');
@@ -125,7 +107,7 @@ test('simple_select - click on an unselected feature', t => {
 
     afterNextRender(() => {
       var args = getFireArgs();
-      args = args.filter(arg => arg[0] === 'draw.simple_select.selected.start');
+      args = args.filter(arg => arg[0] === 'draw.select');
       t.equal(args.length, 1, 'should have one and only one selected start event');
       if (args.length > 0) {
         t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
@@ -136,25 +118,25 @@ test('simple_select - click on an unselected feature', t => {
   });
 });
 
-// test('simple_select - click on an selected feature with shift down', t => {
-//   var id = Draw.add(features.polygon);
-//   Draw.changeMode('simple_select', [id]);
-//   map.fire.reset();
+test('simple_select - click on an selected feature with shift down', t => {
+  var id = Draw.add(features.polygon);
+  Draw.changeMode('simple_select', [id]);
 
-//   afterNextRender(() => {
-//     map.fire('mousedown', makeMouseEvent(3, 3, true));
-//     map.fire('mouseup', makeMouseEvent(3, 3, true));
+  afterNextRender(() => {
+    map.fire.reset();
+    map.fire('mousedown', makeMouseEvent(3, 3, true));
+    map.fire('mouseup', makeMouseEvent(3, 3, true));
 
-//     afterNextRender(() => {
-//       var args = getFireArgs();
-//       console.log(args);
-//       // args = args.filter(arg => arg[0] === 'draw.simple_select.selected.end');
-//       // t.equal(args.length, 1, 'should have one and only one selected end event');
-//       // if (args.length > 0) {
-//       //   t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-//       //   t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
-//       // }
-//       cleanUp(() => t.end());
-//     });
-//   });
-// });
+    afterNextRender(() => {
+      var args = getFireArgs();
+      console.log(args);
+      // args = args.filter(arg => arg[0] === 'draw.deselect');
+      // t.equal(args.length, 1, 'should have one and only one selected end event');
+      // if (args.length > 0) {
+      //   t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
+      //   t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+      // }
+      cleanUp(() => t.end());
+    });
+  });
+});
