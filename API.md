@@ -73,7 +73,7 @@ console.log(Draw.get(id));
 ```
 
 ---
-### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]
+### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]`
 
 This method takes an x and y from pixel space and returns a list of
 features currently rendered by draws at that spot.
@@ -85,6 +85,10 @@ var featureIds = Draw.getFeatureIdsAt(20, 20);
 console.log(featureIds)
 //=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
+---
+### `.getSelectedIds() -> [featureId, featuresId]`
+
+This method returns the feature ids for all features currently in a selected state. If no features are currently selected than it will return an empty array.
 
 ---
 ###`.getAll() -> Object`
