@@ -263,3 +263,9 @@ test('commonSelectors.isEnterKey', t => {
 
   t.end();
 });
+
+test('commonSelectors.true', t => {
+  t.ok(commonSelectors.true());
+  t.ok(commonSelectors.true(false));
+  t.end();
+});

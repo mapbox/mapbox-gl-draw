@@ -2,7 +2,7 @@ module.exports = function render() {
   var mapExists = this.ctx.map && this.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
   if (mapExists) {
     var mode = this.ctx.events.currentModeName();
-    this.ctx.ui.setClass({
+    this.ctx.ui.queueContainerClasses({
       mode: mode
     });
 

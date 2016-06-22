@@ -1,169 +1,164 @@
-const types = require('./lib/types');
-const createControlButton = require('./lib/create_control_button');
+const Constants = require('./constants');
+
+const classTypes = ['mode', 'feature', 'mouse'];
 
 module.exports = function(ctx) {
 
-  var buttons = {};
+  const buttonElements = {};
+  let activeButton = null;
 
-  var currentClass = {
+  const currentContainerClasses = {
+    mode: null, // e.g. mode-direct_select
+    feature: null, // e.g. feature-vertex
+    mouse: null // e.g. mouse-move
+  };
+
+  const nextContainerClasses = {
     mode: null,
     feature: null,
     mouse: null
   };
 
-  var nextClass = {
-    mode: null,
-    feature: null,
-    mouse: null
-  };
+  function queueContainerClasses(options) {
+    Object.assign(nextContainerClasses, options);
+  }
 
-  var classTypes = ['mode', 'feature', 'mouse'];
+  function updateContainerClasses() {
+    if (!ctx.container) return;
 
-  let update = () => {
-    if (ctx.container) {
+    const classesToRemove = [];
+    const classesToAdd = [];
 
-      var remove = [];
-      var add = [];
+    classTypes.forEach(function(type) {
+      if (nextContainerClasses[type] === currentContainerClasses[type]) return;
 
-      var className = [];
+      classesToRemove.push(`${type}-${currentContainerClasses[type]}`);
+      if (nextContainerClasses[type] !== null) {
+        classesToAdd.push(`${type}-${nextContainerClasses[type]}`);
+      }
+    });
 
-      nextClass.feature = nextClass.mouse === 'none' ? null : nextClass.feature;
+    ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
+    ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
 
-      classTypes.forEach(function(type) {
-        className.push(type + '-' + nextClass[type]);
-        if (nextClass[type] !== currentClass[type]) {
-          remove.push(type + '-' + currentClass[type]);
-          if (nextClass[type] !== null) {
-            add.push(type + '-' + nextClass[type]);
-          }
-        }
-      });
-      if (remove.length) {
-        ctx.container.classList.remove.apply(ctx.container.classList, remove);
-        ctx.container.classList.add.apply(ctx.container.classList, add);
+    Object.assign(currentContainerClasses, nextContainerClasses);
+  }
+
+  function createControlButton(id, options = {}) {
+    const button = document.createElement('button');
+    button.className = `${Constants.CONTROL_BUTTON_CLASS} ${options.className}`;
+    button.setAttribute('title', options.title);
+    options.container.appendChild(button);
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const clickedButton = e.target;
+      if (clickedButton === activeButton) {
+        deactivateButtons();
+        return;
       }
 
-      classTypes.forEach(type => {
-        currentClass[type] = nextClass[type];
+      setActiveButton(id);
+      options.onActivate();
+    }, true);
+
+    return button;
+  }
+
+  function deactivateButtons() {
+    if (!activeButton) return;
+    activeButton.classList.remove(Constants.ACTIVE_BUTTON_CLASS);
+    activeButton = null;
+  }
+
+  function setActiveButton(id) {
+    deactivateButtons();
+
+    const button = buttonElements[id];
+    if (!button) return;
+
+    if (button && id !== 'trash') {
+      button.classList.add('active');
+      activeButton = button;
+    }
+  }
+
+  function addButtons() {
+    const controls = ctx.options.controls;
+    if (!controls) return;
+
+    const ctrlPosClassName = `mapboxgl-ctrl-${ctx.options.position || 'top-left'}`;
+    const controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
+    let controlGroup = controlContainer.getElementsByClassName(Constants.CONTROL_GROUP_CLASS)[0];
+
+    if (!controlGroup) {
+      controlGroup = document.createElement('div');
+      controlGroup.className = `${Constants.CONTROL_GROUP_CLASS} mapboxgl-ctrl`;
+
+      const attributionControl = controlContainer.getElementsByClassName(Constants.ATTRIBUTION_CLASS)[0];
+      if (attributionControl) {
+        controlContainer.insertBefore(controlGroup, attributionControl);
+      } else {
+        controlContainer.appendChild(controlGroup);
+      }
+    }
+
+    if (controls[Constants.types.LINE]) {
+      buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
+        container: controlGroup,
+        className: Constants.CONTROL_BUTTON_LINE_CLASS,
+        title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
+        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_LINE)
       });
     }
+
+    if (controls[Constants.types.POLYGON]) {
+      buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
+        container: controlGroup,
+        className: Constants.CONTROL_BUTTON_POLYGON_CLASS,
+        title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
+        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_POLYGON)
+      });
+    }
+
+    if (controls[Constants.types.POINT]) {
+      buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
+        container: controlGroup,
+        className: Constants.CONTROL_BUTTON_POINT_CLASS,
+        title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
+        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_POINT)
+      });
+    }
+
+    if (controls.trash) {
+      buttonElements.trash = createControlButton('trash', {
+        container: controlGroup,
+        className: Constants.CONTROL_BUTTON_TRASH_CLASS,
+        title: 'Delete',
+        onActivate: () => {
+          ctx.api.trash();
+        }
+      });
+    }
+  }
+
+  function removeButtons() {
+    Object.keys(buttonElements).forEach(buttonId => {
+      const button = buttonElements[buttonId];
+      if (button.parentNode) {
+        button.parentNode.removeChild(button);
+      }
+      delete buttonElements[buttonId];
+    });
+  }
+
+  return {
+    setActiveButton,
+    queueContainerClasses,
+    updateContainerClasses,
+    addButtons,
+    removeButtons
   };
-
-  ctx.ui = {
-    setClass: function(opts) {
-        classTypes.forEach(type => {
-        if (opts[type]) {
-          nextClass[type] = opts[type];
-        }
-      });
-    },
-    fireClassUpdate: function() {
-      var equal = Object.keys(nextClass).some(k => {
-        return currentClass[k] !== nextClass[k];
-      });
-
-      if (equal) {
-        update();
-      }
-    },
-    addButtons: function() {
-      var controls = ctx.options.controls;
-      var ctrlPos = 'mapboxgl-ctrl-';
-        switch (ctx.options.position) {
-          case 'top-left':
-          case 'top-right':
-          case 'bottom-left':
-          case 'bottom-right':
-            ctrlPos += ctx.options.position;
-            break;
-          default:
-            ctrlPos += 'top-left';
-        }
-
-        let controlContainer = ctx.container.getElementsByClassName(ctrlPos)[0];
-        let controlGroup = controlContainer.getElementsByClassName('mapboxgl-ctrl-group')[0];
-        if (!controlGroup) {
-          controlGroup = document.createElement('div');
-          controlGroup.className = 'mapboxgl-ctrl-group mapboxgl-ctrl';
-
-          let attributionControl = controlContainer.getElementsByClassName('mapboxgl-ctrl-attrib')[0];
-          if (attributionControl) {
-            controlContainer.insertBefore(controlGroup, attributionControl);
-          }
-          else {
-            controlContainer.appendChild(controlGroup);
-          }
-        }
-
-        if (controls[types.LINE]) {
-          buttons[types.LINE] = createControlButton({
-            container: controlGroup,
-            className: 'mapbox-gl-draw_line',
-            title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-            onActivate: () => ctx.api.changeMode('draw_line_string')
-          });
-        }
-
-        if (controls[types.POLYGON]) {
-          buttons[types.POLYGON] = createControlButton({
-            container: controlGroup,
-            className: 'mapbox-gl-draw_polygon',
-            title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
-            onActivate: () => ctx.api.changeMode('draw_polygon')
-          });
-        }
-
-        if (controls[types.POINT]) {
-          buttons[types.POINT] = createControlButton({
-            container: controlGroup,
-            className: 'mapbox-gl-draw_point',
-            title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
-            onActivate: () => ctx.api.changeMode('draw_point')
-          });
-        }
-
-        if (controls.trash) {
-          buttons.trash = createControlButton({
-            container: controlGroup,
-            className: 'mapbox-gl-draw_trash',
-            title: 'Delete',
-            onActivate: () => {
-              ctx.api.trash();
-              ctx.ui.setButtonInactive('trash');
-            }
-          });
-        }
-      },
-      setButtonActive: function(id) {
-        if (buttons[id] && id !== 'trash') {
-            buttons[id].classList.add('active');
-        }
-      },
-      setButtonInactive: function(id) {
-        if (buttons[id]) {
-          buttons[id].classList.remove('active');
-        }
-      },
-      setAllInactive: function() {
-        var buttonIds = Object.keys(buttons);
-
-        buttonIds.forEach(buttonId => {
-          if (buttonId !== 'trash') {
-            var button = buttons[buttonId];
-            button.classList.remove('active');
-          }
-        });
-      },
-      removeButtons: function() {
-        var buttonIds = Object.keys(buttons);
-
-        buttonIds.forEach(buttonId => {
-          var button = buttons[buttonId];
-          if (button.parentNode) {
-            button.parentNode.removeChild(button);
-          }
-          buttons[buttonId] = null;
-        });
-      }
-    };
 };

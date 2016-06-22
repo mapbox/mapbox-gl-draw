@@ -2,10 +2,10 @@ import mapboxgl from 'mapbox-gl-js-mock';
 import hat from 'hat';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
-export function createMap() {
+export function createMap(container = 'map') {
 
   var map = new mapboxgl.Map({
-    container: 'map',
+    container,
     style: 'mapbox://styles/mapbox/streets-v8'
   });
   // Some mock project/unproject functions

@@ -44,7 +44,7 @@ module.exports = function(ctx) {
       event.originalEvent.stopPropagation();
     }
     else {
-      ctx.ui.setClass({mouse: 'drag'});
+      ctx.ui.queueContainerClasses({mouse: 'drag'});
       currentMode.drag(event);
     }
   };
