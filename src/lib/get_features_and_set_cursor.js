@@ -13,7 +13,7 @@ module.exports = function getFeatureAtAndSetCursors(event, ctx) {
     classes.mouse = 'add';
   }
 
-  ctx.ui.queueContainerClasses(classes);
+  ctx.ui.queueMapClasses(classes);
 
   return features[0];
 };

@@ -7,41 +7,41 @@ module.exports = function(ctx) {
   const buttonElements = {};
   let activeButton = null;
 
-  const currentContainerClasses = {
+  const currentMapClasses = {
     mode: null, // e.g. mode-direct_select
     feature: null, // e.g. feature-vertex
     mouse: null // e.g. mouse-move
   };
 
-  const nextContainerClasses = {
+  const nextMapClasses = {
     mode: null,
     feature: null,
     mouse: null
   };
 
-  function queueContainerClasses(options) {
-    Object.assign(nextContainerClasses, options);
+  function queueMapClasses(options) {
+    Object.assign(nextMapClasses, options);
   }
 
-  function updateContainerClasses() {
+  function updateMapClasses() {
     if (!ctx.container) return;
 
     const classesToRemove = [];
     const classesToAdd = [];
 
     classTypes.forEach(function(type) {
-      if (nextContainerClasses[type] === currentContainerClasses[type]) return;
+      if (nextMapClasses[type] === currentMapClasses[type]) return;
 
-      classesToRemove.push(`${type}-${currentContainerClasses[type]}`);
-      if (nextContainerClasses[type] !== null) {
-        classesToAdd.push(`${type}-${nextContainerClasses[type]}`);
+      classesToRemove.push(`${type}-${currentMapClasses[type]}`);
+      if (nextMapClasses[type] !== null) {
+        classesToAdd.push(`${type}-${nextMapClasses[type]}`);
       }
     });
 
     ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
     ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
 
-    Object.assign(currentContainerClasses, nextContainerClasses);
+    Object.assign(currentMapClasses, nextMapClasses);
   }
 
   function createControlButton(id, options = {}) {
@@ -156,8 +156,8 @@ module.exports = function(ctx) {
   return {
     setButtonActive,
     deactivateButtons,
-    queueContainerClasses,
-    updateContainerClasses,
+    queueMapClasses,
+    updateMapClasses,
     addButtons,
     removeButtons
   };

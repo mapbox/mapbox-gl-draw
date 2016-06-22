@@ -45,12 +45,12 @@ test('ui container classes', t => {
   // Each sub-test relies on state from the prior sub-tests
 
   t.test('update all classes', st => {
-    testUi.queueContainerClasses({
+    testUi.queueMapClasses({
       mode: 'direct_select',
       feature: 'vertex',
       mouse: 'move'
     });
-    testUi.updateContainerClasses();
+    testUi.updateMapClasses();
     st.ok(context.container.classList.contains('mode-direct_select'), 'mode class set');
     st.ok(context.container.classList.contains('feature-vertex'), 'feature class set');
     st.ok(context.container.classList.contains('mouse-move'), 'mouse class set');
@@ -58,10 +58,10 @@ test('ui container classes', t => {
   });
 
   t.test('update only feature class', st => {
-    testUi.queueContainerClasses({
+    testUi.queueMapClasses({
       feature: 'midpoint'
     });
-    testUi.updateContainerClasses();
+    testUi.updateMapClasses();
     st.ok(context.container.classList.contains('mode-direct_select'), 'mode class remains');
     st.ok(context.container.classList.contains('feature-midpoint'), 'feature class updated');
     st.ok(context.container.classList.contains('mouse-move'), 'mouse class remains');
@@ -69,11 +69,11 @@ test('ui container classes', t => {
   });
 
   t.test('update mode and mouse classes', st => {
-    testUi.queueContainerClasses({
+    testUi.queueMapClasses({
       mode: 'foo',
       mouse: 'bar'
     });
-    testUi.updateContainerClasses();
+    testUi.updateMapClasses();
     st.ok(context.container.classList.contains('mode-foo'), 'mode class updated');
     st.ok(context.container.classList.contains('feature-midpoint'), 'feature class remains');
     st.ok(context.container.classList.contains('mouse-bar'), 'mouse class updated');
@@ -81,10 +81,10 @@ test('ui container classes', t => {
   });
 
   t.test('remove only feature class', st => {
-    testUi.queueContainerClasses({
+    testUi.queueMapClasses({
       feature: null
     });
-    testUi.updateContainerClasses();
+    testUi.updateMapClasses();
     st.ok(context.container.classList.contains('mode-foo'), 'mode class remains');
     st.ok(context.container.className.indexOf('feature-') === -1, 'feature class removed');
     st.ok(context.container.classList.contains('mouse-bar'), 'mouse class remains');
@@ -92,12 +92,12 @@ test('ui container classes', t => {
   });
 
   t.test('remove all classes', st => {
-    testUi.queueContainerClasses({
+    testUi.queueMapClasses({
       feature: null,
       mode: null,
       mouse: null
     });
-    testUi.updateContainerClasses();
+    testUi.updateMapClasses();
     st.ok(context.container.className.indexOf('mode-') === -1, 'mode class removed');
     st.ok(context.container.className.indexOf('feature-') === -1, 'feature class still gone');
     st.ok(context.container.className.indexOf('mouse-') === -1, 'mouse class removed');

@@ -27,7 +27,7 @@ module.exports = function(ctx) {
   };
 
   var onClick = function(e) {
-    ctx.ui.queueContainerClasses({mouse:'add'});
+    ctx.ui.queueMapClasses({mouse:'add'});
      if (pos > 0 && feature.coordinates[0][0] === e.lngLat.lng && feature.coordinates[0][1] === e.lngLat.lat) {
       // did we click on the first point
       onFinish();
@@ -58,7 +58,7 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.disable();
         }
       });
-      ctx.ui.queueContainerClasses({mouse:'add'});
+      ctx.ui.queueMapClasses({mouse:'add'});
       ctx.ui.setButtonActive(Constants.types.LINE);
       this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);

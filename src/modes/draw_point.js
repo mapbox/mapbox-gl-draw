@@ -22,7 +22,7 @@ module.exports = function(ctx) {
 
   var done = false;
   var onClick = function(e) {
-    ctx.ui.queueContainerClasses({mouse:'move'});
+    ctx.ui.queueMapClasses({mouse:'move'});
     done = true;
     feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
     ctx.events.changeMode('simple_select', [feature.id]);
@@ -31,7 +31,7 @@ module.exports = function(ctx) {
   return {
     start: function() {
       ctx.store.clearSelected();
-      ctx.ui.queueContainerClasses({mouse:'add'});
+      ctx.ui.queueMapClasses({mouse:'add'});
       ctx.ui.setButtonActive(Constants.types.POINT);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
