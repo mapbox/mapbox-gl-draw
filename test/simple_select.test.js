@@ -75,6 +75,44 @@ test('simple_select box select', t => {
   });
 });
 
+test('simple_select - box select over 1001 points', t => {
+
+  for(var i=0; i<1001; i++) {
+    Draw.add(features.point);
+  }
+  map.fire.reset();
+
+  afterNextRender(() => {
+    map.fire('mousedown', makeMouseEvent(0, 0, true));
+    map.fire('mousemove', makeMouseEvent(7, 7, true));
+    map.fire('mousemove', makeMouseEvent(15, 15, true));
+    map.fire('mouseup', makeMouseEvent(15, 15, true));
+
+    afterNextRender(() => {
+      t.equal(getFireArgs().filter(arg => arg[0] === 'draw.select').length, 0, 'there should be no draw.select event');
+      cleanUp(() => t.end());
+    });
+  });
+});
+
+test('simple_select - box select over no points', t => {
+
+  Draw.add(features.point);
+  map.fire.reset();
+
+  afterNextRender(() => {
+    map.fire('mousedown', makeMouseEvent(0, 0, true));
+    map.fire('mousemove', makeMouseEvent(-7, -7, true));
+    map.fire('mousemove', makeMouseEvent(-15, -15, true));
+    map.fire('mouseup', makeMouseEvent(-15, -15, true));
+
+    afterNextRender(() => {
+      t.equal(getFireArgs().filter(arg => arg[0] === 'draw.select').length, 0, 'there should be no draw.select event');
+      cleanUp(() => t.end());
+    });
+  });
+});
+
 test('simple_select - unselect', t => {
   var id = Draw.add(features.point);
   Draw.changeMode('simple_select', [id]);
@@ -138,6 +176,22 @@ test('simple_select - click on an selected feature with shift down', t => {
       cleanUp(() => t.end());
     });
   });
+});
+
+test('simple_select - delete selected features', t => {
+  var id = Draw.add(features.polygon);
+  Draw.changeMode('simple_select', [id]);
+  map.fire.reset();
+  Draw.trash();
+  var args = getFireArgs();
+  t.equal(args.length, 1, 'should have one and only one event');
+  t.equal(args[0][0], 'draw.deleted');
+  t.equal(args[0][1].featureIds.length, 1, 'should delete only one feautre');
+  t.equal(args[0][1].featureIds[0].id, id, 'should delete the feature we expect it to delete');
+
+  var selectedFeatures = Draw.getSelectedIds();
+  t.equal(selectedFeatures.length, 0, 'nothing should be selected anymore');
+  cleanUp(() => t.end());
 });
 
 test('simple_select - click on an selected feature with shift up to enter direct_select', t => {
@@ -238,10 +292,18 @@ test('simple_select - click on an unselected feature with shift up, while having
 
 test('simple_select - drag a point', t => {
   var pointId = Draw.add(features.point);
+  var multiPointId = Draw.add(features.multiPoint);
+  var lineStringId = Draw.add(features.line);
+  var multiLineStringId = Draw.add(features.multiLineString);
   var polygonId = Draw.add(features.polygon);
+  var multiPolygonId = Draw.add(features.multiPolygon);
+
+  var countPositions = function(feature) {
+    return feature.geometry.coordinates.join(',').split(',').length;
+  }
 
   var startPosition = features.point.geometry.coordinates;
-  Draw.changeMode('simple_select', [pointId, polygonId]);
+  Draw.changeMode('simple_select', [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]);
   afterNextRender(() => {
     map.fire.reset();
     map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
@@ -253,10 +315,33 @@ test('simple_select - drag a point', t => {
     var movedPoint = Draw.get(pointId);
     t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 25, 'point lng moved');
     t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 25, 'point lat moved');
+    t.equal(countPositions(movedPoint), countPositions(features.point), 'point has same number of postions');
+
+    var movedMultiPoint = Draw.get(multiPointId);
+    t.equal(movedMultiPoint.geometry.coordinates[0][0], features.multiPoint.geometry.coordinates[0][0] + 25, 'multipoint lng moved');
+    t.equal(movedMultiPoint.geometry.coordinates[0][1], features.multiPoint.geometry.coordinates[0][1] + 25, 'multipoint lat moved');
+    t.equal(countPositions(movedMultiPoint), countPositions(features.multiPoint), 'multiPoint has same number of postions');
+
+    var movedLineString = Draw.get(lineStringId);
+    t.equal(movedLineString.geometry.coordinates[0][0], features.line.geometry.coordinates[0][0] + 25, 'line lng moved');
+    t.equal(movedLineString.geometry.coordinates[0][1], features.line.geometry.coordinates[0][1] + 25, 'line lat moved');
+    t.equal(countPositions(movedLineString), countPositions(features.line), 'line has same number of postions');
+
+    var movedMultiLineString =Draw.get(multiLineStringId);
+    t.equal(movedMultiLineString.geometry.coordinates[0][0][0], features.multiLineString.geometry.coordinates[0][0][0] + 25, 'multiLineString lng moved');
+    t.equal(movedMultiLineString.geometry.coordinates[0][0][1], features.multiLineString.geometry.coordinates[0][0][1] + 25, 'multiLineString lat moved');
+    t.equal(countPositions(movedMultiLineString), countPositions(features.multiLineString), 'multiLineString has same number of postions');
 
     var movedPolygon =Draw.get(polygonId);
     t.equal(movedPolygon.geometry.coordinates[0][0][0], features.polygon.geometry.coordinates[0][0][0] + 25, 'polygon lng moved');
     t.equal(movedPolygon.geometry.coordinates[0][0][1], features.polygon.geometry.coordinates[0][0][1] + 25, 'polygon lat moved');
+    t.equal(countPositions(movedPolygon), countPositions(features.polygon), 'polygon has same number of postions');
+
+    var movedMultiPolygon =Draw.get(multiPolygonId);
+    t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][0], features.multiPolygon.geometry.coordinates[0][0][0][0] + 25, 'multiPolygon lng moved');
+    t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], features.multiPolygon.geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
+    t.equal(countPositions(movedMultiPolygon), countPositions(features.multiPolygon), 'multiPolygon has same number of postions');
+
     t.end();
   });
 });

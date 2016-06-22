@@ -2,6 +2,7 @@ var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFe
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
+var SimpleSet = require('../lib/simple_set')
 
 module.exports = function(ctx, startingSelectedIds) {
   var startPos = null;
@@ -15,9 +16,14 @@ module.exports = function(ctx, startingSelectedIds) {
 
   function getUniqueIds(allFeatures) {
     if (!allFeatures.length) return [];
-    return allFeatures.map(s => s.properties.id).filter(function(item, pos, ary) {
-      return item && (!pos || item !== ary[pos - 1]);
-    });
+    var ids = allFeatures.map(s => s.properties.id)
+      .filter(id => id !== undefined)
+      .reduce((memo, id) => {
+        memo.add(id);
+        return memo;
+      }, new SimpleSet())
+
+    return ids.values();
   }
 
   var finishBoxSelect = function(bbox, context) {
@@ -48,17 +54,13 @@ module.exports = function(ctx, startingSelectedIds) {
   };
 
   var readyForDirectSelect = function(e) {
-    if (isFeature(e)) {
-      var about = e.featureTarget.properties;
-      return ctx.store.isSelected(about.id)
-        && ctx.store.get(about.id).type !== 'Point';
-    }
-    return false;
+    var about = e.featureTarget.properties;
+    return ctx.store.isSelected(about.id) && ctx.store.get(about.id).type !== 'Point';
   };
 
   var buildFeatureCoords = function() {
     var featureIds = ctx.store.getSelectedIds();
-    featureCoords = featureIds.map(id => ctx.store.get(id).coordinates);
+    featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
     features = featureIds.map(id => ctx.store.get(id));
     numFeatures = featureIds.length;
   };
@@ -192,16 +194,16 @@ module.exports = function(ctx, startingSelectedIds) {
         for (var i = 0; i < numFeatures; i++) {
           var feature = features[i];
           if (feature.type === 'Point') {
-            feature.setCoordinates(coordMap(featureCoords[i]));
+            feature.incomingCoords(coordMap(featureCoords[i]));
           }
           else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
-            feature.setCoordinates(featureCoords[i].map(coordMap));
+            feature.incomingCoords(featureCoords[i].map(coordMap));
           }
           else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
-            feature.setCoordinates(featureCoords[i].map(ringMap));
+            feature.incomingCoords(featureCoords[i].map(ringMap));
           }
           else if (feature.type === 'MultiPolygon') {
-            feature.setCoordinates(featureCoords[i].map(mutliMap));
+            feature.incomingCoords(featureCoords[i].map(mutliMap));
           }
         }
       });

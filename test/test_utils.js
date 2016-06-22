@@ -60,6 +60,24 @@ export const features = {
     }
   },
 
+  multiLineString: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiLineString',
+      coordinates: [[[20, 20], [21, 21], [22, 22]], [[30, 30], [31, 31], [32, 32]]]
+    }
+  },
+
+  multiPoint: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiPoint',
+      coordinates: [[-5, -5], [-10, -10]]
+    }
+  },
+
   point: {
     type: 'Feature',
     properties: {},
