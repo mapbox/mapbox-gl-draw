@@ -5,6 +5,7 @@ module.exports = {
   CONTROL_BUTTON_POINT_CLASS: 'mapbox-gl-draw_point',
   CONTROL_BUTTON_TRASH_CLASS: 'mapbox-gl-draw_trash',
   CONTROL_GROUP_CLASS: 'mapboxgl-ctrl-group',
+  MOUSE_ADD_CLASS_FRAGMENT: 'add',
   ATTRIBUTION_CLASS: 'mapboxgl-ctrl-attrib',
   ACTIVE_BUTTON_CLASS: 'active',
   types: {
@@ -15,6 +16,7 @@ module.exports = {
   modes: {
     DRAW_LINE: 'draw_line_string',
     DRAW_POLYGON: 'draw_polygon',
-    DRAW_POINT: 'draw_point'
+    DRAW_POINT: 'draw_point',
+    SIMPLE_SELECT: 'simple_select'
   }
 };

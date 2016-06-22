@@ -1,54 +1,50 @@
-var {isEnterKey, isEscapeKey} = require('../lib/common_selectors');
-var LineString = require('../feature_types/line_string');
+const CommonSelectors = require('../lib/common_selectors');
+const LineString = require('../feature_types/line_string');
+const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const Constants = require('../constants');
 
 module.exports = function(ctx) {
-
-  var feature = new LineString(ctx, {
-    'type': 'Feature',
-    'properties': {},
-    'geometry': {
-      'type': 'LineString',
-      'coordinates': []
+  const line = new LineString(ctx, {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: []
     }
   });
+  let currentVertexPosition = 0;
 
-  ctx.store.add(feature);
+  if (ctx._test) ctx._test.line = line;
 
-  var stopDrawingAndRemove = function() {
-    ctx.events.changeMode('simple_select');
-    ctx.store.delete([feature.id]);
-  };
+  ctx.store.add(line);
 
-  var pos = 0;
+  function stopDrawingAndRemove() {
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+    ctx.store.delete([line.id]);
+  }
 
-  var onMouseMove = function(e) {
-    feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
-  };
+  function handleMouseMove(e) {
+    // This makes the end of the line follow your mouse around
+    line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+  }
 
-  var onClick = function(e) {
-    ctx.ui.queueMapClasses({mouse:'add'});
-     if (pos > 0 && feature.coordinates[0][0] === e.lngLat.lng && feature.coordinates[0][1] === e.lngLat.lat) {
-      // did we click on the first point
-      onFinish();
+  function handleClick(e) {
+    // Finish if we clicked on the first or last point
+    if (currentVertexPosition > 0 &&
+      (isEventAtCoordinates(e, line.coordinates[0]) || isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]))
+    ) {
+      return finish();
     }
-    else if (pos > 0 && feature.coordinates[pos - 1][0] === e.lngLat.lng && feature.coordinates[pos - 1][1] === e.lngLat.lat) {
-      // click on the last point
-      onFinish();
-    }
-    else {
-      feature.updateCoordinate(pos, e.lngLat.lng, e.lngLat.lat);
-      pos++;
-    }
-  };
 
-  var onFinish = function() {
-    // Prevent finishing if invalid
-    if (!feature.isValid()) return ctx.store.delete([feature.id]);
-    feature.removeCoordinate(`${pos}`);
-    pos--;
-    ctx.events.changeMode('simple_select', [feature.id]);
-  };
+    line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+    currentVertexPosition++;
+  }
+
+  function finish() {
+    line.removeCoordinate(`${currentVertexPosition}`);
+    currentVertexPosition--;
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [line.id]);
+  }
 
   return {
     start: function() {
@@ -58,31 +54,34 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.disable();
         }
       });
-      ctx.ui.queueMapClasses({mouse:'add'});
-      ctx.ui.setButtonActive(Constants.types.LINE);
-      this.on('mousemove', () => true, onMouseMove);
-      this.on('click', () => true, onClick);
-      this.on('keyup', isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', isEnterKey, onFinish);
-      this.on('trash', () => true, stopDrawingAndRemove);
+      ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_ADD_CLASS_FRAGMENT });
+      ctx.ui.setActiveButton(Constants.types.LINE);
+      this.on('mousemove', CommonSelectors.true, handleMouseMove);
+      this.on('click', CommonSelectors.true, handleClick);
+      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
+      this.on('keyup', CommonSelectors.isEnterKey, finish);
+      this.on('trash', CommonSelectors.true, stopDrawingAndRemove);
     },
-    stop: function() {
+
+    stop() {
       setTimeout(() => {
         if (ctx.map && ctx.map.doubleClickZoom) {
           ctx.map.doubleClickZoom.enable();
         }
       }, 0);
-      ctx.ui.deactivateButtons();
-      if (!feature.isValid()) {
-        ctx.store.delete([feature.id]);
+      ctx.ui.setActiveButton();
+
+      // If it's invalid, just destroy the thing
+      if (!line.isValid()) {
+        ctx.store.delete([line.id]);
       }
     },
-    render: function(geojson, push) {
-      if (geojson.geometry.coordinates[0] !== undefined) {
-        geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
-        geojson.properties.meta = geojson.properties.active === 'true' ? 'feature' : geojson.properties.meta;
-        push(geojson);
-      }
+
+    render(geojson, callback) {
+      if (geojson.geometry.coordinates[0] === undefined) return;
+      geojson.properties.active = (geojson.properties.id === line.id) ? 'true' : 'false';
+      geojson.properties.meta = (geojson.properties.active === 'true') ? 'feature' : geojson.properties.meta;
+      callback(geojson);
     }
   };
 };

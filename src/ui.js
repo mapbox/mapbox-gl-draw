@@ -60,7 +60,7 @@ module.exports = function(ctx) {
         return;
       }
 
-      setButtonActive(id);
+      setActiveButton(id);
       options.onActivate();
     }, true);
 
@@ -73,11 +73,12 @@ module.exports = function(ctx) {
     activeButton = null;
   }
 
-  function setButtonActive(id) {
+  function setActiveButton(id) {
+    deactivateButtons();
+
     const button = buttonElements[id];
     if (!button) return;
 
-    deactivateButtons();
     if (button && id !== 'trash') {
       button.classList.add('active');
       activeButton = button;
@@ -89,9 +90,14 @@ module.exports = function(ctx) {
     if (!controls) return;
 
     const ctrlPosClassName = `mapboxgl-ctrl-${ctx.options.position || 'top-left'}`;
-    const controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
-    let controlGroup = controlContainer.getElementsByClassName(Constants.CONTROL_GROUP_CLASS)[0];
+    let controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
+    if (!controlContainer) {
+      controlContainer = document.createElement('div');
+      controlContainer.className = ctrlPosClassName;
+      ctx.container.appendChild(controlContainer);
+    }
 
+    let controlGroup = controlContainer.getElementsByClassName(Constants.CONTROL_GROUP_CLASS)[0];
     if (!controlGroup) {
       controlGroup = document.createElement('div');
       controlGroup.className = `${Constants.CONTROL_GROUP_CLASS} mapboxgl-ctrl`;
@@ -154,8 +160,7 @@ module.exports = function(ctx) {
   }
 
   return {
-    setButtonActive,
-    deactivateButtons,
+    setActiveButton,
     queueMapClasses,
     updateMapClasses,
     addButtons,

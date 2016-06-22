@@ -4,15 +4,18 @@ import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by 
 
 const hatRack = hat.rack();
 
-export function createMap() {
+export function createMap(mapOptions = {}) {
 
-  var map = new mapboxgl.Map({
+  var map = new mapboxgl.Map(Object.assign({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v8'
-  });
+  }, mapOptions));
   // Some mock project/unproject functions
   map.project = ([y, x]) => ({ x, y });
   map.unproject = ([x, y]) => ({ lng: y, lat: x });
+  if (mapOptions.container) {
+    map.getContainer = () => mapOptions.container;
+  }
 
   return map;
 }
