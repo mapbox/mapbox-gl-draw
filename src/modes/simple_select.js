@@ -38,7 +38,7 @@ module.exports = function(ctx, startingSelectedIds) {
         ids.forEach(id => {
           context.render(id);
         });
-        ctx.ui.setClass({mouse:'move'});
+        ctx.ui.queueMapClasses({mouse:'move'});
       }
     }
     boxSelecting = false;
@@ -98,7 +98,7 @@ module.exports = function(ctx, startingSelectedIds) {
           isDragging: true,
           startPos: e.lngLat
         });
-        ctx.ui.setClass({mouse:'move'});
+        ctx.ui.queueMapClasses({mouse:'move'});
       });
 
       if (ctx.options.boxSelect) {
@@ -120,11 +120,11 @@ module.exports = function(ctx, startingSelectedIds) {
         var featureIds = ctx.store.getSelectedIds();
         if (ctx.store.isSelected(id) && !isShiftDown(e)) {
           this.on('click', readyForDirectSelect, directSelect);
-          ctx.ui.setClass({mouse:'pointer'});
+          ctx.ui.queueMapClasses({mouse:'pointer'});
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
-          ctx.ui.setClass({mouse:'pointer'});
+          ctx.ui.queueMapClasses({mouse:'pointer'});
           this.render(id);
           if (featureIds.length === 1 ) {
             ctx.map.doubleClickZoom.enable();
@@ -133,7 +133,7 @@ module.exports = function(ctx, startingSelectedIds) {
         else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
           // add to selected
           ctx.store.select(id);
-          ctx.ui.setClass({mouse:'move'});
+          ctx.ui.queueMapClasses({mouse:'move'});
           this.render(id);
         }
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
@@ -141,13 +141,13 @@ module.exports = function(ctx, startingSelectedIds) {
           featureIds.forEach(formerId => this.render(formerId));
           ctx.store.clearSelected();
           ctx.store.select(id);
-          ctx.ui.setClass({mouse:'move'});
+          ctx.ui.queueMapClasses({mouse:'move'});
           this.render(id);
         }
       });
 
       this.on('drag', () => boxSelecting, function(e) {
-        ctx.ui.setClass({mouse:'add'});
+        ctx.ui.queueMapClasses({mouse:'add'});
         if (!box) {
           box = document.createElement('div');
           box.classList.add('mapbox-gl-draw_boxselect');

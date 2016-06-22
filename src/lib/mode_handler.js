@@ -46,7 +46,7 @@ var ModeHandler = function(mode, DrawContext) {
         break;
       }
     }
-    DrawContext.ui.fireClassUpdate();
+    DrawContext.ui.updateMapClasses();
   };
 
   mode.start.call(ctx);

@@ -1,6 +1,6 @@
 var {isEnterKey, isEscapeKey} = require('../lib/common_selectors');
 var LineString = require('../feature_types/line_string');
-const types = require('../lib/types');
+const Constants = require('../constants');
 
 module.exports = function(ctx) {
 
@@ -27,7 +27,7 @@ module.exports = function(ctx) {
   };
 
   var onClick = function(e) {
-    ctx.ui.setClass({mouse:'add'});
+    ctx.ui.queueMapClasses({mouse:'add'});
      if (pos > 0 && feature.coordinates[0][0] === e.lngLat.lng && feature.coordinates[0][1] === e.lngLat.lat) {
       // did we click on the first point
       onFinish();
@@ -58,8 +58,8 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.disable();
         }
       });
-      ctx.ui.setClass({mouse:'add'});
-      ctx.ui.setButtonActive(types.LINE);
+      ctx.ui.queueMapClasses({mouse:'add'});
+      ctx.ui.setButtonActive(Constants.types.LINE);
       this.on('mousemove', () => true, onMouseMove);
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
@@ -72,7 +72,7 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.enable();
         }
       }, 0);
-      ctx.ui.setButtonInactive(types.LINE);
+      ctx.ui.deactivateButtons();
       if (!feature.isValid()) {
         ctx.store.delete([feature.id]);
       }
