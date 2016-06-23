@@ -35,7 +35,6 @@ module.exports = function(ctx, startingSelectedIds) {
     // If bbox exists, use to select features
     if (bbox) {
       var featuresInBox = featuresAt(null, bbox, ctx);
-      if (featuresInBox.length >= 1000) return ctx.map.dragPan.enable();
       var ids = getUniqueIds(featuresInBox)
         .filter(id => !ctx.store.isSelected(id));
 

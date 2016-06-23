@@ -68,26 +68,6 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - box select over 1001 points', t => {
-
-    for(var i=0; i<1001; i++) {
-      Draw.add(cloneFeature('point'));
-    }
-    map.fire.reset();
-
-    afterNextRender(() => {
-      map.fire('mousedown', makeMouseEvent(0, 0, true));
-      map.fire('mousemove', makeMouseEvent(7, 7, true));
-      map.fire('mousemove', makeMouseEvent(15, 15, true));
-      map.fire('mouseup', makeMouseEvent(15, 15, true));
-
-      afterNextRender(() => {
-        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.select').length, 0, 'there should be no draw.select event');
-        cleanUp(() => t.end());
-      });
-    });
-  });
-
   t.test('simple_select - box select over no points', t => {
 
     Draw.add(cloneFeature('point'));
