@@ -40,7 +40,7 @@ function createMockLifecycleContext() {
   };
 }
 
-test('draw_lines_string mode initialization', t => {
+test('draw_line_string mode initialization', t => {
   const context = createMockContext();
   drawLineStringMode(context);
 
@@ -216,10 +216,6 @@ test('draw_line_string interaction', t => {
   const Draw = GLDraw();
   map.addControl(Draw);
 
-  function getLine() {
-    return Draw.getAll().features[0];
-  }
-
   map.on('load', () => {
     // The following sub-tests share state ...
 
@@ -229,7 +225,7 @@ test('draw_line_string interaction', t => {
 
       const { features } = Draw.getAll();
       st.equal(features.length, 1, 'line created');
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.equal(line.geometry.type, 'LineString');
 
       st.deepEqual(line.geometry.coordinates, [[10, 20]], 'starting coordinate added');
@@ -239,21 +235,21 @@ test('draw_line_string interaction', t => {
 
     t.test('move mouse', st => {
       map.fire('mousemove', makeMouseEvent(15, 23));
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [15, 23]], 'last coordinate added');
       st.end();
     });
 
     t.test('move mouse again', st => {
       map.fire('mousemove', makeMouseEvent(30, 33));
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [30, 33]], 'last coordinate replaced');
       st.end();
     });
 
     t.test('click to add another vertex', st => {
       click(map, makeMouseEvent(35, 35));
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35]], 'last coordinate replaced');
       st.end();
     });
@@ -263,7 +259,7 @@ test('draw_line_string interaction', t => {
       click(map, makeMouseEvent(50, 50));
       click(map, makeMouseEvent(55, 55));
       click(map, makeMouseEvent(55, 55));
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates,
         [[10, 20], [35, 35], [40, 40], [50, 50], [55, 55]],
         'all coordinates in place');
@@ -284,7 +280,7 @@ test('draw_line_string interaction', t => {
       click(map, makeMouseEvent(2, 2));
       click(map, makeMouseEvent(3, 3));
 
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
       Draw.trash();
@@ -304,7 +300,7 @@ test('draw_line_string interaction', t => {
       click(map, makeMouseEvent(2, 2));
       click(map, makeMouseEvent(3, 3));
 
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
       const escapeEvent = createSyntheticEvent('keyup', {
@@ -328,7 +324,7 @@ test('draw_line_string interaction', t => {
       click(map, makeMouseEvent(2, 2));
       click(map, makeMouseEvent(3, 3));
 
-      const line = getLine();
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
       const enterEvent = createSyntheticEvent('keyup', {
@@ -351,7 +347,7 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      let line = getLine();
+      let line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [], 'and has no coordinates');
 
       Draw.changeMode('simple_select');
