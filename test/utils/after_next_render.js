@@ -1,5 +1,15 @@
 export default function(map) {
+  var render = 0;
+  map.on('draw.render', function() {
+    render++;
+  })
   return function(cb) {
-    setTimeout(cb, 32);
+    var lastRender = render;
+   var id = setInterval(function() {
+    if (lastRender < render) {
+      clearInterval(id);
+      cb();
+    }
+   });
   }
 }

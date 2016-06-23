@@ -76,7 +76,7 @@ module.exports = function render() {
     store.ctx.map.fire('draw.deselect', { featureIds: flushedSelectionSets.deselected });
   }
 
-  store.ctx.map.fire('draw.render');
+  store.ctx.map.fire('draw.render', {});
   cleanup();
 
   function cleanup() {
