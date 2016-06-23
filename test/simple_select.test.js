@@ -287,7 +287,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - drag a point', t => {
+  t.test('simple_select - drag every feature type', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var multiPointId = Draw.add(cloneFeature('multiPoint'));
     var lineStringId = Draw.add(cloneFeature('line'));
