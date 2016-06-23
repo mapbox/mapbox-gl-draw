@@ -248,7 +248,7 @@ This is fired when feature coordinates are changed, and there is a mouse click a
 
 ### draw.select
 
-Fired when a feature is selected. The payload is the GeoJSON of the feature that was selected.
+Fired when a feature is selected. The payload is an array of feature IDs.
 
 The `select` event will fire in the following contexts:
 
@@ -258,13 +258,13 @@ The `select` event will fire in the following contexts:
 
 ```js
 {
-  "features": [{ ... }]
+  "featureIds": [{ ... }]
 }
 ```
 
 ### draw.deselect
 
-Fired when a feature is deselected. The payload is the GeoJSON of the feature that was deselected.
+Fired when a feature is deselected. The payload is an array of feature IDs.
 
 The `deselect` event will fire when there is a click outside a selected feature, whether that click is on no features or on another feature (without using `shift+click` to add something else to the existing selection).
 
@@ -272,7 +272,7 @@ The `deselect` event will fire when there is a click outside a selected feature,
 
 ```js
 {
-  "features": [{ ... }]
+  "featureIds": [{ ... }]
 }
 ```
 
