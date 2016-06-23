@@ -5,11 +5,11 @@ const Constants = require('../constants');
 module.exports = function(ctx) {
 
   const point = new Point(ctx, {
-    'type': 'Feature',
-    'properties': {},
-    'geometry': {
-      'type': 'Point',
-      'coordinates': []
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: []
     }
   });
 
