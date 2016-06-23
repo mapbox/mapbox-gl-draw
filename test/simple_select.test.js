@@ -31,19 +31,17 @@ test('simple_select', t => {
     return args;
   }
 
-  t.test('simple_select - setup', t => {
-    var donedone = false;
+  t.test('simple_select - init map for tests', t => {
     var done = function() {
-      if (donedone === false) {
-        t.pass('map loaded');
-        t.end();
-        donedone = true;
-      }
+      map.off('load', done);
+      t.end();
     };
     if (map.loaded()) {
       done();
     }
-    map.on('load', done);
+    else {
+      map.on('load', done);
+    }
   });
 
 
