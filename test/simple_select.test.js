@@ -11,6 +11,10 @@ test('simple_select', t => {
 
   var map = createMap();
   spy(map, 'fire');
+  spy(map.doubleClickZoom, 'enable');
+  spy(map.doubleClickZoom, 'disable');
+  spy(map.dragPan, 'enable');
+  spy(map.dragPan, 'disable');
 
   var Draw = GLDraw();
   map.addControl(Draw);
@@ -45,23 +49,55 @@ test('simple_select', t => {
   });
 
 
-  t.test('simple_select box select', t => {
+  t.test('simple_select - box select', t => {
     Draw.add(cloneFeature('negitivePoint'));
     var id = Draw.add(cloneFeature('point'));
     map.fire.reset();
 
     afterNextRender(() => {
+      map.dragPan.enable.reset();
+      map.dragPan.disable.reset();
       map.fire('mousedown', makeMouseEvent(0, 0, true));
-      map.fire('mousemove', makeMouseEvent(7, 7, true));
+      t.equal(map.dragPan.disable.callCount, 1, 'disable dragPan');
+      map.fire('mousemove', makeMouseEvent(15, 15, true));
+      afterNextRender(() => {
+        t.equal(map.getContainer().className.indexOf('mouse-add') > -1, true, 'mouse-add class has been set');
+        map.fire('mouseup', makeMouseEvent(15, 15, true));
+
+        afterNextRender(() => {
+          t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
+          t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
+          var args = getFireArgs().filter(arg => arg[0] === 'draw.select');
+          t.equal(args.length, 1, 'should have one and only one select event');
+          if (args.length > 0) {
+            t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
+            t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          }
+          cleanUp(() => t.end());
+        });
+      });
+    });
+  });
+
+   t.test('simple_select - box select many features', t => {
+    var ids = [];
+    for (var i=0; i<5; i++) {
+      ids.push(Draw.add(cloneFeature('point')));
+    }
+    map.fire.reset();
+
+    afterNextRender(() => {
+      map.dragPan.enable.reset();
+      map.fire('mousedown', makeMouseEvent(0, 0, true));
       map.fire('mousemove', makeMouseEvent(15, 15, true));
       map.fire('mouseup', makeMouseEvent(15, 15, true));
 
       afterNextRender(() => {
+        t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
         var args = getFireArgs().filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one selected start event');
+        t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          t.equal(args[0][1].featureIds.length, ids.length, 'should select all features');
         }
         cleanUp(() => t.end());
       });
@@ -75,7 +111,6 @@ test('simple_select', t => {
 
     afterNextRender(() => {
       map.fire('mousedown', makeMouseEvent(0, 0, true));
-      map.fire('mousemove', makeMouseEvent(-7, -7, true));
       map.fire('mousemove', makeMouseEvent(-15, -15, true));
       map.fire('mouseup', makeMouseEvent(-15, -15, true));
 
@@ -97,7 +132,7 @@ test('simple_select', t => {
 
       afterNextRender(() => {
         var args = getFireArgs().filter(arg => arg[0] === 'draw.deselect');
-        t.equal(args.length, 1, 'should have one and only one selected end event');
+        t.equal(args.length, 1, 'should have one and only one deselect event');
         if (args.length > 0) {
           t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
           t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to select');
@@ -109,18 +144,19 @@ test('simple_select', t => {
 
   t.test('simple_select - click on an deselected feature', t => {
     var id = Draw.add(cloneFeature('polygon'));
-    console.log(JSON.stringify(cloneFeature('polygon')));
     Draw.changeMode('simple_select');
 
     afterNextRender(() => {
       map.fire.reset();
+      map.doubleClickZoom.disable.reset();
       map.fire('mousedown', makeMouseEvent(50, 30));
       map.fire('mouseup', makeMouseEvent(50, 30));
 
       afterNextRender(() => {
+        t.equal(map.doubleClickZoom.disable.callCount, 1, 'disable doubleClickZoom');
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one selected start event');
+        t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
           t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
           t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
@@ -136,13 +172,16 @@ test('simple_select', t => {
 
     afterNextRender(() => {
       map.fire.reset();
+      map.doubleClickZoom.disable.reset();
       map.fire('mousedown', makeMouseEvent(50, 30, true));
       map.fire('mouseup', makeMouseEvent(50, 30, true));
 
       afterNextRender(() => {
+        t.equal(map.doubleClickZoom.disable.callCount, 1, 'disable doubleClickZoom');
+        t.equal(map.getContainer().className.indexOf('mouse-pointer') > -1, true, 'mouse-pointer class has been set');
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.deselect');
-        t.equal(args.length, 1, 'should have one and only one selected end event');
+        t.equal(args.length, 1, 'should have one and only one deselect event');
         if (args.length > 0) {
           t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
           t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to deselect');
@@ -174,11 +213,16 @@ test('simple_select', t => {
     Draw.changeMode('simple_select', [id]);
 
     afterNextRender(() => {
+      map.doubleClickZoom.enable.reset();
       map.fire.reset();
+      map.doubleClickZoom.disable.reset();
       map.fire('mousedown', makeMouseEvent(50, 30, false));
       map.fire('mouseup', makeMouseEvent(50, 30, false));
 
       afterNextRender(() => {
+        t.equal(map.doubleClickZoom.disable.callCount, 2, 'disable doubleClickZoom. Once for click, once for direct_select');
+        t.equal(map.doubleClickZoom.enable.callCount, 1, 'double click zoom has been enabled');
+        t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.modechange');
         t.equal(args.length, 1, 'should have one and only one modechange event');
@@ -198,11 +242,13 @@ test('simple_select', t => {
     var clickPosition = cloneFeature('polygon').geometry.coordinates[0][0];
 
     afterNextRender(() => {
+      map.doubleClickZoom.enable.reset();
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(clickPosition[0], clickPosition[1]));
       map.fire('mouseup', makeMouseEvent(clickPosition[0], clickPosition[1]));
 
       afterNextRender(() => {
+        t.equal(map.doubleClickZoom.enable.callCount, 1, 'double click zoom has been enabled');
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.modechange');
         t.equal(args.length, 1, 'should have one and only one modechange event');
@@ -226,11 +272,12 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(50, 30, true));
 
       afterNextRender(() => {
+        t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
         t.equal(Draw.getSelectedIds().indexOf(pointId) != -1, true, 'point is still selected');
         t.equal(Draw.getSelectedIds().indexOf(id) != -1, true, 'polygon is now selected');
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one selected start event');
+        t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
           t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
           t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
@@ -251,11 +298,13 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(50, 30, false));
 
       afterNextRender(() => {
+        t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
         t.equal(Draw.getSelectedIds().indexOf(pointId) === -1, true, 'point is no longer selected');
         t.equal(Draw.getSelectedIds().indexOf(id) != -1, true, 'polygon is now selected');
         var args = getFireArgs();
+        t.equal(args.filter(arg => arg[0] === 'draw.deselect').length, 1, 'should have one and only one deselect event');
         args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one selected start event');
+        t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
           t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
           t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
@@ -282,7 +331,6 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 5, startPosition[1] + 5));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));

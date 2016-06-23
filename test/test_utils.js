@@ -7,7 +7,7 @@ const hatRack = hat.rack();
 export function createMap(mapOptions = {}) {
 
   var map = new mapboxgl.Map(Object.assign({
-    container: 'map',
+    container: document.createElement('div'),
     style: 'mapbox://styles/mapbox/streets-v8'
   }, mapOptions));
   // Some mock project/unproject functions
@@ -17,19 +17,38 @@ export function createMap(mapOptions = {}) {
     map.getContainer = () => mapOptions.container;
   }
 
+  var classList = [];
+  var container = map.getContainer();
+  container.classList.add = function(names) {
+    names = names || '';
+    names.split(' ').forEach(name => {
+      if (classList.indexOf(name) === -1) {
+        classList.push(name);
+      }
+    });
+    container.className = classList.join(' ');
+  }
 
-  let getContainer = map.getContainer.bind(map);
+  container.classList.remove = function(names) {
+    names = names || '';
+    names.split(' ').forEach(name => {
+      classList = classList.filter(n => n !== name);
+    });
+    container.className = classList.join(' ');
+  }
+
+  container.className = classList.join(' ');
+
+  container.clientLeft = 0;
+  container.clientTop = 0;
+  container.getBoundingClientRect = function() {
+    return {
+      left: 0,
+      top: 0
+    };
+  }
 
   map.getContainer = function() {
-    var container = getContainer();
-    container.clientLeft = 0;
-    container.clientTop = 0;
-    container.getBoundingClientRect = function() {
-      return {
-        left: 0,
-        top: 0
-      }
-    };
     return container;
   }
 
