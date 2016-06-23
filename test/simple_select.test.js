@@ -86,7 +86,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - unselect', t => {
+  t.test('simple_select - deselect', t => {
     var id = Draw.add(cloneFeature('point'));
     Draw.changeMode('simple_select', [id]);
     map.fire.reset();
@@ -99,15 +99,15 @@ test('simple_select', t => {
         var args = getFireArgs().filter(arg => arg[0] === 'draw.deselect');
         t.equal(args.length, 1, 'should have one and only one selected end event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should unselect only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should unselect the feature we expect it to select');
+          t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
+          t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to select');
         }
         cleanUp(() => t.end());
       });
     });
   });
 
-  t.test('simple_select - click on an unselected feature', t => {
+  t.test('simple_select - click on an deselected feature', t => {
     var id = Draw.add(cloneFeature('polygon'));
     console.log(JSON.stringify(cloneFeature('polygon')));
     Draw.changeMode('simple_select');
@@ -144,8 +144,8 @@ test('simple_select', t => {
         args = args.filter(arg => arg[0] === 'draw.deselect');
         t.equal(args.length, 1, 'should have one and only one selected end event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
+          t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to deselect');
         }
         cleanUp(() => t.end());
       });
@@ -215,7 +215,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on an unselected feature with shift down while having another feature selected', t => {
+  t.test('simple_select - click on an deselected feature with shift down while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [pointId]);
@@ -240,7 +240,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on an unselected feature with shift up, while having another feature selected', t => {
+  t.test('simple_select - click on an deselected feature with shift up, while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [pointId]);
