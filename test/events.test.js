@@ -2,14 +2,14 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { click, accessToken, createMap, features } from './test_utils';
+import { click, accessToken, createMap, cloneFeature } from './test_utils';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
 mapboxgl.accessToken = accessToken;
 
 const EVENT_TIME = 32;
 
-var feature = features.point;
+var feature = cloneFeature('point');
 
 var map = createMap();
 spy(map, 'fire');

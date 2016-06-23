@@ -2,11 +2,11 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, features } from './test_utils';
+import { accessToken, createMap, cloneFeature } from './test_utils';
 
 mapboxgl.accessToken = accessToken;
 
-var feature = features.point;
+var feature = cloneFeature('point');
 
 var map = createMap();
 
@@ -45,12 +45,12 @@ test('API test', t => {
     t.equals(typeof id, 'string', 'valid string id returned on add');
 
     // add featureCollection
-    var listOfIds = Draw.add(features.featureCollection);
-    t.equals(listOfIds.length, features.featureCollection.features.length,
+    var listOfIds = Draw.add(cloneFeature('featureCollection'));
+    t.equals(listOfIds.length, cloneFeature('featureCollection').features.length,
       'valid string id returned when adding a featureCollection');
     Draw.deleteAll();
 
-    var multiId = Draw.add(features.multiPolygon);
+    var multiId = Draw.add(cloneFeature('multiPolygon'));
     t.equals('string', typeof multiId, 'accepts multi features');
 
     t.end();

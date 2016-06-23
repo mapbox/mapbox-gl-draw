@@ -41,7 +41,7 @@ export function click(map, payload) {
   map.fire('mouseup', payload);
 }
 
-export const features = {
+const features = {
   multiPolygon: {
     type: 'Feature',
     properties: {},
@@ -130,10 +130,14 @@ export const features = {
 
 };
 
+export function cloneFeature (type) {
+  return JSON.parse(JSON.stringify(features[type]));
+}
+
 export function createFeature(featureType) {
   const feature = Object.assign({
     id: hatRack()
-  }, features[featureType]);
+  }, cloneFeature(featureType));
   feature.toGeoJSON = () => feature;
   return feature;
 }
