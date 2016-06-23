@@ -1,10 +1,10 @@
-var {isEnterKey, isEscapeKey} = require('../lib/common_selectors');
-var Point = require('../feature_types/point');
+const CommonSelectors = require('../lib/common_selectors');
+const Point = require('../feature_types/point');
 const Constants = require('../constants');
 
 module.exports = function(ctx) {
 
-  var feature = new Point(ctx, {
+  const point = new Point(ctx, {
     'type': 'Feature',
     'properties': {},
     'geometry': {
@@ -13,39 +13,41 @@ module.exports = function(ctx) {
     }
   });
 
-  ctx.store.add(feature);
+  if (ctx._test) ctx._test.point = point;
 
-  var stopDrawingAndRemove = function() {
-    ctx.events.changeMode('simple_select');
-    ctx.store.delete([feature.id]);
-  };
+  ctx.store.add(point);
 
-  var done = false;
-  var onClick = function(e) {
-    ctx.ui.queueMapClasses({mouse:'move'});
-    done = true;
-    feature.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-    ctx.events.changeMode('simple_select', [feature.id]);
-  };
+  function stopDrawingAndRemove() {
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+    ctx.store.delete([point.id]);
+  }
+
+  function handleClick(e) {
+    ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_MOVE_CLASS_FRAGMENT });
+    point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [point.id]);
+  }
 
   return {
-    start: function() {
+    start() {
       ctx.store.clearSelected();
-      ctx.ui.queueMapClasses({mouse:'add'});
+      ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_ADD_CLASS_FRAGMENT });
       ctx.ui.setActiveButton(Constants.types.POINT);
-      this.on('click', () => true, onClick);
-      this.on('keyup', isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', isEnterKey, stopDrawingAndRemove);
-      this.on('trash', () => true, stopDrawingAndRemove);
+      this.on('click', CommonSelectors.true, handleClick);
+      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
+      this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
+      this.on('trash', CommonSelectors.true, stopDrawingAndRemove);
     },
-    stop: function() {
+
+    stop() {
       ctx.ui.setActiveButton();
-      if (done === false) {
-        ctx.store.delete([feature.id]);
+      if (!point.getCoordinate().length) {
+        ctx.store.delete([point.id]);
       }
     },
-    render: function(geojson, push) {
-      geojson.properties.active = geojson.properties.id === feature.id ? 'true' : 'false';
+
+    render(geojson, push) {
+      geojson.properties.active = (geojson.properties.id === point.id) ? 'true' : 'false';
       if (geojson.properties.active === 'false') {
         push(geojson);
       }

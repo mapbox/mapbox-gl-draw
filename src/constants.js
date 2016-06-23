@@ -6,6 +6,7 @@ module.exports = {
   CONTROL_BUTTON_TRASH_CLASS: 'mapbox-gl-draw_trash',
   CONTROL_GROUP_CLASS: 'mapboxgl-ctrl-group',
   MOUSE_ADD_CLASS_FRAGMENT: 'add',
+  MOUSE_MOVE_CLASS_FRAGMENT: 'move',
   ATTRIBUTION_CLASS: 'mapboxgl-ctrl-attrib',
   ACTIVE_BUTTON_CLASS: 'active',
   types: {
