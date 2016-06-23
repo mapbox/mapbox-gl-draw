@@ -181,7 +181,7 @@ test('simple_select', t => {
       afterNextRender(() => {
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.modechange');
-        t.equal(args.length, 1, 'should have one and only one selected end event');
+        t.equal(args.length, 1, 'should have one and only one modechange event');
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
           t.equal(args[0][1].opts.featureId, id, 'should work on the feature we expect')
@@ -205,7 +205,7 @@ test('simple_select', t => {
       afterNextRender(() => {
         var args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.modechange');
-        t.equal(args.length, 1, 'should have one and only one selected end event');
+        t.equal(args.length, 1, 'should have one and only one modechange event');
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
           t.equal(args[0][1].opts.featureId, id, 'should work on the feature we expect')
