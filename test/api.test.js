@@ -2,18 +2,43 @@
 import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import { accessToken, createMap, cloneFeature } from './test_utils';
-
-mapboxgl.accessToken = accessToken;
+import { createMap, cloneFeature } from './test_utils';
+import AfterNextRender from './utils/after_next_render';
 
 var feature = cloneFeature('point');
 
-var map = createMap();
-
 test('API test', t => {
 
+  var map = createMap();
+  var afterNextRender = AfterNextRender(map);
   var Draw = GLDraw();
   map.addControl(Draw);
+
+  test('init map', t => {
+    if(map.loaded()) {
+      t.end();
+    }
+    else {
+      map.once('load', () => t.end());
+    }
+  });
+
+  t.test('getFeatureIdsAt', t => {
+    var id = Draw.add(feature);
+    afterNextRender(() => {
+      // These tests require the the pixel space
+      // and lat/lng space are equal (1px = 1deg)
+      var featureIds = Draw.getFeatureIdsAt({
+        x: feature.geometry.coordinates[0],
+        y: feature.geometry.coordinates[1],
+      });
+
+      t.equals(featureIds.length, 1, 'should have selected the feature');
+      t.equals(featureIds[0], id, 'selected feature should match desired feature');
+      Draw.deleteAll();
+      t.end();
+    });
+  })
 
   t.test('deleteAll', t => {
     Draw.add(feature);
