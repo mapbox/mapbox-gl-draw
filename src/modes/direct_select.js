@@ -43,6 +43,12 @@ module.exports = function(ctx, opts) {
     numCoords = coordPos.length;
   };
 
+  var emitModify = () => {
+    ctx.map.fire('draw.modified', {
+      features: [feature]
+    });
+  };
+
   return {
     start: function() {
       ctx.store.setSelected(featureId);
@@ -67,6 +73,7 @@ module.exports = function(ctx, opts) {
         }
       });
       this.on('mouseup', () => true, function() {
+        if (dragging) emitModify();
         dragging = false;
         coordPos = null;
         numCoords = null;
@@ -80,6 +87,7 @@ module.exports = function(ctx, opts) {
       });
       this.on('trash', () => selectedCoordPaths.length > 0, function() {
         selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
+        emitModify();
         selectedCoordPaths = [];
         if (feature.isValid() === false) {
           ctx.store.delete([featureId]);

@@ -22,20 +22,6 @@ module.exports = function(ctx) {
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
   var recentlyUpdatedFeatureIds = new SimpleSet();
 
-  const emitModifiedFeatures = () => {
-    ctx.store.getChangedIds().forEach(id => recentlyUpdatedFeatureIds.add(id));
-
-    let features = recentlyUpdatedFeatureIds.values().map(id => ctx.store.get(id))
-      .filter(f => f !== undefined)
-      .filter(f => f.isValid())
-      .map(f => f.toGeoJSON());
-
-    if (features.length > 0) {
-      ctx.map.fire('draw.modified', {features: features, stack: (new Error('hi')).stack});
-    }
-    recentlyUpdatedFeatureIds.clear();
-  };
-
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
       point: event.point,
@@ -89,8 +75,6 @@ module.exports = function(ctx) {
     else {
       currentMode.mouseup(event);
     }
-
-    emitModifiedFeatures();
   };
 
   events.trash = function() {
@@ -122,7 +106,6 @@ module.exports = function(ctx) {
     if (isKeyModeValid(event.keyCode)) {
       currentMode.keyup(event);
     }
-    emitModifiedFeatures();
   };
 
   events.zoomend = function() {
