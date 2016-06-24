@@ -177,23 +177,41 @@ This is different from `delete` or `deleteAlll` in that it follows rules describ
 
 ---
 
-### `.changeMode(String: mode, ?Any: options) -> Draw`
+### `.changeMode(String: mode, ?Object: options) -> Draw`
 
-`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own arguments. They are descibed in detail below.
+`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own options. They are described in detail below.
 
 #### Mode: `simple_select`
 
 Lets you select, delete and drag features.
 
-For `simple_select` options is an array of ids. It is optional. If provided, these features will be active at the start of the mode. In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+
+This mode has the following options:
+
+```js
+// `simple_select` options
+{
+  // Array of ids of features that will be initially selected
+  featureIds: Array<string>
+}
+```
 
 #### Mode: `direct_select`
 
 Lets you select, delete and drag vertices.
 
-For `direct_select` options is a single featureId. It is required. This feature will be active for the duration of the mode.
-
 `direct_select` mode doesn't handle point features.
+
+This mode has the following options:
+
+```js
+// `direct_select` options
+{
+  // The id of the feature that is directly selected (required)
+  featureId: string
+}
+```
 
 #### Drawing modes:
 
@@ -310,28 +328,7 @@ The event data is an object with the following shape:
 }
 ```
 
-`simple_select` and `direct_select` modes can be initiated with options specific to that mode.
-
-```js
-// `simple_select` options
-{
-  // Array of ids of features that will be initially selected
-  featureIds: Array<string>
-}
-
-// `direct_select` options
-{
-  // The id of the feature that is directly selected
-  featureId: string
-  // The dot-notation path to a vertex of the feature that will be initially selected
-  coordPath: string,
-  // A starting longitude and latitude, passed to the drag interaction
-  startPos: {
-    lng: number,
-    lat: number
-  }
-}
-```
+`simple_select` and `direct_select` modes can be initiated with options specific to that mode (see above).
 
 ### draw.render
 
