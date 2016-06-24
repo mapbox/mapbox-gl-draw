@@ -276,6 +276,10 @@ The `deselect` event will fire when there is a click outside a selected feature,
 }
 ```
 
+### draw.render
+
+Fired just after Draw calls setData on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
+
 ## Styling Draw
 
 Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-style-spec/) with a preset list of properties.

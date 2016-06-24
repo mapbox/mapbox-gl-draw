@@ -2,6 +2,7 @@ var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFe
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
+var SimpleSet = require('../lib/simple_set');
 
 module.exports = function(ctx, startingSelectedIds) {
   var startPos = null;
@@ -15,13 +16,18 @@ module.exports = function(ctx, startingSelectedIds) {
 
   function getUniqueIds(allFeatures) {
     if (!allFeatures.length) return [];
-    return allFeatures.map(s => s.properties.id).filter(function(item, pos, ary) {
-      return item && (!pos || item !== ary[pos - 1]);
-    });
+    var ids = allFeatures.map(s => s.properties.id)
+      .filter(id => id !== undefined)
+      .reduce((memo, id) => {
+        memo.add(id);
+        return memo;
+      }, new SimpleSet());
+
+    return ids.values();
   }
 
   var finishBoxSelect = function(bbox, context) {
-    if (box) {
+    if (box && box.parentNode) {
       box.parentNode.removeChild(box);
       box = null;
     }
@@ -29,7 +35,6 @@ module.exports = function(ctx, startingSelectedIds) {
     // If bbox exists, use to select features
     if (bbox) {
       var featuresInBox = featuresAt(null, bbox, ctx);
-      if (featuresInBox.length >= 1000) return ctx.map.dragPan.enable();
       var ids = getUniqueIds(featuresInBox)
         .filter(id => !ctx.store.isSelected(id));
 
@@ -48,25 +53,15 @@ module.exports = function(ctx, startingSelectedIds) {
   };
 
   var readyForDirectSelect = function(e) {
-    if (isFeature(e)) {
-      var about = e.featureTarget.properties;
-      return ctx.store.isSelected(about.id)
-        && ctx.store.get(about.id).type !== 'Point';
-    }
-    return false;
+    var about = e.featureTarget.properties;
+    return ctx.store.isSelected(about.id) && ctx.store.get(about.id).type !== 'Point';
   };
 
   var buildFeatureCoords = function() {
     var featureIds = ctx.store.getSelectedIds();
-    featureCoords = featureIds.map(id => ctx.store.get(id).coordinates);
+    featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
     features = featureIds.map(id => ctx.store.get(id));
     numFeatures = featureIds.length;
-  };
-
-  var directSelect = function(e) {
-    ctx.api.changeMode('direct_select', {
-      featureId: e.featureTarget.properties.id
-    });
   };
 
   return {
@@ -118,9 +113,10 @@ module.exports = function(ctx, startingSelectedIds) {
         ctx.map.doubleClickZoom.disable();
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
-        if (ctx.store.isSelected(id) && !isShiftDown(e)) {
-          this.on('click', readyForDirectSelect, directSelect);
-          ctx.ui.queueMapClasses({mouse:'pointer'});
+        if (readyForDirectSelect(e) && !isShiftDown(e)) {
+          ctx.api.changeMode('direct_select', {
+            featureId: e.featureTarget.properties.id
+          });
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
@@ -181,7 +177,6 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('drag', () => dragging, function(e) {
-        this.off('click', readyForDirectSelect, directSelect);
         e.originalEvent.stopPropagation();
 
         if (featureCoords === null) {
@@ -198,16 +193,16 @@ module.exports = function(ctx, startingSelectedIds) {
         for (var i = 0; i < numFeatures; i++) {
           var feature = features[i];
           if (feature.type === 'Point') {
-            feature.setCoordinates(coordMap(featureCoords[i]));
+            feature.incomingCoords(coordMap(featureCoords[i]));
           }
           else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
-            feature.setCoordinates(featureCoords[i].map(coordMap));
+            feature.incomingCoords(featureCoords[i].map(coordMap));
           }
           else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
-            feature.setCoordinates(featureCoords[i].map(ringMap));
+            feature.incomingCoords(featureCoords[i].map(ringMap));
           }
           else if (feature.type === 'MultiPolygon') {
-            feature.setCoordinates(featureCoords[i].map(mutliMap));
+            feature.incomingCoords(featureCoords[i].map(mutliMap));
           }
         }
       });

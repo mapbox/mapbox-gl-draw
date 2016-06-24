@@ -53,7 +53,7 @@
     "express": "^4.13.4",
     "geojson-validation": "^0.1.6",
     "mapbox-gl": "^0.19.0",
-    "mapbox-gl-js-mock": "^0.22.0",
+    "mapbox-gl-js-mock": "^0.23.0",
     "mock-browser": "^0.92.10",
     "nyc": "^6.6.1",
     "opener": "^1.4.1",
@@ -70,7 +70,6 @@
     "geojsonhint": "^1.2.0",
     "hat": "0.0.3",
     "point-geometry": "0.0.0",
-    "ramda": "^0.17.1",
     "sinon": "^1.17.4",
     "turf-area": "^1.1.1"
   }

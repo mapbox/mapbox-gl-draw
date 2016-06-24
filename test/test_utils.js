@@ -7,7 +7,7 @@ const hatRack = hat.rack();
 export function createMap(mapOptions = {}) {
 
   var map = new mapboxgl.Map(Object.assign({
-    container: 'map',
+    container: document.createElement('div'),
     style: 'mapbox://styles/mapbox/streets-v8'
   }, mapOptions));
   // Some mock project/unproject functions
@@ -15,6 +15,41 @@ export function createMap(mapOptions = {}) {
   map.unproject = ([x, y]) => ({ lng: y, lat: x });
   if (mapOptions.container) {
     map.getContainer = () => mapOptions.container;
+  }
+
+  var classList = [];
+  var container = map.getContainer();
+  container.classList.add = function(names) {
+    names = names || '';
+    names.split(' ').forEach(name => {
+      if (classList.indexOf(name) === -1) {
+        classList.push(name);
+      }
+    });
+    container.className = classList.join(' ');
+  }
+
+  container.classList.remove = function(names) {
+    names = names || '';
+    names.split(' ').forEach(name => {
+      classList = classList.filter(n => n !== name);
+    });
+    container.className = classList.join(' ');
+  }
+
+  container.className = classList.join(' ');
+
+  container.clientLeft = 0;
+  container.clientTop = 0;
+  container.getBoundingClientRect = function() {
+    return {
+      left: 0,
+      top: 0
+    };
+  }
+
+  map.getContainer = function() {
+    return container;
   }
 
   return map;
@@ -25,13 +60,13 @@ export function click(map, payload) {
   map.fire('mouseup', payload);
 }
 
-export const features = {
+const features = {
   multiPolygon: {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'MultiPolygon',
-      coordinates: [[[[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]]]]
+      coordinates: [[[[1,1],[2,2],[2,6],[4,3],[1,1]]]]
     }
   },
 
@@ -44,6 +79,24 @@ export const features = {
     }
   },
 
+  multiLineString: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiLineString',
+      coordinates: [[[20, 20], [21, 21], [22, 22]], [[30, 30], [31, 31], [32, 32]]]
+    }
+  },
+
+  multiPoint: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiPoint',
+      coordinates: [[-5, -5], [-10, -10]]
+    }
+  },
+
   point: {
     type: 'Feature',
     properties: {},
@@ -53,12 +106,21 @@ export const features = {
     }
   },
 
-  polygon: {
+  negitivePoint: {
     type: 'Feature',
     properties: {},
     geometry: {
-      type: 'Polygon',
-      coordinates: [[[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]]]
+      type: 'Point',
+      coordinates: [-10, -10]
+    }
+  },
+
+  polygon: {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
     }
   },
 
@@ -87,10 +149,14 @@ export const features = {
 
 };
 
+export function cloneFeature (type) {
+  return JSON.parse(JSON.stringify(features[type]));
+}
+
 export function createFeature(featureType) {
   const feature = Object.assign({
     id: hatRack()
-  }, features[featureType]);
+  }, cloneFeature(featureType));
   feature.toGeoJSON = () => feature;
   return feature;
 }
