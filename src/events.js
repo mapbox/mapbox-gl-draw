@@ -117,13 +117,7 @@ module.exports = function(ctx) {
     currentMode = ModeHandler(mode, ctx);
 
     if (!eventOptions.silent) {
-      const eventData = { mode: modename };
-      if (nextModeOptions && modename === Constants.modes.SIMPLE_SELECT) {
-        eventData.options = nextModeOptions;
-      } else if (nextModeOptions && modename === Constants.modes.DIRECT_SELECT) {
-        eventData.options = { featureId: nextModeOptions.featureId };
-      }
-      ctx.map.fire(Constants.events.MODE_CHANGE, eventData);
+      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename});
     }
 
     ctx.store.setDirty();

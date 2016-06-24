@@ -322,9 +322,7 @@ The event data is an object with the following shape:
 ```js
 {
   // The next mode, i.e. the mode that Draw is changing to
-  mode: string,
-  // Mode options, documented below
-  options: Object
+  mode: string
 }
 ```
 

@@ -69,13 +69,12 @@ function runTests() {
     map.fire('mousemove', makeMouseEvent(20, 20));
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
-      const pointId = firedWith(t, 'draw.create', {
+      firedWith(t, 'draw.create', {
         features: [point25_25GeoJson]
-      }).features[0].id;
+      });
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select',
-        options: { featureIds: [pointId] }
+        mode: 'simple_select'
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -205,13 +204,12 @@ function runTests() {
     click(map, makeMouseEvent(50, 50));
 
     afterNextRender(() => {
-      const lineId = firedWith(t, 'draw.create', {
+      firedWith(t, 'draw.create', {
         features: [line10_30_50GeoJson]
-      }).features[0].id;
+      });
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select',
-        options: { featureIds: [lineId] }
+        mode: 'simple_select'
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -264,7 +262,6 @@ function runTests() {
       coordinates: [[20, 0], [40, 20], [60, 40]]
     }
   };
-  let line20_40_60Id;
 
   test('move the line', t => {
     // Now in `simple_select` mode ...
@@ -278,10 +275,10 @@ function runTests() {
     map.fire('mouseup', makeMouseEvent(30, 10));
 
     afterNextRender(() => {
-      line20_40_60Id = firedWith(t, 'draw.update', {
+      firedWith(t, 'draw.update', {
         action: 'move',
         features: [line20_40_60GeoJson]
-      }).features[0].id;
+      });
 
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -296,8 +293,7 @@ function runTests() {
     click(map, makeMouseEvent(40, 20));
     afterNextRender(() => {
       firedWith(t, 'draw.modechange', {
-        mode: 'direct_select',
-        options: { featureId: line20_40_60Id }
+        mode: 'direct_select'
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -440,13 +436,12 @@ function runTests() {
     click(map, makeMouseEvent(100, 0));
 
     afterNextRender(() => {
-      const polygonId = firedWith(t, 'draw.create', {
+      firedWith(t, 'draw.create', {
         features: [polygon0_0_100_100GeoJson]
-      }).features[0].id;
+      });
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select',
-        options: { featureIds: [polygonId] }
+        mode: 'simple_select'
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -513,7 +508,6 @@ function runTests() {
       coordinates: [[[20, -20], [20, 80], [120, 80], [120, -20], [20, -20]]]
     }
   };
-  let polygon20_20_120_120Id;
 
   test('move the line and the polygon', t => {
     // Now in `simple_select` mode ...
@@ -557,9 +551,9 @@ function runTests() {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(100, 50));
     afterNextRender(() => {
-      polygon20_20_120_120Id = firedWith(t, 'draw.selectionchange', {
+      firedWith(t, 'draw.selectionchange', {
         features: [polygon20_20_120_120GeoJson]
-      }).features[0].id;
+      });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
       ], 'no unexpected draw events');
@@ -572,8 +566,7 @@ function runTests() {
     click(map, makeMouseEvent(20, -20));
     afterNextRender(() => {
       firedWith(t, 'draw.modechange', {
-        mode: 'direct_select',
-        options: { featureId: polygon20_20_120_120Id }
+        mode: 'direct_select'
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.modechange'
@@ -818,17 +811,16 @@ function runTests() {
           coordinates: [[240, 240], [260, 260]]
         }
       };
-      const expectedLineId = firedWith(t, 'draw.create', {
+      firedWith(t, 'draw.create', {
         features: [expectedLine]
-      }).features[0].id;
+      });
 
       firedWith(t, 'draw.selectionchange', {
         features: [expectedLine]
       });
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select',
-        options: { featureIds: [expectedLineId] }
+        mode: 'simple_select'
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -874,17 +866,16 @@ function runTests() {
           coordinates: [[[240, 240], [260, 260], [300, 200], [240, 240]]]
         }
       };
-      const expectedPolygonId = firedWith(t, 'draw.create', {
+      firedWith(t, 'draw.create', {
         features: [expectedPolygon]
-      }).features[0].id;
+      });
 
       firedWith(t, 'draw.selectionchange', {
         features: [expectedPolygon]
       });
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select',
-        options: { featureIds: [expectedPolygonId] }
+        mode: 'simple_select'
       });
 
       t.deepEqual(flushDrawEvents(), [
