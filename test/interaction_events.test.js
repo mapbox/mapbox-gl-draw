@@ -786,6 +786,17 @@ function runTests() {
       t.end();
     });
   });
+
+  test('box selection includes no features', t => {
+    Draw.deleteAll();
+    Draw.changeMode('simple_select');
+    click(map, makeMouseEvent(0, 0, true));
+    click(map, makeMouseEvent(100, 100, true));
+    afterNextRender(() => {
+      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
+      t.end();
+    });
+  });
 }
 
 function flushDrawEvents() {
