@@ -115,7 +115,7 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.CONTROL_BUTTON_LINE_CLASS,
         title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_LINE)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE)
       });
     }
 
@@ -124,7 +124,7 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.CONTROL_BUTTON_POLYGON_CLASS,
         title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
-        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_POLYGON)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON)
       });
     }
 
@@ -133,7 +133,7 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.CONTROL_BUTTON_POINT_CLASS,
         title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
-        onActivate: () => ctx.api.changeMode(Constants.modes.DRAW_POINT)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT)
       });
     }
 
@@ -143,7 +143,7 @@ module.exports = function(ctx) {
         className: Constants.CONTROL_BUTTON_TRASH_CLASS,
         title: 'Delete',
         onActivate: () => {
-          ctx.api.trash();
+          ctx.events.trash();
         }
       });
     }

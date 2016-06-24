@@ -122,7 +122,7 @@ test('simple_select', t => {
 
   t.test('simple_select - deselect', t => {
     var id = Draw.add(cloneFeature('point'));
-    Draw.changeMode('simple_select', [id]);
+    Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
       map.fire.reset();
@@ -166,7 +166,7 @@ test('simple_select', t => {
 
   t.test('simple_select - click on a selected feature with shift down', t => {
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [id]);
+    Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
       map.fire.reset();
@@ -190,7 +190,7 @@ test('simple_select', t => {
 
   t.test('simple_select - delete selected features', t => {
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [id]);
+    Draw.changeMode('simple_select', { featureIds: [id] });
     map.fire.reset();
     Draw.trash();
     afterNextRender(() => {
@@ -209,7 +209,7 @@ test('simple_select', t => {
   t.test('simple_select - click on a selected feature with shift up to enter direct_select', t => {
     Draw.deleteAll();
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [id]);
+    Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
       map.doubleClickZoom.enable.reset();
@@ -235,7 +235,7 @@ test('simple_select', t => {
 
   t.test('simple_select - click on a vertex to enter direct_select', t => {
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [id]);
+    Draw.changeMode('simple_select', { featureIds: [id] });
 
     var clickPosition = cloneFeature('polygon').geometry.coordinates[0][0];
 
@@ -261,7 +261,7 @@ test('simple_select', t => {
   t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [pointId]);
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
       map.fire.reset();
@@ -288,7 +288,7 @@ test('simple_select', t => {
   t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
-    Draw.changeMode('simple_select', [pointId]);
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
       map.fire.reset();
@@ -324,7 +324,9 @@ test('simple_select', t => {
     };
 
     var startPosition = cloneFeature('point').geometry.coordinates;
-    Draw.changeMode('simple_select', [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]);
+    Draw.changeMode('simple_select', {
+      featureIds: [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]
+    });
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));

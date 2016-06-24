@@ -72,10 +72,6 @@ module.exports = function(ctx) {
     }
   };
 
-  events.trash = function() {
-    currentMode.trash();
-  };
-
   // 8 - Backspace
   // 46 - Delete
   var isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
@@ -83,19 +79,19 @@ module.exports = function(ctx) {
   events.keydown = function(event) {
     if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
       event.preventDefault();
-      api.fire('trash');
+      currentMode.trash();
     }
     else if (isKeyModeValid(event.keyCode)) {
       currentMode.keydown(event);
     }
     else if (event.keyCode === 49 && ctx.options.controls.point) {
-      ctx.api.changeMode(Constants.modes.DRAW_POINT);
+      changeMode(Constants.modes.DRAW_POINT);
     }
     else if (event.keyCode === 50 && ctx.options.controls.line_string) {
-      ctx.api.changeMode(Constants.modes.DRAW_LINE);
+      changeMode(Constants.modes.DRAW_LINE);
     }
     else if (event.keyCode === 51 && ctx.options.controls.polygon) {
-      ctx.api.changeMode(Constants.modes.DRAW_POLYGON);
+      changeMode(Constants.modes.DRAW_POLYGON);
     }
   };
 
@@ -109,31 +105,35 @@ module.exports = function(ctx) {
     ctx.store.changeZoom();
   };
 
+  function changeMode(modename, nextModeOptions = {}, eventOptions = {}) {
+    currentMode.stop();
+
+    var modebuilder = modes[modename];
+    if (modebuilder === undefined) {
+      throw new Error(`${modename} is not valid`);
+    }
+    currentModeName = modename;
+    var mode = modebuilder(ctx, nextModeOptions);
+    currentMode = ModeHandler(mode, ctx);
+
+    if (!eventOptions.silent) {
+      ctx.map.fire(Constants.events.MODE_CHANGE, {
+        mode: modename,
+        options: nextModeOptions
+      });
+    }
+
+    ctx.store.setDirty();
+    ctx.store.render();
+  }
+
   var api = {
+    changeMode,
     currentModeName: function() {
       return currentModeName;
     },
     currentModeRender: function(geojson, push) {
       return currentMode.render(geojson, push);
-    },
-    changeMode: function(modename, opts) {
-      currentMode.stop();
-
-      var modebuilder = modes[modename];
-      if (modebuilder === undefined) {
-        throw new Error(`${modename} is not valid`);
-      }
-      currentModeName = modename;
-      var mode = modebuilder(ctx, opts);
-      currentMode = ModeHandler(mode, ctx);
-
-      ctx.map.fire(Constants.events.MODE_CHANGE, {
-        mode: modename
-      });
-
-      ctx.store.setDirty();
-      ctx.store.render();
-
     },
     fire: function(name, event) {
       if (events[name]) {
@@ -161,6 +161,9 @@ module.exports = function(ctx) {
         ctx.container.removeEventListener('keydown', events.keydown);
         ctx.container.removeEventListener('keyup', events.keyup);
       }
+    },
+    trash: function(options) {
+      currentMode.trash(options);
     }
   };
 

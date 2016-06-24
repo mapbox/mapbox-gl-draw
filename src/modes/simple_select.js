@@ -5,7 +5,7 @@ var createSupplementaryPoints = require('../lib/create_supplementary_points');
 var SimpleSet = require('../lib/simple_set');
 const Constants = require('../constants');
 
-module.exports = function(ctx, startingSelectedIds) {
+module.exports = function(ctx, options = {}) {
   var startPos = null;
   var featureCoords = null;
   var startCoordinates = null;
@@ -13,6 +13,8 @@ module.exports = function(ctx, startingSelectedIds) {
   var boxSelecting = false;
   var dragging;
   var canDragMove;
+
+  const initiallySelectedFeatureIds = options.featureIds || [];
 
   function getUniqueIds(allFeatures) {
     if (!allFeatures.length) return [];
@@ -71,7 +73,7 @@ module.exports = function(ctx, startingSelectedIds) {
       canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(startingSelectedIds);
+      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
 
       // When a click falls outside any features,
       // - clear the selection
@@ -85,10 +87,9 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
-        ctx.api.changeMode(Constants.modes.DIRECT_SELECT, {
+        ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
           coordPath: e.featureTarget.properties.coord_path,
-          isDragging: true,
           startPos: e.lngLat
         });
         ctx.ui.queueMapClasses({mouse:'move'});
@@ -112,9 +113,9 @@ module.exports = function(ctx, startingSelectedIds) {
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
-          ctx.api.changeMode(Constants.modes.DIRECT_SELECT, {
+          ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
             featureId: e.featureTarget.properties.id
-          });
+          }, { emit: options.emit });
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
@@ -210,17 +211,16 @@ module.exports = function(ctx, startingSelectedIds) {
           ], this);
         }
       });
-
-      this.on('trash', () => true, function() {
-        featureCoords = null;
-        ctx.store.delete(ctx.store.getSelectedIds());
-      });
     },
     render: function(geojson, push) {
       geojson.properties.active = ctx.store.isSelected(geojson.properties.id) ? 'true' : 'false';
       push(geojson);
       if (geojson.properties.active !== 'true' || geojson.geometry.type === 'Point') return;
       createSupplementaryPoints(geojson).forEach(push);
+    },
+    trash() {
+      featureCoords = null;
+      ctx.store.delete(ctx.store.getSelectedIds());
     }
   };
 };

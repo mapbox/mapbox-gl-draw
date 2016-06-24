@@ -19,7 +19,7 @@ module.exports = function(ctx) {
 
   function stopDrawingAndRemove() {
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-    ctx.store.delete([point.id]);
+    ctx.store.delete([point.id], { silent: true });
   }
 
   function handleClick(e) {
@@ -28,7 +28,7 @@ module.exports = function(ctx) {
     ctx.map.fire(Constants.events.CREATE, {
       features: [point.toGeoJSON()]
     });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [point.id]);
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [point.id] });
   }
 
   return {
@@ -39,13 +39,12 @@ module.exports = function(ctx) {
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
-      this.on('trash', CommonSelectors.true, stopDrawingAndRemove);
     },
 
     stop() {
       ctx.ui.setActiveButton();
       if (!point.getCoordinate().length) {
-        ctx.store.delete([point.id]);
+        ctx.store.delete([point.id], { silent: true });
       }
     },
 
@@ -54,6 +53,10 @@ module.exports = function(ctx) {
       if (geojson.properties.active === 'false') {
         push(geojson);
       }
+    },
+
+    trash() {
+      stopDrawingAndRemove();
     }
   };
 };

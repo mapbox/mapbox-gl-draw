@@ -8,12 +8,14 @@ import {
   createMap,
   click
 } from './test_utils';
+import createAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 
 const container = document.createElement('div');
 document.body.appendChild(container);
 const map = createMap({ container });
 const fireSpy = spy(map, 'fire');
+const afterNextRender = createAfterNextRender(map);
 const Draw = GLDraw();
 map.addControl(Draw);
 
@@ -384,19 +386,21 @@ function runTests() {
     // Click the polygon button
     polygonButton.click();
 
-    firedWith(t, 'draw.modechange', {
-      mode: 'draw_polygon'
-    });
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'draw_polygon'
+      });
 
-    firedWith(t, 'draw.selectionchange', {
-      features: []
-    });
+      firedWith(t, 'draw.selectionchange', {
+        features: []
+      });
 
-    t.deepEqual(flushDrawEvents(), [
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
-    t.end();
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange',
+        'draw.selectionchange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
   });
 
   const polygon0_0_100_100GeoJson = {
@@ -565,6 +569,68 @@ function runTests() {
       t.end();
     });
   });
+
+  // Below are tests to ensure that API usage to modify data does not
+  // trigger events, only user interactions
+  test('API usage does not trigger events', t => {
+    Draw.deleteAll();
+    Draw.add({
+      type: 'Feature',
+      id: 'point',
+      properties: {},
+      geometry: {
+        type: 'Point',
+        coordinates: [10, 10]
+      }
+    });
+    Draw.add({
+      type: 'Feature',
+      id: 'line',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: [[10, 10], [20, 20]]
+      }
+    });
+    Draw.changeMode('draw_polygon');
+    Draw.changeMode('simple_select');
+    Draw.delete('point');
+    afterNextRender(() => {
+      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('except when the API function does not directly correspond to the event', t => {
+    const line = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: [[10, 10], [20, 20], [30, 30]]
+      }
+    };
+    const lineId = Draw.add(line);
+    Draw.changeMode('simple_select', {
+      featureIds: [lineId]
+    });
+    afterNextRender(() => {
+      Draw.trash();
+      afterNextRender(() => {
+        firedWith(t, 'draw.selectionchange', {
+          features: [line]
+        });
+        firedWith(t, 'draw.delete', {
+          features: [line]
+        });
+        t.deepEqual(flushDrawEvents(), [
+          'draw.selectionchange',
+          'draw.delete'
+        ], 'no unexpected draw events');
+        t.end();
+      });
+    });
+  });
 }
 
 function flushDrawEvents() {
@@ -601,12 +667,6 @@ function firedWith(tester, eventName, expectedEventData) {
   }
   tester.deepEqual(actualEventData, expectedEventData, 'with correct data');
   return call.args[1];
-}
-
-function afterNextRender(cb) {
-  setTimeout(() => {
-    cb();
-  }, 32);
 }
 
 function withoutId(obj) {

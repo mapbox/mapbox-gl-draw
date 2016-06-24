@@ -19,8 +19,10 @@ function createMockContext({ position, controls } = {}) {
         keybindings: true
       },
       api: {
-        changeMode: spy(),
         trash: spy()
+      },
+      events: {
+        changeMode: spy()
       }
     },
     cleanup() {
@@ -218,9 +220,9 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(pointButton.classList.contains('active'), 'point button is inactive');
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
 
-    st.equal(context.api.changeMode.callCount, 1, 'changeMode called');
-    st.deepEqual(context.api.changeMode.getCall(0).args, ['draw_line_string'], 'with correct arguments');
-    context.api.changeMode.reset();
+    st.equal(context.events.changeMode.callCount, 1, 'changeMode called');
+    st.deepEqual(context.events.changeMode.getCall(0).args, ['draw_line_string'], 'with correct arguments');
+    context.events.changeMode.reset();
 
     st.end();
   });
@@ -233,9 +235,9 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(pointButton.classList.contains('active'), 'point button is inactive');
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
 
-    st.equal(context.api.changeMode.callCount, 1, 'changeMode called');
-    st.deepEqual(context.api.changeMode.getCall(0).args, ['draw_polygon'], 'with correct arguments');
-    context.api.changeMode.reset();
+    st.equal(context.events.changeMode.callCount, 1, 'changeMode called');
+    st.deepEqual(context.events.changeMode.getCall(0).args, ['draw_polygon'], 'with correct arguments');
+    context.events.changeMode.reset();
 
     st.end();
   });
@@ -247,7 +249,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(polygonButton.classList.contains('active'), 'polygon button is inactive');
     st.ok(pointButton.classList.contains('active'), 'point button is active');
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
-    st.equal(context.api.changeMode.callCount, 0, 'changeMode not called');
+    st.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
 
     testUi.setActiveButton();
 
@@ -255,7 +257,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(polygonButton.classList.contains('active'), 'polygon button is inactive');
     st.notOk(pointButton.classList.contains('active'), 'point button is inactive');
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
-    st.equal(context.api.changeMode.callCount, 0, 'changeMode not called');
+    st.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
 
     st.end();
   });
@@ -268,8 +270,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.notOk(pointButton.classList.contains('active'), 'point button is inactive');
     st.notOk(trashButton.classList.contains('active'), 'trash button is inactive');
 
-    st.equal(context.api.changeMode.callCount, 0, 'changeMode not called');
-    st.equal(context.api.trash.callCount, 1, 'trash called');
+    st.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
 
     st.end();
   });

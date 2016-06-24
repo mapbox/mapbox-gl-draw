@@ -75,12 +75,11 @@ test('draw_line_string start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['line_string'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
-  t.ok(lifecycleContext.on.calledWith('trash', CommonSelectors.true));
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.disable.callCount, 1);
@@ -116,8 +115,10 @@ test('draw_line_string stop with invalid line', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
-  t.deepEqual(context.store.delete.getCall(0).args, [[context._test.line.id]],
-    'store.delete received correct arguments');
+  t.deepEqual(context.store.delete.getCall(0).args, [
+    [context._test.line.id],
+    { silent: true }
+  ], 'store.delete received correct arguments');
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.enable.callCount, 1);

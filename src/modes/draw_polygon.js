@@ -17,7 +17,7 @@ module.exports = function(ctx) {
 
   var stopDrawingAndRemove = function() {
     ctx.events.changeMode('simple_select');
-    ctx.store.delete([feature.id]);
+    ctx.store.delete([feature.id], { silent: true });
   };
 
   var pos = 0;
@@ -51,7 +51,7 @@ module.exports = function(ctx) {
         features: [feature.toGeoJSON()]
       });
     }
-    ctx.events.changeMode('simple_select', [feature.id]);
+    ctx.events.changeMode('simple_select', { featureIds: [feature.id] });
   };
 
   return {
@@ -68,7 +68,6 @@ module.exports = function(ctx) {
       this.on('click', () => true, onClick);
       this.on('keyup', isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', isEnterKey, onFinish);
-      this.on('trash', () => true, stopDrawingAndRemove);
     },
     stop: function() {
       setTimeout(() => {
@@ -78,7 +77,7 @@ module.exports = function(ctx) {
       }, 0);
       ctx.ui.setActiveButton();
       if (!feature.isValid()) {
-        ctx.store.delete([feature.id]);
+        ctx.store.delete([feature.id], { silent: true });
       }
     },
     render: function(geojson, push) {
@@ -99,6 +98,9 @@ module.exports = function(ctx) {
       else if (geojson.properties.active === 'false' || pos > 1) {
         push(geojson);
       }
+    },
+    trash() {
+      stopDrawingAndRemove();
     }
   };
 };

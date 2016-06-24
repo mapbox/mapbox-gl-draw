@@ -83,7 +83,7 @@ Store.prototype.add = function(feature) {
  * and fires an event.
  * @param {string | Array<string>} featureIds
  * @param {Object} [options]
- * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
 Store.prototype.delete = function(featureIds, options = {}) {
@@ -94,7 +94,7 @@ Store.prototype.delete = function(featureIds, options = {}) {
     if (!options.silent) {
       this._deletedFeaturesToEmit.add(this._features[id]);
     }
-    _emitSelectionChange this._features[id];
+    delete this._features[id];
     this.isDirty = true;
   });
   return this;
@@ -120,7 +120,7 @@ Store.prototype.getAll = function() {
  * Adds features to the current selection.
  * @param {string | Array<string>} featureIds
  * @param {Object} [options]
- * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
 Store.prototype.select = function(featureIds, options = {}) {
@@ -138,7 +138,7 @@ Store.prototype.select = function(featureIds, options = {}) {
  * Deletes features from the current selection.
  * @param {string | Array<string>} featureIds
  * @param {Object} [options]
- * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
 Store.prototype.deselect = function(featureIds, options = {}) {
@@ -155,11 +155,11 @@ Store.prototype.deselect = function(featureIds, options = {}) {
 /**
  * Clears the current selection.
  * @param {Object} [options]
- * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
 Store.prototype.clearSelected = function(options = {}) {
-  this.deselect(this._selectedFeatureIds.values(), options);
+  this.deselect(this._selectedFeatureIds.values(), { silent: options.silent });
   return this;
 };
 
@@ -168,7 +168,7 @@ Store.prototype.clearSelected = function(options = {}) {
  * If no feature ids are passed, the store is just cleared.
  * @param {string | Array<string> | undefined} featureIds
  * @param {Object} [options]
- * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
 Store.prototype.setSelected = function(featureIds, options = {}) {
@@ -177,12 +177,12 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
   // Deselect any features not in the new selection
   this.deselect(this._selectedFeatureIds.values().filter(id => {
     return featureIds.indexOf(id) === -1;
-  }), options);
+  }), { silent: options.silent });
 
   // Select any features in the new selection that were not already selected
   this.select(featureIds.filter(id => {
     return !this._selectedFeatureIds.has(id);
-  }), options);
+  }), { silent: options.silent });
 
   return this;
 };

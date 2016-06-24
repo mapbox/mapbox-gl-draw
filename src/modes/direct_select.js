@@ -91,21 +91,6 @@ module.exports = function(ctx, opts) {
       this.on('click', isInactiveFeature, function() {
         ctx.events.changeMode('simple_select');
       });
-      this.on('trash', () => selectedCoordPaths.length > 0, function() {
-        selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
-        ctx.map.fire(Constants.events.UPDATE, {
-          type: Constants.updateTypes.CHANGE_COORDINATES,
-          features: ctx.store.getSelected().map(f => f.toGeoJSON())
-        });
-        selectedCoordPaths = [];
-        if (feature.isValid() === false) {
-          ctx.store.delete([featureId]);
-          ctx.events.changeMode('simple_select');
-        }
-      });
-      this.on('trash', () => selectedCoordPaths.length === 0, function() {
-        ctx.events.changeMode('simple_select', [featureId]);
-      });
     },
     stop: function() {
       ctx.map.doubleClickZoom.enable();
@@ -123,6 +108,22 @@ module.exports = function(ctx, opts) {
       else {
         geojson.properties.active = 'false';
         push(geojson);
+      }
+    },
+    trash: function(options = {}) {
+      if (selectedCoordPaths.length === 0) {
+        return ctx.events.changeMode('simple_select', { features: [feature] }, { emit: options.emit });
+      }
+
+      selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
+      ctx.map.fire(Constants.events.UPDATE, {
+        type: Constants.updateTypes.CHANGE_COORDINATES,
+        features: ctx.store.getSelected().map(f => f.toGeoJSON())
+      });
+      selectedCoordPaths = [];
+      if (feature.isValid() === false) {
+        ctx.store.delete([featureId], { emit: options.emit });
+        ctx.events.changeMode('simple_select', null);
       }
     }
   };

@@ -20,7 +20,7 @@ module.exports = function(ctx) {
 
   function stopDrawingAndRemove() {
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-    ctx.store.delete([line.id]);
+    ctx.store.delete([line.id], { silent: true });
   }
 
   function handleMouseMove(e) {
@@ -48,7 +48,7 @@ module.exports = function(ctx) {
         features: [line.toGeoJSON()]
       });
     }
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [line.id]);
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
   }
 
   return {
@@ -65,7 +65,6 @@ module.exports = function(ctx) {
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', CommonSelectors.isEnterKey, finish);
-      this.on('trash', CommonSelectors.true, stopDrawingAndRemove);
     },
 
     stop() {
@@ -78,7 +77,7 @@ module.exports = function(ctx) {
 
       // If it's invalid, just destroy the thing
       if (!line.isValid()) {
-        ctx.store.delete([line.id]);
+        ctx.store.delete([line.id], { silent: true });
       }
     },
 
@@ -87,6 +86,10 @@ module.exports = function(ctx) {
       geojson.properties.active = (geojson.properties.id === line.id) ? 'true' : 'false';
       geojson.properties.meta = (geojson.properties.active === 'true') ? 'feature' : geojson.properties.meta;
       callback(geojson);
+    },
+
+    trash() {
+      stopDrawingAndRemove();
     }
   };
 };

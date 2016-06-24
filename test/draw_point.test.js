@@ -69,11 +69,10 @@ test('draw_point start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['point'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 3, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
-  t.ok(lifecycleContext.on.calledWith('trash', CommonSelectors.true));
 
   t.end();
 });
@@ -103,8 +102,10 @@ test('draw_point stop with no point placed', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
-  t.deepEqual(context.store.delete.getCall(0).args, [[context._test.point.id]],
-    'store.delete received correct arguments');
+  t.deepEqual(context.store.delete.getCall(0).args, [
+    [context._test.point.id],
+    { silent: true }
+  ], 'store.delete received correct arguments');
 
   t.end();
 });
