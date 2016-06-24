@@ -67,8 +67,10 @@
     "mapbox-gl": "^0.20.0 || ^0.19.0 || ^0.18.0 || ^0.17.0"
   },
   "dependencies": {
+    "geojson-normalize": "0.0.1",
     "geojsonhint": "^1.2.0",
     "hat": "0.0.3",
+    "lodash.isequal": "^4.2.0",
     "point-geometry": "0.0.0",
     "sinon": "^1.17.4",
     "turf-area": "^1.1.1"

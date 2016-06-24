@@ -169,6 +169,24 @@ Draw
 
 ---
 
+### `.set(Object: featureCollection) -> [featureId, featureId]`
+
+This function takes a featureCollection and performs the required delete, create and update actions internally to make Draw represent this change. Effectively this is the same as `Draw.deleteAll()` followed by `Draw.add(featureCollection)` except that it doesn't effect performance as much.
+
+Example:
+
+```js
+var ids = Draw.set({type: 'FeatureCollection', features: [{
+  type: 'Feature',
+  properties: {},
+  id: 'example-id',
+  geometry: { type: 'Point', coordinates: [0, 0] }
+}]});
+// => ['example-id']
+```
+
+---
+
 ### `.trash() -> Draw`
 
 This envokes the current modes trash event. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, these cancel the current process.
