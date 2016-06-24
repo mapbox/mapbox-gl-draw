@@ -33,13 +33,13 @@ styles | Array | An array of style objects. By default draw provides a style for
 
 `mapboxgl.Draw()` returns an instance of `Draw` which has the following API for working with your data:
 
-###`.add(Object: GeoJSON) -> String || [String]`
+###`.add(Object: GeoJSON) -> [String]`
 
-This method takes either a Feature or a FeatureCollection and adds it to Draw. It returns an id for interacting with the added feature. When a FeatureCollection is provided an array of ids is returned. If there is no ID on the feature, a random ID will be genearted.
+This method takes either a Feature or a FeatureCollection and adds it to Draw. It returns an array of ids for interacting with the added features.
 
-Currently the only supoorted GeoJSON feature types are `Point`, `LineString` and `Polygon`.
+Currently the supported GeoJSON feature types are `Point`, `LineString`, `Polygon`, `MultiPoint`,  `MultiLineString`, and `MultiPolygon`.
 
-Adding a feature with the same id as another feature in Draw forces an update.
+Adding a feature with the same id as another feature performs an update.
 
 Example:
 
