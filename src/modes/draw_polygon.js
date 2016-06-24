@@ -44,10 +44,13 @@ module.exports = function(ctx) {
   };
 
   var onFinish = function() {
-    // Prevent finishing if invalid
-    if (!feature.isValid()) return ctx.store.delete([feature.id]);
     feature.removeCoordinate(`0.${pos}`);
     pos--;
+    if (feature.isValid()) {
+      ctx.map.fire(Constants.events.CREATE, {
+        features: [feature.toGeoJSON()]
+      });
+    }
     ctx.events.changeMode('simple_select', [feature.id]);
   };
 

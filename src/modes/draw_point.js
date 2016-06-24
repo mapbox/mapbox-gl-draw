@@ -25,6 +25,9 @@ module.exports = function(ctx) {
   function handleClick(e) {
     ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_MOVE_CLASS_FRAGMENT });
     point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
+    ctx.map.fire(Constants.events.CREATE, {
+      features: [point.toGeoJSON()]
+    });
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [point.id]);
   }
 

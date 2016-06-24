@@ -43,6 +43,11 @@ module.exports = function(ctx) {
   function finish() {
     line.removeCoordinate(`${currentVertexPosition}`);
     currentVertexPosition--;
+    if (line.isValid()) {
+      ctx.map.fire(Constants.events.CREATE, {
+        features: [line.toGeoJSON()]
+      });
+    }
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, [line.id]);
   }
 

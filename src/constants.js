@@ -18,6 +18,19 @@ module.exports = {
     DRAW_LINE: 'draw_line_string',
     DRAW_POLYGON: 'draw_polygon',
     DRAW_POINT: 'draw_point',
-    SIMPLE_SELECT: 'simple_select'
+    SIMPLE_SELECT: 'simple_select',
+    DIRECT_SELECT: 'direct_select'
+  },
+  events: {
+    CREATE: 'draw.create',
+    DELETE: 'draw.delete',
+    UPDATE: 'draw.update',
+    SELECTION_CHANGE: 'draw.selectionchange',
+    MODE_CHANGE: 'draw.modechange',
+    RENDER: 'draw.render'
+  },
+  updateTypes: {
+    MOVE: 'move',
+    CHANGE_COORDINATES: 'change_coordinates'
   }
 };

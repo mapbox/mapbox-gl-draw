@@ -3,7 +3,6 @@ import test from 'tape';
 import GLDraw from '../';
 import { createMap, cloneFeature } from './test_utils';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-import stub from 'sinon/lib/sinon/stub'; // avoid babel-register-related error by importing only stub
 import AfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 
@@ -25,15 +24,15 @@ test('simple_select', t => {
     Draw.deleteAll();
     map.fire.reset();
     afterNextRender(cb);
-  }
+  };
 
   var getFireArgs = function() {
     var args = [];
-    for (var i=0; i<map.fire.callCount; i++) {
+    for (var i = 0; i < map.fire.callCount; i++) {
       args.push(map.fire.getCall(i).args);
     }
     return args;
-  }
+  };
 
   t.test('simple_select - init map for tests', t => {
     var done = function() {
@@ -67,11 +66,11 @@ test('simple_select', t => {
         afterNextRender(() => {
           t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
           t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
-          var args = getFireArgs().filter(arg => arg[0] === 'draw.select');
-          t.equal(args.length, 1, 'should have one and only one select event');
+          var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+          t.equal(args.length, 1, 'should have one and only one selectionchange event');
           if (args.length > 0) {
-            t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-            t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+            t.equal(args[0][1].features.length, 1, 'should have one feature selected');
+            t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
           }
           cleanUp(() => t.end());
         });
@@ -81,7 +80,7 @@ test('simple_select', t => {
 
    t.test('simple_select - box select many features', t => {
     var ids = [];
-    for (var i=0; i<5; i++) {
+    for (var i = 0; i < 5; i++) {
       ids.push(Draw.add(cloneFeature('point')));
     }
     map.fire.reset();
@@ -94,10 +93,10 @@ test('simple_select', t => {
 
       afterNextRender(() => {
         t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
-        var args = getFireArgs().filter(arg => arg[0] === 'draw.select');
+        var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
         t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, ids.length, 'should select all features');
+          t.equal(args[0][1].features.length, ids.length, 'should have all features selected');
         }
         cleanUp(() => t.end());
       });
@@ -115,7 +114,7 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(-15, -15, true));
 
       afterNextRender(() => {
-        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.select').length, 0, 'there should be no draw.select event');
+        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
         cleanUp(() => t.end());
       });
     });
@@ -124,25 +123,24 @@ test('simple_select', t => {
   t.test('simple_select - deselect', t => {
     var id = Draw.add(cloneFeature('point'));
     Draw.changeMode('simple_select', [id]);
-    map.fire.reset();
 
     afterNextRender(() => {
+      map.fire.reset();
       map.fire('mousedown', makeMouseEvent(15, 15));
       map.fire('mouseup', makeMouseEvent(15, 15));
 
       afterNextRender(() => {
-        var args = getFireArgs().filter(arg => arg[0] === 'draw.deselect');
-        t.equal(args.length, 1, 'should have one and only one deselect event');
+        var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to select');
+          t.equal(args[0][1].features.length, 0, 'should have no features selected');
         }
         cleanUp(() => t.end());
       });
     });
   });
 
-  t.test('simple_select - click on an deselected feature', t => {
+  t.test('simple_select - click on a deselected feature', t => {
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select');
 
@@ -155,18 +153,18 @@ test('simple_select', t => {
       afterNextRender(() => {
         t.equal(map.doubleClickZoom.disable.callCount, 1, 'disable doubleClickZoom');
         var args = getFireArgs();
-        args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one select event');
+        args = args.filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          t.equal(args[0][1].features.length, 1, 'should have only one feature selected');
+          t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
         }
         cleanUp(() => t.end());
       });
     });
   });
 
-  t.test('simple_select - click on an selected feature with shift down', t => {
+  t.test('simple_select - click on a selected feature with shift down', t => {
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [id]);
 
@@ -180,11 +178,10 @@ test('simple_select', t => {
         t.equal(map.doubleClickZoom.disable.callCount, 1, 'disable doubleClickZoom');
         t.equal(map.getContainer().className.indexOf('mouse-pointer') > -1, true, 'mouse-pointer class has been set');
         var args = getFireArgs();
-        args = args.filter(arg => arg[0] === 'draw.deselect');
-        t.equal(args.length, 1, 'should have one and only one deselect event');
+        args = args.filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should deselect only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should deselect the feature we expect it to deselect');
+          t.equal(args[0][1].features.length, 0, 'should have no features selected');
         }
         cleanUp(() => t.end());
       });
@@ -196,18 +193,20 @@ test('simple_select', t => {
     Draw.changeMode('simple_select', [id]);
     map.fire.reset();
     Draw.trash();
-    var args = getFireArgs();
-    t.equal(args.length, 1, 'should have one and only one event');
-    t.equal(args[0][0], 'draw.deleted');
-    t.equal(args[0][1].featureIds.length, 1, 'should delete only one feautre');
-    t.equal(args[0][1].featureIds[0].id, id, 'should delete the feature we expect it to delete');
+    afterNextRender(() => {
+      var args = getFireArgs();
+      args = args.filter(arg => arg[0] === 'draw.delete');
+      t.equal(args.length, 1, 'should have one and only one draw.delete event');
+      t.equal(args[0][1].features.length, 1, 'should delete only one feature');
+      t.equal(args[0][1].features[0].id, id, 'should delete the feature we expect it to delete');
 
-    var selectedFeatures = Draw.getSelectedIds();
-    t.equal(selectedFeatures.length, 0, 'nothing should be selected anymore');
-    cleanUp(() => t.end());
+      var selectedFeatures = Draw.getSelectedIds();
+      t.equal(selectedFeatures.length, 0, 'nothing should be selected anymore');
+      cleanUp(() => t.end());
+    });
   });
 
-  t.test('simple_select - click on an selected feature with shift up to enter direct_select', t => {
+  t.test('simple_select - click on a selected feature with shift up to enter direct_select', t => {
     Draw.deleteAll();
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [id]);
@@ -228,7 +227,6 @@ test('simple_select', t => {
         t.equal(args.length, 1, 'should have one and only one modechange event');
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
-          t.equal(args[0][1].opts.featureId, id, 'should work on the feature we expect')
         }
         cleanUp(() => t.end());
       });
@@ -254,14 +252,13 @@ test('simple_select', t => {
         t.equal(args.length, 1, 'should have one and only one modechange event');
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
-          t.equal(args[0][1].opts.featureId, id, 'should work on the feature we expect')
         }
         cleanUp(() => t.end());
       });
     });
   });
 
-  t.test('simple_select - click on an deselected feature with shift down while having another feature selected', t => {
+  t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [pointId]);
@@ -273,21 +270,22 @@ test('simple_select', t => {
 
       afterNextRender(() => {
         t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
-        t.equal(Draw.getSelectedIds().indexOf(pointId) != -1, true, 'point is still selected');
-        t.equal(Draw.getSelectedIds().indexOf(id) != -1, true, 'polygon is now selected');
+        t.equal(Draw.getSelectedIds().indexOf(pointId) !== -1, true, 'point is still selected');
+        t.equal(Draw.getSelectedIds().indexOf(id) !== -1, true, 'polygon is now selected');
         var args = getFireArgs();
-        args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one select event');
+        args = args.filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          t.equal(args[0][1].features.length, 2, 'should have two features selected');
+          t.equal(args[0][1].features[0].id, pointId, 'selection includes point');
+          t.equal(args[0][1].features[1].id, id, 'selection includes polygon');
         }
         cleanUp(() => t.end());
       });
     });
   });
 
-  t.test('simple_select - click on an deselected feature with shift up, while having another feature selected', t => {
+  t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', t => {
     var pointId = Draw.add(cloneFeature('point'));
     var id = Draw.add(cloneFeature('polygon'));
     Draw.changeMode('simple_select', [pointId]);
@@ -300,14 +298,13 @@ test('simple_select', t => {
       afterNextRender(() => {
         t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
         t.equal(Draw.getSelectedIds().indexOf(pointId) === -1, true, 'point is no longer selected');
-        t.equal(Draw.getSelectedIds().indexOf(id) != -1, true, 'polygon is now selected');
+        t.equal(Draw.getSelectedIds().indexOf(id) !== -1, true, 'polygon is now selected');
         var args = getFireArgs();
-        t.equal(args.filter(arg => arg[0] === 'draw.deselect').length, 1, 'should have one and only one deselect event');
-        args = args.filter(arg => arg[0] === 'draw.select');
-        t.equal(args.length, 1, 'should have one and only one select event');
+        args = args.filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
         if (args.length > 0) {
-          t.equal(args[0][1].featureIds.length, 1, 'should select only one feautre');
-          t.equal(args[0][1].featureIds[0], id, 'should select the feature we expect it to select');
+          t.equal(args[0][1].features.length, 1, 'should have only one feature selected');
+          t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
         }
         cleanUp(() => t.end());
       });
@@ -324,7 +321,7 @@ test('simple_select', t => {
 
     var countPositions = function(feature) {
       return feature.geometry.coordinates.join(',').split(',').length;
-    }
+    };
 
     var startPosition = cloneFeature('point').geometry.coordinates;
     Draw.changeMode('simple_select', [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]);
@@ -350,17 +347,17 @@ test('simple_select', t => {
       t.equal(movedLineString.geometry.coordinates[0][1], cloneFeature('line').geometry.coordinates[0][1] + 25, 'line lat moved');
       t.equal(countPositions(movedLineString), countPositions(cloneFeature('line')), 'line has same number of postions');
 
-      var movedMultiLineString =Draw.get(multiLineStringId);
+      var movedMultiLineString = Draw.get(multiLineStringId);
       t.equal(movedMultiLineString.geometry.coordinates[0][0][0], cloneFeature('multiLineString').geometry.coordinates[0][0][0] + 25, 'multiLineString lng moved');
       t.equal(movedMultiLineString.geometry.coordinates[0][0][1], cloneFeature('multiLineString').geometry.coordinates[0][0][1] + 25, 'multiLineString lat moved');
       t.equal(countPositions(movedMultiLineString), countPositions(cloneFeature('multiLineString')), 'multiLineString has same number of postions');
 
-      var movedPolygon =Draw.get(polygonId);
+      var movedPolygon = Draw.get(polygonId);
       t.equal(movedPolygon.geometry.coordinates[0][0][0], cloneFeature('polygon').geometry.coordinates[0][0][0] + 25, 'polygon lng moved');
       t.equal(movedPolygon.geometry.coordinates[0][0][1], cloneFeature('polygon').geometry.coordinates[0][0][1] + 25, 'polygon lat moved');
       t.equal(countPositions(movedPolygon), countPositions(cloneFeature('polygon')), 'polygon has same number of postions');
 
-      var movedMultiPolygon =Draw.get(multiPolygonId);
+      var movedMultiPolygon = Draw.get(multiPolygonId);
       t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][0], cloneFeature('multiPolygon').geometry.coordinates[0][0][0][0] + 25, 'multiPolygon lng moved');
       t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], cloneFeature('multiPolygon').geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
       t.equal(countPositions(movedMultiPolygon), countPositions(cloneFeature('multiPolygon')), 'multiPolygon has same number of postions');
@@ -371,4 +368,3 @@ test('simple_select', t => {
 
   t.end();
 });
-

@@ -1,14 +1,14 @@
 var ModeHandler = require('./lib/mode_handler');
 var getFeatureAtAndSetCursors = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
-var SimpleSet = require('./lib/simple_set');
+var Constants = require('./constants');
 
 var modes = {
-  'simple_select': require('./modes/simple_select'),
-  'direct_select': require('./modes/direct_select'),
-  'draw_point': require('./modes/draw_point'),
-  'draw_line_string': require('./modes/draw_line_string'),
-  'draw_polygon': require('./modes/draw_polygon')
+  [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
+  [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
+  [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
+  [Constants.modes.DRAW_LINE]: require('./modes/draw_line_string'),
+  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon')
 };
 
 module.exports = function(ctx) {
@@ -18,23 +18,8 @@ module.exports = function(ctx) {
   };
 
   var events = {};
-  var currentModeName = 'simple_select';
+  var currentModeName = Constants.modes.SIMPLE_SELECT;
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
-  var recentlyUpdatedFeatureIds = new SimpleSet();
-
-  const emitModifiedFeatures = () => {
-    ctx.store.getChangedIds().forEach(id => recentlyUpdatedFeatureIds.add(id));
-
-    let features = recentlyUpdatedFeatureIds.values().map(id => ctx.store.get(id))
-      .filter(f => f !== undefined)
-      .filter(f => f.isValid())
-      .map(f => f.toGeoJSON());
-
-    if (features.length > 0) {
-      ctx.map.fire('draw.modified', {features: features});
-    }
-    recentlyUpdatedFeatureIds.clear();
-  };
 
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
@@ -58,10 +43,6 @@ module.exports = function(ctx) {
       event.featureTarget = target;
       currentMode.mousemove(event);
     }
-  };
-
-  events.drawChanged = function(event) {
-    event.features.forEach(f => recentlyUpdatedFeatureIds.add(f.id));
   };
 
   events.mousedown = function(event) {
@@ -89,18 +70,18 @@ module.exports = function(ctx) {
     else {
       currentMode.mouseup(event);
     }
-
-    emitModifiedFeatures();
   };
 
   events.trash = function() {
     currentMode.trash();
   };
 
-  var isKeyModeValid = (code) => !(code === 8 || (code >= 48 && code <= 57));
+  // 8 - Backspace
+  // 46 - Delete
+  var isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    if (event.keyCode === 8 && ctx.options.controls.trash) {
+    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
       event.preventDefault();
       api.fire('trash');
     }
@@ -108,13 +89,13 @@ module.exports = function(ctx) {
       currentMode.keydown(event);
     }
     else if (event.keyCode === 49 && ctx.options.controls.point) {
-      ctx.api.changeMode('draw_point');
+      ctx.api.changeMode(Constants.modes.DRAW_POINT);
     }
     else if (event.keyCode === 50 && ctx.options.controls.line_string) {
-      ctx.api.changeMode('draw_line_string');
+      ctx.api.changeMode(Constants.modes.DRAW_LINE);
     }
     else if (event.keyCode === 51 && ctx.options.controls.polygon) {
-      ctx.api.changeMode('draw_polygon');
+      ctx.api.changeMode(Constants.modes.DRAW_POLYGON);
     }
   };
 
@@ -122,7 +103,6 @@ module.exports = function(ctx) {
     if (isKeyModeValid(event.keyCode)) {
       currentMode.keyup(event);
     }
-    emitModifiedFeatures();
   };
 
   events.zoomend = function() {
@@ -147,9 +127,8 @@ module.exports = function(ctx) {
       var mode = modebuilder(ctx, opts);
       currentMode = ModeHandler(mode, ctx);
 
-      ctx.map.fire('draw.modechange', {
-        mode: modename,
-        opts: opts
+      ctx.map.fire(Constants.events.MODE_CHANGE, {
+        mode: modename
       });
 
       ctx.store.setDirty();
@@ -167,8 +146,6 @@ module.exports = function(ctx) {
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
 
-      ctx.map.on('draw.changed', events.drawChanged);
-
       if (ctx.options.keybindings) {
         ctx.container.addEventListener('keydown', events.keydown);
         ctx.container.addEventListener('keyup', events.keyup);
@@ -179,8 +156,6 @@ module.exports = function(ctx) {
 
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
-
-      ctx.map.off('draw.changed', events.drawChanged);
 
       if (ctx.options.keybindings) {
         ctx.container.removeEventListener('keydown', events.keydown);
