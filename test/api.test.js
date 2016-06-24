@@ -41,7 +41,7 @@ test('API test', t => {
   });
 
   t.test('add', t => {
-    var id = Draw.add(feature);
+    var id = Draw.add(feature)[0];
     t.equals(typeof id, 'string', 'valid string id returned on add');
 
     // add featureCollection
@@ -50,7 +50,7 @@ test('API test', t => {
       'valid string id returned when adding a featureCollection');
     Draw.deleteAll();
 
-    var multiId = Draw.add(cloneFeature('multiPolygon'));
+    var multiId = Draw.add(cloneFeature('multiPolygon'))[0];
     t.equals('string', typeof multiId, 'accepts multi features');
 
     t.end();
@@ -104,7 +104,7 @@ test('API test', t => {
   });
 
   t.test('delete', t => {
-    var id = Draw.add(feature);
+    var id = Draw.add(feature)[0];
     Draw.delete(id);
     t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
     t.end();

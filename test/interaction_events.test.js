@@ -742,7 +742,7 @@ function runTests() {
         coordinates: [[10, 10], [20, 20], [30, 30]]
       }
     };
-    const lineId = Draw.add(line);
+    const lineId = Draw.add(line)[0];
     Draw.changeMode('simple_select', {
       featureIds: [lineId]
     });

@@ -1,3 +1,5 @@
+var isEqual = require('lodash.isequal');
+var normalize = require('geojson-normalize');
 var hat = require('hat');
 var featuresAt = require('./lib/features_at');
 var geojsonhint = require('geojsonhint');
@@ -11,8 +13,6 @@ var featureTypes = {
   'MultiPoint': require('./feature_types/multi_feature')
 };
 
-var featureTypeStr = Object.keys(featureTypes).join(', ');
-
 module.exports = function(ctx) {
 
   return {
@@ -23,50 +23,52 @@ module.exports = function(ctx) {
     getSelectedIds: function () {
       return ctx.store.getSelectedIds();
     },
-    add: function (geojson, validateGeoJSON=true) {
-       if (geojson.type !== 'FeatureCollection' && !geojson.geometry) {
-        geojson = {
-          type: 'Feature',
-          id: geojson.id,
-          properties: geojson.properties || {},
-          geometry: geojson
-        };
+    set: function(featureCollection) {
+      if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
+        throw new Error('Invalid FeatureCollection');
+      }
+      var toDelete = JSON.parse(JSON.stringify(ctx.store.getAllIds()));
+      var newIds = this.add(featureCollection);
+
+      var newIdsForFasterLookUp = {};
+      for (var i = 0; i < newIds.length; i++) {
+        newIdsForFasterLookUp[newIds[i]] = 0;
       }
 
-      if (validateGeoJSON) {
-        var errors = geojsonhint.hint(geojson);
-        if (errors.length) {
-          throw new Error(errors[0].message);
+      toDelete = toDelete.filter(id => {
+        return newIdsForFasterLookUp[id] === undefined;
+      });
+      ctx.store.delete(toDelete);
+      return newIds;
+    },
+    add: function (geojson) {
+      var featureCollection = normalize(geojson);
+      var errors = geojsonhint.hint(featureCollection);
+      if (errors.length) {
+        throw new Error(errors[0].message);
+      }
+      featureCollection = JSON.parse(JSON.stringify(featureCollection));
+
+      var ids = featureCollection.features.map(feature => {
+        feature.id = feature.id || hat();
+
+        if (ctx.store.get(feature.id) === undefined) {
+          var model = featureTypes[feature.geometry.type];
+          let internalFeature = new model(ctx, feature);
+          ctx.store.add(internalFeature);
         }
-
-        (geojson.type === 'FeatureCollection' ? geojson.features : [geojson]).forEach(feature => {
-          if (featureTypes[feature.geometry.type] === undefined) {
-            throw new Error(`Invalid feature type. Must be ${featureTypeStr}`);
+        else {
+          let internalFeature = ctx.store.get(feature.id);
+          internalFeature.properties = feature.properties;
+          if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
+            internalFeature.incomingCoords(feature.geometry.coordinates);
           }
-        });
-      }
+        }
+        return feature.id;
+      });
 
-      if (geojson.type === 'FeatureCollection') {
-        return geojson.features.map(feature => this.add(feature, false));
-      }
-
-      geojson = JSON.parse(JSON.stringify(geojson));
-
-      geojson.id = geojson.id || hat();
-
-      if (ctx.store.get(geojson.id) === undefined) {
-        var model = featureTypes[geojson.geometry.type];
-
-        let internalFeature = new model(ctx, geojson);
-        ctx.store.add(internalFeature);
-      }
-      else {
-        let internalFeature = ctx.store.get(geojson.id);
-        internalFeature.properties = geojson.properties;
-        internalFeature.incomingCoords(geojson.geometry.coordinates);
-      }
       ctx.store.render();
-      return geojson.id;
+      return ids;
     },
     get: function (id) {
       var feature = ctx.store.get(id);
