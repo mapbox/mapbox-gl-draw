@@ -143,7 +143,7 @@ function runTests() {
     map.fire('mouseup', makeMouseEvent(35, 10));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'move',
+        action: 'move',
         features: [point35_15GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -279,7 +279,7 @@ function runTests() {
 
     afterNextRender(() => {
       line20_40_60Id = firedWith(t, 'draw.update', {
-        type: 'move',
+        action: 'move',
         features: [line20_40_60GeoJson]
       }).features[0].id;
 
@@ -328,7 +328,7 @@ function runTests() {
     map.fire('mouseup', makeMouseEvent(140, 120));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [line20_140_60GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -353,7 +353,7 @@ function runTests() {
     click(map, makeMouseEvent(80, 60));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [line20_60_140_60GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -379,7 +379,7 @@ function runTests() {
     container.dispatchEvent(backspaceEvent);
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [line20_60_140GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -528,7 +528,7 @@ function runTests() {
 
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'move',
+        action: 'move',
         features: [line40_100_160GeoJson, polygon20_20_120_120GeoJson]
       });
 
@@ -613,7 +613,7 @@ function runTests() {
 
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [polygon0_0_120_120GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -638,7 +638,7 @@ function runTests() {
     click(map, makeMouseEvent(120, 30));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [polygon0_0_120_120_120GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
@@ -664,7 +664,7 @@ function runTests() {
     Draw.trash();
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
-        type: 'change_coordinates',
+        action: 'change_coordinates',
         features: [polygon0_120_120_0GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [

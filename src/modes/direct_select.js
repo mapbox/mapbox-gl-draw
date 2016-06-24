@@ -37,7 +37,7 @@ module.exports = function(ctx, opts) {
     var about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
     ctx.map.fire(Constants.events.UPDATE, {
-      type: Constants.updateTypes.CHANGE_COORDINATES,
+      action: Constants.updateActions.CHANGE_COORDINATES,
       features: ctx.store.getSelected().map(f => f.toGeoJSON())
     });
     selectedCoordPaths = [about.coord_path];
@@ -76,7 +76,7 @@ module.exports = function(ctx, opts) {
       this.on('mouseup', () => true, function() {
         if (dragging) {
           ctx.map.fire(Constants.events.UPDATE, {
-            type: Constants.updateTypes.CHANGE_COORDINATES,
+            action: Constants.updateActions.CHANGE_COORDINATES,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
         }
@@ -110,19 +110,19 @@ module.exports = function(ctx, opts) {
         push(geojson);
       }
     },
-    trash: function(options = {}) {
+    trash: function() {
       if (selectedCoordPaths.length === 0) {
-        return ctx.events.changeMode('simple_select', { features: [feature] }, { emit: options.emit });
+        return ctx.events.changeMode('simple_select', { features: [feature] });
       }
 
       selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
       ctx.map.fire(Constants.events.UPDATE, {
-        type: Constants.updateTypes.CHANGE_COORDINATES,
+        action: Constants.updateActions.CHANGE_COORDINATES,
         features: ctx.store.getSelected().map(f => f.toGeoJSON())
       });
       selectedCoordPaths = [];
       if (feature.isValid() === false) {
-        ctx.store.delete([featureId], { emit: options.emit });
+        ctx.store.delete([featureId]);
         ctx.events.changeMode('simple_select', null);
       }
     }

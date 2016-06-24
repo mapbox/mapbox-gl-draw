@@ -115,7 +115,7 @@ module.exports = function(ctx, options = {}) {
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
           ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
             featureId: e.featureTarget.properties.id
-          }, { emit: options.emit });
+          });
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
@@ -197,7 +197,7 @@ module.exports = function(ctx, options = {}) {
       this.on('mouseup', () => true, function(e) {
         if (dragging) {
           ctx.map.fire(Constants.events.UPDATE, {
-            type: Constants.updateTypes.MOVE,
+            action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
         }

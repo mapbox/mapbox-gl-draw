@@ -29,7 +29,7 @@ module.exports = {
     MODE_CHANGE: 'draw.modechange',
     RENDER: 'draw.render'
   },
-  updateTypes: {
+  updateActions: {
     MOVE: 'move',
     CHANGE_COORDINATES: 'change_coordinates'
   }
