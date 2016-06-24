@@ -25,6 +25,12 @@ document.body.removeChild(container);
 const backspaceEvent = createSyntheticEvent('keydown', {
   keyCode: 8
 });
+const enterEvent = createSyntheticEvent('keyup', {
+  keyCode: 13
+});
+const escapeEvent = createSyntheticEvent('keyup', {
+  keyCode: 27
+});
 
 function runTests() {
   const pointButton = container.getElementsByClassName('mapbox-gl-draw_point')[0];
@@ -63,12 +69,13 @@ function runTests() {
     map.fire('mousemove', makeMouseEvent(20, 20));
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
-      firedWith(t, 'draw.create', {
+      const pointId = firedWith(t, 'draw.create', {
         features: [point25_25GeoJson]
-      });
+      }).features[0].id;
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select'
+        mode: 'simple_select',
+        options: { featureIds: [pointId] }
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -198,12 +205,13 @@ function runTests() {
     click(map, makeMouseEvent(50, 50));
 
     afterNextRender(() => {
-      firedWith(t, 'draw.create', {
+      const lineId = firedWith(t, 'draw.create', {
         features: [line10_30_50GeoJson]
-      });
+      }).features[0].id;
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select'
+        mode: 'simple_select',
+        options: { featureIds: [lineId] }
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -256,6 +264,7 @@ function runTests() {
       coordinates: [[20, 0], [40, 20], [60, 40]]
     }
   };
+  let line20_40_60Id;
 
   test('move the line', t => {
     // Now in `simple_select` mode ...
@@ -269,10 +278,10 @@ function runTests() {
     map.fire('mouseup', makeMouseEvent(30, 10));
 
     afterNextRender(() => {
-      firedWith(t, 'draw.update', {
+      line20_40_60Id = firedWith(t, 'draw.update', {
         type: 'move',
         features: [line20_40_60GeoJson]
-      });
+      }).features[0].id;
 
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -287,7 +296,8 @@ function runTests() {
     click(map, makeMouseEvent(40, 20));
     afterNextRender(() => {
       firedWith(t, 'draw.modechange', {
-        mode: 'direct_select'
+        mode: 'direct_select',
+        options: { featureId: line20_40_60Id }
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -430,12 +440,13 @@ function runTests() {
     click(map, makeMouseEvent(100, 0));
 
     afterNextRender(() => {
-      firedWith(t, 'draw.create', {
+      const polygonId = firedWith(t, 'draw.create', {
         features: [polygon0_0_100_100GeoJson]
-      });
+      }).features[0].id;
 
       firedWith(t, 'draw.modechange', {
-        mode: 'simple_select'
+        mode: 'simple_select',
+        options: { featureIds: [polygonId] }
       });
 
       firedWith(t, 'draw.selectionchange', {
@@ -629,6 +640,150 @@ function runTests() {
         ], 'no unexpected draw events');
         t.end();
       });
+    });
+  });
+
+  test('start draw_point mode then exit with Enter', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_point');
+    container.dispatchEvent(enterEvent);
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select'
+      });
+      t.equal(Draw.getAll().features.length, 0, 'no feature created');
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('start draw_point mode then exit with Escape', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_point');
+    container.dispatchEvent(escapeEvent);
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select'
+      });
+      t.equal(Draw.getAll().features.length, 0, 'no feature created');
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('start draw_line_string mode and drawing a line then finish with Enter', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_line_string');
+    click(map, makeMouseEvent(240, 240));
+    click(map, makeMouseEvent(260, 260));
+    container.dispatchEvent(enterEvent);
+    afterNextRender(() => {
+      const expectedLine = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [[240, 240], [260, 260]]
+        }
+      };
+      const expectedLineId = firedWith(t, 'draw.create', {
+        features: [expectedLine]
+      }).features[0].id;
+
+      firedWith(t, 'draw.selectionchange', {
+        features: [expectedLine]
+      });
+
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select',
+        options: { featureIds: [expectedLineId] }
+      });
+
+      t.deepEqual(flushDrawEvents(), [
+        'draw.create',
+        'draw.modechange',
+        'draw.selectionchange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('start draw_line_string mode then exit with Escape', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_line_string');
+    click(map, makeMouseEvent(240, 240));
+    click(map, makeMouseEvent(260, 260));
+    container.dispatchEvent(escapeEvent);
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select'
+      });
+      t.equal(Draw.getAll().features.length, 0, 'no feature created');
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('start draw_polygon mode and drawing a polygon then finish with Enter', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_polygon');
+    click(map, makeMouseEvent(240, 240));
+    click(map, makeMouseEvent(260, 260));
+    click(map, makeMouseEvent(300, 200));
+    container.dispatchEvent(enterEvent);
+    afterNextRender(() => {
+      const expectedPolygon = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[[240, 240], [260, 260], [300, 200], [240, 240]]]
+        }
+      };
+      const expectedPolygonId = firedWith(t, 'draw.create', {
+        features: [expectedPolygon]
+      }).features[0].id;
+
+      firedWith(t, 'draw.selectionchange', {
+        features: [expectedPolygon]
+      });
+
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select',
+        options: { featureIds: [expectedPolygonId] }
+      });
+
+      t.deepEqual(flushDrawEvents(), [
+        'draw.create',
+        'draw.modechange',
+        'draw.selectionchange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('start draw_polygon mode then exit with Escape', t => {
+    Draw.deleteAll();
+    Draw.changeMode('draw_polygon');
+    click(map, makeMouseEvent(240, 240));
+    click(map, makeMouseEvent(260, 260));
+    click(map, makeMouseEvent(300, 200));
+    container.dispatchEvent(escapeEvent);
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'simple_select'
+      });
+      t.equal(Draw.getAll().features.length, 0, 'no feature created');
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange'
+      ], 'no unexpected draw events');
+      t.end();
     });
   });
 }
