@@ -61,18 +61,18 @@ module.exports = function render() {
     features: store.sources.hot
   });
 
-  if (store._selectionChangedSinceRender) {
+  if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
       features: store.getSelected().map(feature => feature.toGeoJSON())
     });
-    store._selectionChangedSinceRender = false;
+    store._emitSelectionChange = false;
   }
 
-  if (store._deletedFeaturesSinceRender.values().length) {
+  if (store._deletedFeaturesToEmit.values().length) {
     store.ctx.map.fire(Constants.events.DELETE, {
-      features: store._deletedFeaturesSinceRender.values().map(feature => feature.toGeoJSON())
+      features: store._deletedFeaturesToEmit.values().map(feature => feature.toGeoJSON())
     });
-    store._deletedFeaturesSinceRender.clear();
+    store._deletedFeaturesToEmit.clear();
   }
 
   store.ctx.map.fire(Constants.events.RENDER, {});

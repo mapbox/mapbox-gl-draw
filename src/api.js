@@ -58,7 +58,7 @@ module.exports = function(ctx) {
         var model = featureTypes[geojson.geometry.type];
 
         let internalFeature = new model(ctx, geojson);
-        ctx.store.add(internalFeature);
+        ctx.store.add(internalFeature, { silent: true });
       }
       else {
         let internalFeature = ctx.store.get(geojson.id);
@@ -81,15 +81,16 @@ module.exports = function(ctx) {
       };
     },
     delete: function(id) {
-      ctx.store.delete([id]);
+      ctx.store.delete([id], { silent: true });
       ctx.store.render();
     },
     deleteAll: function() {
-      ctx.store.delete(ctx.store.getAll().map(feature => feature.id));
+      ctx.store.delete(ctx.store.getAllIds(), { silent: true });
       ctx.store.render();
     },
-    changeMode: function(mode, opts) {
-      ctx.events.changeMode(mode, opts);
+    changeMode: function(mode, options = {}) {
+      options.silent = true;
+      ctx.events.changeMode(mode, options);
     },
     trash: function() {
       ctx.events.fire('trash');

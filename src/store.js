@@ -8,8 +8,8 @@ var Store = module.exports = function(ctx) {
   this._featureIds = new SimpleSet();
   this._selectedFeatureIds = new SimpleSet();
   this._changedFeatureIds = new SimpleSet();
-  this._deletedFeaturesSinceRender = new SimpleSet();
-  this._selectionChangedSinceRender = false;
+  this._deletedFeaturesToEmit = new SimpleSet();
+  this._emitSelectionChange = false;
   this.ctx = ctx;
   this.sources = {
     hot: [],
@@ -66,6 +66,7 @@ Store.prototype.getAllIds = function() {
 /**
  * Adds a feature to the store.
  * @param {Object} feature
+ *
  * @return {Store} this
  */
 Store.prototype.add = function(feature) {
@@ -81,15 +82,19 @@ Store.prototype.add = function(feature) {
  * If changes were made, sets the state to the dirty
  * and fires an event.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
  * @return {Store} this
  */
-Store.prototype.delete = function(featureIds) {
+Store.prototype.delete = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (!this._featureIds.has(id)) return;
     this._featureIds.delete(id);
     this._selectedFeatureIds.delete(id);
-    this._deletedFeaturesSinceRender.add(this._features[id]);
-    delete this._features[id];
+    if (!options.silent) {
+      this._deletedFeaturesToEmit.add(this._features[id]);
+    }
+    _emitSelectionChange this._features[id];
     this.isDirty = true;
   });
   return this;
@@ -114,13 +119,17 @@ Store.prototype.getAll = function() {
 /**
  * Adds features to the current selection.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
  * @return {Store} this
  */
-Store.prototype.select = function(featureIds) {
+Store.prototype.select = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.add(id);
-    this._selectionChangedSinceRender = true;
+    if (!options.silent) {
+      this._emitSelectionChange = true;
+    }
   });
   return this;
 };
@@ -128,23 +137,29 @@ Store.prototype.select = function(featureIds) {
 /**
  * Deletes features from the current selection.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
  * @return {Store} this
  */
-Store.prototype.deselect = function(featureIds) {
+Store.prototype.deselect = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
-    this._selectionChangedSinceRender = true;
+    if (!options.silent) {
+      this._emitSelectionChange = true;
+    }
   });
   return this;
 };
 
 /**
  * Clears the current selection.
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
  * @return {Store} this
  */
-Store.prototype.clearSelected = function() {
-  this.deselect(this._selectedFeatureIds.values());
+Store.prototype.clearSelected = function(options = {}) {
+  this.deselect(this._selectedFeatureIds.values(), options);
   return this;
 };
 
@@ -152,20 +167,22 @@ Store.prototype.clearSelected = function() {
  * Sets the store's selection, clearing any prior values.
  * If no feature ids are passed, the store is just cleared.
  * @param {string | Array<string> | undefined} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this selection will not trigger an event.
  * @return {Store} this
  */
-Store.prototype.setSelected = function(featureIds) {
+Store.prototype.setSelected = function(featureIds, options = {}) {
   featureIds = toDenseArray(featureIds);
 
   // Deselect any features not in the new selection
   this.deselect(this._selectedFeatureIds.values().filter(id => {
     return featureIds.indexOf(id) === -1;
-  }));
+  }), options);
 
   // Select any features in the new selection that were not already selected
   this.select(featureIds.filter(id => {
     return !this._selectedFeatureIds.has(id);
-  }));
+  }), options);
 
   return this;
 };
