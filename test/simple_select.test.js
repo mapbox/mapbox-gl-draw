@@ -23,7 +23,9 @@ test('simple_select', t => {
   var cleanUp = function(cb) {
     Draw.deleteAll();
     map.fire.reset();
-    afterNextRender(cb);
+    if (cb) {
+      afterNextRender(cb);
+    }
   };
 
   var getFireArgs = function() {
@@ -50,7 +52,7 @@ test('simple_select', t => {
 
   t.test('simple_select - box select', t => {
     Draw.add(cloneFeature('negitivePoint'));
-    var id = Draw.add(cloneFeature('point'));
+    var id = Draw.add(cloneFeature('point'))[0];
     map.fire.reset();
 
     afterNextRender(() => {
@@ -79,10 +81,14 @@ test('simple_select', t => {
   });
 
    t.test('simple_select - box select many features', t => {
-    var ids = [];
+    var features = [];
     for (var i = 0; i < 5; i++) {
-      ids.push(Draw.add(cloneFeature('point')));
+      features.push(cloneFeature('point'));
     }
+    var ids = Draw.add({
+      type: 'FeatureCollection',
+      features: features
+    });
     map.fire.reset();
 
     afterNextRender(() => {
@@ -121,7 +127,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - deselect', t => {
-    var id = Draw.add(cloneFeature('point'));
+    var id = Draw.add(cloneFeature('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -141,7 +147,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature', t => {
-    var id = Draw.add(cloneFeature('polygon'));
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select');
 
     afterNextRender(() => {
@@ -165,7 +171,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a selected feature with shift down', t => {
-    var id = Draw.add(cloneFeature('polygon'));
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -189,7 +195,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - delete selected features', t => {
-    var id = Draw.add(cloneFeature('polygon'));
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
     map.fire.reset();
     Draw.trash();
@@ -208,7 +214,7 @@ test('simple_select', t => {
 
   t.test('simple_select - click on a selected feature with shift up to enter direct_select', t => {
     Draw.deleteAll();
-    var id = Draw.add(cloneFeature('polygon'));
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -234,7 +240,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a vertex to enter direct_select', t => {
-    var id = Draw.add(cloneFeature('polygon'));
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     var clickPosition = cloneFeature('polygon').geometry.coordinates[0][0];
@@ -259,8 +265,8 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
-    var pointId = Draw.add(cloneFeature('point'));
-    var id = Draw.add(cloneFeature('polygon'));
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
@@ -286,8 +292,8 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', t => {
-    var pointId = Draw.add(cloneFeature('point'));
-    var id = Draw.add(cloneFeature('polygon'));
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
@@ -312,12 +318,12 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - drag every feature type', t => {
-    var pointId = Draw.add(cloneFeature('point'));
-    var multiPointId = Draw.add(cloneFeature('multiPoint'));
-    var lineStringId = Draw.add(cloneFeature('line'));
-    var multiLineStringId = Draw.add(cloneFeature('multiLineString'));
-    var polygonId = Draw.add(cloneFeature('polygon'));
-    var multiPolygonId = Draw.add(cloneFeature('multiPolygon'));
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var multiPointId = Draw.add(cloneFeature('multiPoint'))[0];
+    var lineStringId = Draw.add(cloneFeature('line'))[0];
+    var multiLineStringId = Draw.add(cloneFeature('multiLineString'))[0];
+    var polygonId = Draw.add(cloneFeature('polygon'))[0];
+    var multiPolygonId = Draw.add(cloneFeature('multiPolygon'))[0];
 
     var countPositions = function(feature) {
       return feature.geometry.coordinates.join(',').split(',').length;
