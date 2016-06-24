@@ -1,5 +1,6 @@
 var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
+const Constants = require('../constants');
 
 module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
@@ -9,15 +10,15 @@ module.exports = function(ctx, opts) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
-  var dragging = opts.isDragging || false;
   var startPos = opts.startPos || null;
   var coordPos = null;
-  var numCoords = null;
+  var dragging;
+  var canDragMove;
 
   var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
   var onVertex = function(e) {
-    dragging = true;
+    canDragMove = true;
     startPos = e.lngLat;
     var about = e.featureTarget.properties;
     var selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
@@ -31,25 +32,31 @@ module.exports = function(ctx, opts) {
   };
 
   var onMidpoint = function(e) {
-    dragging = true;
+    canDragMove = true;
     startPos = e.lngLat;
     var about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
+    ctx.map.fire(Constants.events.UPDATE, {
+      action: Constants.updateActions.CHANGE_COORDINATES,
+      features: ctx.store.getSelected().map(f => f.toGeoJSON())
+    });
     selectedCoordPaths = [about.coord_path];
   };
 
   var setupCoordPos = function() {
     coordPos = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-    numCoords = coordPos.length;
   };
 
   return {
     start: function() {
+      dragging = false;
+      canDragMove = false;
       ctx.store.setSelected(featureId);
       ctx.map.doubleClickZoom.disable();
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
-      this.on('drag', () => dragging, function(e) {
+      this.on('drag', () => canDragMove, function(e) {
+        dragging = true;
         e.originalEvent.stopPropagation();
         if (coordPos === null) {
           setupCoordPos();
@@ -57,7 +64,7 @@ module.exports = function(ctx, opts) {
         var lngChange = e.lngLat.lng - startPos.lng;
         var latChange = e.lngLat.lat - startPos.lat;
 
-        for (var i = 0; i < numCoords; i++) {
+        for (var i = 0; i < coordPos.length; i++) {
           var coord_path = selectedCoordPaths[i];
           var pos = coordPos[i];
 
@@ -67,9 +74,15 @@ module.exports = function(ctx, opts) {
         }
       });
       this.on('mouseup', () => true, function() {
+        if (dragging) {
+          ctx.map.fire(Constants.events.UPDATE, {
+            action: Constants.updateActions.CHANGE_COORDINATES,
+            features: ctx.store.getSelected().map(f => f.toGeoJSON())
+          });
+        }
         dragging = false;
+        canDragMove = false;
         coordPos = null;
-        numCoords = null;
         startPos = null;
       });
       this.on('click', noFeature, function() {
@@ -77,17 +90,6 @@ module.exports = function(ctx, opts) {
       });
       this.on('click', isInactiveFeature, function() {
         ctx.events.changeMode('simple_select');
-      });
-      this.on('trash', () => selectedCoordPaths.length > 0, function() {
-        selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
-        selectedCoordPaths = [];
-        if (feature.isValid() === false) {
-          ctx.store.delete([featureId]);
-          ctx.events.changeMode('simple_select');
-        }
-      });
-      this.on('trash', () => selectedCoordPaths.length === 0, function() {
-        ctx.events.changeMode('simple_select', [featureId]);
       });
     },
     stop: function() {
@@ -106,6 +108,22 @@ module.exports = function(ctx, opts) {
       else {
         geojson.properties.active = 'false';
         push(geojson);
+      }
+    },
+    trash: function() {
+      if (selectedCoordPaths.length === 0) {
+        return ctx.events.changeMode('simple_select', { features: [feature] });
+      }
+
+      selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
+      ctx.map.fire(Constants.events.UPDATE, {
+        action: Constants.updateActions.CHANGE_COORDINATES,
+        features: ctx.store.getSelected().map(f => f.toGeoJSON())
+      });
+      selectedCoordPaths = [];
+      if (feature.isValid() === false) {
+        ctx.store.delete([featureId]);
+        ctx.events.changeMode('simple_select', null);
       }
     }
   };

@@ -7,9 +7,9 @@ var Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new SimpleSet();
   this._selectedFeatureIds = new SimpleSet();
-  this._selectedSinceLastFlush = new SimpleSet();
-  this._deselectedSinceLastFlush = new SimpleSet();
-  this._changedIds = new SimpleSet();
+  this._changedFeatureIds = new SimpleSet();
+  this._deletedFeaturesToEmit = new SimpleSet();
+  this._emitSelectionChange = false;
   this.ctx = ctx;
   this.sources = {
     hot: [],
@@ -34,7 +34,7 @@ Store.prototype.setDirty = function() {
  * @return {Store} this
  */
 Store.prototype.featureChanged = function(featureId) {
-  this._changedIds.add(featureId);
+  this._changedFeatureIds.add(featureId);
   return this;
 };
 
@@ -43,7 +43,7 @@ Store.prototype.featureChanged = function(featureId) {
  * @return {Store} this
  */
 Store.prototype.getChangedIds = function() {
-  return this._changedIds.values();
+  return this._changedFeatureIds.values();
 };
 
 /**
@@ -51,7 +51,7 @@ Store.prototype.getChangedIds = function() {
  * @return {Store} this
  */
 Store.prototype.clearChangedIds = function() {
-  this._changedIds.clear();
+  this._changedFeatureIds.clear();
   return this;
 };
 
@@ -66,6 +66,7 @@ Store.prototype.getAllIds = function() {
 /**
  * Adds a feature to the store.
  * @param {Object} feature
+ *
  * @return {Store} this
  */
 Store.prototype.add = function(feature) {
@@ -81,25 +82,21 @@ Store.prototype.add = function(feature) {
  * If changes were made, sets the state to the dirty
  * and fires an event.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.delete = function(featureIds) {
-  var deleted = [];
+Store.prototype.delete = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (!this._featureIds.has(id)) return;
-    deleted.push(this.get(id).toGeoJSON());
-
-    delete this._features[id];
     this._featureIds.delete(id);
     this._selectedFeatureIds.delete(id);
-    this._selectedSinceLastFlush.delete(id);
-    this._deselectedSinceLastFlush.delete(id);
-  });
-
-  if (deleted.length > 0) {
+    if (!options.silent) {
+      this._deletedFeaturesToEmit.add(this._features[id]);
+    }
+    delete this._features[id];
     this.isDirty = true;
-    this.ctx.map.fire('draw.deleted', { featureIds: deleted });
-  }
+  });
   return this;
 };
 
@@ -122,14 +119,17 @@ Store.prototype.getAll = function() {
 /**
  * Adds features to the current selection.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.select = function(featureIds) {
+Store.prototype.select = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.add(id);
-    this._selectedSinceLastFlush.add(id);
-    this._deselectedSinceLastFlush.delete(id);
+    if (!options.silent) {
+      this._emitSelectionChange = true;
+    }
   });
   return this;
 };
@@ -137,24 +137,29 @@ Store.prototype.select = function(featureIds) {
 /**
  * Deletes features from the current selection.
  * @param {string | Array<string>} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.deselect = function(featureIds) {
+Store.prototype.deselect = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
-    this._selectedSinceLastFlush.delete(id);
-    this._deselectedSinceLastFlush.add(id);
+    if (!options.silent) {
+      this._emitSelectionChange = true;
+    }
   });
   return this;
 };
 
 /**
  * Clears the current selection.
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.clearSelected = function() {
-  this.deselect(this._selectedFeatureIds.values());
+Store.prototype.clearSelected = function(options = {}) {
+  this.deselect(this._selectedFeatureIds.values(), { silent: options.silent });
   return this;
 };
 
@@ -162,20 +167,22 @@ Store.prototype.clearSelected = function() {
  * Sets the store's selection, clearing any prior values.
  * If no feature ids are passed, the store is just cleared.
  * @param {string | Array<string> | undefined} featureIds
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.setSelected = function(featureIds) {
+Store.prototype.setSelected = function(featureIds, options = {}) {
   featureIds = toDenseArray(featureIds);
 
   // Deselect any features not in the new selection
   this.deselect(this._selectedFeatureIds.values().filter(id => {
     return featureIds.indexOf(id) === -1;
-  }));
+  }), { silent: options.silent });
 
   // Select any features in the new selection that were not already selected
   this.select(featureIds.filter(id => {
     return !this._selectedFeatureIds.has(id);
-  }));
+  }), { silent: options.silent });
 
   return this;
 };
@@ -189,27 +196,18 @@ Store.prototype.getSelectedIds = function() {
 };
 
 /**
+ * Returns features in the current selection.
+ * @return {Array<Object>} Selected features.
+ */
+Store.prototype.getSelected = function() {
+  return this._selectedFeatureIds.values().map(id => this.get(id));
+};
+
+/**
  * Indicates whether a feature is selected.
  * @param {string} featureId
  * @return {boolean} `true` if the feature is selected, `false` if not.
  */
 Store.prototype.isSelected = function(featureId) {
   return this._selectedFeatureIds.has(featureId);
-};
-
-/**
- * Get the sets of selected and deselected
- * feature ids since the last flush, and clear those sets.
- *
- * @return {Object} The flushed sets.
- */
-Store.prototype.flushSelected = function() {
-  const wereSelected = this._selectedSinceLastFlush.values();
-  const wereDeselected = this._deselectedSinceLastFlush.values();
-  this._selectedSinceLastFlush.clear();
-  this._deselectedSinceLastFlush.clear();
-  return {
-    selected: wereSelected,
-    deselected: wereDeselected
-  };
 };

@@ -1,3 +1,5 @@
+const Constants = require('./constants');
+
 module.exports = function render() {
   const store = this;
   var mapExists = store.ctx.map && store.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
@@ -59,24 +61,21 @@ module.exports = function render() {
     features: store.sources.hot
   });
 
-  let changed = store.getChangedIds().map(id => store.get(id))
-    .filter(feature => feature !== undefined)
-    .filter(feature => feature.isValid())
-    .map(feature => feature.toGeoJSON());
-
-  if (changed.length) {
-    store.ctx.map.fire('draw.changed', {features: changed});
+  if (store._emitSelectionChange) {
+    store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
+      features: store.getSelected().map(feature => feature.toGeoJSON())
+    });
+    store._emitSelectionChange = false;
   }
 
-  const flushedSelectionSets = store.flushSelected();
-  if (flushedSelectionSets.selected.length) {
-    store.ctx.map.fire('draw.select', { featureIds: flushedSelectionSets.selected });
-  }
-  if (flushedSelectionSets.deselected.length) {
-    store.ctx.map.fire('draw.deselect', { featureIds: flushedSelectionSets.deselected });
+  if (store._deletedFeaturesToEmit.values().length) {
+    store.ctx.map.fire(Constants.events.DELETE, {
+      features: store._deletedFeaturesToEmit.values().map(feature => feature.toGeoJSON())
+    });
+    store._deletedFeaturesToEmit.clear();
   }
 
-  store.ctx.map.fire('draw.render', {});
+  store.ctx.map.fire(Constants.events.RENDER, {});
   cleanup();
 
   function cleanup() {

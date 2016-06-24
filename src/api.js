@@ -81,18 +81,18 @@ module.exports = function(ctx) {
       };
     },
     delete: function(id) {
-      ctx.store.delete([id]);
+      ctx.store.delete([id], { silent: true });
       ctx.store.render();
     },
     deleteAll: function() {
-      ctx.store.delete(ctx.store.getAll().map(feature => feature.id));
+      ctx.store.delete(ctx.store.getAllIds(), { silent: true });
       ctx.store.render();
     },
-    changeMode: function(mode, opts) {
-      ctx.events.changeMode(mode, opts);
+    changeMode: function(mode, modeOptions) {
+      ctx.events.changeMode(mode, modeOptions, { silent: true });
     },
     trash: function() {
-      ctx.events.fire('trash');
+      ctx.events.trash({ silent: true });
     }
   };
 };

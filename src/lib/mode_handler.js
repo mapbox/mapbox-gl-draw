@@ -7,8 +7,7 @@ var ModeHandler = function(mode, DrawContext) {
     mousedown: [],
     mouseup: [],
     keydown: [],
-    keyup: [],
-    trash: []
+    keyup: []
   };
 
   var ctx = {
@@ -56,6 +55,12 @@ var ModeHandler = function(mode, DrawContext) {
     stop: function() {
       if (mode.stop) mode.stop();
     },
+    trash: function() {
+      if (mode.trash) {
+        mode.trash();
+        DrawContext.store.render();
+      }
+    },
     drag: function(event) {
       delegate('drag', event);
     },
@@ -76,9 +81,6 @@ var ModeHandler = function(mode, DrawContext) {
     },
     keyup: function(event) {
       delegate('keyup', event);
-    },
-    trash: function(event) {
-      delegate('trash', event);
     }
   };
 };

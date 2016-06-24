@@ -177,23 +177,41 @@ This is different from `delete` or `deleteAlll` in that it follows rules describ
 
 ---
 
-### `.changeMode(String: mode, ?Any: options) -> Draw`
+### `.changeMode(String: mode, ?Object: options) -> Draw`
 
-`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own arguments. They are descibed in detail below.
+`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own options. They are described in detail below.
 
 #### Mode: `simple_select`
 
 Lets you select, delete and drag features.
 
-For `simple_select` options is an array of ids. It is optional. If provided, these features will be active at the start of the mode. In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+
+This mode has the following options:
+
+```js
+// `simple_select` options
+{
+  // Array of ids of features that will be initially selected
+  featureIds: Array<string>
+}
+```
 
 #### Mode: `direct_select`
 
 Lets you select, delete and drag vertices.
 
-For `direct_select` options is a single featureId. It is required. This feature will be active for the duration of the mode.
-
 `direct_select` mode doesn't handle point features.
+
+This mode has the following options:
+
+```js
+// `direct_select` options
+{
+  // The id of the feature that is directly selected (required)
+  featureId: string
+}
+```
 
 #### Drawing modes:
 
@@ -205,80 +223,114 @@ The three drawing modes work identically. They do not take an options argument.
 
 ## Events
 
-Draw fires off a number of events. All of these events are name spaced `draw.` and are emitted via map object.
+Draw fires off a number of events. All of these events are namespaced with `draw.` and are emitted from the map object.
 
-### draw.modechange
+They are all triggered as the result of user interaction.
 
-This event is fired just after the current mode is stopped and just before the next mode is started. A render will not happen until after all event handlers have been triggered. This means you can force a mode redirect by calling `changeMode` inside of a `draw.modechange` handler.
+**If you invoke a function in the Draw API, any event that *directly corresponds with* that function will not be fired.** For example, if you invoke `Draw.delete(..)`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `Draw.changeMode('draw_polygon')`, you will *not* see a `draw.modechange` event (because that directly corresponds with the invoked function) but you *will* see a `draw.selectionchange` event, since by changing the mode you deselected a feature.
 
-This is not fired when the first mode is started.
+### `draw.create`
 
-Here is an example payload.
+Fired when a feature is created. The following will trigger this event:
 
-```js
-{
-  mode: `direct_select`
-  opts: '123123123'
-}
-```
+- Finish drawing a feature. Simply clicking will create a Point. A LineString or Polygon is only created when the user has finished drawing it — i.e. double-clicked the last vertex or hit Enter — and the drawn feature is valid.
 
-### draw.deleted
-
-This is fired every time a feature is deleted. The payload is a list GeoJSON features just before they were deleted.
-
-### draw.changed
-
-This is fired when feature coordinates are changed. It is fired just after the changes have been sent to be rendered. The payload is the GeoJSON of all changed features. Deleted features will not show up here.
+The event data is an object with the following shape:
 
 ```js
 {
-  "features": [{ ... }]
+  // Array of GeoJSON objects representing the features that were created
+  features: Array<Object>
 }
 ```
 
-### draw.modified
+### `draw.delete`
 
-This is fired when feature coordinates are changed, and there is a mouse click action (specifically mouseUp). It listens for draw.changed, and stores the most recent features changed. The payload is the GeoJSON of all changed features, at the moment of mouseUp. Deleted features will not show up here.
+Fired when one or more features are deleted. The following will trigger this event:
+
+- Click the Trash button when one or more features are selected in `simple_select` mode.
+- Hit the Backspace or Delete keys when one or features are selected in `simple_select` mode.
+- Invoke `Draw.trash()` when you have a feature selected in `simple_select` mode.
+
+The event data is an object with the following shape:
 
 ```js
 {
-  "features": [{ ... }]
+  // Array of GeoJSON objects representing the features that were deleted
+  features: Array<Object>
 }
 ```
 
-### draw.select
+### `draw.update`
 
-Fired when a feature is selected. The payload is an array of feature IDs.
+Fired when one or more features are updated. The following will trigger this event, which can be subcategorized by `action`:
 
-The `select` event will fire in the following contexts:
+- `action: 'move'`
+  - Finish moving one or more selected features in `simple_select` mode. The event will only fire when the movement is finished — i.e. when the user releases the mouse button or hits Enter.
+- `action: 'change_coordinates'`
+  - Finish moving one or more vertices of a selected feature in `direct_select` mode. The event will only fire when the movement is finished — i.e. when the user releases the mouse button or hits Enter.
+  - Delete one or more vertices of a selected feature in `direct_select` mode, which can be done by hitting the Backspace or Delete keys, clicking the Trash button, or invoking `Draw.trash()`.
+  - Add a vertex to the selected feature by clicking a midpoint on that feature in `direct_select` mode.
 
-- When a new feature is created (because it is selected on creation).
-- When a feature is added to an existing selection with `shift+click`.
-- When a feature is included within a box selection.
+This event will not fire when a feature is created or deleted. To track those interactions, listen for `draw.create` and `draw.delete`.
+
+The event data is an object with the following shape:
 
 ```js
 {
-  "featureIds": [{ ... }]
+  // Array of GeoJSON objects representing the features that were updated
+  features: Array<Object>,
+  action: string
 }
 ```
 
-### draw.deselect
+### `draw.selectionchange`
 
-Fired when a feature is deselected. The payload is an array of feature IDs.
+Fired when the selection is changed (one or more features are selected or deselected). The following will trigger this event:
 
-The `deselect` event will fire when there is a click outside a selected feature, whether that click is on no features or on another feature (without using `shift+click` to add something else to the existing selection).
+- Click on a feature to select it.
+- Create a box-selection that includes at least one feature.
+- When a feature is already selected, shift-click on another feature to add it to the selection.
+- Click outside the selected feature(s) to deselect.
+- Finish drawing a feature (features are selected just after they are created).
+- When a feature is already selected, invoke `Draw.changeMode()` such that the feature becomes deselected.
+- Use `Draw.changeMode('simple_select', { featureIds: [..] })` to switch to `simple_select` mode and immediately select the specified features.
 
-(The event does not fire when a feature is deleted.)
+The event data is an object with the following shape:
 
 ```js
 {
-  "featureIds": [{ ... }]
+  // Array of GeoJSON objects representing the features
+  // that are selected, after the change
+  features: Array<Object>
 }
 ```
+
+### `draw.modechange`
+
+Fired when the mode is changed. The following will trigger this event:
+
+- Click the point, line, or polygon buttons to begin drawing (enter a `draw_*` mode).
+- Finish drawing a feature (enter `simple_select` mode).
+- While in `simple_select` mode, click on an already selected feature (enter `direct_select` mode).
+- While in `direct_select` mode, click outside all features (enter `simple_select` mode).
+
+This event is fired just after the current mode stops and just before the next mode starts. A render will not happen until after all event handlers have been triggered, so you can force a mode redirect by calling `Draw.changeMode()` inside a `draw.modechange` handler.
+
+The event data is an object with the following shape:
+
+```js
+{
+  // The next mode, i.e. the mode that Draw is changing to
+  mode: string
+}
+```
+
+`simple_select` and `direct_select` modes can be initiated with options specific to that mode (see above).
 
 ### draw.render
 
-Fired just after Draw calls setData on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
+Fired just after Draw calls `setData()` on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
 
 ## Styling Draw
 

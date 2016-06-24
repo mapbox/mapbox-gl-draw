@@ -3,16 +3,18 @@ var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 var SimpleSet = require('../lib/simple_set');
+const Constants = require('../constants');
 
-module.exports = function(ctx, startingSelectedIds) {
+module.exports = function(ctx, options = {}) {
   var startPos = null;
-  var dragging = null;
   var featureCoords = null;
   var startCoordinates = null;
-  var features = null;
-  var numFeatures = null;
   var box;
   var boxSelecting = false;
+  var dragging;
+  var canDragMove;
+
+  const initiallySelectedFeatureIds = options.featureIds || [];
 
   function getUniqueIds(allFeatures) {
     if (!allFeatures.length) return [];
@@ -60,8 +62,6 @@ module.exports = function(ctx, startingSelectedIds) {
   var buildFeatureCoords = function() {
     var featureIds = ctx.store.getSelectedIds();
     featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
-    features = featureIds.map(id => ctx.store.get(id));
-    numFeatures = featureIds.length;
   };
 
   return {
@@ -70,10 +70,10 @@ module.exports = function(ctx, startingSelectedIds) {
     },
     start: function() {
       dragging = false;
-
+      canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(startingSelectedIds);
+      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
 
       // When a click falls outside any features,
       // - clear the selection
@@ -87,10 +87,9 @@ module.exports = function(ctx, startingSelectedIds) {
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
-        ctx.api.changeMode('direct_select', {
+        ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
           coordPath: e.featureTarget.properties.coord_path,
-          isDragging: true,
           startPos: e.lngLat
         });
         ctx.ui.queueMapClasses({mouse:'move'});
@@ -105,8 +104,8 @@ module.exports = function(ctx, startingSelectedIds) {
       }
 
       this.on('mousedown', isActiveFeature, function(e) {
+        canDragMove = true;
         startPos = e.lngLat;
-        dragging = true;
       });
 
       this.on('click', isFeature, function(e) {
@@ -114,7 +113,7 @@ module.exports = function(ctx, startingSelectedIds) {
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
-          ctx.api.changeMode('direct_select', {
+          ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
             featureId: e.featureTarget.properties.id
           });
         }
@@ -135,8 +134,7 @@ module.exports = function(ctx, startingSelectedIds) {
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
-          ctx.store.clearSelected();
-          ctx.store.select(id);
+          ctx.store.setSelected(id);
           ctx.ui.queueMapClasses({mouse:'move'});
           this.render(id);
         }
@@ -163,20 +161,8 @@ module.exports = function(ctx, startingSelectedIds) {
         box.style.height = maxY - minY + 'px';
       });
 
-      this.on('mouseup', () => true, function(e) {
-        dragging = false;
-        featureCoords = null;
-        features = null;
-        numFeatures = null;
-        if (boxSelecting) {
-          finishBoxSelect([
-            startCoordinates,
-            mouseEventPoint(e.originalEvent, ctx.container)
-          ], this);
-        }
-      });
-
-      this.on('drag', () => dragging, function(e) {
+      this.on('drag', () => canDragMove, function(e) {
+        dragging = true;
         e.originalEvent.stopPropagation();
 
         if (featureCoords === null) {
@@ -190,8 +176,9 @@ module.exports = function(ctx, startingSelectedIds) {
         var ringMap = (ring) => ring.map(coord => coordMap(coord));
         var mutliMap = (multi) => multi.map(ring => ringMap(ring));
 
-        for (var i = 0; i < numFeatures; i++) {
-          var feature = features[i];
+        const selectedFeatures = ctx.store.getSelected();
+
+        selectedFeatures.forEach((feature, i) => {
           if (feature.type === 'Point') {
             feature.incomingCoords(coordMap(featureCoords[i]));
           }
@@ -204,15 +191,25 @@ module.exports = function(ctx, startingSelectedIds) {
           else if (feature.type === 'MultiPolygon') {
             feature.incomingCoords(featureCoords[i].map(mutliMap));
           }
-        }
+        });
       });
 
-      this.on('trash', () => true, function() {
+      this.on('mouseup', () => true, function(e) {
+        if (dragging) {
+          ctx.map.fire(Constants.events.UPDATE, {
+            action: Constants.updateActions.MOVE,
+            features: ctx.store.getSelected().map(f => f.toGeoJSON())
+          });
+        }
         dragging = false;
+        canDragMove = false;
         featureCoords = null;
-        features = null;
-        numFeatures = null;
-        ctx.store.delete(ctx.store.getSelectedIds());
+        if (boxSelecting) {
+          finishBoxSelect([
+            startCoordinates,
+            mouseEventPoint(e.originalEvent, ctx.container)
+          ], this);
+        }
       });
     },
     render: function(geojson, push) {
@@ -220,6 +217,10 @@ module.exports = function(ctx, startingSelectedIds) {
       push(geojson);
       if (geojson.properties.active !== 'true' || geojson.geometry.type === 'Point') return;
       createSupplementaryPoints(geojson).forEach(push);
+    },
+    trash() {
+      featureCoords = null;
+      ctx.store.delete(ctx.store.getSelectedIds());
     }
   };
 };
