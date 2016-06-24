@@ -513,6 +513,7 @@ function runTests() {
       coordinates: [[[20, -20], [20, 80], [120, 80], [120, -20], [20, -20]]]
     }
   };
+  let polygon20_20_120_120Id;
 
   test('move the line and the polygon', t => {
     // Now in `simple_select` mode ...
@@ -556,13 +557,140 @@ function runTests() {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(100, 50));
     afterNextRender(() => {
-      firedWith(t, 'draw.selectionchange', {
+      polygon20_20_120_120Id = firedWith(t, 'draw.selectionchange', {
         features: [polygon20_20_120_120GeoJson]
-      });
+      }).features[0].id;
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
+    });
+  });
+
+  test('select a vertex', t => {
+    // Now in `simple_select` mode ...
+    click(map, makeMouseEvent(20, -20));
+    afterNextRender(() => {
+      firedWith(t, 'draw.modechange', {
+        mode: 'direct_select',
+        options: { featureId: polygon20_20_120_120Id }
+      });
+      t.deepEqual(flushDrawEvents(), [
+        'draw.modechange'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('add another vertex to the selection', t => {
+    // Now in `simple_select` mode ...
+    click(map, makeMouseEvent(20, 80, true));
+    afterNextRender(() => {
+      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  const polygon0_0_120_120GeoJson = {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[0, -20], [0, 80], [120, 80], [120, -20], [0, -20]]]
+    }
+  };
+
+  test('move the vertices', t => {
+    // Now in `direct_select` mode ...
+    // Click a vertex again
+    map.fire('mousedown', makeMouseEvent(20, 80));
+    // Drag it a little bit
+    repeat(20, i => {
+      map.fire('mousemove', makeMouseEvent(20 - i, 80));
+    });
+    // Release the mouse
+    map.fire('mouseup', makeMouseEvent(0, 80));
+
+    afterNextRender(() => {
+      firedWith(t, 'draw.update', {
+        type: 'change_coordinates',
+        features: [polygon0_0_120_120GeoJson]
+      });
+      t.deepEqual(flushDrawEvents(), [
+        'draw.update'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  const polygon0_0_120_120_120GeoJson = {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[0, -20], [0, 80], [120, 80], [120, 30], [120, -20], [0, -20]]]
+    }
+  };
+
+  test('add another vertex', t => {
+    // Now in `direct_select` mode ...
+    // Click a midpoint
+    click(map, makeMouseEvent(120, 30));
+    afterNextRender(() => {
+      firedWith(t, 'draw.update', {
+        type: 'change_coordinates',
+        features: [polygon0_0_120_120_120GeoJson]
+      });
+      t.deepEqual(flushDrawEvents(), [
+        'draw.update'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  const polygon0_120_120_0GeoJson = {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[0, 80], [120, 80], [120, 30], [0, 80]]]
+    }
+  };
+
+  test('select then delete two vertices with Draw.trash()', t => {
+    // Now in `direct_select` mode ...
+    click(map, makeMouseEvent(0, -20));
+    click(map, makeMouseEvent(120, -20, true));
+    Draw.trash();
+    afterNextRender(() => {
+      firedWith(t, 'draw.update', {
+        type: 'change_coordinates',
+        features: [polygon0_120_120_0GeoJson]
+      });
+      t.deepEqual(flushDrawEvents(), [
+        'draw.update'
+      ], 'no unexpected draw events');
+      t.end();
+    });
+  });
+
+  test('select the polygon', t => {
+    // Deselect everything
+    click(map, makeMouseEvent(-200, -200));
+    afterNextRender(() => {
+      flushDrawEvents();
+      // Now in `simple_select` mode ...
+      // Click the polygon
+      click(map, makeMouseEvent(120, 30));
+      afterNextRender(() => {
+        firedWith(t, 'draw.selectionchange', {
+          features: [polygon0_120_120_0GeoJson]
+        });
+        t.deepEqual(flushDrawEvents(), [
+          'draw.selectionchange'
+        ], 'no unexpected draw events');
+        t.end();
+      });
     });
   });
 
@@ -572,7 +700,7 @@ function runTests() {
     click(map, makeMouseEvent(100, 40, true));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygon20_20_120_120GeoJson, line40_100_160GeoJson]
+        features: [polygon0_120_120_0GeoJson, line40_100_160GeoJson]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
