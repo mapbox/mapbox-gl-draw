@@ -3,6 +3,7 @@ var normalize = require('geojson-normalize');
 var hat = require('hat');
 var featuresAt = require('./lib/features_at');
 var geojsonhint = require('geojsonhint');
+var Constants = require('./constants');
 
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
@@ -97,6 +98,14 @@ module.exports = function(ctx) {
     },
     getMode: function() {
       return ctx.events.getMode();
+    },
+    setSelected: function(featureIds) {
+      if (this.getMode() === Constants.modes.SIMPLE_SELECT) {
+        ctx.store.setSelected(featureIds, { silent: true });
+      } else {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds }, { silent: true });
+      }
+      ctx.store.render();
     },
     trash: function() {
       ctx.events.trash({ silent: true });
