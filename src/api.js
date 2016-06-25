@@ -95,6 +95,9 @@ module.exports = function(ctx) {
     changeMode: function(mode, modeOptions) {
       ctx.events.changeMode(mode, modeOptions, { silent: true });
     },
+    getMode: function() {
+      return ctx.events.getMode();
+    },
     trash: function() {
       ctx.events.trash({ silent: true });
     }

@@ -197,6 +197,10 @@ This is different from `delete` or `deleteAlll` in that it follows rules describ
 
 ---
 
+### `.getMode() -> Draw`
+
+Returns Draw's current mode. For more about the modes, see below.
+
 ### `.changeMode(String: mode, ?Object: options) -> Draw`
 
 `changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own options. They are described in detail below.

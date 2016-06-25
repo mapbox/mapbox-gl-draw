@@ -161,6 +161,9 @@ module.exports = function(ctx) {
     },
     trash: function(options) {
       currentMode.trash(options);
+    },
+    getMode: function() {
+      return currentModeName;
     }
   };
 
