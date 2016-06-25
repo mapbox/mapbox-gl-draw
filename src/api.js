@@ -39,6 +39,8 @@ module.exports = function(ctx) {
         return newIdsForFasterLookUp[id] === undefined;
       });
       ctx.store.delete(toDelete);
+
+      ctx.store.render();
       return newIds;
     },
     add: function (geojson) {
