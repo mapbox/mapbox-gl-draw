@@ -2,7 +2,7 @@ var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFe
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
-var SimpleSet = require('../lib/simple_set');
+var StringSet = require('../lib/string_set');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
@@ -23,7 +23,7 @@ module.exports = function(ctx, options = {}) {
       .reduce((memo, id) => {
         memo.add(id);
         return memo;
-      }, new SimpleSet());
+      }, new StringSet());
 
     return ids.values();
   }
