@@ -1,4 +1,4 @@
-var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFeature} = require('../lib/common_selectors');
+var {noFeature, isShiftDown, isFeature, isOfMetaType, isShiftMousedown, isActiveFeature} = require('../lib/common_selectors');
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
@@ -28,6 +28,13 @@ module.exports = function(ctx, options = {}) {
     return ids.values();
   }
 
+  var cleanupBoxSelect = function() {
+    boxSelecting = false;
+    setTimeout(() => {
+      ctx.map.dragPan.enable();
+    }, 0);
+  };
+
   var finishBoxSelect = function(bbox, context) {
     if (box && box.parentNode) {
       box.parentNode.removeChild(box);
@@ -48,10 +55,7 @@ module.exports = function(ctx, options = {}) {
         ctx.ui.queueMapClasses({mouse:'move'});
       }
     }
-    boxSelecting = false;
-    setTimeout(() => {
-      ctx.map.dragPan.enable();
-    }, 0);
+    cleanupBoxSelect();
   };
 
   var readyForDirectSelect = function(e) {
@@ -75,6 +79,15 @@ module.exports = function(ctx, options = {}) {
       // probably passed in from a `draw_*` mode
       if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
 
+      // Any click should stop box selecting and dragging
+      this.on('click', () => true, function() {
+        dragging = false;
+        canDragMove = false;
+        if (boxSelecting) {
+          cleanupBoxSelect();
+        }
+      });
+
       // When a click falls outside any features,
       // - clear the selection
       // - re-render the deselected features
@@ -96,7 +109,7 @@ module.exports = function(ctx, options = {}) {
       });
 
       if (ctx.options.boxSelect) {
-        this.on('mousedown', isBoxSelecting, function(e) {
+        this.on('mousedown', isShiftMousedown, function(e) {
           ctx.map.dragPan.disable();
           startCoordinates = mouseEventPoint(e.originalEvent, ctx.container);
           boxSelecting = true;
@@ -200,16 +213,16 @@ module.exports = function(ctx, options = {}) {
             action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
+          dragging = false;
         }
-        dragging = false;
-        canDragMove = false;
-        featureCoords = null;
         if (boxSelecting) {
           finishBoxSelect([
             startCoordinates,
             mouseEventPoint(e.originalEvent, ctx.container)
           ], this);
         }
+        canDragMove = false;
+        featureCoords = null;
       });
     },
     render: function(geojson, push) {

@@ -37,15 +37,18 @@ var ModeHandler = function(mode, DrawContext) {
   var delegate = function (eventName, event) {
     var handles = handlers[eventName];
     var iHandle = handles.length;
+    var handlerCalled = false;
     while (iHandle--) {
       var handle = handles[iHandle];
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
-        DrawContext.store.render();
-        break;
+        handlerCalled = true;
       }
     }
-    DrawContext.ui.updateMapClasses();
+    if (handlerCalled) {
+      DrawContext.store.render();
+      DrawContext.ui.updateMapClasses();
+    }
   };
 
   mode.start.call(ctx);

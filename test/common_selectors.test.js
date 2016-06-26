@@ -23,29 +23,29 @@ test('commonSelectors.isOfMetaType', t => {
   t.end();
 });
 
-test('commonSelectors.isBoxSelecting', t => {
-  t.ok(commonSelectors.isBoxSelecting({
+test('commonSelectors.isShiftMousedown', t => {
+  t.ok(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: true,
       button: 0
     }
   }));
 
-  t.notOk(commonSelectors.isBoxSelecting({
+  t.notOk(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: false,
       button: 0
     }
   }));
 
-  t.notOk(commonSelectors.isBoxSelecting({
+  t.notOk(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: true,
       button: 1
     }
   }));
 
-  t.notOk(commonSelectors.isBoxSelecting({
+  t.notOk(commonSelectors.isShiftMousedown({
     nothing: false
   }));
 
