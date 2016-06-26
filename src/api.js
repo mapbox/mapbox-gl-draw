@@ -2,6 +2,7 @@ var isEqual = require('lodash.isequal');
 var normalize = require('geojson-normalize');
 var hat = require('hat');
 var featuresAt = require('./lib/features_at');
+var stringSetsAreEqual = require('./lib/string_sets_are_equal');
 var geojsonhint = require('geojsonhint');
 var Constants = require('./constants');
 
@@ -23,6 +24,15 @@ module.exports = function(ctx) {
     },
     getSelectedIds: function () {
       return ctx.store.getSelectedIds();
+    },
+    setSelected: function(idsToSelect) {
+      if (stringSetsAreEqual(idsToSelect, ctx.store.getSelectedIds())) return;
+      if (this.getMode() !== Constants.modes.SIMPLE_SELECT) {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: idsToSelect }, { silent: true });
+      } else {
+        ctx.store.setSelected(idsToSelect, { silent: true });
+        ctx.store.render();
+      }
     },
     set: function(featureCollection) {
       if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
@@ -98,14 +108,6 @@ module.exports = function(ctx) {
     },
     getMode: function() {
       return ctx.events.getMode();
-    },
-    setSelected: function(featureIds) {
-      if (this.getMode() === Constants.modes.SIMPLE_SELECT) {
-        ctx.store.setSelected(featureIds, { silent: true });
-      } else {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds }, { silent: true });
-      }
-      ctx.store.render();
     },
     trash: function() {
       ctx.events.trash({ silent: true });

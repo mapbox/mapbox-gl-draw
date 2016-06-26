@@ -131,6 +131,7 @@ Store.prototype.select = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.add(id);
+    this._changedFeatureIds.add(id);
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
@@ -149,6 +150,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
   toDenseArray(featureIds).forEach(id => {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
+    this._changedFeatureIds.add(id);
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
