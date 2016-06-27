@@ -5,7 +5,7 @@ import Point from '../src/feature_types/point';
 import GLDraw from '../';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
-import createMockCtx from './utils/create_mock_context';
+import createMockCtx from './utils/create_mock_feature_context';
 import drawGeometry from './utils/draw_geometry';
 import createMap from './utils/create_map';
 

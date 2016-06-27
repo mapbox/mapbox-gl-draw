@@ -5,7 +5,7 @@ import Point from '../src/feature_types/point';
 import Polygon from '../src/feature_types/polygon';
 import LineString from '../src/feature_types/line_string';
 import MultiFeature from '../src/feature_types/multi_feature';
-import createMockCtx from './utils/create_mock_context';
+import createMockCtx from './utils/create_mock_feature_context';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 
 test('MultiPoint via MultiFeature', t => {

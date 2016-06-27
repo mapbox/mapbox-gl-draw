@@ -6,7 +6,7 @@ import createMap from './utils/create_map';
 import getGeoJSON from './utils/get_geojson';
 import AfterNextRender from './utils/after_next_render';
 
-var feature = cloneFeature('point');
+var feature = getGeoJSON('point');
 
 test('API test', t => {
 
@@ -25,7 +25,7 @@ test('API test', t => {
   });
 
   t.test('getFeatureIdsAt', t => {
-    var id = Draw.add(feature);
+    var id = Draw.add(feature)[0];
     afterNextRender(() => {
       // These tests require the the pixel space
       // and lat/lng space are equal (1px = 1deg)
