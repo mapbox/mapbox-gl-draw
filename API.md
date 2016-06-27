@@ -73,12 +73,14 @@ console.log(Draw.get(id));
 ```
 
 ---
-### `.getFeatureIdsAt(Number: x, Number: y) -> [featureId, featuresId]`
+### `.getFeatureIdsAt(Object: point) -> [featureId, featuresId]`
 
-This method takes an x and y from pixel space and returns a list of
+This method takes an object with x and y and returns a list of
 features currently rendered by draws at that spot.
 
 This is good for using mouse events to get information out of draw.
+
+x and y must be from from pixel space, not latitude and longitude.
 
 ```js
 var featureIds = Draw.getFeatureIdsAt(20, 20);

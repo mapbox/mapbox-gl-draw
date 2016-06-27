@@ -16,8 +16,8 @@ var featureTypes = {
 module.exports = function(ctx) {
 
   return {
-    getFeatureIdsAt: function(x, y) {
-      var features = featuresAt({point: {x, y}}, null, ctx);
+    getFeatureIdsAt: function(point) {
+      var features = featuresAt({point}, null, ctx);
       return features.map(feature => feature.properties.id);
     },
     getSelectedIds: function () {
