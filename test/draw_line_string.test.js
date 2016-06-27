@@ -2,7 +2,8 @@ import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
-import { click, accessToken, createMap } from './test_utils';
+import click from './utils/mouse_click';
+import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawLineStringMode from '../src/modes/draw_line_string';
@@ -207,8 +208,6 @@ test('draw_line_string render, no coordinates', t => {
 
   t.end();
 });
-
-mapboxgl.accessToken = accessToken;
 
 test('draw_line_string interaction', t => {
   const container = document.createElement('div');
