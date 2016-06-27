@@ -119,6 +119,7 @@ module.exports = function(ctx, options = {}) {
       this.on('mousedown', isActiveFeature, function(e) {
         canDragMove = true;
         startPos = e.lngLat;
+        this.render(e.featureTarget.properties.id);
       });
 
       this.on('click', isFeature, function(e) {
