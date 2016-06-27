@@ -49,7 +49,6 @@ module.exports = function(ctx) {
         features: [line.toGeoJSON()]
       });
     }
-    ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
   }
 
