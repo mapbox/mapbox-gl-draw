@@ -3,13 +3,11 @@ import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by 
 import Feature from '../src/feature_types/feature';
 import Point from '../src/feature_types/point';
 import GLDraw from '../';
-import {
-  createMap,
-  drawGeometry,
-  createFeature,
-  getPublicMemberKeys,
-  createMockCtx
-} from './test_utils';
+import createFeature from './utils/create_feature';
+import getPublicMemberKeys from './utils/get_public_member_keys';
+import createMockCtx from './utils/create_mock_context';
+import drawGeometry from './utils/draw_geometry';
+import createMap from './utils/create_map';
 
 test('Point constructor and API', t => {
   const rawPoint = createFeature('point');

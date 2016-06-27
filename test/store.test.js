@@ -1,6 +1,8 @@
 import test from 'tape';
 import Store from '../src/store';
-import { createMap, createFeature, getPublicMemberKeys } from './test_utils';
+import createFeature from './utils/create_feature';
+import getPublicMemberKeys from './utils/get_public_member_keys';
+import createMap from './utils/create_map';
 
 function createStore() {
   const map = createMap();
