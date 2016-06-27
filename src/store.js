@@ -1,14 +1,14 @@
 var throttle = require('./lib/throttle');
 var toDenseArray = require('./lib/to_dense_array');
-var SimpleSet = require('./lib/simple_set');
+var StringSet = require('./lib/string_set');
 var render = require('./render');
 
 var Store = module.exports = function(ctx) {
   this._features = {};
-  this._featureIds = new SimpleSet();
-  this._selectedFeatureIds = new SimpleSet();
-  this._changedFeatureIds = new SimpleSet();
-  this._deletedFeaturesToEmit = new SimpleSet();
+  this._featureIds = new StringSet();
+  this._selectedFeatureIds = new StringSet();
+  this._changedFeatureIds = [];
+  this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
   this.ctx = ctx;
   this.sources = {
@@ -34,7 +34,9 @@ Store.prototype.setDirty = function() {
  * @return {Store} this
  */
 Store.prototype.featureChanged = function(featureId) {
-  this._changedFeatureIds.add(featureId);
+  if (this._changedFeatureIds.indexOf(featureId) === -1) {
+    this._changedFeatureIds.push(featureId);
+  }
   return this;
 };
 
@@ -43,7 +45,7 @@ Store.prototype.featureChanged = function(featureId) {
  * @return {Store} this
  */
 Store.prototype.getChangedIds = function() {
-  return this._changedFeatureIds.values();
+  return this._changedFeatureIds;
 };
 
 /**
@@ -51,7 +53,7 @@ Store.prototype.getChangedIds = function() {
  * @return {Store} this
  */
 Store.prototype.clearChangedIds = function() {
-  this._changedFeatureIds.clear();
+  this._changedFeatureIds = [];
   return this;
 };
 
@@ -92,7 +94,9 @@ Store.prototype.delete = function(featureIds, options = {}) {
     this._featureIds.delete(id);
     this._selectedFeatureIds.delete(id);
     if (!options.silent) {
-      this._deletedFeaturesToEmit.add(this._features[id]);
+      if (this._deletedFeaturesToEmit.indexOf(this._features[id]) === -1) {
+        this._deletedFeaturesToEmit.push(this._features[id]);
+      }
     }
     delete this._features[id];
     this.isDirty = true;
