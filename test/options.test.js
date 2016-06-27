@@ -3,6 +3,9 @@ import test from 'tape';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
+import { accessToken } from './test_utils';
+
+mapboxgl.accessToken = accessToken;
 
 test('Options test', t => {
   t.test('no options', t => {
