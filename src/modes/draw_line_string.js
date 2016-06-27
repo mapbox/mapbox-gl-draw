@@ -29,6 +29,7 @@ module.exports = function(ctx) {
   }
 
   function handleClick(e) {
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
     // Finish if we clicked on the first or last point
     if (currentVertexPosition > 0 &&
       (isEventAtCoordinates(e, line.coordinates[0]) || isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]))
@@ -48,6 +49,7 @@ module.exports = function(ctx) {
         features: [line.toGeoJSON()]
       });
     }
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
   }
 
@@ -59,7 +61,7 @@ module.exports = function(ctx) {
           ctx.map.doubleClickZoom.disable();
         }
       });
-      ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_ADD_CLASS_FRAGMENT });
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
       this.on('click', CommonSelectors.true, handleClick);

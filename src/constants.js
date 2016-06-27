@@ -9,6 +9,13 @@ module.exports = {
   MOUSE_MOVE_CLASS_FRAGMENT: 'move',
   ATTRIBUTION_CLASS: 'mapboxgl-ctrl-attrib',
   ACTIVE_BUTTON_CLASS: 'active',
+  cursors: {
+    ADD: 'add',
+    MOVE: 'move',
+    DRAG: 'drag',
+    POINTER: 'pointer',
+    NONE: 'none'
+  },
   types: {
     POLYGON: 'polygon',
     LINE: 'line_string',

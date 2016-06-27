@@ -52,7 +52,7 @@ module.exports = function(ctx, options = {}) {
         ids.forEach(id => {
           context.render(id);
         });
-        ctx.ui.queueMapClasses({mouse:'move'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       }
     }
     cleanupBoxSelect();
@@ -105,7 +105,7 @@ module.exports = function(ctx, options = {}) {
           coordPath: e.featureTarget.properties.coord_path,
           startPos: e.lngLat
         });
-        ctx.ui.queueMapClasses({mouse:'move'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       });
 
       if (ctx.options.boxSelect) {
@@ -132,7 +132,7 @@ module.exports = function(ctx, options = {}) {
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
-          ctx.ui.queueMapClasses({mouse:'pointer'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
           this.render(id);
           if (featureIds.length === 1 ) {
             ctx.map.doubleClickZoom.enable();
@@ -141,20 +141,20 @@ module.exports = function(ctx, options = {}) {
         else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
           // add to selected
           ctx.store.select(id);
-          ctx.ui.queueMapClasses({mouse:'move'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
           this.render(id);
         }
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
           ctx.store.setSelected(id);
-          ctx.ui.queueMapClasses({mouse:'move'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
           this.render(id);
         }
       });
 
       this.on('drag', () => boxSelecting, function(e) {
-        ctx.ui.queueMapClasses({mouse:'add'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         if (!box) {
           box = document.createElement('div');
           box.classList.add('mapbox-gl-draw_boxselect');
