@@ -94,8 +94,8 @@ module.exports = function(ctx) {
         features: ctx.store.getAll().map(feature => feature.toGeoJSON())
       };
     },
-    delete: function(id) {
-      ctx.store.delete([id], { silent: true });
+    delete: function(featureIds) {
+      ctx.store.delete(featureIds, { silent: true });
       ctx.store.render();
     },
     deleteAll: function() {
