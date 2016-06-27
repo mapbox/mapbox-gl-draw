@@ -27,7 +27,7 @@ module.exports = function(ctx) {
       if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
         throw new Error('Invalid FeatureCollection');
       }
-      var toDelete = JSON.parse(JSON.stringify(ctx.store.getAllIds()));
+      var toDelete = ctx.store.getAllIds().slice(0);
       var newIds = this.add(featureCollection);
 
       var newIdsForFasterLookUp = {};
