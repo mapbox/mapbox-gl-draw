@@ -18,8 +18,7 @@ module.exports = function(ctx, opts) {
   var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
   var onVertex = function(e) {
-    canDragMove = true;
-    startPos = e.lngLat;
+    startDragging(e);
     var about = e.featureTarget.properties;
     var selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
     if (!isShiftDown(e) && selectedIndex === -1) {
@@ -32,8 +31,7 @@ module.exports = function(ctx, opts) {
   };
 
   var onMidpoint = function(e) {
-    canDragMove = true;
-    startPos = e.lngLat;
+    startDragging(e);
     var about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
     ctx.map.fire(Constants.events.UPDATE, {
@@ -41,6 +39,18 @@ module.exports = function(ctx, opts) {
       features: ctx.store.getSelected().map(f => f.toGeoJSON())
     });
     selectedCoordPaths = [about.coord_path];
+  };
+
+  var startDragging = function(e) {
+    canDragMove = true;
+    startPos = e.lngLat;
+  };
+
+  var stopDragging = function() {
+    dragging = false;
+    canDragMove = false;
+    coordPos = null;
+    startPos = null;
   };
 
   var setupCoordPos = function() {
@@ -73,6 +83,9 @@ module.exports = function(ctx, opts) {
           feature.updateCoordinate(coord_path, lng, lat);
         }
       });
+      this.on('click', () => true, function() {
+        stopDragging();
+      });
       this.on('mouseup', () => true, function() {
         if (dragging) {
           ctx.map.fire(Constants.events.UPDATE, {
@@ -80,10 +93,7 @@ module.exports = function(ctx, opts) {
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
         }
-        dragging = false;
-        canDragMove = false;
-        coordPos = null;
-        startPos = null;
+        stopDragging();
       });
       this.on('click', noFeature, function() {
         ctx.events.changeMode('simple_select');
