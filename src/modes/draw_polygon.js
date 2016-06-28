@@ -56,13 +56,15 @@ module.exports = function(ctx) {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
+      if (ctx.store.get(polygon.id) === undefined) return;
       polygon.removeCoordinate(`0.${currentVertexPosition}`);
-      if (polygon.isValid() && ctx.store.get(polygon.id) !== undefined) {
+
+      if (polygon.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]
         });
       }
-      else if (ctx.store.get(polygon.id) !== undefined) {
+      else {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }

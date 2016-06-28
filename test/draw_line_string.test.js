@@ -321,7 +321,7 @@ test('draw_line_string interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then change_mode before a click', st => {
+    t.test('start draw_line_string mode then changemode before a click', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 

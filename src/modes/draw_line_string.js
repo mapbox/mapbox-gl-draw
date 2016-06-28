@@ -58,13 +58,14 @@ module.exports = function(ctx) {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
+      if (ctx.store.get(line.id) === undefined) return;
       line.removeCoordinate(`${currentVertexPosition}`);
-      if (line.isValid() && ctx.store.get(line.id) !== undefined) {
+      if (line.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [line.toGeoJSON()]
         });
       }
-      else if (ctx.store.get(line.id) !== undefined) {
+      else {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
