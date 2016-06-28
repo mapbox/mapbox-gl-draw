@@ -73,6 +73,7 @@
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.0.0",
     "sinon": "^1.17.4",
-    "turf-area": "^1.1.1"
+    "turf-area": "^1.1.1",
+    "xtend": "^4.0.1"
   }
 }

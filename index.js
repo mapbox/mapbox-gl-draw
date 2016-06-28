@@ -1,6 +1,5 @@
 'use strict';
 
-require('./src/lib/polyfills');
 var Setup = require('./src/setup');
 var Options = require('./src/options');
 var API = require('./src/api');
