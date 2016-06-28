@@ -87,14 +87,25 @@ module.exports = function(ctx) {
     },
     delete: function(featureIds) {
       ctx.store.delete(featureIds, { silent: true });
-      ctx.store.render();
+      // If we were in direct select mode and our selected feature no longer exists
+      // (because it was deleted), we need to get out of that mode.
+      if (this.getMode() === Constants.modes.DIRECT_SELECT && !ctx.store.getSelectedIds().length) {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      } else {
+        ctx.store.render();
+      }
     },
     deleteAll: function() {
       ctx.store.delete(ctx.store.getAllIds(), { silent: true });
-      ctx.store.render();
+      // If we were in direct select mode, now our selected feature no longer exists,
+      // so escape that mode.
+      if (this.getMode() === Constants.modes.DIRECT_SELECT) {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      } else {
+        ctx.store.render();
+      }
     },
     changeMode: function(mode, modeOptions) {
-      console.error(`changing mode to ${mode}`)
       // Avoid changing modes just to re-select what's already selected
       if (mode === Constants.modes.SIMPLE_SELECT && this.getMode() === Constants.modes.SIMPLE_SELECT) {
         if (stringSetsAreEqual((modeOptions.featureIds || []), ctx.store.getSelectedIds())) return;

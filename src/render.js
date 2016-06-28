@@ -7,13 +7,6 @@ module.exports = function render() {
 
   var mode = store.ctx.events.currentModeName();
 
-  // If we were in direct select mode and our selected feature no longer exists
-  // (because it was deleted), we need to get out of that mode.
-  if (mode === Constants.modes.DIRECT_SELECT && !store.get(store.getSelectedIds()[0])) {
-    // The mode change should cause a re-render
-    return store.ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-  }
-
   store.ctx.ui.queueMapClasses({ mode });
 
   var newHotIds = [];
