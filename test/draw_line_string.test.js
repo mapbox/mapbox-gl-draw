@@ -1,4 +1,5 @@
 import test from 'tape';
+import xtend from 'xtend';
 import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
 import click from './utils/mouse_click';
@@ -55,8 +56,8 @@ test('draw_line_string mode initialization', t => {
     }
   });
   // Strip ids for this comparison
-  t.deepEqual(Object.assign(context.store.add.getCall(0).args[0], { id: null }),
-    Object.assign(emptyLine, { id: null }), 'with a new line');
+  t.deepEqual(xtend(context.store.add.getCall(0).args[0], { id: null }),
+    xtend(emptyLine, { id: null }), 'with a new line');
 
   t.end();
 });

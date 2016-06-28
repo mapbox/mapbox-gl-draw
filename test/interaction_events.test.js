@@ -1,6 +1,7 @@
 // These tests ensure that user interactions fire the right events
 
 import test from 'tape';
+import xtend from 'xtend';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
@@ -939,7 +940,7 @@ function firedWith(tester, eventName, expectedEventData) {
     return {};
   }
   tester.pass(`${eventName} called`);
-  const actualEventData = Object.assign({}, call.args[1]);
+  const actualEventData = xtend(call.args[1]);
 
   if (actualEventData.features) {
     actualEventData.features = actualEventData.features.map(withoutId);
@@ -949,7 +950,7 @@ function firedWith(tester, eventName, expectedEventData) {
 }
 
 function withoutId(obj) {
-  const clone = Object.assign({}, obj);
+  const clone = xtend(obj);
   delete clone.id;
   return clone;
 }
