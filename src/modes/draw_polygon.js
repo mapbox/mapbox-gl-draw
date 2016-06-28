@@ -20,11 +20,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(polygon);
 
-  function stopDrawingAndRemove() {
-    ctx.store.delete([polygon.id], { silent: true });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-  }
-
   function handleMouseMove(e) {
     polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
   }
@@ -34,20 +29,10 @@ module.exports = function(ctx) {
     // Finish if we clicked on the first or last point
     if (currentVertexPosition > 0 &&
       (isEventAtCoordinates(e, polygon.coordinates[0][0]) || isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1]))
-    ) return finish();
+    ) return ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
 
     polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
     currentVertexPosition++;
-  }
-
-  function finish() {
-    if (!polygon.isValid()) return stopDrawingAndRemove();
-    polygon.removeCoordinate(`0.${currentVertexPosition}`);
-    currentVertexPosition--;
-    ctx.map.fire(Constants.events.CREATE, {
-      features: [polygon.toGeoJSON()]
-    });
-    ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
   }
 
   return {
@@ -58,17 +43,32 @@ module.exports = function(ctx) {
       ctx.ui.setActiveButton(Constants.types.POLYGON);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
       this.on('click', CommonSelectors.true, handleClick);
-      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', CommonSelectors.isEnterKey, finish);
+      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+        ctx.store.delete([polygon.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      });
+      this.on('keyup', CommonSelectors.isEnterKey, () => {
+        ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
+      });
     },
 
     stop: function() {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
-      // If it's invalid, just destroy the thing
-      if (!polygon.isValid()) {
+      // check to see if we've deleted this feature
+      if (ctx.store.get(polygon.id) === undefined) return;
+
+      //remove last added coordinate
+      polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      if (polygon.isValid()) {
+        ctx.map.fire(Constants.events.CREATE, {
+          features: [polygon.toGeoJSON()]
+        });
+      }
+      else {
         ctx.store.delete([polygon.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
 
@@ -76,11 +76,12 @@ module.exports = function(ctx) {
       geojson.properties.active = (geojson.properties.id === polygon.id) ? 'true' : 'false';
       geojson.properties.meta = (geojson.properties.active === 'true') ? 'feature' : geojson.properties.meta;
 
+      if (geojson.geometry.coordinates.length === 0) return;
       const coordinateCount = geojson.geometry.coordinates[0].length;
-      if (coordinateCount < 2) return;
+      if (coordinateCount < 3) return;
 
       // If we've only drawn two vertices, make a LineString instead of a Polygon
-      if (geojson.properties.active === 'true' && coordinateCount === 2) {
+      if (geojson.properties.active === 'true' && coordinateCount === 3) {
         let coords = [
           [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
         ];
@@ -92,12 +93,13 @@ module.exports = function(ctx) {
             type: 'LineString'
           }
         });
-      } else if (geojson.properties.active === 'false' || coordinateCount > 2) {
+      } else if (geojson.properties.active === 'false' || coordinateCount > 3) {
         callback(geojson);
       }
     },
     trash() {
-      stopDrawingAndRemove();
+      ctx.store.delete([polygon.id], { silent: true });
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }
   };
 };

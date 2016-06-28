@@ -1,48 +1,27 @@
 import test from 'tape';
 import xtend from 'xtend';
-import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
-import click from './utils/mouse_click';
+import mouseClick from './utils/mouse_click';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import {
+  enterEvent,
+  startPointEvent,
+  startLineStringEvent,
+  startPolygonEvent,
+  escapeEvent
+} from './utils/key_events';
 
-function createMockContext() {
-  return {
-    store: {
-      add: spy(),
-      delete: spy(),
-      featureChanged: spy(),
-      clearSelected: spy()
-    },
-    events: {
-      changeMode: spy()
-    },
-    ui: {
-      queueMapClasses: spy(),
-      setActiveButton: spy()
-    },
-    map: {
-      doubleClickZoom: {
-        disable: spy(),
-        enable: spy()
-      }
-    },
-    _test: {}
-  };
-}
 
-function createMockLifecycleContext() {
-  return {
-    on: spy()
-  };
-}
 
 test('draw_line_string mode initialization', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   drawLineStringMode(context);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
@@ -63,7 +42,7 @@ test('draw_line_string mode initialization', t => {
 });
 
 test('draw_line_string start', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawLineStringMode(context);
 
@@ -89,7 +68,7 @@ test('draw_line_string start', t => {
 });
 
 test('draw_line_string stop with valid line', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   // Fake a valid line
@@ -105,7 +84,7 @@ test('draw_line_string stop with valid line', t => {
 });
 
 test('draw_line_string stop with invalid line', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   // Fake an invalid line
@@ -116,10 +95,12 @@ test('draw_line_string stop with invalid line', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
-  t.deepEqual(context.store.delete.getCall(0).args, [
-    [context._test.line.id],
-    { silent: true }
-  ], 'store.delete received correct arguments');
+  if (context.store.delete.callCount > 0) {
+    t.deepEqual(context.store.delete.getCall(0).args, [
+      [context._test.line.id],
+      { silent: true }
+    ], 'store.delete received correct arguments');
+  }
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.enable.callCount, 1);
@@ -128,7 +109,7 @@ test('draw_line_string stop with invalid line', t => {
 });
 
 test('draw_line_string render, active', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -160,7 +141,7 @@ test('draw_line_string render, active', t => {
 });
 
 test('draw_line_string render, inactive', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -191,7 +172,7 @@ test('draw_line_string render, inactive', t => {
 });
 
 test('draw_line_string render, no coordinates', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -221,7 +202,7 @@ test('draw_line_string interaction', t => {
 
     Draw.changeMode('draw_line_string');
     t.test('first click', st => {
-      click(map, makeMouseEvent(10, 20));
+      mouseClick(map, makeMouseEvent(10, 20));
 
       const { features } = Draw.getAll();
       st.equal(features.length, 1, 'line created');
@@ -248,23 +229,23 @@ test('draw_line_string interaction', t => {
     });
 
     t.test('click to add another vertex', st => {
-      click(map, makeMouseEvent(35, 35));
+      mouseClick(map, makeMouseEvent(35, 35));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35]], 'last coordinate replaced');
       st.end();
     });
 
     t.test('add more points then click on the last vertex to finish', st => {
-      click(map, makeMouseEvent(40, 40));
-      click(map, makeMouseEvent(50, 50));
-      click(map, makeMouseEvent(55, 55));
-      click(map, makeMouseEvent(55, 55));
+      mouseClick(map, makeMouseEvent(40, 40));
+      mouseClick(map, makeMouseEvent(50, 50));
+      mouseClick(map, makeMouseEvent(55, 55));
+      mouseClick(map, makeMouseEvent(55, 55));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates,
         [[10, 20], [35, 35], [40, 40], [50, 50], [55, 55]],
         'all coordinates in place');
 
-      click(map, makeMouseEvent(40, 40));
+      mouseClick(map, makeMouseEvent(40, 40));
       st.deepEqual(line.geometry.coordinates,
         [[10, 20], [35, 35], [40, 40], [50, 50], [55, 55]],
         'since we exited draw_line_string mode, another click does not add a coordinate');
@@ -276,9 +257,9 @@ test('draw_line_string interaction', t => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
@@ -286,7 +267,7 @@ test('draw_line_string interaction', t => {
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
 
       st.end();
@@ -296,52 +277,51 @@ test('draw_line_string interaction', t => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
-      const escapeEvent = createSyntheticEvent('keyup', {
-        keyCode: 27
-      });
       container.dispatchEvent(escapeEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
 
       st.end();
     });
 
+    // ZERO CLICK TESTS
+
     t.test('start a line and end it with Enter', st => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
-      const enterEvent = createSyntheticEvent('keyup', {
-        keyCode: 13
-      });
       container.dispatchEvent(enterEvent);
 
       st.equal(Draw.getAll().features.length, 1, 'the feature was added');
       st.deepEqual(Draw.getAll().features[0].geometry.coordinates, [[1, 1], [2, 2], [3, 3]], 'the line is correct');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 1, 'no longer drawing');
 
       st.end();
     });
 
-    t.test('start draw_line_string mode then exit before a click', st => {
+    t.test('start draw_line_string mode then changemode before a click', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -352,6 +332,94 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('simple_select');
       st.equal(Draw.getAll().features.length, 0, 'line is removed');
+
+      st.end();
+    });
+
+    // ONE CLICK TESTS
+
+    t.test('start draw_line_string mode then enter after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(enterEvent);
+      st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a point after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startPointEvent);
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a line_string after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startLineStringEvent);
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a polygon after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startPolygonEvent);
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then double click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
+
+      st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
 
       st.end();
     });

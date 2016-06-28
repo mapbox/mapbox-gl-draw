@@ -78,7 +78,9 @@ module.exports = function(ctx, options = {}) {
       canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
+      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
+        return ctx.store.get(id) !== undefined;
+      }));
 
       // Any mouseup should stop box selecting and dragging
       this.on('mouseup', () => true, function() {
