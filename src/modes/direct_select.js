@@ -97,10 +97,10 @@ module.exports = function(ctx, opts) {
         stopDragging();
       });
       this.on('click', noFeature, function() {
-        ctx.events.changeMode('simple_select');
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
       this.on('click', isInactiveFeature, function() {
-        ctx.events.changeMode('simple_select');
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
     },
     stop: function() {
@@ -123,7 +123,7 @@ module.exports = function(ctx, opts) {
     },
     trash: function() {
       if (selectedCoordPaths.length === 0) {
-        return ctx.events.changeMode('simple_select', { features: [feature] });
+        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { features: [feature] });
       }
 
       selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
@@ -134,7 +134,7 @@ module.exports = function(ctx, opts) {
       selectedCoordPaths = [];
       if (feature.isValid() === false) {
         ctx.store.delete([featureId]);
-        ctx.events.changeMode('simple_select', null);
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, null);
       }
     }
   };
