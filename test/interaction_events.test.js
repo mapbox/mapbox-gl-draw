@@ -747,14 +747,10 @@ function runTests() {
     afterNextRender(() => {
       Draw.trash();
       afterNextRender(() => {
-        firedWith(t, 'draw.selectionchange', {
-          features: [line]
-        });
         firedWith(t, 'draw.delete', {
           features: [line]
         });
         t.deepEqual(flushDrawEvents(), [
-          'draw.selectionchange',
           'draw.delete'
         ], 'no unexpected draw events');
         t.end();

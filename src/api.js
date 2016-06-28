@@ -105,7 +105,7 @@ module.exports = function(ctx) {
         ctx.store.render();
       }
     },
-    changeMode: function(mode, modeOptions) {
+    changeMode: function(mode, modeOptions = {}) {
       // Avoid changing modes just to re-select what's already selected
       if (mode === Constants.modes.SIMPLE_SELECT && this.getMode() === Constants.modes.SIMPLE_SELECT) {
         if (stringSetsAreEqual((modeOptions.featureIds || []), ctx.store.getSelectedIds())) return;
