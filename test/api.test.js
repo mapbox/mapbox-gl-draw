@@ -24,7 +24,7 @@ test('API test', t => {
     }
   });
 
-  t.test('getFeatureIdsAt', t => {
+  t.test('Draw.getFeatureIdsAt', t => {
     var id = Draw.add(feature)[0];
     afterNextRender(() => {
       // These tests require the the pixel space
@@ -39,16 +39,16 @@ test('API test', t => {
       Draw.deleteAll();
       t.end();
     });
-  })
+  });
 
-  t.test('deleteAll', t => {
+  t.test('Draw.deleteAll', t => {
     Draw.add(getGeoJSON('point'));
     Draw.deleteAll();
     t.equals(Draw.getAll().features.length, 0, 'Draw.deleteAll removes all geometries');
     t.end();
   });
 
-  t.test('changeMode', t => {
+  t.test('Draw.changeMode', t => {
 
     Draw.changeMode('draw_'+Draw.types.POLYGON);
     var featureCollection = Draw.getAll();
@@ -66,31 +66,54 @@ test('API test', t => {
     t.end();
   });
 
-  t.test('add', t => {
+  t.test('Draw.add -- point', t => {
     var id = Draw.add(getGeoJSON('point'))[0];
     t.equals(typeof id, 'string', 'valid string id returned on add');
+    Draw.deleteAll();
+    t.end();
+  });
 
-    // add featureCollection
+  t.test('Draw.add -- FeatureCollection', t => {
     var listOfIds = Draw.add(getGeoJSON('featureCollection'));
     t.equals(listOfIds.length, getGeoJSON('featureCollection').features.length,
       'valid string id returned when adding a featureCollection');
     Draw.deleteAll();
+    t.end();
+  });
 
+  t.test('Draw.add -- MultiPolygon', t => {
     var multiId = Draw.add(getGeoJSON('multiPolygon'))[0];
     t.equals('string', typeof multiId, 'accepts multi features');
-
+    Draw.deleteAll();
     t.end();
   });
 
-  t.test('add will error when handed non-geojson', t => {
-    t.throws(function() {
-      Draw.add({});
-    }, 'when an empty object is passed');
+  t.test('Draw.add -- null geometry', t => {
+      t.throws(() => { Draw.add(getGeoJSON('nullGeometry'))}, 'null geometry is invalid');
+      t.end();
+  });
 
+  t.test('Draw.add -- GeometryCollection', t => {
+      t.throws(() => { Draw.add(getGeoJSON('geometryCollection'))}, 'geometry collections are not valid in Draw');
+      t.end();
+  });
+
+  t.test('Draw.add -- Invalid geojson', t => {
+      t.throws(() => { Draw.add({})}, 'Invlaid GeoJSON throws an error');
+      t.end();
+  });
+
+  t.test('Draw.add -- change geometry type', t => {
+    var id = Draw.add(getGeoJSON('point'))[0];
+    var polygon = getGeoJSON('polygon');
+    polygon.id = id;
+    Draw.add(polygon);
+    t.deepEquals(polygon, Draw.get(id), 'changed geometry type');
+    Draw.deleteAll();
     t.end();
   });
 
-  t.test('add existing feature with changed properties', t => {
+  t.test('Draw.add -- existing feature with changed properties', t => {
     var id = Draw.add(getGeoJSON('point'));
     var point = Draw.get(id);
 
@@ -105,7 +128,7 @@ test('API test', t => {
     }, 32);
   });
 
-  t.test('get', t => {
+  t.test('Draw.get', t => {
     var id = Draw.add(getGeoJSON('point'));
     var f = Draw.get(id);
     t.deepEquals(
@@ -118,7 +141,7 @@ test('API test', t => {
     t.end();
   });
 
-  t.test('getAll', t => {
+  t.test('Draw.getAll', t => {
     Draw.add(getGeoJSON('point'));
     t.deepEquals(
       getGeoJSON('point').geometry,
@@ -129,7 +152,7 @@ test('API test', t => {
     t.end();
   });
 
-  t.test('delete', t => {
+  t.test('Draw.delete', t => {
     var id = Draw.add(getGeoJSON('point'))[0];
     Draw.delete(id);
     t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
@@ -138,6 +161,7 @@ test('API test', t => {
 
 
   t.test('done', t => {
+    Draw.deleteAll();
     Draw.remove();
     t.end();
   });
