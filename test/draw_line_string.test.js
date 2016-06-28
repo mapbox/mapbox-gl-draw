@@ -1,7 +1,7 @@
 import test from 'tape';
 import xtend from 'xtend';
 import GLDraw from '../';
-import click from './utils/mouse_click';
+import mouseClick from './utils/mouse_click';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
@@ -202,7 +202,7 @@ test('draw_line_string interaction', t => {
 
     Draw.changeMode('draw_line_string');
     t.test('first click', st => {
-      click(map, makeMouseEvent(10, 20));
+      mouseClick(map, makeMouseEvent(10, 20));
 
       const { features } = Draw.getAll();
       st.equal(features.length, 1, 'line created');
@@ -229,23 +229,23 @@ test('draw_line_string interaction', t => {
     });
 
     t.test('click to add another vertex', st => {
-      click(map, makeMouseEvent(35, 35));
+      mouseClick(map, makeMouseEvent(35, 35));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35]], 'last coordinate replaced');
       st.end();
     });
 
     t.test('add more points then click on the last vertex to finish', st => {
-      click(map, makeMouseEvent(40, 40));
-      click(map, makeMouseEvent(50, 50));
-      click(map, makeMouseEvent(55, 55));
-      click(map, makeMouseEvent(55, 55));
+      mouseClick(map, makeMouseEvent(40, 40));
+      mouseClick(map, makeMouseEvent(50, 50));
+      mouseClick(map, makeMouseEvent(55, 55));
+      mouseClick(map, makeMouseEvent(55, 55));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates,
         [[10, 20], [35, 35], [40, 40], [50, 50], [55, 55]],
         'all coordinates in place');
 
-      click(map, makeMouseEvent(40, 40));
+      mouseClick(map, makeMouseEvent(40, 40));
       st.deepEqual(line.geometry.coordinates,
         [[10, 20], [35, 35], [40, 40], [50, 50], [55, 55]],
         'since we exited draw_line_string mode, another click does not add a coordinate');
@@ -257,9 +257,9 @@ test('draw_line_string interaction', t => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
@@ -267,7 +267,7 @@ test('draw_line_string interaction', t => {
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
 
       st.end();
@@ -277,9 +277,9 @@ test('draw_line_string interaction', t => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
@@ -288,7 +288,7 @@ test('draw_line_string interaction', t => {
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
 
@@ -299,10 +299,10 @@ test('draw_line_string interaction', t => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
-      click(map, makeMouseEvent(2, 2));
-      click(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(2, 2));
+      mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
@@ -312,7 +312,7 @@ test('draw_line_string interaction', t => {
       st.equal(Draw.getAll().features.length, 1, 'the feature was added');
       st.deepEqual(Draw.getAll().features[0].geometry.coordinates, [[1, 1], [2, 2], [3, 3]], 'the line is correct');
 
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 1, 'no longer drawing');
 
@@ -340,14 +340,14 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
       let line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
 
       container.dispatchEvent(enterEvent);
-      st.equal(Draw.getAll().features.length, 0, 'feature was removed');
+      st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
 
       st.end();
     });
@@ -358,14 +358,14 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
       let line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
 
       container.dispatchEvent(startPointEvent);
-      st.equal(Draw.get(line.id), undefined, 'feature was removed');
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
 
       st.end();
     });
@@ -376,14 +376,14 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
       let line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
 
       container.dispatchEvent(startLineStringEvent);
-      st.equal(Draw.get(line.id), undefined, 'feature was removed');
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
 
       st.end();
     });
@@ -394,14 +394,14 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      click(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
       let line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
 
       container.dispatchEvent(startPolygonEvent);
-      st.equal(Draw.get(line.id), undefined, 'feature was removed');
+      st.equal(Draw.get(line.id), undefined, 'line_string was removed');
 
       st.end();
     });

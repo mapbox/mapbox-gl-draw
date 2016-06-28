@@ -2,7 +2,7 @@ import test from 'tape';
 import xtend from 'xtend';
 import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
-import click from './utils/mouse_click';
+import mouseClick from './utils/mouse_click';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
@@ -153,7 +153,7 @@ test('draw_point interaction', t => {
     t.test('clicking', st => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
-      click(map, makeMouseEvent(10, 20));
+      mouseClick(map, makeMouseEvent(10, 20));
 
       const { features } = Draw.getAll();
       st.equal(features.length, 1, 'point created');
@@ -162,7 +162,7 @@ test('draw_point interaction', t => {
 
       st.deepEqual(point.geometry.coordinates, [10, 20], 'coordinate added');
 
-      click(map, makeMouseEvent(30, 30));
+      mouseClick(map, makeMouseEvent(30, 30));
       st.equal(features.length, 1, 'mode has changed, so another click does not create another point');
 
       st.end();
@@ -175,7 +175,7 @@ test('draw_point interaction', t => {
       container.dispatchEvent(escapeEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
-      click(map, makeMouseEvent(30, 30));
+      mouseClick(map, makeMouseEvent(30, 30));
       st.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
 
       st.end();
@@ -188,7 +188,7 @@ test('draw_point interaction', t => {
       container.dispatchEvent(enterEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
-      click(map, makeMouseEvent(30, 30));
+      mouseClick(map, makeMouseEvent(30, 30));
       st.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
 
       st.end();
@@ -201,7 +201,7 @@ test('draw_point interaction', t => {
       Draw.trash();
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
-      click(map, makeMouseEvent(30, 30));
+      mouseClick(map, makeMouseEvent(30, 30));
       st.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
 
       st.end();
