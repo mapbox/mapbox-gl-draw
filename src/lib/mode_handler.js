@@ -25,10 +25,6 @@ var ModeHandler = function(mode, DrawContext) {
         return handler.selector !== selector || handler.fn !== fn;
       });
     },
-    fire: function(event, payload) {
-      var modename = DrawContext.events.currentModeName();
-      DrawContext.map.fire(`draw.${modename}.${event}`, payload);
-    },
     render: function(id) {
       DrawContext.store.featureChanged(id);
     }
