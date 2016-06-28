@@ -7,7 +7,7 @@ var Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
-  this._changedFeatureIds = [];
+  this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
   this.ctx = ctx;
@@ -34,9 +34,7 @@ Store.prototype.setDirty = function() {
  * @return {Store} this
  */
 Store.prototype.featureChanged = function(featureId) {
-  if (this._changedFeatureIds.indexOf(featureId) === -1) {
-    this._changedFeatureIds.push(featureId);
-  }
+  this._changedFeatureIds.add(featureId);
   return this;
 };
 
@@ -45,7 +43,7 @@ Store.prototype.featureChanged = function(featureId) {
  * @return {Store} this
  */
 Store.prototype.getChangedIds = function() {
-  return this._changedFeatureIds;
+  return this._changedFeatureIds.values();
 };
 
 /**
@@ -53,7 +51,7 @@ Store.prototype.getChangedIds = function() {
  * @return {Store} this
  */
 Store.prototype.clearChangedIds = function() {
-  this._changedFeatureIds = [];
+  this._changedFeatureIds.clear();
   return this;
 };
 
