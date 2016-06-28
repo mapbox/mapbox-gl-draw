@@ -11,12 +11,21 @@ import LineString from '../src/feature_types/line_string';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 
 function createMockContext() {
-  return {
+  var _store = {};
+
+  var api = {
     store: {
-      add: spy(),
-      delete: spy(),
+      add: function(f) {
+        _store[f.id] = f;
+      },
+      delete: function(id) {
+        delete _store[id];
+      },
       featureChanged: spy(),
-      clearSelected: spy()
+      clearSelected: spy(),
+      get: function(id) {
+        return _store[id];
+      }
     },
     events: {
       changeMode: spy()
@@ -29,10 +38,17 @@ function createMockContext() {
       doubleClickZoom: {
         disable: spy(),
         enable: spy()
-      }
+      },
+      fire: spy()
     },
     _test: {}
   };
+
+  spy(api.store, 'add');
+  spy(api.store, 'delete');
+  spy(api.store, 'get');
+
+  return api;
 }
 
 function createMockLifecycleContext() {
@@ -40,6 +56,22 @@ function createMockLifecycleContext() {
     on: spy()
   };
 }
+
+const enterEvent = createSyntheticEvent('keyup', {
+  keyCode: 13
+});
+
+const startPointEvent = createSyntheticEvent('keydown', {
+  keyCode: 49
+});
+
+const startLineStringEvent = createSyntheticEvent('keydown', {
+  keyCode: 50
+});
+
+const startPolygonEvent = createSyntheticEvent('keydown', {
+  keyCode: 51
+});
 
 test('draw_line_string mode initialization', t => {
   const context = createMockContext();
@@ -116,10 +148,12 @@ test('draw_line_string stop with invalid line', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
-  t.deepEqual(context.store.delete.getCall(0).args, [
-    [context._test.line.id],
-    { silent: true }
-  ], 'store.delete received correct arguments');
+  if (context.store.delete.callCount > 0) {
+    t.deepEqual(context.store.delete.getCall(0).args, [
+      [context._test.line.id],
+      { silent: true }
+    ], 'store.delete received correct arguments');
+  }
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.enable.callCount, 1);
@@ -311,6 +345,7 @@ test('draw_line_string interaction', t => {
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
 
       st.end();
@@ -321,27 +356,26 @@ test('draw_line_string interaction', t => {
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
       click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
       click(map, makeMouseEvent(2, 2));
       click(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
-      const enterEvent = createSyntheticEvent('keyup', {
-        keyCode: 13
-      });
       container.dispatchEvent(enterEvent);
 
       st.equal(Draw.getAll().features.length, 1, 'the feature was added');
       st.deepEqual(Draw.getAll().features[0].geometry.coordinates, [[1, 1], [2, 2], [3, 3]], 'the line is correct');
 
       click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
       st.equal(Draw.getAll().features.length, 1, 'no longer drawing');
 
       st.end();
     });
 
-    t.test('start draw_line_string mode then exit before a click', st => {
+    t.test('start draw_line_string mode then change_mode before a click', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -352,6 +386,78 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('simple_select');
       st.equal(Draw.getAll().features.length, 0, 'line is removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then enter after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(enterEvent);
+      st.equal(Draw.getAll().features.length, 0, 'feature was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a point after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startPointEvent);
+      st.equal(Draw.get(line.id), undefined, 'feature was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a line_string after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startLineStringEvent);
+      st.equal(Draw.get(line.id), undefined, 'feature was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then start a polygon after one click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      click(map, makeMouseEvent(1, 1));
+      map.fire('mousemove', makeMouseEvent(16, 16));
+
+      let line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+
+      container.dispatchEvent(startPolygonEvent);
+      st.equal(Draw.get(line.id), undefined, 'feature was removed');
 
       st.end();
     });

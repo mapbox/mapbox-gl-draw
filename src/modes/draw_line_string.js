@@ -35,21 +35,11 @@ module.exports = function(ctx) {
     if (currentVertexPosition > 0 &&
       (isEventAtCoordinates(e, line.coordinates[0]) || isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]))
     ) {
-      return finish();
+      return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
     }
 
     line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
     currentVertexPosition++;
-  }
-
-  function finish() {
-    if (!line.isValid()) return stopDrawingAndRemove();
-    line.removeCoordinate(`${currentVertexPosition}`);
-    currentVertexPosition--;
-    ctx.map.fire(Constants.events.CREATE, {
-      features: [line.toGeoJSON()]
-    });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
   }
 
   return {
@@ -61,16 +51,23 @@ module.exports = function(ctx) {
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', CommonSelectors.isEnterKey, finish);
+      this.on('keyup', CommonSelectors.isEnterKey, () => {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
+      });
     },
 
     stop() {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
-      // If it's invalid, just destroy the thing
-      if (!line.isValid()) {
-        ctx.store.delete([line.id], { silent: true });
+      line.removeCoordinate(`${currentVertexPosition}`);
+      if (line.isValid() && ctx.store.get(line.id) !== undefined) {
+        ctx.map.fire(Constants.events.CREATE, {
+          features: [line.toGeoJSON()]
+        });
+      }
+      else if (ctx.store.get(line.id) !== undefined) {
+        stopDrawingAndRemove();
       }
     },
 
