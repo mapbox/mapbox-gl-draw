@@ -30,8 +30,6 @@ module.exports = function(ctx, options = {}) {
   }
 
   var cleanupBoxSelect = function() {
-    dragging = false;
-    canDragMove = false;
     boxSelecting = false;
     setTimeout(() => {
       ctx.map.dragPan.enable();
@@ -82,8 +80,10 @@ module.exports = function(ctx, options = {}) {
       // probably passed in from a `draw_*` mode
       if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
 
-      // Any click should stop box selecting and dragging
-      this.on('click', () => true, function() {
+      // Any mouseup should stop box selecting and dragging
+      this.on('mouseup', () => true, function() {
+        dragging = false;
+        canDragMove = false;
         if (boxSelecting) {
           cleanupBoxSelect();
         }
@@ -118,9 +118,9 @@ module.exports = function(ctx, options = {}) {
       }
 
       this.on('mousedown', isActiveFeature, function(e) {
+        this.render(e.featureTarget.properties.id);
         canDragMove = true;
         startPos = e.lngLat;
-        this.render(e.featureTarget.properties.id);
       });
 
       this.on('click', isFeature, function(e) {
