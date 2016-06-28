@@ -55,8 +55,15 @@ module.exports = function(ctx) {
       var ids = featureCollection.features.map(feature => {
         feature.id = feature.id || hat();
 
-        if (ctx.store.get(feature.id) === undefined) {
+        if (feature.geometry === null) {
+          throw new Error('Invalid geometry: null');
+        }
+
+        if (ctx.store.get(feature.id) === undefined || ctx.store.get(feature.id).type !== feature.geometry.type) {
           var model = featureTypes[feature.geometry.type];
+          if (model === undefined) {
+            throw new Error(`Invalid geometry type: ${feature.geometry.type}.`);
+          }
           let internalFeature = new model(ctx, feature);
           ctx.store.add(internalFeature);
         }
