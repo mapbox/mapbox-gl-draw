@@ -45,7 +45,7 @@ var ModeHandler = function(mode, DrawContext) {
   mode.start.call(ctx);
 
   return {
-    render: mode.render || function(geojson) {return geojson; },
+    render: mode.render,
     stop: function() {
       if (mode.stop) mode.stop();
     },
