@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import createSyntheticEvent from 'synthetic-dom-events';
+import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
@@ -9,34 +9,12 @@ import CommonSelectors from '../src/lib/common_selectors';
 import drawPointMode from '../src/modes/draw_point';
 import Point from '../src/feature_types/point';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-
-function createMockContext() {
-  return {
-    store: {
-      add: spy(),
-      delete: spy(),
-      featureChanged: spy(),
-      clearSelected: spy()
-    },
-    events: {
-      changeMode: spy()
-    },
-    ui: {
-      queueMapClasses: spy(),
-      setActiveButton: spy()
-    },
-    _test: {}
-  };
-}
-
-function createMockLifecycleContext() {
-  return {
-    on: spy()
-  };
-}
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import {escapeEvent, enterEvent} from './utils/key_events';
 
 test('draw_point mode initialization', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   drawPointMode(context);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
@@ -57,7 +35,7 @@ test('draw_point mode initialization', t => {
 });
 
 test('draw_point start', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
 
@@ -79,7 +57,7 @@ test('draw_point start', t => {
 });
 
 test('draw_point stop with point placed', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
   // Fake a placed point
@@ -95,7 +73,7 @@ test('draw_point stop with point placed', t => {
 });
 
 test('draw_point stop with no point placed', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
   mode.stop.call();
@@ -112,7 +90,7 @@ test('draw_point stop with no point placed', t => {
 });
 
 test('draw_point render, active', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
   const memo = [];
@@ -132,7 +110,7 @@ test('draw_point render, active', t => {
 });
 
 test('draw_point render, inactive', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
   const memo = [];
@@ -194,9 +172,6 @@ test('draw_point interaction', t => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
 
-      const escapeEvent = createSyntheticEvent('keyup', {
-        keyCode: 27
-      });
       container.dispatchEvent(escapeEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -210,9 +185,6 @@ test('draw_point interaction', t => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
 
-      const enterEvent = createSyntheticEvent('keyup', {
-        keyCode: 13
-      });
       container.dispatchEvent(enterEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');

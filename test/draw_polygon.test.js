@@ -1,6 +1,5 @@
 import test from 'tape';
 import xtend from 'xtend';
-import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
 import createMap from './utils/create_map';
 import mouseClick from './utils/mouse_click';
@@ -9,40 +8,12 @@ import CommonSelectors from '../src/lib/common_selectors';
 import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-
-function createMockContext() {
-  return {
-    store: {
-      add: spy(),
-      delete: spy(),
-      featureChanged: spy(),
-      clearSelected: spy()
-    },
-    events: {
-      changeMode: spy()
-    },
-    ui: {
-      queueMapClasses: spy(),
-      setActiveButton: spy()
-    },
-    map: {
-      doubleClickZoom: {
-        disable: spy(),
-        enable: spy()
-      }
-    },
-    _test: {}
-  };
-}
-
-function createMockLifecycleContext() {
-  return {
-    on: spy()
-  };
-}
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import {escapeEvent, enterEvent} from './utils/key_events';
 
 test('draw_polygon mode initialization', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   drawPolygonMode(context);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
@@ -63,7 +34,7 @@ test('draw_polygon mode initialization', t => {
 });
 
 test('draw_polygon start', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPolygonMode(context);
 
@@ -89,7 +60,7 @@ test('draw_polygon start', t => {
 });
 
 test('draw_polygon stop with valid polygon', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   // Fake a valid polygon
@@ -105,7 +76,7 @@ test('draw_polygon stop with valid polygon', t => {
 });
 
 test('draw_polygon stop with invalid polygon', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   // Fake an invalid polygon
@@ -128,7 +99,7 @@ test('draw_polygon stop with invalid polygon', t => {
 });
 
 test('draw_polygon render, active, with only two vertices', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   const memo = [];
@@ -160,7 +131,7 @@ test('draw_polygon render, active, with only two vertices', t => {
 });
 
 test('draw_polygon render, active', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   const memo = [];
@@ -192,7 +163,7 @@ test('draw_polygon render, active', t => {
 });
 
 test('draw_polygon render, inactive', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   const memo = [];
@@ -223,7 +194,7 @@ test('draw_polygon render, inactive', t => {
 });
 
 test('draw_polygon render, no coordinates', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
   const memo = [];
@@ -336,9 +307,6 @@ test('draw_polygon interaction', t => {
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
 
-      const escapeEvent = createSyntheticEvent('keyup', {
-        keyCode: 27
-      });
       container.dispatchEvent(escapeEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -360,9 +328,6 @@ test('draw_polygon interaction', t => {
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
 
-      const enterEvent = createSyntheticEvent('keyup', {
-        keyCode: 13
-      });
       container.dispatchEvent(enterEvent);
 
       st.equal(Draw.getAll().features.length, 1, 'the feature was added');

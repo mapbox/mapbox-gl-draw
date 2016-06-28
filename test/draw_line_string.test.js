@@ -1,6 +1,5 @@
 import test from 'tape';
 import xtend from 'xtend';
-import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
@@ -9,72 +8,20 @@ import CommonSelectors from '../src/lib/common_selectors';
 import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import {
+  enterEvent,
+  startPointEvent,
+  startLineStringEvent,
+  startPolygonEvent,
+  escapeEvent
+} from './utils/key_events';
 
-function createMockContext() {
-  var _store = {};
 
-  var api = {
-    store: {
-      add: function(f) {
-        _store[f.id] = f;
-      },
-      delete: function(id) {
-        delete _store[id];
-      },
-      featureChanged: spy(),
-      clearSelected: spy(),
-      get: function(id) {
-        return _store[id];
-      }
-    },
-    events: {
-      changeMode: spy()
-    },
-    ui: {
-      queueMapClasses: spy(),
-      setActiveButton: spy()
-    },
-    map: {
-      doubleClickZoom: {
-        disable: spy(),
-        enable: spy()
-      },
-      fire: spy()
-    },
-    _test: {}
-  };
-
-  spy(api.store, 'add');
-  spy(api.store, 'delete');
-  spy(api.store, 'get');
-
-  return api;
-}
-
-function createMockLifecycleContext() {
-  return {
-    on: spy()
-  };
-}
-
-const enterEvent = createSyntheticEvent('keyup', {
-  keyCode: 13
-});
-
-const startPointEvent = createSyntheticEvent('keydown', {
-  keyCode: 49
-});
-
-const startLineStringEvent = createSyntheticEvent('keydown', {
-  keyCode: 50
-});
-
-const startPolygonEvent = createSyntheticEvent('keydown', {
-  keyCode: 51
-});
 
 test('draw_line_string mode initialization', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   drawLineStringMode(context);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
@@ -95,7 +42,7 @@ test('draw_line_string mode initialization', t => {
 });
 
 test('draw_line_string start', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawLineStringMode(context);
 
@@ -121,7 +68,7 @@ test('draw_line_string start', t => {
 });
 
 test('draw_line_string stop with valid line', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   // Fake a valid line
@@ -137,7 +84,7 @@ test('draw_line_string stop with valid line', t => {
 });
 
 test('draw_line_string stop with invalid line', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   // Fake an invalid line
@@ -162,7 +109,7 @@ test('draw_line_string stop with invalid line', t => {
 });
 
 test('draw_line_string render, active', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -194,7 +141,7 @@ test('draw_line_string render, active', t => {
 });
 
 test('draw_line_string render, inactive', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -225,7 +172,7 @@ test('draw_line_string render, inactive', t => {
 });
 
 test('draw_line_string render, no coordinates', t => {
-  const context = createMockContext();
+  const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
   const place = [];
@@ -337,9 +284,6 @@ test('draw_line_string interaction', t => {
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
 
-      const escapeEvent = createSyntheticEvent('keyup', {
-        keyCode: 27
-      });
       container.dispatchEvent(escapeEvent);
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
