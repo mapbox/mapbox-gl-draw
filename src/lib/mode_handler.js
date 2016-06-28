@@ -20,15 +20,6 @@ var ModeHandler = function(mode, DrawContext) {
         fn: fn
       });
     },
-    off: function(event, selector, fn) {
-      handlers[event] = handlers[event].filter(handler => {
-        return handler.selector !== selector || handler.fn !== fn;
-      });
-    },
-    fire: function(event, payload) {
-      var modename = DrawContext.events.currentModeName();
-      DrawContext.map.fire(`draw.${modename}.${event}`, payload);
-    },
     render: function(id) {
       DrawContext.store.featureChanged(id);
     }
@@ -54,7 +45,7 @@ var ModeHandler = function(mode, DrawContext) {
   mode.start.call(ctx);
 
   return {
-    render: mode.render || function(geojson) {return geojson; },
+    render: mode.render,
     stop: function() {
       if (mode.stop) mode.stop();
     },

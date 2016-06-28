@@ -352,7 +352,7 @@ The event data is an object with the following shape:
 
 `simple_select` and `direct_select` modes can be initiated with options specific to that mode (see above).
 
-### draw.render
+### `draw.render`
 
 Fired just after Draw calls `setData()` on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
 
