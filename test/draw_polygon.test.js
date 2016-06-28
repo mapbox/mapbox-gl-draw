@@ -323,6 +323,8 @@ test('draw_polygon interaction', t => {
       st.end();
     });
 
+    // ZERO CLICK TESTS
+
     t.test('start a polygon and end it with Enter', st => {
       // Start a new polygon
       Draw.deleteAll();
@@ -359,6 +361,8 @@ test('draw_polygon interaction', t => {
 
       st.end();
     });
+
+    // ONE CLICK TESTS
 
     t.test('start draw_polygon mode then enter after one click', st => {
       Draw.deleteAll();
@@ -432,6 +436,22 @@ test('draw_polygon interaction', t => {
       st.end();
     });
 
+    t.test('start draw_polygon mode then doubleclick', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_polygon');
+      st.equal(Draw.getAll().features.length, 1, 'polygon is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
+
+      st.equal(Draw.getAll().features.length, 0, 'polygon was removed');
+
+      st.end();
+    });
+
+    // TWO CLICK TESTS
+
     t.test('start draw_polygon mode then enter after two clicks', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
@@ -503,6 +523,21 @@ test('draw_polygon interaction', t => {
 
       container.dispatchEvent(startPolygonEvent);
       st.equal(Draw.get(polygon.id), undefined, 'polygon was removed');
+
+      st.end();
+    });
+
+     t.test('start draw_polygon mode then doubleclick', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_polygon');
+      st.equal(Draw.getAll().features.length, 1, 'polygon is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(16, 16));
+      mouseClick(map, makeMouseEvent(16, 16));
+
+      st.equal(Draw.getAll().features.length, 0, 'polygon was removed');
 
       st.end();
     });

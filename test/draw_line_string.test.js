@@ -295,6 +295,8 @@ test('draw_line_string interaction', t => {
       st.end();
     });
 
+    // ZERO CLICK TESTS
+
     t.test('start a line and end it with Enter', st => {
       // Start a new line
       Draw.deleteAll();
@@ -333,6 +335,8 @@ test('draw_line_string interaction', t => {
 
       st.end();
     });
+
+    // ONE CLICK TESTS
 
     t.test('start draw_line_string mode then enter after one click', st => {
       Draw.deleteAll();
@@ -402,6 +406,20 @@ test('draw_line_string interaction', t => {
 
       container.dispatchEvent(startPolygonEvent);
       st.equal(Draw.get(line.id), undefined, 'line_string was removed');
+
+      st.end();
+    });
+
+    t.test('start draw_line_string mode then double click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      st.equal(Draw.getAll().features.length, 1, 'line is added');
+      mouseClick(map, makeMouseEvent(1, 1));
+      mouseClick(map, makeMouseEvent(1, 1));
+
+      st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
 
       st.end();
     });
