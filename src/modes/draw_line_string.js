@@ -19,11 +19,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(line);
 
-  function stopDrawingAndRemove() {
-    ctx.store.delete([line.id], { silent: true });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-  }
-
   function handleMouseMove(e) {
     // This makes the end of the line follow your mouse around
     line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
@@ -50,7 +45,10 @@ module.exports = function(ctx) {
       ctx.ui.setActiveButton(Constants.types.LINE);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
       this.on('click', CommonSelectors.true, handleClick);
-      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
+      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      });
       this.on('keyup', CommonSelectors.isEnterKey, () => {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       });
@@ -67,7 +65,8 @@ module.exports = function(ctx) {
         });
       }
       else if (ctx.store.get(line.id) !== undefined) {
-        stopDrawingAndRemove();
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
 
@@ -79,7 +78,8 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      stopDrawingAndRemove();
+      ctx.store.delete([line.id], { silent: true });
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }
   };
 };

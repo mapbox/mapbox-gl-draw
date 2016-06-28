@@ -723,6 +723,8 @@ function runTests() {
         coordinates: [[10, 10], [20, 20]]
       }
     });
+    Draw.changeMode('draw_point');
+    Draw.changeMode('draw_line_string');
     Draw.changeMode('draw_polygon');
     Draw.changeMode('simple_select');
     Draw.delete('point');

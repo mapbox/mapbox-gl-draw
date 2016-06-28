@@ -8,6 +8,7 @@ var Polygon = function(ctx, geojson) {
 Polygon.prototype = Object.create(Feature.prototype);
 
 Polygon.prototype.isValid = function() {
+  if (this.coordinates.length === 0) return false;
   return this.coordinates.every(ring => ring.length > 2);
 };
 
