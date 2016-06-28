@@ -1,5 +1,5 @@
 import test from 'tape';
-import createMap from './utils/create_map';
+import { createMap } from './test_utils';
 import createSupplementaryPoints from '../src/lib/create_supplementary_points';
 
 test('createSupplementaryPoints with a point', t => {

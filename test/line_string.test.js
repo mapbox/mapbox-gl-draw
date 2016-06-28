@@ -4,11 +4,14 @@ import Feature from '../src/feature_types/feature';
 import LineString from '../src/feature_types/line_string';
 import GLDraw from '../';
 import mapboxgl from 'mapbox-gl-js-mock';
-import createFeature from './utils/create_feature';
-import getPublicMemberKeys from './utils/get_public_member_keys';
-import createMockCtx from './utils/create_mock_feature_context';
-import drawGeometry from './utils/draw_geometry';
-import createMap from './utils/create_map';
+import {
+  accessToken,
+  createMap,
+  createFeature,
+  getPublicMemberKeys,
+  createMockCtx,
+  drawGeometry
+} from './test_utils';
 
 test('LineString constructor and API', t => {
   const rawLine = createFeature('line');
@@ -110,6 +113,7 @@ test('LineString#updateCoordinate', t => {
 
 test('LineString integration', function lineDrawClass(t){
   const lineStringCoordinates = [[0, 0], [1, 1], [2, 2]];
+  mapboxgl.accessToken = accessToken;
   const map = createMap();
   const Draw = GLDraw();
   map.addControl(Draw);

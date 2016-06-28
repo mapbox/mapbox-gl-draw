@@ -1,11 +1,10 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import GLDraw from '../';
+import { createMap, cloneFeature } from './test_utils';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import AfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
-import getGeoJSON from './utils/get_geojson';
-import createMap from './utils/create_map';
 
 test('simple_select', t => {
 
@@ -50,8 +49,8 @@ test('simple_select', t => {
 
 
   t.test('simple_select - box select', t => {
-    Draw.add(getGeoJSON('negitivePoint'));
-    var id = Draw.add(getGeoJSON('point'))[0];
+    Draw.add(cloneFeature('negitivePoint'));
+    var id = Draw.add(cloneFeature('point'))[0];
     map.fire.reset();
 
     afterNextRender(() => {
@@ -82,7 +81,7 @@ test('simple_select', t => {
    t.test('simple_select - box select many features', t => {
     var features = [];
     for (var i = 0; i < 5; i++) {
-      features.push(getGeoJSON('point'));
+      features.push(cloneFeature('point'));
     }
     var ids = Draw.add({
       type: 'FeatureCollection',
@@ -110,7 +109,7 @@ test('simple_select', t => {
 
   t.test('simple_select - box select over no points', t => {
 
-    Draw.add(getGeoJSON('point'));
+    Draw.add(cloneFeature('point'));
     map.fire.reset();
 
     afterNextRender(() => {
@@ -126,7 +125,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - deselect', t => {
-    var id = Draw.add(getGeoJSON('point'))[0];
+    var id = Draw.add(cloneFeature('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -146,7 +145,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature', t => {
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select');
 
     afterNextRender(() => {
@@ -170,7 +169,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a selected feature with shift down', t => {
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -194,7 +193,7 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - delete selected features', t => {
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
     map.fire.reset();
     Draw.trash();
@@ -213,7 +212,7 @@ test('simple_select', t => {
 
   t.test('simple_select - click on a selected feature with shift up to enter direct_select', t => {
     Draw.deleteAll();
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
@@ -239,10 +238,10 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a vertex to enter direct_select', t => {
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
-    var clickPosition = getGeoJSON('polygon').geometry.coordinates[0][0];
+    var clickPosition = cloneFeature('polygon').geometry.coordinates[0][0];
 
     afterNextRender(() => {
       map.doubleClickZoom.enable.reset();
@@ -264,8 +263,8 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
-    var pointId = Draw.add(getGeoJSON('point'))[0];
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
@@ -291,8 +290,8 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', t => {
-    var pointId = Draw.add(getGeoJSON('point'))[0];
-    var id = Draw.add(getGeoJSON('polygon'))[0];
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var id = Draw.add(cloneFeature('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
@@ -317,18 +316,18 @@ test('simple_select', t => {
   });
 
   t.test('simple_select - drag every feature type', t => {
-    var pointId = Draw.add(getGeoJSON('point'))[0];
-    var multiPointId = Draw.add(getGeoJSON('multiPoint'))[0];
-    var lineStringId = Draw.add(getGeoJSON('line'))[0];
-    var multiLineStringId = Draw.add(getGeoJSON('multiLineString'))[0];
-    var polygonId = Draw.add(getGeoJSON('polygon'))[0];
-    var multiPolygonId = Draw.add(getGeoJSON('multiPolygon'))[0];
+    var pointId = Draw.add(cloneFeature('point'))[0];
+    var multiPointId = Draw.add(cloneFeature('multiPoint'))[0];
+    var lineStringId = Draw.add(cloneFeature('line'))[0];
+    var multiLineStringId = Draw.add(cloneFeature('multiLineString'))[0];
+    var polygonId = Draw.add(cloneFeature('polygon'))[0];
+    var multiPolygonId = Draw.add(cloneFeature('multiPolygon'))[0];
 
     var countPositions = function(feature) {
       return feature.geometry.coordinates.join(',').split(',').length;
     };
 
-    var startPosition = getGeoJSON('point').geometry.coordinates;
+    var startPosition = cloneFeature('point').geometry.coordinates;
     Draw.changeMode('simple_select', {
       featureIds: [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]
     });
@@ -342,32 +341,32 @@ test('simple_select', t => {
       var movedPoint = Draw.get(pointId);
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 25, 'point lng moved');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 25, 'point lat moved');
-      t.equal(countPositions(movedPoint), countPositions(getGeoJSON('point')), 'point has same number of postions');
+      t.equal(countPositions(movedPoint), countPositions(cloneFeature('point')), 'point has same number of postions');
 
       var movedMultiPoint = Draw.get(multiPointId);
-      t.equal(movedMultiPoint.geometry.coordinates[0][0], getGeoJSON('multiPoint').geometry.coordinates[0][0] + 25, 'multipoint lng moved');
-      t.equal(movedMultiPoint.geometry.coordinates[0][1], getGeoJSON('multiPoint').geometry.coordinates[0][1] + 25, 'multipoint lat moved');
-      t.equal(countPositions(movedMultiPoint), countPositions(getGeoJSON('multiPoint')), 'multiPoint has same number of postions');
+      t.equal(movedMultiPoint.geometry.coordinates[0][0], cloneFeature('multiPoint').geometry.coordinates[0][0] + 25, 'multipoint lng moved');
+      t.equal(movedMultiPoint.geometry.coordinates[0][1], cloneFeature('multiPoint').geometry.coordinates[0][1] + 25, 'multipoint lat moved');
+      t.equal(countPositions(movedMultiPoint), countPositions(cloneFeature('multiPoint')), 'multiPoint has same number of postions');
 
       var movedLineString = Draw.get(lineStringId);
-      t.equal(movedLineString.geometry.coordinates[0][0], getGeoJSON('line').geometry.coordinates[0][0] + 25, 'line lng moved');
-      t.equal(movedLineString.geometry.coordinates[0][1], getGeoJSON('line').geometry.coordinates[0][1] + 25, 'line lat moved');
-      t.equal(countPositions(movedLineString), countPositions(getGeoJSON('line')), 'line has same number of postions');
+      t.equal(movedLineString.geometry.coordinates[0][0], cloneFeature('line').geometry.coordinates[0][0] + 25, 'line lng moved');
+      t.equal(movedLineString.geometry.coordinates[0][1], cloneFeature('line').geometry.coordinates[0][1] + 25, 'line lat moved');
+      t.equal(countPositions(movedLineString), countPositions(cloneFeature('line')), 'line has same number of postions');
 
       var movedMultiLineString = Draw.get(multiLineStringId);
-      t.equal(movedMultiLineString.geometry.coordinates[0][0][0], getGeoJSON('multiLineString').geometry.coordinates[0][0][0] + 25, 'multiLineString lng moved');
-      t.equal(movedMultiLineString.geometry.coordinates[0][0][1], getGeoJSON('multiLineString').geometry.coordinates[0][0][1] + 25, 'multiLineString lat moved');
-      t.equal(countPositions(movedMultiLineString), countPositions(getGeoJSON('multiLineString')), 'multiLineString has same number of postions');
+      t.equal(movedMultiLineString.geometry.coordinates[0][0][0], cloneFeature('multiLineString').geometry.coordinates[0][0][0] + 25, 'multiLineString lng moved');
+      t.equal(movedMultiLineString.geometry.coordinates[0][0][1], cloneFeature('multiLineString').geometry.coordinates[0][0][1] + 25, 'multiLineString lat moved');
+      t.equal(countPositions(movedMultiLineString), countPositions(cloneFeature('multiLineString')), 'multiLineString has same number of postions');
 
       var movedPolygon = Draw.get(polygonId);
-      t.equal(movedPolygon.geometry.coordinates[0][0][0], getGeoJSON('polygon').geometry.coordinates[0][0][0] + 25, 'polygon lng moved');
-      t.equal(movedPolygon.geometry.coordinates[0][0][1], getGeoJSON('polygon').geometry.coordinates[0][0][1] + 25, 'polygon lat moved');
-      t.equal(countPositions(movedPolygon), countPositions(getGeoJSON('polygon')), 'polygon has same number of postions');
+      t.equal(movedPolygon.geometry.coordinates[0][0][0], cloneFeature('polygon').geometry.coordinates[0][0][0] + 25, 'polygon lng moved');
+      t.equal(movedPolygon.geometry.coordinates[0][0][1], cloneFeature('polygon').geometry.coordinates[0][0][1] + 25, 'polygon lat moved');
+      t.equal(countPositions(movedPolygon), countPositions(cloneFeature('polygon')), 'polygon has same number of postions');
 
       var movedMultiPolygon = Draw.get(multiPolygonId);
-      t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][0], getGeoJSON('multiPolygon').geometry.coordinates[0][0][0][0] + 25, 'multiPolygon lng moved');
-      t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], getGeoJSON('multiPolygon').geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
-      t.equal(countPositions(movedMultiPolygon), countPositions(getGeoJSON('multiPolygon')), 'multiPolygon has same number of postions');
+      t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][0], cloneFeature('multiPolygon').geometry.coordinates[0][0][0][0] + 25, 'multiPolygon lng moved');
+      t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], cloneFeature('multiPolygon').geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
+      t.equal(countPositions(movedMultiPolygon), countPositions(cloneFeature('multiPolygon')), 'multiPolygon has same number of postions');
 
       t.end();
     });

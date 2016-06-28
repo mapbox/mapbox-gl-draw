@@ -1,9 +1,7 @@
 import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
-import createFeature from './utils/create_feature';
-import getPublicMemberKeys from './utils/get_public_member_keys';
-import createMockCtx from './utils/create_mock_feature_context';
+import { createFeature, getPublicMemberKeys, createMockCtx } from './test_utils';
 
 test('Feature contrusctor and API', t => {
   const featureGeoJson = createFeature('line');

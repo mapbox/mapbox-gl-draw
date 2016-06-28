@@ -4,8 +4,10 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
-import click from './utils/mouse_click';
-import createMap from './utils/create_map';
+import {
+  createMap,
+  click
+} from './test_utils';
 import createAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 
