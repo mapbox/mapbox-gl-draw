@@ -1,6 +1,7 @@
 const CommonSelectors = require('../lib/common_selectors');
 const LineString = require('../feature_types/line_string');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx) {
@@ -44,22 +45,17 @@ module.exports = function(ctx) {
   function finish() {
     line.removeCoordinate(`${currentVertexPosition}`);
     currentVertexPosition--;
-    if (line.isValid()) {
-      ctx.map.fire(Constants.events.CREATE, {
-        features: [line.toGeoJSON()]
-      });
-    }
+    if (!line.isValid()) return stopDrawingAndRemove();
+    ctx.map.fire(Constants.events.CREATE, {
+      features: [line.toGeoJSON()]
+    });
     ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
   }
 
   return {
     start: function() {
       ctx.store.clearSelected();
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.disable();
-        }
-      });
+      doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
@@ -69,11 +65,7 @@ module.exports = function(ctx) {
     },
 
     stop() {
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.enable();
-        }
-      }, 0);
+      doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
       // If it's invalid, just destroy the thing

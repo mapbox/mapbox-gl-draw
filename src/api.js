@@ -25,15 +25,6 @@ module.exports = function(ctx) {
     getSelectedIds: function () {
       return ctx.store.getSelectedIds();
     },
-    setSelected: function(idsToSelect) {
-      if (stringSetsAreEqual(idsToSelect, ctx.store.getSelectedIds())) return;
-      if (this.getMode() !== Constants.modes.SIMPLE_SELECT) {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: idsToSelect }, { silent: true });
-      } else {
-        ctx.store.setSelected(idsToSelect, { silent: true });
-        ctx.store.render();
-      }
-    },
     set: function(featureCollection) {
       if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
         throw new Error('Invalid FeatureCollection');
@@ -103,6 +94,20 @@ module.exports = function(ctx) {
       ctx.store.render();
     },
     changeMode: function(mode, modeOptions) {
+      console.error(`changing mode to ${mode}`)
+      // Avoid changing modes just to re-select what's already selected
+      if (mode === Constants.modes.SIMPLE_SELECT && this.getMode() === Constants.modes.SIMPLE_SELECT) {
+        if (stringSetsAreEqual((modeOptions.featureIds || []), ctx.store.getSelectedIds())) return;
+        // And if we are changing the selection within simple_select mode, just change the selection,
+        // instead of stopping and re-starting the mode
+        return ctx.store.setSelected(modeOptions.featureIds, { silent: true });
+      }
+
+      if (mode === Constants.modes.DIRECT_SELECT && this.getMode() === Constants.modes.DIRECT_SELECT
+        && modeOptions.featureId === ctx.store.getSelectedIds()[0]) {
+        return;
+      }
+
       ctx.events.changeMode(mode, modeOptions, { silent: true });
     },
     getMode: function() {

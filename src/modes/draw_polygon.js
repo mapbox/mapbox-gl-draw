@@ -1,5 +1,6 @@
 const CommonSelectors = require('../lib/common_selectors');
 const Polygon = require('../feature_types/polygon');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 
@@ -42,22 +43,17 @@ module.exports = function(ctx) {
   function finish() {
     polygon.removeCoordinate(`0.${currentVertexPosition}`);
     currentVertexPosition--;
-    if (polygon.isValid()) {
-      ctx.map.fire(Constants.events.CREATE, {
-        features: [polygon.toGeoJSON()]
-      });
-    }
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+    if (!polygon.isValid()) return stopDrawingAndRemove();
+    ctx.map.fire(Constants.events.CREATE, {
+      features: [polygon.toGeoJSON()]
+    });
+    ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
   }
 
   return {
     start() {
       ctx.store.clearSelected();
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.disable();
-        }
-      }, 0);
+      doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
@@ -66,12 +62,8 @@ module.exports = function(ctx) {
       this.on('keyup', CommonSelectors.isEnterKey, finish);
     },
 
-    stop() {
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.enable();
-        }
-      }, 0);
+    stop: function() {
+      doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
       // If it's invalid, just destroy the thing

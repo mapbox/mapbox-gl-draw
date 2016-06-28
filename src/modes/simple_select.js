@@ -3,6 +3,7 @@ var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 var StringSet = require('../lib/string_set');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
@@ -29,6 +30,8 @@ module.exports = function(ctx, options = {}) {
   }
 
   var cleanupBoxSelect = function() {
+    dragging = false;
+    canDragMove = false;
     boxSelecting = false;
     setTimeout(() => {
       ctx.map.dragPan.enable();
@@ -70,7 +73,7 @@ module.exports = function(ctx, options = {}) {
 
   return {
     stop: function() {
-      ctx.map.doubleClickZoom.enable();
+      doubleClickZoom.enable(ctx);
     },
     start: function() {
       dragging = false;
@@ -81,8 +84,6 @@ module.exports = function(ctx, options = {}) {
 
       // Any click should stop box selecting and dragging
       this.on('click', () => true, function() {
-        dragging = false;
-        canDragMove = false;
         if (boxSelecting) {
           cleanupBoxSelect();
         }
@@ -96,7 +97,7 @@ module.exports = function(ctx, options = {}) {
         var wasSelected = ctx.store.getSelectedIds();
         ctx.store.clearSelected();
         wasSelected.forEach(id => this.render(id));
-        ctx.map.doubleClickZoom.enable();
+        doubleClickZoom.enable(ctx);
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
@@ -123,7 +124,7 @@ module.exports = function(ctx, options = {}) {
       });
 
       this.on('click', isFeature, function(e) {
-        ctx.map.doubleClickZoom.disable();
+        doubleClickZoom.disable(ctx);
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
@@ -136,7 +137,7 @@ module.exports = function(ctx, options = {}) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
           this.render(id);
           if (featureIds.length === 1 ) {
-            ctx.map.doubleClickZoom.enable();
+            doubleClickZoom.enable(ctx);
           }
         }
         else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
