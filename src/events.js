@@ -8,7 +8,8 @@ var modes = {
   [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
   [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
   [Constants.modes.DRAW_LINE]: require('./modes/draw_line_string'),
-  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon')
+  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
+  [Constants.modes.STATIC]: require('./modes/static')
 };
 
 module.exports = function(ctx) {
