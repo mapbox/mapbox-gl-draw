@@ -20,11 +20,6 @@ var ModeHandler = function(mode, DrawContext) {
         fn: fn
       });
     },
-    off: function(event, selector, fn) {
-      handlers[event] = handlers[event].filter(handler => {
-        return handler.selector !== selector || handler.fn !== fn;
-      });
-    },
     render: function(id) {
       DrawContext.store.featureChanged(id);
     }
