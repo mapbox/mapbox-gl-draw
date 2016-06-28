@@ -56,9 +56,11 @@ module.exports = function(ctx) {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
+      // check to see if we've deleted this feature
       if (ctx.store.get(polygon.id) === undefined) return;
-      polygon.removeCoordinate(`0.${currentVertexPosition}`);
 
+      //remove last added coordinate
+      polygon.removeCoordinate(`0.${currentVertexPosition}`);
       if (polygon.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]

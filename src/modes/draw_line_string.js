@@ -58,7 +58,10 @@ module.exports = function(ctx) {
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
+      // check to see if we've deleted this feature
       if (ctx.store.get(line.id) === undefined) return;
+
+      //remove last added coordinate
       line.removeCoordinate(`${currentVertexPosition}`);
       if (line.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
