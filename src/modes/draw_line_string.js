@@ -20,8 +20,8 @@ module.exports = function(ctx) {
   ctx.store.add(line);
 
   function stopDrawingAndRemove() {
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     ctx.store.delete([line.id], { silent: true });
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
   }
 
   function handleMouseMove(e) {
@@ -43,9 +43,9 @@ module.exports = function(ctx) {
   }
 
   function finish() {
+    if (!line.isValid()) return stopDrawingAndRemove();
     line.removeCoordinate(`${currentVertexPosition}`);
     currentVertexPosition--;
-    if (!line.isValid()) return stopDrawingAndRemove();
     ctx.map.fire(Constants.events.CREATE, {
       features: [line.toGeoJSON()]
     });

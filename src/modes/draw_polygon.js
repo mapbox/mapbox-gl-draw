@@ -21,8 +21,8 @@ module.exports = function(ctx) {
   ctx.store.add(polygon);
 
   function stopDrawingAndRemove() {
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     ctx.store.delete([polygon.id], { silent: true });
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
   }
 
   function handleMouseMove(e) {
@@ -41,9 +41,9 @@ module.exports = function(ctx) {
   }
 
   function finish() {
+    if (!polygon.isValid()) return stopDrawingAndRemove();
     polygon.removeCoordinate(`0.${currentVertexPosition}`);
     currentVertexPosition--;
-    if (!polygon.isValid()) return stopDrawingAndRemove();
     ctx.map.fire(Constants.events.CREATE, {
       features: [polygon.toGeoJSON()]
     });
