@@ -1,5 +1,4 @@
 import test from 'tape';
-import mapboxgl from 'mapbox-gl-js-mock';
 import createSyntheticEvent from 'synthetic-dom-events';
 import GLDraw from '../';
 import click from './utils/mouse_click';

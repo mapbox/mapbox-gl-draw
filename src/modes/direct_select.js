@@ -1,5 +1,6 @@
 var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx, opts) {
@@ -62,7 +63,7 @@ module.exports = function(ctx, opts) {
       dragging = false;
       canDragMove = false;
       ctx.store.setSelected(featureId);
-      ctx.map.doubleClickZoom.disable();
+      doubleClickZoom.disable(ctx);
       this.on('mousedown', isOfMetaType('vertex'), onVertex);
       this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
       this.on('drag', () => canDragMove, function(e) {
@@ -96,14 +97,14 @@ module.exports = function(ctx, opts) {
         stopDragging();
       });
       this.on('click', noFeature, function() {
-        ctx.events.changeMode('simple_select');
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
       this.on('click', isInactiveFeature, function() {
-        ctx.events.changeMode('simple_select');
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
     },
     stop: function() {
-      ctx.map.doubleClickZoom.enable();
+      doubleClickZoom.enable(ctx);
     },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
@@ -122,7 +123,7 @@ module.exports = function(ctx, opts) {
     },
     trash: function() {
       if (selectedCoordPaths.length === 0) {
-        return ctx.events.changeMode('simple_select', { features: [feature] });
+        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { features: [feature] });
       }
 
       selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
@@ -133,7 +134,7 @@ module.exports = function(ctx, opts) {
       selectedCoordPaths = [];
       if (feature.isValid() === false) {
         ctx.store.delete([featureId]);
-        ctx.events.changeMode('simple_select', null);
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, null);
       }
     }
   };

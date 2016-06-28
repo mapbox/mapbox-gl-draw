@@ -136,9 +136,9 @@ console.log(Draw.getAll());
 ```
 ---
 
-###`.delete(String: id) -> Draw`
+###`.delete(String | Array<String> : id) -> Draw`
 
-This method takes an id removes the coorisponding feature from Draw.
+This method takes an id or an array of ids and removes the corresponding features from Draw.
 
 In `direct_select` mode, deleting the active feature will stop the mode and revert to the `simple_select` mode.
 
@@ -196,6 +196,10 @@ This envokes the current modes trash event. For the `simple_select` mode this de
 This is different from `delete` or `deleteAlll` in that it follows rules described by the current mode.
 
 ---
+
+### `.getMode() -> Draw`
+
+Returns Draw's current mode. For more about the modes, see below.
 
 ### `.changeMode(String: mode, ?Object: options) -> Draw`
 

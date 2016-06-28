@@ -24,9 +24,7 @@ test('simple_select', t => {
   var cleanUp = function(cb) {
     Draw.deleteAll();
     map.fire.reset();
-    if (cb) {
-      afterNextRender(cb);
-    }
+    if (cb) cb();
   };
 
   var getFireArgs = function() {
@@ -75,7 +73,7 @@ test('simple_select', t => {
             t.equal(args[0][1].features.length, 1, 'should have one feature selected');
             t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
           }
-          cleanUp(() => t.end());
+          cleanUp(t.end);
         });
       });
     });
@@ -105,7 +103,7 @@ test('simple_select', t => {
         if (args.length > 0) {
           t.equal(args[0][1].features.length, ids.length, 'should have all features selected');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -122,7 +120,7 @@ test('simple_select', t => {
 
       afterNextRender(() => {
         t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -142,7 +140,7 @@ test('simple_select', t => {
         if (args.length > 0) {
           t.equal(args[0][1].features.length, 0, 'should have no features selected');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -166,7 +164,7 @@ test('simple_select', t => {
           t.equal(args[0][1].features.length, 1, 'should have only one feature selected');
           t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -190,7 +188,7 @@ test('simple_select', t => {
         if (args.length > 0) {
           t.equal(args[0][1].features.length, 0, 'should have no features selected');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -209,7 +207,7 @@ test('simple_select', t => {
 
       var selectedFeatures = Draw.getSelectedIds();
       t.equal(selectedFeatures.length, 0, 'nothing should be selected anymore');
-      cleanUp(() => t.end());
+      cleanUp(t.end);
     });
   });
 
@@ -235,7 +233,7 @@ test('simple_select', t => {
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -260,7 +258,7 @@ test('simple_select', t => {
         if (args.length > 0) {
           t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -287,7 +285,7 @@ test('simple_select', t => {
           t.equal(args[0][1].features[0].id, pointId, 'selection includes point');
           t.equal(args[0][1].features[1].id, id, 'selection includes polygon');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });
@@ -313,7 +311,7 @@ test('simple_select', t => {
           t.equal(args[0][1].features.length, 1, 'should have only one feature selected');
           t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
         }
-        cleanUp(() => t.end());
+        cleanUp(t.end);
       });
     });
   });

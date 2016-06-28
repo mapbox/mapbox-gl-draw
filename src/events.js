@@ -1,5 +1,5 @@
 var ModeHandler = require('./lib/mode_handler');
-var getFeatureAtAndSetCursors = require('./lib/get_features_and_set_cursor');
+var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
 var Constants = require('./constants');
 
@@ -29,20 +29,18 @@ module.exports = function(ctx) {
       event.originalEvent.stopPropagation();
     }
     else {
-      ctx.ui.queueMapClasses({mouse: 'drag'});
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     }
   };
 
   events.mousemove = function(event) {
     if (mouseDownInfo.isDown) {
-      events.drag(event);
+      return events.drag(event);
     }
-    else {
-      var target = getFeatureAtAndSetCursors(event, ctx);
-      event.featureTarget = target;
-      currentMode.mousemove(event);
-    }
+    var target = getFeaturesAndSetCursor(event, ctx);
+    event.featureTarget = target;
+    currentMode.mousemove(event);
   };
 
   events.mousedown = function(event) {
@@ -51,14 +49,14 @@ module.exports = function(ctx) {
       time: new Date().getTime(),
       point: event.point
     };
-    var target = getFeatureAtAndSetCursors(event, ctx);
+    var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
     mouseDownInfo.isDown = false;
-    var target = getFeatureAtAndSetCursors(event, ctx);
+    var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
 
     if (isClick(mouseDownInfo, {
@@ -161,6 +159,9 @@ module.exports = function(ctx) {
     },
     trash: function(options) {
       currentMode.trash(options);
+    },
+    getMode: function() {
+      return currentModeName;
     }
   };
 

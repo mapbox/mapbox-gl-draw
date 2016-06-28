@@ -23,7 +23,7 @@ module.exports = function(ctx) {
   }
 
   function handleClick(e) {
-    ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_MOVE_CLASS_FRAGMENT });
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
     ctx.map.fire(Constants.events.CREATE, {
       features: [point.toGeoJSON()]
@@ -34,7 +34,7 @@ module.exports = function(ctx) {
   return {
     start() {
       ctx.store.clearSelected();
-      ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_ADD_CLASS_FRAGMENT });
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POINT);
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
