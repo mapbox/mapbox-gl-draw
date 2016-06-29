@@ -233,6 +233,12 @@ This mode has the following options:
 }
 ```
 
+#### Mode: `static`
+
+Disables editing for all drawn features. It does not take an options argument.
+
+Note that this mode can only be entered or exited via `.changeMode`
+
 #### Drawing modes:
 
 The three drawing modes work identically. They do not take an options argument.
