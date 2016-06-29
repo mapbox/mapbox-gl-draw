@@ -7,6 +7,10 @@ module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
   var feature = ctx.store.get(featureId);
 
+  if (!feature) {
+    throw new Error('You must provide a featureId to enter direct_select mode');
+  }
+
   if (feature.type === 'Point') {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
