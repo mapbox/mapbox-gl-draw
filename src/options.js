@@ -1,3 +1,5 @@
+const xtend = require('xtend');
+
 const defaultOptions = {
   defaultMode: 'simple_select',
   position: 'top-left',
@@ -25,30 +27,31 @@ const hideControls = {
 
 function addSources(styles, sourceBucket) {
   return styles.map(style => {
-    var s = Object.assign({}, style);
-    if (s.source) return style;
-    s.id = `${s.id}.${sourceBucket}`;
-    s.source = `mapbox-gl-draw-${sourceBucket}`;
-    return s;
+    if (style.source) return style;
+    return xtend(style, {
+      id: `${style.id}.${sourceBucket}`,
+      source: `mapbox-gl-draw-${sourceBucket}`
+    });
   });
 }
 
 module.exports = function(options = {}) {
-  var opts = Object.assign({}, options);
+  let withDefaults = xtend(options);
 
-  if (!opts.controls) {
-    opts.controls = {};
+  if (!options.controls) {
+    withDefaults.controls = {};
   }
 
-  if (opts.displayControlsDefault === false) {
-    opts.controls = Object.assign({}, hideControls, opts.controls);
+  if (options.displayControlsDefault === false) {
+    withDefaults.controls = xtend(hideControls, options.controls);
   } else {
-    opts.controls = Object.assign({}, showControls, opts.controls);
+    withDefaults.controls = xtend(showControls, options.controls);
   }
 
-  opts = Object.assign({}, defaultOptions, opts);
+  withDefaults = xtend(defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
-  opts.styles = addSources(opts.styles, 'cold').concat(addSources(opts.styles, 'hot'));
-  return opts;
+  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+
+  return withDefaults;
 };

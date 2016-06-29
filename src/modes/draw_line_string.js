@@ -1,6 +1,7 @@
 const CommonSelectors = require('../lib/common_selectors');
 const LineString = require('../feature_types/line_string');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx) {
@@ -18,66 +19,58 @@ module.exports = function(ctx) {
 
   ctx.store.add(line);
 
-  function stopDrawingAndRemove() {
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-    ctx.store.delete([line.id], { silent: true });
-  }
-
   function handleMouseMove(e) {
     // This makes the end of the line follow your mouse around
     line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
   }
 
   function handleClick(e) {
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
     // Finish if we clicked on the first or last point
     if (currentVertexPosition > 0 &&
       (isEventAtCoordinates(e, line.coordinates[0]) || isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]))
     ) {
-      return finish();
+      return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
     }
 
     line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
     currentVertexPosition++;
   }
 
-  function finish() {
-    line.removeCoordinate(`${currentVertexPosition}`);
-    currentVertexPosition--;
-    if (line.isValid()) {
-      ctx.map.fire(Constants.events.CREATE, {
-        features: [line.toGeoJSON()]
-      });
-    }
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-  }
-
   return {
     start: function() {
       ctx.store.clearSelected();
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.disable();
-        }
-      });
-      ctx.ui.queueMapClasses({ mouse: Constants.MOUSE_ADD_CLASS_FRAGMENT });
+      doubleClickZoom.disable(ctx);
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
       this.on('mousemove', CommonSelectors.true, handleMouseMove);
       this.on('click', CommonSelectors.true, handleClick);
-      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', CommonSelectors.isEnterKey, finish);
+      this.on('keyup', CommonSelectors.isEscapeKey, () => {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      });
+      this.on('keyup', CommonSelectors.isEnterKey, () => {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
+      });
     },
 
     stop() {
-      setTimeout(() => {
-        if (ctx.map && ctx.map.doubleClickZoom) {
-          ctx.map.doubleClickZoom.enable();
-        }
-      }, 0);
+      doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
-      // If it's invalid, just destroy the thing
-      if (!line.isValid()) {
+      // check to see if we've deleted this feature
+      if (ctx.store.get(line.id) === undefined) return;
+
+      //remove last added coordinate
+      line.removeCoordinate(`${currentVertexPosition}`);
+      if (line.isValid()) {
+        ctx.map.fire(Constants.events.CREATE, {
+          features: [line.toGeoJSON()]
+        });
+      }
+      else {
         ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
 
@@ -89,7 +82,8 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      stopDrawingAndRemove();
+      ctx.store.delete([line.id], { silent: true });
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
     }
   };
 };

@@ -60,7 +60,7 @@
   cursor: -moz-grab;
   cursor: -webkit-grab;
 }
-.mapboxgl-map.mode-direct_select.feature-vertex .mapboxgl-canvas-container.mapboxgl-interactive {
+.mapboxgl-map.mode-direct_select.feature-vertex.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: move;
 }
 .mapboxgl-map.mode-direct_select.feature-midpoint.mouse-pointer .mapboxgl-canvas-container.mapboxgl-interactive {

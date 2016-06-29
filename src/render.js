@@ -6,9 +6,8 @@ module.exports = function render() {
   if (!mapExists) return cleanup();
 
   var mode = store.ctx.events.currentModeName();
-  store.ctx.ui.queueMapClasses({
-    mode: mode
-  });
+
+  store.ctx.ui.queueMapClasses({ mode });
 
   var newHotIds = [];
   var newColdIds = [];

@@ -1,6 +1,6 @@
 {
   "name": "mapbox-gl-draw",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -73,6 +73,7 @@
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.0.0",
     "sinon": "^1.17.4",
-    "turf-area": "^1.1.1"
+    "turf-area": "^1.1.1",
+    "xtend": "^4.0.1"
   }
 }

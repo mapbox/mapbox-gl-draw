@@ -1,8 +1,9 @@
-var {noFeature, isShiftDown, isFeature, isOfMetaType, isBoxSelecting, isActiveFeature} = require('../lib/common_selectors');
+var {noFeature, isShiftDown, isFeature, isOfMetaType, isShiftMousedown, isActiveFeature} = require('../lib/common_selectors');
 var mouseEventPoint = require('../lib/mouse_event_point');
 var featuresAt = require('../lib/features_at');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 var StringSet = require('../lib/string_set');
+const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
@@ -28,6 +29,13 @@ module.exports = function(ctx, options = {}) {
     return ids.values();
   }
 
+  var cleanupBoxSelect = function() {
+    boxSelecting = false;
+    setTimeout(() => {
+      ctx.map.dragPan.enable();
+    }, 0);
+  };
+
   var finishBoxSelect = function(bbox, context) {
     if (box && box.parentNode) {
       box.parentNode.removeChild(box);
@@ -45,13 +53,10 @@ module.exports = function(ctx, options = {}) {
         ids.forEach(id => {
           context.render(id);
         });
-        ctx.ui.queueMapClasses({mouse:'move'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       }
     }
-    boxSelecting = false;
-    setTimeout(() => {
-      ctx.map.dragPan.enable();
-    }, 0);
+    cleanupBoxSelect();
   };
 
   var readyForDirectSelect = function(e) {
@@ -66,14 +71,25 @@ module.exports = function(ctx, options = {}) {
 
   return {
     stop: function() {
-      ctx.map.doubleClickZoom.enable();
+      doubleClickZoom.enable(ctx);
     },
     start: function() {
       dragging = false;
       canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds);
+      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
+        return ctx.store.get(id) !== undefined;
+      }));
+
+      // Any mouseup should stop box selecting and dragging
+      this.on('mouseup', () => true, function() {
+        dragging = false;
+        canDragMove = false;
+        if (boxSelecting) {
+          cleanupBoxSelect();
+        }
+      });
 
       // When a click falls outside any features,
       // - clear the selection
@@ -83,7 +99,7 @@ module.exports = function(ctx, options = {}) {
         var wasSelected = ctx.store.getSelectedIds();
         ctx.store.clearSelected();
         wasSelected.forEach(id => this.render(id));
-        ctx.map.doubleClickZoom.enable();
+        doubleClickZoom.enable(ctx);
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
@@ -92,11 +108,11 @@ module.exports = function(ctx, options = {}) {
           coordPath: e.featureTarget.properties.coord_path,
           startPos: e.lngLat
         });
-        ctx.ui.queueMapClasses({mouse:'move'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       });
 
       if (ctx.options.boxSelect) {
-        this.on('mousedown', isBoxSelecting, function(e) {
+        this.on('mousedown', isShiftMousedown, function(e) {
           ctx.map.dragPan.disable();
           startCoordinates = mouseEventPoint(e.originalEvent, ctx.container);
           boxSelecting = true;
@@ -104,12 +120,13 @@ module.exports = function(ctx, options = {}) {
       }
 
       this.on('mousedown', isActiveFeature, function(e) {
+        this.render(e.featureTarget.properties.id);
         canDragMove = true;
         startPos = e.lngLat;
       });
 
       this.on('click', isFeature, function(e) {
-        ctx.map.doubleClickZoom.disable();
+        doubleClickZoom.disable(ctx);
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
@@ -119,29 +136,29 @@ module.exports = function(ctx, options = {}) {
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
-          ctx.ui.queueMapClasses({mouse:'pointer'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
           this.render(id);
           if (featureIds.length === 1 ) {
-            ctx.map.doubleClickZoom.enable();
+            doubleClickZoom.enable(ctx);
           }
         }
         else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
           // add to selected
           ctx.store.select(id);
-          ctx.ui.queueMapClasses({mouse:'move'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
           this.render(id);
         }
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
           ctx.store.setSelected(id);
-          ctx.ui.queueMapClasses({mouse:'move'});
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
           this.render(id);
         }
       });
 
       this.on('drag', () => boxSelecting, function(e) {
-        ctx.ui.queueMapClasses({mouse:'add'});
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         if (!box) {
           box = document.createElement('div');
           box.classList.add('mapbox-gl-draw_boxselect');
@@ -200,16 +217,16 @@ module.exports = function(ctx, options = {}) {
             action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
+          dragging = false;
         }
-        dragging = false;
-        canDragMove = false;
-        featureCoords = null;
         if (boxSelecting) {
           finishBoxSelect([
             startCoordinates,
             mouseEventPoint(e.originalEvent, ctx.container)
           ], this);
         }
+        canDragMove = false;
+        featureCoords = null;
       });
     },
     render: function(geojson, push) {

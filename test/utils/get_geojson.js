@@ -71,6 +71,24 @@ const features = {
     }
   },
 
+  nullGeometry: {
+    type: 'Feature',
+    properties: {},
+    geometry: null
+  },
+
+  geometryCollection: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'GeometryCollection',
+      geometries: [{
+          "type": "Polygon",
+          "coordinates": [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+      }]
+    }
+  },
+
   featureCollection: {
     type: 'FeatureCollection',
     features: [

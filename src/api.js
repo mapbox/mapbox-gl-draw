@@ -2,7 +2,9 @@ var isEqual = require('lodash.isequal');
 var normalize = require('geojson-normalize');
 var hat = require('hat');
 var featuresAt = require('./lib/features_at');
+var stringSetsAreEqual = require('./lib/string_sets_are_equal');
 var geojsonhint = require('geojsonhint');
+var Constants = require('./constants');
 
 var featureTypes = {
   'Polygon': require('./feature_types/polygon'),
@@ -38,7 +40,8 @@ module.exports = function(ctx) {
       toDelete = toDelete.filter(id => {
         return newIdsForFasterLookUp[id] === undefined;
       });
-      ctx.store.delete(toDelete);
+      this.delete(toDelete);
+
       return newIds;
     },
     add: function (geojson) {
@@ -52,8 +55,15 @@ module.exports = function(ctx) {
       var ids = featureCollection.features.map(feature => {
         feature.id = feature.id || hat();
 
-        if (ctx.store.get(feature.id) === undefined) {
+        if (feature.geometry === null) {
+          throw new Error('Invalid geometry: null');
+        }
+
+        if (ctx.store.get(feature.id) === undefined || ctx.store.get(feature.id).type !== feature.geometry.type) {
           var model = featureTypes[feature.geometry.type];
+          if (model === undefined) {
+            throw new Error(`Invalid geometry type: ${feature.geometry.type}.`);
+          }
           let internalFeature = new model(ctx, feature);
           ctx.store.add(internalFeature);
         }
@@ -82,16 +92,44 @@ module.exports = function(ctx) {
         features: ctx.store.getAll().map(feature => feature.toGeoJSON())
       };
     },
-    delete: function(id) {
-      ctx.store.delete([id], { silent: true });
-      ctx.store.render();
+    delete: function(featureIds) {
+      ctx.store.delete(featureIds, { silent: true });
+      // If we were in direct select mode and our selected feature no longer exists
+      // (because it was deleted), we need to get out of that mode.
+      if (this.getMode() === Constants.modes.DIRECT_SELECT && !ctx.store.getSelectedIds().length) {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      } else {
+        ctx.store.render();
+      }
     },
     deleteAll: function() {
       ctx.store.delete(ctx.store.getAllIds(), { silent: true });
-      ctx.store.render();
+      // If we were in direct select mode, now our selected feature no longer exists,
+      // so escape that mode.
+      if (this.getMode() === Constants.modes.DIRECT_SELECT) {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      } else {
+        ctx.store.render();
+      }
     },
-    changeMode: function(mode, modeOptions) {
+    changeMode: function(mode, modeOptions = {}) {
+      // Avoid changing modes just to re-select what's already selected
+      if (mode === Constants.modes.SIMPLE_SELECT && this.getMode() === Constants.modes.SIMPLE_SELECT) {
+        if (stringSetsAreEqual((modeOptions.featureIds || []), ctx.store.getSelectedIds())) return;
+        // And if we are changing the selection within simple_select mode, just change the selection,
+        // instead of stopping and re-starting the mode
+        return ctx.store.setSelected(modeOptions.featureIds, { silent: true });
+      }
+
+      if (mode === Constants.modes.DIRECT_SELECT && this.getMode() === Constants.modes.DIRECT_SELECT
+        && modeOptions.featureId === ctx.store.getSelectedIds()[0]) {
+        return;
+      }
+
       ctx.events.changeMode(mode, modeOptions, { silent: true });
+    },
+    getMode: function() {
+      return ctx.events.getMode();
     },
     trash: function() {
       ctx.events.trash({ silent: true });

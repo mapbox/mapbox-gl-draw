@@ -1,3 +1,4 @@
+const xtend = require('xtend');
 const Constants = require('./constants');
 
 const classTypes = ['mode', 'feature', 'mouse'];
@@ -7,20 +8,20 @@ module.exports = function(ctx) {
   const buttonElements = {};
   let activeButton = null;
 
-  const currentMapClasses = {
+  let currentMapClasses = {
     mode: null, // e.g. mode-direct_select
     feature: null, // e.g. feature-vertex
     mouse: null // e.g. mouse-move
   };
 
-  const nextMapClasses = {
+  let nextMapClasses = {
     mode: null,
     feature: null,
     mouse: null
   };
 
   function queueMapClasses(options) {
-    Object.assign(nextMapClasses, options);
+    nextMapClasses = xtend(nextMapClasses, options);
   }
 
   function updateMapClasses() {
@@ -41,7 +42,7 @@ module.exports = function(ctx) {
     ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
     ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
 
-    Object.assign(currentMapClasses, nextMapClasses);
+    currentMapClasses = xtend(currentMapClasses, nextMapClasses);
   }
 
   function createControlButton(id, options = {}) {
