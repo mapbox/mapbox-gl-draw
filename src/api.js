@@ -130,6 +130,7 @@ module.exports = function(ctx) {
       // And if we are changing the selection within simple_select mode, just change the selection,
       // instead of stopping and re-starting the mode
       ctx.store.setSelected(modeOptions.featureIds, { silent: true });
+      ctx.store.render();
       return api;
     }
 

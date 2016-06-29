@@ -340,21 +340,25 @@ test('Draw.changeMode to select and de-select pre-existing features', t => {
 
   const returnC = Draw.changeMode('simple_select', { featureIds: [pointId] });
   t.equals(returnC, Draw, 'returns Draw instance');
-  t.deepEquals(Draw.getSelectedIds(), [pointId],
-    'change to simple_select with different featureIds to change selection');
+  afterNextRender(() => {
+    t.pass('a render occurred when selection changed');
 
-  const returnD = Draw.changeMode('direct_select', { featureId: polygonId });
-  t.equals(returnD, Draw, 'returns Draw instance');
-  t.deepEquals(Draw.getSelectedIds(), [polygonId],
-    'change to direct_select changes selection');
+    t.deepEquals(Draw.getSelectedIds(), [pointId],
+      'change to simple_select with different featureIds to change selection');
 
-  const returnE = Draw.changeMode('direct_select', { featureId: polygonId });
-  t.equals(returnE, Draw, 'returns Draw instance');
-  t.deepEquals(Draw.getSelectedIds(), [polygonId],
-    'changing to direct_select with same selection does nothing');
+    const returnD = Draw.changeMode('direct_select', { featureId: polygonId });
+    t.equals(returnD, Draw, 'returns Draw instance');
+    t.deepEquals(Draw.getSelectedIds(), [polygonId],
+      'change to direct_select changes selection');
 
-  Draw.deleteAll();
-  t.end();
+    const returnE = Draw.changeMode('direct_select', { featureId: polygonId });
+    t.equals(returnE, Draw, 'returns Draw instance');
+    t.deepEquals(Draw.getSelectedIds(), [polygonId],
+      'changing to direct_select with same selection does nothing');
+
+    Draw.deleteAll();
+    t.end();
+  });
 });
 
 test('Cleanup', t => {
