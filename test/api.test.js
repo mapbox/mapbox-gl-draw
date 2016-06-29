@@ -62,12 +62,12 @@ test('Draw.set', t => {
     type: 'FeatureCollection',
     features: [point, line, polygon]
   };
-  const returnValue = Draw.set(collection);
-  t.equal(returnValue.length, 3,
+  const drawInstance = Draw.set(collection);
+  t.equal(drawInstance.length, 3,
     'return value is correct length');
-  const pointId = returnValue[0];
-  const lineId = returnValue[1];
-  const polygonId = returnValue[2];
+  const pointId = drawInstance[0];
+  const lineId = drawInstance[1];
+  const polygonId = drawInstance[2];
   t.equal(Draw.get(pointId).geometry.type, 'Point',
     'point id returned');
   t.equal(Draw.get(lineId).geometry.type, 'LineString',
@@ -84,10 +84,10 @@ test('Draw.set', t => {
     type: 'FeatureCollection',
     features: [polygon]
   };
-  const nextReturnValue = Draw.set(nextCollection);
-  t.equal(nextReturnValue.length, 1,
+  const nextDrawInstance = Draw.set(nextCollection);
+  t.equal(nextDrawInstance.length, 1,
     'return value is correct length');
-  const nextPolygonId = nextReturnValue[0];
+  const nextPolygonId = nextDrawInstance[0];
   t.equal(Draw.get(nextPolygonId).geometry.type, 'Polygon',
     'polygon id returned');
   t.equal(Draw.getAll().features.length, 1,
@@ -113,11 +113,11 @@ test('Draw.set', t => {
     type: 'FeatureCollection',
     features: [newLine, overlappingPolygon]
   };
-  const overlappingReturnValue = Draw.set(overlappingCollection);
-  t.equal(overlappingReturnValue.length, 2,
+  const overlappingDrawInstance = Draw.set(overlappingCollection);
+  t.equal(overlappingDrawInstance.length, 2,
     'return value is correct length');
-  const newLineId = overlappingReturnValue[0];
-  const overlappingPolygonId = overlappingReturnValue[1];
+  const newLineId = overlappingDrawInstance[0];
+  const overlappingPolygonId = overlappingDrawInstance[1];
   t.equal(Draw.get(newLineId).geometry.type, 'LineString',
     'new line id returned');
   t.equal(Draw.get(overlappingPolygonId).geometry.type, 'Polygon',
@@ -241,8 +241,8 @@ test('Draw.getAll', t => {
 
 test('Draw.delete one feature', t => {
   var id = Draw.add(getGeoJSON('point'))[0];
-  const returnValue = Draw.delete(id);
-  t.equals(returnValue, Draw, 'returns Draw instance');
+  const drawInstance = Draw.delete(id);
+  t.equals(drawInstance, Draw, 'returns Draw instance');
   t.equals(Draw.getAll().features.length, 0, 'can remove a feature by its id');
   t.end();
 });
@@ -251,8 +251,8 @@ test('Draw.delete multiple features', t => {
   var [pointId] = Draw.add(getGeoJSON('point'));
   var [lineId] = Draw.add(getGeoJSON('line'));
   Draw.add(getGeoJSON('polygon'));
-  const returnValue = Draw.delete([pointId, lineId]);
-  t.equals(returnValue, Draw, 'returns Draw instance');
+  const drawInstance = Draw.delete([pointId, lineId]);
+  t.equals(drawInstance, Draw, 'returns Draw instance');
   t.equals(Draw.getAll().features.length, 1, 'can remove multiple features by id');
   t.equals(Draw.getAll().features[0].geometry.type, 'Polygon',
     'the right features were removed');
@@ -271,8 +271,8 @@ test('Draw.delete a feature that is direct_selected', t => {
 
 test('Draw.deleteAll', t => {
   Draw.add(getGeoJSON('point'));
-  const returnValue = Draw.deleteAll();
-  t.equals(returnValue, Draw, 'returns Draw instance');
+  const drawInstance = Draw.deleteAll();
+  t.equals(drawInstance, Draw, 'returns Draw instance');
   t.equals(Draw.getAll().features.length, 0, 'Draw.deleteAll removes all geometries');
   t.end();
 });
@@ -292,8 +292,8 @@ test('Draw.deleteAll when in direct_select mode', t => {
 });
 
 test('Draw.changeMode and Draw.getMode with no pre-existing feature', t => {
-  const returnValue = Draw.changeMode('draw_polygon');
-  t.equals(returnValue, Draw, 'changeMode returns Draw instance');
+  const drawInstance = Draw.changeMode('draw_polygon');
+  t.equals(drawInstance, Draw, 'changeMode returns Draw instance');
   t.equals(Draw.getMode(), 'draw_polygon', 'changed to draw_polygon');
   t.equals(Draw.getAll().features.length, 1, 'one feature added');
   t.equals(Draw.getAll().features[0].geometry.type, 'Polygon', 'and it is a polygon');
