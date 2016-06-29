@@ -237,12 +237,6 @@ This mode has the following options:
 }
 ```
 
-#### Mode: `static`
-
-Disables editing for all drawn features. It does not take an options argument.
-
-Note that this mode can only be entered or exited via `.changeMode`
-
 #### Drawing modes:
 
 The three drawing modes work identically. They do not take an options argument.
@@ -250,6 +244,12 @@ The three drawing modes work identically. They do not take an options argument.
 - `draw_line_string`: Draws a LineString feature.
 - `draw_polygon`: Draws a Polygon feature.
 - `draw_point`: Draws a Point feature.
+
+#### Mode: `static`
+
+Disables editing for all drawn features. It does not take an options argument.
+
+Note that this mode can only be entered or exited via `.changeMode`
 
 ## Events
 
@@ -378,7 +378,7 @@ property | values | function
 --- | --- | ---
 meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features added by the user.
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
-mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
+mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon, static | Indicates which mode Draw is currently in.
 
 Draw also provides a few more properties, but they should not be used for styling. For details on them, see `Using Draw with map.queryRenderFeatures`.
 
