@@ -40,7 +40,7 @@ module.exports = function(ctx) {
         map.dragPan.enable();
       }
 
-      if (map.style.loaded()) { // not public
+      if (map.loaded()) {
         setup.addLayers();
         ctx.events.addEventListeners();
       } else {

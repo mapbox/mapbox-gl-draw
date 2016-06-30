@@ -14,8 +14,7 @@ module.exports = function render() {
 
   if (store.isDirty) {
     newColdIds = store.getAllIds();
-  }
-  else {
+  } else {
     newHotIds = store.getChangedIds().filter(id => store.get(id) !== undefined);
     newColdIds = store.sources.hot.filter(function getColdIds(geojson) {
       return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined;
