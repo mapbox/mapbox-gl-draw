@@ -44,7 +44,7 @@ const features = {
     }
   },
 
-  negitivePoint: {
+  negativePoint: {
     type: 'Feature',
     properties: {},
     geometry: {

@@ -50,7 +50,7 @@ test('simple_select', t => {
 
 
   t.test('simple_select - box select', t => {
-    Draw.add(getGeoJSON('negitivePoint'));
+    Draw.add(getGeoJSON('negativePoint'));
     var id = Draw.add(getGeoJSON('point'))[0];
     map.fire.reset();
 
