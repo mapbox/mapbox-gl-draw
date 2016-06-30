@@ -35,6 +35,8 @@ app.use('/debug', express.static(__dirname + '/debug'));
 app.use('/dist', express.static(__dirname + '/dist'));
 
 
-app.listen(process.env.PORT || 9966, function () {
-    console.log('mapbox-gl-draw debug server running at http://localhost:9966');
+var port = process.env.PORT || 9967;
+
+app.listen(port, function () {
+    console.log('mapbox-gl-draw debug server running at http://localhost:' + port);
 });
