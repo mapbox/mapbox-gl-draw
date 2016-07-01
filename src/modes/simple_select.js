@@ -7,12 +7,12 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
-  var startPos = null;
+  var dragMoveStartLocation = null;
   var featureCoords = null;
-  var startCoordinates = null;
-  var box;
+  var boxSelectStartLocation = null;
+  var boxSelectElement;
   var boxSelecting = false;
-  var dragging;
+  var dragMoving;
   var canDragMove;
 
   const initiallySelectedFeatureIds = options.featureIds || [];
@@ -37,9 +37,9 @@ module.exports = function(ctx, options = {}) {
   };
 
   var finishBoxSelect = function(bbox, context) {
-    if (box && box.parentNode) {
-      box.parentNode.removeChild(box);
-      box = null;
+    if (boxSelectElement && boxSelectElement.parentNode) {
+      boxSelectElement.parentNode.removeChild(boxSelectElement);
+      boxSelectElement = null;
     }
 
     // If bbox exists, use to select features
@@ -74,7 +74,7 @@ module.exports = function(ctx, options = {}) {
       doubleClickZoom.enable(ctx);
     },
     start: function() {
-      dragging = false;
+      dragMoving = false;
       canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
@@ -82,9 +82,9 @@ module.exports = function(ctx, options = {}) {
         return ctx.store.get(id) !== undefined;
       }));
 
-      // Any mouseup should stop box selecting and dragging
+      // Any mouseup should stop box selecting and dragMoving
       this.on('mouseup', () => true, function() {
-        dragging = false;
+        dragMoving = false;
         canDragMove = false;
         if (boxSelecting) {
           cleanupBoxSelect();
@@ -114,7 +114,7 @@ module.exports = function(ctx, options = {}) {
       if (ctx.options.boxSelect) {
         this.on('mousedown', isShiftMousedown, function(e) {
           ctx.map.dragPan.disable();
-          startCoordinates = mouseEventPoint(e.originalEvent, ctx.container);
+          boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
           boxSelecting = true;
         });
       }
@@ -122,7 +122,7 @@ module.exports = function(ctx, options = {}) {
       this.on('mousedown', isActiveFeature, function(e) {
         this.render(e.featureTarget.properties.id);
         canDragMove = true;
-        startPos = e.lngLat;
+        dragMoveStartLocation = e.lngLat;
       });
 
       this.on('click', isFeature, function(e) {
@@ -159,35 +159,35 @@ module.exports = function(ctx, options = {}) {
 
       this.on('drag', () => boxSelecting, function(e) {
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        if (!box) {
-          box = document.createElement('div');
-          box.classList.add('mapbox-gl-draw_boxselect');
-          ctx.container.appendChild(box);
+        if (!boxSelectElement) {
+          boxSelectElement = document.createElement('div');
+          boxSelectElement.classList.add('mapbox-gl-draw_boxselect');
+          ctx.container.appendChild(boxSelectElement);
         }
         var current = mouseEventPoint(e.originalEvent, ctx.container);
-        var minX = Math.min(startCoordinates.x, current.x),
-          maxX = Math.max(startCoordinates.x, current.x),
-          minY = Math.min(startCoordinates.y, current.y),
-          maxY = Math.max(startCoordinates.y, current.y);
+        var minX = Math.min(boxSelectStartLocation.x, current.x),
+          maxX = Math.max(boxSelectStartLocation.x, current.x),
+          minY = Math.min(boxSelectStartLocation.y, current.y),
+          maxY = Math.max(boxSelectStartLocation.y, current.y);
 
         // Adjust width and xy position of the box element ongoing
         var pos = 'translate(' + minX + 'px,' + minY + 'px)';
-        box.style.transform = pos;
-        box.style.WebkitTransform = pos;
-        box.style.width = maxX - minX + 'px';
-        box.style.height = maxY - minY + 'px';
+        boxSelectElement.style.transform = pos;
+        boxSelectElement.style.WebkitTransform = pos;
+        boxSelectElement.style.width = maxX - minX + 'px';
+        boxSelectElement.style.height = maxY - minY + 'px';
       });
 
       this.on('drag', () => canDragMove, function(e) {
-        dragging = true;
+        dragMoving = true;
         e.originalEvent.stopPropagation();
 
         if (featureCoords === null) {
           buildFeatureCoords();
         }
 
-        var lngD = e.lngLat.lng - startPos.lng;
-        var latD = e.lngLat.lat - startPos.lat;
+        var lngD = e.lngLat.lng - dragMoveStartLocation.lng;
+        var latD = e.lngLat.lat - dragMoveStartLocation.lat;
 
         var coordMap = (coord) => [coord[0] + lngD, coord[1] + latD];
         var ringMap = (ring) => ring.map(coord => coordMap(coord));
@@ -212,16 +212,16 @@ module.exports = function(ctx, options = {}) {
       });
 
       this.on('mouseup', () => true, function(e) {
-        if (dragging) {
+        if (dragMoving) {
           ctx.map.fire(Constants.events.UPDATE, {
             action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
-          dragging = false;
+          dragMoving = false;
         }
         if (boxSelecting) {
           finishBoxSelect([
-            startCoordinates,
+            boxSelectStartLocation,
             mouseEventPoint(e.originalEvent, ctx.container)
           ], this);
         }
