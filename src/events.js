@@ -20,7 +20,23 @@ module.exports = function(ctx) {
 
   var events = {};
   var currentModeName = Constants.modes.SIMPLE_SELECT;
-  var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
+  var currentMode;
+
+  function initialize() {
+    // Add event listeners
+    ctx.map.on('mousemove', events.mousemove);
+
+    ctx.map.on('mousedown', events.mousedown);
+    ctx.map.on('mouseup', events.mouseup);
+
+    if (ctx.options.keybindings) {
+      ctx.container.addEventListener('keydown', events.keydown);
+      ctx.container.addEventListener('keyup', events.keyup);
+    }
+
+    // Start us in simple_select mode
+    currentMode = ModeHandler(modes.simple_select(ctx), ctx);
+  }
 
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
@@ -124,6 +140,7 @@ module.exports = function(ctx) {
   }
 
   var api = {
+    initialize,
     changeMode,
     currentModeName: function() {
       return currentModeName;
@@ -134,17 +151,6 @@ module.exports = function(ctx) {
     fire: function(name, event) {
       if (events[name]) {
         events[name](event);
-      }
-    },
-    addEventListeners: function() {
-      ctx.map.on('mousemove', events.mousemove);
-
-      ctx.map.on('mousedown', events.mousedown);
-      ctx.map.on('mouseup', events.mouseup);
-
-      if (ctx.options.keybindings) {
-        ctx.container.addEventListener('keydown', events.keydown);
-        ctx.container.addEventListener('keyup', events.keyup);
       }
     },
     removeEventListeners: function() {

@@ -42,11 +42,11 @@ module.exports = function(ctx) {
 
       if (map.loaded()) {
         setup.addLayers();
-        ctx.events.addEventListeners();
+        ctx.events.initialize();
       } else {
         map.on('load', () => {
           setup.addLayers();
-          ctx.events.addEventListeners();
+          ctx.events.initialize();
         });
       }
     },
