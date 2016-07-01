@@ -1,25 +1,26 @@
-var {noFeature, isShiftDown, isFeature, isOfMetaType, isShiftMousedown, isActiveFeature} = require('../lib/common_selectors');
-var mouseEventPoint = require('../lib/mouse_event_point');
-var featuresAt = require('../lib/features_at');
-var createSupplementaryPoints = require('../lib/create_supplementary_points');
-var StringSet = require('../lib/string_set');
+const CommonSelectors = require('../lib/common_selectors');
+const mouseEventPoint = require('../lib/mouse_event_point');
+const featuresAt = require('../lib/features_at');
+const createSupplementaryPoints = require('../lib/create_supplementary_points');
+const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
-  var startPos = null;
-  var featureCoords = null;
-  var startCoordinates = null;
-  var box;
-  var boxSelecting = false;
-  var dragging;
-  var canDragMove;
+  let dragMoveStartLocation = null;
+  let featureCoords = null;
+  let boxSelectStartLocation = null;
+  let boxSelectElement;
+  let boxSelecting = false;
+  let canBoxSelect = false;
+  let dragMoving = false;
+  let canDragMove = false;
 
   const initiallySelectedFeatureIds = options.featureIds || [];
 
-  function getUniqueIds(allFeatures) {
+  const getUniqueIds = function(allFeatures) {
     if (!allFeatures.length) return [];
-    var ids = allFeatures.map(s => s.properties.id)
+    const ids = allFeatures.map(s => s.properties.id)
       .filter(id => id !== undefined)
       .reduce((memo, id) => {
         memo.add(id);
@@ -27,46 +28,23 @@ module.exports = function(ctx, options = {}) {
       }, new StringSet());
 
     return ids.values();
-  }
+  };
 
-  var cleanupBoxSelect = function() {
-    boxSelecting = false;
+  const stopExtendedInteractions = function() {
+    if (boxSelectElement) {
+      if (boxSelectElement.parentNode) boxSelectElement.parentNode.removeChild(boxSelectElement);
+      boxSelectElement = null;
+    }
+
     setTimeout(() => {
       ctx.map.dragPan.enable();
     }, 0);
-  };
 
-  var finishBoxSelect = function(bbox, context) {
-    if (box && box.parentNode) {
-      box.parentNode.removeChild(box);
-      box = null;
-    }
-
-    // If bbox exists, use to select features
-    if (bbox) {
-      var featuresInBox = featuresAt(null, bbox, ctx);
-      var ids = getUniqueIds(featuresInBox)
-        .filter(id => !ctx.store.isSelected(id));
-
-      if (ids.length) {
-        ctx.store.select(ids);
-        ids.forEach(id => {
-          context.render(id);
-        });
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-      }
-    }
-    cleanupBoxSelect();
-  };
-
-  var readyForDirectSelect = function(e) {
-    var about = e.featureTarget.properties;
-    return ctx.store.isSelected(about.id) && ctx.store.get(about.id).type !== 'Point';
-  };
-
-  var buildFeatureCoords = function() {
-    var featureIds = ctx.store.getSelectedIds();
-    featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
+    boxSelecting = false;
+    canBoxSelect = false;
+    dragMoving = false;
+    canDragMove = false;
+    featureCoords = null;
   };
 
   return {
@@ -74,35 +52,30 @@ module.exports = function(ctx, options = {}) {
       doubleClickZoom.enable(ctx);
     },
     start: function() {
-      dragging = false;
-      canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
       if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
         return ctx.store.get(id) !== undefined;
       }));
 
-      // Any mouseup should stop box selecting and dragging
-      this.on('mouseup', () => true, function() {
-        dragging = false;
-        canDragMove = false;
-        if (boxSelecting) {
-          cleanupBoxSelect();
+      // Any mouseup should stop box selecting and dragMoving
+      this.on('mouseup', CommonSelectors.true, stopExtendedInteractions);
+
+      // Click (with or without shift) on no feature
+      this.on('click', CommonSelectors.noFeature, function() {
+        // Clear the re-render selection
+        const wasSelected = ctx.store.getSelectedIds();
+        if (wasSelected.length) {
+          ctx.store.clearSelected();
+          wasSelected.forEach(id => this.render(id));
         }
-      });
-
-      // When a click falls outside any features,
-      // - clear the selection
-      // - re-render the deselected features
-      // - enable double-click zoom
-      this.on('click', noFeature, function() {
-        var wasSelected = ctx.store.getSelectedIds();
-        ctx.store.clearSelected();
-        wasSelected.forEach(id => this.render(id));
         doubleClickZoom.enable(ctx);
+        stopExtendedInteractions();
       });
 
-      this.on('click', isOfMetaType('vertex'), function(e) {
+      // Click (with or without shift) on a vertex
+      this.on('click', CommonSelectors.isOfMetaType('vertex'), function(e) {
+        // Enter direct select mode
         ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
           coordPath: e.featureTarget.properties.coord_path,
@@ -111,123 +84,152 @@ module.exports = function(ctx, options = {}) {
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       });
 
-      if (ctx.options.boxSelect) {
-        this.on('mousedown', isShiftMousedown, function(e) {
-          ctx.map.dragPan.disable();
-          startCoordinates = mouseEventPoint(e.originalEvent, ctx.container);
-          boxSelecting = true;
-        });
-      }
-
-      this.on('mousedown', isActiveFeature, function(e) {
+      // Mousedown on a selected feature
+      this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
+        stopExtendedInteractions();
+        // Re-render it and enable drag move
         this.render(e.featureTarget.properties.id);
         canDragMove = true;
-        startPos = e.lngLat;
+        dragMoveStartLocation = e.lngLat;
       });
 
-      this.on('click', isFeature, function(e) {
+      // Click (with or without shift) on any feature
+      this.on('click', CommonSelectors.isFeature, function(e) {
+        // Stop everything
         doubleClickZoom.disable(ctx);
-        var id = e.featureTarget.properties.id;
-        var featureIds = ctx.store.getSelectedIds();
-        if (readyForDirectSelect(e) && !isShiftDown(e)) {
-          ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
-            featureId: e.featureTarget.properties.id
+        stopExtendedInteractions();
+
+        const isShiftClick = CommonSelectors.isShiftDown(e);
+        const selectedFeatureIds = ctx.store.getSelectedIds();
+        const featureId = e.featureTarget.properties.id;
+        const isFeatureSelected = ctx.store.isSelected(featureId);
+
+        // Click (without shift) on any selected feature but a point
+        if (!isShiftClick && isFeatureSelected && ctx.store.get(featureId).type !== 'Point') {
+          // Enter direct select mode
+          return ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
+            featureId: featureId
           });
         }
-        else if (ctx.store.isSelected(id) && isShiftDown(e)) {
-          ctx.store.deselect(id);
+
+        // Shift-click on a selected feature
+        if (isFeatureSelected && isShiftClick) {
+          // Deselect it
+          ctx.store.deselect(featureId);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-          this.render(id);
-          if (featureIds.length === 1 ) {
+          if (selectedFeatureIds.length === 1 ) {
             doubleClickZoom.enable(ctx);
           }
-        }
-        else if (!ctx.store.isSelected(id) && isShiftDown(e)) {
-          // add to selected
-          ctx.store.select(id);
+        // Shift-click on an unselected feature
+        } else if (!isFeatureSelected && isShiftClick) {
+          // Add it to the selection
+          ctx.store.select(featureId);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-          this.render(id);
-        }
-        else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
-          // make selected
-          featureIds.forEach(formerId => this.render(formerId));
-          ctx.store.setSelected(id);
+        // Click (without shift) on an unselected feature
+        } else if (!isFeatureSelected && !isShiftClick) {
+          // Make it the only selected feature
+          selectedFeatureIds.forEach(this.render);
+          ctx.store.setSelected(featureId);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-          this.render(id);
         }
+
+        // No matter what, re-render the clicked feature
+        this.render(featureId);
       });
 
-      this.on('drag', () => boxSelecting, function(e) {
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        if (!box) {
-          box = document.createElement('div');
-          box.classList.add('mapbox-gl-draw_boxselect');
-          ctx.container.appendChild(box);
-        }
-        var current = mouseEventPoint(e.originalEvent, ctx.container);
-        var minX = Math.min(startCoordinates.x, current.x),
-          maxX = Math.max(startCoordinates.x, current.x),
-          minY = Math.min(startCoordinates.y, current.y),
-          maxY = Math.max(startCoordinates.y, current.y);
-
-        // Adjust width and xy position of the box element ongoing
-        var pos = 'translate(' + minX + 'px,' + minY + 'px)';
-        box.style.transform = pos;
-        box.style.WebkitTransform = pos;
-        box.style.width = maxX - minX + 'px';
-        box.style.height = maxY - minY + 'px';
-      });
-
+      // Dragging when drag move is enabled
       this.on('drag', () => canDragMove, function(e) {
-        dragging = true;
+        dragMoving = true;
         e.originalEvent.stopPropagation();
 
+        // Change coordinates of all selected features
+
         if (featureCoords === null) {
-          buildFeatureCoords();
+          featureCoords = ctx.store.getSelectedIds()
+            .map(id => ctx.store.get(id).getCoordinates());
         }
 
-        var lngD = e.lngLat.lng - startPos.lng;
-        var latD = e.lngLat.lat - startPos.lat;
+        const lngD = e.lngLat.lng - dragMoveStartLocation.lng;
+        const latD = e.lngLat.lat - dragMoveStartLocation.lat;
 
-        var coordMap = (coord) => [coord[0] + lngD, coord[1] + latD];
-        var ringMap = (ring) => ring.map(coord => coordMap(coord));
-        var mutliMap = (multi) => multi.map(ring => ringMap(ring));
+        const coordMap = (coord) => [coord[0] + lngD, coord[1] + latD];
+        const ringMap = (ring) => ring.map(coord => coordMap(coord));
+        const mutliMap = (multi) => multi.map(ring => ringMap(ring));
 
-        const selectedFeatures = ctx.store.getSelected();
-
-        selectedFeatures.forEach((feature, i) => {
+        ctx.store.getSelected().forEach((feature, i) => {
           if (feature.type === 'Point') {
             feature.incomingCoords(coordMap(featureCoords[i]));
-          }
-          else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
+          } else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
             feature.incomingCoords(featureCoords[i].map(coordMap));
-          }
-          else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
+          } else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
             feature.incomingCoords(featureCoords[i].map(ringMap));
-          }
-          else if (feature.type === 'MultiPolygon') {
+          } else if (feature.type === 'MultiPolygon') {
             feature.incomingCoords(featureCoords[i].map(mutliMap));
           }
         });
       });
 
-      this.on('mouseup', () => true, function(e) {
-        if (dragging) {
+      // Mouseup, always
+      this.on('mouseup', CommonSelectors.true, function(e) {
+        // End any extended interactions
+        if (dragMoving) {
           ctx.map.fire(Constants.events.UPDATE, {
             action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
-          dragging = false;
-        }
-        if (boxSelecting) {
-          finishBoxSelect([
-            startCoordinates,
+        } else if (boxSelecting) {
+          const bbox = [
+            boxSelectStartLocation,
             mouseEventPoint(e.originalEvent, ctx.container)
-          ], this);
+          ];
+          const featuresInBox = featuresAt(null, bbox, ctx);
+          const idsToSelect = getUniqueIds(featuresInBox)
+            .filter(id => !ctx.store.isSelected(id));
+
+          if (idsToSelect.length) {
+            ctx.store.select(idsToSelect);
+            idsToSelect.forEach(this.render);
+            ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+          }
         }
-        canDragMove = false;
-        featureCoords = null;
+        stopExtendedInteractions();
       });
+
+      if (ctx.options.boxSelect) {
+        // Shift-mousedown anywhere
+        this.on('mousedown', CommonSelectors.isShiftMousedown, function(e) {
+          stopExtendedInteractions();
+          // Enable box select
+          ctx.map.dragPan.disable();
+          boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
+          canBoxSelect = true;
+        });
+
+        // Drag when box select is enabled
+        this.on('drag', () => canBoxSelect, function(e) {
+          boxSelecting = true;
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+
+          // Create the box node if it doesn't exist
+          if (!boxSelectElement) {
+            boxSelectElement = document.createElement('div');
+            boxSelectElement.classList.add('mapbox-gl-draw_boxselect');
+            ctx.container.appendChild(boxSelectElement);
+          }
+
+          // Adjust the box node's width and xy position
+          const current = mouseEventPoint(e.originalEvent, ctx.container);
+          const minX = Math.min(boxSelectStartLocation.x, current.x);
+          const maxX = Math.max(boxSelectStartLocation.x, current.x);
+          const minY = Math.min(boxSelectStartLocation.y, current.y);
+          const maxY = Math.max(boxSelectStartLocation.y, current.y);
+          const translateValue = `translate(${minX}px, ${minY}px)`;
+          boxSelectElement.style.transform = translateValue;
+          boxSelectElement.style.WebkitTransform = translateValue;
+          boxSelectElement.style.width = `${maxX - minX}px`;
+          boxSelectElement.style.height = `${maxY - minY}px`;
+        });
+      }
     },
     render: function(geojson, push) {
       geojson.properties.active = ctx.store.isSelected(geojson.properties.id) ? 'true' : 'false';
