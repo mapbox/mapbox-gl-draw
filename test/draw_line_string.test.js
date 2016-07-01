@@ -7,7 +7,6 @@ import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import {
@@ -17,8 +16,6 @@ import {
   startPolygonEvent,
   escapeEvent
 } from './utils/key_events';
-
-
 
 test('draw_line_string mode initialization', t => {
   const context = createMockDrawModeContext();
@@ -108,11 +105,63 @@ test('draw_line_string stop with invalid line', t => {
   }, 10);
 });
 
-test('draw_line_string render, active', t => {
+test('draw_line_string render active line with 0 coordinates', t => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
-  const place = [];
+  const memo = [];
+  const geojson = {
+    type: 'Feature',
+    properties: {
+      id: context._test.line.id
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: []
+    }
+  };
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 0, 'does not render');
+  t.end();
+});
+
+test('draw_line_string render active line with 1 coordinate', t => {
+  const context = createMockDrawModeContext();
+  const mode = drawLineStringMode(context);
+
+  const memo = [];
+  const geojson = {
+    type: 'Feature',
+    properties: {
+      id: context._test.line.id
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: [[0, 0]]
+    }
+  };
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 1, 'does render');
+  t.deepEqual(memo[0], {
+    type: 'Feature',
+    properties: {
+      id: context._test.line.id,
+      active: 'true',
+      meta: 'feature'
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: [[0, 0]]
+    }
+  }, 'with active: true, meta: feature');
+  t.end();
+});
+
+test('draw_line_string render active line with 2 coordinates', t => {
+  const context = createMockDrawModeContext();
+  const mode = drawLineStringMode(context);
+
+  const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
@@ -123,9 +172,9 @@ test('draw_line_string render, active', t => {
       coordinates: [[0, 0], [10, 10]]
     }
   };
-  mode.render(geojson, x => place.push(x));
-  t.equal(place.length, 1);
-  t.deepEqual(place[0], {
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 1, 'does render');
+  t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
       id: context._test.line.id,
@@ -136,57 +185,38 @@ test('draw_line_string render, active', t => {
       type: 'LineString',
       coordinates: [[0, 0], [10, 10]]
     }
-  });
+  }, 'with active: true, meta: feature');
   t.end();
 });
 
-test('draw_line_string render, inactive', t => {
+test('draw_line_string render inactive feature', t => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
 
-  const place = [];
+  const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
       meta: 'nothing'
     },
     geometry: {
-      type: 'LineString',
-      coordinates: [[0, 0], [10, 10]]
+      type: 'Point',
+      coordinates: [0, 0]
     }
   };
-  mode.render(geojson, x => place.push(x));
-  t.equal(place.length, 1);
-  t.deepEqual(place[0], {
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 1, 'does render');
+  t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
       active: 'false',
       meta: 'nothing'
     },
     geometry: {
-      type: 'LineString',
-      coordinates: [[0, 0], [10, 10]]
+      type: 'Point',
+      coordinates: [0, 0]
     }
-  });
-  t.end();
-});
-
-test('draw_line_string render, no coordinates', t => {
-  const context = createMockDrawModeContext();
-  const mode = drawLineStringMode(context);
-
-  const place = [];
-  const geojson = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'LineString',
-      coordinates: []
-    }
-  };
-  mode.render(geojson, x => place.push(x));
-  t.equal(place.length, 0);
-
+  }, 'unaltered except active: false');
   t.end();
 });
 

@@ -75,9 +75,13 @@ module.exports = function(ctx) {
     },
 
     render(geojson, callback) {
+      const isActiveLine = geojson.properties.id === line.id;
+      geojson.properties.active = (isActiveLine) ? 'true' : 'false';
+      if (!isActiveLine) return callback(geojson);
+
+      // Only render the line if it has at least one real coordinate
       if (geojson.geometry.coordinates[0] === undefined) return;
-      geojson.properties.active = (geojson.properties.id === line.id) ? 'true' : 'false';
-      geojson.properties.meta = (geojson.properties.active === 'true') ? 'feature' : geojson.properties.meta;
+      geojson.properties.meta = 'feature';
       callback(geojson);
     },
 

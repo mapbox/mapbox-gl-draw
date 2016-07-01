@@ -7,7 +7,6 @@ import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import {
@@ -104,7 +103,49 @@ test('draw_polygon stop with invalid polygon', t => {
   }, 10);
 });
 
-test('draw_polygon render, active, with only two vertices', t => {
+test('draw_polygon render active polygon with no coordinates', t => {
+  const context = createMockDrawModeContext();
+  const mode = drawPolygonMode(context);
+
+  const memo = [];
+  const geojson = {
+    type: 'Feature',
+    properties: {
+      id: context._test.polygon.id
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[]]
+    }
+  };
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 0, 'does not render');
+
+  t.end();
+});
+
+test('draw_polygon render active polygon with 1 coordinate (and closer)', t => {
+  const context = createMockDrawModeContext();
+  const mode = drawPolygonMode(context);
+
+  const memo = [];
+  const geojson = {
+    type: 'Feature',
+    properties: {
+      id: context._test.polygon.id
+    },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[10, 10], [10, 10]]]
+    }
+  };
+  mode.render(geojson, x => memo.push(x));
+  t.equal(memo.length, 0, 'does not render');
+
+  t.end();
+});
+
+test('draw_polygon render active polygon with 2 coordinates (and closer)', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
@@ -120,7 +161,7 @@ test('draw_polygon render, active, with only two vertices', t => {
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1);
+  t.equal(memo.length, 1, 'does render');
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
@@ -132,11 +173,11 @@ test('draw_polygon render, active, with only two vertices', t => {
       type: 'LineString',
       coordinates: [[0, 0], [0, 10]]
     }
-  }, 'a line string is sent to the callback');
+  }, 'renders as a LineString with meta: feature, active: true');
   t.end();
 });
 
-test('draw_polygon render, active', t => {
+test('draw_polygon render active polygon with 3 coordinates (and closer)', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
@@ -152,7 +193,7 @@ test('draw_polygon render, active', t => {
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1);
+  t.equal(memo.length, 1, 'does render');
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
@@ -164,11 +205,11 @@ test('draw_polygon render, active', t => {
       type: 'Polygon',
       coordinates: [[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]]
     }
-  }, 'the polygon is sent to the callback');
+  }, 'renders as a polygon with meta: feature, active: true');
   t.end();
 });
 
-test('draw_polygon render, inactive', t => {
+test('draw_polygon render inactive feature', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
 
@@ -179,12 +220,12 @@ test('draw_polygon render, inactive', t => {
       meta: 'meh'
     },
     geometry: {
-      type: 'Polygon',
-      coordinates: [[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]]
+      type: 'LineString',
+      coordinates: [[0, 0], [0, 10]]
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1);
+  t.equal(memo.length, 1, 'does render');
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
@@ -192,32 +233,12 @@ test('draw_polygon render, inactive', t => {
       meta: 'meh'
     },
     geometry: {
-      type: 'Polygon',
-      coordinates: [[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]]
+      type: 'LineString',
+      coordinates: [[0, 0], [0, 10]]
     }
-  }, 'the polygon is sent to the callback');
+  }, 'unaltered except active: false');
   t.end();
 });
-
-test('draw_polygon render, no coordinates', t => {
-  const context = createMockDrawModeContext();
-  const mode = drawPolygonMode(context);
-
-  const memo = [];
-  const geojson = {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[]]
-    }
-  };
-  mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 0);
-
-  t.end();
-});
-
 
 test('draw_polygon interaction', t => {
   const container = document.createElement('div');

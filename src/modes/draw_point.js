@@ -48,11 +48,11 @@ module.exports = function(ctx) {
       }
     },
 
-    render(geojson, push) {
-      geojson.properties.active = (geojson.properties.id === point.id) ? 'true' : 'false';
-      if (geojson.properties.active === 'false') {
-        push(geojson);
-      }
+    render(geojson, callback) {
+      const isActivePoint = geojson.properties.id === point.id;
+      geojson.properties.active = (isActivePoint) ? 'true' : 'false';
+      if (!isActivePoint) return callback(geojson);
+      // Never render the point we're drawing
     },
 
     trash() {

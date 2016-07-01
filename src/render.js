@@ -34,22 +34,16 @@ module.exports = function render() {
 
   var coldChanged = lastColdCount !== store.sources.cold.length || newColdIds.length > 0;
 
-  newHotIds.concat(newColdIds).concat(newColdIds).map(function prepForViewUpdates(id) {
-    if (newHotIds.indexOf(id) > -1) {
-      return {source: 'hot', 'id': id};
-    }
-    else {
-      return {source: 'cold', 'id': id};
-    }
-  }).forEach(function calculateViewUpdate(change) {
-    let {id, source} = change;
-    let feature = store.get(id);
-    let featureInternal = feature.internal(mode);
+  newHotIds.forEach(id => renderFeature(id, 'hot'));
+  newColdIds.forEach(id => renderFeature(id, 'cold'));
 
-    store.ctx.events.currentModeRender(featureInternal, function addGeoJsonToView(geojson) {
+  function renderFeature(id, source) {
+    const feature = store.get(id);
+    const featureInternal = feature.internal(mode);
+    store.ctx.events.currentModeRender(featureInternal, (geojson) => {
       store.sources[source].push(geojson);
     });
-  });
+  }
 
   if (coldChanged) {
     store.ctx.map.getSource('mapbox-gl-draw-cold').setData({

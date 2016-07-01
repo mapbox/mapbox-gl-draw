@@ -1,6 +1,5 @@
 import test from 'tape';
 import xtend from 'xtend';
-import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
 import mouseClick from './utils/mouse_click';
 import createMap from './utils/create_map';
@@ -8,7 +7,6 @@ import makeMouseEvent from './utils/make_mouse_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawPointMode from '../src/modes/draw_point';
 import Point from '../src/feature_types/point';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import {escapeEvent, enterEvent} from './utils/key_events';
@@ -89,7 +87,7 @@ test('draw_point stop with no point placed', t => {
   t.end();
 });
 
-test('draw_point render, active', t => {
+test('draw_point render the active point', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
@@ -105,11 +103,11 @@ test('draw_point render, active', t => {
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 0);
+  t.equal(memo.length, 0, 'active point does not render');
   t.end();
 });
 
-test('draw_point render, inactive', t => {
+test('draw_point render an inactive feature', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
 
@@ -120,12 +118,12 @@ test('draw_point render, inactive', t => {
       meta: 'nothing'
     },
     geometry: {
-      type: 'Point',
-      coordinates: [10, 10]
+      type: 'LineString',
+      coordinates: [[10, 10], [20, 20]]
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1);
+  t.equal(memo.length, 1, 'does render');
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
@@ -133,10 +131,10 @@ test('draw_point render, inactive', t => {
       meta: 'nothing'
     },
     geometry: {
-      type: 'Point',
-      coordinates: [10, 10]
+      type: 'LineString',
+      coordinates: [[10, 10], [20, 20]]
     }
-  });
+  }, 'unaltered except active: false');
   t.end();
 });
 
