@@ -10,6 +10,7 @@ module.exports = function(ctx, options = {}) {
   var startPos = null;
   var featureCoords = null;
   var startCoordinates = null;
+  var mapCanvas = ctx.map.getCanvasContainer();
   var box;
   var boxSelecting = false;
   var dragging;
@@ -30,18 +31,21 @@ module.exports = function(ctx, options = {}) {
   }
 
   var cleanupBoxSelect = function() {
+    if (!boxSelecting) return;
+    // Remove the rendered box
+    if (box && box.parentNode) {
+      box.parentNode.removeChild(box);
+      box = null;
+    }
+    // Cleanup the state variables
     boxSelecting = false;
+    // Enable regular dragging
     setTimeout(() => {
       ctx.map.dragPan.enable();
     }, 0);
   };
 
   var finishBoxSelect = function(bbox, context) {
-    if (box && box.parentNode) {
-      box.parentNode.removeChild(box);
-      box = null;
-    }
-
     // If bbox exists, use to select features
     if (bbox) {
       var featuresInBox = featuresAt(null, bbox, ctx);
@@ -69,8 +73,13 @@ module.exports = function(ctx, options = {}) {
     featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
   };
 
+  var handleMouseout = function() {
+    cleanupBoxSelect();
+  };
+
   return {
     stop: function() {
+      mapCanvas.removeEventListener('mouseout', handleMouseout);
       doubleClickZoom.enable(ctx);
     },
     start: function() {
@@ -82,13 +91,15 @@ module.exports = function(ctx, options = {}) {
         return ctx.store.get(id) !== undefined;
       }));
 
-      // Any mouseup should stop box selecting and dragging
-      this.on('mouseup', () => true, function() {
+      // Attach a listener to mouseout, pending the mapbox-gl-js release including
+      // https://github.com/mapbox/mapbox-gl-js/pull/2777
+      mapCanvas.addEventListener('mouseout', handleMouseout);
+
+      // Any click should stop box selecting and dragging
+      this.on('click', () => true, function() {
         dragging = false;
         canDragMove = false;
-        if (boxSelecting) {
-          cleanupBoxSelect();
-        }
+        cleanupBoxSelect();
       });
 
       // When a click falls outside any features,
