@@ -29,36 +29,6 @@ module.exports = function(ctx, options = {}) {
     return ids.values();
   }
 
-  var cleanupBoxSelect = function() {
-    boxSelecting = false;
-    setTimeout(() => {
-      ctx.map.dragPan.enable();
-    }, 0);
-  };
-
-  var finishBoxSelect = function(bbox, context) {
-    if (boxSelectElement && boxSelectElement.parentNode) {
-      boxSelectElement.parentNode.removeChild(boxSelectElement);
-      boxSelectElement = null;
-    }
-
-    // If bbox exists, use to select features
-    if (bbox) {
-      var featuresInBox = featuresAt(null, bbox, ctx);
-      var ids = getUniqueIds(featuresInBox)
-        .filter(id => !ctx.store.isSelected(id));
-
-      if (ids.length) {
-        ctx.store.select(ids);
-        ids.forEach(id => {
-          context.render(id);
-        });
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-      }
-    }
-    cleanupBoxSelect();
-  };
-
   var readyForDirectSelect = function(e) {
     var about = e.featureTarget.properties;
     return ctx.store.isSelected(about.id) && ctx.store.get(about.id).type !== 'Point';
@@ -69,13 +39,26 @@ module.exports = function(ctx, options = {}) {
     featureCoords = featureIds.map(id => ctx.store.get(id).getCoordinates());
   };
 
+  var stopExtendedInteractions = function() {
+    if (boxSelectElement) {
+      boxSelectElement.parentNode.removeChild(boxSelectElement);
+      boxSelectElement = null;
+    }
+    setTimeout(() => {
+      ctx.map.dragPan.enable();
+    }, 0);
+
+    boxSelecting = false;
+    canDragMove = false;
+    dragMoving = false;
+    featureCoords = null;
+  };
+
   return {
     stop: function() {
       doubleClickZoom.enable(ctx);
     },
     start: function() {
-      dragMoving = false;
-      canDragMove = false;
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
       if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
@@ -83,13 +66,7 @@ module.exports = function(ctx, options = {}) {
       }));
 
       // Any mouseup should stop box selecting and dragMoving
-      this.on('mouseup', () => true, function() {
-        dragMoving = false;
-        canDragMove = false;
-        if (boxSelecting) {
-          cleanupBoxSelect();
-        }
-      });
+      this.on('mouseup', () => true, stopExtendedInteractions);
 
       // When a click falls outside any features,
       // - clear the selection
@@ -130,14 +107,13 @@ module.exports = function(ctx, options = {}) {
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
-          ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
+          return ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
             featureId: e.featureTarget.properties.id
           });
         }
         else if (ctx.store.isSelected(id) && isShiftDown(e)) {
           ctx.store.deselect(id);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-          this.render(id);
           if (featureIds.length === 1 ) {
             doubleClickZoom.enable(ctx);
           }
@@ -146,15 +122,14 @@ module.exports = function(ctx, options = {}) {
           // add to selected
           ctx.store.select(id);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-          this.render(id);
         }
         else if (!ctx.store.isSelected(id) && !isShiftDown(e)) {
           // make selected
           featureIds.forEach(formerId => this.render(formerId));
           ctx.store.setSelected(id);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-          this.render(id);
         }
+        this.render(id);
       });
 
       this.on('drag', () => boxSelecting, function(e) {
@@ -171,11 +146,11 @@ module.exports = function(ctx, options = {}) {
           maxY = Math.max(boxSelectStartLocation.y, current.y);
 
         // Adjust width and xy position of the box element ongoing
-        var pos = 'translate(' + minX + 'px,' + minY + 'px)';
-        boxSelectElement.style.transform = pos;
-        boxSelectElement.style.WebkitTransform = pos;
-        boxSelectElement.style.width = maxX - minX + 'px';
-        boxSelectElement.style.height = maxY - minY + 'px';
+        var translateValue = `translate(${minX}px, ${minY}px)`;
+        boxSelectElement.style.transform = translateValue;
+        boxSelectElement.style.WebkitTransform = translateValue;
+        boxSelectElement.style.width = `${maxX - minX}px`;
+        boxSelectElement.style.height = `${maxY - minY}px`;
       });
 
       this.on('drag', () => canDragMove, function(e) {
@@ -217,16 +192,22 @@ module.exports = function(ctx, options = {}) {
             action: Constants.updateActions.MOVE,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
-          dragMoving = false;
-        }
-        if (boxSelecting) {
-          finishBoxSelect([
+        } else if (boxSelecting) {
+          var bbox = [
             boxSelectStartLocation,
             mouseEventPoint(e.originalEvent, ctx.container)
-          ], this);
+          ];
+          var featuresInBox = featuresAt(null, bbox, ctx);
+          var ids = getUniqueIds(featuresInBox)
+            .filter(id => !ctx.store.isSelected(id));
+
+          if (ids.length) {
+            ctx.store.select(ids);
+            ids.forEach(this.render);
+            ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+          }
         }
-        canDragMove = false;
-        featureCoords = null;
+        stopExtendedInteractions();
       });
     },
     render: function(geojson, push) {
