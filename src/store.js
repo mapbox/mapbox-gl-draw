@@ -19,6 +19,26 @@ var Store = module.exports = function(ctx) {
   this.isDirty = false;
 };
 
+
+/**
+ * Delays all rendering until the returned function is invoked
+ * @return {Function} renderBatch
+ */
+Store.prototype.createRenderBatch = function() {
+  let holdRender = this.render;
+  let numRenders = 0;
+  this.render = function() {
+    numRenders++;
+  };
+
+  return () => {
+    this.render = holdRender;
+    if (numRenders > 0) {
+      this.render();
+    }
+  };
+};
+
 /**
  * Sets the store's state to dirty.
  * @return {Store} this

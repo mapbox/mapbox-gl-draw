@@ -34,6 +34,7 @@ test('Store constructor and public API', t => {
 
   // prototype members
   t.equal(typeof Store.prototype.setDirty, 'function', 'exposes store.setDirty');
+  t.equal(typeof Store.prototype.createRenderBatch, 'function', 'exposes store.createRenderBatch');
   t.equal(typeof Store.prototype.featureChanged, 'function', 'exposes store.featureChanged');
   t.equal(typeof Store.prototype.getChangedIds, 'function', 'exposes store.getChangedIds');
   t.equal(typeof Store.prototype.clearChangedIds, 'function', 'exposes store.clearChangedIds');
@@ -50,7 +51,7 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 16, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 17, 'no untested prototype members');
 
   t.end();
 });
@@ -60,6 +61,29 @@ test('Store#setDirty', t => {
   t.equal(store.isDirty, false);
   store.setDirty();
   t.equal(store.isDirty, true);
+  t.end();
+});
+
+test('Store#createRenderBatch', t => {
+  const store = createStore();
+  var numRenders = 0;
+  store.render = function() {
+    numRenders++;
+  }
+  store.render();
+  t.equal(numRenders, 1, 'render incrementes number of renders');
+  var renderBatch = store.createRenderBatch();
+  store.render();
+  store.render();
+  store.render();
+  t.equal(numRenders, 1, 'when batching render doesn\'t get incremented');
+  renderBatch();
+  t.equal(numRenders, 2, 'when releasing batch, render only happens once');
+
+  var renderBatch = store.createRenderBatch();
+  renderBatch();
+  t.equal(numRenders, 2, 'when releasing batch, render doesn\'t happen if render wasn\'t called');
+
   t.end();
 });
 

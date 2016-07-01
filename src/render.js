@@ -21,10 +21,6 @@ module.exports = function render() {
     }).map(geojson => geojson.properties.id);
   }
 
-  // if (newHotIds.length + newColdIds.length === 0 && this.isDirty === false) {
-  //   return; // there is nothing to change...
-  // }
-
   store.sources.hot = [];
   let lastColdCount = store.sources.cold.length;
   store.sources.cold = store.isDirty ? [] : store.sources.cold.filter(function saveColdFeatures(geojson) {

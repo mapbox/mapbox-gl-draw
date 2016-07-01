@@ -32,6 +32,7 @@ module.exports = function(ctx) {
     if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');
     }
+    var renderBatch = ctx.store.createRenderBatch();
     var toDelete = ctx.store.getAllIds().slice();
     var newIds = api.add(featureCollection);
     var newIdsLookup = new StringSet(newIds);
@@ -41,6 +42,7 @@ module.exports = function(ctx) {
       api.delete(toDelete);
     }
 
+    renderBatch();
     return newIds;
   };
 
