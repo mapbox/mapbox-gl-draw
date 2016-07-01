@@ -78,7 +78,10 @@ module.exports = function(ctx) {
       return feature.id;
     });
 
-    ctx.store.render();
+    if (ids.length) {
+      ctx.store.render();
+    }
+
     return ids;
   };
 
