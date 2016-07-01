@@ -66,7 +66,6 @@ test('simple_select', t => {
 
         afterNextRender(() => {
           t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
-          t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
           var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
           t.equal(args.length, 1, 'should have one and only one selectionchange event');
           if (args.length > 0) {
@@ -97,7 +96,6 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(15, 15, true));
 
       afterNextRender(() => {
-        t.equal(map.dragPan.enable.callCount, 1, 'double click zoom has been enabled');
         var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
         t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {

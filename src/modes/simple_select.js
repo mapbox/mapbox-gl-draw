@@ -12,8 +12,9 @@ module.exports = function(ctx, options = {}) {
   var boxSelectStartLocation = null;
   var boxSelectElement;
   var boxSelecting = false;
-  var dragMoving;
-  var canDragMove;
+  var canBoxSelect = false;
+  var dragMoving = false;
+  var canDragMove = false;
 
   const initiallySelectedFeatureIds = options.featureIds || [];
 
@@ -41,7 +42,7 @@ module.exports = function(ctx, options = {}) {
 
   var stopExtendedInteractions = function() {
     if (boxSelectElement) {
-      boxSelectElement.parentNode.removeChild(boxSelectElement);
+      if (boxSelectElement.parentNode) boxSelectElement.parentNode.removeChild(boxSelectElement);
       boxSelectElement = null;
     }
     setTimeout(() => {
@@ -49,8 +50,9 @@ module.exports = function(ctx, options = {}) {
     }, 0);
 
     boxSelecting = false;
-    canDragMove = false;
+    canBoxSelect = false;
     dragMoving = false;
+    canDragMove = false;
     featureCoords = null;
   };
 
@@ -74,9 +76,12 @@ module.exports = function(ctx, options = {}) {
       // - enable double-click zoom
       this.on('click', noFeature, function() {
         var wasSelected = ctx.store.getSelectedIds();
-        ctx.store.clearSelected();
-        wasSelected.forEach(id => this.render(id));
+        if (wasSelected.length) {
+          ctx.store.clearSelected();
+          wasSelected.forEach(id => this.render(id));
+        }
         doubleClickZoom.enable(ctx);
+        stopExtendedInteractions();
       });
 
       this.on('click', isOfMetaType('vertex'), function(e) {
@@ -92,7 +97,7 @@ module.exports = function(ctx, options = {}) {
         this.on('mousedown', isShiftMousedown, function(e) {
           ctx.map.dragPan.disable();
           boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
-          boxSelecting = true;
+          canBoxSelect = true;
         });
       }
 
@@ -104,6 +109,7 @@ module.exports = function(ctx, options = {}) {
 
       this.on('click', isFeature, function(e) {
         doubleClickZoom.disable(ctx);
+        stopExtendedInteractions();
         var id = e.featureTarget.properties.id;
         var featureIds = ctx.store.getSelectedIds();
         if (readyForDirectSelect(e) && !isShiftDown(e)) {
@@ -132,7 +138,8 @@ module.exports = function(ctx, options = {}) {
         this.render(id);
       });
 
-      this.on('drag', () => boxSelecting, function(e) {
+      this.on('drag', () => canBoxSelect, function(e) {
+        boxSelecting = true;
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         if (!boxSelectElement) {
           boxSelectElement = document.createElement('div');
@@ -193,12 +200,12 @@ module.exports = function(ctx, options = {}) {
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
           });
         } else if (boxSelecting) {
-          var bbox = [
+          const bbox = [
             boxSelectStartLocation,
             mouseEventPoint(e.originalEvent, ctx.container)
           ];
-          var featuresInBox = featuresAt(null, bbox, ctx);
-          var ids = getUniqueIds(featuresInBox)
+          const featuresInBox = featuresAt(null, bbox, ctx);
+          const ids = getUniqueIds(featuresInBox)
             .filter(id => !ctx.store.isSelected(id));
 
           if (ids.length) {
