@@ -86,6 +86,7 @@ module.exports = function(ctx, options = {}) {
 
       // Mousedown on a selected feature
       this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
+        stopExtendedInteractions();
         // Re-render it and enable drag move
         this.render(e.featureTarget.properties.id);
         canDragMove = true;
@@ -197,6 +198,7 @@ module.exports = function(ctx, options = {}) {
       if (ctx.options.boxSelect) {
         // Shift-mousedown anywhere
         this.on('mousedown', CommonSelectors.isShiftMousedown, function(e) {
+          stopExtendedInteractions();
           // Enable box select
           ctx.map.dragPan.disable();
           boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
