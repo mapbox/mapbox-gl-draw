@@ -73,29 +73,39 @@ module.exports = function(ctx) {
     },
 
     render(geojson, callback) {
-      geojson.properties.active = (geojson.properties.id === polygon.id) ? 'true' : 'false';
-      geojson.properties.meta = (geojson.properties.active === 'true') ? 'feature' : geojson.properties.meta;
+      const isActivePolygon = geojson.properties.id === polygon.id;
+      geojson.properties.active = (isActivePolygon) ? 'true' : 'false';
+      if (!isActivePolygon) return callback(geojson);
 
+      // Don't render a polygon until it has two positions
+      // (and a 3rd which is just the first repeated)
       if (geojson.geometry.coordinates.length === 0) return;
+
       const coordinateCount = geojson.geometry.coordinates[0].length;
+
+      // If we have fewer than two positions (plus the closer),
+      // it's not yet a shape to render
       if (coordinateCount < 3) return;
 
-      // If we've only drawn two vertices, make a LineString instead of a Polygon
-      if (geojson.properties.active === 'true' && coordinateCount === 3) {
-        let coords = [
-          [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
-        ];
-        return callback({
-          type: 'Feature',
-          properties: geojson.properties,
-          geometry: {
-            coordinates: coords,
-            type: 'LineString'
-          }
-        });
-      } else if (geojson.properties.active === 'false' || coordinateCount > 3) {
-        callback(geojson);
-      }
+      geojson.properties.meta = 'feature';
+
+      // If we have more than two positions (plus the closer),
+      // render the Polygon
+      if (coordinateCount > 3) return callback(geojson);
+
+      // If we've only drawn two positions (plus the closer),
+      // make a LineString instead of a Polygon
+      const lineCoordinates = [
+        [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
+      ];
+      return callback({
+        type: 'Feature',
+        properties: geojson.properties,
+        geometry: {
+          coordinates: lineCoordinates,
+          type: 'LineString'
+        }
+      });
     },
     trash() {
       ctx.store.delete([polygon.id], { silent: true });
