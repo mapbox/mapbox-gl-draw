@@ -1,6 +1,7 @@
 var events = require('./events');
 var Store = require('./store');
 var ui = require('./ui');
+var Constants = require('./constants');
 
 module.exports = function(ctx) {
 
@@ -52,18 +53,18 @@ module.exports = function(ctx) {
     },
     addLayers: function() {
       // drawn features style
-      ctx.map.addSource('mapbox-gl-draw-cold', {
+      ctx.map.addSource(Constants.sources.COLD, {
         data: {
-          type: 'FeatureCollection',
+          type: Constants.geojsonTypes.FEATURE_COLLECTION,
           features: []
         },
         type: 'geojson'
       });
 
       // hot features style
-      ctx.map.addSource('mapbox-gl-draw-hot', {
+      ctx.map.addSource(Constants.sources.HOT, {
         data: {
-          type: 'FeatureCollection',
+          type: Constants.geojsonTypes.FEATURE_COLLECTION,
           features: []
         },
         type: 'geojson'
@@ -80,8 +81,8 @@ module.exports = function(ctx) {
         ctx.map.removeLayer(style.id);
       });
 
-      ctx.map.removeSource('mapbox-gl-draw-cold');
-      ctx.map.removeSource('mapbox-gl-draw-hot');
+      ctx.map.removeSource(Constants.sources.COLD);
+      ctx.map.removeSource(Constants.sources.HOT);
     }
   };
 

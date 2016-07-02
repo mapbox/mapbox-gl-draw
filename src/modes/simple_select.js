@@ -74,7 +74,7 @@ module.exports = function(ctx, options = {}) {
       });
 
       // Click (with or without shift) on a vertex
-      this.on('click', CommonSelectors.isOfMetaType('vertex'), function(e) {
+      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), function(e) {
         // Enter direct select mode
         ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
@@ -105,7 +105,7 @@ module.exports = function(ctx, options = {}) {
         const isFeatureSelected = ctx.store.isSelected(featureId);
 
         // Click (without shift) on any selected feature but a point
-        if (!isShiftClick && isFeatureSelected && ctx.store.get(featureId).type !== 'Point') {
+        if (!isShiftClick && isFeatureSelected && ctx.store.get(featureId).type !== Constants.geojsonTypes.POINT) {
           // Enter direct select mode
           return ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
             featureId: featureId
@@ -157,13 +157,13 @@ module.exports = function(ctx, options = {}) {
         const mutliMap = (multi) => multi.map(ring => ringMap(ring));
 
         ctx.store.getSelected().forEach((feature, i) => {
-          if (feature.type === 'Point') {
+          if (feature.type === Constants.geojsonTypes.POINT) {
             feature.incomingCoords(coordMap(featureCoords[i]));
-          } else if (feature.type === 'LineString' || feature.type === 'MultiPoint') {
+          } else if (feature.type === Constants.geojsonTypes.LINE_STRING || feature.type === Constants.geojsonTypes.MULTI_POINT) {
             feature.incomingCoords(featureCoords[i].map(coordMap));
-          } else if (feature.type === 'Polygon' || feature.type === 'MultiLineString') {
+          } else if (feature.type === Constants.geojsonTypes.POLYGON || feature.type === Constants.geojsonTypes.MULTI_LINE_STRING) {
             feature.incomingCoords(featureCoords[i].map(ringMap));
-          } else if (feature.type === 'MultiPolygon') {
+          } else if (feature.type === Constants.geojsonTypes.MULTI_POLYGON) {
             feature.incomingCoords(featureCoords[i].map(mutliMap));
           }
         });
@@ -213,7 +213,7 @@ module.exports = function(ctx, options = {}) {
           // Create the box node if it doesn't exist
           if (!boxSelectElement) {
             boxSelectElement = document.createElement('div');
-            boxSelectElement.classList.add('mapbox-gl-draw_boxselect');
+            boxSelectElement.classList.add(Constants.classes.BOX_SELECT);
             ctx.container.appendChild(boxSelectElement);
           }
 
@@ -232,9 +232,12 @@ module.exports = function(ctx, options = {}) {
       }
     },
     render: function(geojson, push) {
-      geojson.properties.active = ctx.store.isSelected(geojson.properties.id) ? 'true' : 'false';
+      geojson.properties.active = (ctx.store.isSelected(geojson.properties.id) )
+        ? Constants.activeStates.ACTIVE
+        : Constants.activeStates.INACTIVE;
       push(geojson);
-      if (geojson.properties.active !== 'true' || geojson.geometry.type === 'Point') return;
+      if (geojson.properties.active !== Constants.activeStates.ACTIVE
+        || geojson.geometry.type === Constants.geojsonTypes.POINT) return;
       createSupplementaryPoints(geojson).forEach(push);
     },
     trash() {

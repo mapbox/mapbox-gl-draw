@@ -8,12 +8,12 @@ var Constants = require('./constants');
 var StringSet = require('./lib/string_set');
 
 var featureTypes = {
-  'Polygon': require('./feature_types/polygon'),
-  'LineString': require('./feature_types/line_string'),
-  'Point': require('./feature_types/point'),
-  'MultiPolygon': require('./feature_types/multi_feature'),
-  'MultiLineString': require('./feature_types/multi_feature'),
-  'MultiPoint': require('./feature_types/multi_feature')
+  Polygon: require('./feature_types/polygon'),
+  LineString: require('./feature_types/line_string'),
+  Point: require('./feature_types/point'),
+  MultiPolygon: require('./feature_types/multi_feature'),
+  MultiLineString: require('./feature_types/multi_feature'),
+  MultiPoint: require('./feature_types/multi_feature')
 };
 
 module.exports = function(ctx) {
@@ -29,7 +29,7 @@ module.exports = function(ctx) {
   };
 
   api.set = function(featureCollection) {
-    if (featureCollection.type === undefined || featureCollection.type !== 'FeatureCollection' || !Array.isArray(featureCollection.features)) {
+    if (featureCollection.type === undefined || featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');
     }
     var renderBatch = ctx.store.createRenderBatch();
@@ -94,7 +94,7 @@ module.exports = function(ctx) {
 
   api.getAll = function() {
     return {
-      type: 'FeatureCollection',
+      type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getAll().map(feature => feature.toGeoJSON())
     };
   };

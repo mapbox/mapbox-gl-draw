@@ -1,3 +1,5 @@
+const Constants = require('../constants');
+
 module.exports = {
   isOfMetaType: function(type) {
     return function(e) {
@@ -15,14 +17,14 @@ module.exports = {
   isActiveFeature: function(e) {
     if (!e.featureTarget) return false;
     if (!e.featureTarget.properties) return false;
-    return e.featureTarget.properties.active === 'true' &&
-      e.featureTarget.properties.meta === 'feature';
+    return e.featureTarget.properties.active === Constants.activeStates.ACTIVE &&
+      e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
   isInactiveFeature: function(e) {
     if (!e.featureTarget) return false;
     if (!e.featureTarget.properties) return false;
-    return e.featureTarget.properties.active === 'false' &&
-      e.featureTarget.properties.meta === 'feature';
+    return e.featureTarget.properties.active === Constants.activeStates.INACTIVE &&
+      e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
   noFeature: function(e) {
     return e.featureTarget === undefined;
@@ -30,7 +32,7 @@ module.exports = {
   isFeature: function(e) {
     if (!e.featureTarget) return false;
     if (!e.featureTarget.properties) return false;
-    return e.featureTarget.properties.meta === 'feature';
+    return e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
   isShiftDown: function(e) {
     if (!e.originalEvent) return false;

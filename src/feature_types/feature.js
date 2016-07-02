@@ -1,4 +1,5 @@
 var hat = require('hat');
+var Constants = require('../constants');
 
 var Feature = function(ctx, geojson) {
   this.ctx = ctx;
@@ -27,29 +28,29 @@ Feature.prototype.getCoordinates = function() {
 
 Feature.prototype.toGeoJSON = function() {
   return JSON.parse(JSON.stringify({
-    'id': this.id,
-    'type': 'Feature',
-    'properties': this.properties,
-    'geometry': {
-      'coordinates': this.getCoordinates(),
-      'type': this.type
+    id: this.id,
+    type: Constants.geojsonTypes.FEATURE,
+    properties: this.properties,
+    geometry: {
+      coordinates: this.getCoordinates(),
+      type: this.type
     }
   }));
 };
 
 Feature.prototype.internal = function(mode) {
   return {
-    'type': 'Feature',
-    'properties': {
-      'id': this.id,
-      'meta': 'feature',
+    type: Constants.geojsonTypes.FEATURE,
+    properties: {
+      id: this.id,
+      meta: Constants.meta.FEATURE,
       'meta:type': this.type,
-      'active': 'false',
+      active: Constants.activeStates.INACTIVE,
       mode: mode
     },
-    'geometry': {
-      'coordinates': this.getCoordinates(),
-      'type': this.type
+    geometry: {
+      coordinates: this.getCoordinates(),
+      type: this.type
     }
   };
 };

@@ -5,10 +5,10 @@ const Constants = require('../constants');
 module.exports = function(ctx) {
 
   const point = new Point(ctx, {
-    type: 'Feature',
+    type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
-      type: 'Point',
+      type: Constants.geojsonTypes.POINT,
       coordinates: []
     }
   });
@@ -50,7 +50,7 @@ module.exports = function(ctx) {
 
     render(geojson, callback) {
       const isActivePoint = geojson.properties.id === point.id;
-      geojson.properties.active = (isActivePoint) ? 'true' : 'false';
+      geojson.properties.active = (isActivePoint) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActivePoint) return callback(geojson);
       // Never render the point we're drawing
     },

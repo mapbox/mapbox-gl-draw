@@ -2,7 +2,7 @@ const Constants = require('./constants');
 
 module.exports = function render() {
   const store = this;
-  var mapExists = store.ctx.map && store.ctx.map.getSource('mapbox-gl-draw-hot') !== undefined;
+  var mapExists = store.ctx.map && store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
   if (!mapExists) return cleanup();
 
   var mode = store.ctx.events.currentModeName();
@@ -42,14 +42,14 @@ module.exports = function render() {
   }
 
   if (coldChanged) {
-    store.ctx.map.getSource('mapbox-gl-draw-cold').setData({
-      type: 'FeatureCollection',
+    store.ctx.map.getSource(Constants.sources.COLD).setData({
+      type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: store.sources.cold
     });
   }
 
-  store.ctx.map.getSource('mapbox-gl-draw-hot').setData({
-    type: 'FeatureCollection',
+  store.ctx.map.getSource(Constants.sources.HOT).setData({
+    type: Constants.geojsonTypes.FEATURE_COLLECTION,
     features: store.sources.hot
   });
 

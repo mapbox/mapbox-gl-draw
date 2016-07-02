@@ -7,10 +7,10 @@ const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 module.exports = function(ctx) {
 
   const polygon = new Polygon(ctx, {
-    type: 'Feature',
+    type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
-      type: 'Polygon',
+      type: Constants.geojsonTypes.POLYGON,
       coordinates: [[]]
     }
   });
@@ -29,7 +29,7 @@ module.exports = function(ctx) {
     // Finish if we clicked on the first or last point
     if (currentVertexPosition > 0 &&
       (isEventAtCoordinates(e, polygon.coordinates[0][0]) || isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1]))
-    ) return ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
+    ) return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
 
     polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
     currentVertexPosition++;
@@ -48,7 +48,7 @@ module.exports = function(ctx) {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
       this.on('keyup', CommonSelectors.isEnterKey, () => {
-        ctx.events.changeMode('simple_select', { featureIds: [polygon.id] });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
       });
     },
 
@@ -74,7 +74,7 @@ module.exports = function(ctx) {
 
     render(geojson, callback) {
       const isActivePolygon = geojson.properties.id === polygon.id;
-      geojson.properties.active = (isActivePolygon) ? 'true' : 'false';
+      geojson.properties.active = (isActivePolygon) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActivePolygon) return callback(geojson);
 
       // Don't render a polygon until it has two positions
@@ -87,7 +87,7 @@ module.exports = function(ctx) {
       // it's not yet a shape to render
       if (coordinateCount < 3) return;
 
-      geojson.properties.meta = 'feature';
+      geojson.properties.meta = Constants.meta.FEATURE;
 
       // If we have more than two positions (plus the closer),
       // render the Polygon
@@ -99,11 +99,11 @@ module.exports = function(ctx) {
         [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
       ];
       return callback({
-        type: 'Feature',
+        type: Constants.geojsonTypes.FEATURE,
         properties: geojson.properties,
         geometry: {
           coordinates: lineCoordinates,
-          type: 'LineString'
+          type: Constants.geojsonTypes.LINE_STRING
         }
       });
     },

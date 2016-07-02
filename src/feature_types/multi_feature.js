@@ -1,9 +1,10 @@
 var Feature = require('./feature');
+var Constants = require('../constants');
 
 var models = {
-  'MultiPoint': require('./point'),
-  'MultiLineString': require('./line_string'),
-  'MultiPolygon': require('./polygon')
+  MultiPoint: require('./point'),
+  MultiLineString: require('./line_string'),
+  MultiPolygon: require('./polygon')
 };
 
 let takeAction = (features, action, path, lng, lat) => {
@@ -27,7 +28,7 @@ MultiFeature.prototype = Object.create(Feature.prototype);
 MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
   return coordinates.map(coords => new this.model(this.ctx, {
     id: this.id,
-    type: 'Feature',
+    type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
       coordinates: coords,
@@ -50,7 +51,10 @@ MultiFeature.prototype.getCoordinate = function(path) {
 };
 
 MultiFeature.prototype.getCoordinates = function() {
-  return JSON.parse(JSON.stringify(this.features.map(f => f.type === 'Polygon' ? f.getCoordinates() : f.coordinates)));
+  return JSON.parse(JSON.stringify(this.features.map(f => {
+    if (f.type === Constants.geojsonTypes.POLYGON) return f.getCoordinates();
+    return f.coordinates;
+  })));
 };
 
 MultiFeature.prototype.updateCoordinate = function(path, lng, lat) {
