@@ -51,7 +51,7 @@ test('direct_select', t => {
       click(map, makeMouseEvent(clickAt[0], clickAt[1]));
       afterNextRender(() => {
         map.fire('mousedown', makeMouseEvent(clickAt[0] + 15, clickAt[1] + 15));
-        map.fire('mousemove', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30));
+        map.fire('mousemove', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30, { which: 1 }));
         map.fire('mouseup', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30));
         var afterMove = Draw.get(ids[0]);
         t.deepEquals(getGeoJSON('polygon').geometry, afterMove.geometry, 'should be the same after the drag');

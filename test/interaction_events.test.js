@@ -136,7 +136,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i));
+      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { which: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
     afterNextRender(() => {
@@ -268,7 +268,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i));
+      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(30, 10));
@@ -317,7 +317,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(40 + (5 * i), 20 + (5 * i)));
+      map.fire('mousemove', makeMouseEvent(40 + (5 * i), 20 + (5 * i), { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(140, 120));
@@ -473,9 +473,9 @@ function runTests() {
   test('box-select the line and the polygon', t => {
     // Now in `simple_select` mode ...
     // Mouse down with the shift key
-    map.fire('mousedown', makeMouseEvent(200, 200, true));
+    map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i)));
+      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { which: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
 
@@ -514,7 +514,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(50, 50));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(50 + i, 50 - i));
+      map.fire('mousemove', makeMouseEvent(50 + i, 50 - i, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(70, 30));
@@ -576,7 +576,7 @@ function runTests() {
 
   test('add another vertex to the selection', t => {
     // Now in `simple_select` mode ...
-    click(map, makeMouseEvent(20, 80, true));
+    click(map, makeMouseEvent(20, 80, { shiftKey: true }));
     afterNextRender(() => {
       t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
       t.end();
@@ -598,7 +598,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 80));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(20 - i, 80));
+      map.fire('mousemove', makeMouseEvent(20 - i, 80, { which: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(0, 80));
@@ -652,7 +652,7 @@ function runTests() {
   test('select then delete two vertices with Draw.trash()', t => {
     // Now in `direct_select` mode ...
     click(map, makeMouseEvent(0, -20));
-    click(map, makeMouseEvent(120, -20, true));
+    click(map, makeMouseEvent(120, -20, { shiftKey: true }));
     Draw.trash();
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
@@ -689,7 +689,7 @@ function runTests() {
   test('add the line to the selection', t => {
     // Now in `simple_select` mode ...
     // shift-click to add to selection
-    click(map, makeMouseEvent(100, 40, true));
+    click(map, makeMouseEvent(100, 40, { shiftKey: true }));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
         features: [polygon0_120_120_0GeoJson, line40_100_160GeoJson]
@@ -906,8 +906,8 @@ function runTests() {
   test('box selection includes no features', t => {
     Draw.deleteAll();
     Draw.changeMode('simple_select');
-    click(map, makeMouseEvent(0, 0, true));
-    click(map, makeMouseEvent(100, 100, true));
+    click(map, makeMouseEvent(0, 0, { shiftKey: true }));
+    click(map, makeMouseEvent(100, 100, { shiftKey: true }));
     afterNextRender(() => {
       t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
       t.end();

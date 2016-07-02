@@ -9,7 +9,9 @@ import createMap from './utils/create_map';
 
 test('simple_select', t => {
 
-  var map = createMap();
+  var mapContainer = document.createElement('div');
+  document.body.appendChild(mapContainer);
+  var map = createMap({ container: mapContainer });
   spy(map, 'fire');
   spy(map.doubleClickZoom, 'enable');
   spy(map.doubleClickZoom, 'disable');
@@ -57,12 +59,15 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.dragPan.enable.reset();
       map.dragPan.disable.reset();
-      map.fire('mousedown', makeMouseEvent(0, 0, true));
+      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       t.equal(map.dragPan.disable.callCount, 1, 'disable dragPan');
-      map.fire('mousemove', makeMouseEvent(15, 15, true));
+      map.fire('mousemove', makeMouseEvent(15, 15, {
+        shiftKey: true,
+        which: 1
+      }));
       afterNextRender(() => {
         t.equal(map.getContainer().className.indexOf('mouse-add') > -1, true, 'mouse-add class has been set');
-        map.fire('mouseup', makeMouseEvent(15, 15, true));
+        map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
         afterNextRender(() => {
           t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
@@ -91,9 +96,12 @@ test('simple_select', t => {
 
     afterNextRender(() => {
       map.dragPan.enable.reset();
-      map.fire('mousedown', makeMouseEvent(0, 0, true));
-      map.fire('mousemove', makeMouseEvent(15, 15, true));
-      map.fire('mouseup', makeMouseEvent(15, 15, true));
+      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
+      map.fire('mousemove', makeMouseEvent(15, 15, {
+        shiftKey: true,
+        which: 1
+      }));
+      map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       afterNextRender(() => {
         var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
@@ -112,9 +120,30 @@ test('simple_select', t => {
     map.fire.reset();
 
     afterNextRender(() => {
-      map.fire('mousedown', makeMouseEvent(0, 0, true));
-      map.fire('mousemove', makeMouseEvent(-15, -15, true));
-      map.fire('mouseup', makeMouseEvent(-15, -15, true));
+      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
+      map.fire('mousemove', makeMouseEvent(-15, -15, {
+        shiftKey: true,
+        which: 1
+      }));
+      map.fire('mouseup', makeMouseEvent(-15, -15, { shiftKey: true }));
+
+      afterNextRender(() => {
+        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
+        cleanUp(t.end);
+      });
+    });
+  });
+
+  t.test('simple_select - box select then mousemove', t => {
+    Draw.add(getGeoJSON('point'));
+    map.fire.reset();
+
+    afterNextRender(() => {
+      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
+      map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
+      // This mousemove (not a drag) cancels the box select
+      map.fire('mousemove', makeMouseEvent(15, 15));
+      map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       afterNextRender(() => {
         t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
@@ -174,8 +203,8 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.doubleClickZoom.disable.reset();
-      map.fire('mousedown', makeMouseEvent(50, 30, true));
-      map.fire('mouseup', makeMouseEvent(50, 30, true));
+      map.fire('mousedown', makeMouseEvent(50, 30, { shiftKey: true }));
+      map.fire('mouseup', makeMouseEvent(50, 30, { shiftKey: true }));
 
       afterNextRender(() => {
         t.equal(map.doubleClickZoom.disable.callCount, 1, 'disable doubleClickZoom');
@@ -268,8 +297,8 @@ test('simple_select', t => {
 
     afterNextRender(() => {
       map.fire.reset();
-      map.fire('mousedown', makeMouseEvent(50, 30, true));
-      map.fire('mouseup', makeMouseEvent(50, 30, true));
+      map.fire('mousedown', makeMouseEvent(50, 30, { shiftKey: true }));
+      map.fire('mouseup', makeMouseEvent(50, 30, { shiftKey: true }));
 
       afterNextRender(() => {
         t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
@@ -333,8 +362,8 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { which: 1 }));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
 
       var movedPoint = Draw.get(pointId);
@@ -370,6 +399,29 @@ test('simple_select', t => {
       t.end();
     });
   });
+
+  t.test('simple_select - interrupt drag move with mousemove', t => {
+    var pointId = Draw.add(getGeoJSON('point'))[0];
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
+    var startPosition = getGeoJSON('point').geometry.coordinates;
+    afterNextRender(() => {
+      map.fire.reset();
+      map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
+      // Dragging
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      // Not dragging
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+      map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+
+      var movedPoint = Draw.get(pointId);
+      t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
+      t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
+
+      t.end();
+    });
+  });
+
+  document.body.removeChild(mapContainer);
 
   t.end();
 });
