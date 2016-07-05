@@ -51,6 +51,7 @@ module.exports = function(ctx, opts) {
   };
 
   var startDragging = function(e) {
+    ctx.map.dragPan.disable();
     canDragMove = true;
     startPos = e.lngLat;
   };
@@ -73,11 +74,6 @@ module.exports = function(ctx, opts) {
       canDragMove = false;
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
-
-      // Anytime the mouse goes down in the active feature, disable dragPan
-      this.on('mousedown', e => isVertex(e) || isMidpoint(e), () => {
-        ctx.map.dragPan.disable();
-      });
 
       // On mousemove that is not a drag, stop vertex movement.
       this.on('mousemove', CommonSelectors.true, stopDragging);

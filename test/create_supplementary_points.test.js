@@ -515,3 +515,146 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
 
   t.end();
 });
+
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude north limit', t => {
+  const line = {
+    type: 'Feature',
+    properties: {
+      id: 'foo'
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: [[0, 0], [4, 4], [7, 87]]
+    }
+  };
+
+  const result = createSupplementaryPoints(line, {
+    map: createMap(),
+    midpoints: true
+  });
+
+  t.deepEqual(result, [{
+    geometry: {
+      coordinates: [0, 0],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '0',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [2, 2],
+      type: 'Point'
+    },
+    properties: {
+      coord_path: '1',
+      lat: 2,
+      lng: 2,
+      meta: 'midpoint',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [4, 4],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '1',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [7, 87],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '2',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }], 'adds vertices');
+
+  t.end();
+});
+
+
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude south limit', t => {
+  const line = {
+    type: 'Feature',
+    properties: {
+      id: 'foo'
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: [[0, 0], [4, 4], [7, -87]]
+    }
+  };
+
+  const result = createSupplementaryPoints(line, {
+    map: createMap(),
+    midpoints: true
+  });
+
+  t.deepEqual(result, [{
+    geometry: {
+      coordinates: [0, 0],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '0',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [2, 2],
+      type: 'Point'
+    },
+    properties: {
+      coord_path: '1',
+      lat: 2,
+      lng: 2,
+      meta: 'midpoint',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [4, 4],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '1',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [7, -87],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '2',
+      meta: 'vertex',
+      parent: 'foo'
+    },
+    type: 'Feature'
+  }], 'adds vertices');
+
+  t.end();
+});

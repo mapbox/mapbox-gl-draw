@@ -33,9 +33,9 @@ const escapeEvent = createSyntheticEvent('keyup', {
 
 function runTests() {
   const pointButton = container.getElementsByClassName('mapbox-gl-draw_point')[0];
-  const lineButton = container.getElementsByClassName('mapbox-gl-draw_line')[0];
+  const lineCutton = container.getElementsByClassName('mapbox-gl-draw_line')[0];
   const trashButton = container.getElementsByClassName('mapbox-gl-draw_trash')[0];
-  const polygonButton = container.getElementsByClassName('mapbox-gl-draw_polygon')[0];
+  const polygonEutton = container.getElementsByClassName('mapbox-gl-draw_polygon')[0];
 
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.
@@ -52,7 +52,7 @@ function runTests() {
     t.end();
   });
 
-  const point25_25GeoJson = {
+  const pointA = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -69,7 +69,7 @@ function runTests() {
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
       firedWith(t, 'draw.create', {
-        features: [point25_25GeoJson]
+        features: [pointA]
       });
 
       firedWith(t, 'draw.modechange', {
@@ -77,7 +77,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [point25_25GeoJson]
+        features: [pointA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -114,7 +114,7 @@ function runTests() {
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [point25_25GeoJson]
+        features: [pointA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -123,7 +123,7 @@ function runTests() {
     });
   });
 
-  const point35_15GeoJson = {
+  const pointB = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -142,7 +142,7 @@ function runTests() {
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'move',
-        features: [point35_15GeoJson]
+        features: [pointB]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -156,7 +156,7 @@ function runTests() {
     trashButton.click();
     afterNextRender(() => {
       firedWith(t, 'draw.delete', {
-        features: [point35_15GeoJson]
+        features: [pointB]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.delete'
@@ -167,7 +167,7 @@ function runTests() {
 
   test('enter draw_line_string mode', t => {
     // Click the line button
-    lineButton.click();
+    lineCutton.click();
     firedWith(t, 'draw.modechange', {
       mode: 'draw_line_string'
     });
@@ -177,7 +177,7 @@ function runTests() {
     t.end();
   });
 
-  const line10_30_50GeoJson = {
+  const lineA = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -204,7 +204,7 @@ function runTests() {
 
     afterNextRender(() => {
       firedWith(t, 'draw.create', {
-        features: [line10_30_50GeoJson]
+        features: [lineA]
       });
 
       firedWith(t, 'draw.modechange', {
@@ -212,7 +212,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [line10_30_50GeoJson]
+        features: [lineA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -244,7 +244,7 @@ function runTests() {
     click(map, makeMouseEvent(30, 30));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [line10_30_50GeoJson]
+        features: [lineA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -253,7 +253,7 @@ function runTests() {
     });
   });
 
-  const line20_40_60GeoJson = {
+  const lineB = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -271,12 +271,12 @@ function runTests() {
       map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { which: 1 }));
     });
     // Release the mouse
-    map.fire('mouseup', makeMouseEvent(30, 10));
+    map.fire('mouseup', makeMouseEvent(40, 0));
 
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'move',
-        features: [line20_40_60GeoJson]
+        features: [lineB]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -302,12 +302,12 @@ function runTests() {
     });
   });
 
-  const line20_140_60GeoJson = {
+  const lineC = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [140, 120], [60, 40]]
+      coordinates: [[20, 0], [62, 42], [60, 40]]
     }
   };
 
@@ -316,15 +316,15 @@ function runTests() {
     // Click the vertex again
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
-    repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(40 + (5 * i), 20 + (5 * i), { which: 1 }));
+    repeat(22, i => {
+      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { which: 1 }));
     });
     // Release the mouse
-    map.fire('mouseup', makeMouseEvent(140, 120));
+    map.fire('mouseup', makeMouseEvent(60, 40));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [line20_140_60GeoJson]
+        features: [lineC]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -333,23 +333,23 @@ function runTests() {
     });
   });
 
-  const line20_60_140_60GeoJson = {
+  const lineD = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [80, 60], [140, 120], [60, 40]]
+      coordinates: [[20, 0], [41, 21], [62, 42], [60, 40]]
     }
   };
 
   test('add another vertex', t => {
     // Now in `direct_select` mode ...
-    // Click a midpoint
-    click(map, makeMouseEvent(80, 60));
+    // Click a midpoint of lineC
+    click(map, makeMouseEvent(41, 21));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [line20_60_140_60GeoJson]
+        features: [lineD]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -358,24 +358,24 @@ function runTests() {
     });
   });
 
-  const line20_60_140GeoJson = {
+  const lineE = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [80, 60], [140, 120]]
+      coordinates: [[20, 0], [62, 42], [60, 40]]
     }
   };
 
   test('delete a vertex with Backspace', t => {
     // Now in `direct_select` mode ...
     // Click a vertex
-    click(map, makeMouseEvent(60, 40));
+    click(map, makeMouseEvent(41, 21));
     container.dispatchEvent(backspaceEvent);
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [line20_60_140GeoJson]
+        features: [lineE]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -389,7 +389,7 @@ function runTests() {
 
   test('enter draw_polygon mode', t => {
     // Click the polygon button
-    polygonButton.click();
+    polygonEutton.click();
 
     afterNextRender(() => {
       firedWith(t, 'draw.modechange', {
@@ -408,12 +408,12 @@ function runTests() {
     });
   });
 
-  const polygon0_0_100_100GeoJson = {
+  const polygonA = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, 0], [0, 100], [100, 100], [100, 0], [0, 0]]]
+      coordinates: [[[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]]]
     }
   };
 
@@ -421,22 +421,22 @@ function runTests() {
     // Now in `draw_polygon` mode ...
     click(map, makeMouseEvent(0, 0));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(0, 0 + (5 * i)));
+      map.fire('mousemove', makeMouseEvent(0, 0 + i));
     });
-    click(map, makeMouseEvent(0, 100));
+    click(map, makeMouseEvent(0, 30));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(0 + (5 * i), 100));
+      map.fire('mousemove', makeMouseEvent(0 + i, 30));
     });
-    click(map, makeMouseEvent(100, 100));
+    click(map, makeMouseEvent(30, 30));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(100, 100 - (5 * i)));
+      map.fire('mousemove', makeMouseEvent(30, 30 - i));
     });
-    click(map, makeMouseEvent(100, 0));
-    click(map, makeMouseEvent(100, 0));
+    click(map, makeMouseEvent(30, 0));
+    click(map, makeMouseEvent(30, 0));
 
     afterNextRender(() => {
       firedWith(t, 'draw.create', {
-        features: [polygon0_0_100_100GeoJson]
+        features: [polygonA]
       });
 
       firedWith(t, 'draw.modechange', {
@@ -444,7 +444,7 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [polygon0_0_100_100GeoJson]
+        features: [polygonA]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -481,7 +481,7 @@ function runTests() {
 
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [line20_60_140GeoJson, polygon0_0_100_100GeoJson]
+        features: [lineE, polygonA]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -490,39 +490,39 @@ function runTests() {
     });
   });
 
-  const line40_100_160GeoJson = {
+  const lineF = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[40, -20], [100, 40], [160, 100]]
+      coordinates: [[40, -20], [82, 22], [80, 20]]
     }
   };
 
-  const polygon20_20_120_120GeoJson = {
+  const polygonB = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[20, -20], [20, 80], [120, 80], [120, -20], [20, -20]]]
+      coordinates: [[[20, -20], [20, 10], [50, 10], [50, -20], [20, -20]]]
     }
   };
 
   test('move the line and the polygon', t => {
     // Now in `simple_select` mode ...
     // Mousedown anywhere on either feature, not a vertex
-    map.fire('mousedown', makeMouseEvent(50, 50));
+    map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(50 + i, 50 - i, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { which: 1 }));
     });
     // Release the mouse
-    map.fire('mouseup', makeMouseEvent(70, 30));
+    map.fire('mouseup', makeMouseEvent(20, -5));
 
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'move',
-        features: [line40_100_160GeoJson, polygon20_20_120_120GeoJson]
+        features: [lineF, polygonB]
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -548,10 +548,10 @@ function runTests() {
 
   test('select the polygon', t => {
     // Now in `simple_select` mode ...
-    click(map, makeMouseEvent(100, 50));
+    click(map, makeMouseEvent(48, 0));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygon20_20_120_120GeoJson]
+        features: [polygonB]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -576,37 +576,37 @@ function runTests() {
 
   test('add another vertex to the selection', t => {
     // Now in `simple_select` mode ...
-    click(map, makeMouseEvent(20, 80, { shiftKey: true }));
+    click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     afterNextRender(() => {
       t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
       t.end();
     });
   });
 
-  const polygon0_0_120_120GeoJson = {
+  const polygonC = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, -20], [0, 80], [120, 80], [120, -20], [0, -20]]]
+      coordinates: [[[0, -20], [0, 10], [50, 10], [50, -20], [0, -20]]]
     }
   };
 
   test('move the vertices', t => {
     // Now in `direct_select` mode ...
     // Click a vertex again
-    map.fire('mousedown', makeMouseEvent(20, 80));
+    map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(20 - i, 80, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 - i, 10, { which: 1 }));
     });
     // Release the mouse
-    map.fire('mouseup', makeMouseEvent(0, 80));
+    map.fire('mouseup', makeMouseEvent(0, 10));
 
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [polygon0_0_120_120GeoJson]
+        features: [polygonC]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -615,23 +615,23 @@ function runTests() {
     });
   });
 
-  const polygon0_0_120_120_120GeoJson = {
+  const polygonD = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, -20], [0, 80], [120, 80], [120, 30], [120, -20], [0, -20]]]
+      coordinates: [[[0, -20], [0, 10], [25, 10], [50, 10], [50, -20], [0, -20]]]
     }
   };
 
   test('add another vertex', t => {
     // Now in `direct_select` mode ...
     // Click a midpoint
-    click(map, makeMouseEvent(120, 30));
+    click(map, makeMouseEvent(25, 10));
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [polygon0_0_120_120_120GeoJson]
+        features: [polygonD]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -640,24 +640,24 @@ function runTests() {
     });
   });
 
-  const polygon0_120_120_0GeoJson = {
+  const polygonE = {
     type: 'Feature',
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, 80], [120, 80], [120, 30], [0, 80]]]
+      coordinates: [[[0, 10], [50, 10], [50, -20], [0, 10]]]
     }
   };
 
   test('select then delete two vertices with Draw.trash()', t => {
     // Now in `direct_select` mode ...
     click(map, makeMouseEvent(0, -20));
-    click(map, makeMouseEvent(120, -20, { shiftKey: true }));
+    click(map, makeMouseEvent(25, 10, { shiftKey: true }));
     Draw.trash();
     afterNextRender(() => {
       firedWith(t, 'draw.update', {
         action: 'change_coordinates',
-        features: [polygon0_120_120_0GeoJson]
+        features: [polygonE]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.update'
@@ -673,10 +673,10 @@ function runTests() {
       flushDrawEvents();
       // Now in `simple_select` mode ...
       // Click the polygon
-      click(map, makeMouseEvent(120, 30));
+      click(map, makeMouseEvent(50, 10));
       afterNextRender(() => {
         firedWith(t, 'draw.selectionchange', {
-          features: [polygon0_120_120_0GeoJson]
+          features: [polygonE]
         });
         t.deepEqual(flushDrawEvents(), [
           'draw.selectionchange'
@@ -689,10 +689,10 @@ function runTests() {
   test('add the line to the selection', t => {
     // Now in `simple_select` mode ...
     // shift-click to add to selection
-    click(map, makeMouseEvent(100, 40, { shiftKey: true }));
+    click(map, makeMouseEvent(82, 22, { shiftKey: true }));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygon0_120_120_0GeoJson, line40_100_160GeoJson]
+        features: [polygonE, lineF]
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
