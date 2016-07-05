@@ -34,6 +34,12 @@ module.exports = {
     if (!e.featureTarget.properties) return false;
     return e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
+  isVertex: function(e) {
+    var featureTarget = e.featureTarget;
+    if (!featureTarget) return false;
+    if (!featureTarget.properties) return false;
+    return featureTarget.properties.meta === Constants.meta.VERTEX;
+  },
   isShiftDown: function(e) {
     if (!e.originalEvent) return false;
     return e.originalEvent.shiftKey === true;

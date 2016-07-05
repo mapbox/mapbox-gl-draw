@@ -20,16 +20,12 @@ module.exports = function(ctx) {
 
   ctx.store.add(polygon);
 
-  function handleMouseMove(e) {
-    polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
-  }
-
   function handleClick(e) {
     ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-    // Finish if we clicked on the first or last point
-    if (currentVertexPosition > 0 &&
-      (isEventAtCoordinates(e, polygon.coordinates[0][0]) || isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1]))
-    ) return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+    // Finish if we clicked on the last point
+    if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
+      return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+    }
 
     polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
     currentVertexPosition++;
@@ -41,7 +37,17 @@ module.exports = function(ctx) {
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
-      this.on('mousemove', CommonSelectors.true, handleMouseMove);
+      this.on('mousemove', CommonSelectors.isVertex, () => {
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
+      });
+      this.on('click', CommonSelectors.isVertex, () => {
+        polygon.removeCoordinate(`0.${currentVertexPosition}`);
+        currentVertexPosition--;
+        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+      });
+      this.on('mousemove', CommonSelectors.true, e => {
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+      });
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([polygon.id], { silent: true });
@@ -53,6 +59,7 @@ module.exports = function(ctx) {
     },
 
     stop: function() {
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
       doubleClickZoom.enable(ctx);
       ctx.ui.setActiveButton();
 
@@ -89,9 +96,28 @@ module.exports = function(ctx) {
 
       geojson.properties.meta = Constants.meta.FEATURE;
 
+      if (coordinateCount > 4) {
+        // Add a start position marker to the map, clicking on this will finish the feature
+        // This should only be shown when we're in a valid spot
+        callback({
+          type: Constants.geojsonTypes.FEATURE,
+          properties: {
+            meta: Constants.meta.VERTEX,
+            parent: polygon.id,
+            coord_path: '0.0'
+          },
+          geometry: {
+            type: Constants.geojsonTypes.POINT,
+            coordinates: geojson.geometry.coordinates[0][0]
+          }
+        });
+      }
+
       // If we have more than two positions (plus the closer),
       // render the Polygon
-      if (coordinateCount > 3) return callback(geojson);
+      if (coordinateCount > 3) {
+        return callback(geojson);
+      }
 
       // If we've only drawn two positions (plus the closer),
       // make a LineString instead of a Polygon
