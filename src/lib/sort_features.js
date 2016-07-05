@@ -1,15 +1,16 @@
 const area = require('turf-area');
+const Constants = require('../constants');
 
 const FEATURE_SORT_RANKS = {
-  'Point': 0,
-  'LineString': 1,
-  'Polygon': 2
+  Point: 0,
+  LineString: 1,
+  Polygon: 2
 };
 
 function comparator(a, b) {
   const score = FEATURE_SORT_RANKS[a.geometry.type] - FEATURE_SORT_RANKS[b.geometry.type];
 
-  if (score === 0 && a.geometry.type === 'Polygon') {
+  if (score === 0 && a.geometry.type === Constants.geojsonTypes.POLYGON) {
     return a.area - b.area;
   }
 
@@ -19,9 +20,9 @@ function comparator(a, b) {
 // Sort in the order above, then sort polygons by area ascending.
 function sortFeatures(features) {
   return features.map(feature => {
-      if (feature.geometry.type === 'Polygon') {
+      if (feature.geometry.type === Constants.geojsonTypes.POLYGON) {
         feature.area = area({
-          type: 'Feature',
+          type: Constants.geojsonTypes.FEATURE,
           property: {},
           geometry: feature.geometry
         });

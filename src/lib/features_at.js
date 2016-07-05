@@ -1,10 +1,11 @@
 var sortFeatures = require('./sort_features');
 var mapEventToBoundingBox = require('./map_event_to_bounding_box');
+var Constants = require('../constants');
 
 var META_TYPES = [
-  'feature',
-  'midpoint',
-  'vertex'
+  Constants.meta.FEATURE,
+  Constants.meta.MIDPOINT,
+  Constants.meta.VERTEX
 ];
 
 // Requires either event or bbox

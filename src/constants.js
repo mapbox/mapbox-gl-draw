@@ -1,12 +1,21 @@
 module.exports = {
-  CONTROL_BUTTON_CLASS: 'mapbox-gl-draw_ctrl-draw-btn',
-  CONTROL_BUTTON_LINE_CLASS: 'mapbox-gl-draw_line',
-  CONTROL_BUTTON_POLYGON_CLASS: 'mapbox-gl-draw_polygon',
-  CONTROL_BUTTON_POINT_CLASS: 'mapbox-gl-draw_point',
-  CONTROL_BUTTON_TRASH_CLASS: 'mapbox-gl-draw_trash',
-  CONTROL_GROUP_CLASS: 'mapboxgl-ctrl-group',
-  ATTRIBUTION_CLASS: 'mapboxgl-ctrl-attrib',
-  ACTIVE_BUTTON_CLASS: 'active',
+  classes: {
+    CONTROL_BASE: 'mapboxgl-ctrl',
+    CONTROL_PREFIX: 'mapboxgl-ctrl-',
+    CONTROL_BUTTON: 'mapbox-gl-draw_ctrl-draw-btn',
+    CONTROL_BUTTON_LINE: 'mapbox-gl-draw_line',
+    CONTROL_BUTTON_POLYGON: 'mapbox-gl-draw_polygon',
+    CONTROL_BUTTON_POINT: 'mapbox-gl-draw_point',
+    CONTROL_BUTTON_TRASH: 'mapbox-gl-draw_trash',
+    CONTROL_GROUP: 'mapboxgl-ctrl-group',
+    ATTRIBUTION: 'mapboxgl-ctrl-attrib',
+    ACTIVE_BUTTON: 'active',
+    BOX_SELECT: 'mapbox-gl-draw_boxselect'
+  },
+  sources: {
+    HOT: 'mapbox-gl-draw-hot',
+    COLD: 'mapbox-gl-draw-cold'
+  },
   cursors: {
     ADD: 'add',
     MOVE: 'move',
@@ -18,6 +27,17 @@ module.exports = {
     POLYGON: 'polygon',
     LINE: 'line_string',
     POINT: 'point'
+  },
+  geojsonTypes: {
+    FEATURE: 'Feature',
+    POLYGON: 'Polygon',
+    LINE_STRING: 'LineString',
+    POINT: 'Point',
+    FEATURE_COLLECTION: 'FeatureCollection',
+    MULTI_PREFIX: 'Multi',
+    MULTI_POINT: 'MultiPoint',
+    MULTI_LINE_STRING: 'MultiLineString',
+    MULTI_POLYGON: 'MultiPolygon'
   },
   modes: {
     DRAW_LINE: 'draw_line_string',
@@ -38,5 +58,14 @@ module.exports = {
   updateActions: {
     MOVE: 'move',
     CHANGE_COORDINATES: 'change_coordinates'
+  },
+  meta: {
+    FEATURE: 'feature',
+    MIDPOINT: 'midpoint',
+    VERTEX: 'vertex'
+  },
+  activeStates: {
+    ACTIVE: 'true',
+    INACTIVE: 'false'
   }
 };

@@ -11,7 +11,7 @@ module.exports = function(ctx, opts) {
     throw new Error('You must provide a featureId to enter direct_select mode');
   }
 
-  if (feature.type === 'Point') {
+  if (feature.type === Constants.geojsonTypes.POINT) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
@@ -68,8 +68,8 @@ module.exports = function(ctx, opts) {
       canDragMove = false;
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
-      this.on('mousedown', isOfMetaType('vertex'), onVertex);
-      this.on('mousedown', isOfMetaType('midpoint'), onMidpoint);
+      this.on('mousedown', isOfMetaType(Constants.meta.VERTEX), onVertex);
+      this.on('mousedown', isOfMetaType(Constants.meta.MIDPOINT), onMidpoint);
       this.on('drag', () => canDragMove, function(e) {
         dragging = true;
         e.originalEvent.stopPropagation();
@@ -112,7 +112,7 @@ module.exports = function(ctx, opts) {
     },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
-        geojson.properties.active = 'true';
+        geojson.properties.active = Constants.activeStates.ACTIVE;
         push(geojson);
         createSupplementaryPoints(geojson, {
           map: ctx.map,
@@ -121,7 +121,7 @@ module.exports = function(ctx, opts) {
         }).forEach(push);
       }
       else {
-        geojson.properties.active = 'false';
+        geojson.properties.active = Constants.activeStates.INACTIVE;
         push(geojson);
       }
     },

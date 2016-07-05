@@ -47,7 +47,7 @@ module.exports = function(ctx) {
 
   function createControlButton(id, options = {}) {
     const button = document.createElement('button');
-    button.className = `${Constants.CONTROL_BUTTON_CLASS} ${options.className}`;
+    button.className = `${Constants.classes.CONTROL_BUTTON} ${options.className}`;
     button.setAttribute('title', options.title);
     options.container.appendChild(button);
 
@@ -70,7 +70,7 @@ module.exports = function(ctx) {
 
   function deactivateButtons() {
     if (!activeButton) return;
-    activeButton.classList.remove(Constants.ACTIVE_BUTTON_CLASS);
+    activeButton.classList.remove(Constants.classes.ACTIVE_BUTTON);
     activeButton = null;
   }
 
@@ -81,7 +81,7 @@ module.exports = function(ctx) {
     if (!button) return;
 
     if (button && id !== 'trash') {
-      button.classList.add('active');
+      button.classList.add(Constants.classes.ACTIVE_BUTTON);
       activeButton = button;
     }
   }
@@ -90,7 +90,7 @@ module.exports = function(ctx) {
     const controls = ctx.options.controls;
     if (!controls) return;
 
-    const ctrlPosClassName = `mapboxgl-ctrl-${ctx.options.position || 'top-left'}`;
+    const ctrlPosClassName = `${Constants.classes.CONTROL_PREFIX}${ctx.options.position || 'top-left'}`;
     let controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
     if (!controlContainer) {
       controlContainer = document.createElement('div');
@@ -98,12 +98,12 @@ module.exports = function(ctx) {
       ctx.container.appendChild(controlContainer);
     }
 
-    let controlGroup = controlContainer.getElementsByClassName(Constants.CONTROL_GROUP_CLASS)[0];
+    let controlGroup = controlContainer.getElementsByClassName(Constants.classes.CONTROL_GROUP)[0];
     if (!controlGroup) {
       controlGroup = document.createElement('div');
-      controlGroup.className = `${Constants.CONTROL_GROUP_CLASS} mapboxgl-ctrl`;
+      controlGroup.className = `${Constants.classes.CONTROL_GROUP} ${Constants.classes.CONTROL_BASE}`;
 
-      const attributionControl = controlContainer.getElementsByClassName(Constants.ATTRIBUTION_CLASS)[0];
+      const attributionControl = controlContainer.getElementsByClassName(Constants.classes.ATTRIBUTION)[0];
       if (attributionControl) {
         controlContainer.insertBefore(controlGroup, attributionControl);
       } else {
@@ -114,7 +114,7 @@ module.exports = function(ctx) {
     if (controls[Constants.types.LINE]) {
       buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
         container: controlGroup,
-        className: Constants.CONTROL_BUTTON_LINE_CLASS,
+        className: Constants.classes.CONTROL_BUTTON_LINE,
         title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE)
       });
@@ -123,7 +123,7 @@ module.exports = function(ctx) {
     if (controls[Constants.types.POLYGON]) {
       buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
         container: controlGroup,
-        className: Constants.CONTROL_BUTTON_POLYGON_CLASS,
+        className: Constants.classes.CONTROL_BUTTON_POLYGON,
         title: `Polygon tool ${ctx.options.keybindings && '(p)'}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON)
       });
@@ -132,7 +132,7 @@ module.exports = function(ctx) {
     if (controls[Constants.types.POINT]) {
       buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
         container: controlGroup,
-        className: Constants.CONTROL_BUTTON_POINT_CLASS,
+        className: Constants.classes.CONTROL_BUTTON_POINT,
         title: `Marker tool ${ctx.options.keybindings && '(m)'}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT)
       });
@@ -141,7 +141,7 @@ module.exports = function(ctx) {
     if (controls.trash) {
       buttonElements.trash = createControlButton('trash', {
         container: controlGroup,
-        className: Constants.CONTROL_BUTTON_TRASH_CLASS,
+        className: Constants.classes.CONTROL_BUTTON_TRASH,
         title: 'Delete',
         onActivate: () => {
           ctx.events.trash();

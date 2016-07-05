@@ -6,10 +6,10 @@ const Constants = require('../constants');
 
 module.exports = function(ctx) {
   const line = new LineString(ctx, {
-    type: 'Feature',
+    type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
-      type: 'LineString',
+      type: Constants.geojsonTypes.LINE_STRING,
       coordinates: []
     }
   });
@@ -76,12 +76,12 @@ module.exports = function(ctx) {
 
     render(geojson, callback) {
       const isActiveLine = geojson.properties.id === line.id;
-      geojson.properties.active = (isActiveLine) ? 'true' : 'false';
+      geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActiveLine) return callback(geojson);
 
       // Only render the line if it has at least one real coordinate
       if (geojson.geometry.coordinates[0] === undefined) return;
-      geojson.properties.meta = 'feature';
+      geojson.properties.meta = Constants.meta.FEATURE;
       callback(geojson);
     },
 

@@ -1,7 +1,8 @@
 const xtend = require('xtend');
+const Constants = require('./constants');
 
 const defaultOptions = {
-  defaultMode: 'simple_select',
+  defaultMode: Constants.modes.SIMPLE_SELECT,
   position: 'top-left',
   keybindings: true,
   clickBuffer: 2,
@@ -30,7 +31,9 @@ function addSources(styles, sourceBucket) {
     if (style.source) return style;
     return xtend(style, {
       id: `${style.id}.${sourceBucket}`,
-      source: `mapbox-gl-draw-${sourceBucket}`
+      source: (sourceBucket === 'hot')
+        ? Constants.sources.HOT
+        : Constants.sources.COLD
     });
   });
 }
