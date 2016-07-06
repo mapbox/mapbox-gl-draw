@@ -116,7 +116,7 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_LINE,
         title: `LineString tool ${ctx.options.keybindings && '(l)'}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING)
       });
     }
 

@@ -29,6 +29,52 @@ displayControlsDefault | boolean | Sets default value for the control keys in th
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
+## Modes
+
+The modes names are available as an enum at `Draw.modes`.
+
+### `simple_select`
+
+`Draw.modes.SIMPLE_SELECT === 'simple_select'`
+
+Lets you select, delete and drag features.
+
+In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
+
+### `direct_select`
+
+`Draw.modes.DIRECT_SELECT === 'direct_select'`
+
+Lets you select, delete and drag vertices.
+
+`direct_select` mode doesn't handle point features.
+
+### `draw_line_string`
+
+`Draw.modes.DRAW_LINE_STRING === 'draw_line_string'`
+
+Lets you draw a LineString feature.
+
+### `draw_polygon`
+
+`Draw.modes.DRAW_POLYGON === 'draw_polygon'`
+
+Lets you draw a Polygon feature.
+
+### `draw_point`
+
+`Draw.modes.DRAW_POINT === 'draw_point'`
+
+Lets you draw a Point feature.
+
+### `static`
+
+`Draw.modes.STATIC === 'static'`
+
+Disables editing for all drawn features. It does not take an options argument.
+
+Note that this mode can only be entered or exited via `.changeMode`
+
 ## API Methods
 
 `mapboxgl.Draw()` returns an instance of `Draw` which has the following API for working with your data:
@@ -203,15 +249,7 @@ Returns Draw's current mode. For more about the modes, see below.
 
 ### `.changeMode(String: mode, ?Object: options) -> Draw`
 
-`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. Each mode takes its own options. They are described in detail below.
-
-#### Mode: `simple_select`
-
-Lets you select, delete and drag features.
-
-In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
-
-This mode has the following options:
+`changeMode` triggers the mode switching process inside Draw. `mode` must be one of the below strings. `simple_select` and `direct_select` modes accept an `options` object.
 
 ```js
 // `simple_select` options
@@ -221,14 +259,6 @@ This mode has the following options:
 }
 ```
 
-#### Mode: `direct_select`
-
-Lets you select, delete and drag vertices.
-
-`direct_select` mode doesn't handle point features.
-
-This mode has the following options:
-
 ```js
 // `direct_select` options
 {
@@ -236,20 +266,6 @@ This mode has the following options:
   featureId: string
 }
 ```
-
-#### Drawing modes:
-
-The three drawing modes work identically. They do not take an options argument.
-
-- `draw_line_string`: Draws a LineString feature.
-- `draw_polygon`: Draws a Polygon feature.
-- `draw_point`: Draws a Point feature.
-
-#### Mode: `static`
-
-Disables editing for all drawn features. It does not take an options argument.
-
-Note that this mode can only be entered or exited via `.changeMode`
 
 ## Events
 
