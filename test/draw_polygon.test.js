@@ -581,7 +581,6 @@ test('draw_polygon interaction', t => {
 
     // FIVE CLICK TEST
 
-    // This test would require this render to be operational.
     t.test('end draw_polygon mode by clicking on the start point', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
