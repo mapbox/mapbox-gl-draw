@@ -52,8 +52,10 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 6, 'this.on called');
+  t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
@@ -193,8 +195,20 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
+  t.equal(memo.length, 2, 'does render');
   t.deepEqual(memo[0], {
+    type: 'Feature',
+    properties: {
+      parent: context._test.polygon.id,
+      meta: 'vertex',
+      coord_path: '0.0'
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
+  }, 'renders as a point with meta: vertex');
+  t.deepEqual(memo[1], {
     type: 'Feature',
     properties: {
       id: context._test.polygon.id,

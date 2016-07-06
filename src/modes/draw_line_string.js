@@ -80,7 +80,7 @@ module.exports = function(ctx) {
       if (!isActiveLine) return callback(geojson);
 
       // Only render the line if it has at least one real coordinate
-      if (geojson.geometry.coordinates[0] === undefined) return;
+      if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
       callback(geojson);
     },

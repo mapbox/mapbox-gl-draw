@@ -137,7 +137,7 @@ test('draw_line_string render active line with 1 coordinate', t => {
     },
     geometry: {
       type: 'LineString',
-      coordinates: [[0, 0]]
+      coordinates: [[0, 0], [15, 15]]
     }
   };
   mode.render(geojson, x => memo.push(x));
@@ -151,7 +151,7 @@ test('draw_line_string render active line with 1 coordinate', t => {
     },
     geometry: {
       type: 'LineString',
-      coordinates: [[0, 0]]
+      coordinates: [[0, 0], [15, 15]]
     }
   }, 'with active: true, meta: feature');
   t.end();

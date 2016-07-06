@@ -132,20 +132,21 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
 });
 
 test('Polygon integration', t => {
-  const polygonCoordinates = [[[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]]];
+  const polygonCoordinates = [[[0, 0], [30, 15], [30, 30], [15, 30], [0, 0]]];
   const map = createMap();
   const Draw = GLDraw();
   map.addControl(Draw);
 
   map.on('load', function() {
-    drawGeometry(map, Draw, 'Polygon', polygonCoordinates);
+    drawGeometry(map, Draw, 'Polygon', polygonCoordinates, () => {
+      const feats = Draw.getAll().features;
+      t.equals(1, feats.length, 'only one');
+      t.equals('Polygon', feats[0].geometry.type, 'of the right type');
+      t.equals(feats[0].geometry.coordinates[0].length, polygonCoordinates[0].length, 'right number of points');
+      t.deepEquals(feats[0].geometry.coordinates, polygonCoordinates, 'in the right spot');
+      Draw.remove();
+      t.end();
+    });
 
-    const feats = Draw.getAll().features;
-    t.equals(1, feats.length, 'only one');
-    t.equals('Polygon', feats[0].geometry.type, 'of the right type');
-    t.equals(polygonCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
-    t.deepEquals(polygonCoordinates, feats[0].geometry.coordinates, 'in the right spot');
-    Draw.remove();
   });
-  t.plan(4);
 });
