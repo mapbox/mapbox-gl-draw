@@ -5,7 +5,7 @@
   },
   "env": {
     "node": true,
-    "browser": true,
+    "browser": true
   },
   "globals": {
     "mapboxgl": true
