@@ -14,10 +14,7 @@ var modes = {
 
 module.exports = function(ctx) {
 
-  var mouseDownInfo = {
-    isDown: false
-  };
-
+  var mouseDownInfo = {};
   var events = {};
   var currentModeName = Constants.modes.SIMPLE_SELECT;
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
@@ -36,7 +33,7 @@ module.exports = function(ctx) {
   };
 
   events.mousemove = function(event) {
-    if (mouseDownInfo.isDown) {
+    if (event.originalEvent.which === 1) {
       return events.drag(event);
     }
     var target = getFeaturesAndSetCursor(event, ctx);
@@ -46,7 +43,6 @@ module.exports = function(ctx) {
 
   events.mousedown = function(event) {
     mouseDownInfo = {
-      isDown: true,
       time: new Date().getTime(),
       point: event.point
     };
@@ -56,7 +52,6 @@ module.exports = function(ctx) {
   };
 
   events.mouseup = function(event) {
-    mouseDownInfo.isDown = false;
     var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
 

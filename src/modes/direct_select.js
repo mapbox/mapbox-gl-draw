@@ -2,6 +2,10 @@ var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
+const CommonSelectors = require('../lib/common_selectors');
+
+const isVertex = isOfMetaType(Constants.meta.VERTEX);
+const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
 module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
@@ -52,6 +56,7 @@ module.exports = function(ctx, opts) {
   };
 
   var stopDragging = function() {
+    ctx.map.dragPan.enable();
     dragging = false;
     canDragMove = false;
     coordPos = null;
@@ -68,8 +73,17 @@ module.exports = function(ctx, opts) {
       canDragMove = false;
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
-      this.on('mousedown', isOfMetaType(Constants.meta.VERTEX), onVertex);
-      this.on('mousedown', isOfMetaType(Constants.meta.MIDPOINT), onMidpoint);
+
+      // Anytime the mouse goes down in the active feature, disable dragPan
+      this.on('mousedown', e => isVertex(e) || isMidpoint(e), () => {
+        ctx.map.dragPan.disable();
+      });
+
+      // On mousemove that is not a drag, stop vertex movement.
+      this.on('mousemove', CommonSelectors.true, stopDragging);
+
+      this.on('mousedown', isVertex, onVertex);
+      this.on('mousedown', isMidpoint, onMidpoint);
       this.on('drag', () => canDragMove, function(e) {
         dragging = true;
         e.originalEvent.stopPropagation();
@@ -88,10 +102,8 @@ module.exports = function(ctx, opts) {
           feature.updateCoordinate(coord_path, lng, lat);
         }
       });
-      this.on('click', () => true, function() {
-        stopDragging();
-      });
-      this.on('mouseup', () => true, function() {
+      this.on('click', CommonSelectors.true, stopDragging);
+      this.on('mouseup', CommonSelectors.true, function() {
         if (dragging) {
           ctx.map.fire(Constants.events.UPDATE, {
             action: Constants.updateActions.CHANGE_COORDINATES,

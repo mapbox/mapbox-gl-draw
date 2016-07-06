@@ -4,11 +4,11 @@ const featuresAt = require('../lib/features_at');
 const createSupplementaryPoints = require('../lib/create_supplementary_points');
 const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
+const moveFeature = require('../lib/move_feature');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
-  let dragMoveStartLocation = null;
-  let featureCoords = null;
+  let dragMoveLocation = null;
   let boxSelectStartLocation = null;
   let boxSelectElement;
   let boxSelecting = false;
@@ -36,15 +36,12 @@ module.exports = function(ctx, options = {}) {
       boxSelectElement = null;
     }
 
-    setTimeout(() => {
-      ctx.map.dragPan.enable();
-    }, 0);
+    ctx.map.dragPan.enable();
 
     boxSelecting = false;
     canBoxSelect = false;
     dragMoving = false;
     canDragMove = false;
-    featureCoords = null;
   };
 
   return {
@@ -60,6 +57,13 @@ module.exports = function(ctx, options = {}) {
 
       // Any mouseup should stop box selecting and dragMoving
       this.on('mouseup', CommonSelectors.true, stopExtendedInteractions);
+
+      // On mousemove that is not a drag, stop extended interactions.
+      // This is useful if you drag off the canvas, release the button,
+      // then move the mouse back over the canvas --- we don't the
+      // interaction to continue (but we do let it continue if you held
+      // the mouse button that whole time)
+      this.on('mousemove', CommonSelectors.true, stopExtendedInteractions);
 
       // Click (with or without shift) on no feature
       this.on('click', CommonSelectors.noFeature, function() {
@@ -86,11 +90,18 @@ module.exports = function(ctx, options = {}) {
 
       // Mousedown on a selected feature
       this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
+        // Stop any already-underway extended interactions
         stopExtendedInteractions();
+
+        // Disable map.dragPan immediately so it can't start
+        ctx.map.dragPan.disable();
+
         // Re-render it and enable drag move
         this.render(e.featureTarget.properties.id);
+
+        // Set up the state for drag moving
         canDragMove = true;
-        dragMoveStartLocation = e.lngLat;
+        dragMoveLocation = e.lngLat;
       });
 
       // Click (with or without shift) on any feature
@@ -142,31 +153,14 @@ module.exports = function(ctx, options = {}) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        // Change coordinates of all selected features
+        const lngDelta = e.lngLat.lng - dragMoveLocation.lng;
+        const latDelta = e.lngLat.lat - dragMoveLocation.lat;
 
-        if (featureCoords === null) {
-          featureCoords = ctx.store.getSelectedIds()
-            .map(id => ctx.store.get(id).getCoordinates());
-        }
-
-        const lngD = e.lngLat.lng - dragMoveStartLocation.lng;
-        const latD = e.lngLat.lat - dragMoveStartLocation.lat;
-
-        const coordMap = (coord) => [coord[0] + lngD, coord[1] + latD];
-        const ringMap = (ring) => ring.map(coord => coordMap(coord));
-        const mutliMap = (multi) => multi.map(ring => ringMap(ring));
-
-        ctx.store.getSelected().forEach((feature, i) => {
-          if (feature.type === Constants.geojsonTypes.POINT) {
-            feature.incomingCoords(coordMap(featureCoords[i]));
-          } else if (feature.type === Constants.geojsonTypes.LINE_STRING || feature.type === Constants.geojsonTypes.MULTI_POINT) {
-            feature.incomingCoords(featureCoords[i].map(coordMap));
-          } else if (feature.type === Constants.geojsonTypes.POLYGON || feature.type === Constants.geojsonTypes.MULTI_LINE_STRING) {
-            feature.incomingCoords(featureCoords[i].map(ringMap));
-          } else if (feature.type === Constants.geojsonTypes.MULTI_POLYGON) {
-            feature.incomingCoords(featureCoords[i].map(mutliMap));
-          }
+        ctx.store.getSelected().forEach(feature => {
+          moveFeature(feature, lngDelta, latDelta);
         });
+
+        dragMoveLocation = e.lngLat;
       });
 
       // Mouseup, always
@@ -199,8 +193,8 @@ module.exports = function(ctx, options = {}) {
         // Shift-mousedown anywhere
         this.on('mousedown', CommonSelectors.isShiftMousedown, function(e) {
           stopExtendedInteractions();
-          // Enable box select
           ctx.map.dragPan.disable();
+          // Enable box select
           boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
           canBoxSelect = true;
         });
@@ -241,7 +235,6 @@ module.exports = function(ctx, options = {}) {
       createSupplementaryPoints(geojson).forEach(push);
     },
     trash() {
-      featureCoords = null;
       ctx.store.delete(ctx.store.getSelectedIds());
     }
   };

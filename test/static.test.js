@@ -56,10 +56,10 @@ test('static', t => {
 
     afterNextRender(() => {
       map.dragPan.disable.reset();
-      map.fire('mousedown', makeMouseEvent(0, 0, true));
+      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       t.equal(map.dragPan.disable.callCount, 0, 'dragPan is still enabled');
-      map.fire('mousemove', makeMouseEvent(15, 15, true));
-      map.fire('mouseup', makeMouseEvent(15, 15, true));
+      map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
+      map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
       t.equal(args.length, 0, 'should have zero selectionchange events');
