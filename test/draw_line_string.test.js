@@ -137,23 +137,11 @@ test('draw_line_string render active line with 1 coordinate', t => {
     },
     geometry: {
       type: 'LineString',
-      coordinates: [[0, 0], [15, 15]]
+      coordinates: [[0, 0]]
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
-  t.deepEqual(memo[0], {
-    type: 'Feature',
-    properties: {
-      id: context._test.line.id,
-      active: 'true',
-      meta: 'feature'
-    },
-    geometry: {
-      type: 'LineString',
-      coordinates: [[0, 0], [15, 15]]
-    }
-  }, 'with active: true, meta: feature');
+  t.equal(memo.length, 0, 'does not render');
   t.end();
 });
 

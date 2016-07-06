@@ -9,6 +9,7 @@ import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import AfterNextRender from './utils/after_next_render';
 import {
   enterEvent,
   startPointEvent,
@@ -263,6 +264,7 @@ test('draw_polygon interaction', t => {
 
   map.on('load', () => {
     // The following sub-tests share state ...
+    const afterNextRender = AfterNextRender(map);
 
     Draw.changeMode('draw_polygon');
     t.test('first click', st => {
@@ -575,6 +577,31 @@ test('draw_polygon interaction', t => {
       st.equal(Draw.getAll().features.length, 0, 'polygon was removed');
 
       st.end();
+    });
+
+    // FIVE CLICK TEST
+
+    // This test would require this render to be operational.
+    t.test('end draw_polygon mode by clicking on the start point', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+      Draw.changeMode('draw_polygon');
+      let polygon = Draw.getAll().features[0];
+      st.equal(polygon !== undefined, true, 'polygon is added');
+      mouseClick(map, makeMouseEvent(0, 0));
+      mouseClick(map, makeMouseEvent(20, 0));
+      mouseClick(map, makeMouseEvent(20, 20));
+      mouseClick(map, makeMouseEvent(0, 20));
+
+      afterNextRender(() => {
+        map.fire('mousemove', makeMouseEvent(0, 0));
+        mouseClick(map, makeMouseEvent(0, 0));
+
+        polygon = Draw.get(polygon.id);
+        st.deepEqual(polygon.geometry.coordinates, [[[0, 0], [20, 0], [20, 20], [0,20], [0, 0]]], 'and has right coordinates');
+        Draw.deleteAll();
+        st.end();
+      });
     });
 
     document.body.removeChild(container);
