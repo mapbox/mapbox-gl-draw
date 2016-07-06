@@ -202,7 +202,8 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
     properties: {
       parent: context._test.polygon.id,
       meta: 'vertex',
-      coord_path: '0.0'
+      coord_path: '0.0',
+      active: 'false'
     },
     geometry: {
       type: 'Point',

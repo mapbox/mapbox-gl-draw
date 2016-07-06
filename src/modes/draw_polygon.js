@@ -3,6 +3,7 @@ const Polygon = require('../feature_types/polygon');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
+const createVertex = require('../lib/create_vertex');
 
 module.exports = function(ctx) {
 
@@ -99,18 +100,7 @@ module.exports = function(ctx) {
       if (coordinateCount > 4) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
-        callback({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {
-            meta: Constants.meta.VERTEX,
-            parent: polygon.id,
-            coord_path: '0.0'
-          },
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: geojson.geometry.coordinates[0][0]
-          }
-        });
+        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
       }
 
       // If we have more than two positions (plus the closer),
