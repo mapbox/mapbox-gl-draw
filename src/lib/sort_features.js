@@ -1,4 +1,4 @@
-const area = require('turf-area');
+const area = require('geojson-area');
 const Constants = require('../constants');
 
 const FEATURE_SORT_RANKS = {
@@ -21,7 +21,7 @@ function comparator(a, b) {
 function sortFeatures(features) {
   return features.map(feature => {
       if (feature.geometry.type === Constants.geojsonTypes.POLYGON) {
-        feature.area = area({
+        feature.area = area.geometry({
           type: Constants.geojsonTypes.FEATURE,
           property: {},
           geometry: feature.geometry
