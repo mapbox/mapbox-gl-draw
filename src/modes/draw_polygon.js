@@ -38,18 +38,16 @@ module.exports = function(ctx) {
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
-      this.on('mousemove', CommonSelectors.isVertex, () => {
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-      });
-      this.on('click', CommonSelectors.isVertex, () => {
-        polygon.removeCoordinate(`0.${currentVertexPosition}`);
-        currentVertexPosition--;
-        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
-      });
       this.on('mousemove', CommonSelectors.true, e => {
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+        if (CommonSelectors.isVertex(e)) {
+          ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
+        }
       });
       this.on('click', CommonSelectors.true, handleClick);
+      this.on('click', CommonSelectors.isVertex, () => {
+        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+      });
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);

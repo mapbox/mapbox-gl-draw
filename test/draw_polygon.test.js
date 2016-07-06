@@ -53,8 +53,7 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 6, 'this.on called');
-  t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.isVertex));
+  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));

@@ -34,6 +34,10 @@ var ModeHandler = function(mode, DrawContext) {
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
         handlerCalled = true;
+        // ensure an event is only handled once
+        // we do this to let modes have multiple overlapping selectors
+        // and relay on order of oppertations to filter
+        break;
       }
     }
     if (handlerCalled) {

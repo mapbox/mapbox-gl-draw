@@ -156,20 +156,20 @@ test('commonSelectors.isInactiveFeature', t => {
   t.end();
 });
 
-test('commonSelectors.noFeature', t => {
-  t.ok(commonSelectors.noFeature({
+test('commonSelectors.noTarget', t => {
+  t.ok(commonSelectors.noTarget({
     something: 1
   }));
 
-  t.ok(commonSelectors.noFeature({
+  t.ok(commonSelectors.noTarget({
     FeatureTarget: 1
   }));
 
-  t.notOk(commonSelectors.noFeature({
+  t.notOk(commonSelectors.noTarget({
     featureTarget: {}
   }));
 
-  t.notOk(commonSelectors.noFeature({
+  t.notOk(commonSelectors.noTarget({
     featureTarget: null
   }));
 

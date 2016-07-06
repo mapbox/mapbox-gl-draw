@@ -1,6 +1,6 @@
 const Constants = require('../constants');
 
-module.exports = {
+var CommonSelectors = module.exports = {
   isOfMetaType: function(type) {
     return function(e) {
       var featureTarget = e.featureTarget;
@@ -26,7 +26,7 @@ module.exports = {
     return e.featureTarget.properties.active === Constants.activeStates.INACTIVE &&
       e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
-  noFeature: function(e) {
+  noTarget: function(e) {
     return e.featureTarget === undefined;
   },
   isFeature: function(e) {

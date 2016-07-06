@@ -1,4 +1,4 @@
-var {noFeature, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
+var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
@@ -112,7 +112,7 @@ module.exports = function(ctx, opts) {
         }
         stopDragging();
       });
-      this.on('click', noFeature, function() {
+      this.on('click', noTarget, function() {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
       this.on('click', isInactiveFeature, function() {
