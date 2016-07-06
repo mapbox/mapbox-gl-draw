@@ -117,7 +117,7 @@ test('draw_polygon render active polygon with no coordinates', t => {
     },
     geometry: {
       type: 'Polygon',
-      coordinates: [[]]
+      coordinates: []
     }
   };
   mode.render(geojson, x => memo.push(x));
