@@ -28,21 +28,18 @@ var ModeHandler = function(mode, DrawContext) {
   var delegate = function (eventName, event) {
     var handles = handlers[eventName];
     var iHandle = handles.length;
-    var handlerCalled = false;
     while (iHandle--) {
       var handle = handles[iHandle];
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
-        handlerCalled = true;
+        DrawContext.store.render();
+        DrawContext.ui.updateMapClasses();
+
         // ensure an event is only handled once
         // we do this to let modes have multiple overlapping selectors
         // and relay on order of oppertations to filter
         break;
       }
-    }
-    if (handlerCalled) {
-      DrawContext.store.render();
-      DrawContext.ui.updateMapClasses();
     }
   };
 
