@@ -195,7 +195,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 2, 'does render');
+  t.equal(memo.length, 3, 'does render');
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
@@ -208,8 +208,21 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
       type: 'Point',
       coordinates: [0, 0]
     }
-  }, 'renders as a point with meta: vertex');
+  }, 'renders the start point point with meta: vertex');
   t.deepEqual(memo[1], {
+    type: 'Feature',
+    properties: {
+      parent: context._test.polygon.id,
+      meta: 'vertex',
+      coord_path: '0.2',
+      active: 'false'
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [10, 10]
+    }
+  }, 'renders end point with meta: vertex');
+  t.deepEqual(memo[2], {
     type: 'Feature',
     properties: {
       id: context._test.polygon.id,

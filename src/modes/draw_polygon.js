@@ -21,17 +21,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(polygon);
 
-  function handleClick(e) {
-    ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-    // Finish if we clicked on the last point
-    if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
-      return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
-    }
-
-    polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
-    currentVertexPosition++;
-  }
-
   return {
     start() {
       ctx.store.clearSelected();
@@ -44,7 +33,14 @@ module.exports = function(ctx) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
-      this.on('click', CommonSelectors.true, handleClick);
+      this.on('click', CommonSelectors.true, (e) => {
+        if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
+          return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+        }
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+        currentVertexPosition++;
+      });
       this.on('click', CommonSelectors.isVertex, () => {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
       });
@@ -99,6 +95,8 @@ module.exports = function(ctx) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
+        let endPos = geojson.geometry.coordinates[0].length - 3;
+        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
       }
 
       // If we have more than two positions (plus the closer),

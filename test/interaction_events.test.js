@@ -832,8 +832,8 @@ function runTests() {
   test('start draw_line_string mode then exit with Escape', t => {
     Draw.deleteAll();
     Draw.changeMode('draw_line_string');
-    click(map, makeMouseEvent(240, 240));
-    click(map, makeMouseEvent(260, 260));
+    click(map, makeMouseEvent(0, 0));
+    click(map, makeMouseEvent(20, 20));
     container.dispatchEvent(escapeEvent);
     afterNextRender(() => {
       firedWith(t, 'draw.modechange', {
