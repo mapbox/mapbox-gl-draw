@@ -455,23 +455,25 @@ test('draw_line_string interaction', t => {
       let lineString = Draw.getAll().features[0]
       st.equal(lineString !== undefined, true, 'line is added');
       mouseClick(map, makeMouseEvent(0, 0));
-      mouseClick(map, makeMouseEvent(15, 15));
       afterNextRender(() => {
-        map.fire('mousemove', makeMouseEvent(30, 30));
-        map.fire('mousemove', makeMouseEvent(15, 15));
         mouseClick(map, makeMouseEvent(15, 15));
-        lineString = Draw.get(lineString.id);
-        st.equal(lineString !== undefined, true, 'line_string is here');
-        st.deepEqual(lineString, {
-          id: lineString.id,
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: [[0,0], [15, 15]]
-          }
-        }, 'line_string has the right coordinates');
-        st.end();
+        map.fire('mousemove', makeMouseEvent(30, 30));
+        afterNextRender(() => {
+          map.fire('mousemove', makeMouseEvent(15, 15));
+          mouseClick(map, makeMouseEvent(16, 16));
+          lineString = Draw.get(lineString.id);
+          st.equal(lineString !== undefined, true, 'line_string is here');
+          st.deepEqual(lineString, {
+            id: lineString.id,
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: [[0,0], [15, 15]]
+            }
+          }, 'line_string has the right coordinates');
+          st.end();
+        });
       });
 
 
