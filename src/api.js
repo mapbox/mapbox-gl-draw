@@ -17,7 +17,9 @@ var featureTypes = {
 };
 
 module.exports = function(ctx) {
-  const api = {};
+  const api = {
+    modes: Constants.modes
+  };
 
   api.getFeatureIdsAt = function(point) {
     var features = featuresAt({ point }, null, ctx);

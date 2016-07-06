@@ -1,10 +1,12 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import Constants from '../src/constants';
 import GLDraw from '../';
 import createMap from './utils/create_map';
 import getGeoJSON from './utils/get_geojson';
 import AfterNextRender from './utils/after_next_render';
+import getPublicMemberKeys from './utils/get_public_member_keys';
 
 var map = createMap();
 var afterNextRender = AfterNextRender(map);
@@ -359,6 +361,17 @@ test('Draw.changeMode to select and de-select pre-existing features', t => {
     Draw.deleteAll();
     t.end();
   });
+});
+
+test('Draw.modes', t => {
+  t.equal(Draw.modes.SIMPLE_SELECT, Constants.modes.SIMPLE_SELECT, 'simple_select');
+  t.equal(Draw.modes.DIRECT_SELECT, Constants.modes.DIRECT_SELECT, 'direct_select');
+  t.equal(Draw.modes.DRAW_POINT, Constants.modes.DRAW_POINT, 'draw_point');
+  t.equal(Draw.modes.DRAW_LINE_STRING, Constants.modes.DRAW_LINE_STRING, 'draw_line_string');
+  t.equal(Draw.modes.DRAW_POLYGON, Constants.modes.DRAW_POLYGON, 'draw_polygon');
+  t.equal(Draw.modes.STATIC, Constants.modes.STATIC, 'static');
+  t.equal(getPublicMemberKeys(Draw.modes).length, 6, 'no unexpected modes');
+  t.end();
 });
 
 test('Cleanup', t => {

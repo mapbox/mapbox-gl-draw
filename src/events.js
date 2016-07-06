@@ -7,7 +7,7 @@ var modes = {
   [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
   [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
   [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
-  [Constants.modes.DRAW_LINE]: require('./modes/draw_line_string'),
+  [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
   [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
   [Constants.modes.STATIC]: require('./modes/static')
 };
@@ -87,7 +87,7 @@ module.exports = function(ctx) {
       changeMode(Constants.modes.DRAW_POINT);
     }
     else if (event.keyCode === 50 && ctx.options.controls.line_string) {
-      changeMode(Constants.modes.DRAW_LINE);
+      changeMode(Constants.modes.DRAW_LINE_STRING);
     }
     else if (event.keyCode === 51 && ctx.options.controls.polygon) {
       changeMode(Constants.modes.DRAW_POLYGON);
