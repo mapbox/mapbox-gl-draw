@@ -66,7 +66,7 @@ module.exports = function(ctx, options = {}) {
       this.on('mousemove', CommonSelectors.true, stopExtendedInteractions);
 
       // Click (with or without shift) on no feature
-      this.on('click', CommonSelectors.noFeature, function() {
+      this.on('click', CommonSelectors.noTarget, function() {
         // Clear the re-render selection
         const wasSelected = ctx.store.getSelectedIds();
         if (wasSelected.length) {

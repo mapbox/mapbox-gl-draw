@@ -109,19 +109,20 @@ test('LineString#updateCoordinate', t => {
 });
 
 test('LineString integration', function lineDrawClass(t){
-  const lineStringCoordinates = [[0, 0], [1, 1], [2, 2]];
+  const lineStringCoordinates = [[0, 0], [40, 20], [20, 40]];
   const map = createMap();
   const Draw = GLDraw();
   map.addControl(Draw);
 
   map.on('load', function() {
-    drawGeometry(map, Draw, 'LineString', lineStringCoordinates);
-    const feats = Draw.getAll().features;
-    t.equals(1, feats.length, 'only one');
-    t.equals('LineString', feats[0].geometry.type, 'of the right type');
-    t.equals(lineStringCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
-    t.deepEquals(lineStringCoordinates, feats[0].geometry.coordinates, 'in the right spot');
-    Draw.remove();
+    drawGeometry(map, Draw, 'LineString', lineStringCoordinates, () => {
+      const feats = Draw.getAll().features;
+      t.equals(1, feats.length, 'only one');
+      t.equals('LineString', feats[0].geometry.type, 'of the right type');
+      t.equals(lineStringCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
+      t.deepEquals(lineStringCoordinates, feats[0].geometry.coordinates, 'in the right spot');
+      Draw.remove();
+      t.end();
+    });
   });
-  t.plan(4);
 });

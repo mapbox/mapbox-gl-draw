@@ -9,6 +9,7 @@ import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import AfterNextRender from './utils/after_next_render';
 import {
   enterEvent,
   startPointEvent,
@@ -52,8 +53,9 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
@@ -115,7 +117,7 @@ test('draw_polygon render active polygon with no coordinates', t => {
     },
     geometry: {
       type: 'Polygon',
-      coordinates: [[]]
+      coordinates: []
     }
   };
   mode.render(geojson, x => memo.push(x));
@@ -193,8 +195,34 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
+  t.equal(memo.length, 3, 'does render');
   t.deepEqual(memo[0], {
+    type: 'Feature',
+    properties: {
+      parent: context._test.polygon.id,
+      meta: 'vertex',
+      coord_path: '0.0',
+      active: 'false'
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [0, 0]
+    }
+  }, 'renders the start point point with meta: vertex');
+  t.deepEqual(memo[1], {
+    type: 'Feature',
+    properties: {
+      parent: context._test.polygon.id,
+      meta: 'vertex',
+      coord_path: '0.2',
+      active: 'false'
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [10, 10]
+    }
+  }, 'renders end point with meta: vertex');
+  t.deepEqual(memo[2], {
     type: 'Feature',
     properties: {
       id: context._test.polygon.id,
@@ -249,6 +277,7 @@ test('draw_polygon interaction', t => {
 
   map.on('load', () => {
     // The following sub-tests share state ...
+    const afterNextRender = AfterNextRender(map);
 
     Draw.changeMode('draw_polygon');
     t.test('first click', st => {
@@ -561,6 +590,30 @@ test('draw_polygon interaction', t => {
       st.equal(Draw.getAll().features.length, 0, 'polygon was removed');
 
       st.end();
+    });
+
+    // FIVE CLICK TEST
+
+    t.test('end draw_polygon mode by clicking on the start point', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+      Draw.changeMode('draw_polygon');
+      let polygon = Draw.getAll().features[0];
+      st.equal(polygon !== undefined, true, 'polygon is added');
+      mouseClick(map, makeMouseEvent(0, 0));
+      mouseClick(map, makeMouseEvent(20, 0));
+      mouseClick(map, makeMouseEvent(20, 20));
+      mouseClick(map, makeMouseEvent(0, 20));
+
+      afterNextRender(() => {
+        map.fire('mousemove', makeMouseEvent(0, 0));
+        mouseClick(map, makeMouseEvent(0, 0));
+
+        polygon = Draw.get(polygon.id);
+        st.deepEqual(polygon.geometry.coordinates, [[[0, 0], [20, 0], [20, 20], [0,20], [0, 0]]], 'and has right coordinates');
+        Draw.deleteAll();
+        st.end();
+      });
     });
 
     document.body.removeChild(container);

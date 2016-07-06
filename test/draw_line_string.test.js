@@ -9,6 +9,7 @@ import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import AfterNextRender from './utils/after_next_render';
 import {
   enterEvent,
   startPointEvent,
@@ -52,9 +53,10 @@ test('draw_line_string start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['line_string'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
 
@@ -141,19 +143,7 @@ test('draw_line_string render active line with 1 coordinate', t => {
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
-  t.deepEqual(memo[0], {
-    type: 'Feature',
-    properties: {
-      id: context._test.line.id,
-      active: 'true',
-      meta: 'feature'
-    },
-    geometry: {
-      type: 'LineString',
-      coordinates: [[0, 0]]
-    }
-  }, 'with active: true, meta: feature');
+  t.equal(memo.length, 0, 'does not render');
   t.end();
 });
 
@@ -226,6 +216,7 @@ test('draw_line_string interaction', t => {
   const map = createMap({ container });
   const Draw = GLDraw();
   map.addControl(Draw);
+  var afterNextRender = AfterNextRender(map);
 
   map.on('load', () => {
     // The following sub-tests share state ...
@@ -452,6 +443,40 @@ test('draw_line_string interaction', t => {
       st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
 
       st.end();
+    });
+
+    // THREE CLICK TEST
+
+    t.test('start draw_line_string mode then double click', st => {
+      Draw.deleteAll();
+      st.equal(Draw.getAll().features.length, 0, 'no features yet');
+
+      Draw.changeMode('draw_line_string');
+      let lineString = Draw.getAll().features[0]
+      st.equal(lineString !== undefined, true, 'line is added');
+      mouseClick(map, makeMouseEvent(0, 0));
+      afterNextRender(() => {
+        mouseClick(map, makeMouseEvent(15, 15));
+        map.fire('mousemove', makeMouseEvent(30, 30));
+        afterNextRender(() => {
+          map.fire('mousemove', makeMouseEvent(15, 15));
+          mouseClick(map, makeMouseEvent(16, 16));
+          lineString = Draw.get(lineString.id);
+          st.equal(lineString !== undefined, true, 'line_string is here');
+          st.deepEqual(lineString, {
+            id: lineString.id,
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: [[0,0], [15, 15]]
+            }
+          }, 'line_string has the right coordinates');
+          st.end();
+        });
+      });
+
+
     });
 
     document.body.removeChild(container);

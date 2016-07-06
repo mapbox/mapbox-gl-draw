@@ -76,14 +76,15 @@ test('Point integration test', t => {
   map.addControl(Draw);
 
   map.on('load', function() {
-    drawGeometry(map, Draw, 'Point', pointCoordinates);
-    const feats = Draw.getAll().features;
-    t.equals(1, feats.length, 'only one');
-    t.equals('Point', feats[0].geometry.type, 'of the right type');
-    t.deepEquals([10, 10], feats[0].geometry.coordinates, 'in the right spot');
+    drawGeometry(map, Draw, 'Point', pointCoordinates, () => {
+      const feats = Draw.getAll().features;
+      t.equals(1, feats.length, 'only one');
+      t.equals('Point', feats[0].geometry.type, 'of the right type');
+      t.deepEquals([10, 10], feats[0].geometry.coordinates, 'in the right spot');
 
-    Draw.remove();
-    t.end();
+      Draw.remove();
+      t.end();
+    });
   });
 
 });
