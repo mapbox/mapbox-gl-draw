@@ -80,7 +80,7 @@ test('Store#createRenderBatch', t => {
   renderBatch();
   t.equal(numRenders, 2, 'when releasing batch, render only happens once');
 
-  var renderBatch = store.createRenderBatch();
+  renderBatch = store.createRenderBatch();
   renderBatch();
   t.equal(numRenders, 2, 'when releasing batch, render doesn\'t happen if render wasn\'t called');
 

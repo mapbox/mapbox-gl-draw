@@ -54,11 +54,11 @@ const features = {
   },
 
   polygon: {
-    "type": "Feature",
-    "properties": {},
-    "geometry": {
-      "type": "Polygon",
-      "coordinates": [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
     }
   },
 
@@ -83,8 +83,8 @@ const features = {
     geometry: {
       type: 'GeometryCollection',
       geometries: [{
-          "type": "Polygon",
-          "coordinates": [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+        type: 'Polygon',
+        coordinates: [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
       }]
     }
   },
