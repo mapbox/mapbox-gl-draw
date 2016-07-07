@@ -1,5 +1,6 @@
 var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
+const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
@@ -19,10 +20,9 @@ module.exports = function(ctx, opts) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
-  var startPos = opts.startPos || null;
-  var coordPos = null;
-  var dragging;
-  var canDragMove;
+  var dragMoveLocation = opts.startPos || null;
+  var dragMoving = false;
+  var canDragMove = false;
 
   var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
@@ -53,25 +53,18 @@ module.exports = function(ctx, opts) {
   var startDragging = function(e) {
     ctx.map.dragPan.disable();
     canDragMove = true;
-    startPos = e.lngLat;
+    dragMoveLocation = e.lngLat;
   };
 
   var stopDragging = function() {
     ctx.map.dragPan.enable();
-    dragging = false;
+    dragMoving = false;
     canDragMove = false;
-    coordPos = null;
-    startPos = null;
-  };
-
-  var setupCoordPos = function() {
-    coordPos = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+    dragMoveLocation = null;
   };
 
   return {
     start: function() {
-      dragging = false;
-      canDragMove = false;
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
 
@@ -81,26 +74,36 @@ module.exports = function(ctx, opts) {
       this.on('mousedown', isVertex, onVertex);
       this.on('mousedown', isMidpoint, onMidpoint);
       this.on('drag', () => canDragMove, function(e) {
-        dragging = true;
+        dragMoving = true;
         e.originalEvent.stopPropagation();
-        if (coordPos === null) {
-          setupCoordPos();
-        }
-        var lngChange = e.lngLat.lng - startPos.lng;
-        var latChange = e.lngLat.lat - startPos.lat;
 
-        for (var i = 0; i < coordPos.length; i++) {
-          var coord_path = selectedCoordPaths[i];
-          var pos = coordPos[i];
+        var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+        var selectedCoordPoints = selectedCoords.map(coords => ({
+          type: Constants.geojsonTypes.FEATURE,
+          properties: {},
+          geometry: {
+            type: Constants.geojsonTypes.POINT,
+            coordinates: coords
+          }
+        }));
+        var delta = {
+          lng: e.lngLat.lng - dragMoveLocation.lng,
+          lat: e.lngLat.lat - dragMoveLocation.lat
+        };
+        var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
 
-          var lng = pos[0] + lngChange;
-          var lat = pos[1] + latChange;
-          feature.updateCoordinate(coord_path, lng, lat);
+        for (var i = 0; i < selectedCoords.length; i++) {
+          var coord = selectedCoords[i];
+          feature.updateCoordinate(selectedCoordPaths[i],
+            coord[0] + constrainedDelta.lng,
+            coord[1] + constrainedDelta.lat);
         }
+
+        dragMoveLocation = e.lngLat;
       });
       this.on('click', CommonSelectors.true, stopDragging);
       this.on('mouseup', CommonSelectors.true, function() {
-        if (dragging) {
+        if (dragMoving) {
           ctx.map.fire(Constants.events.UPDATE, {
             action: Constants.updateActions.CHANGE_COORDINATES,
             features: ctx.store.getSelected().map(f => f.toGeoJSON())
