@@ -1,12 +1,9 @@
-const extent = require('geojson-extent');
 const xtend = require('xtend');
-const constrainLatitudeChange = require('./constrain_latitude_change');
+const constrainFeatureMovement = require('./constrain_feature_movement');
 const Constants = require('../constants');
 
 module.exports = function(features, delta) {
-  const constrainedDelta = xtend(delta, {
-    lat: constrainLatitudeChange(features.map(f => f.toGeoJSON()), delta.lat)
-  });
+  const constrainedDelta = constrainFeatureMovement(features.map(feature => feature.toGeoJSON()), delta);
 
   features.forEach(feature => {
     const currentCoordinates = feature.getCoordinates();

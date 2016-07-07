@@ -71,5 +71,7 @@ module.exports = {
   LAT_MIN: -90,
   LAT_RENDERED_MIN: -85,
   LAT_MAX: 90,
-  LAT_RENDERED_MAX: 85
+  LAT_RENDERED_MAX: 85,
+  LNG_MIN: -270,
+  LNG_MAX: 270
 };
