@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "geojson-area": "^0.2.1",
+    "geojson-extent": "^0.3.2",
     "geojson-normalize": "0.0.1",
     "geojsonhint": "^1.2.0",
     "hat": "0.0.3",

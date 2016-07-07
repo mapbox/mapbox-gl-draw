@@ -4,7 +4,7 @@ const featuresAt = require('../lib/features_at');
 const createSupplementaryPoints = require('../lib/create_supplementary_points');
 const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
-const moveFeature = require('../lib/move_feature');
+const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
 
 module.exports = function(ctx, options = {}) {
@@ -153,12 +153,12 @@ module.exports = function(ctx, options = {}) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        const lngDelta = e.lngLat.lng - dragMoveLocation.lng;
-        const latDelta = e.lngLat.lat - dragMoveLocation.lat;
+        const delta = {
+          lng: e.lngLat.lng - dragMoveLocation.lng,
+          lat: e.lngLat.lat - dragMoveLocation.lat
+        };
 
-        ctx.store.getSelected().forEach(feature => {
-          moveFeature(feature, lngDelta, latDelta);
-        });
+        moveFeatures(ctx.store.getSelected(), delta);
 
         dragMoveLocation = e.lngLat;
       });
