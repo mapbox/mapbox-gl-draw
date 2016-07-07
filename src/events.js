@@ -10,7 +10,7 @@ var modes = {
   [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
   [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
   [Constants.modes.STATIC]: require('./modes/static'),
-  [Constants.modes.MIXED]: require('./modes/mixed')
+  [Constants.modes.SINGLE_FEATURE_SELECT]: require('./modes/single_feature_select')
 };
 
 module.exports = function(ctx) {

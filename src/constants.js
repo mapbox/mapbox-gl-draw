@@ -46,7 +46,7 @@ module.exports = {
     SIMPLE_SELECT: 'simple_select',
     DIRECT_SELECT: 'direct_select',
     STATIC: 'static',
-    MIXED: 'mixed'
+    SINGLE_FEATURE_SELECT: 'single_feature_select'
   },
   events: {
     CREATE: 'draw.create',

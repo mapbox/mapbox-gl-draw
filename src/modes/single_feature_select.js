@@ -11,11 +11,11 @@ module.exports = function (ctx, opts) {
   let feature = ctx.store.get(featureId);
 
   if (!feature) {
-    throw new Error('You must provide a featureId to enter mixed mode');
+    throw new Error('You must provide a featureId to enter single_feature_select mode');
   }
 
   if (feature.type === 'Point') {
-    throw new TypeError('mixed mode doesn\'t handle point features');
+    throw new TypeError('single_feature_select mode doesn\'t handle point features');
   }
 
   let startPos = opts.startPos || null;
