@@ -9,8 +9,7 @@ var modes = {
   [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
   [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
   [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
-  [Constants.modes.STATIC]: require('./modes/static'),
-  [Constants.modes.SINGLE_FEATURE_SELECT]: require('./modes/single_feature_select')
+  [Constants.modes.STATIC]: require('./modes/static')
 };
 
 module.exports = function(ctx) {
