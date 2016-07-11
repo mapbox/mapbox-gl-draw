@@ -11,14 +11,11 @@ var ModeHandler = function(mode, DrawContext) {
   };
 
   var ctx = {
-    on: function(event, selector, fn) {
+    on: function(event, fn) {
       if (handlers[event] === undefined) {
         throw new Error(`Invalid event type: ${event}`);
       }
-      handlers[event].push({
-        selector: selector,
-        fn: fn
-      });
+      handlers[event].push(fn);
     },
     render: function(id) {
       DrawContext.store.featureChanged(id);
@@ -26,20 +23,13 @@ var ModeHandler = function(mode, DrawContext) {
   };
 
   var delegate = function (eventName, event) {
-    var handles = handlers[eventName];
-    var iHandle = handles.length;
-    while (iHandle--) {
-      var handle = handles[iHandle];
-      if (handle.selector(event)) {
-        handle.fn.call(ctx, event);
-        DrawContext.store.render();
-        DrawContext.ui.updateMapClasses();
+    handlers[eventName].forEach(handle => {
+      handle.call(ctx, event);
+    });
 
-        // ensure an event is only handled once
-        // we do this to let modes have multiple overlapping selectors
-        // and relay on order of oppertations to filter
-        break;
-      }
+    if (handlers[eventName].length > 0) {
+      DrawContext.store.render();
+      DrawContext.ui.updateMapClasses();
     }
   };
 

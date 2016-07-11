@@ -27,13 +27,16 @@ module.exports = function(ctx) {
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
-      this.on('mousemove', CommonSelectors.true, e => {
+      this.on('mousemove', e => {
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
-      this.on('click', CommonSelectors.true, (e) => {
+
+      this.on('click', e => {
+        if(CommonSelectors.isVertex(e)) return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+
         if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
         }
@@ -41,15 +44,16 @@ module.exports = function(ctx) {
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
       });
-      this.on('click', CommonSelectors.isVertex, () => {
-        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
-      });
-      this.on('keyup', CommonSelectors.isEscapeKey, () => {
-        ctx.store.delete([polygon.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-      this.on('keyup', CommonSelectors.isEnterKey, () => {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+
+      this.on('keyup', e => {
+        if (CommonSelectors.isEscapeKey(e)) {
+          ctx.store.delete([polygon.id], { silent: true });
+          return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+        }
+
+        if (CommonSelectors.isEnterKey(e)) {
+          return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
+        }
       });
     },
 

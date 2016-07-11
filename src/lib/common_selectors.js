@@ -40,6 +40,12 @@ module.exports = {
     if (!featureTarget.properties) return false;
     return featureTarget.properties.meta === Constants.meta.VERTEX;
   },
+  isMidpoint: function(e) {
+    var featureTarget = e.featureTarget;
+    if (!featureTarget) return false;
+    if (!featureTarget.properties) return false;
+    return featureTarget.properties.meta === Constants.meta.MIDPOINT;
+  },
   isShiftDown: function(e) {
     if (!e.originalEvent) return false;
     return e.originalEvent.shiftKey === true;

@@ -1,12 +1,8 @@
-var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
-
-const isVertex = isOfMetaType(Constants.meta.VERTEX);
-const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
 module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
@@ -30,10 +26,10 @@ module.exports = function(ctx, opts) {
     startDragging(e);
     var about = e.featureTarget.properties;
     var selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
-    if (!isShiftDown(e) && selectedIndex === -1) {
+    if (!CommonSelectors.isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths = [about.coord_path];
     }
-    else if (isShiftDown(e) && selectedIndex === -1) {
+    else if (CommonSelectors.isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths.push(about.coord_path);
     }
     feature.changed();
@@ -68,41 +64,54 @@ module.exports = function(ctx, opts) {
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
 
-      // On mousemove that is not a drag, stop vertex movement.
-      this.on('mousemove', CommonSelectors.true, stopDragging);
-
-      this.on('mousedown', isVertex, onVertex);
-      this.on('mousedown', isMidpoint, onMidpoint);
-      this.on('drag', () => canDragMove, function(e) {
-        dragMoving = true;
-        e.originalEvent.stopPropagation();
-
-        var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-        var selectedCoordPoints = selectedCoords.map(coords => ({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coords
-          }
-        }));
-        var delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-        var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
-
-        for (var i = 0; i < selectedCoords.length; i++) {
-          var coord = selectedCoords[i];
-          feature.updateCoordinate(selectedCoordPaths[i],
-            coord[0] + constrainedDelta.lng,
-            coord[1] + constrainedDelta.lat);
-        }
-
-        dragMoveLocation = e.lngLat;
+      this.on('mousemove', (e) => {
+        stopDragging(e);
       });
-      this.on('click', CommonSelectors.true, stopDragging);
-      this.on('mouseup', CommonSelectors.true, function() {
+
+      this.on('mousedown', (e) => {
+        if (CommonSelectors.isVertex(e))  return onVertex(e);
+        if (CommonSelectors.isMidpoint(e)) return onMidpoint(e);
+      });
+
+      this.on('drag', (e) => {
+        if(canDragMove) {
+          dragMoving = true;
+          e.originalEvent.stopPropagation();
+
+          var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+          var selectedCoordPoints = selectedCoords.map(coords => ({
+            type: Constants.geojsonTypes.FEATURE,
+            properties: {},
+            geometry: {
+              type: Constants.geojsonTypes.POINT,
+              coordinates: coords
+            }
+          }));
+          var delta = {
+            lng: e.lngLat.lng - dragMoveLocation.lng,
+            lat: e.lngLat.lat - dragMoveLocation.lat
+          };
+          var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+
+          for (var i = 0; i < selectedCoords.length; i++) {
+            var coord = selectedCoords[i];
+            feature.updateCoordinate(selectedCoordPaths[i],
+              coord[0] + constrainedDelta.lng,
+              coord[1] + constrainedDelta.lat);
+          }
+
+          dragMoveLocation = e.lngLat;
+        }
+      });
+
+      this.on('click', (e) => {
+        if (CommonSelectors.noTarget(e) || CommonSelectors.isInactiveFeature(e)) {
+          return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+        }
+        stopDragging(e);
+      });
+
+      this.on('mouseup', e => {
         if (dragMoving) {
           ctx.map.fire(Constants.events.UPDATE, {
             action: Constants.updateActions.CHANGE_COORDINATES,
@@ -110,12 +119,6 @@ module.exports = function(ctx, opts) {
           });
         }
         stopDragging();
-      });
-      this.on('click', noTarget, function() {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-      this.on('click', isInactiveFeature, function() {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
     },
     stop: function() {
