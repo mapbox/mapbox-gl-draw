@@ -1,3 +1,7 @@
+## 0.11.10
+
+- Add support for mapbox-gl 0.21
+
 ## 0.10.0
 
 - Add `draw.select` and `draw.deselect`, replacing `draw.mode.simple_select.selected.*` events.
