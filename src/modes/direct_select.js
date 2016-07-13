@@ -85,13 +85,10 @@ module.exports = function(ctx, opts) {
         this.on('mousedown', CommonSelectors.isActiveFeature, function (e) {
           dragMode = 'feature';
 
-          ctx.map.dragPan.disable();
-          this.render(e.featureTarget.properties.id);
-
-          // Set up the state for drag moving
+          startDragging(e);
           dragMoving = false;
-          canDragMove = true;
-          dragMoveLocation = e.lngLat;
+
+          this.render(e.featureTarget.properties.id);
         });
       }
 
