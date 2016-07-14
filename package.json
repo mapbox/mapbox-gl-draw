@@ -57,6 +57,7 @@
     "sinon": "^1.17.4",
     "synthetic-dom-events": "^0.3.0",
     "tape": "^4.0.0",
+    "turf-centroid": "^3.0.12",
     "uglify-js": "^2.4.23",
     "unassertify": "^2.0.3"
   },

@@ -1,16 +1,18 @@
-var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
-var createSupplementaryPoints = require('../lib/create_supplementary_points');
+const {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
+const createSupplementaryPoints = require('../lib/create_supplementary_points');
 const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
+const moveFeatures = require('../lib/move_features');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
 module.exports = function(ctx, opts) {
-  var featureId = opts.featureId;
-  var feature = ctx.store.get(featureId);
+  let featureId = opts.featureId;
+  let feature = ctx.store.get(featureId);
+  let dragFeature = opts.dragFeature;
 
   if (!feature) {
     throw new Error('You must provide a featureId to enter direct_select mode');
@@ -20,16 +22,19 @@ module.exports = function(ctx, opts) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
-  var dragMoveLocation = opts.startPos || null;
-  var dragMoving = false;
-  var canDragMove = false;
+  let dragMoveLocation = opts.startPos || null;
+  let dragMoving = false;
+  let canDragMove = false;
 
-  var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
+  let selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
-  var onVertex = function(e) {
+  let dragMode = null;
+
+  const onVertex = function(e) {
     startDragging(e);
-    var about = e.featureTarget.properties;
-    var selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
+    dragMode = 'vertex';
+    let about = e.featureTarget.properties;
+    let selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
     if (!isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths = [about.coord_path];
     }
@@ -39,9 +44,10 @@ module.exports = function(ctx, opts) {
     feature.changed();
   };
 
-  var onMidpoint = function(e) {
+  const onMidpoint = function(e) {
     startDragging(e);
-    var about = e.featureTarget.properties;
+    dragMode = 'midpoint';
+    let about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
     ctx.map.fire(Constants.events.UPDATE, {
       action: Constants.updateActions.CHANGE_COORDINATES,
@@ -50,13 +56,13 @@ module.exports = function(ctx, opts) {
     selectedCoordPaths = [about.coord_path];
   };
 
-  var startDragging = function(e) {
+  const startDragging = function(e) {
     ctx.map.dragPan.disable();
     canDragMove = true;
     dragMoveLocation = e.lngLat;
   };
 
-  var stopDragging = function() {
+  const stopDragging = function() {
     ctx.map.dragPan.enable();
     dragMoving = false;
     canDragMove = false;
@@ -73,33 +79,64 @@ module.exports = function(ctx, opts) {
 
       this.on('mousedown', isVertex, onVertex);
       this.on('mousedown', isMidpoint, onMidpoint);
+
+      if (dragFeature) {
+
+        this.on('mousedown', CommonSelectors.isActiveFeature, function (e) {
+          dragMode = 'feature';
+
+          startDragging(e);
+          dragMoving = false;
+
+          this.render(e.featureTarget.properties.id);
+        });
+      }
+
       this.on('drag', () => canDragMove, function(e) {
-        dragMoving = true;
-        e.originalEvent.stopPropagation();
 
-        var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-        var selectedCoordPoints = selectedCoords.map(coords => ({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coords
+        if (dragFeature && dragMode === 'feature') {
+
+          dragMoving = true;
+          e.originalEvent.stopPropagation();
+
+          const delta = {
+            lng: e.lngLat.lng - dragMoveLocation.lng,
+            lat: e.lngLat.lat - dragMoveLocation.lat
+          };
+
+          moveFeatures(ctx.store.getSelected(), delta);
+
+          dragMoveLocation = e.lngLat;
+
+        } else {
+
+          dragMoving = true;
+          e.originalEvent.stopPropagation();
+
+          let selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+          let selectedCoordPoints = selectedCoords.map(coords => ({
+            type      : Constants.geojsonTypes.FEATURE,
+            properties: {},
+            geometry  : {
+              type       : Constants.geojsonTypes.POINT,
+              coordinates: coords
+            }
+          }));
+          let delta = {
+            lng: e.lngLat.lng - dragMoveLocation.lng,
+            lat: e.lngLat.lat - dragMoveLocation.lat
+          };
+          let constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+
+          for (let i = 0; i < selectedCoords.length; i++) {
+            let coord = selectedCoords[i];
+            feature.updateCoordinate(selectedCoordPaths[i],
+              coord[0] + constrainedDelta.lng,
+              coord[1] + constrainedDelta.lat);
           }
-        }));
-        var delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-        var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
 
-        for (var i = 0; i < selectedCoords.length; i++) {
-          var coord = selectedCoords[i];
-          feature.updateCoordinate(selectedCoordPaths[i],
-            coord[0] + constrainedDelta.lng,
-            coord[1] + constrainedDelta.lat);
+          dragMoveLocation = e.lngLat;
         }
-
-        dragMoveLocation = e.lngLat;
       });
       this.on('click', CommonSelectors.true, stopDragging);
       this.on('mouseup', CommonSelectors.true, function() {
@@ -118,9 +155,11 @@ module.exports = function(ctx, opts) {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       });
     },
+
     stop: function() {
       doubleClickZoom.enable(ctx);
     },
+
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
         geojson.properties.active = Constants.activeStates.ACTIVE;
@@ -136,6 +175,7 @@ module.exports = function(ctx, opts) {
         push(geojson);
       }
     },
+
     trash: function() {
       if (selectedCoordPaths.length === 0) {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { features: [feature] });

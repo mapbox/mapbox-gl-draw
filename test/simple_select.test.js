@@ -6,6 +6,7 @@ import AfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
+import countPositions from './utils/count_positions';
 
 test('simple_select', t => {
 
@@ -350,10 +351,6 @@ test('simple_select', t => {
     var multiLineStringId = Draw.add(getGeoJSON('multiLineString'))[0];
     var polygonId = Draw.add(getGeoJSON('polygon'))[0];
     var multiPolygonId = Draw.add(getGeoJSON('multiPolygon'))[0];
-
-    var countPositions = function(feature) {
-      return feature.geometry.coordinates.join(',').split(',').length;
-    };
 
     var startPosition = getGeoJSON('point').geometry.coordinates;
     Draw.changeMode('simple_select', {
