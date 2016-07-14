@@ -55,116 +55,7 @@ module.exports = function(ctx, options = {}) {
         return ctx.store.get(id) !== undefined;
       }));
 
-      // Any mouseup should stop box selecting and dragMoving
-      this.on('mouseup', CommonSelectors.true, stopExtendedInteractions);
-
-      // On mousemove that is not a drag, stop extended interactions.
-      // This is useful if you drag off the canvas, release the button,
-      // then move the mouse back over the canvas --- we don't the
-      // interaction to continue (but we do let it continue if you held
-      // the mouse button that whole time)
-      this.on('mousemove', CommonSelectors.true, stopExtendedInteractions);
-
-      // Click (with or without shift) on no feature
-      this.on('click', CommonSelectors.noTarget, function() {
-        // Clear the re-render selection
-        const wasSelected = ctx.store.getSelectedIds();
-        if (wasSelected.length) {
-          ctx.store.clearSelected();
-          wasSelected.forEach(id => this.render(id));
-        }
-        doubleClickZoom.enable(ctx);
-        stopExtendedInteractions();
-      });
-
-      // Click (with or without shift) on a vertex
-      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), function(e) {
-        // Enter direct select mode
-        ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
-          featureId: e.featureTarget.properties.parent,
-          coordPath: e.featureTarget.properties.coord_path,
-          startPos: e.lngLat
-        });
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-      });
-
-      // Mousedown on a selected feature
-      this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
-        // Stop any already-underway extended interactions
-        stopExtendedInteractions();
-
-        // Disable map.dragPan immediately so it can't start
-        ctx.map.dragPan.disable();
-
-        // Re-render it and enable drag move
-        this.render(e.featureTarget.properties.id);
-
-        // Set up the state for drag moving
-        canDragMove = true;
-        dragMoveLocation = e.lngLat;
-      });
-
-      // Click (with or without shift) on any feature
-      this.on('click', CommonSelectors.isFeature, function(e) {
-        // Stop everything
-        doubleClickZoom.disable(ctx);
-        stopExtendedInteractions();
-
-        const isShiftClick = CommonSelectors.isShiftDown(e);
-        const selectedFeatureIds = ctx.store.getSelectedIds();
-        const featureId = e.featureTarget.properties.id;
-        const isFeatureSelected = ctx.store.isSelected(featureId);
-
-        // Click (without shift) on any selected feature but a point
-        if (!isShiftClick && isFeatureSelected && ctx.store.get(featureId).type !== Constants.geojsonTypes.POINT) {
-          // Enter direct select mode
-          return ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
-            featureId: featureId
-          });
-        }
-
-        // Shift-click on a selected feature
-        if (isFeatureSelected && isShiftClick) {
-          // Deselect it
-          ctx.store.deselect(featureId);
-          ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-          if (selectedFeatureIds.length === 1 ) {
-            doubleClickZoom.enable(ctx);
-          }
-        // Shift-click on an unselected feature
-        } else if (!isFeatureSelected && isShiftClick) {
-          // Add it to the selection
-          ctx.store.select(featureId);
-          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-        // Click (without shift) on an unselected feature
-        } else if (!isFeatureSelected && !isShiftClick) {
-          // Make it the only selected feature
-          selectedFeatureIds.forEach(this.render);
-          ctx.store.setSelected(featureId);
-          ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-        }
-
-        // No matter what, re-render the clicked feature
-        this.render(featureId);
-      });
-
-      // Dragging when drag move is enabled
-      this.on('drag', () => canDragMove, function(e) {
-        dragMoving = true;
-        e.originalEvent.stopPropagation();
-
-        const delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-
-        moveFeatures(ctx.store.getSelected(), delta);
-
-        dragMoveLocation = e.lngLat;
-      });
-
-      // Mouseup, always
-      this.on('mouseup', CommonSelectors.true, function(e) {
+      this.on('mouseup', e => {
         // End any extended interactions
         if (dragMoving) {
           ctx.map.fire(Constants.events.UPDATE, {
@@ -186,21 +77,133 @@ module.exports = function(ctx, options = {}) {
             ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
           }
         }
-        stopExtendedInteractions();
+        return stopExtendedInteractions();
       });
 
-      if (ctx.options.boxSelect) {
-        // Shift-mousedown anywhere
-        this.on('mousedown', CommonSelectors.isShiftMousedown, function(e) {
+      this.on('mousemove', e => {
+        // On mousemove that is not a drag, stop extended interactions.
+        // This is useful if you drag off the canvas, release the button,
+        // then move the mouse back over the canvas --- we don't the
+        // interaction to continue (but we do let it continue if you held
+        // the mouse button that whole time)
+        return stopExtendedInteractions(e);
+      });
+
+      this.on('click', e => {
+        if (CommonSelectors.noTarget(e)) {
+          // Click (with or without shift) on no feature
+          // Clear the re-render selection
+          const wasSelected = ctx.store.getSelectedIds();
+          if (wasSelected.length) {
+            ctx.store.clearSelected();
+            wasSelected.forEach(id => this.render(id));
+          }
+          doubleClickZoom.enable(ctx);
+          return stopExtendedInteractions();
+        }
+
+        if(CommonSelectors.isVertex(e)) {
+          // Click (with or without shift) on a vertex
+          // Enter direct select mode
+          ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
+            featureId: e.featureTarget.properties.parent,
+            coordPath: e.featureTarget.properties.coord_path,
+            startPos: e.lngLat
+          });
+          return ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+        }
+
+        if (CommonSelectors.isFeature(e)) {
+          // Click (with or without shift) on any feature
+          // Stop everything
+          doubleClickZoom.disable(ctx);
+          stopExtendedInteractions();
+
+          const isShiftClick = CommonSelectors.isShiftDown(e);
+          const selectedFeatureIds = ctx.store.getSelectedIds();
+          const featureId = e.featureTarget.properties.id;
+          const isFeatureSelected = ctx.store.isSelected(featureId);
+
+          // Click (without shift) on any selected feature but a point
+          if (!isShiftClick && isFeatureSelected && ctx.store.get(featureId).type !== Constants.geojsonTypes.POINT) {
+            // Enter direct select mode
+            return ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
+              featureId: featureId
+            });
+          }
+
+          // Shift-click on a selected feature
+          if (isFeatureSelected && isShiftClick) {
+            // Deselect it
+            ctx.store.deselect(featureId);
+            ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
+            if (selectedFeatureIds.length === 1 ) {
+              doubleClickZoom.enable(ctx);
+            }
+          // Shift-click on an unselected feature
+          } else if (!isFeatureSelected && isShiftClick) {
+            // Add it to the selection
+            ctx.store.select(featureId);
+            ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+          // Click (without shift) on an unselected feature
+          } else if (!isFeatureSelected && !isShiftClick) {
+            // Make it the only selected feature
+            selectedFeatureIds.forEach(this.render);
+            ctx.store.setSelected(featureId);
+            ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+          }
+
+          // No matter what, re-render the clicked feature
+          return this.render(featureId);
+        }
+      });
+
+      this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
+        // Mousedown on a selected feature
+        if (CommonSelectors.isActiveFeature(e)) {
+          // Stop any already-underway extended interactions
+          stopExtendedInteractions();
+
+          // Disable map.dragPan immediately so it can't start
+          ctx.map.dragPan.disable();
+
+          // Re-render it and enable drag move
+          this.render(e.featureTarget.properties.id);
+
+          // Set up the state for drag moving
+          canDragMove = true;
+          dragMoveLocation = e.lngLat;
+          return;
+        }
+
+        if (ctx.options.boxSelect && CommonSelectors.isShiftMousedown(e)) {
           stopExtendedInteractions();
           ctx.map.dragPan.disable();
           // Enable box select
           boxSelectStartLocation = mouseEventPoint(e.originalEvent, ctx.container);
           canBoxSelect = true;
-        });
+          return;
+        }
+      });
 
-        // Drag when box select is enabled
-        this.on('drag', () => canBoxSelect, function(e) {
+      this.on('drag', e => {
+        if(canDragMove) {
+          // Dragging when drag move is enabled
+          dragMoving = true;
+          e.originalEvent.stopPropagation();
+
+          const delta = {
+            lng: e.lngLat.lng - dragMoveLocation.lng,
+            lat: e.lngLat.lat - dragMoveLocation.lat
+          };
+
+          moveFeatures(ctx.store.getSelected(), delta);
+
+          dragMoveLocation = e.lngLat;
+          return;
+        }
+
+        if (ctx.options.boxSelect && canBoxSelect) {
           boxSelecting = true;
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
 
@@ -222,8 +225,8 @@ module.exports = function(ctx, options = {}) {
           boxSelectElement.style.WebkitTransform = translateValue;
           boxSelectElement.style.width = `${maxX - minX}px`;
           boxSelectElement.style.height = `${maxY - minY}px`;
-        });
-      }
+        }
+      });
     },
     render: function(geojson, push) {
       geojson.properties.active = (ctx.store.isSelected(geojson.properties.id) )
