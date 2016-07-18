@@ -5,92 +5,98 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
 
-module.exports = function(ctx) {
-  const line = new LineString({
-    type: Constants.geojsonTypes.FEATURE,
-    properties: {},
-    geometry: {
-      type: Constants.geojsonTypes.LINE_STRING,
-      coordinates: []
+import ModeInterface from './mode_interface';
+
+export default class DrawPointMode extends ModeInterface {
+  constructor(store, ui, map) {
+    this.line = new LineString({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.LINE_STRING,
+        coordinates: []
+      }
+    });
+
+    this.currentVertexPosition = 0;
+
+    store.add(this.line);
+    store.clearSelected();
+    doubleClickZoom.disable({map});
+    ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+    ui.setActiveButton(Constants.types.LINE);
+  }
+
+  onMousemove(e) {
+    this.line.updateCoordinate(this.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+    if (CommonSelectors.isVertex(e)) {
+      ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
     }
-  });
-  let currentVertexPosition = 0;
+  }
 
-  if (ctx._test) ctx._test.line = line;
-
-  ctx.store.add(line);
-
-  return {
-    start: function() {
-      ctx.store.clearSelected();
-      doubleClickZoom.disable(ctx);
-      ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-      ctx.ui.setActiveButton(Constants.types.LINE);
-      this.on('mousemove', CommonSelectors.true, (e) => {
-        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-        if (CommonSelectors.isVertex(e)) {
-          ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-        }
-      });
-      this.on('click', CommonSelectors.true, (e) => {
-        if(currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
-          return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-        }
-        ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-        currentVertexPosition++;
-      });
-      this.on('click', CommonSelectors.isVertex, () => {
-        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-      });
-      this.on('keyup', CommonSelectors.isEscapeKey, () => {
-        ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-      this.on('keyup', CommonSelectors.isEnterKey, () => {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-      });
-    },
-
-    stop() {
-      doubleClickZoom.enable(ctx);
-      ctx.ui.setActiveButton();
-
-      // check to see if we've deleted this feature
-      if (ctx.store.get(line.id) === undefined) return;
-
-      //remove last added coordinate
-      line.removeCoordinate(`${currentVertexPosition}`);
-      if (line.isValid()) {
-        ctx.map.fire(Constants.events.CREATE, {
-          features: [line.toGeoJSON()]
-        });
-      }
-      else {
-        ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
-      }
-    },
-
-    render(geojson, callback) {
-      const isActiveLine = geojson.properties.id === line.id;
-      geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
-      if (!isActiveLine) return callback(geojson);
-
-      // Only render the line if it has at least one real coordinate
-      if (geojson.geometry.coordinates.length < 2) return;
-      geojson.properties.meta = Constants.meta.FEATURE;
-
-      if(geojson.geometry.coordinates.length >= 3) {
-        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length-2], `${geojson.geometry.coordinates.length-2}`, false));
-      }
-
-      callback(geojson);
-    },
-
-    trash() {
-      ctx.store.delete([line.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+  onClick (e, store) {
+    if (CommonSelectors.isVertex(e)) {
+      store.setSelected([this.line.id]);
+      return this.changeMode(Constants.modes.SIMPLE_SELECT);
     }
-  };
-};
+    if(this.currentVertexPosition > 0 && isEventAtCoordinates(e, this.line.coordinates[this.currentVertexPosition - 1])) {
+      return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [this.line.id] });
+    }
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+    this.line.updateCoordinate(this.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+    this.currentVertexPosition++;
+  }
+
+  onKeyup(e, store) {
+    if (CommonSelectors.isEscapeKey(e)) {
+      store.delete([this.line.id], { silent: true});
+      return this.changeMode(Constants.modes.SIMPLE_SELECT);
+    }
+
+    if (CommonSelectors.isEnterKey(e)) {
+      store.setSelected([this.line.id]);
+      return this.changeMode(Constants.modes.SIMPLE_SELECT);
+    }
+  }
+
+  onTrash(store) {
+    store.delete([this.line.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
+
+  changeMode(nextModeName, store, ui, map) {
+    doubleClickZoom.enable({map});
+    ui.setActiveButton();
+    if (store.get(this.line.id) === undefined) return;
+
+    //remove last added coordinate
+    this.line.removeCoordinate(`${this.currentVertexPosition}`);
+
+    if (this.line.isValid()) {
+      map.fire(Constants.events.CREATE, {
+        features: [line.toGeoJSON()]
+      });
+    }
+    else {
+      store.delete([this.line.id], { silent: true});
+      this.changeMode(Constants.modes.SIMPLE_SELECT, {silent: true});
+    }
+  }
+
+  prepareAndRender(geojson, render) {
+    const isActiveLine = geojson.properties.id === this.line.id;
+    geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+    if (!isActiveLine) return render(geojson);
+
+    // Only render the line if it has at least one real coordinate
+    if (geojson.geometry.coordinates.length < 2) return;
+    geojson.properties.meta = Constants.meta.FEATURE;
+
+    if(geojson.geometry.coordinates.length >= 3) {
+      render(createVertex(this.line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length-2], `${geojson.geometry.coordinates.length-2}`, false));
+    }
+
+    render(geojson);
+  }
+
+}

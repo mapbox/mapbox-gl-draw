@@ -22,10 +22,10 @@ export default class DrawPointMode extends ModeInterface {
     ui.setActiveButton(Constants.types.POINT);
   }
 
-  onClick(e, store, ui) {
+  onClick(e, store, ui, map) {
     ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-    ctx.map.fire(Constants.events.CREATE, {
+    map.fire(Constants.events.CREATE, {
       features: [point.toGeoJSON()]
     });
     store.setSelected([point.id]);
@@ -39,9 +39,14 @@ export default class DrawPointMode extends ModeInterface {
     }
   }
 
-  changeMode(nextModeName, revertChanges, store, ui) {
+  onTrash() {
+    store.delete([this.point.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
+
+  changeMode(nextModeName, store, ui) {
     ui.setActiveButton();
-    if (revertChanges || !this.point.getCoordinate().length) {
+    if (!this.point.getCoordinate().length) {
       store.delete([point.id], {silent: true});
     }
   }

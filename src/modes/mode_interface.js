@@ -5,6 +5,7 @@
  ************************
  * store {object} - is the store object (normally ctx.store)
  * ui {object} - is the ui object (normally ctx.ui)
+ * map {object} - the mapbox-gl-js map object
  * event {object} - is the event that triggered this handler
  * nextModeName {string} - the name of the mode being transitioned too
  * revertChanges {boolean} - if ture, the mode should try to undo its changes
@@ -16,16 +17,17 @@
  */
 
 export default class ModeInterface {
-  constructor() {} // store, ui
-  onClick () {} // event, store, ui
-  onDrag () {} // event, store, ui
-  onMousemove () {} // event, store, ui
-  onMousedown () {} // event, store, ui
-  onMouseup () {} // event, store, ui
-  onKeydown () {} // event, store, ui
-  onKeyup () {} // event, store, ui
-  changeMode () {} // nextModeName, revertChanges, store, ui
-  prepareAndRender () { // geojson, render, store, ui
+  constructor() {} // store, ui, map
+  onClick () {} // event, store, ui, map
+  onDrag () {} // event, store, ui, map
+  onMousemove () {} // event, store, ui, map
+  onMousedown () {} // event, store, ui, map
+  onMouseup () {} // event, store, ui, map
+  onKeydown () {} // event, store, ui, map
+  onKeyup () {} // event, store, ui, map
+  onTrash() {} // store, ui, map
+  changeMode () {} // nextModeName, store, ui, map
+  prepareAndRender () { // geojson, render, store, ui, map
     throw new Error('A mode must implement prepareAndRender');
   }
 }
