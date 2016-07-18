@@ -1,12 +1,14 @@
 var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 const constrainFeatureMovement = require('../lib/constrain_feature_movement');
-const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 
-const isVertex = isOfMetaType(Constants.meta.VERTEX);
-const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
+export default class DirectSelectMode extends ModeInterface {
+  constructor (options, store, ui) {
+    /// meh
+  }
+}
 
 module.exports = function(ctx, opts) {
   var featureId = opts.featureId;
@@ -66,7 +68,7 @@ module.exports = function(ctx, opts) {
   return {
     start: function() {
       ctx.store.setSelected(featureId);
-      doubleClickZoom.disable(ctx);
+      this.doubleClickZoom(false);
 
       // On mousemove that is not a drag, stop vertex movement.
       this.on('mousemove', CommonSelectors.true, stopDragging);
@@ -119,7 +121,7 @@ module.exports = function(ctx, opts) {
       });
     },
     stop: function() {
-      doubleClickZoom.enable(ctx);
+      this.doubleClickZoom(true);
     },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {

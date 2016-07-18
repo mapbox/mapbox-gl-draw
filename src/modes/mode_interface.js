@@ -5,8 +5,10 @@
  ************************
  * store {object} - is the store object (normally ctx.store)
  * ui {object} - is the ui object (normally ctx.ui)
- * map {object} - the mapbox-gl-js map object
  * event {object} - is the event that triggered this handler
+      * mapPoint - a point that represents where the mouse is in pixel space
+      * featureTarget - the feature under the mouse
+      * originalEvent - the event that triggered this event
  * nextModeName {string} - the name of the mode being transitioned too
  * revertChanges {boolean} - if ture, the mode should try to undo its changes
  * geojson {object} - is the geojson representation of an internal feature.
@@ -17,17 +19,23 @@
  */
 
 export default class ModeInterface {
-  constructor() {} // store, ui, map
-  onClick () {} // event, store, ui, map
-  onDrag () {} // event, store, ui, map
-  onMousemove () {} // event, store, ui, map
-  onMousedown () {} // event, store, ui, map
-  onMouseup () {} // event, store, ui, map
-  onKeydown () {} // event, store, ui, map
-  onKeyup () {} // event, store, ui, map
-  onTrash() {} // store, ui, map
-  changeMode () {} // nextModeName, store, ui, map
-  prepareAndRender () { // geojson, render, store, ui, map
+  constructor() {} // store, ui
+  onClick () {} // event, store, ui
+  onDrag () {} // event, store, ui
+  onMousemove () {} // event, store, ui
+  onMousedown () {} // event, store, ui
+  onMouseup () {} // event, store, ui
+  onKeydown () {} // event, store, ui
+  onKeyup () {} // event, store, ui
+  onTrash() {} // store, ui
+  changeMode () {} // nextModeName, store, ui
+  prepareAndRender () { // geojson, render, store, ui
     throw new Error('A mode must implement prepareAndRender');
   }
 }
+
+// this.doubleClickZoom(enable) if ture, set to enabled. If false, set to disabled.
+// this.dragPan(enable) if ture, set to enabled. If false, set to disabled.
+// events need to have points on them based on the container (mouseEventPoint(e.originalEvent, ctx.container);)
+// this.appendChild() should add a dom node to the screen that will be cleaned up on mode change
+// this.fire fires an event

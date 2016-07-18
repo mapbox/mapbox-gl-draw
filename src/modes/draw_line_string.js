@@ -1,14 +1,13 @@
 const CommonSelectors = require('../lib/common_selectors');
 const LineString = require('../feature_types/line_string');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
-const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
 
 import ModeInterface from './mode_interface';
 
-export default class DrawPointMode extends ModeInterface {
-  constructor(store, ui, map) {
+export default class DrawLineStringMode extends ModeInterface {
+  constructor(store, ui) {
     this.line = new LineString({
       type: Constants.geojsonTypes.FEATURE,
       properties: {},
@@ -22,7 +21,7 @@ export default class DrawPointMode extends ModeInterface {
 
     store.add(this.line);
     store.clearSelected();
-    doubleClickZoom.disable({map});
+    this.doubleClickZoom(false);
     ui.queueMapClasses({ mouse: Constants.cursors.ADD });
     ui.setActiveButton(Constants.types.LINE);
   }
@@ -64,8 +63,8 @@ export default class DrawPointMode extends ModeInterface {
     this.changeMode(Constants.modes.SIMPLE_SELECT);
   }
 
-  changeMode(nextModeName, store, ui, map) {
-    doubleClickZoom.enable({map});
+  changeMode(nextModeName, store, ui) {
+    this.doubleClickZoom(true);
     ui.setActiveButton();
     if (store.get(this.line.id) === undefined) return;
 
@@ -73,7 +72,7 @@ export default class DrawPointMode extends ModeInterface {
     this.line.removeCoordinate(`${this.currentVertexPosition}`);
 
     if (this.line.isValid()) {
-      map.fire(Constants.events.CREATE, {
+      this.fire(Constants.events.CREATE, {
         features: [line.toGeoJSON()]
       });
     }

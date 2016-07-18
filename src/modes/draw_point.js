@@ -22,10 +22,10 @@ export default class DrawPointMode extends ModeInterface {
     ui.setActiveButton(Constants.types.POINT);
   }
 
-  onClick(e, store, ui, map) {
+  onClick(e, store, ui) {
     ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-    map.fire(Constants.events.CREATE, {
+    this.fire(Constants.events.CREATE, {
       features: [point.toGeoJSON()]
     });
     store.setSelected([point.id]);
