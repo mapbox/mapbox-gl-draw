@@ -6,7 +6,7 @@ const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
 
 module.exports = function(ctx) {
-  const line = new LineString(ctx, {
+  const line = new LineString({
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {

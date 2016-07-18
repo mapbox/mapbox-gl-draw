@@ -90,6 +90,9 @@ Store.prototype.getAllIds = function() {
  * @return {Store} this
  */
 Store.prototype.add = function(feature) {
+  feature.changed = () => {
+    this.featureChanged(feature.id);
+  }
   this.featureChanged(feature.id);
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);

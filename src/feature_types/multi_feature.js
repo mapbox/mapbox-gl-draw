@@ -14,8 +14,8 @@ let takeAction = (features, action, path, lng, lat) => {
   return features[idx][action](tail, lng, lat);
 };
 
-var MultiFeature = function(ctx, geojson) {
-  Feature.call(this, ctx, geojson);
+var MultiFeature = function(geojson) {
+  Feature.call(this, geojson);
 
   delete this.coordinates;
   this.model = models[geojson.geometry.type];
@@ -26,7 +26,7 @@ var MultiFeature = function(ctx, geojson) {
 MultiFeature.prototype = Object.create(Feature.prototype);
 
 MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
-  return coordinates.map(coords => new this.model(this.ctx, {
+  return coordinates.map(coords => new this.model({
     id: this.id,
     type: Constants.geojsonTypes.FEATURE,
     properties: {},

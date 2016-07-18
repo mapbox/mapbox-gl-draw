@@ -7,7 +7,7 @@ const createVertex = require('../lib/create_vertex');
 
 module.exports = function(ctx) {
 
-  const polygon = new Polygon(ctx, {
+  const polygon = new Polygon({
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
