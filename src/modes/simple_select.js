@@ -5,6 +5,8 @@ const StringSet = require('../lib/string_set');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
 
+import ModeInterface from './mode_interface';
+
 const getUniqueIds = function(allFeatures) {
   if (!allFeatures.length) return [];
   const ids = allFeatures.map(s => s.properties.id)
@@ -19,6 +21,7 @@ const getUniqueIds = function(allFeatures) {
 
 export default class SimpleSelectMode extends ModeInterface {
   constructor (options, store, ui) {
+    super();
     this.boxSelectIsOn = options.boxSelect;
     this.dragMoveLocation = null;
     this.boxSelectStartLocation = null;
@@ -103,7 +106,7 @@ export default class SimpleSelectMode extends ModeInterface {
       this.stopExtendedInteractions();
       this.dragPan(false);
       // Enable box select
-      this.boxSelectStartLocation = e.mapPoint;
+      this.boxSelectStartLocation = e.mouseEventPoint;
       this.canBoxSelect = true;
     }
   }
@@ -177,16 +180,17 @@ export default class SimpleSelectMode extends ModeInterface {
       if (!this.boxSelectElement) {
         this.boxSelectElement = document.createElement('div');
         this.boxSelectElement.classList.add(Constants.classes.BOX_SELECT);
-        this.appendChild(boxSelectElement);
+        this.appendChild(this.boxSelectElement);
       }
 
       // Adjust the box node's width and xy position
-      const current = e.mousePoint;
+      const current = e.mouseEventPoint;
       const minX = Math.min(this.boxSelectStartLocation.x, current.x);
       const maxX = Math.max(this.boxSelectStartLocation.x, current.x);
       const minY = Math.min(this.boxSelectStartLocation.y, current.y);
       const maxY = Math.max(this.boxSelectStartLocation.y, current.y);
       const translateValue = `translate(${minX}px, ${minY}px)`;
+      console.log(translateValue);
       this.boxSelectElement.style.transform = translateValue;
       this.boxSelectElement.style.WebkitTransform = translateValue;
       this.boxSelectElement.style.width = `${maxX - minX}px`;
@@ -207,7 +211,7 @@ export default class SimpleSelectMode extends ModeInterface {
     if (this.boxSelecting) {
       const bbox = [
         this.boxSelectStartLocation,
-        e.mousePoint
+        e.mouseEventPoint
       ];
       const featuresInBox = store.featuresAt(bbox);
       const idsToSelect = getUniqueIds(featuresInBox)
@@ -219,7 +223,7 @@ export default class SimpleSelectMode extends ModeInterface {
         ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
       }
     }
-    return stopExtendedInteractions();
+    return this.stopExtendedInteractions();
   }
 
   prepareAndRender(geojson, render, store) {

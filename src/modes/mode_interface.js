@@ -19,7 +19,7 @@
  */
 
 export default class ModeInterface {
-  constructor() {} // store, ui
+  constructor() {} // options, store, ui
   onClick () {} // event, store, ui
   onDrag () {} // event, store, ui
   onMousemove () {} // event, store, ui
@@ -39,3 +39,23 @@ export default class ModeInterface {
 // events need to have points on them based on the container (mouseEventPoint(e.originalEvent, ctx.container);)
 // this.appendChild() should add a dom node to the screen that will be cleaned up on mode change
 // this.fire fires an event
+
+
+// store.add
+// store.getSelectedIds()
+// store.getSelected()
+// store.clearSelected()
+// store.setSelected()
+// store.featureChanged()
+// store.isSelected()
+// store.get()
+// store.deselect()
+// store.featuresAt()
+// store.select()
+// store.delete()
+
+
+
+
+
+

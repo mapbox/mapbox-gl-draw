@@ -4,8 +4,11 @@ const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
 
+import ModeInterface from './mode_interface';
+
 export default class DrawPolygonMode extends ModeInterface {
   constructor (store, ui) {
+    super();
     this.currentVertexPosition = 0;
     this.polygon = new Polygon({
       type: Constants.geojsonTypes.FEATURE,

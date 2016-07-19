@@ -6,6 +6,7 @@ import ModeInterface from './mode_interface';
 
 export default class DrawPointMode extends ModeInterface {
   constructor(store, ui) {
+    super();
     this.point = new Point({
       type: Constants.geojsonTypes.FEATURE,
       properties: {},

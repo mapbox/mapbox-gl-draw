@@ -8,6 +8,7 @@ import ModeInterface from './mode_interface';
 
 export default class DrawLineStringMode extends ModeInterface {
   constructor(store, ui) {
+    super();
     this.line = new LineString({
       type: Constants.geojsonTypes.FEATURE,
       properties: {},

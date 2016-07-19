@@ -50,4 +50,4 @@ Feature.prototype.internal = function(mode) {
   };
 };
 
-export default Feature;
+module.exports = Feature;

@@ -3,13 +3,21 @@ var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
 var Constants = require('./constants');
 
+import SimpleSelectMode from './modes/simple_select';
+import DirectSelectMode from './modes/direct_select';
+import DrawPointMode from './modes/draw_point';
+import DrawLineStringMode from './modes/draw_line_string';
+import DrawPolygonMode from './modes/draw_polygon';
+import StaticMode from './modes/static';
+
+
 var modes = {
-  [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
-  [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
-  [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
-  [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
-  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
-  [Constants.modes.STATIC]: require('./modes/static')
+  [Constants.modes.SIMPLE_SELECT]: SimpleSelectMode,
+  [Constants.modes.DIRECT_SELECT]: DirectSelectMode,
+  [Constants.modes.DRAW_POINT]: DrawPointMode,
+  [Constants.modes.DRAW_LINE_STRING]: DrawLineStringMode,
+  [Constants.modes.DRAW_POLYGON]: DrawPolygonMode,
+  [Constants.modes.STATIC]: StaticMode
 };
 
 module.exports = function(ctx) {
@@ -17,7 +25,7 @@ module.exports = function(ctx) {
   var mouseDownInfo = {};
   var events = {};
   var currentModeName = Constants.modes.SIMPLE_SELECT;
-  var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
+  var currentMode = ModeHandler(new modes.simple_select(ctx.options, ctx.store, ctx.ui), ctx);
 
   events.drag = function(event) {
     if (isClick(mouseDownInfo, {
@@ -107,7 +115,7 @@ module.exports = function(ctx) {
       throw new Error(`${modename} is not valid`);
     }
     currentModeName = modename;
-    var mode = modebuilder(ctx, nextModeOptions);
+    var mode = new modebuilder(ctx.options, ctx.store, ctx.ui);
     currentMode = ModeHandler(mode, ctx);
 
     if (!eventOptions.silent) {
