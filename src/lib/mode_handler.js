@@ -22,11 +22,33 @@ var ModeHandler = function(mode, ctx) {
     }
   }
 
+  var finalNextModeName = null;
+  mode.changeMode = function(nextModeName, eventOptions = {}) {
+    var emit = finalNextModeName === null;
+    finalNextModeName = nextModeName;
+    if (emit) {
+      ctx.events.changeMode(nextModeName, eventOptions);
+      // todo: clean up...
+    }
+    else {
+      mode.onChangeMode(nextModeName, ctx.store, ctx.ui);
+    }
+    var out = finalNextModeName;
+    if (emit) {
+      finalNextModeName = null;
+    }
+    return out;
+  }
+
   var children = [];
 
   mode.appendChild = function(child) {
     children.push(child);
     ctx.container.appendChild(child);
+  }
+
+  mode.fire = function(...args) {
+    map.fire.call(map, args);
   }
 
   function delegate(action, event) {
@@ -44,10 +66,11 @@ var ModeHandler = function(mode, ctx) {
   }
 
   return {
-    render: mode.render,
-    stop: function() {
-      // todo: clean up children
-      if (mode.stop) mode.stop();
+    changeMode: function(modename) {
+      return mode.changeMode(modename);
+    },
+    render: function(geojson, render) {
+      mode.prepareAndRender(geojson, render, ctx.store, ctx.ui);
     },
     trash: function() {
       mode.onTrash();

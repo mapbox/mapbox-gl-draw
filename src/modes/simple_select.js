@@ -46,7 +46,7 @@ export default class SimpleSelectMode extends ModeInterface {
     this.canDragMove = false;
   }
 
-  changeMode (nextModeName, store, ui) {
+  onChangeMode (nextModeName, store, ui) {
     this.doubleClickZoom(true);
   }
 
@@ -163,8 +163,8 @@ export default class SimpleSelectMode extends ModeInterface {
       e.originalEvent.stopPropagation();
 
       const delta = {
-        lng: e.lngLat.lng - dragMoveLocation.lng,
-        lat: e.lngLat.lat - dragMoveLocation.lat
+        lng: e.lngLat.lng - this.dragMoveLocation.lng,
+        lat: e.lngLat.lat - this.dragMoveLocation.lat
       };
 
       moveFeatures(store.getSelected(), delta);
@@ -205,7 +205,7 @@ export default class SimpleSelectMode extends ModeInterface {
         action: Constants.updateActions.MOVE,
         features: store.getSelected().map(f => f.toGeoJSON())
       });
-      return stopExtendedInteractions();
+      return this.stopExtendedInteractions();
     }
 
     if (this.boxSelecting) {

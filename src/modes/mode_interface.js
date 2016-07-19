@@ -28,7 +28,7 @@ export default class ModeInterface {
   onKeydown () {} // event, store, ui
   onKeyup () {} // event, store, ui
   onTrash() {} // store, ui
-  changeMode () {} // nextModeName, store, ui
+  onChangeMode () {} // nextModeName, store, ui
   prepareAndRender () { // geojson, render, store, ui
     throw new Error('A mode must implement prepareAndRender');
   }

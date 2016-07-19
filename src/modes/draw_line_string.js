@@ -7,7 +7,7 @@ const createVertex = require('../lib/create_vertex');
 import ModeInterface from './mode_interface';
 
 export default class DrawLineStringMode extends ModeInterface {
-  constructor(store, ui) {
+  constructor(options, store, ui) {
     super();
     this.line = new LineString({
       type: Constants.geojsonTypes.FEATURE,
@@ -64,7 +64,7 @@ export default class DrawLineStringMode extends ModeInterface {
     this.changeMode(Constants.modes.SIMPLE_SELECT);
   }
 
-  changeMode(nextModeName, store, ui) {
+  onChangeMode(nextModeName, store, ui) {
     this.doubleClickZoom(true);
     ui.setActiveButton();
     if (store.get(this.line.id) === undefined) return;

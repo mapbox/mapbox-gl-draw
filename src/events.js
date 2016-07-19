@@ -107,8 +107,8 @@ module.exports = function(ctx) {
     ctx.store.changeZoom();
   };
 
-  function changeMode(modename, nextModeOptions, eventOptions = {}) {
-    currentMode.stop();
+  function changeMode(modename, eventOptions = {}) {
+    var modename = currentMode.changeMode(modename);
 
     var modebuilder = modes[modename];
     if (modebuilder === undefined) {

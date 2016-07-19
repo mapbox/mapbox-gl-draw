@@ -130,7 +130,7 @@ export default class DirectSelectMode extends ModeInterface {
     stopDragging();
   }
 
-  changeMode() {
+  onChangeMode() {
     this.doubleClickZoom(true);
   }
 

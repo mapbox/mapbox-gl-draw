@@ -7,7 +7,7 @@ const createVertex = require('../lib/create_vertex');
 import ModeInterface from './mode_interface';
 
 export default class DrawPolygonMode extends ModeInterface {
-  constructor (store, ui) {
+  constructor (options, store, ui) {
     super();
     this.currentVertexPosition = 0;
     this.polygon = new Polygon({
@@ -66,7 +66,7 @@ export default class DrawPolygonMode extends ModeInterface {
     this.changeMode(Constants.modes.SIMPLE_SELECT);
   }
 
-  changeMode (nextModeName, store, ui) {
+  onChangeMode (nextModeName, store, ui) {
     ui.queueMapClasses({ mouse: Constants.cursors.NONE });
     this.doubleClickZoom(true);
     ui.setActiveButton();
