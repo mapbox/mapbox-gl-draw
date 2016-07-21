@@ -1,3 +1,7 @@
+## 0.11.11
+
+- Fix bug caused by `render` calling itself synchronously, side-stepping the throttle and possibly emitting the same deleted features twice.
+
 ## 0.11.10
 
 - Add support for mapbox-gl 0.21
