@@ -16,10 +16,10 @@ function throttle(fn, time, context) {
       args = arguments;
 
     } else {
-      // call and lock until later
+      // lock until later then call
+      lock = true;
       fn.apply(context, arguments);
       setTimeout(later, time);
-      lock = true;
     }
   };
 

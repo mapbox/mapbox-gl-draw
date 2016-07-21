@@ -61,10 +61,13 @@ module.exports = function render() {
   }
 
   if (store._deletedFeaturesToEmit.length) {
-    store.ctx.map.fire(Constants.events.DELETE, {
-      features: store._deletedFeaturesToEmit.map(feature => feature.toGeoJSON())
-    });
+    var geojsonToEmit = store._deletedFeaturesToEmit.map(feature => feature.toGeoJSON());
+
     store._deletedFeaturesToEmit = [];
+
+    store.ctx.map.fire(Constants.events.DELETE, {
+      features: geojsonToEmit
+    });
   }
 
   store.ctx.map.fire(Constants.events.RENDER, {});
