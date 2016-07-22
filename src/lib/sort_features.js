@@ -7,7 +7,7 @@ const FEATURE_SORT_RANKS = {
   Polygon: 2
 };
 
-function comparator(a, b) {
+const comparator = (a, b) => {
   const score = FEATURE_SORT_RANKS[a.geometry.type] - FEATURE_SORT_RANKS[b.geometry.type];
 
   if (score === 0 && a.geometry.type === Constants.geojsonTypes.POLYGON) {

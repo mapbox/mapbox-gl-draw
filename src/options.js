@@ -26,7 +26,7 @@ const hideControls = {
   trash: false
 };
 
-function addSources(styles, sourceBucket) {
+const addSources = (styles, sourceBucket) => {
   return styles.map(style => {
     if (style.source) return style;
     return xtend(style, {
@@ -36,7 +36,7 @@ function addSources(styles, sourceBucket) {
         : Constants.sources.COLD
     });
   });
-}
+};
 
 module.exports = function(options = {}) {
   let withDefaults = xtend(options);
