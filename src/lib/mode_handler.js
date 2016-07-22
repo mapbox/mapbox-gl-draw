@@ -1,81 +1,101 @@
-var ModeHandler = function(mode, DrawContext) {
+import Point from 'point-geometry';
+import doubleClickZoom from './double_click_zoom';
+import dragPan from './drag_pan';
 
-  var handlers = {
-    drag: [],
-    click: [],
-    mousemove: [],
-    mousedown: [],
-    mouseup: [],
-    keydown: [],
-    keyup: []
-  };
+var ModeHandler = function(mode, ctx) {
 
-  var ctx = {
-    on: function(event, selector, fn) {
-      if (handlers[event] === undefined) {
-        throw new Error(`Invalid event type: ${event}`);
-      }
-      handlers[event].push({
-        selector: selector,
-        fn: fn
-      });
-    },
-    render: function(id) {
-      DrawContext.store.featureChanged(id);
+  mode.dragPan = function(enable) {
+    if (enable) {
+      dragPan.enable(ctx);
     }
-  };
-
-  var delegate = function (eventName, event) {
-    var handles = handlers[eventName];
-    var iHandle = handles.length;
-    while (iHandle--) {
-      var handle = handles[iHandle];
-      if (handle.selector(event)) {
-        handle.fn.call(ctx, event);
-        DrawContext.store.render();
-        DrawContext.ui.updateMapClasses();
-
-        // ensure an event is only handled once
-        // we do this to let modes have multiple overlapping selectors
-        // and relay on order of oppertations to filter
-        break;
-      }
+    else {
+      dragPan.disable(ctx);
     }
-  };
+  }
 
-  mode.start.call(ctx);
+  mode.doubleClickZoom = function(enable) {
+    if (enable) {
+      doubleClickZoom.enable(ctx);
+    }
+    else {
+      doubleClickZoom.disable(ctx);
+    }
+  }
+
+  var finalNextModeName = null;
+  mode.changeMode = function(nextModeName, eventOptions = {}) {
+    var emit = finalNextModeName === null;
+    finalNextModeName = nextModeName;
+    if (emit) {
+      ctx.events.changeMode(nextModeName, eventOptions);
+      // todo: clean up...
+    }
+    else {
+      mode.onChangeMode(nextModeName, ctx.store, ctx.ui);
+    }
+    var out = finalNextModeName;
+    if (emit) {
+      finalNextModeName = null;
+    }
+    return out;
+  }
+
+  var children = [];
+
+  mode.appendChild = function(child) {
+    children.push(child);
+    ctx.container.appendChild(child);
+  }
+
+  mode.fire = function(...args) {
+    map.fire.call(map, args);
+  }
+
+  function delegate(action, event) {
+    console.log(action);
+    if (event.originalEvent) {
+      const rect = ctx.container.getBoundingClientRect();
+      event.mouseEventPoint = new Point(
+        event.originalEvent.clientX - rect.left - ctx.container.clientLeft,
+        event.originalEvent.clientY - rect.top - ctx.container.clientTop
+      );
+    }
+    mode[action](event, ctx.store, ctx.ui);
+    ctx.store.render();
+    ctx.ui.updateMapClasses();
+  }
 
   return {
-    render: mode.render,
-    stop: function() {
-      if (mode.stop) mode.stop();
+    changeMode: function(modename) {
+      return mode.changeMode(modename);
+    },
+    render: function(geojson, render) {
+      mode.prepareAndRender(geojson, render, ctx.store, ctx.ui);
     },
     trash: function() {
-      if (mode.trash) {
-        mode.trash();
-        DrawContext.store.render();
-      }
+      mode.onTrash();
+      ctx.store.render();
     },
     drag: function(event) {
-      delegate('drag', event);
+      delegate('onDrag', event);
     },
     click: function(event) {
-      delegate('click', event);
+      delegate('onClick', event);
     },
     mousemove: function(event) {
-      delegate('mousemove', event);
+      delegate('onMousemove', event);
     },
     mousedown: function(event) {
-      delegate('mousedown', event);
+      delegate('onMousedown', event);
     },
     mouseup: function(event) {
-      delegate('mouseup', event);
+      delegate('onMouseup', event);
     },
     keydown: function(event) {
-      delegate('keydown', event);
+      delegate('onKeydown', event);
     },
     keyup: function(event) {
-      delegate('keyup', event);
+      delegate('onKeyup', event);
     }
   };
 };

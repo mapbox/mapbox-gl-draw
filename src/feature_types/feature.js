@@ -1,16 +1,11 @@
 var hat = require('hat');
 var Constants = require('../constants');
 
-var Feature = function(ctx, geojson) {
-  this.ctx = ctx;
+var Feature = function(geojson) {
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
   this.id = geojson.id || hat();
   this.type = geojson.geometry.type;
-};
-
-Feature.prototype.changed = function() {
-  this.ctx.store.featureChanged(this.id);
 };
 
 Feature.prototype.incomingCoords = function(coords) {

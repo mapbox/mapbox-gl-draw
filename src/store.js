@@ -2,6 +2,7 @@ var throttle = require('./lib/throttle');
 var toDenseArray = require('./lib/to_dense_array');
 var StringSet = require('./lib/string_set');
 var render = require('./render');
+const featuresAt = require('./lib/features_at');
 
 var Store = module.exports = function(ctx) {
   this._features = {};
@@ -19,6 +20,10 @@ var Store = module.exports = function(ctx) {
   this.isDirty = false;
 };
 
+
+Store.prototype.featuresAt = function(bbox) {
+  return featuresAt(null, bbox, this.ctx);
+}
 
 /**
  * Delays all rendering until the returned function is invoked
@@ -90,6 +95,9 @@ Store.prototype.getAllIds = function() {
  * @return {Store} this
  */
 Store.prototype.add = function(feature) {
+  feature.changed = () => {
+    this.featureChanged(feature.id);
+  }
   this.featureChanged(feature.id);
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);

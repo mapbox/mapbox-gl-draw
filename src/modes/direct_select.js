@@ -1,156 +1,170 @@
-var {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
 var createSupplementaryPoints = require('../lib/create_supplementary_points');
 const constrainFeatureMovement = require('../lib/constrain_feature_movement');
-const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 
-const isVertex = isOfMetaType(Constants.meta.VERTEX);
-const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
+import ModeInterface from './mode_interface';
 
-module.exports = function(ctx, opts) {
-  var featureId = opts.featureId;
-  var feature = ctx.store.get(featureId);
+export default class DirectSelectMode extends ModeInterface {
+  constructor (options, store, ui) {
+    super();
+    this.feature = store.getSelected()[0];
 
-  if (!feature) {
-    throw new Error('You must provide a featureId to enter direct_select mode');
+    if (this.feature === undefined) {
+      throw new Error('A feature must be selected to enter DirectSelect mode');
+    }
+
+    if (this.feature.type === Constants.geojsonTypes.POINT) {
+      throw new TypeError('direct_select mode doesn\'t handle point features');
+    }
+
+    this.featureId = this.feature.id;
+
+    this.dragMoveLocation = null;
+    this.dragMoving = false;
+    this.canDragMove = false;
+
+    this.selectedCoordPaths = []; // todo...
+
+    this.doubleClickZoom(false);
   }
 
-  if (feature.type === Constants.geojsonTypes.POINT) {
-    throw new TypeError('direct_select mode doesn\'t handle point features');
+  startDragging (e) {
+    this.dragPan(false);
+    this.canDragMove = true;
+    this.dragMoveLocation = e.lngLat;
   }
 
-  var dragMoveLocation = opts.startPos || null;
-  var dragMoving = false;
-  var canDragMove = false;
+  stopDragging (e) {
+    this.dragPan(true);
+    this.dragMoving = false;
+    this.canDragMove = false;
+    this.dragMoveLocation = null;
+  }
 
-  var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
-
-  var onVertex = function(e) {
-    startDragging(e);
+  onVertex (e) {
+    this.startDragging(e);
     var about = e.featureTarget.properties;
-    var selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
+    var selectedIndex = this.selectedCoordPaths.indexOf(about.coord_path);
     if (!isShiftDown(e) && selectedIndex === -1) {
-      selectedCoordPaths = [about.coord_path];
+      this.selectedCoordPaths = [about.coord_path];
     }
     else if (isShiftDown(e) && selectedIndex === -1) {
-      selectedCoordPaths.push(about.coord_path);
+      this.selectedCoordPaths.push(about.coord_path);
     }
-    feature.changed();
-  };
+    this.feature.changed();
+  }
 
-  var onMidpoint = function(e) {
-    startDragging(e);
+  onMidpoint (e, store) {
+    this.startDragging(e);
     var about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
-    ctx.map.fire(Constants.events.UPDATE, {
+    this.fire(Constants.events.UPDATE, {
+      action: Constants.updateActions.CHANGE_COORDINATES,
+      features: store.getSelected().map(f => f.toGeoJSON())
+    });
+    this.selectedCoordPaths = [about.coord_path];
+  }
+
+  onMouseMove (e) {
+    this.stopDragging(e);
+  }
+
+  onMousedown (e) {
+    if (CommonSelectors.isVertex(e)) {
+      return this.onVertex(e);
+    }
+
+    if (CommonSelectors.isMidpoint(e)) {
+      return this.onMidpoint(e);
+    }
+  }
+
+  onDraw (e) {
+    if (this.canDragMove) {
+      this.dragMoving = true;
+      e.originalEvent.stopPropagation();
+
+      var selectedCoords = this.selectedCoordPaths.map(coord_path => this.feature.getCoordinate(coord_path));
+      var selectedCoordPoints = selectedCoords.map(coords => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coords
+        }
+      }));
+      var delta = {
+        lng: e.lngLat.lng - this.dragMoveLocation.lng,
+        lat: e.lngLat.lat - this.dragMoveLocation.lat
+      };
+      var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+
+      for (var i = 0; i < selectedCoords.length; i++) {
+        var coord = selectedCoords[i];
+        this.feature.updateCoordinate(this.selectedCoordPaths[i],
+          coord[0] + constrainedDelta.lng,
+          coord[1] + constrainedDelta.lat);
+      }
+
+      this.dragMoveLocation = e.lngLat;
+    }
+  }
+
+  onClick(e, store) {
+    if (CommonSelectors.noTarget(e) || CommonSelectors.isInactiveFeature(e)) {
+      store.clearSelected();
+      return this.changeMode(Constants.modes.SIMPLE_SELECT);
+    }
+
+    this.stopDragging(e);
+  }
+
+  onMouseup (e, store) {
+    if (this.dragMoving) {
+      this.fire(Constants.events.UPDATE, {
+        action: Constants.updateActions.CHANGE_COORDINATES,
+        features: store.getSelected().map(f => f.toGeoJSON())
+      });
+    }
+    stopDragging();
+  }
+
+  onChangeMode() {
+    this.doubleClickZoom(true);
+  }
+
+  prepareAndRender(geojson, render) {
+    if (featureId === geojson.properties.id) {
+      geojson.properties.active = Constants.activeStates.ACTIVE;
+      render(geojson);
+      createSupplementaryPoints(geojson, {
+        map: ctx.map,
+        midpoints: true,
+        selectedPaths: this.selectedCoordPaths
+      }).forEach(render);
+    }
+    else {
+      geojson.properties.active = Constants.activeStates.INACTIVE;
+      render(geojson);
+    }
+  }
+
+  onTrash(store, ui) {
+    if (this.selectedCoordPaths.length === 0) {
+      return this.changeMode(Constants.modes.SIMPLE_SELECT);
+    }
+
+    this.selectedCoordPaths.sort().reverse().forEach(id => this.feature.removeCoordinate(id));
+    this.fire(Constants.events.UPDATE, {
       action: Constants.updateActions.CHANGE_COORDINATES,
       features: ctx.store.getSelected().map(f => f.toGeoJSON())
     });
-    selectedCoordPaths = [about.coord_path];
-  };
-
-  var startDragging = function(e) {
-    ctx.map.dragPan.disable();
-    canDragMove = true;
-    dragMoveLocation = e.lngLat;
-  };
-
-  var stopDragging = function() {
-    ctx.map.dragPan.enable();
-    dragMoving = false;
-    canDragMove = false;
-    dragMoveLocation = null;
-  };
-
-  return {
-    start: function() {
-      ctx.store.setSelected(featureId);
-      doubleClickZoom.disable(ctx);
-
-      // On mousemove that is not a drag, stop vertex movement.
-      this.on('mousemove', CommonSelectors.true, stopDragging);
-
-      this.on('mousedown', isVertex, onVertex);
-      this.on('mousedown', isMidpoint, onMidpoint);
-      this.on('drag', () => canDragMove, function(e) {
-        dragMoving = true;
-        e.originalEvent.stopPropagation();
-
-        var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-        var selectedCoordPoints = selectedCoords.map(coords => ({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coords
-          }
-        }));
-        var delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-        var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
-
-        for (var i = 0; i < selectedCoords.length; i++) {
-          var coord = selectedCoords[i];
-          feature.updateCoordinate(selectedCoordPaths[i],
-            coord[0] + constrainedDelta.lng,
-            coord[1] + constrainedDelta.lat);
-        }
-
-        dragMoveLocation = e.lngLat;
-      });
-      this.on('click', CommonSelectors.true, stopDragging);
-      this.on('mouseup', CommonSelectors.true, function() {
-        if (dragMoving) {
-          ctx.map.fire(Constants.events.UPDATE, {
-            action: Constants.updateActions.CHANGE_COORDINATES,
-            features: ctx.store.getSelected().map(f => f.toGeoJSON())
-          });
-        }
-        stopDragging();
-      });
-      this.on('click', noTarget, function() {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-      this.on('click', isInactiveFeature, function() {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-    },
-    stop: function() {
-      doubleClickZoom.enable(ctx);
-    },
-    render: function(geojson, push) {
-      if (featureId === geojson.properties.id) {
-        geojson.properties.active = Constants.activeStates.ACTIVE;
-        push(geojson);
-        createSupplementaryPoints(geojson, {
-          map: ctx.map,
-          midpoints: true,
-          selectedPaths: selectedCoordPaths
-        }).forEach(push);
-      }
-      else {
-        geojson.properties.active = Constants.activeStates.INACTIVE;
-        push(geojson);
-      }
-    },
-    trash: function() {
-      if (selectedCoordPaths.length === 0) {
-        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { features: [feature] });
-      }
-
-      selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
-      ctx.map.fire(Constants.events.UPDATE, {
-        action: Constants.updateActions.CHANGE_COORDINATES,
-        features: ctx.store.getSelected().map(f => f.toGeoJSON())
-      });
-      selectedCoordPaths = [];
-      if (feature.isValid() === false) {
-        ctx.store.delete([featureId]);
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, null);
-      }
+    this.selectedCoordPaths = [];
+    if (this.feature.isValid() === false) {
+      store.delete([featureId]);
+      this.changeMode(Constants.modes.SIMPLE_SELECT);
     }
-  };
-};
+  }
+
+}

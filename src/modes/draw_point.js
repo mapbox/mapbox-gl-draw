@@ -2,61 +2,60 @@ const CommonSelectors = require('../lib/common_selectors');
 const Point = require('../feature_types/point');
 const Constants = require('../constants');
 
-module.exports = function(ctx) {
+import ModeInterface from './mode_interface';
 
-  const point = new Point(ctx, {
-    type: Constants.geojsonTypes.FEATURE,
-    properties: {},
-    geometry: {
-      type: Constants.geojsonTypes.POINT,
-      coordinates: []
-    }
-  });
-
-  if (ctx._test) ctx._test.point = point;
-
-  ctx.store.add(point);
-
-  function stopDrawingAndRemove() {
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-    ctx.store.delete([point.id], { silent: true });
-  }
-
-  function handleClick(e) {
-    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-    point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-    ctx.map.fire(Constants.events.CREATE, {
-      features: [point.toGeoJSON()]
-    });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [point.id] });
-  }
-
-  return {
-    start() {
-      ctx.store.clearSelected();
-      ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-      ctx.ui.setActiveButton(Constants.types.POINT);
-      this.on('click', CommonSelectors.true, handleClick);
-      this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
-      this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
-    },
-
-    stop() {
-      ctx.ui.setActiveButton();
-      if (!point.getCoordinate().length) {
-        ctx.store.delete([point.id], { silent: true });
+export default class DrawPointMode extends ModeInterface {
+  constructor(options, store, ui) {
+    super();
+    this.point = new Point({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.POINT,
+        coordinates: []
       }
-    },
+    });
 
-    render(geojson, callback) {
-      const isActivePoint = geojson.properties.id === point.id;
-      geojson.properties.active = (isActivePoint) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
-      if (!isActivePoint) return callback(geojson);
-      // Never render the point we're drawing
-    },
+    store.add(this.point);
 
-    trash() {
-      stopDrawingAndRemove();
+    store.clearSelected();
+    ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+    ui.setActiveButton(Constants.types.POINT);
+  }
+
+  onClick(e, store, ui) {
+    ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+    this.point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
+    this.fire(Constants.events.CREATE, {
+      features: [this.point.toGeoJSON()]
+    });
+    store.setSelected([this.point.id]);
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
+
+  onKeyup(e, store) {
+    if (CommonSelectors.isEscapeKey(e) || CommonSelectors.isEnterKey(e)) {
+      store.delete([this.point.id], {silent: true});
+      this.changeMode(Constants.modes.SIMPLE_SELECT);
     }
-  };
-};
+  }
+
+  onTrash() {
+    store.delete([this.point.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
+
+  onChangeMode(nextModeName, store, ui) {
+    ui.setActiveButton();
+    if (!this.point.getCoordinate().length) {
+      store.delete([this.point.id], {silent: true});
+    }
+  }
+
+  prepareAndRender(geojson, render) {
+    const isActivePoint = geojson.properties.id === this.point.id;
+    geojson.properties.active = (isActivePoint) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+    if (!isActivePoint) return render(geojson);
+    // Never render the point we're drawing
+  }
+}

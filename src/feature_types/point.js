@@ -1,7 +1,7 @@
 var Feature = require('./feature');
 
-var Point = function(ctx, geojson) {
-  Feature.call(this, ctx, geojson);
+var Point = function(geojson) {
+  Feature.call(this, geojson);
 };
 
 Point.prototype = Object.create(Feature.prototype);
