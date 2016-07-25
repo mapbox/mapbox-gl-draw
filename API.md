@@ -314,7 +314,7 @@ Fired when one or more features are updated. The following will trigger this eve
 - `action: 'move'`
   - Finish moving one or more selected features in `simple_select` mode. The event will only fire when the movement is finished — i.e. when the user releases the mouse button or hits Enter.
 - `action: 'change_coordinates'`
-  - Finish moving one or more vertices of a selected feature in `direct_select` mode. The event will only fire when the movement is finished — i.e. when the user releases the mouse button or hits Enter.
+  - Finish moving one or more vertices of a selected feature in `direct_select` mode. The event will only fire when the movement is finished — i.e. when the user releases the mouse button or hits Enter, or her mouse leaves the map container.
   - Delete one or more vertices of a selected feature in `direct_select` mode, which can be done by hitting the Backspace or Delete keys, clicking the Trash button, or invoking `Draw.trash()`.
   - Add a vertex to the selected feature by clicking a midpoint on that feature in `direct_select` mode.
 

@@ -6,6 +6,7 @@ import AfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
+import createSyntheticEvent from 'synthetic-dom-events';
 
 test('simple_select', t => {
 
@@ -416,6 +417,50 @@ test('simple_select', t => {
       var movedPoint = Draw.get(pointId);
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
+
+      t.end();
+    });
+  });
+
+  t.test('simple_select - fire one update when dragging mouse leaves container and button is released outside', t => {
+    var pointId = Draw.add(getGeoJSON('point'))[0];
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
+    var startPosition = getGeoJSON('point').geometry.coordinates;
+    afterNextRender(() => {
+      map.fire.reset();
+      map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+      map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+
+      var movedPoint = Draw.get(pointId);
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.update');
+      t.equal(args.length, 1, 'draw.update called once');
+      t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
+      t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
+
+      t.end();
+    });
+  });
+
+  t.test('simple_select - fire two update when dragging mouse leaves container then returns and button is released inside', t => {
+    var pointId = Draw.add(getGeoJSON('point'))[0];
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
+    var startPosition = getGeoJSON('point').geometry.coordinates;
+    afterNextRender(() => {
+      map.fire.reset();
+      map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { which: 1 }));
+      map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
+
+      var movedPoint = Draw.get(pointId);
+      var args = getFireArgs().filter(arg => arg[0] === 'draw.update');
+      t.equal(args.length, 2, 'draw.update called twice');
+      t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 25, 'point lng moved to the mouseup location');
+      t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 25, 'point lat moved to the mouseup location');
 
       t.end();
     });

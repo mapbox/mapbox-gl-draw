@@ -26,6 +26,26 @@ module.exports = function(ctx, opts) {
 
   var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
 
+  var fireUpdate = function() {
+    ctx.map.fire(Constants.events.UPDATE, {
+      action: Constants.updateActions.CHANGE_COORDINATES,
+      features: ctx.store.getSelected().map(f => f.toGeoJSON())
+    });
+  };
+
+  var startDragging = function(e) {
+    ctx.map.dragPan.disable();
+    canDragMove = true;
+    dragMoveLocation = e.lngLat;
+  };
+
+  var stopDragging = function() {
+    ctx.map.dragPan.enable();
+    dragMoving = false;
+    canDragMove = false;
+    dragMoveLocation = null;
+  };
+
   var onVertex = function(e) {
     startDragging(e);
     var about = e.featureTarget.properties;
@@ -43,24 +63,8 @@ module.exports = function(ctx, opts) {
     startDragging(e);
     var about = e.featureTarget.properties;
     feature.addCoordinate(about.coord_path, about.lng, about.lat);
-    ctx.map.fire(Constants.events.UPDATE, {
-      action: Constants.updateActions.CHANGE_COORDINATES,
-      features: ctx.store.getSelected().map(f => f.toGeoJSON())
-    });
+    fireUpdate();
     selectedCoordPaths = [about.coord_path];
-  };
-
-  var startDragging = function(e) {
-    ctx.map.dragPan.disable();
-    canDragMove = true;
-    dragMoveLocation = e.lngLat;
-  };
-
-  var stopDragging = function() {
-    ctx.map.dragPan.enable();
-    dragMoving = false;
-    canDragMove = false;
-    dragMoveLocation = null;
   };
 
   return {
@@ -70,6 +74,9 @@ module.exports = function(ctx, opts) {
 
       // On mousemove that is not a drag, stop vertex movement.
       this.on('mousemove', CommonSelectors.true, stopDragging);
+
+      // As soon as you mouse leaves the canvas, update the feature
+      this.on('mouseout', () => dragMoving, fireUpdate);
 
       this.on('mousedown', isVertex, onVertex);
       this.on('mousedown', isMidpoint, onMidpoint);
@@ -104,10 +111,7 @@ module.exports = function(ctx, opts) {
       this.on('click', CommonSelectors.true, stopDragging);
       this.on('mouseup', CommonSelectors.true, function() {
         if (dragMoving) {
-          ctx.map.fire(Constants.events.UPDATE, {
-            action: Constants.updateActions.CHANGE_COORDINATES,
-            features: ctx.store.getSelected().map(f => f.toGeoJSON())
-          });
+          fireUpdate();
         }
         stopDragging();
       });

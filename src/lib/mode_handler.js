@@ -6,6 +6,7 @@ var ModeHandler = function(mode, DrawContext) {
     mousemove: [],
     mousedown: [],
     mouseup: [],
+    mouseout: [],
     keydown: [],
     keyup: []
   };
@@ -70,6 +71,9 @@ var ModeHandler = function(mode, DrawContext) {
     },
     mouseup: function(event) {
       delegate('mouseup', event);
+    },
+    mouseout: function(event) {
+      delegate('mouseout', event);
     },
     keydown: function(event) {
       delegate('keydown', event);

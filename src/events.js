@@ -66,6 +66,10 @@ module.exports = function(ctx) {
     }
   };
 
+  events.mouseout = function(event) {
+    currentMode.mouseout(event);
+  };
+
   // 8 - Backspace
   // 46 - Delete
   var isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
@@ -137,6 +141,8 @@ module.exports = function(ctx) {
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
 
+      ctx.container.addEventListener('mouseout', events.mouseout);
+
       if (ctx.options.keybindings) {
         ctx.container.addEventListener('keydown', events.keydown);
         ctx.container.addEventListener('keyup', events.keyup);
@@ -147,6 +153,8 @@ module.exports = function(ctx) {
 
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
+
+      ctx.container.removeEventListener('mouseout', events.mouseout);
 
       if (ctx.options.keybindings) {
         ctx.container.removeEventListener('keydown', events.keydown);
