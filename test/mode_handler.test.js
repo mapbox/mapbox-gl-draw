@@ -15,9 +15,10 @@ test('returned API', t => {
   t.equal(typeof mh.mousemove, 'function', 'exposes mousemove');
   t.equal(typeof mh.mousedown, 'function', 'exposes mousedown');
   t.equal(typeof mh.mouseup, 'function', 'exposes mouseup');
+  t.equal(typeof mh.mouseout, 'function', 'exposes mouseout');
   t.equal(typeof mh.keydown, 'function', 'exposes keydown');
   t.equal(typeof mh.keyup, 'function', 'exposes keyup');
-  t.equal(Object.keys(mh).length, 10, 'no unexpected properties');
+  t.equal(Object.keys(mh).length, 11, 'no unexpected properties');
   t.end();
 });
 
@@ -88,6 +89,12 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
   mh.mouseup({ two: 2 });
   t.equal(mouseupSpy.callCount, 1, 'mouseup callback called via delegation');
   t.deepEqual(mouseupSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
+
+  const mouseoutSpy = spy();
+  startContext.on('mouseout', () => true, mouseoutSpy);
+  mh.mouseout({ two: 2 });
+  t.equal(mouseoutSpy.callCount, 1, 'mouseout callback called via delegation');
+  t.deepEqual(mouseoutSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
 
   const keydownSpy = spy();
   startContext.on('keydown', () => true, keydownSpy);

@@ -18,6 +18,13 @@ module.exports = function(ctx, options = {}) {
 
   const initiallySelectedFeatureIds = options.featureIds || [];
 
+  const fireUpdate = function() {
+    ctx.map.fire(Constants.events.UPDATE, {
+      action: Constants.updateActions.MOVE,
+      features: ctx.store.getSelected().map(f => f.toGeoJSON())
+    });
+  };
+
   const getUniqueIds = function(allFeatures) {
     if (!allFeatures.length) return [];
     const ids = allFeatures.map(s => s.properties.id)
@@ -60,10 +67,13 @@ module.exports = function(ctx, options = {}) {
 
       // On mousemove that is not a drag, stop extended interactions.
       // This is useful if you drag off the canvas, release the button,
-      // then move the mouse back over the canvas --- we don't the
-      // interaction to continue (but we do let it continue if you held
-      // the mouse button that whole time)
+      // then move the mouse back over the canvas --- we don't allow the
+      // interaction to continue then, but we do let it continue if you held
+      // the mouse button that whole time
       this.on('mousemove', CommonSelectors.true, stopExtendedInteractions);
+
+      // As soon as you mouse leaves the canvas, update the feature
+      this.on('mouseout', () => dragMoving, fireUpdate);
 
       // Click (with or without shift) on no feature
       this.on('click', CommonSelectors.noTarget, function() {
@@ -167,10 +177,7 @@ module.exports = function(ctx, options = {}) {
       this.on('mouseup', CommonSelectors.true, function(e) {
         // End any extended interactions
         if (dragMoving) {
-          ctx.map.fire(Constants.events.UPDATE, {
-            action: Constants.updateActions.MOVE,
-            features: ctx.store.getSelected().map(f => f.toGeoJSON())
-          });
+          fireUpdate();
         } else if (boxSelecting) {
           const bbox = [
             boxSelectStartLocation,
