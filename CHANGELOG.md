@@ -1,3 +1,7 @@
+## 0.11.12
+
+- Fix bug causing render update with firing `draw.update` event when mouse leaves map container.
+
 ## 0.11.11
 
 - Fix bug caused by `render` calling itself synchronously, side-stepping the throttle and possibly emitting the same deleted features twice.
