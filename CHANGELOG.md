@@ -1,5 +1,10 @@
 ## 0.11.12
 
+
+- Use geojsonhint version 2.0.0beta
+
+## 0.11.12
+
 - Fix bug causing render update with firing `draw.update` event when mouse leaves map container.
 
 ## 0.11.11
