@@ -99,8 +99,22 @@ module.exports = function(ctx) {
     }
   };
 
-  events.zoomend = function() {
-    ctx.store.changeZoom();
+  events.viewboxChanged = function() {
+    let bounds = ctx.map.getBounds();
+
+    let east = bounds.getEast();
+    let west = bounds.getWest();
+
+    if (east > 540 && west > -540) {
+      let center = ctx.map.getCenter().toArray();
+      center[0] -= east - 540;
+      ctx.map.setCenter(center);
+    } else if (west < -540 && east < 540) {
+      let center = ctx.map.getCenter().toArray();
+      center[0] -= west + 540
+      ctx.map.setCenter(center);
+    }
+
   };
 
   function changeMode(modename, nextModeOptions, eventOptions = {}) {
@@ -136,6 +150,10 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
+      ctx.map.on('zoomend', events.viewboxChanged);
+      ctx.map.on('dragend', events.viewboxChanged);
+      ctx.map.on('touchend', events.viewboxChanged);
+
       ctx.map.on('mousemove', events.mousemove);
 
       ctx.map.on('mousedown', events.mousedown);
@@ -149,6 +167,10 @@ module.exports = function(ctx) {
       }
     },
     removeEventListeners: function() {
+      ctx.map.off('zoomend', events.viewboxChanged);
+      ctx.map.off('dragend', events.viewboxChanged);
+      ctx.map.off('touchend', events.viewboxChanged);
+
       ctx.map.off('mousemove', events.mousemove);
 
       ctx.map.off('mousedown', events.mousedown);
