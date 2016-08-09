@@ -2,6 +2,7 @@ var ModeHandler = require('./lib/mode_handler');
 var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
 var Constants = require('./constants');
+var throttle = require('./lib/throttle');
 
 var modes = {
   [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
@@ -99,9 +100,23 @@ module.exports = function(ctx) {
     }
   };
 
-  events.zoomend = function() {
-    ctx.store.changeZoom();
-  };
+  events.viewboxChanged = throttle(function() {
+    let bounds = ctx.map.getBounds();
+
+    let east = bounds.getEast();
+    let west = bounds.getWest();
+
+    if (east > 540 && west > -540) {
+      let center = ctx.map.getCenter().toArray();
+      center[0] -= east - 540;
+      ctx.map.setCenter(center);
+    } else if (west < -540 && east < 540) {
+      let center = ctx.map.getCenter().toArray();
+      center[0] -= west + 540
+      ctx.map.setCenter(center);
+    }
+
+  }, 100);
 
   function changeMode(modename, nextModeOptions, eventOptions = {}) {
     currentMode.stop();
@@ -136,6 +151,8 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
+      ctx.map.on('render', events.viewboxChanged);
+
       ctx.map.on('mousemove', events.mousemove);
 
       ctx.map.on('mousedown', events.mousedown);
@@ -149,6 +166,8 @@ module.exports = function(ctx) {
       }
     },
     removeEventListeners: function() {
+      ctx.map.off('render', events.viewboxChanged);
+
       ctx.map.off('mousemove', events.mousemove);
 
       ctx.map.off('mousedown', events.mousedown);
