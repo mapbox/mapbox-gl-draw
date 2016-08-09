@@ -2,6 +2,7 @@ var ModeHandler = require('./lib/mode_handler');
 var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 var isClick = require('./lib/is_click');
 var Constants = require('./constants');
+var throttle = require('./lib/throttle');
 
 var modes = {
   [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
@@ -99,7 +100,7 @@ module.exports = function(ctx) {
     }
   };
 
-  events.viewboxChanged = function() {
+  events.viewboxChanged = throttle(function() {
     let bounds = ctx.map.getBounds();
 
     let east = bounds.getEast();
@@ -115,7 +116,7 @@ module.exports = function(ctx) {
       ctx.map.setCenter(center);
     }
 
-  };
+  }, 100);
 
   function changeMode(modename, nextModeOptions, eventOptions = {}) {
     currentMode.stop();
@@ -150,9 +151,7 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
-      ctx.map.on('zoomend', events.viewboxChanged);
-      ctx.map.on('dragend', events.viewboxChanged);
-      ctx.map.on('touchend', events.viewboxChanged);
+      ctx.map.on('render', events.viewboxChanged);
 
       ctx.map.on('mousemove', events.mousemove);
 
@@ -167,9 +166,7 @@ module.exports = function(ctx) {
       }
     },
     removeEventListeners: function() {
-      ctx.map.off('zoomend', events.viewboxChanged);
-      ctx.map.off('dragend', events.viewboxChanged);
-      ctx.map.off('touchend', events.viewboxChanged);
+      ctx.map.off('render', events.viewboxChanged);
 
       ctx.map.off('mousemove', events.mousemove);
 
