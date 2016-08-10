@@ -41,6 +41,8 @@ Lets you select, delete and drag features.
 
 In this mode, features can have their active state changed by the user. To control what is active, react to changes as described in the events section below.
 
+Draw will transition into `simple_select` mode every time a single feature has completed drawing.
+
 ### `direct_select`
 
 `Draw.modes.DIRECT_SELECT === 'direct_select'`
@@ -382,13 +384,19 @@ Fired just after Draw calls `setData()` on `mapbox-gl-js`. This does not imply t
 
 Draw is styled by the [Mapbox GL Style Spec](https://www.mapbox.com/mapbox-gl-style-spec/) with a preset list of properties.
 
+`source`
+
 The `GL Style Spec` requires each layer to have a source. **DO NOT PROVIDE THIS** for styling draw.
 
-The `GL Style Spec` also requires an id. Draw will provide this for you. If you wish to set this id to interact with draw layers, know that Draw will add `hot` and `cold` if no source is provided.
-
-Draw moves features between sources for performance gains, because of this it is recommeneded that you **DO NOT** provide a source for a style despite the fact the `GL Style Spec` requires a source. **Draw will provide the source for you automatically**.
+Draw moves features between sources for performance gains, because of this it is recommended that you **DO NOT** provide a source for a style despite the fact the `GL Style Spec` requires a source. **Draw will provide the source for you automatically**.
 
 If you need to style gl-draw for debugging sources the source names are `mapbox-gl-draw-hot` and `mapbox-gl-draw-cold`.
+
+`id`
+
+The `GL Style Spec` also requires an id. **YOU MUST PROVIDE THIS**.
+
+Draw will add `.hot` and `.cold` to the end of your id.
 
 property | values | function
 --- | --- | ---
@@ -398,11 +406,12 @@ mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon
 
 Draw also provides a few more properties, but they should not be used for styling. For details on them, see `Using Draw with map.queryRenderFeatures`.
 
-### Example Custom Style
-
-With this style all Point features are blue and have a black halo when active. No other features are rendered, even if they are present.
+### Example Custom Styles
 
 ```js
+// With this style, all Point features are blue and have a black halo when active.
+// No other features are rendered, even if they are present.
+
 mapbox.Draw({
   styles: [
     {
@@ -433,6 +442,126 @@ mapbox.Draw({
     }
   ]
 });
+
+// With this style, all line and polygon features are have dashed red outline
+// and transparent fill while being drawn, including the point vertices.
+// When the Draw mode is changed the 'static', these features will be drawn
+// with solid black outline and transparent fill.
+// Point vertices use the same point filter, and render these points twice:
+// once as a larger-radius halo, and again as the vertex inset point.
+
+// ACTIVE (being drawn)
+// line stroke
+{
+    "id": "gl-draw-line",
+    "type": "line",
+    "filter": ["all", ["==", "$type", "LineString"], ["!=", "mode", "static"]],
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-color": "#D20C0C",
+      "line-dasharray": [0.2, 2],
+      "line-width": 2
+    },
+    "interactive": true
+},
+// polygon fill
+{
+  "id": "gl-draw-polygon-fill",
+  "type": "fill",
+  "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+  "paint": {
+    "fill-color": "#D20C0C",
+    "fill-outline-color": "#D20C0C",
+    "fill-opacity": 0.1
+  },
+  "interactive": true
+},
+// polygon outline stroke
+// This doesn't style the first edge of the polygon, which uses the line stroke styling instead
+{
+  "id": "gl-draw-polygon-stroke-active",
+  "type": "line",
+  "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+  "layout": {
+    "line-cap": "round",
+    "line-join": "round"
+  },
+  "paint": {
+    "line-color": "#D20C0C",
+    "line-dasharray": [0.2, 2],
+    "line-width": 2
+  },
+  "interactive": true
+},
+// vertex point halos
+{
+  "id": "gl-draw-polygon-and-line-vertex-halo-active",
+  "type": "circle",
+  "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+  "paint": {
+    "circle-radius": 5,
+    "circle-color": "#FFF"
+  },
+  "interactive": true
+},
+// vertex points
+{
+  "id": "gl-draw-polygon-and-line-vertex-active",
+  "type": "circle",
+  "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+  "paint": {
+    "circle-radius": 3,
+    "circle-color": "#D20C0C",
+  },
+  "interactive": true
+},
+
+// INACTIVE (static, already drawn)
+// line stroke
+{
+    "id": "gl-draw-line-static",
+    "type": "line",
+    "filter": ["all", ["==", "$type", "LineString"], ["==", "mode", "static"]],
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-color": "#000",
+      "line-width": 3
+    },
+    "interactive": true
+},
+// polygon fill
+{
+  "id": "gl-draw-polygon-fill-static",
+  "type": "fill",
+  "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+  "paint": {
+    "fill-color": "#000",
+    "fill-outline-color": "#000",
+    "fill-opacity": 0.1
+  },
+  "interactive": true
+},
+// polygon outline
+{
+  "id": "gl-draw-polygon-stroke-static",
+  "type": "line",
+  "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+  "layout": {
+    "line-cap": "round",
+    "line-join": "round"
+  },
+  "paint": {
+    "line-color": "#000",
+    "line-width": 3
+  },
+  "interactive": true
+}
 ```
 
 ## Using Draw with `map.queryRenderFeatures`
