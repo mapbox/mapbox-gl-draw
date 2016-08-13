@@ -14,9 +14,9 @@ module.exports = function(ctx) {
 
   var setup = {
     addTo: function(map) {
-        ctx.map = map;
-        setup.onAdd(map);
-        return this;
+      ctx.map = map;
+      setup.onAdd(map);
+      return this;
     },
     remove: function() {
       setup.removeLayers();

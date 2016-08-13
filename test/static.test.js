@@ -67,7 +67,7 @@ test('static', t => {
     });
   });
 
-   t.test('static - try clicking many features', t => {
+  t.test('static - try clicking many features', t => {
     var features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
     Draw.add({
       type: 'FeatureCollection',
