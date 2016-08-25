@@ -39,8 +39,13 @@ module.exports = function(ctx) {
       }
     });
 
-    ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
-    ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
+    if (classesToRemove.length > 0) {
+      ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
+    }
+
+    if (classesToAdd.length > 0) {
+      ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
+    }
 
     currentMapClasses = xtend(currentMapClasses, nextMapClasses);
   }
