@@ -577,7 +577,7 @@ test('draw_polygon interaction', t => {
       st.end();
     });
 
-     t.test('start draw_polygon mode then doubleclick', st => {
+    t.test('start draw_polygon mode then doubleclick', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 

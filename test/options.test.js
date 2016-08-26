@@ -1,6 +1,5 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import mapboxgl from 'mapbox-gl-js-mock';
 import GLDraw from '../';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 

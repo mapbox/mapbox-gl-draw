@@ -84,7 +84,7 @@ test('simple_select', t => {
     });
   });
 
-   t.test('simple_select - box select many features', t => {
+  t.test('simple_select - box select many features', t => {
     var features = [];
     for (var i = 0; i < 5; i++) {
       features.push(getGeoJSON('point'));

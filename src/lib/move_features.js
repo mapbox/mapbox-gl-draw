@@ -1,4 +1,3 @@
-const xtend = require('xtend');
 const constrainFeatureMovement = require('./constrain_feature_movement');
 const Constants = require('../constants');
 

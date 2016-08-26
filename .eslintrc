@@ -1,9 +1,10 @@
 {
+  "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 6,
     "sourceType": "module"
   },
   "env": {
+    "es6": true,
     "node": true,
     "browser": true
   },
@@ -11,6 +12,7 @@
     "mapboxgl": true
   },
   "rules": {
+    "indent": [2, 2],
     "strict": [0],
     "curly": [0],
     "no-alert": [0],

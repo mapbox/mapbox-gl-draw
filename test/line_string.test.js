@@ -3,7 +3,6 @@ import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by 
 import Feature from '../src/feature_types/feature';
 import LineString from '../src/feature_types/line_string';
 import GLDraw from '../';
-import mapboxgl from 'mapbox-gl-js-mock';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
