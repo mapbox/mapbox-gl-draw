@@ -27,7 +27,7 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
     let firstPointString = '';
     let lastVertex = null;
     line.forEach((point, pointIndex) => {
-      const pointPath = (lineBasePath !== undefined) ? `${lineBasePath}.${pointIndex}` : String(pointIndex);
+      const pointPath = (lineBasePath != undefined) ? `${lineBasePath}.${pointIndex}` : String(pointIndex);
       const vertex = createVertex(featureId, point, pointPath, isSelectedPath(pointPath));
 
       // If we're creating midpoints, check if there was a
