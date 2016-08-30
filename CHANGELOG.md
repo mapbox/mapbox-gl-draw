@@ -1,5 +1,8 @@
-## 0.11.12
+## 0.11.16
 
+- Fix geojsonhint error filtering.
+
+## 0.11.12
 
 - Use geojsonhint version 2.0.0beta
 
