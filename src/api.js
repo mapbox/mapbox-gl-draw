@@ -50,7 +50,7 @@ module.exports = function(ctx) {
 
   api.add = function (geojson) {
     var featureCollection = normalize(geojson);
-    var errors = geojsonhint.hint(featureCollection).filter(e => e.level !== 'warn');
+    var errors = geojsonhint.hint(featureCollection).filter(e => e.level === 'error');
     if (errors.length) {
       throw new Error(errors[0].message);
     }
