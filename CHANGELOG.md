@@ -1,4 +1,4 @@
-## 0.11.16
+## 0.11.17
 
 - Fix geojsonhint error filtering.
 
