@@ -184,8 +184,15 @@ test('Draw.add -- GeometryCollection', t => {
 
 test('Draw.add -- Invalid geojson', t => {
   t.throws(() => {
-    Draw.add({});
-  }, 'Invlaid GeoJSON throws an error');
+    Draw.add({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Point',
+        coordinates: 7
+      }
+    });
+  }, /coordinates/, 'Invalid GeoJSON throws an error');
   t.end();
 });
 
