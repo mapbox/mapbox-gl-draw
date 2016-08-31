@@ -49,11 +49,11 @@ module.exports = function(ctx) {
   };
 
   api.add = function (geojson) {
-    var featureCollection = normalize(geojson);
-    var errors = geojsonhint.hint(featureCollection).filter(e => e.level === 'error');
+    var errors = geojsonhint.hint(geojson).filter(e => e.level !== 'message');
     if (errors.length) {
       throw new Error(errors[0].message);
     }
+    var featureCollection = normalize(geojson);
     featureCollection = JSON.parse(JSON.stringify(featureCollection));
 
     var ids = featureCollection.features.map(feature => {
