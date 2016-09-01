@@ -394,7 +394,7 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     },
     properties: {
       active: 'false',
-      coord_path: '0',
+      coord_path: '0.0',
       meta: 'vertex',
       parent: 'foo'
     },
@@ -405,7 +405,7 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
       type: 'Point'
     },
     properties: {
-      coord_path: '1',
+      coord_path: '0.1',
       lat: 2,
       lng: 2,
       meta: 'midpoint',
@@ -418,8 +418,8 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
       type: 'Point'
     },
     properties: {
-      active: 'true',
-      coord_path: '1',
+      active: 'false',
+      coord_path: '0.1',
       meta: 'vertex',
       parent: 'foo'
     },
@@ -430,7 +430,7 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
       type: 'Point'
     },
     properties: {
-      coord_path: '2',
+      coord_path: '0.2',
       lat: 6,
       lng: 6,
       meta: 'midpoint',
@@ -443,8 +443,8 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
       type: 'Point'
     },
     properties: {
-      active: 'true',
-      coord_path: '2',
+      active: 'false',
+      coord_path: '0.2',
       meta: 'vertex',
       parent: 'foo'
     },
