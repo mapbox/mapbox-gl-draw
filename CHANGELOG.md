@@ -1,3 +1,11 @@
+## 0.11.19
+
+- Fix bug with MultiLineString
+
+## 0.11.18
+
+- Upgrade mapbox-gl dependency
+
 ## 0.11.17
 
 - Fix geojsonhint error filtering.
