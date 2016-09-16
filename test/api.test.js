@@ -54,6 +54,31 @@ test('Draw.getSelectedIds', t => {
   t.end();
 });
 
+test('Draw.getSelected', t => {
+  const [lineId] = Draw.add(getGeoJSON('line'));
+  const [pointId] = Draw.add(getGeoJSON('point'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', { featureIds: [lineId, pointId] });
+  const fc = Draw.getSelected();
+
+  t.equal(typeof fc.features, 'object', 'we have a feature collection');
+
+  const selected = fc.features.map(f => f.id);
+  t.equal(selected.length, 2,
+    'returns correct number of ids');
+  t.notEqual(selected.indexOf(lineId), -1,
+    'result contains line');
+  t.notEqual(selected.indexOf(pointId), -1,
+    'result contains point');
+  Draw.changeMode('simple_select', { featureIds: [polygonId] });
+  const nextSelected = Draw.getSelected().features.map(f => f.id);
+  t.equal(nextSelected.length, 1,
+    'updates length');
+  t.equal(nextSelected[0], polygonId,
+    'updates content');
+  t.end();
+});
+
 test('Draw.set', t => {
   const point = getGeoJSON('point');
   const line = getGeoJSON('line');
@@ -194,6 +219,22 @@ test('Draw.add -- Invalid geojson', t => {
     });
   }, /coordinates/, 'Invalid GeoJSON throws an error');
   t.end();
+});
+
+test('Draw.add - accept lots of decimal percision', t => {
+   for (var i=0; i<30; i++) {
+     var div = Math.pow(10, i);
+     var pos = [1/div, 1/div];
+     var id = Draw.add({
+        type: 'Point',
+        coordinates: pos
+     });
+     var point = Draw.get(id);
+     t.equals(point.geometry.coordinates[0], pos[0], 'lng right at 10e'+i);
+     t.equals(point.geometry.coordinates[1], pos[1], 'lat right at 10e'+i);
+   }
+   Draw.deleteAll();
+   t.end();
 });
 
 test('Draw.add -- change geometry type', t => {

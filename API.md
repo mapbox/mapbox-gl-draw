@@ -141,6 +141,11 @@ console.log(featureIds)
 This method returns the feature ids for all features currently in a selected state. If no features are currently selected than it will return an empty array.
 
 ---
+### `.getSelected() -> Object`
+
+This method returns a FeatureCollection of all the selected features. If nothing is selected, it will return an empty FeatureCollection.
+
+---
 ###`.getAll() -> Object`
 
 This method returns all features added to Draw in a single GeoJSON FeatureCollection.

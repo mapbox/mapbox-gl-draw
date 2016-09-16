@@ -16,6 +16,18 @@ test('moveFeatures point', t => {
   t.end();
 });
 
+test('moveFeatures point and truncate the Position to 6 decimal points', t => {
+  const point = new Point(mockFeatureContext, getGeoJSON('point'));
+  point.setCoordinates([10, 20]);
+  moveFeatures([point], { lng: 50.000000001, lat: 20.000000001 });
+  t.deepEqual(point.getCoordinates(), [60, 40]);
+
+  point.setCoordinates([10, 20]);
+  moveFeatures([point], { lng: 50.123456789, lat: 20.123456789 });
+  t.deepEqual(point.getCoordinates(), [60.123456, 40.123456]);
+  t.end();
+});
+
 test('moveFeatures point beyond north limit map', t => {
   const point = new Point(mockFeatureContext, getGeoJSON('point'));
   point.setCoordinates([10, 20]);

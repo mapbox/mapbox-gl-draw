@@ -30,6 +30,13 @@ module.exports = function(ctx) {
     return ctx.store.getSelectedIds();
   };
 
+  api.getSelected = function () {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION,
+      features: ctx.store.getSelectedIds().map(id => ctx.store.get(id)).map(feature => feature.toGeoJSON())
+    };
+  };
+
   api.set = function(featureCollection) {
     if (featureCollection.type === undefined || featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');
@@ -49,7 +56,7 @@ module.exports = function(ctx) {
   };
 
   api.add = function (geojson) {
-    var errors = geojsonhint.hint(geojson).filter(e => e.level !== 'message');
+    var errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
     if (errors.length) {
       throw new Error(errors[0].message);
     }
