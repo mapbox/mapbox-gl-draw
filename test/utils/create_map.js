@@ -13,6 +13,10 @@ export default function createMap(mapOptions = {}) {
     map.getContainer = () => mapOptions.container;
   }
 
+  map.getCanvas = function() {
+    return map.getContainer();
+  }
+
   var classList = [];
   var container = map.getContainer();
   container.classList.add = function(names) {
