@@ -196,6 +196,22 @@ test('Draw.add -- Invalid geojson', t => {
   t.end();
 });
 
+test('Draw.add - accept lots of decimal percision', t => {
+   for (var i=0; i<30; i++) {
+     var div = Math.pow(10, i);
+     var pos = [1/div, 1/div];
+     var id = Draw.add({
+        type: 'Point',
+        coordinates: pos
+     });
+     var point = Draw.get(id);
+     t.equals(point.geometry.coordinates[0], pos[0], 'lng right at 10e'+i);
+     t.equals(point.geometry.coordinates[1], pos[1], 'lat right at 10e'+i);
+   }
+   Draw.deleteAll();
+   t.end();
+});
+
 test('Draw.add -- change geometry type', t => {
   var id = Draw.add(getGeoJSON('point'))[0];
   var polygon = getGeoJSON('polygon');
