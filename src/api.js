@@ -30,6 +30,13 @@ module.exports = function(ctx) {
     return ctx.store.getSelectedIds();
   };
 
+  api.getSelected = function () {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION,
+      features: ctx.store.getSelectedIds().map(id => ctx.store.get(id)).map(feature => feature.toGeoJSON())
+    };
+  };
+
   api.set = function(featureCollection) {
     if (featureCollection.type === undefined || featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');

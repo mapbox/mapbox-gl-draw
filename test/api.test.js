@@ -54,6 +54,31 @@ test('Draw.getSelectedIds', t => {
   t.end();
 });
 
+test('Draw.getSelected', t => {
+  const [lineId] = Draw.add(getGeoJSON('line'));
+  const [pointId] = Draw.add(getGeoJSON('point'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', { featureIds: [lineId, pointId] });
+  const fc = Draw.getSelected();
+
+  t.equal(typeof fc.features, 'object', 'we have a feature collection');
+
+  const selected = fc.features.map(f => f.id);
+  t.equal(selected.length, 2,
+    'returns correct number of ids');
+  t.notEqual(selected.indexOf(lineId), -1,
+    'result contains line');
+  t.notEqual(selected.indexOf(pointId), -1,
+    'result contains point');
+  Draw.changeMode('simple_select', { featureIds: [polygonId] });
+  const nextSelected = Draw.getSelected().features.map(f => f.id);
+  t.equal(nextSelected.length, 1,
+    'updates length');
+  t.equal(nextSelected[0], polygonId,
+    'updates content');
+  t.end();
+});
+
 test('Draw.set', t => {
   const point = getGeoJSON('point');
   const line = getGeoJSON('line');
