@@ -26,5 +26,6 @@ var Draw = function(options) {
 
 module.exports = Draw;
 
-window.mapboxgl = window.mapboxgl || {};
-window.mapboxgl.Draw = Draw;
+if (window && window.mapboxgl) {
+  window.mapboxgl.Draw = Draw;
+}
