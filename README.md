@@ -54,3 +54,10 @@ npm start & open http://localhost:9966/debug/?access_token=<token>
 ```
 npm run test
 ```
+
+### Naming things
+
+We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
+
+- http://turfjs.org/docs/
+- http://toblerity.org/shapely/manual.html
