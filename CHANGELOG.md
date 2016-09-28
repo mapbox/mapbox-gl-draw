@@ -1,3 +1,7 @@
+## 0.11.20
+
+- Fix bug causing problems when selecting features at tile intersections.
+
 ## 0.11.19
 
 - Fix bug with MultiLineString
