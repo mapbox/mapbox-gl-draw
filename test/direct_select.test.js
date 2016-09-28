@@ -85,7 +85,7 @@ test('direct_select', t => {
         map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
         map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
         mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
-        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30));
+        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30), { which: 1 });
         map.fire('mouseup', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30));
 
         var afterMove = Draw.get(ids[0]);

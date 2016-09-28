@@ -1,6 +1,7 @@
 var sortFeatures = require('./sort_features');
 var mapEventToBoundingBox = require('./map_event_to_bounding_box');
 var Constants = require('../constants');
+var StringSet = require('./string_set');
 
 var META_TYPES = [
   Constants.meta.FEATURE,
@@ -24,5 +25,14 @@ module.exports = function(event, bbox, ctx) {
       return META_TYPES.indexOf(feature.properties.meta) !== -1;
     });
 
-  return sortFeatures(features);
+  var featureIds = new StringSet();
+  var uniqueFeatures = [];
+  features.forEach((feature) => {
+    const featureId = feature.properties.id;
+    if (featureIds.has(featureId)) return;
+    featureIds.add(featureId);
+    uniqueFeatures.push(feature);
+  });
+
+  return sortFeatures(uniqueFeatures);
 };
