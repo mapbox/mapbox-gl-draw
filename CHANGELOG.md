@@ -1,3 +1,7 @@
+## 0.11.21
+
+- Upgrade mapbox-gl dependency
+
 ## 0.11.20
 
 - Fix bug causing problems when selecting features at tile intersections.
