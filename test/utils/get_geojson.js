@@ -1,10 +1,26 @@
 const features = {
   multiPolygon: {
     type: 'Feature',
-    properties: {},
+    properties: {'a':'b', 'c':'d'},
     geometry: {
       type: 'MultiPolygon',
       coordinates: [[[[1,1],[2,2],[2,6],[4,3],[1,1]]]]
+    }
+  },
+
+  multiPolygon2: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'MultiPolygon',
+      coordinates: [
+        [
+          [[1,1],[2,2],[4,3],[1,1]]
+        ],
+        [
+          [[30, 20], [50, 40], [70, 30], [30, 20]]
+        ]
+      ]
     }
   },
 
@@ -14,6 +30,15 @@ const features = {
     geometry: {
       type: 'LineString',
       coordinates: [[0, 0], [1, 1], [2, 2]]
+    }
+  },
+
+  line2: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: [[3, 3], [5, 5], [7, 7]]
     }
   },
 
@@ -44,6 +69,15 @@ const features = {
     }
   },
 
+  point2: {
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [20, 40]
+    }
+  },
+
   negativePoint: {
     type: 'Feature',
     properties: {},
@@ -55,10 +89,19 @@ const features = {
 
   polygon: {
     type: 'Feature',
-    properties: {},
+    properties: {'a':'b', 'c':'d'},
     geometry: {
       type: 'Polygon',
       coordinates: [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+    }
+  },
+
+  polygon2: {
+    type: 'Feature',
+    properties: {'a2':'b2', 'c2':'d2'},
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[40, 30],[60, 50],[90, 90],[100, 80],[40, 30]]]
     }
   },
 

@@ -1,3 +1,8 @@
+## 0.12.0
+
+- Adds support for combining features into multi-features
+- Adds support for uncombing multi-fetaures into features
+
 ## 0.11.21
 
 - Upgrade mapbox-gl dependency

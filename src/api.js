@@ -163,5 +163,15 @@ module.exports = function(ctx) {
     return api;
   };
 
+  api.combineFeatures = function() {
+    ctx.events.combineFeatures({ silent: true });
+    return api;
+  };
+
+  api.uncombineFeatures = function() {
+    ctx.events.uncombineFeatures({ silent: true });
+    return api;
+  };
+
   return api;
 };

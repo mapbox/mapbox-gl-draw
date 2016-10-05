@@ -7,6 +7,8 @@ module.exports = {
     CONTROL_BUTTON_POLYGON: 'mapbox-gl-draw_polygon',
     CONTROL_BUTTON_POINT: 'mapbox-gl-draw_point',
     CONTROL_BUTTON_TRASH: 'mapbox-gl-draw_trash',
+    CONTROL_BUTTON_COMBINE_FEATURES: 'mapbox-gl-draw_combine',
+    CONTROL_BUTTON_UNCOMBINE_FEATURES: 'mapbox-gl-draw_uncombine',
     CONTROL_GROUP: 'mapboxgl-ctrl-group',
     ATTRIBUTION: 'mapboxgl-ctrl-attrib',
     ACTIVE_BUTTON: 'active',
@@ -53,7 +55,9 @@ module.exports = {
     UPDATE: 'draw.update',
     SELECTION_CHANGE: 'draw.selectionchange',
     MODE_CHANGE: 'draw.modechange',
-    RENDER: 'draw.render'
+    RENDER: 'draw.render',
+    COMBINE_FEATURES: 'draw.combine',
+    UNCOMBINE_FEATURES: 'draw.uncombine'
   },
   updateActions: {
     MOVE: 'move',

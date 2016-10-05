@@ -244,15 +244,47 @@ var ids = Draw.set({type: 'FeatureCollection', features: [{
 
 ### `.trash() -> Draw`
 
-This envokes the current modes trash event. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, these cancel the current process.
+This invokes the current modes trash event. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
 
-This is different from `delete` or `deleteAlll` in that it follows rules described by the current mode.
+This is different from `delete` or `deleteAll` in that it follows rules described by the current mode.
+
+---
+
+### `.combineFeatures() -> Draw`
+
+This invokes the current modes combineFeatures event. For the `simple_select` mode this function will combine all selected features into a multifeature, so long as they are all of the same geometry type. For example:
+
+- LineString, LineString => MultiLineString
+- MultiLineString, LineString => MultiLineString
+- MultiLineString, MultiLineString => MultiLineString
+
+Calling this function on different geometry types will not cause any changes. For example:
+
+- Point, LineString => no action taken
+- MultiLineString, MultiPoint => no action taken
+
+When called in the `direct_select` and drawing modes no action is taken. The current modes are also not exited.
+
+---
+
+### `.uncombineFeatures() -> Draw`
+
+This invokes the current modes uncombineFeatures event. For the `simple_select` mode this takes the currently selected features, and for each multi-feature selected, it will split it into its component feature parts. For example:
+
+- MultiLineString (of two parts) => LineString, LineString 
+- MultiLineString (of three parts) => LineString, LineString, LineString
+- MultiLineString (of two parts), Point => LineString, LineString, Point
+- LineString => LineString
+
+When called in the `direct_select` and drawing modes no action is taken. The current modes are also not exited.
 
 ---
 
 ### `.getMode() -> Draw`
 
 Returns Draw's current mode. For more about the modes, see below.
+
+---
 
 ### `.changeMode(String: mode, ?Object: options) -> Draw`
 
@@ -311,6 +343,38 @@ The event data is an object with the following shape:
 {
   // Array of GeoJSON objects representing the features that were deleted
   features: Array<Object>
+}
+```
+
+### `draw.combine`
+
+Fired when features are combined. The following will trigger this event:
+
+- Click the Combine button when more than one features are selected in `simple_select` mode.
+- Invoke `Draw.combineFeatures()` when you have more than one features selected in `simple_select` mode.
+
+The event data is an object with the following shape:
+
+```js
+{
+  deletedFeatures: Array<Object>, // Array of GeoJSON objects representing the features that were deleted
+  createdFeatures: Array<Object> // Array of GeoJSON objects representing the multifeature that has been created
+}
+```
+
+### `draw.uncombine`
+
+Fired when features are uncombined. The following will trigger this event:
+
+- Click the Uncombine button when one or more multifeatures are selected in `simple_select` mode. Non multifeatures may also be selected.
+- Invoke `Draw.uncombineFeatures()` when you have one or more multifeatures selected in `simple_select` mode. Non multifeatures may also be selected.
+
+The event data is an object with the following shape:
+
+```js
+{
+  deletedFeatures: Array<Object>, // Array of GeoJSON objects representing the multifeatures that were deleted
+  createdFeatures: Array<Object> // Array of GeoJSON objects representing the single features that have been created
 }
 ```
 

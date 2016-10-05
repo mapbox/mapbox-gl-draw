@@ -16,14 +16,18 @@ const showControls = {
   point: true,
   line_string: true,
   polygon: true,
-  trash: true
+  trash: true,
+  combine_features: true,
+  uncombine_features: true
 };
 
 const hideControls = {
   point: false,
   line_string: false,
   polygon: false,
-  trash: false
+  trash: false,
+  combine_features: false,
+  uncombine_features: false
 };
 
 function addSources(styles, sourceBucket) {
