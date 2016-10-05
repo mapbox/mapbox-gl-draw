@@ -1,5 +1,6 @@
 var Feature = require('./feature');
 var Constants = require('../constants');
+var hat = require('hat');
 
 var models = {
   MultiPoint: require('./point'),
@@ -27,7 +28,7 @@ MultiFeature.prototype = Object.create(Feature.prototype);
 
 MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
   return coordinates.map(coords => new this.model(this.ctx, {
-    id: this.id,
+    id: hat(),
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {
@@ -67,6 +68,10 @@ MultiFeature.prototype.addCoordinate = function(path, lng, lat) {
 
 MultiFeature.prototype.removeCoordinate = function(path) {
   takeAction(this.features, 'removeCoordinate', path);
+};
+
+MultiFeature.prototype.getFeatures = function() {
+  return this.features;
 };
 
 module.exports = MultiFeature;

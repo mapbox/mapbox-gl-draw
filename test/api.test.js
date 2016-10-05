@@ -422,6 +422,195 @@ test('Draw.modes', t => {
   t.end();
 });
 
+test('Draw.combineFeatures -- polygon + polygon = multiploygon', t => {
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  const [polygon2Id] = Draw.add(getGeoJSON('polygon2'));
+  Draw.changeMode('simple_select', { featureIds: [polygonId, polygon2Id]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 1, 'can combine two features');
+  t.equals(Draw.getAll().features[0].geometry.type, 'MultiPolygon', 'can combine two polygons into MultiPolygon');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[0], getGeoJSON('polygon').geometry.coordinates, 'first set of coordinates in multipolygon matches with second polygon in selection');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[1], getGeoJSON('polygon2').geometry.coordinates, 'second set of coordinates in multipolygon matches with first polygon in selection');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- point + point = multipoint', t => {
+  const [pointId] = Draw.add(getGeoJSON('point'));
+  const [point2Id] = Draw.add(getGeoJSON('point2'));
+  Draw.changeMode('simple_select', { featureIds: [pointId, point2Id]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 1, 'can combine two features');
+  t.equals(Draw.getAll().features[0].geometry.type, 'MultiPoint', 'can combine two points into MultiPoint');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[0], getGeoJSON('point').geometry.coordinates, 'first set of coordinates in multipoint matches with first point in selection');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[1], getGeoJSON('point2').geometry.coordinates, 'second set of coordinates in multipoint matches with second point in selection');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- linestring + linestring = multilinestring', t => {
+  const [lineId] = Draw.add(getGeoJSON('line'));
+  const [line2Id] = Draw.add(getGeoJSON('line2'));
+  Draw.changeMode('simple_select', { featureIds: [lineId, line2Id]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 1, 'can combine two features');
+  t.equals(Draw.getAll().features[0].geometry.type, 'MultiLineString', 'can combine two linestrings into MultiLineString');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[0], getGeoJSON('line').geometry.coordinates, 'first set of coordinates in multilinestring matches with first line in selection');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[1], getGeoJSON('line2').geometry.coordinates, 'second set of coordinates in multilinestring matches with second line selection');
+  Draw.deleteAll();
+  t.end();
+});
+
+
+test('Draw.combineFeatures -- point + multipoint = multipoint', t => {
+  const [pointId] = Draw.add(getGeoJSON('point'));
+  const [multipointId] = Draw.add(getGeoJSON('multiPoint'));
+  Draw.changeMode('simple_select', { featureIds: [pointId, multipointId]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 1, 'can combine two features');
+  t.equals(Draw.getAll().features[0].geometry.type, 'MultiPoint', 'can combine two points into MultiPoint');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[0], getGeoJSON('point').geometry.coordinates, 'first set of coordinates in multipoint matches with first point in selection');
+  t.deepEquals(Draw.getAll().features[0].geometry.coordinates[1], getGeoJSON('multiPoint').geometry.coordinates[0], 'second set of coordinates in multipoint matches with first set of coordinates in multipoint in selection');
+   t.deepEquals(Draw.getAll().features[0].geometry.coordinates[2], getGeoJSON('multiPoint').geometry.coordinates[1], 'third set of coordinates in multipoint matches with second set of coordinates in multipoint in selection');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- return on non-similar features', t => {
+  const [lineId] = Draw.add(getGeoJSON('line'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', { featureIds: [lineId, polygonId]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 2, 'should not combine non similar features');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- do nothing on non-similar features', t => {
+  const [lineId] = Draw.add(getGeoJSON('line'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', { featureIds: [lineId, polygonId]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 2, 'should not combine non similar features');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- work for multifeature + feature', t => {
+  const [multipolygonId] = Draw.add(getGeoJSON('multiPolygon'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', { featureIds: [polygonId, multipolygonId]});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 1, 'should work for multifeature + feature');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.combineFeatures -- should do nothing if nothing is selected', t => {
+  const [multipolygonId] = Draw.add(getGeoJSON('multiPolygon'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', {});
+
+  Draw.combineFeatures();
+  t.equals(Draw.getAll().features.length, 2, 'should do nothing if nothing is selected');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.uncombineFeatures -- multilinestring', t => {
+  const [multiLineStringId] = Draw.add(getGeoJSON('multiLineString'));
+  Draw.changeMode('simple_select', { featureIds: [multiLineStringId]});
+
+  Draw.uncombineFeatures();
+  var featuresInDraw = Draw.getAll().features;
+
+  t.equals(featuresInDraw.length, 2, 'can uncombine multiLineString');
+
+  t.deepEquals(featuresInDraw[0].geometry.coordinates,
+    getGeoJSON('multiLineString').geometry.coordinates[0],
+    'first set of coordinates in multilinestring matches with first lineString in selection');
+
+  t.deepEquals(featuresInDraw[1].geometry.coordinates,
+    getGeoJSON('multiLineString').geometry.coordinates[1],
+    'second set of coordinates in multilinestring matches with second lineString in selection');
+
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.uncombineFeatures -- multipolygon', t => {
+  const [multipolygon2Id] = Draw.add(getGeoJSON('multiPolygon2'));
+  Draw.changeMode('simple_select', { featureIds: [multipolygon2Id]});
+
+  Draw.uncombineFeatures();
+
+  var featuresInDraw = Draw.getAll().features;
+
+  t.equals(featuresInDraw.length, 2, 'can uncombine multipolygon');
+
+  t.deepEquals(featuresInDraw[0].geometry.coordinates,
+    getGeoJSON('multiPolygon2').geometry.coordinates[0],
+    'first set of coordinates in multipolygon matches with first polygon in selection');
+
+  t.deepEquals(featuresInDraw[1].geometry.coordinates,
+    getGeoJSON('multiPolygon2').geometry.coordinates[1],
+    'second set of coordinates in multipolygon matches with second polygon in selection');
+
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.uncombineFeatures -- multipoint', t => {
+  const [multipointId] = Draw.add(getGeoJSON('multiPoint'));
+  Draw.changeMode('simple_select', { featureIds: [multipointId]});
+
+  Draw.uncombineFeatures();
+
+  var featuresInDraw = Draw.getAll().features;
+
+  t.equals(featuresInDraw.length, 2, 'can uncombine multipoint');
+
+  t.deepEquals(featuresInDraw[0].geometry.coordinates,
+    getGeoJSON('multiPoint').geometry.coordinates[0],
+    'first set of coordinates in multipoint matches with first point in selection');
+
+  t.deepEquals(featuresInDraw[1].geometry.coordinates,
+    getGeoJSON('multiPoint').geometry.coordinates[1],
+    'second set of coordinates in multipoint matches with second point in selection');
+
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.uncombineFeatures -- should do nothing if nothing is selected', t => {
+  const [multipolygonId] = Draw.add(getGeoJSON('multiPolygon'));
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  Draw.changeMode('simple_select', {});
+
+  Draw.uncombineFeatures();
+  t.equals(Draw.getAll().features.length, 2, 'should do nothing if nothing is selected');
+  Draw.deleteAll();
+  t.end();
+});
+
+test('Draw.uncombineFeatures -- should do nothing if nothing if only non multifeature is selected', t => {
+  const [polygonId] = Draw.add(getGeoJSON('polygon'));
+  const [pointId] = Draw.add(getGeoJSON('point'));
+  Draw.changeMode('simple_select', { featureIds: [polygonId, pointId]});
+
+  Draw.uncombineFeatures();
+  t.equals(Draw.getAll().features.length, 2, 'should do nothing if nothing is selected');
+  Draw.deleteAll();
+  t.end();
+});
+
 test('Cleanup', t => {
   Draw.deleteAll();
   Draw.remove();

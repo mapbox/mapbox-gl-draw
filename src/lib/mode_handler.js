@@ -62,6 +62,16 @@ var ModeHandler = function(mode, DrawContext) {
         DrawContext.store.render();
       }
     },
+    combineFeatures: function() {
+      if (mode.combineFeatures) {
+        mode.combineFeatures();
+      }
+    },
+    uncombineFeatures: function() {
+      if (mode.uncombineFeatures) {
+        mode.uncombineFeatures();
+      }
+    },
     drag: function(event) {
       delegate('drag', event);
     },

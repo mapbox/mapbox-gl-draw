@@ -5,6 +5,7 @@ const classTypes = ['mode', 'feature', 'mouse'];
 
 module.exports = function(ctx) {
 
+
   const buttonElements = {};
   let activeButton = null;
 
@@ -150,6 +151,28 @@ module.exports = function(ctx) {
         title: 'Delete',
         onActivate: () => {
           ctx.events.trash();
+        }
+      });
+    }
+
+    if (controls.combine_features) {
+      buttonElements.combine_features = createControlButton('combineFeatures', {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_COMBINE_FEATURES,
+        title: 'Combine',
+        onActivate: () => {
+          ctx.events.combineFeatures();
+        }
+      });
+    }
+
+    if (controls.uncombine_features) {
+      buttonElements.uncombine_features = createControlButton('uncombineFeatures', {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
+        title: 'Uncombine',
+        onActivate: () => {
+          ctx.events.uncombineFeatures();
         }
       });
     }

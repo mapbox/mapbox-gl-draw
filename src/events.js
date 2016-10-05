@@ -165,6 +165,12 @@ module.exports = function(ctx) {
     trash: function(options) {
       currentMode.trash(options);
     },
+    combineFeatures: function() {
+      currentMode.combineFeatures();
+    },
+    uncombineFeatures: function() {
+      currentMode.uncombineFeatures();
+    },
     getMode: function() {
       return currentModeName;
     }

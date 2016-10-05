@@ -6,6 +6,7 @@ const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
+const MultiFeature = require('../feature_types/multi_feature');
 
 module.exports = function(ctx, options = {}) {
   let dragMoveLocation = null;
@@ -233,7 +234,7 @@ module.exports = function(ctx, options = {}) {
       }
     },
     render: function(geojson, push) {
-      geojson.properties.active = (ctx.store.isSelected(geojson.properties.id) )
+      geojson.properties.active = (ctx.store.isSelected(geojson.properties.id))
         ? Constants.activeStates.ACTIVE
         : Constants.activeStates.INACTIVE;
       push(geojson);
@@ -241,8 +242,83 @@ module.exports = function(ctx, options = {}) {
         || geojson.geometry.type === Constants.geojsonTypes.POINT) return;
       createSupplementaryPoints(geojson).forEach(push);
     },
-    trash() {
+    trash: function() {
       ctx.store.delete(ctx.store.getSelectedIds());
+    },
+    combineFeatures: function() {
+      var selectedFeatures = ctx.store.getSelected();
+
+      if(selectedFeatures.length === 0 || selectedFeatures.length < 2) return;
+
+      var coordinates = [], featuresCombined = [];
+      var featureType = selectedFeatures[0].type.replace('Multi','');
+
+      for(var i = 0; i < selectedFeatures.length; i++) {
+        var feature = selectedFeatures[i];
+
+        if(feature.type.replace('Multi','') !== featureType) {
+          return;
+        }
+        if(feature.type.includes('Multi')) {
+          feature.getCoordinates().forEach(function(subcoords) {
+            coordinates.push(subcoords);
+          });
+        } else {
+          coordinates.push(feature.getCoordinates());
+        }
+
+        featuresCombined.push(feature.toGeoJSON());
+      }
+
+      if(featuresCombined.length > 1) {
+
+        var multiFeature = new MultiFeature(ctx, {
+          type: Constants.geojsonTypes.FEATURE,
+          properties: featuresCombined[0].properties,
+          geometry: {
+            type: 'Multi' + featureType,
+            coordinates: coordinates
+          }
+        });
+
+        ctx.store.add(multiFeature);
+        ctx.store.delete(ctx.store.getSelectedIds(), { silent: true });
+        ctx.store.setSelected([multiFeature.id]);
+
+        ctx.map.fire(Constants.events.COMBINE_FEATURES, {
+          createdFeatures: [multiFeature.toGeoJSON()],
+          deletedFeatures: featuresCombined
+        });
+      }
+    },
+    uncombineFeatures: function() {
+      var selectedFeatures = ctx.store.getSelected();
+      if (selectedFeatures.length === 0) return;
+
+      var createdFeatures = [];
+      var featuresUncombined = [];
+
+      for(var i = 0; i < selectedFeatures.length; i++) {
+        var feature = selectedFeatures[i];
+
+        if(feature instanceof MultiFeature) {
+          feature.getFeatures().forEach(function(subFeature){
+            ctx.store.add(subFeature);
+            subFeature.properties = feature.properties;
+            createdFeatures.push(subFeature.toGeoJSON());
+            ctx.store.select([subFeature.id]);
+          });
+          ctx.store.delete(feature.id, { silent: true });
+          featuresUncombined.push(feature.toGeoJSON());
+        }
+      }
+
+      if (createdFeatures.length > 1) {
+        ctx.map.fire(Constants.events.UNCOMBINE_FEATURES, {
+          createdFeatures: createdFeatures,
+          deletedFeatures: featuresUncombined
+        });
+      }
     }
   };
 };

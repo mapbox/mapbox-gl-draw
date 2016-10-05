@@ -18,7 +18,9 @@ test('returned API', t => {
   t.equal(typeof mh.mouseout, 'function', 'exposes mouseout');
   t.equal(typeof mh.keydown, 'function', 'exposes keydown');
   t.equal(typeof mh.keyup, 'function', 'exposes keyup');
-  t.equal(Object.keys(mh).length, 11, 'no unexpected properties');
+  t.equal(typeof mh.combineFeatures, 'function', 'exposes combineFeatures');
+  t.equal(typeof mh.uncombineFeatures, 'function', 'exposes uncombineFeatures');
+  t.equal(Object.keys(mh).length, 13, 'no unexpected properties');
   t.end();
 });
 
