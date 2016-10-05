@@ -15,7 +15,7 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
     // Cycle through a Polygon's rings and
     // process each line
     coordinates.forEach((line, lineIndex) => {
-      processLine(line, (basePath) ? `${basePath}.${lineIndex}` : String(lineIndex));
+      processLine(line, (basePath !== null) ? `${basePath}.${lineIndex}` : String(lineIndex));
     });
   } else if (type === Constants.geojsonTypes.LINE_STRING) {
     processLine(coordinates, basePath);
@@ -35,7 +35,9 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
       // between that vertex and this one.
       if (options.midpoints && lastVertex) {
         const midpoint = createMidpoint(featureId, lastVertex, vertex, options.map);
-        if (midpoint) supplementaryPoints.push(midpoint);
+        if (midpoint) {
+          supplementaryPoints.push(midpoint);
+        }
       }
       lastVertex = vertex;
 
