@@ -1,5 +1,9 @@
 ## 0.12.0
 
+- Fix bug that broke editing multifeatures in direct_select mode after using the combine feature
+
+## 0.12.0
+
 - Adds support for combining features into multi-features
 - Adds support for uncombing multi-fetaures into features
 
