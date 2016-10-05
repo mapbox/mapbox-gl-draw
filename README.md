@@ -55,6 +55,19 @@ npm start & open http://localhost:9966/debug/?access_token=<token>
 npm run test
 ```
 
+### Publishing
+
+To github and npm
+
+```
+npm version (major|minor|patch)
+git push --tags
+git push
+npm publish
+```
+
+To add to CDN add `dist` folder to [mapbox-gl-plugins](https://github.com/mapbox/mapbox-gl-plugins/tree/master/plugins/mapbox-gl-draw).
+
 ### Naming things
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
