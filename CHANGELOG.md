@@ -1,4 +1,4 @@
-## 0.12.0
+## 0.12.1
 
 - Fix bug that broke editing multifeatures in direct_select mode after using the combine feature
 
