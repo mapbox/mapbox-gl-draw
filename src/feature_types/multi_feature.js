@@ -60,14 +60,17 @@ MultiFeature.prototype.getCoordinates = function() {
 
 MultiFeature.prototype.updateCoordinate = function(path, lng, lat) {
   takeAction(this.features, 'updateCoordinate', path, lng, lat);
+  this.changed();
 };
 
 MultiFeature.prototype.addCoordinate = function(path, lng, lat) {
   takeAction(this.features, 'addCoordinate', path, lng, lat);
+  this.changed();
 };
 
 MultiFeature.prototype.removeCoordinate = function(path) {
   takeAction(this.features, 'removeCoordinate', path);
+  this.changed();
 };
 
 MultiFeature.prototype.getFeatures = function() {

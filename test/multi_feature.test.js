@@ -107,7 +107,7 @@ test('MultiPoint', t => {
     'getCoordinates returns the complete multi-coordinates');
 
   multiPoint.setCoordinates([[6, 6], [7, 7]]);
-  t.equal(changedSpy.callCount, 1, 'changed called by setCoordinates');
+  t.equal(changedSpy.callCount, 2, 'changed called by setCoordinates');
   t.deepEqual(multiPoint.getCoordinates(), [[6, 6], [7, 7]]);
 
   t.equal(multiPoint.isValid(), true, 'positive validation works');
