@@ -69,7 +69,7 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     style: 'mapbox://styles/mapbox/streets-v8'
   });
 
-  map.addControl(new mapboxgl.Navigation({
+  map.addControl(new (mapboxgl.NavigationControl || mapboxgl.Navigation)({
     position: 'top-left'
   }));
 
