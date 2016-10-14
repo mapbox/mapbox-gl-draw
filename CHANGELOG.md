@@ -1,3 +1,7 @@
+## 0.12.2
+
+- Add support for mapbox-gl-js 0.26.x
+
 ## 0.12.1
 
 - Fix bug that broke editing multifeatures in direct_select mode after using the combine feature
