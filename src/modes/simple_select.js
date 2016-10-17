@@ -7,6 +7,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
 const MultiFeature = require('../feature_types/multi_feature');
+const actionables = require('../lib/actionables');
 
 module.exports = function(ctx, options = {}) {
   let dragMoveLocation = null;
@@ -25,6 +26,32 @@ module.exports = function(ctx, options = {}) {
       features: ctx.store.getSelected().map(f => f.toGeoJSON())
     });
   };
+
+  const fireActionable = actionables(ctx, () => {
+    var selectedFeatures = ctx.store.getSelected();
+
+    var multiFeatures = selectedFeatures.filter(
+      feature => feature instanceof MultiFeature
+    );
+
+    var combine = false;
+
+    if (selectedFeatures.length) {
+      var featureType = selectedFeatures[0].type.replace('Multi','');
+      selectedFeatures.forEach(feature => {
+        if(feature.type.replace('Multi','') === featureType) {
+          combine = true;
+        }
+      });
+    }
+
+    var uncombine = multiFeatures.length > 0;
+    var trash = selectedFeatures.length > 0;
+
+    return {
+      combine, uncombine, trash
+    };
+  });
 
   const getUniqueIds = function(allFeatures) {
     if (!allFeatures.length) return [];
@@ -59,9 +86,12 @@ module.exports = function(ctx, options = {}) {
     start: function() {
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
-        return ctx.store.get(id) !== undefined;
-      }));
+      if (ctx.store) {
+        ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
+          return ctx.store.get(id) !== undefined;
+        }));
+        fireActionable();
+      }
 
       // Any mouseup should stop box selecting and dragMoving
       this.on('mouseup', CommonSelectors.true, stopExtendedInteractions);
@@ -238,6 +268,7 @@ module.exports = function(ctx, options = {}) {
         ? Constants.activeStates.ACTIVE
         : Constants.activeStates.INACTIVE;
       push(geojson);
+      fireActionable();
       if (geojson.properties.active !== Constants.activeStates.ACTIVE
         || geojson.geometry.type === Constants.geojsonTypes.POINT) return;
       createSupplementaryPoints(geojson).forEach(push);

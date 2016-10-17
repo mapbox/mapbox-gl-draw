@@ -55,6 +55,7 @@ module.exports = {
     UPDATE: 'draw.update',
     SELECTION_CHANGE: 'draw.selectionchange',
     MODE_CHANGE: 'draw.modechange',
+    ACTIONABLE: 'draw.actionable',
     RENDER: 'draw.render',
     COMBINE_FEATURES: 'draw.combine',
     UNCOMBINE_FEATURES: 'draw.uncombine'

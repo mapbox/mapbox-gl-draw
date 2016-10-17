@@ -4,6 +4,7 @@ const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
+const actionables = require('../lib/actionables');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -32,6 +33,12 @@ module.exports = function(ctx, opts) {
       features: ctx.store.getSelected().map(f => f.toGeoJSON())
     });
   };
+
+  const fireActionable = actionables(ctx, () => ({
+    combine: false,
+    uncombine: false,
+    trash: selectedCoordPaths.length > 0
+  }));
 
   var startDragging = function(e) {
     ctx.map.dragPan.disable();
@@ -139,6 +146,7 @@ module.exports = function(ctx, opts) {
         geojson.properties.active = Constants.activeStates.INACTIVE;
         push(geojson);
       }
+      fireActionable();
     },
     trash: function() {
       if (selectedCoordPaths.length === 0) {

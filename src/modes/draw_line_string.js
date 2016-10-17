@@ -50,6 +50,11 @@ module.exports = function(ctx) {
       this.on('keyup', CommonSelectors.isEnterKey, () => {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       });
+      ctx.map.fire(Constants.events.ACTIONABLE, {
+        combine: false,
+        uncombine: false,
+        trash: true
+      });
     },
 
     stop() {
