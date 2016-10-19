@@ -51,6 +51,46 @@ test('direct_select', t => {
     }
   });
 
+  t.test('direct_select - should fire correct actionable when no vertices selected', st => {
+    const ids = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: ids[0]
+    });
+    afterNextRender(() => {
+      const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
+      st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+      if (actionableArgs.length > 0) {
+        const actionable = actionableArgs[actionableArgs.length-1][1]
+        st.equal(actionable.combine, false, 'should fire correct combine actionable');
+        st.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
+        st.equal(actionable.trash, false, 'should fire correct trash actionable');
+      }
+      cleanUp(() => st.end());
+    });
+  });
+
+  t.test('direct_select - should fire correct actionable when a vertex is selected', st => {
+    const ids = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: ids[0]
+    });
+    const clickAt = getGeoJSON('polygon').geometry.coordinates[0][0];
+    afterNextRender(() => {
+      click(map, makeMouseEvent(clickAt[0], clickAt[1]));
+      afterNextRender(() => {
+        const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
+        st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+        if (actionableArgs.length > 0) {
+          const actionable = actionableArgs[actionableArgs.length-1][1]
+          st.equal(actionable.combine, false, 'should fire correct combine actionable');
+          st.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
+          st.equal(actionable.trash, true, 'should fire correct trash actionable');
+        }
+        cleanUp(() => st.end());
+      });
+    });
+  });
+
   t.test('direct_select - a click on a vertex and than dragging the map shouldn\'t drag the vertex', st => {
     var ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
