@@ -7,7 +7,6 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
 const MultiFeature = require('../feature_types/multi_feature');
-const actionables = require('../lib/actionables');
 
 module.exports = function(ctx, options = {}) {
   let dragMoveLocation = null;
@@ -27,7 +26,7 @@ module.exports = function(ctx, options = {}) {
     });
   };
 
-  const fireActionable = actionables(ctx, () => {
+  const fireActionable = () => {
     var selectedFeatures = ctx.store.getSelected();
 
     var multiFeatures = selectedFeatures.filter(
@@ -36,11 +35,12 @@ module.exports = function(ctx, options = {}) {
 
     var combine = false;
 
-    if (selectedFeatures.length) {
+    if (selectedFeatures.length > 1) {
+      combine = true;
       var featureType = selectedFeatures[0].type.replace('Multi','');
       selectedFeatures.forEach(feature => {
-        if(feature.type.replace('Multi','') === featureType) {
-          combine = true;
+        if(feature.type.replace('Multi','') !== featureType) {
+          combine = false;
         }
       });
     }
@@ -48,10 +48,10 @@ module.exports = function(ctx, options = {}) {
     var uncombine = multiFeatures.length > 0;
     var trash = selectedFeatures.length > 0;
 
-    return {
+    ctx.map.fire(Constants.events.ACTIONABLE, {
       combine, uncombine, trash
-    };
-  });
+    });
+  };
 
   const getUniqueIds = function(allFeatures) {
     if (!allFeatures.length) return [];
@@ -321,6 +321,7 @@ module.exports = function(ctx, options = {}) {
           deletedFeatures: featuresCombined
         });
       }
+      fireActionable();
     },
     uncombineFeatures: function() {
       var selectedFeatures = ctx.store.getSelected();
@@ -350,6 +351,7 @@ module.exports = function(ctx, options = {}) {
           deletedFeatures: featuresUncombined
         });
       }
+      fireActionable();
     }
   };
 };
