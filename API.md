@@ -26,7 +26,7 @@ keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
 clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
-controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: point, line, polygon and trash.
+controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
 ## Modes
@@ -244,7 +244,7 @@ var ids = Draw.set({type: 'FeatureCollection', features: [{
 
 ### `.trash() -> Draw`
 
-This invokes the current modes trash event. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
+This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
 
 This is different from `delete` or `deleteAll` in that it follows rules described by the current mode.
 
@@ -252,7 +252,7 @@ This is different from `delete` or `deleteAll` in that it follows rules describe
 
 ### `.combineFeatures() -> Draw`
 
-This invokes the current modes combineFeatures event. For the `simple_select` mode this function will combine all selected features into a multifeature, so long as they are all of the same geometry type. For example:
+This invokes the current modes combineFeatures action. For the `simple_select` mode this function will combine all selected features into a multifeature, so long as they are all of the same geometry type. For example:
 
 - LineString, LineString => MultiLineString
 - MultiLineString, LineString => MultiLineString
@@ -269,7 +269,7 @@ When called in the `direct_select` and drawing modes no action is taken. The cur
 
 ### `.uncombineFeatures() -> Draw`
 
-This invokes the current modes uncombineFeatures event. For the `simple_select` mode this takes the currently selected features, and for each multi-feature selected, it will split it into its component feature parts. For example:
+This invokes the current modes uncombineFeatures action. For the `simple_select` mode this takes the currently selected features, and for each multi-feature selected, it will split it into its component feature parts. For example:
 
 - MultiLineString (of two parts) => LineString, LineString 
 - MultiLineString (of three parts) => LineString, LineString, LineString
@@ -448,6 +448,21 @@ The event data is an object with the following shape:
 ### `draw.render`
 
 Fired just after Draw calls `setData()` on `mapbox-gl-js`. This does not imply that the set data call has updated the map, just that the map is being updated.
+
+
+### `draw.actionable`
+
+Fired as the state of Draw changes to enable and disable different actions. Following this event will enable you know if `Draw.trash()`, `Draw.combineFeatures()` and `Draw.uncombineFeatures()` will have an effect.
+
+```js
+{
+  actions: {
+    trash: true
+    combineFeatures: false,
+    uncombineFeatures: false
+  }
+}
+```
 
 ## Styling Draw
 

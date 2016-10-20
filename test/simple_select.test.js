@@ -72,12 +72,23 @@ test('simple_select', t => {
 
         afterNextRender(() => {
           t.equal(map.getContainer().className.indexOf('mouse-move') > -1, true, 'mouse-move class has been set');
-          var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+          const fireArgs = getFireArgs();
+          var args = fireArgs.filter(arg => arg[0] === 'draw.selectionchange');
           t.equal(args.length, 1, 'should have one and only one selectionchange event');
           if (args.length > 0) {
             t.equal(args[0][1].features.length, 1, 'should have one feature selected');
             t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
           }
+
+          const actionableArgs = fireArgs.filter(arg => arg[0] === 'draw.actionable');
+          t.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+          if (actionableArgs.length > 0) {
+            const actionable = actionableArgs[actionableArgs.length-1][1]
+            t.equal(actionable.actions.combineFeatures, false, 'should fire correct combine actionable');
+            t.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+            t.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
+          }
+
           cleanUp(t.end);
         });
       });
@@ -105,11 +116,22 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       afterNextRender(() => {
-        var args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+        const fireArgs = getFireArgs();
+        var args = fireArgs.filter(arg => arg[0] === 'draw.selectionchange');
         t.equal(args.length, 1, 'should have one and only one select event');
         if (args.length > 0) {
           t.equal(args[0][1].features.length, ids.length, 'should have all features selected');
         }
+
+        const actionableArgs = fireArgs.filter(arg => arg[0] === 'draw.actionable');
+        t.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+        if (actionableArgs.length > 0) {
+          const actionable = actionableArgs[actionableArgs.length-1][1]
+          t.equal(actionable.actions.combineFeatures, true, 'should fire correct combine actionable');
+          t.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+          t.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
+        }
+
         cleanUp(t.end);
       });
     });

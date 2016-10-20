@@ -26,6 +26,33 @@ module.exports = function(ctx, options = {}) {
     });
   };
 
+  const fireActionable = () => {
+    var selectedFeatures = ctx.store.getSelected();
+
+    var multiFeatures = selectedFeatures.filter(
+      feature => feature instanceof MultiFeature
+    );
+
+    var combineFeatures = false;
+
+    if (selectedFeatures.length > 1) {
+      combineFeatures = true;
+      var featureType = selectedFeatures[0].type.replace('Multi','');
+      selectedFeatures.forEach(feature => {
+        if(feature.type.replace('Multi','') !== featureType) {
+          combineFeatures = false;
+        }
+      });
+    }
+
+    var uncombineFeatures = multiFeatures.length > 0;
+    var trash = selectedFeatures.length > 0;
+
+    ctx.events.actionable({
+      combineFeatures, uncombineFeatures, trash
+    });
+  };
+
   const getUniqueIds = function(allFeatures) {
     if (!allFeatures.length) return [];
     const ids = allFeatures.map(s => s.properties.id)
@@ -59,9 +86,12 @@ module.exports = function(ctx, options = {}) {
     start: function() {
       // Select features that should start selected,
       // probably passed in from a `draw_*` mode
-      if (ctx.store) ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
-        return ctx.store.get(id) !== undefined;
-      }));
+      if (ctx.store) {
+        ctx.store.setSelected(initiallySelectedFeatureIds.filter(id => {
+          return ctx.store.get(id) !== undefined;
+        }));
+        fireActionable();
+      }
 
       // Any mouseup should stop box selecting and dragMoving
       this.on('mouseup', CommonSelectors.true, stopExtendedInteractions);
@@ -238,6 +268,7 @@ module.exports = function(ctx, options = {}) {
         ? Constants.activeStates.ACTIVE
         : Constants.activeStates.INACTIVE;
       push(geojson);
+      fireActionable();
       if (geojson.properties.active !== Constants.activeStates.ACTIVE
         || geojson.geometry.type === Constants.geojsonTypes.POINT) return;
       createSupplementaryPoints(geojson).forEach(push);
@@ -290,6 +321,7 @@ module.exports = function(ctx, options = {}) {
           deletedFeatures: featuresCombined
         });
       }
+      fireActionable();
     },
     uncombineFeatures: function() {
       var selectedFeatures = ctx.store.getSelected();
@@ -319,6 +351,7 @@ module.exports = function(ctx, options = {}) {
           deletedFeatures: featuresUncombined
         });
       }
+      fireActionable();
     }
   };
 };
