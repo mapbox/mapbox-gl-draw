@@ -53,19 +53,24 @@ test('direct_select', t => {
 
   t.test('direct_select - should fire correct actionable when no vertices selected', st => {
     const ids = Draw.add(getGeoJSON('polygon'));
-    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
-      featureId: ids[0]
+    Draw.changeMode(Constants.modes.SIMPLE_SELECT, {
+      featureIds: ids
     });
     afterNextRender(() => {
-      const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
-      st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
-      if (actionableArgs.length > 0) {
-        const actionable = actionableArgs[actionableArgs.length-1][1]
-        st.equal(actionable.combine, false, 'should fire correct combine actionable');
-        st.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
-        st.equal(actionable.trash, false, 'should fire correct trash actionable');
-      }
-      cleanUp(() => st.end());
+      Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+        featureId: ids[0]
+      });
+      afterNextRender(() => {
+        const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
+        st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+        if (actionableArgs.length > 0) {
+          const actionable = actionableArgs[actionableArgs.length-1][1]
+          st.equal(actionable.actions.combineFeatures, false, 'should fire correct combine actionable');
+          st.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+          st.equal(actionable.actions.trash, false, 'should fire correct trash actionable');
+        }
+        cleanUp(() => st.end());
+      });
     });
   });
 
@@ -82,9 +87,9 @@ test('direct_select', t => {
         st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
         if (actionableArgs.length > 0) {
           const actionable = actionableArgs[actionableArgs.length-1][1]
-          st.equal(actionable.combine, false, 'should fire correct combine actionable');
-          st.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
-          st.equal(actionable.trash, true, 'should fire correct trash actionable');
+          st.equal(actionable.actions.combineFeatures, false, 'should fire correct combine actionable');
+          st.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+          st.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
         }
         cleanUp(() => st.end());
       });

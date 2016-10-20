@@ -39,9 +39,9 @@ module.exports = function(ctx) {
       this.on('click', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
-      ctx.map.fire(Constants.events.ACTIONABLE, {
-        combine: false,
-        uncombine: false,
+      ctx.events.actionable({
+        combineFeatures: false,
+        uncombineFeatures: false,
         trash: true
       });
     },

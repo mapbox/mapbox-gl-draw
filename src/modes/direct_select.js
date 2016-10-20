@@ -33,9 +33,9 @@ module.exports = function(ctx, opts) {
     });
   };
 
-  const fireActionable = () => ctx.map.fire(Constants.events.ACTIONABLE, {
-    combine: false,
-    uncombine: false,
+  const fireActionable = () => ctx.events.actionable({
+    combineFeatures: false,
+    uncombineFeatures: false,
     trash: selectedCoordPaths.length > 0
   });
 
@@ -148,10 +148,6 @@ module.exports = function(ctx, opts) {
       fireActionable();
     },
     trash: function() {
-      if (selectedCoordPaths.length === 0) {
-        return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { features: [feature] });
-      }
-
       selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
       ctx.map.fire(Constants.events.UPDATE, {
         action: Constants.updateActions.CHANGE_COORDINATES,

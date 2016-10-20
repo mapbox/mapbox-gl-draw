@@ -33,23 +33,23 @@ module.exports = function(ctx, options = {}) {
       feature => feature instanceof MultiFeature
     );
 
-    var combine = false;
+    var combineFeatures = false;
 
     if (selectedFeatures.length > 1) {
-      combine = true;
+      combineFeatures = true;
       var featureType = selectedFeatures[0].type.replace('Multi','');
       selectedFeatures.forEach(feature => {
         if(feature.type.replace('Multi','') !== featureType) {
-          combine = false;
+          combineFeatures = false;
         }
       });
     }
 
-    var uncombine = multiFeatures.length > 0;
+    var uncombineFeatures = multiFeatures.length > 0;
     var trash = selectedFeatures.length > 0;
 
-    ctx.map.fire(Constants.events.ACTIONABLE, {
-      combine, uncombine, trash
+    ctx.events.actionable({
+      combineFeatures, uncombineFeatures, trash
     });
   };
 

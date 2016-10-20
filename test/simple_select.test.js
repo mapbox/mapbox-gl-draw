@@ -84,9 +84,9 @@ test('simple_select', t => {
           t.ok(actionableArgs.length > 0, 'should have fired an actionable event');
           if (actionableArgs.length > 0) {
             const actionable = actionableArgs[actionableArgs.length-1][1]
-            t.equal(actionable.combine, false, 'should fire correct combine actionable');
-            t.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
-            t.equal(actionable.trash, true, 'should fire correct trash actionable');
+            t.equal(actionable.actions.combineFeatures, false, 'should fire correct combine actionable');
+            t.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+            t.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
           }
 
           cleanUp(t.end);
@@ -127,9 +127,9 @@ test('simple_select', t => {
         t.ok(actionableArgs.length > 0, 'should have fired an actionable event');
         if (actionableArgs.length > 0) {
           const actionable = actionableArgs[actionableArgs.length-1][1]
-          t.equal(actionable.combine, true, 'should fire correct combine actionable');
-          t.equal(actionable.uncombine, false, 'should fire correct uncombine actionable');
-          t.equal(actionable.trash, true, 'should fire correct trash actionable');
+          t.equal(actionable.actions.combineFeatures, true, 'should fire correct combine actionable');
+          t.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+          t.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
         }
 
         cleanUp(t.end);

@@ -18,7 +18,8 @@ export default function createMockDrawModeContext() {
       }
     },
     events: {
-      changeMode: spy()
+      changeMode: spy(),
+      actionable: spy()
     },
     ui: {
       queueMapClasses: spy(),
