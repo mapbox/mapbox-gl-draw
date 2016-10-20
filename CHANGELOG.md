@@ -1,3 +1,7 @@
+## 0.13.0
+
+- Adds `draw.actionable` as a way to track if `Draw.trash`, `Draw.combineFeatures` and `Draw.uncombineFeatuers` are actionable.
+
 ## 0.12.2
 
 - Add support for mapbox-gl-js 0.26.x
