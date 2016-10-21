@@ -275,6 +275,7 @@ module.exports = function(ctx, options = {}) {
     },
     trash: function() {
       ctx.store.delete(ctx.store.getSelectedIds());
+      fireActionable();
     },
     combineFeatures: function() {
       var selectedFeatures = ctx.store.getSelected();
