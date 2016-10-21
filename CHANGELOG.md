@@ -1,3 +1,8 @@
+## 0.13.1
+
+- Fixes a when where `draw.actionable` would fail to fire on `trash` if there were no features left.
+- Fixes a bug where `trash` moves Draw from `direct_select` to `simple_select`.
+
 ## 0.13.0
 
 - Adds `draw.actionable` as a way to track if `Draw.trash`, `Draw.combineFeatures` and `Draw.uncombineFeatuers` are actionable.
