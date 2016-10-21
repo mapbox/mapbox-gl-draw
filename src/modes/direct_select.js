@@ -157,7 +157,7 @@ module.exports = function(ctx, opts) {
       fireActionable();
       if (feature.isValid() === false) {
         ctx.store.delete([featureId]);
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, null);
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {});
       }
     }
   };
