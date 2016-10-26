@@ -85,7 +85,9 @@ module.exports = function(ctx, opts) {
       this.on('mouseout', () => dragMoving, fireUpdate);
 
       this.on('mousedown', isVertex, onVertex);
+      this.on('touchstart', isVertex, onVertex);
       this.on('mousedown', isMidpoint, onMidpoint);
+      this.on('touchstart', isMidpoint, onMidpoint);
       this.on('drag', () => canDragMove, function(e) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
@@ -121,12 +123,23 @@ module.exports = function(ctx, opts) {
         }
         stopDragging();
       });
-      this.on('click', noTarget, function() {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      this.on('touchend', CommonSelectors.true, function() {
+        if (dragMoving) {
+          fireUpdate();
+        }
+        stopDragging();
       });
-      this.on('click', isInactiveFeature, function() {
+      this.on('click', noTarget, clickNoTarget);
+      this.on('tap', noTarget, clickNoTarget);
+      this.on('click', isInactiveFeature, clickInactive);
+      this.on('tap', isInactiveFeature, clickInactive);
+
+      function clickNoTarget() {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
+      }
+      function clickInactive() {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      }
     },
     stop: function() {
       doubleClickZoom.enable(ctx);

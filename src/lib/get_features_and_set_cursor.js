@@ -2,7 +2,7 @@ var featuresAt = require('./features_at');
 var Constants = require('../constants');
 
 module.exports = function getFeatureAtAndSetCursors(event, ctx) {
-  var features = featuresAt(event, null, ctx);
+  var features = featuresAt.click(event, null, ctx);
   var classes = { mouse: Constants.cursors.NONE };
 
   if (features[0]) {

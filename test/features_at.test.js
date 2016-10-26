@@ -50,7 +50,7 @@ const mockContext = {
 };
 
 test('featuresAt with bounding box', t => {
-  const result = featuresAt(null, [[10, 10], [20, 20]], mockContext);
+  const result = featuresAt.click(null, [[10, 10], [20, 20]], mockContext);
 
   t.equal(mockContext.map.queryRenderedFeatures.callCount, 1);
   t.deepEqual(mockContext.map.queryRenderedFeatures.getCall(0).args, [

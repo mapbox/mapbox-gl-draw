@@ -10,11 +10,24 @@ var META_TYPES = [
 ];
 
 // Requires either event or bbox
-module.exports = function(event, bbox, ctx) {
+module.exports = {
+  click: featuresAtClick,
+  touch: featuresAtTouch
+}
+
+function featuresAtClick(event, bbox, ctx) {
+  return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
+}
+
+function featuresAtTouch(event, bbox, ctx) {
+  return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
+}
+
+function featuresAt(event, bbox, ctx, buffer) {
   if (ctx.map === null) return [];
 
   var box = (event)
-    ? mapEventToBoundingBox(event, ctx.options.clickBuffer)
+    ? mapEventToBoundingBox(event, buffer)
     : bbox;
 
   var queryParams = {};

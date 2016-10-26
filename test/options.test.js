@@ -12,6 +12,7 @@ test('Options test', t => {
       position: 'top-left',
       keybindings: true,
       clickBuffer: 2,
+      touchBuffer: 25,
       displayControlsDefault: true,
       boxSelect: true,
       styles: Draw.options.styles,

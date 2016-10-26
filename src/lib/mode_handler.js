@@ -10,7 +10,11 @@ var ModeHandler = function(mode, DrawContext) {
     mouseup: [],
     mouseout: [],
     keydown: [],
-    keyup: []
+    keyup: [],
+    touchstart: [],
+    touchmove: [],
+    touchend: [],
+    tap: []
   };
 
   var ctx = {
@@ -95,6 +99,18 @@ var ModeHandler = function(mode, DrawContext) {
     },
     keyup: function(event) {
       delegate('keyup', event);
+    },
+    touchstart: function(event) {
+      delegate('touchstart', event);
+    },
+    touchmove: function(event) {
+      delegate('touchmove', event);
+    },
+    touchend: function(event) {
+      delegate('touchend', event);
+    },
+    tap: function(event) {
+      delegate('tap', event);
     }
   };
 };

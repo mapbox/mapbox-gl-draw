@@ -1,6 +1,8 @@
 var ModeHandler = require('./lib/mode_handler');
 var getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
+var featuresAt = require('./lib/features_at');
 var isClick = require('./lib/is_click');
+var isTap = require('./lib/is_tap');
 var Constants = require('./constants');
 
 var modes = {
@@ -15,26 +17,35 @@ var modes = {
 module.exports = function(ctx) {
 
   var mouseDownInfo = {};
+  var touchStartInfo = {};
   var events = {};
   var currentModeName = Constants.modes.SIMPLE_SELECT;
   var currentMode = ModeHandler(modes.simple_select(ctx), ctx);
 
-  events.drag = function(event) {
-    if (isClick(mouseDownInfo, {
+  events.drag = function(event, isDrag) {
+    if (isDrag({
       point: event.point,
       time: new Date().getTime()
     })) {
-      event.originalEvent.stopPropagation();
-    }
-    else {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     }
+    else {
+      event.originalEvent.stopPropagation();
+    }
+  }
+
+  events.mousedrag = function(event) {
+    events.drag(event, (endInfo) => !isClick(mouseDownInfo, endInfo));
+  };
+
+  events.touchdrag = function(event) {
+    events.drag(event, (endInfo) => !isTap(touchStartInfo, endInfo));
   };
 
   events.mousemove = function(event) {
     if (event.originalEvent.which === 1) {
-      return events.drag(event);
+      return events.mousedrag(event);
     }
     var target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
@@ -68,6 +79,51 @@ module.exports = function(ctx) {
 
   events.mouseout = function(event) {
     currentMode.mouseout(event);
+  };
+
+  events.touchstart = function(event) {
+    // Prevent emulated mouse events because we will fully handle the touch here.
+    // This does not stop the touch events from propogating to mapbox though.
+    event.originalEvent.preventDefault();
+    if (!ctx.options.touchEnabled) {
+      return;
+    }
+
+    touchStartInfo = {
+      time: new Date().getTime(),
+      point: event.point
+    };
+    var target = featuresAt.touch(event, null, ctx)[0];
+    event.featureTarget = target;
+    currentMode.touchstart(event);
+  };
+
+  events.touchmove = function(event) {
+    event.originalEvent.preventDefault();
+    if (!ctx.options.touchEnabled) {
+      return;
+    }
+
+    currentMode.touchmove(event);
+    return events.touchdrag(event);
+  };
+
+  events.touchend = function(event) {
+    event.originalEvent.preventDefault();
+    if (!ctx.options.touchEnabled) {
+      return;
+    }
+
+    var target = featuresAt.touch(event, null, ctx)[0];
+    event.featureTarget = target;
+    if (isTap(touchStartInfo, {
+      time: new Date().getTime(),
+      point: event.point
+    })) {
+      currentMode.tap(event)
+    } else {
+      currentMode.touchend(event);
+    }
   };
 
   // 8 - Backspace
@@ -155,9 +211,12 @@ module.exports = function(ctx) {
     },
     addEventListeners: function() {
       ctx.map.on('mousemove', events.mousemove);
-
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
+
+      ctx.map.on('touchmove', events.touchmove);
+      ctx.map.on('touchstart', events.touchstart);
+      ctx.map.on('touchend', events.touchend);
 
       ctx.container.addEventListener('mouseout', events.mouseout);
 
@@ -168,9 +227,12 @@ module.exports = function(ctx) {
     },
     removeEventListeners: function() {
       ctx.map.off('mousemove', events.mousemove);
-
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
+
+      ctx.map.off('touchmove', events.touchmove);
+      ctx.map.off('touchstart', events.touchstart);
+      ctx.map.off('touchend', events.touchend);
 
       ctx.container.removeEventListener('mouseout', events.mouseout);
 

@@ -22,7 +22,7 @@ module.exports = function(ctx) {
   };
 
   api.getFeatureIdsAt = function(point) {
-    var features = featuresAt({ point }, null, ctx);
+    var features = featuresAt.click({ point }, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 
