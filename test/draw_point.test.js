@@ -46,8 +46,9 @@ test('draw_point start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['point'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 3, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
 

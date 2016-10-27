@@ -18,9 +18,13 @@ test('returned API', t => {
   t.equal(typeof mh.mouseout, 'function', 'exposes mouseout');
   t.equal(typeof mh.keydown, 'function', 'exposes keydown');
   t.equal(typeof mh.keyup, 'function', 'exposes keyup');
+  t.equal(typeof mh.touchstart, 'function', 'exposes touchstart');
+  t.equal(typeof mh.touchmove, 'function', 'exposes touchmove');
+  t.equal(typeof mh.touchend, 'function', 'exposes touchend');
+  t.equal(typeof mh.tap, 'function', 'exposes tap');
   t.equal(typeof mh.combineFeatures, 'function', 'exposes combineFeatures');
   t.equal(typeof mh.uncombineFeatures, 'function', 'exposes uncombineFeatures');
-  t.equal(Object.keys(mh).length, 13, 'no unexpected properties');
+  t.equal(Object.keys(mh).length, 17, 'no unexpected properties');
   t.end();
 });
 
@@ -109,6 +113,24 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
   mh.keyup({ two: 2 });
   t.equal(keyupSpy.callCount, 1, 'keyup callback called via delegation');
   t.deepEqual(keyupSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
+
+  const touchstartSpy = spy();
+  startContext.on('touchstart', () => true, touchstartSpy);
+  mh.touchstart({ two: 2 });
+  t.equal(touchstartSpy.callCount, 1, 'touchstart callback called via delegation');
+  t.deepEqual(touchstartSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
+
+  const touchmoveSpy = spy();
+  startContext.on('touchmove', () => true, touchmoveSpy);
+  mh.touchmove({ two: 2 });
+  t.equal(touchmoveSpy.callCount, 1, 'touchmove callback called via delegation');
+  t.deepEqual(touchmoveSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
+
+  const touchendSpy = spy();
+  startContext.on('touchend', () => true, touchendSpy);
+  mh.touchend({ two: 2 });
+  t.equal(touchendSpy.callCount, 1, 'touchend callback called via delegation');
+  t.deepEqual(touchendSpy.getCall(0).args, [{ two: 2 }], 'with correct argument');
 
   t.end();
 });

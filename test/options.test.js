@@ -10,6 +10,7 @@ test('Options test', t => {
     var defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
+      touchEnabled: true,
       keybindings: true,
       clickBuffer: 2,
       touchBuffer: 25,
@@ -36,7 +37,9 @@ test('Options test', t => {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      touchEnabled: true,
       clickBuffer: 10,
+      touchBuffer: 25,
       boxSelect: true,
       displayControlsDefault: true,
       styles: Draw.options.styles,
@@ -60,7 +63,9 @@ test('Options test', t => {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      touchEnabled: true,
       clickBuffer: 2,
+      touchBuffer: 25,
       boxSelect: true,
       displayControlsDefault: false,
       styles: Draw.options.styles,
@@ -83,8 +88,10 @@ test('Options test', t => {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      touchEnabled: true,
       displayControlsDefault: false,
       clickBuffer: 2,
+      touchBuffer: 25,
       boxSelect: true,
       styles: Draw.options.styles,
       controls: {
@@ -107,7 +114,9 @@ test('Options test', t => {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
+      touchEnabled: true,
       displayControlsDefault: true,
+      touchBuffer: 25,
       clickBuffer: 2,
       boxSelect: true,
       styles: Draw.options.styles,
@@ -122,6 +131,32 @@ test('Options test', t => {
     };
 
     t.deepEquals(defaultOptions, Draw.options);
+    t.end();
+  });
+
+  t.test('disable touch interaction', t => {
+    var Draw = GLDraw({ touchEnabled: false });
+    var defaultOptions = {
+      defaultMode: 'simple_select',
+      position: 'top-left',
+      touchEnabled: false,
+      keybindings: true,
+      clickBuffer: 2,
+      touchBuffer: 25,
+      displayControlsDefault: true,
+      boxSelect: true,
+      styles: Draw.options.styles,
+      controls: {
+        point: true,
+        line_string: true,
+        polygon: true,
+        trash: true,
+        combine_features: true,
+        uncombine_features: true
+      }
+    };
+    t.deepEquals(defaultOptions, Draw.options);
+    t.deepEquals(styleWithSourcesFixture, Draw.options.styles);
     t.end();
   });
 

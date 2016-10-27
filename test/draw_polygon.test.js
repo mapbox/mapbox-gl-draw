@@ -53,12 +53,14 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 7, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.isVertex));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.disable.callCount, 1);
