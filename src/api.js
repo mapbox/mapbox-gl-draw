@@ -173,5 +173,9 @@ module.exports = function(ctx) {
     return api;
   };
 
+  api.setFeatureProperty = function(featureId, name, property) {
+    ctx.store.setFeatureProperty(featureId, name, property);
+  }
+
   return api;
 };

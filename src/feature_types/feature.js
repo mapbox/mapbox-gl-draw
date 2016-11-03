@@ -26,6 +26,10 @@ Feature.prototype.getCoordinates = function() {
   return JSON.parse(JSON.stringify(this.coordinates));
 };
 
+Feature.prototype.setProperty = function(name, value) {
+  this.properties[name] = value;
+}
+
 Feature.prototype.toGeoJSON = function() {
   return JSON.parse(JSON.stringify({
     id: this.id,
@@ -39,15 +43,19 @@ Feature.prototype.toGeoJSON = function() {
 };
 
 Feature.prototype.internal = function(mode) {
+  var properties = {
+    id: this.id,
+    meta: Constants.meta.FEATURE,
+    'meta:type': this.type,
+    active: Constants.activeStates.INACTIVE,
+    mode: mode
+  };
+  for (var name in this.properties) {
+    properties[name] = this.properties[name];
+  }
   return {
     type: Constants.geojsonTypes.FEATURE,
-    properties: {
-      id: this.id,
-      meta: Constants.meta.FEATURE,
-      'meta:type': this.type,
-      active: Constants.activeStates.INACTIVE,
-      mode: mode
-    },
+    properties: properties,
     geometry: {
       coordinates: this.getCoordinates(),
       type: this.type
