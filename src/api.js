@@ -175,6 +175,7 @@ module.exports = function(ctx) {
 
   api.setFeatureProperty = function(featureId, name, property) {
     ctx.store.setFeatureProperty(featureId, name, property);
+    return api;
   }
 
   return api;

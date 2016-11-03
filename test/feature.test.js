@@ -122,3 +122,12 @@ test('Feature#internal', t => {
   });
   t.end();
 });
+
+test('Feature#setProperty', t => {
+  const ctx = createMockCtx();
+  const polygon = createFeature('polygon');
+  const feature = new Feature(ctx, polygon);
+  feature.setProperty('size', 200);
+  t.equal(feature.properties.size, 200);
+  t.end();
+});
