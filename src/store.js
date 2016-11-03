@@ -7,6 +7,8 @@ var Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
+  this._selectedPoints = [];
+  this._selectedPointsFeatureId = null;
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
@@ -169,6 +171,9 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
+    if (this._selectedPointsFeatureId === id) {
+      this.clearSelectedPoints();
+    }
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
@@ -212,6 +217,32 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
 };
 
 /**
+ * Sets the store's points selection, clearing any prior values.
+ * Expects to be passed the feature id that the points belong to.
+ * @param {string} featureId
+ * @param {Array<Array<string>>} points
+ * @return {Store} this
+ */
+Store.prototype.setSelectedPoints = function(featureId, points) {
+  this._selectedPointsFeatureId = featureId;
+  this._selectedPoints = points;
+  this._emitSelectionChange = true;
+  return this;
+};
+
+/**
+ * Clears the current points selection.
+ * @param {Object} [options]
+ * @return {Store} this
+ */
+Store.prototype.clearSelectedPoints = function() {
+  this._selectedPointsFeatureId = null;
+  this._selectedPoints = [];
+  this._emitSelectionChange = true;
+  return this;
+};
+
+/**
  * Returns the ids of features in the current selection.
  * @return {Array<string>} Selected feature ids.
  */
@@ -225,6 +256,14 @@ Store.prototype.getSelectedIds = function() {
  */
 Store.prototype.getSelected = function() {
   return this._selectedFeatureIds.values().map(id => this.get(id));
+};
+
+/**
+ * Returns selected points in the currently selected feature.
+ * @return {Array<Object>} Selected points.
+ */
+Store.prototype.getSelectedPoints = function() {
+  return this._selectedPoints;
 };
 
 /**

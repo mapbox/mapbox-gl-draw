@@ -50,8 +50,11 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.isSelected, 'function', 'exposes store.isSelected');
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
+  t.equal(typeof Store.prototype.setSelectedPoints, 'function', 'exposes store.setSelectedPoints');
+  t.equal(typeof Store.prototype.getSelectedPoints, 'function', 'exposes store.getSelectedPoints');
+  t.equal(typeof Store.prototype.clearSelectedPoints, 'function', 'exposes store.clearSelectedPoints');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 17, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 20, 'no untested prototype members');
 
   t.end();
 });

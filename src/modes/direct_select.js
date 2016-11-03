@@ -25,6 +25,9 @@ module.exports = function(ctx, opts) {
   var canDragMove = false;
 
   var selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
+  var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
+  var selectedPoints = coordinatesToPoints(selectedCoordinates);
+  ctx.store.setSelectedPoints(featureId, selectedPoints);
 
   var fireUpdate = function() {
     ctx.map.fire(Constants.events.UPDATE, {
@@ -62,6 +65,9 @@ module.exports = function(ctx, opts) {
     else if (isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths.push(about.coord_path);
     }
+    var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
+    var selectedPoints = coordinatesToPoints(selectedCoordinates);
+    ctx.store.setSelectedPoints(featureId, selectedPoints);
     feature.changed();
   };
 
@@ -72,6 +78,21 @@ module.exports = function(ctx, opts) {
     fireUpdate();
     selectedCoordPaths = [about.coord_path];
   };
+
+  function pathsToCoordinates(paths) {
+    return paths.map(coord_path => feature.getCoordinate(coord_path));
+  }
+
+  function coordinatesToPoints(coordinates) {
+    return coordinates.map(coords => ({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.POINT,
+        coordinates: coords
+      }
+    }));
+  }
 
   return {
     start: function() {
@@ -90,23 +111,16 @@ module.exports = function(ctx, opts) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-        var selectedCoordPoints = selectedCoords.map(coords => ({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coords
-          }
-        }));
+        var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
+        var selectedPoints = coordinatesToPoints(selectedCoordinates);
         var delta = {
           lng: e.lngLat.lng - dragMoveLocation.lng,
           lat: e.lngLat.lat - dragMoveLocation.lat
         };
-        var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+        var constrainedDelta = constrainFeatureMovement(selectedPoints, delta);
 
-        for (var i = 0; i < selectedCoords.length; i++) {
-          var coord = selectedCoords[i];
+        for (var i = 0; i < selectedCoordinates.length; i++) {
+          var coord = selectedCoordinates[i];
           feature.updateCoordinate(selectedCoordPaths[i],
             coord[0] + constrainedDelta.lng,
             coord[1] + constrainedDelta.lat);
@@ -130,6 +144,7 @@ module.exports = function(ctx, opts) {
     },
     stop: function() {
       doubleClickZoom.enable(ctx);
+      ctx.store.clearSelectedPoints();
     },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
@@ -154,6 +169,7 @@ module.exports = function(ctx, opts) {
         features: ctx.store.getSelected().map(f => f.toGeoJSON())
       });
       selectedCoordPaths = [];
+      ctx.store.clearSelectedPoints();
       fireActionable();
       if (feature.isValid() === false) {
         ctx.store.delete([featureId]);

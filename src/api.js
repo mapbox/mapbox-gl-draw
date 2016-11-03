@@ -37,6 +37,13 @@ module.exports = function(ctx) {
     };
   };
 
+  api.getSelectedPoints = function () {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION,
+      features: ctx.store.getSelectedPoints()
+    };
+  };
+
   api.set = function(featureCollection) {
     if (featureCollection.type === undefined || featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');
