@@ -296,7 +296,8 @@ function runTests() {
       });
 
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange'
+        'draw.modechange',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -327,7 +328,8 @@ function runTests() {
         features: [lineC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -378,7 +380,8 @@ function runTests() {
         features: [lineE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -568,7 +571,8 @@ function runTests() {
         mode: 'direct_select'
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange'
+        'draw.modechange',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -578,7 +582,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     afterNextRender(() => {
-      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
+      t.deepEqual(flushDrawEvents(), ['draw.selectionchange'], 'no unexpected draw events');
       t.end();
     });
   });
@@ -609,7 +613,8 @@ function runTests() {
         features: [polygonC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -660,7 +665,8 @@ function runTests() {
         features: [polygonE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
