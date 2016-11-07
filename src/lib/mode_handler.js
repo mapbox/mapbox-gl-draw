@@ -1,4 +1,3 @@
-const truncatePoint = require('./truncate_point');
 
 var ModeHandler = function(mode, DrawContext) {
 
@@ -30,7 +29,7 @@ var ModeHandler = function(mode, DrawContext) {
 
   var delegate = function (eventName, event) {
     if (event.lngLat) {
-      event.lngLat = truncatePoint(event.lngLat);
+      event.lngLat = event.lngLat;
     }
     var handles = handlers[eventName];
     var iHandle = handles.length;
