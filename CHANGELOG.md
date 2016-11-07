@@ -1,3 +1,7 @@
+## 0.13.2
+
+- Removes deprecated `interactive` property from styles.
+
 ## 0.13.1
 
 - Fixes a when where `draw.actionable` would fail to fire on `trash` if there were no features left.

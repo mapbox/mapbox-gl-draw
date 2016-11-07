@@ -22,8 +22,7 @@ mapbox.Draw({
       'paint': {
         'circle-radius': 7,
         'circle-color': '#000000'
-      },
-      'interactive': true
+      }
     },
     {
       'id': 'points-are-blue',
@@ -35,8 +34,7 @@ mapbox.Draw({
       'paint': {
         'circle-radius': 5,
         'circle-color': '#000088'
-      },
-      'interactive': true
+      }
     }
   ]
 });
@@ -63,8 +61,7 @@ mapbox.Draw({
           "line-color": "#D20C0C",
           "line-dasharray": [0.2, 2],
           "line-width": 2
-        },
-        "interactive": true
+        }
     },
     // polygon fill
     {
@@ -75,8 +72,7 @@ mapbox.Draw({
         "fill-color": "#D20C0C",
         "fill-outline-color": "#D20C0C",
         "fill-opacity": 0.1
-      },
-      "interactive": true
+      }
     },
     // polygon outline stroke
     // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
@@ -92,8 +88,7 @@ mapbox.Draw({
         "line-color": "#D20C0C",
         "line-dasharray": [0.2, 2],
         "line-width": 2
-      },
-      "interactive": true
+      }
     },
     // vertex point halos
     {
@@ -103,8 +98,7 @@ mapbox.Draw({
       "paint": {
         "circle-radius": 5,
         "circle-color": "#FFF"
-      },
-      "interactive": true
+      }
     },
     // vertex points
     {
@@ -114,8 +108,7 @@ mapbox.Draw({
       "paint": {
         "circle-radius": 3,
         "circle-color": "#D20C0C",
-      },
-      "interactive": true
+      }
     },
 
     // INACTIVE (static, already drawn)
@@ -131,8 +124,7 @@ mapbox.Draw({
         "paint": {
           "line-color": "#000",
           "line-width": 3
-        },
-        "interactive": true
+        }
     },
     // polygon fill
     {
@@ -143,8 +135,7 @@ mapbox.Draw({
         "fill-color": "#000",
         "fill-outline-color": "#000",
         "fill-opacity": 0.1
-      },
-      "interactive": true
+      }
     },
     // polygon outline
     {
@@ -158,8 +149,7 @@ mapbox.Draw({
       "paint": {
         "line-color": "#000",
         "line-width": 3
-      },
-      "interactive": true
+      }
     }
   ]
 });
