@@ -28,9 +28,6 @@ var ModeHandler = function(mode, DrawContext) {
   };
 
   var delegate = function (eventName, event) {
-    if (event.lngLat) {
-      event.lngLat = event.lngLat;
-    }
     var handles = handlers[eventName];
     var iHandle = handles.length;
     while (iHandle--) {
