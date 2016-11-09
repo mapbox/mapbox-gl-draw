@@ -1,5 +1,5 @@
 import click from './mouse_click';
-import AfterNextRender from './after_next_render';
+import setupAfterNextRender from './after_next_render';
 import makeMouseEvent from './make_mouse_event';
 
 /**
@@ -13,23 +13,23 @@ const mapFeaturesToModes = {
 };
 
 export default function drawGeometry(map, draw, type, coordinates, cb) {
-  var afterNextRender = AfterNextRender(map);
+  const afterNextRender = setupAfterNextRender(map);
   draw.changeMode(mapFeaturesToModes[type]);
   let drawCoordinates;
   if (type === 'Polygon') drawCoordinates = coordinates[0];
   if (type === 'Point') drawCoordinates = [coordinates];
   if (type === 'LineString') drawCoordinates = coordinates;
 
-  let addCoordinate = function(idx) {
-    let point = drawCoordinates[idx] ;
+  const addCoordinate = function(idx) {
+    const point = drawCoordinates[idx];
     if (point === undefined) {
       return cb();
     }
     click(map, makeMouseEvent(point[0], point[1], false));
     afterNextRender(() => {
-      addCoordinate(idx+1);
+      addCoordinate(idx + 1);
     });
-  }
+  };
 
   addCoordinate(0);
 }

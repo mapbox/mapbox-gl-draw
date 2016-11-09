@@ -4,7 +4,7 @@ import test from 'tape';
 import xtend from 'xtend';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createSyntheticEvent from 'synthetic-dom-events';
-import GLDraw from '../';
+import glDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
 import createAfterNextRender from './utils/after_next_render';
@@ -15,7 +15,7 @@ document.body.appendChild(container);
 const map = createMap({ container });
 const fireSpy = spy(map, 'fire');
 const afterNextRender = createAfterNextRender(map);
-const Draw = GLDraw();
+const Draw = glDraw();
 map.addControl(Draw);
 
 map.on('load', runTests);

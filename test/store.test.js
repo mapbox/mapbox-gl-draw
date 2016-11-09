@@ -66,13 +66,13 @@ test('Store#setDirty', t => {
 
 test('Store#createRenderBatch', t => {
   const store = createStore();
-  var numRenders = 0;
+  let numRenders = 0;
   store.render = function() {
     numRenders++;
-  }
+  };
   store.render();
   t.equal(numRenders, 1, 'render incrementes number of renders');
-  var renderBatch = store.createRenderBatch();
+  let renderBatch = store.createRenderBatch();
   store.render();
   store.render();
   store.render();
