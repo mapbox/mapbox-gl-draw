@@ -148,7 +148,7 @@ module.exports = function(ctx) {
       buttonElements[Constants.types.CIRCLE] = createControlButton(Constants.types.CIRCLE, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_CIRCLE,
-        title: `Circle tool ${ctx.options.keybindings && '(p)'}`,
+        title: `Circle tool ${ctx.options.keybindings && '(c)'}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_CIRCLE)
       });
     }

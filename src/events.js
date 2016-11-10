@@ -9,6 +9,7 @@ var modes = {
   [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
   [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
   [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
+  [Constants.modes.DRAW_CIRCLE]: require('./modes/draw_circle'),
   [Constants.modes.STATIC]: require('./modes/static')
 };
 
