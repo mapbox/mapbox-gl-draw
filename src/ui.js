@@ -144,6 +144,15 @@ module.exports = function(ctx) {
       });
     }
 
+    if (controls[Constants.types.CIRCLE]) {
+      buttonElements[Constants.types.CIRCLE] = createControlButton(Constants.types.CIRCLE, {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_CIRCLE,
+        title: `Circle tool ${ctx.options.keybindings && '(p)'}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_CIRCLE)
+      });
+    }
+
     if (controls.trash) {
       buttonElements.trash = createControlButton('trash', {
         container: controlGroup,
