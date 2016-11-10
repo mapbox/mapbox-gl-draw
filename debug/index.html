@@ -41,6 +41,7 @@
 <div class='toggle'>
   <button id='addBtn'>add draw</button>
   <button id='removeBtn'>remove draw</button>
+  <button id='flipStyleBtn'>change style</button>
 </div>
 <script src='/mapbox-gl.js'></script>
 <script src='/mapbox-gl-draw.js'></script>
@@ -73,7 +74,7 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     position: 'top-left'
   }));
 
-  var Draw = window.Draw = mapboxgl.Draw({ position: 'bottom-right' });
+  var Draw = window.Draw = mapboxGlDraw({ position: 'bottom-right' });
   map.addControl(Draw);
 
   map.on('load', function() {
@@ -81,6 +82,8 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     // toggle
     var addButton = document.getElementById('addBtn');
     var removeButton = document.getElementById('removeBtn');
+    var flipStyleButton = document.getElementById('flipStyleBtn');
+    var currentStyle = 'streets-v9';
     addButton.onclick = function() {
       if (Draw) return;
       Draw = mapboxgl.Draw();
@@ -90,6 +93,11 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
       if (!Draw) return;
       Draw.remove();
       Draw = null;
+    }
+    flipStyleButton.onclick = function() {
+      var style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
+      map.setStyle('mapbox://styles/mapbox/' + style);
+      currentStyle = style;
     }
 
     var startPoint = document.getElementById('start-point');

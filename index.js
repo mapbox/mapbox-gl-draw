@@ -14,6 +14,7 @@ const Draw = function(options) {
   ctx.api = api;
 
   const setup = runSetup(ctx);
+
   api.addTo = setup.addTo;
   api.remove = setup.remove;
   api.types = Constants.types;

@@ -98,6 +98,18 @@ module.exports = function(ctx) {
     ctx.store.changeZoom();
   };
 
+  events.data = function(event) {
+    if (event.dataType === 'style') {
+      const { setup, map, options, store } = ctx;
+      const hasLayers = !!options.styles.find(style => map.getLayer(style.id));
+      if (!hasLayers) {
+        setup.addLayers();
+        store.setDirty();
+        store.render();
+      }
+    }
+  };
+
   function changeMode(modename, nextModeOptions, eventOptions = {}) {
     currentMode.stop();
 
@@ -149,9 +161,9 @@ module.exports = function(ctx) {
     },
     addEventListeners: function() {
       ctx.map.on('mousemove', events.mousemove);
-
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
+      ctx.map.on('data', events.data);
 
       ctx.container.addEventListener('mouseout', events.mouseout);
 
@@ -162,9 +174,9 @@ module.exports = function(ctx) {
     },
     removeEventListeners: function() {
       ctx.map.off('mousemove', events.mousemove);
-
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
+      ctx.map.on('data', events.data);
 
       ctx.container.removeEventListener('mouseout', events.mouseout);
 

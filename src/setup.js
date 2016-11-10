@@ -86,5 +86,7 @@ module.exports = function(ctx) {
     }
   };
 
+  ctx.setup = setup;
+
   return setup;
 };
