@@ -16,6 +16,8 @@ var Draw = function(options) {
   ctx.api = api;
 
   var setup = Setup(ctx);
+  ctx.setup = setup;
+
   api.addTo = setup.addTo;
   api.remove = setup.remove;
   api.types = Constants.types;
