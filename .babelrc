@@ -1,4 +1,11 @@
 {
   "presets": ["es2015"],
-  "plugins": ["transform-flow-strip-types"]
+  "env": {
+    "test": {
+      "sourceMaps": "inline",
+      "plugins": [
+        "__coverage__"
+      ]
+    }
+  }
 }
