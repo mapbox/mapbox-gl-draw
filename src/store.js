@@ -1,9 +1,9 @@
-var throttle = require('./lib/throttle');
-var toDenseArray = require('./lib/to_dense_array');
-var StringSet = require('./lib/string_set');
-var render = require('./render');
+const throttle = require('./lib/throttle');
+const toDenseArray = require('./lib/to_dense_array');
+const StringSet = require('./lib/string_set');
+const render = require('./render');
 
-var Store = module.exports = function(ctx) {
+const Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
@@ -25,7 +25,7 @@ var Store = module.exports = function(ctx) {
  * @return {Function} renderBatch
  */
 Store.prototype.createRenderBatch = function() {
-  let holdRender = this.render;
+  const holdRender = this.render;
   let numRenders = 0;
   this.render = function() {
     numRenders++;

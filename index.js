@@ -1,21 +1,19 @@
-'use strict';
-
-var Setup = require('./src/setup');
-var Options = require('./src/options');
-var API = require('./src/api');
+const runSetup = require('./src/setup');
+const setupOptions = require('./src/options');
+const setupAPI = require('./src/api');
 const Constants = require('./src/constants');
 
-var Draw = function(options) {
-  options = Options(options);
+const Draw = function(options) {
+  options = setupOptions(options);
 
-  var ctx = {
+  const ctx = {
     options: options
   };
 
-  var api = API(ctx);
+  const api = setupAPI(ctx);
   ctx.api = api;
 
-  var setup = Setup(ctx);
+  const setup = runSetup(ctx);
   api.addTo = setup.addTo;
   api.remove = setup.remove;
   api.types = Constants.types;
@@ -25,6 +23,3 @@ var Draw = function(options) {
 };
 
 module.exports = Draw;
-
-window.mapboxgl = window.mapboxgl || {};
-window.mapboxgl.Draw = Draw;

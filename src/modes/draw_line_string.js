@@ -33,7 +33,7 @@ module.exports = function(ctx) {
         }
       });
       this.on('click', CommonSelectors.true, (e) => {
-        if(currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
+        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
@@ -70,8 +70,7 @@ module.exports = function(ctx) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [line.toGeoJSON()]
         });
-      }
-      else {
+      } else {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
@@ -86,8 +85,8 @@ module.exports = function(ctx) {
       if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
 
-      if(geojson.geometry.coordinates.length >= 3) {
-        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length-2], `${geojson.geometry.coordinates.length-2}`, false));
+      if (geojson.geometry.coordinates.length >= 3) {
+        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length - 2], `${geojson.geometry.coordinates.length - 2}`, false));
       }
 
       callback(geojson);

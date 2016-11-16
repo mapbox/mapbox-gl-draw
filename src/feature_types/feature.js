@@ -1,7 +1,7 @@
-var hat = require('hat');
-var Constants = require('../constants');
+const hat = require('hat');
+const Constants = require('../constants');
 
-var Feature = function(ctx, geojson) {
+const Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;

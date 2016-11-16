@@ -13,6 +13,6 @@ module.exports = function isClick(start, end, options = {}) {
   start.time = start.time || end.time;
   const moveDistance = euclideanDistance(start.point, end.point);
 
-  return moveDistance < fineTolerance
-    || (moveDistance < grossTolerance && (end.time - start.time) < interval);
+  return moveDistance < fineTolerance ||
+    (moveDistance < grossTolerance && (end.time - start.time) < interval);
 };

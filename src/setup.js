@@ -1,7 +1,7 @@
-var events = require('./events');
-var Store = require('./store');
-var ui = require('./ui');
-var Constants = require('./constants');
+const events = require('./events');
+const Store = require('./store');
+const ui = require('./ui');
+const Constants = require('./constants');
 
 module.exports = function(ctx) {
 
@@ -12,11 +12,11 @@ module.exports = function(ctx) {
   ctx.store = null;
   ctx.ui = ui(ctx);
 
-  var setup = {
+  const setup = {
     addTo: function(map) {
-        ctx.map = map;
-        setup.onAdd(map);
-        return this;
+      ctx.map = map;
+      setup.onAdd(map);
+      return this;
     },
     remove: function() {
       setup.removeLayers();
