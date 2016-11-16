@@ -1,14 +1,14 @@
-var Feature = require('./feature');
+const Feature = require('./feature');
 
-var Point = function(ctx, geojson) {
+const Point = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
 };
 
 Point.prototype = Object.create(Feature.prototype);
 
 Point.prototype.isValid = function() {
-  return typeof this.coordinates[0] === 'number'
-    && typeof this.coordinates[1] === 'number';
+  return typeof this.coordinates[0] === 'number' &&
+    typeof this.coordinates[1] === 'number';
 };
 
 Point.prototype.updateCoordinate = function(pathOrLng, lngOrLat, lat) {

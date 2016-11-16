@@ -2,8 +2,7 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
 import LineString from '../src/feature_types/line_string';
-import GLDraw from '../';
-import mapboxgl from 'mapbox-gl-js-mock';
+import glDraw from '../';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
@@ -108,13 +107,13 @@ test('LineString#updateCoordinate', t => {
   t.end();
 });
 
-test('LineString integration', function lineDrawClass(t){
+test('LineString integration', t => {
   const lineStringCoordinates = [[0, 0], [40, 20], [20, 40]];
   const map = createMap();
-  const Draw = GLDraw();
+  const Draw = glDraw();
   map.addControl(Draw);
 
-  map.on('load', function() {
+  map.on('load', () => {
     drawGeometry(map, Draw, 'LineString', lineStringCoordinates, () => {
       const feats = Draw.getAll().features;
       t.equals(1, feats.length, 'only one');

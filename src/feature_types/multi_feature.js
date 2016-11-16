@@ -1,21 +1,21 @@
-var Feature = require('./feature');
-var Constants = require('../constants');
-var hat = require('hat');
+const Feature = require('./feature');
+const Constants = require('../constants');
+const hat = require('hat');
 
-var models = {
+const models = {
   MultiPoint: require('./point'),
   MultiLineString: require('./line_string'),
   MultiPolygon: require('./polygon')
 };
 
-let takeAction = (features, action, path, lng, lat) => {
-  var parts = path.split('.');
-  var idx = parseInt(parts[0], 10);
-  var tail = (!parts[1]) ? null : parts.slice(1).join('.');
+const takeAction = (features, action, path, lng, lat) => {
+  const parts = path.split('.');
+  const idx = parseInt(parts[0], 10);
+  const tail = (!parts[1]) ? null : parts.slice(1).join('.');
   return features[idx][action](tail, lng, lat);
 };
 
-var MultiFeature = function(ctx, geojson) {
+const MultiFeature = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
 
   delete this.coordinates;
@@ -27,7 +27,8 @@ var MultiFeature = function(ctx, geojson) {
 MultiFeature.prototype = Object.create(Feature.prototype);
 
 MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
-  return coordinates.map(coords => new this.model(this.ctx, {
+  const Model = this.model.bind(this);
+  return coordinates.map(coords => new Model(this.ctx, {
     id: hat(),
     type: Constants.geojsonTypes.FEATURE,
     properties: {},

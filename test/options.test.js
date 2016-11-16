@@ -1,13 +1,12 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import mapboxgl from 'mapbox-gl-js-mock';
-import GLDraw from '../';
+import glDraw from '../';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 
 test('Options test', t => {
   t.test('no options', t => {
-    var Draw = GLDraw();
-    var defaultOptions = {
+    const Draw = glDraw();
+    const defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
@@ -30,8 +29,8 @@ test('Options test', t => {
   });
 
   t.test('use custom clickBuffer', t => {
-    var Draw = GLDraw({ clickBuffer: 10 });
-    var defaultOptions = {
+    const Draw = glDraw({ clickBuffer: 10 });
+    const defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
@@ -54,8 +53,8 @@ test('Options test', t => {
   });
 
   t.test('hide all controls', t => {
-    var Draw = GLDraw({displayControlsDefault: false});
-    var defaultOptions = {
+    const Draw = glDraw({displayControlsDefault: false});
+    const defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
@@ -77,8 +76,8 @@ test('Options test', t => {
   });
 
   t.test('hide controls but show point', t => {
-    var Draw = GLDraw({displayControlsDefault: false, controls: {point:true}});
-    var defaultOptions = {
+    const Draw = glDraw({displayControlsDefault: false, controls: {point:true}});
+    const defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
@@ -101,8 +100,8 @@ test('Options test', t => {
   });
 
   t.test('hide only point control', t => {
-    var Draw = GLDraw({ controls: {point:false}});
-    var defaultOptions = {
+    const Draw = glDraw({ controls: {point:false}});
+    const defaultOptions = {
       defaultMode: 'simple_select',
       position: 'top-left',
       keybindings: true,
@@ -125,7 +124,7 @@ test('Options test', t => {
   });
 
   t.test('custom styles', t => {
-    var Draw = GLDraw({styles: [{
+    const Draw = glDraw({styles: [{
       'id': 'custom-polygon',
       'type': 'fill',
       'filter': ['all', ['==', '$type', 'Polygon']],
@@ -141,7 +140,7 @@ test('Options test', t => {
       }
     }]});
 
-    var styles = [
+    const styles = [
       {
         'id': 'custom-polygon.cold',
         'source': 'mapbox-gl-draw-cold',

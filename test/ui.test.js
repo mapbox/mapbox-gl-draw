@@ -123,11 +123,13 @@ test('ui buttons with no options.controls', t => {
 });
 
 test('ui buttons with one options.controls', t => {
+  /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
-      line_string: true
+      line_string: true 
     }
   });
+  /* eslint-enable */
   const testUi = ui(context);
 
   t.deepEqual(getButtons(), [], 'confirm we start with no buttons');
@@ -175,6 +177,7 @@ test('ui buttons control group container inserted above attribution control, in 
 });
 
 test('ui buttons with all options.controls, no attribution control', t => {
+  /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
       line_string: true,
@@ -183,6 +186,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
       trash: true
     }
   });
+  /* eslint-enable */
   const testUi = ui(context);
 
   t.deepEqual(getButtons(), [], 'confirm we start with no buttons');

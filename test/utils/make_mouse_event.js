@@ -1,7 +1,7 @@
 const xtend = require('xtend');
 
 module.exports = function(lng = 0, lat = 0, eventProperties = {}) {
-  var e = {
+  const e = {
     originalEvent: xtend({
       stopPropagation: function() {},
       button: 0,

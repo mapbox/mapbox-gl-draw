@@ -1,6 +1,6 @@
-var Feature = require('./feature');
+const Feature = require('./feature');
 
-var Polygon = function(ctx, geojson) {
+const Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
   this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
 };
@@ -26,17 +26,17 @@ Polygon.prototype.setCoordinates = function(coords) {
 
 Polygon.prototype.addCoordinate = function(path, lng, lat) {
   this.changed();
-  var ids = path.split('.').map(x => parseInt(x, 10));
+  const ids = path.split('.').map(x => parseInt(x, 10));
 
-  var ring = this.coordinates[ids[0]];
+  const ring = this.coordinates[ids[0]];
 
   ring.splice(ids[1], 0, [lng, lat]);
 };
 
 Polygon.prototype.removeCoordinate = function(path) {
   this.changed();
-  var ids = path.split('.').map(x => parseInt(x, 10));
-  var ring = this.coordinates[ids[0]];
+  const ids = path.split('.').map(x => parseInt(x, 10));
+  const ring = this.coordinates[ids[0]];
   if (ring) {
     ring.splice(ids[1], 1);
     if (ring.length < 3) {
@@ -46,8 +46,8 @@ Polygon.prototype.removeCoordinate = function(path) {
 };
 
 Polygon.prototype.getCoordinate = function(path) {
-  var ids = path.split('.').map(x => parseInt(x, 10));
-  var ring = this.coordinates[ids[0]];
+  const ids = path.split('.').map(x => parseInt(x, 10));
+  const ring = this.coordinates[ids[0]];
   return JSON.parse(JSON.stringify(ring[ids[1]]));
 };
 
@@ -57,9 +57,9 @@ Polygon.prototype.getCoordinates = function() {
 
 Polygon.prototype.updateCoordinate = function(path, lng, lat) {
   this.changed();
-  var parts = path.split('.');
-  var ringId = parseInt(parts[0], 10);
-  var coordId = parseInt(parts[1], 10);
+  const parts = path.split('.');
+  const ringId = parseInt(parts[0], 10);
+  const coordId = parseInt(parts[1], 10);
 
   if (this.coordinates[ringId] === undefined) {
     this.coordinates[ringId] = [];

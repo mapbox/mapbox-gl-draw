@@ -31,7 +31,7 @@ module.exports = function(ctx) {
     const classesToRemove = [];
     const classesToAdd = [];
 
-    classTypes.forEach(function(type) {
+    classTypes.forEach((type) => {
       if (nextMapClasses[type] === currentMapClasses[type]) return;
 
       classesToRemove.push(`${type}-${currentMapClasses[type]}`);
