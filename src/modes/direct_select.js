@@ -84,50 +84,50 @@ module.exports = function(ctx, opts) {
   };
 
   const dragVertex = (e, delta) => {
-    var selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-    var selectedCoordPoints = selectedCoords.map(coords => ({
+    const selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+    const selectedCoordPoints = selectedCoords.map(coords => ({
       type: Constants.geojsonTypes.FEATURE,
       properties: {},
       geometry: {
-type: Constants.geojsonTypes.POINT,
-coordinates: coords
-}
-}));
-var constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
-for (var i = 0; i < selectedCoords.length; i++) {
-var coord = selectedCoords[i];
-feature.updateCoordinate(selectedCoordPaths[i],
-coord[0] + constrainedDelta.lng,
-coord[1] + constrainedDelta.lat);
-}
-};
+        type: Constants.geojsonTypes.POINT,
+        coordinates: coords
+      }
+    }));
 
-return {
-start: function() {
-ctx.store.setSelected(featureId);
-doubleClickZoom.disable(ctx);
+    const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+    for (let i = 0; i < selectedCoords.length; i++) {
+      const coord = selectedCoords[i];
+      feature.updateCoordinate(selectedCoordPaths[i],
+      coord[0] + constrainedDelta.lng,
+      coord[1] + constrainedDelta.lat);
+    }
+  };
 
-// On mousemove that is not a drag, stop vertex movement.
-this.on('mousemove', CommonSelectors.true, e => {
-stopDragging(e);
-if (CommonSelectors.isActiveFeature(e) && selectedCoordPaths.length > 0) ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
-});
+  return {
+    start: function() {
+      ctx.store.setSelected(featureId);
+      doubleClickZoom.disable(ctx);
 
-// As soon as you mouse leaves the canvas, update the feature
-this.on('mouseout', () => dragMoving, fireUpdate);
+      // On mousemove that is not a drag, stop vertex movement.
+      this.on('mousemove', CommonSelectors.true, e => {
+        stopDragging(e);
+        if (CommonSelectors.isActiveFeature(e) && selectedCoordPaths.length > 0) ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
+      });
 
-this.on('mousedown', isVertex, onVertex);
-this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
-this.on('mousedown', isMidpoint, onMidpoint);
-this.on('drag', () => canDragMove, (e) => {
-dragMoving = true;
-e.originalEvent.stopPropagation();
+      // As soon as you mouse leaves the canvas, update the feature
+      this.on('mouseout', () => dragMoving, fireUpdate);
+
+      this.on('mousedown', isVertex, onVertex);
+      this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
+      this.on('mousedown', isMidpoint, onMidpoint);
+      this.on('drag', () => canDragMove, (e) => {
+        dragMoving = true;
+        e.originalEvent.stopPropagation();
 
         const delta = {
           lng: e.lngLat.lng - dragMoveLocation.lng,
           lat: e.lngLat.lat - dragMoveLocation.lat
         };
-
         if (selectedCoordPaths.length > 0) dragVertex(e, delta);
         else dragFeature(e, delta);
 
