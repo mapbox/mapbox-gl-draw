@@ -176,7 +176,7 @@ module.exports = function(ctx) {
       ctx.map.off('mousemove', events.mousemove);
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
-      ctx.map.on('data', events.data);
+      ctx.map.off('data', events.data);
 
       ctx.container.removeEventListener('mouseout', events.mouseout);
 
