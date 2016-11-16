@@ -16,6 +16,13 @@ const map = createMap({ container });
 const fireSpy = spy(map, 'fire');
 const afterNextRender = createAfterNextRender(map);
 const Draw = glDraw();
+const onAdd = Draw.onAdd.bind(Draw);
+let controlGroup = null;
+Draw.onAdd = function(m) {
+  controlGroup = onAdd(m);
+  return controlGroup;
+};
+
 map.addControl(Draw);
 
 map.on('load', runTests);
@@ -32,10 +39,10 @@ const escapeEvent = createSyntheticEvent('keyup', {
 });
 
 function runTests() {
-  const pointButton = container.getElementsByClassName('mapbox-gl-draw_point')[0];
-  const lineCutton = container.getElementsByClassName('mapbox-gl-draw_line')[0];
-  const trashButton = container.getElementsByClassName('mapbox-gl-draw_trash')[0];
-  const polygonEutton = container.getElementsByClassName('mapbox-gl-draw_polygon')[0];
+  const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
+  const lineCutton = controlGroup.getElementsByClassName('mapbox-gl-draw_line')[0];
+  const trashButton = controlGroup.getElementsByClassName('mapbox-gl-draw_trash')[0];
+  const polygonEutton = controlGroup.getElementsByClassName('mapbox-gl-draw_polygon')[0];
 
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.

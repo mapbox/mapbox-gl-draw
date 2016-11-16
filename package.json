@@ -16,8 +16,8 @@
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
-    "build": "NODE_ENV=production browserify index.js > dist/mapbox-gl-draw.js",
-    "prepublish": "NODE_ENV=production browserify index.js | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "build": "NODE_ENV=production browserify index.js --sandalone mapboxglDraw > dist/mapbox-gl-draw.js",
+    "prepublish": "NODE_ENV=production browserify index.js --sandalone mapboxglDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "node server.js"
   },
   "repository": {
@@ -51,8 +51,8 @@
     "eslint": "^3.0.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
-    "mapbox-gl": "^0.26.0",
-    "mapbox-gl-js-mock": "^0.26.0",
+    "mapbox-gl": "^0.27.0",
+    "mapbox-gl-js-mock": "^0.27.1",
     "mock-browser": "^0.92.10",
     "nyc": "^6.6.1",
     "opener": "^1.4.1",
@@ -63,7 +63,7 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.26.0 || ^0.25.0 || ^0.24.0 || ^0.23.0 || ^0.22.0 || ^0.21.0 || ^0.20.0 || ^0.19.0 || ^0.18.0 || ^0.17.0"
+    "mapbox-gl": "^0.27.0"
   },
   "dependencies": {
     "geojson-area": "^0.2.1",

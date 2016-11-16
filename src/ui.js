@@ -94,28 +94,10 @@ module.exports = function(ctx) {
 
   function addButtons() {
     const controls = ctx.options.controls;
-    if (!controls) return;
+    const controlGroup = document.createElement('div');
+    controlGroup.className = `${Constants.classes.CONTROL_GROUP} ${Constants.classes.CONTROL_BASE}`;
 
-    const ctrlPosClassName = `${Constants.classes.CONTROL_PREFIX}${ctx.options.position || 'top-left'}`;
-    let controlContainer = ctx.container.getElementsByClassName(ctrlPosClassName)[0];
-    if (!controlContainer) {
-      controlContainer = document.createElement('div');
-      controlContainer.className = ctrlPosClassName;
-      ctx.container.appendChild(controlContainer);
-    }
-
-    let controlGroup = controlContainer.getElementsByClassName(Constants.classes.CONTROL_GROUP)[0];
-    if (!controlGroup) {
-      controlGroup = document.createElement('div');
-      controlGroup.className = `${Constants.classes.CONTROL_GROUP} ${Constants.classes.CONTROL_BASE}`;
-
-      const attributionControl = controlContainer.getElementsByClassName(Constants.classes.ATTRIBUTION)[0];
-      if (attributionControl) {
-        controlContainer.insertBefore(controlGroup, attributionControl);
-      } else {
-        controlContainer.appendChild(controlGroup);
-      }
-    }
+    if (!controls) return controlGroup;
 
     if (controls[Constants.types.LINE]) {
       buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
@@ -176,6 +158,8 @@ module.exports = function(ctx) {
         }
       });
     }
+
+    return controlGroup;
   }
 
   function removeButtons() {

@@ -120,7 +120,7 @@ test('LineString integration', t => {
       t.equals('LineString', feats[0].geometry.type, 'of the right type');
       t.equals(lineStringCoordinates[0].length, feats[0].geometry.coordinates[0].length, 'right number of points');
       t.deepEquals(lineStringCoordinates, feats[0].geometry.coordinates, 'in the right spot');
-      Draw.remove();
+      Draw.onRemove();
       t.end();
     });
   });

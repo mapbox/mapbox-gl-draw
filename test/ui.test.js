@@ -33,8 +33,8 @@ function createMockContext({ position, controls } = {}) {
   };
 }
 
-function getButtons() {
-  return Array.prototype.slice.call(document.getElementsByClassName('mapbox-gl-draw_ctrl-draw-btn'));
+function getButtons(div) {
+  return Array.prototype.slice.call(div.getElementsByClassName('mapbox-gl-draw_ctrl-draw-btn'));
 }
 
 test('ui container classes', t => {
@@ -113,10 +113,8 @@ test('ui buttons with no options.controls', t => {
   const { context, cleanup } = createMockContext();
   const testUi = ui(context);
 
-  t.deepEqual(getButtons(), [], 'confirm we start with no buttons');
-
-  testUi.addButtons();
-  t.deepEqual(getButtons(), [], 'still no buttons');
+  const div = testUi.addButtons();
+  t.deepEqual(getButtons(div), [], 'still no buttons');
 
   cleanup();
   t.end();
@@ -132,10 +130,8 @@ test('ui buttons with one options.controls', t => {
   /* eslint-enable */
   const testUi = ui(context);
 
-  t.deepEqual(getButtons(), [], 'confirm we start with no buttons');
-
-  testUi.addButtons();
-  const buttons = getButtons();
+  const div = testUi.addButtons();
+  const buttons = getButtons(div);
   t.equal(buttons.length, 1, 'one button added');
   t.ok(buttons[0].classList.contains('mapbox-gl-draw_line'), 'has line class');
   t.ok(buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'has control class');
@@ -152,25 +148,13 @@ test('ui buttons control group container inserted above attribution control, in 
   });
 
   const controlContainer = getControlContainer();
-
-  const attributionControl = document.createElement('div');
-  attributionControl.className = 'mapboxgl-ctrl-attrib';
-  controlContainer.appendChild(attributionControl);
-
   const testUi = ui(context);
 
   t.equal(controlContainer.getElementsByClassName('mapboxgl-ctrl-group').length, 0,
     'confirm control group does not exist at first');
 
-  testUi.addButtons();
-  const controlGroup = controlContainer.getElementsByClassName('mapboxgl-ctrl-group')[0];
+  const controlGroup = testUi.addButtons();
   t.ok(controlGroup, 'control group exists');
-  t.equal(controlGroup.parentNode, controlContainer, 'is child of container');
-
-  const controlContainerChildren = Array.prototype.slice.call(controlContainer.children);
-  t.equal(controlContainerChildren.indexOf(controlGroup),
-    controlContainerChildren.indexOf(attributionControl) - 1,
-    'is before attributon control');
 
   cleanup();
   t.end();
@@ -189,11 +173,8 @@ test('ui buttons with all options.controls, no attribution control', t => {
   /* eslint-enable */
   const testUi = ui(context);
 
-  t.deepEqual(getButtons(), [], 'confirm we start with no buttons');
-
-  testUi.addButtons();
-  const buttons = getButtons();
-  const controlGroup = context.container.getElementsByClassName('mapboxgl-ctrl-group')[0];
+  const controlGroup = testUi.addButtons();
+  const buttons = getButtons(controlGroup);
 
   t.equal(buttons.length, 4, 'one button added');
 
