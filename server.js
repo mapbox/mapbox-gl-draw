@@ -3,7 +3,7 @@ var app = express();
 var browserify = require('browserify-middleware');
 
 
-app.get('/mapbox-gl-draw.js', browserify('./index.js', {
+app.get('/mapbox-gl-draw.js', browserify('./dist.js', {
     standalone: 'mapbox-gl-draw',
     debug: true,
     cache: 'dynamic',

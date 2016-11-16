@@ -52,7 +52,7 @@
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
     "mapbox-gl": "^0.27.0",
-    "mapbox-gl-js-mock": "^0.27.0",
+    "mapbox-gl-js-mock": "^0.27.1",
     "mock-browser": "^0.92.10",
     "nyc": "^6.6.1",
     "opener": "^1.4.1",
@@ -72,7 +72,6 @@
     "geojsonhint": "^2.0.0beta",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
-    "mapbox-gl-js-mock": "^0.27.1",
     "point-geometry": "0.0.0",
     "xtend": "^4.0.1"
   }

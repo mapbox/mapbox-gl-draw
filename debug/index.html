@@ -70,9 +70,9 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     style: 'mapbox://styles/mapbox/streets-v8'
   });
 
-  map.addControl(new (mapboxgl.NavigationControl || mapboxgl.Navigation)(), 'top-left');
+  map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-  var Draw = window.Draw = mapboxGlDraw();
+  var Draw = window.Draw = mapboxglDraw();
   map.addControl(Draw, 'bottom-right');
 
   map.on('load', function() {
