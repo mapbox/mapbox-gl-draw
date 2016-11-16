@@ -144,7 +144,7 @@ test('Polygon integration', t => {
       t.equals('Polygon', feats[0].geometry.type, 'of the right type');
       t.equals(feats[0].geometry.coordinates[0].length, polygonCoordinates[0].length, 'right number of points');
       t.deepEquals(feats[0].geometry.coordinates, polygonCoordinates, 'in the right spot');
-      Draw.remove();
+      Draw.onRemove();
       t.end();
     });
 

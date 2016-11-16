@@ -613,6 +613,6 @@ test('Draw.uncombineFeatures -- should do nothing if nothing if only non multife
 
 test('Cleanup', t => {
   Draw.deleteAll();
-  Draw.remove();
+  Draw.onRemove();
   t.end();
 });

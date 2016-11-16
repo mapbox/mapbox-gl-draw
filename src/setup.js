@@ -12,26 +12,28 @@ module.exports = function(ctx) {
   ctx.store = null;
   ctx.ui = ui(ctx);
 
+  let controlContainer = null;
+
   const setup = {
-    addTo: function(map) {
-      ctx.map = map;
-      setup.onAdd(map);
-      return this;
-    },
-    remove: function() {
+    onRemove: function() {
       setup.removeLayers();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
+
+      if (controlContainer && controlContainer.parentNode) controlContainer.parentNode.removeChild(controlContainer);
+      controlContainer = null;
+
       return this;
     },
     onAdd: function(map) {
+      ctx.map = map;
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
 
-      ctx.ui.addButtons();
+      controlContainer = ctx.ui.addButtons();
 
       if (ctx.options.boxSelect) {
         map.boxZoom.disable();
@@ -50,6 +52,8 @@ module.exports = function(ctx) {
           ctx.events.addEventListeners();
         });
       }
+
+      return controlContainer;
     },
     addLayers: function() {
       // drawn features style
