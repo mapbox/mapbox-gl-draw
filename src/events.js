@@ -32,7 +32,8 @@ module.exports = function(ctx) {
   };
 
   events.mousemove = function(event) {
-    if (event.originalEvent.which === 1) {
+    var button = event.originalEvent.button !== undefined ? event.originalEvent.button : event.originalEvent.which;
+    if (button === 1) {
       return events.drag(event);
     }
     const target = getFeaturesAndSetCursor(event, ctx);
