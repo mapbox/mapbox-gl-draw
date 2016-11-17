@@ -3,7 +3,7 @@
 To use Draw
 
 ```js
-var Draw = mapboxgl.Draw({ options });
+var Draw = mapboxglDraw({ options });
 map.addControl(Draw);
 ```
 
@@ -79,7 +79,7 @@ Note that this mode can only be entered or exited via `.changeMode`
 
 ## API Methods
 
-`mapboxgl.Draw()` returns an instance of `Draw` which has the following API for working with your data:
+`mapboxglDraw()` returns an instance of `Draw` which has the following API for working with your data:
 
 ###`.add(Object: GeoJSON) -> [String]`
 
