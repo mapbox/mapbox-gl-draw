@@ -143,7 +143,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
     afterNextRender(() => {
@@ -275,7 +275,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(40, 0));
@@ -324,7 +324,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
     repeat(22, i => {
-      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(60, 40));
@@ -482,7 +482,7 @@ function runTests() {
     // Mouse down with the shift key
     map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
 
@@ -521,7 +521,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(20, -5));
@@ -605,7 +605,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(20 - i, 10, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 - i, 10, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(0, 10));

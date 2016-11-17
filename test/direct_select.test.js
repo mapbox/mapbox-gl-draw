@@ -107,7 +107,7 @@ test('direct_select', t => {
       click(map, makeMouseEvent(clickAt[0], clickAt[1]));
       afterNextRender(() => {
         map.fire('mousedown', makeMouseEvent(clickAt[0] + 15, clickAt[1] + 15));
-        map.fire('mousemove', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30, { button: 1 }));
+        map.fire('mousemove', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30, { buttons: 1 }));
         map.fire('mouseup', makeMouseEvent(clickAt[0] + 30, clickAt[1] + 30));
         const afterMove = Draw.get(ids[0]);
         st.deepEquals(getGeoJSON('polygon').geometry, afterMove.geometry, 'should be the same after the drag');
@@ -128,9 +128,9 @@ test('direct_select', t => {
       afterNextRender(() => {
         map.fire.reset();
         map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-        map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
+        map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
         mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
-        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30), { button: 1 });
+        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30), { buttons: 1 });
         map.fire('mouseup', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30));
 
         const afterMove = Draw.get(ids[0]);
@@ -156,9 +156,9 @@ test('direct_select', t => {
       afterNextRender(() => {
         map.fire.reset();
         map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-        map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
+        map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
         mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
-        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30, { button: 1 }));
+        map.fire('mousemove', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30, { buttons: 1 }));
         map.fire('mouseup', makeMouseEvent(startPosition[0] + 30, startPosition[1] + 30));
 
         const afterMove = Draw.get(ids[0]);
@@ -184,7 +184,7 @@ test('direct_select', t => {
       map.fire.reset();
       click(map, makeMouseEvent(centroid[0], centroid[1]));
       map.fire('mousedown', makeMouseEvent(centroid[0], centroid[1]));
-      map.fire('mousemove', makeMouseEvent(centroid[0] + 15, centroid[1] + 15, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(centroid[0] + 15, centroid[1] + 15, { buttons: 1 }));
       map.fire('mouseup', makeMouseEvent(centroid[0] + 15, centroid[1] + 15));
 
       const afterMove = Draw.get(polygonId);
