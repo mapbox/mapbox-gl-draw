@@ -172,10 +172,10 @@ module.exports = function(ctx) {
     return api;
   };
 
-  api.setFeatureProperty = function(featureId, name, property) {
-    ctx.store.setFeatureProperty(featureId, name, property);
+  api.setFeatureProperty = function(featureId, property, value) {
+    ctx.store.setFeatureProperty(featureId, property, value);
     return api;
-  }
+  };
 
   return api;
 };

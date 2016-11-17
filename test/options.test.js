@@ -8,11 +8,11 @@ test('Options test', t => {
     const Draw = glDraw();
     const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       clickBuffer: 2,
       displayControlsDefault: true,
       boxSelect: true,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -32,12 +32,12 @@ test('Options test', t => {
     const Draw = glDraw({ clickBuffer: 10 });
     const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       clickBuffer: 10,
       boxSelect: true,
       displayControlsDefault: true,
       styles: Draw.options.styles,
+      userProperties: false,
       controls: {
         point: true,
         line_string: true,
@@ -56,11 +56,11 @@ test('Options test', t => {
     const Draw = glDraw({displayControlsDefault: false});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       clickBuffer: 2,
       boxSelect: true,
       displayControlsDefault: false,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: false,
@@ -79,11 +79,11 @@ test('Options test', t => {
     const Draw = glDraw({displayControlsDefault: false, controls: {point:true}});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       displayControlsDefault: false,
       clickBuffer: 2,
       boxSelect: true,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -103,10 +103,10 @@ test('Options test', t => {
     const Draw = glDraw({ controls: {point:false}});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       displayControlsDefault: true,
       clickBuffer: 2,
+      userProperties: false,
       boxSelect: true,
       styles: Draw.options.styles,
       controls: {

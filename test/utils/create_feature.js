@@ -10,6 +10,6 @@ export default function createFeature(featureType) {
     properties: {}
   }, getGeoJSON(featureType));
   feature.toGeoJSON = () => feature;
-  feature.setProperty = (property, name) => feature.properties[property] = name;
+  feature.setProperty = (property, name) => { feature.properties[property] = name; };
   return feature;
 }

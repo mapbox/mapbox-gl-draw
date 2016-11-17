@@ -615,7 +615,7 @@ test('Draw.setFeatureProperty', t => {
   Draw.add(getGeoJSON('point'));
   const featureId = Draw.getAll().features[0].id;
   const drawInstance = Draw.setFeatureProperty(featureId, 'price', 200);
-  t.equals(drawInstance, Draw, 'returns Draw instance');  
+  t.equals(drawInstance, Draw, 'returns Draw instance');
   t.equals(Draw.get(featureId).properties.price, 200, 'Draw.setFeatureProperty adds a property');
   t.end();
 });

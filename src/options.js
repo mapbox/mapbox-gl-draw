@@ -3,13 +3,13 @@ const Constants = require('./constants');
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
-  position: 'top-left',
   keybindings: true,
   clickBuffer: 2,
   boxSelect: true,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
-  controls: {}
+  controls: {},
+  userProperties: false
 };
 
 const showControls = {

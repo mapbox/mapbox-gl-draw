@@ -241,9 +241,9 @@ test('Store#setSelected', t => {
 test('Store#setFeatureProperty', t => {
   const store = createStore();
   const point = createFeature('point');
-  
+
   store.add(point);
-  store.clearChangedIds();  
+  store.clearChangedIds();
   store.setFeatureProperty(point.id, 'size', 200);
   t.deepEqual(store.getChangedIds(), [point.id]);
   t.equal(store.get(point.id).properties.size, 200, 'sets the property on the feature');

@@ -100,15 +100,36 @@ test('Feature#toGeoJSON', t => {
   t.end();
 });
 
-test('Feature#internal', t => {
-  const ctx = createMockCtx();
+test('Feature#internal - when userProperties is true', t => {
+  const ctx = createMockCtx({userProperties: true});
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);
   t.deepEqual(feature.internal('foo'), {
     type: 'Feature',
     properties: {
-      a: 'b',
-      c: 'd',
+      user_a: 'b',
+      user_c: 'd',
+      id: feature.id,
+      meta: 'feature',
+      'meta:type': feature.type,
+      active: 'false',
+      mode: 'foo'
+    },
+    geometry: {
+      coordinates: feature.coordinates,
+      type: feature.type
+    }
+  });
+  t.end();
+
+});
+test('Feature#internal - when userProperties is false', t => {
+  const ctx = createMockCtx({userProperties: false});
+  const polygon = createFeature('polygon');
+  const feature = new Feature(ctx, polygon);
+  t.deepEqual(feature.internal('foo'), {
+    type: 'Feature',
+    properties: {
       id: feature.id,
       meta: 'feature',
       'meta:type': feature.type,
