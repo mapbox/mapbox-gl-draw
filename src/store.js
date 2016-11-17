@@ -235,3 +235,14 @@ Store.prototype.getSelected = function() {
 Store.prototype.isSelected = function(featureId) {
   return this._selectedFeatureIds.has(featureId);
 };
+
+/** 
+ * Sets a property on the given feature
+ * @param {string} featureId
+ * @param {string} property name
+ * @param {string} property value
+*/
+Store.prototype.setFeatureProperty = function(featureId, name, value) {
+  this.get(featureId).setProperty(name, value);
+  this.featureChanged(featureId);
+};

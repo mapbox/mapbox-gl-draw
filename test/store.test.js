@@ -50,8 +50,9 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.isSelected, 'function', 'exposes store.isSelected');
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
+  t.equal(typeof Store.prototype.setFeatureProperty, 'function', 'exposes store.setFeatureProperty');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 17, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 18, 'no untested prototype members');
 
   t.end();
 });
@@ -236,3 +237,17 @@ test('Store#setSelected', t => {
 
   t.end();
 });
+
+test('Store#setFeatureProperty', t => {
+  const store = createStore();
+  const point = createFeature('point');
+  
+  store.add(point);
+  store.clearChangedIds();  
+  store.setFeatureProperty(point.id, 'size', 200);
+  t.deepEqual(store.getChangedIds(), [point.id]);
+  t.equal(store.get(point.id).properties.size, 200, 'sets the property on the feature');
+
+  t.end();
+});
+
