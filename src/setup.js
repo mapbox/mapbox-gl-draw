@@ -43,14 +43,20 @@ module.exports = function(ctx) {
         map.dragPan.enable();
       }
 
-      if (map.loaded()) {
+      let intervalId = null;
+
+      const connect = () => {
+        map.off('load', connect);
+        clearInterval(intervalId);
         setup.addLayers();
         ctx.events.addEventListeners();
+      };
+
+      if (map.loaded()) {
+        connect();
       } else {
-        map.on('load', () => {
-          setup.addLayers();
-          ctx.events.addEventListeners();
-        });
+        map.on('load', connect);
+        intervalId = setInterval(() => { if (map.loaded()) connect(); }, 16);
       }
 
       return controlContainer;
