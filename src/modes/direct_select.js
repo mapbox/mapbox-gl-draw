@@ -4,6 +4,7 @@ const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
+const moveFeatures = require('../lib/move_features');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -54,6 +55,7 @@ module.exports = function(ctx, opts) {
 
   const onVertex = function(e) {
     startDragging(e);
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     const about = e.featureTarget.properties;
     const selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
     if (!isShiftDown(e) && selectedIndex === -1) {
@@ -72,44 +74,63 @@ module.exports = function(ctx, opts) {
     selectedCoordPaths = [about.coord_path];
   };
 
+  const onFeature = function(e) {
+    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+    if (selectedCoordPaths.length === 0) startDragging(e);
+    else stopDragging();
+  };
+
+  const dragFeature = (e, delta) => {
+    moveFeatures(ctx.store.getSelected(), delta);
+    dragMoveLocation = e.lngLat;
+  };
+
+  const dragVertex = (e, delta) => {
+    const selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
+    const selectedCoordPoints = selectedCoords.map(coords => ({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.POINT,
+        coordinates: coords
+      }
+    }));
+
+    const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+    for (let i = 0; i < selectedCoords.length; i++) {
+      const coord = selectedCoords[i];
+      feature.updateCoordinate(selectedCoordPaths[i],
+      coord[0] + constrainedDelta.lng,
+      coord[1] + constrainedDelta.lat);
+    }
+  };
+
   return {
     start: function() {
       ctx.store.setSelected(featureId);
       doubleClickZoom.disable(ctx);
 
       // On mousemove that is not a drag, stop vertex movement.
-      this.on('mousemove', CommonSelectors.true, stopDragging);
+      this.on('mousemove', CommonSelectors.true, e => {
+        stopDragging(e);
+      });
 
       // As soon as you mouse leaves the canvas, update the feature
       this.on('mouseout', () => dragMoving, fireUpdate);
 
       this.on('mousedown', isVertex, onVertex);
+      this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
       this.on('mousedown', isMidpoint, onMidpoint);
       this.on('drag', () => canDragMove, (e) => {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        const selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-        const selectedCoordPoints = selectedCoords.map(coords => ({
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coords
-          }
-        }));
         const delta = {
           lng: e.lngLat.lng - dragMoveLocation.lng,
           lat: e.lngLat.lat - dragMoveLocation.lat
         };
-        const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
-
-        for (let i = 0; i < selectedCoords.length; i++) {
-          const coord = selectedCoords[i];
-          feature.updateCoordinate(selectedCoordPaths[i],
-            coord[0] + constrainedDelta.lng,
-            coord[1] + constrainedDelta.lat);
-        }
+        if (selectedCoordPaths.length > 0) dragVertex(e, delta);
+        else dragFeature(e, delta);
 
         dragMoveLocation = e.lngLat;
       });
@@ -125,6 +146,10 @@ module.exports = function(ctx, opts) {
       });
       this.on('click', isInactiveFeature, () => {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      });
+      this.on('click', CommonSelectors.isActiveFeature, () => {
+        selectedCoordPaths = [];
+        feature.changed();
       });
     },
     stop: function() {

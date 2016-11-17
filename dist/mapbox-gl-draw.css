@@ -73,6 +73,9 @@
 .mapboxgl-map.mode-direct_select.feature-midpoint.mouse-pointer .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: cell;
 }
+.mapboxgl-map.mode-direct_select.feature-feature.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
+  cursor: move;
+}
 .mapboxgl-map.mode-static.mouse-pointer  .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: grab;
   cursor: -moz-grab;

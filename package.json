@@ -38,6 +38,7 @@
     "instrument": false
   },
   "devDependencies": {
+    "@turf/centroid": "^3.6.1",
     "babel-core": "^6.9.1",
     "babel-eslint": "^7.1.0",
     "babel-plugin-__coverage__": "^11.0.0",

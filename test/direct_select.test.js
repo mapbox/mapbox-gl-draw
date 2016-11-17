@@ -1,4 +1,5 @@
 /* eslint no-shadow:[0] */
+import turfCentroid from '@turf/centroid';
 import test from 'tape';
 import glDraw from '../';
 import click from './utils/mouse_click';
@@ -168,6 +169,31 @@ test('direct_select', t => {
 
         cleanUp(() => st.end());
       });
+    });
+  });
+
+  t.test('direct_select - drag feature if no vertices are selected', st => {
+    const [polygonId] = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: polygonId
+    });
+
+    const startPosition = getGeoJSON('polygon').geometry.coordinates[0][1];
+    const centroid = turfCentroid(getGeoJSON('polygon')).geometry.coordinates;
+    afterNextRender(() => {
+      map.fire.reset();
+      click(map, makeMouseEvent(centroid[0], centroid[1]));
+      map.fire('mousedown', makeMouseEvent(centroid[0], centroid[1]));
+      map.fire('mousemove', makeMouseEvent(centroid[0] + 15, centroid[1] + 15, { which: 1 }));
+      map.fire('mouseup', makeMouseEvent(centroid[0] + 15, centroid[1] + 15));
+
+      const afterMove = Draw.get(polygonId);
+      const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
+      st.equal(args.length, 1, 'draw.update called once');
+      st.equal(afterMove.geometry.coordinates[0][1][0], startPosition[0] + 15, 'point lng moved to the mouseup location');
+      st.equal(afterMove.geometry.coordinates[0][1][1], startPosition[1] + 15, 'point lat moved to the mouseup location');
+
+      cleanUp(() => st.end());
     });
   });
 
