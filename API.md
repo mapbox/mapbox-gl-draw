@@ -21,7 +21,6 @@ map.on('load', function() {
 
 option | values | function
 --- | --- | ---
-drawing | boolean | The ability to draw and delete features - default: `true`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
 clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
