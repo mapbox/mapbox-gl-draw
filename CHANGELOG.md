@@ -1,3 +1,11 @@
+## 0.15.0
+
+- Adds support for `mapbox-gl-js@0.28.0`
+- Adds `Draw.setFeatureProperty(string, string, any)`
+- Adds `mapboxglDraw({userProperties: boolean})` to add user properties to the data rendered by Draw
+- Fixes bug where Draw would fail to attach to mapbox-gl-js if added while a style was loading
+- Fixes bug where Firefox would treat all mousemove events as drag events
+
 ## 0.14.0
 
 #### ⚠️ Breaking changes ⚠️
