@@ -4,19 +4,36 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 [![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
 
+**Requires [mapbox-gl-js@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016) or higher.**
+
 ### Installing
 
 ```
 npm install mapbox-gl-draw
 ```
 
-Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/dev-pages/dist/mapbox-gl-draw.css)
+Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
 
 ```html
-<link href="mapbox-gl-draw.css" rel="stylesheet" />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.14.0/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Usage in your application
+
+**When using modules**
+
+```js
+var mapboxgl = require('mapbox-gl');
+var mapboxglDraw = require('mapbox-gl-draw');
+```
+
+**When using a CDN**
+
+```html
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.14.0/mapbox-gl-draw.js'></script>
+```
+
+**Example setup**
 
 ```js
 mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
