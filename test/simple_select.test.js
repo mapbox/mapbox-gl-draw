@@ -63,7 +63,7 @@ test('simple_select', t => {
       t.equal(map.dragPan.disable.callCount, 1, 'disable dragPan');
       map.fire('mousemove', makeMouseEvent(15, 15, {
         shiftKey: true,
-        which: 1
+        button: 1
       }));
       afterNextRender(() => {
         t.equal(map.getContainer().className.indexOf('mouse-add') > -1, true, 'mouse-add class has been set');
@@ -110,7 +110,7 @@ test('simple_select', t => {
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       map.fire('mousemove', makeMouseEvent(15, 15, {
         shiftKey: true,
-        which: 1
+        button: 1
       }));
       map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
@@ -145,7 +145,7 @@ test('simple_select', t => {
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       map.fire('mousemove', makeMouseEvent(-15, -15, {
         shiftKey: true,
-        which: 1
+        button: 1
       }));
       map.fire('mouseup', makeMouseEvent(-15, -15, { shiftKey: true }));
 
@@ -384,8 +384,8 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { button: 1 }));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
 
       const movedPoint = Draw.get(pointId);
@@ -430,7 +430,7 @@ test('simple_select', t => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       // Dragging
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
       // Not dragging
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
@@ -450,7 +450,7 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
       mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
@@ -472,9 +472,9 @@ test('simple_select', t => {
     afterNextRender(() => {
       map.fire.reset();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { button: 1 }));
       mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
-      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { button: 1 }));
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
 
       const movedPoint = Draw.get(pointId);
