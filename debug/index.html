@@ -73,6 +73,7 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
   map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
   var Draw = window.Draw = mapboxglDraw();
+  var drawIsActive = true;
   map.addControl(Draw, 'bottom-right');
 
   map.on('load', function() {
@@ -83,14 +84,14 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     var flipStyleButton = document.getElementById('flipStyleBtn');
     var currentStyle = 'streets-v9';
     addButton.onclick = function() {
-      if (Draw) return;
-      Draw = mapboxgl.Draw();
-      map.addControl(Draw);
+      if (drawIsActive) return;
+      drawIsActive = true;
+      map.addControl(Draw, 'bottom-right');
     }
     removeButton.onclick = function() {
-      if (!Draw) return;
-      Draw.remove();
-      Draw = null;
+      if (!drawIsActive) return;
+      drawIsActive = false;
+      map.removeControl(Draw);
     }
     flipStyleButton.onclick = function() {
       var style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
