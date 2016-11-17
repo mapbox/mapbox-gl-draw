@@ -32,7 +32,7 @@ module.exports = function(ctx) {
   };
 
   events.mousemove = function(event) {
-    const button = event.originalEvent.button !== undefined ? event.originalEvent.button : event.originalEvent.which;
+    const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
     if (button === 1) {
       return events.drag(event);
     }
