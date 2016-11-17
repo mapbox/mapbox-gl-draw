@@ -4,15 +4,11 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 [![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
 
-**All versions below 0.6.0 are no longer supported**
-
 ### Installing
 
 ```
 npm install mapbox-gl-draw
 ```
-
-Require or include `mapbox-gl-draw` after `mapbox-gl`.
 
 Also include [mapbox-gl-draw.css](https://github.com/mapbox/mapbox-gl-draw/blob/dev-pages/dist/mapbox-gl-draw.css)
 
@@ -32,7 +28,7 @@ var map = new mapboxgl.Map({
   zoom: 9
 });
 
-var Draw = mapboxgl.Draw();
+var Draw = mapboxglDraw();
 
 map.addControl(Draw)
 ```
@@ -68,7 +64,7 @@ npm publish
 
 To add to CDN add the js and css files from the `dist` folder to [mapbox-gl-plugins](https://github.com/mapbox/mapbox-gl-plugins/tree/master/plugins/mapbox-gl-draw).
 
-### Naming things
+### Naming actions
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
 
