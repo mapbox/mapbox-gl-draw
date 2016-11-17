@@ -113,7 +113,6 @@ module.exports = function(ctx, opts) {
       // On mousemove that is not a drag, stop vertex movement.
       this.on('mousemove', CommonSelectors.true, e => {
         stopDragging(e);
-        if (CommonSelectors.isActiveFeature(e) && selectedCoordPaths.length > 0) ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
       });
 
       // As soon as you mouse leaves the canvas, update the feature
