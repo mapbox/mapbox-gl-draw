@@ -1,6 +1,6 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import glDraw from '../';
+import MapboxDraw from '../';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
@@ -19,7 +19,7 @@ test('simple_select', t => {
   spy(map.dragPan, 'enable');
   spy(map.dragPan, 'disable');
 
-  const Draw = glDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   const afterNextRender = setupAfterNextRender(map);

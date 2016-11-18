@@ -55,7 +55,6 @@ module.exports = function(ctx, opts) {
 
   const onVertex = function(e) {
     startDragging(e);
-    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     const about = e.featureTarget.properties;
     const selectedIndex = selectedCoordPaths.indexOf(about.coord_path);
     if (!isShiftDown(e) && selectedIndex === -1) {
@@ -75,7 +74,6 @@ module.exports = function(ctx, opts) {
   };
 
   const onFeature = function(e) {
-    ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
     if (selectedCoordPaths.length === 0) startDragging(e);
     else stopDragging();
   };
@@ -112,6 +110,12 @@ module.exports = function(ctx, opts) {
 
       // On mousemove that is not a drag, stop vertex movement.
       this.on('mousemove', CommonSelectors.true, e => {
+        const isFeature = CommonSelectors.isActiveFeature(e);
+        const onVertex = isVertex(e);
+        const noCoords = selectedCoordPaths.length === 0;
+        if (isFeature && noCoords) ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+        else if (onVertex && !noCoords) ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
+        else ctx.ui.queueMapClasses({ mouse: Constants.cursors.NONE });
         stopDragging(e);
       });
 

@@ -1,11 +1,11 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import glDraw from '../';
+import MapboxDraw from '../';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 
 test('Options test', t => {
   t.test('no options', t => {
-    const Draw = glDraw();
+    const Draw = new MapboxDraw();
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
@@ -29,7 +29,7 @@ test('Options test', t => {
   });
 
   t.test('use custom clickBuffer', t => {
-    const Draw = glDraw({ clickBuffer: 10 });
+    const Draw = new MapboxDraw({ clickBuffer: 10 });
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
@@ -53,7 +53,7 @@ test('Options test', t => {
   });
 
   t.test('hide all controls', t => {
-    const Draw = glDraw({displayControlsDefault: false});
+    const Draw = new MapboxDraw({displayControlsDefault: false});
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
@@ -76,7 +76,7 @@ test('Options test', t => {
   });
 
   t.test('hide controls but show point', t => {
-    const Draw = glDraw({displayControlsDefault: false, controls: {point:true}});
+    const Draw = new MapboxDraw({displayControlsDefault: false, controls: {point:true}});
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
@@ -100,7 +100,7 @@ test('Options test', t => {
   });
 
   t.test('hide only point control', t => {
-    const Draw = glDraw({ controls: {point:false}});
+    const Draw = new MapboxDraw({ controls: {point:false}});
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
@@ -124,7 +124,7 @@ test('Options test', t => {
   });
 
   t.test('custom styles', t => {
-    const Draw = glDraw({styles: [{
+    const Draw = new MapboxDraw({styles: [{
       'id': 'custom-polygon',
       'type': 'fill',
       'filter': ['all', ['==', '$type', 'Polygon']],

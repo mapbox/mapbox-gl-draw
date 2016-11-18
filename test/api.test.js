@@ -2,7 +2,7 @@
 import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Constants from '../src/constants';
-import setupGLDraw from '../';
+import MapboxDraw from '../';
 import createMap from './utils/create_map';
 import getGeoJSON from './utils/get_geojson';
 import setupAfterNextRender from './utils/after_next_render';
@@ -10,7 +10,7 @@ import getPublicMemberKeys from './utils/get_public_member_keys';
 
 const map = createMap();
 const afterNextRender = setupAfterNextRender(map);
-const Draw = setupGLDraw();
+const Draw = new MapboxDraw();
 map.addControl(Draw);
 const addSpy = spy(Draw, 'add');
 const deleteSpy = spy(Draw, 'delete');

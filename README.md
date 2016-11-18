@@ -24,7 +24,7 @@ Draw ships with CSS, make sure you include it in your build. It can be found on 
 
 ```js
 var mapboxgl = require('mapbox-gl');
-var mapboxglDraw = require('mapbox-gl-draw');
+var MapboxDraw = require('mapbox-gl-draw');
 ```
 
 **When using a CDN**
@@ -45,7 +45,7 @@ var map = new mapboxgl.Map({
   zoom: 9
 });
 
-var Draw = mapboxglDraw();
+var Draw = new MapboxDraw();
 
 map.addControl(Draw)
 ```
