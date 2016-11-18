@@ -2,7 +2,7 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
 import Polygon from '../src/feature_types/polygon';
-import glDraw from '../';
+import MapboxDraw from '../';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
@@ -134,7 +134,7 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
 test('Polygon integration', t => {
   const polygonCoordinates = [[[0, 0], [30, 15], [30, 30], [15, 30], [0, 0]]];
   const map = createMap();
-  const Draw = glDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   map.on('load', () => {

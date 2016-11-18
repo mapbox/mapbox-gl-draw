@@ -16,10 +16,9 @@ const featureTypes = {
   MultiPoint: require('./feature_types/multi_feature')
 };
 
-module.exports = function(ctx) {
-  const api = {
-    modes: Constants.modes
-  };
+module.exports = function(ctx, api) {
+
+  api.modes = Constants.modes;
 
   api.getFeatureIdsAt = function(point) {
     const features = featuresAt({ point }, null, ctx);

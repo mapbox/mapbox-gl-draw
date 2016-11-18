@@ -1,7 +1,7 @@
 /* eslint no-shadow:[0] */
 import turfCentroid from '@turf/centroid';
 import test from 'tape';
-import glDraw from '../';
+import MapboxDraw from '../';
 import click from './utils/mouse_click';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
@@ -18,7 +18,7 @@ test('direct_select', t => {
   const map = createMap({ container: mapContainer });
   spy(map, 'fire');
 
-  const Draw = glDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   const afterNextRender = setupAfterNextRender(map);

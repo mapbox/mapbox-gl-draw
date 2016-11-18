@@ -16,8 +16,8 @@
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
-    "build": "NODE_ENV=production browserify index.js --standalone mapboxglDraw > dist/mapbox-gl-draw.js",
-    "prepublish": "NODE_ENV=production browserify index.js --standalone mapboxglDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw.js",
+    "prepublish": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "node server.js"
   },
   "repository": {

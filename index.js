@@ -3,14 +3,14 @@ const setupOptions = require('./src/options');
 const setupAPI = require('./src/api');
 const Constants = require('./src/constants');
 
-const Draw = function(options) {
+const setupDraw = function(options, api) {
   options = setupOptions(options);
 
   const ctx = {
     options: options
   };
 
-  const api = setupAPI(ctx);
+  api = setupAPI(ctx, api);
   ctx.api = api;
 
   const setup = runSetup(ctx);
@@ -23,4 +23,6 @@ const Draw = function(options) {
   return api;
 };
 
-module.exports = Draw;
+module.exports = function(options) {
+  setupDraw(options, this);
+};
