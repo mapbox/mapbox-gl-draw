@@ -53,8 +53,9 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.setSelectedPoints, 'function', 'exposes store.setSelectedPoints');
   t.equal(typeof Store.prototype.getSelectedPoints, 'function', 'exposes store.getSelectedPoints');
   t.equal(typeof Store.prototype.clearSelectedPoints, 'function', 'exposes store.clearSelectedPoints');
+  t.equal(typeof Store.prototype.setFeatureProperty, 'function', 'exposes store.setFeatureProperty');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 20, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 21, 'no untested prototype members');
 
   t.end();
 });
@@ -69,13 +70,13 @@ test('Store#setDirty', t => {
 
 test('Store#createRenderBatch', t => {
   const store = createStore();
-  var numRenders = 0;
+  let numRenders = 0;
   store.render = function() {
     numRenders++;
-  }
+  };
   store.render();
   t.equal(numRenders, 1, 'render incrementes number of renders');
-  var renderBatch = store.createRenderBatch();
+  let renderBatch = store.createRenderBatch();
   store.render();
   store.render();
   store.render();
@@ -239,3 +240,17 @@ test('Store#setSelected', t => {
 
   t.end();
 });
+
+test('Store#setFeatureProperty', t => {
+  const store = createStore();
+  const point = createFeature('point');
+
+  store.add(point);
+  store.clearChangedIds();
+  store.setFeatureProperty(point.id, 'size', 200);
+  t.deepEqual(store.getChangedIds(), [point.id]);
+  t.equal(store.get(point.id).properties.size, 200, 'sets the property on the feature');
+
+  t.end();
+});
+

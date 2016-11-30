@@ -1,13 +1,13 @@
-var isEqual = require('lodash.isequal');
-var normalize = require('geojson-normalize');
-var hat = require('hat');
-var featuresAt = require('./lib/features_at');
-var stringSetsAreEqual = require('./lib/string_sets_are_equal');
-var geojsonhint = require('geojsonhint');
-var Constants = require('./constants');
-var StringSet = require('./lib/string_set');
+const isEqual = require('lodash.isequal');
+const normalize = require('geojson-normalize');
+const hat = require('hat');
+const featuresAt = require('./lib/features_at');
+const stringSetsAreEqual = require('./lib/string_sets_are_equal');
+const geojsonhint = require('geojsonhint');
+const Constants = require('./constants');
+const StringSet = require('./lib/string_set');
 
-var featureTypes = {
+const featureTypes = {
   Polygon: require('./feature_types/polygon'),
   LineString: require('./feature_types/line_string'),
   Point: require('./feature_types/point'),
@@ -16,13 +16,12 @@ var featureTypes = {
   MultiPoint: require('./feature_types/multi_feature')
 };
 
-module.exports = function(ctx) {
-  const api = {
-    modes: Constants.modes
-  };
+module.exports = function(ctx, api) {
+
+  api.modes = Constants.modes;
 
   api.getFeatureIdsAt = function(point) {
-    var features = featuresAt({ point }, null, ctx);
+    const features = featuresAt({ point }, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 
@@ -48,10 +47,10 @@ module.exports = function(ctx) {
     if (featureCollection.type === undefined || featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION || !Array.isArray(featureCollection.features)) {
       throw new Error('Invalid FeatureCollection');
     }
-    var renderBatch = ctx.store.createRenderBatch();
-    var toDelete = ctx.store.getAllIds().slice();
-    var newIds = api.add(featureCollection);
-    var newIdsLookup = new StringSet(newIds);
+    const renderBatch = ctx.store.createRenderBatch();
+    let toDelete = ctx.store.getAllIds().slice();
+    const newIds = api.add(featureCollection);
+    const newIdsLookup = new StringSet(newIds);
 
     toDelete = toDelete.filter(id => !newIdsLookup.has(id));
     if (toDelete.length) {
@@ -63,14 +62,13 @@ module.exports = function(ctx) {
   };
 
   api.add = function (geojson) {
-    var errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
+    const errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
     if (errors.length) {
       throw new Error(errors[0].message);
     }
-    var featureCollection = normalize(geojson);
-    featureCollection = JSON.parse(JSON.stringify(featureCollection));
+    const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
-    var ids = featureCollection.features.map(feature => {
+    const ids = featureCollection.features.map(feature => {
       feature.id = feature.id || hat();
 
       if (feature.geometry === null) {
@@ -79,15 +77,15 @@ module.exports = function(ctx) {
 
       if (ctx.store.get(feature.id) === undefined || ctx.store.get(feature.id).type !== feature.geometry.type) {
         // If the feature has not yet been created ...
-        var model = featureTypes[feature.geometry.type];
-        if (model === undefined) {
+        const Model = featureTypes[feature.geometry.type];
+        if (Model === undefined) {
           throw new Error(`Invalid geometry type: ${feature.geometry.type}.`);
         }
-        let internalFeature = new model(ctx, feature);
+        const internalFeature = new Model(ctx, feature);
         ctx.store.add(internalFeature);
       } else {
         // If a feature of that id has already been created, and we are swapping it out ...
-        let internalFeature = ctx.store.get(feature.id);
+        const internalFeature = ctx.store.get(feature.id);
         internalFeature.properties = feature.properties;
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);
@@ -102,7 +100,7 @@ module.exports = function(ctx) {
 
 
   api.get = function (id) {
-    var feature = ctx.store.get(id);
+    const feature = ctx.store.get(id);
     if (feature) {
       return feature.toGeoJSON();
     }
@@ -152,8 +150,8 @@ module.exports = function(ctx) {
       return api;
     }
 
-    if (mode === Constants.modes.DIRECT_SELECT && api.getMode() === Constants.modes.DIRECT_SELECT
-      && modeOptions.featureId === ctx.store.getSelectedIds()[0]) {
+    if (mode === Constants.modes.DIRECT_SELECT && api.getMode() === Constants.modes.DIRECT_SELECT &&
+      modeOptions.featureId === ctx.store.getSelectedIds()[0]) {
       return api;
     }
 
@@ -177,6 +175,11 @@ module.exports = function(ctx) {
 
   api.uncombineFeatures = function() {
     ctx.events.uncombineFeatures({ silent: true });
+    return api;
+  };
+
+  api.setFeatureProperty = function(featureId, property, value) {
+    ctx.store.setFeatureProperty(featureId, property, value);
     return api;
   };
 

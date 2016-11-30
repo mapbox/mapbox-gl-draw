@@ -2,7 +2,7 @@ import mapboxgl from 'mapbox-gl-js-mock';
 
 export default function createMap(mapOptions = {}) {
 
-  var map = new mapboxgl.Map(Object.assign({
+  const map = new mapboxgl.Map(Object.assign({
     container: document.createElement('div'),
     style: 'mapbox://styles/mapbox/streets-v8'
   }, mapOptions));
@@ -15,10 +15,10 @@ export default function createMap(mapOptions = {}) {
 
   map.getCanvas = function() {
     return map.getContainer();
-  }
+  };
 
-  var classList = [];
-  var container = map.getContainer();
+  let classList = [];
+  const container = map.getContainer();
   container.classList.add = function(names) {
     names = names || '';
     names.split(' ').forEach(name => {
@@ -27,7 +27,7 @@ export default function createMap(mapOptions = {}) {
       }
     });
     container.className = classList.join(' ');
-  }
+  };
 
   container.classList.remove = function(names) {
     names = names || '';
@@ -35,7 +35,7 @@ export default function createMap(mapOptions = {}) {
       classList = classList.filter(n => n !== name);
     });
     container.className = classList.join(' ');
-  }
+  };
 
   container.className = classList.join(' ');
 
@@ -46,11 +46,11 @@ export default function createMap(mapOptions = {}) {
       left: 0,
       top: 0
     };
-  }
+  };
 
   map.getContainer = function() {
     return container;
-  }
+  };
 
   return map;
 }

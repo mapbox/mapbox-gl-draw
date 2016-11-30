@@ -3,13 +3,13 @@ const Constants = require('../constants');
 module.exports = {
   isOfMetaType: function(type) {
     return function(e) {
-      var featureTarget = e.featureTarget;
+      const featureTarget = e.featureTarget;
       if (!featureTarget) return false;
       if (!featureTarget.properties) return false;
       return featureTarget.properties.meta === type;
     };
   },
-  isShiftMousedown(e) {
+  isShiftMousedown: function(e) {
     if (!e.originalEvent) return false;
     if (!e.originalEvent.shiftKey) return false;
     return e.originalEvent.button === 0;
@@ -35,7 +35,7 @@ module.exports = {
     return e.featureTarget.properties.meta === Constants.meta.FEATURE;
   },
   isVertex: function(e) {
-    var featureTarget = e.featureTarget;
+    const featureTarget = e.featureTarget;
     if (!featureTarget) return false;
     if (!featureTarget.properties) return false;
     return featureTarget.properties.meta === Constants.meta.VERTEX;

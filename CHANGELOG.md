@@ -1,3 +1,28 @@
+## 0.16.0
+
+#### ⚠️ Breaking changes ⚠️
+
+- Changes `mapboxglDraw` to `MapboxDraw` to match other control names.
+- Changes `MapboxDraw()` to `new MapboxDraw()` to match other control interfaces.
+- Provides clearer icon support for drag feature in `direct_select`.
+
+## 0.15.0
+
+- Adds support for `mapbox-gl-js@0.28.0`.
+- Adds `Draw.setFeatureProperty(string, string, any)`.
+- Adds `mapboxglDraw({userProperties: boolean})` to add user properties to the data rendered by Draw.
+- Fixes bug where Draw would fail to attach to mapbox-gl-js if added while a style was loading.
+- Fixes bug where Firefox would treat all mousemove events as drag events.
+
+## 0.14.0
+
+#### ⚠️ Breaking changes ⚠️
+
+- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016).
+- Detects style changes and reapplies Draw if it has been removed.
+- Fixes UMD support.
+- Changes `mapboxgl.Draw` to `mapboxglDraw` when in global scope.
+
 ## 0.13.2
 
 - Removes deprecated `interactive` property from styles.
@@ -17,7 +42,7 @@
 
 ## 0.12.1
 
-- Fix bug that broke editing multifeatures in direct_select mode after using the combine feature
+- Fix bug that broke editing MultiFeatures in `direct_select` mode after using the combine feature
 
 ## 0.12.0
 

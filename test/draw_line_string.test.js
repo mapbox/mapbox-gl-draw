@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import mouseClick from './utils/mouse_click';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
@@ -9,7 +9,7 @@ import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
-import AfterNextRender from './utils/after_next_render';
+import setupAfterNextRender from './utils/after_next_render';
 import {
   enterEvent,
   startPointEvent,
@@ -214,9 +214,9 @@ test('draw_line_string interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
-  var afterNextRender = AfterNextRender(map);
+  const afterNextRender = setupAfterNextRender(map);
 
   map.on('load', () => {
     // The following sub-tests share state ...
@@ -348,7 +348,7 @@ test('draw_line_string interaction', t => {
 
       Draw.changeMode('draw_line_string');
       st.equal(Draw.getAll().features.length, 1, 'line is added');
-      let line = Draw.getAll().features[0];
+      const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [], 'and has no coordinates');
 
       Draw.changeMode('simple_select');
@@ -368,8 +368,8 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [16, 16]], 'and has right coordinates');
 
       container.dispatchEvent(enterEvent);
       st.equal(Draw.getAll().features.length, 0, 'line_string was removed');
@@ -386,8 +386,8 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [16, 16]], 'and has right coordinates');
 
       container.dispatchEvent(startPointEvent);
       st.equal(Draw.get(line.id), undefined, 'line_string was removed');
@@ -404,8 +404,8 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [16, 16]], 'and has right coordinates');
 
       container.dispatchEvent(startLineStringEvent);
       st.equal(Draw.get(line.id), undefined, 'line_string was removed');
@@ -422,8 +422,8 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1,1], [16,16]], 'and has right coordinates');
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [16, 16]], 'and has right coordinates');
 
       container.dispatchEvent(startPolygonEvent);
       st.equal(Draw.get(line.id), undefined, 'line_string was removed');
@@ -452,7 +452,7 @@ test('draw_line_string interaction', t => {
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
       Draw.changeMode('draw_line_string');
-      let lineString = Draw.getAll().features[0]
+      let lineString = Draw.getAll().features[0];
       st.equal(lineString !== undefined, true, 'line is added');
       mouseClick(map, makeMouseEvent(0, 0));
       afterNextRender(() => {
@@ -469,7 +469,7 @@ test('draw_line_string interaction', t => {
             properties: {},
             geometry: {
               type: 'LineString',
-              coordinates: [[0,0], [15, 15]]
+              coordinates: [[0, 0], [15, 15]]
             }
           }, 'line_string has the right coordinates');
           st.end();

@@ -4,7 +4,7 @@ const features = {
     properties: {'a':'b', 'c':'d'},
     geometry: {
       type: 'MultiPolygon',
-      coordinates: [[[[1,1],[2,2],[2,6],[4,3],[1,1]]]]
+      coordinates: [[[[1, 1], [2, 2], [2, 6], [4, 3], [1, 1]]]]
     }
   },
 
@@ -15,7 +15,7 @@ const features = {
       type: 'MultiPolygon',
       coordinates: [
         [
-          [[1,1],[2,2],[4,3],[1,1]]
+          [[1, 1], [2, 2], [4, 3], [1, 1]]
         ],
         [
           [[30, 20], [50, 40], [70, 30], [30, 20]]
@@ -92,7 +92,7 @@ const features = {
     properties: {'a':'b', 'c':'d'},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+      coordinates: [[[30, 20], [50, 40], [70, 30], [50, 20], [30, 20]]]
     }
   },
 
@@ -101,7 +101,7 @@ const features = {
     properties: {'a2':'b2', 'c2':'d2'},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[40, 30],[60, 50],[90, 90],[100, 80],[40, 30]]]
+      coordinates: [[[40, 30], [60, 50], [90, 90], [100, 80], [40, 30]]]
     }
   },
 
@@ -127,7 +127,7 @@ const features = {
       type: 'GeometryCollection',
       geometries: [{
         type: 'Polygon',
-        coordinates: [[[30, 20],[50, 40],[70, 30],[50, 20],[30, 20]]]
+        coordinates: [[[30, 20], [50, 40], [70, 30], [50, 20], [30, 20]]]
       }]
     }
   },

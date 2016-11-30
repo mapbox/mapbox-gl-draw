@@ -1,5 +1,3 @@
-const truncatePoint = require('./truncate_point');
-const xtend = require('xtend');
 const constrainFeatureMovement = require('./constrain_feature_movement');
 const Constants = require('../constants');
 
@@ -10,11 +8,11 @@ module.exports = function(features, delta) {
     const currentCoordinates = feature.getCoordinates();
 
     const moveCoordinate = (coord) => {
-        let point = truncatePoint({
-          lng: coord[0] + constrainedDelta.lng,
-          lat: coord[1] + constrainedDelta.lat
-        });
-        return [point.lng, point.lat];
+      const point = {
+        lng: coord[0] + constrainedDelta.lng,
+        lat: coord[1] + constrainedDelta.lat
+      };
+      return [point.lng, point.lat];
     };
     const moveRing = (ring) => ring.map(coord => moveCoordinate(coord));
     const moveMultiPolygon = (multi) => multi.map(ring => moveRing(ring));

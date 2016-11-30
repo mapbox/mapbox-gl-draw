@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import createMap from './utils/create_map';
 import mouseClick from './utils/mouse_click';
 import makeMouseEvent from './utils/make_mouse_event';
@@ -9,7 +9,7 @@ import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
-import AfterNextRender from './utils/after_next_render';
+import setupAfterNextRender from './utils/after_next_render';
 import {
   enterEvent,
   startPointEvent,
@@ -272,12 +272,12 @@ test('draw_polygon interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   map.on('load', () => {
     // The following sub-tests share state ...
-    const afterNextRender = AfterNextRender(map);
+    const afterNextRender = setupAfterNextRender(map);
 
     Draw.changeMode('draw_polygon');
     t.test('first click', st => {
@@ -403,7 +403,7 @@ test('draw_polygon interaction', t => {
 
       Draw.changeMode('draw_polygon');
       st.equal(Draw.getAll().features.length, 1, 'polygon is added');
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.type, 'Polygon');
 
       Draw.changeMode('simple_select');
@@ -423,7 +423,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(enterEvent);
@@ -441,7 +441,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startPointEvent);
@@ -459,7 +459,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startLineStringEvent);
@@ -477,7 +477,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       map.fire('mousemove', makeMouseEvent(16, 16));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startPolygonEvent);
@@ -512,7 +512,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(16, 16));
       map.fire('mousemove', makeMouseEvent(8, 0));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [8, 0], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(enterEvent);
@@ -530,7 +530,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(16, 16));
       map.fire('mousemove', makeMouseEvent(8, 0));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [8, 0], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startPointEvent);
@@ -549,7 +549,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(16, 16));
       map.fire('mousemove', makeMouseEvent(8, 0));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [8, 0], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startLineStringEvent);
@@ -568,7 +568,7 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(16, 16));
       map.fire('mousemove', makeMouseEvent(8, 0));
 
-      let polygon = Draw.getAll().features[0];
+      const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [16, 16], [8, 0], [1, 1]]], 'and has right coordinates');
 
       container.dispatchEvent(startPolygonEvent);
@@ -577,7 +577,7 @@ test('draw_polygon interaction', t => {
       st.end();
     });
 
-     t.test('start draw_polygon mode then doubleclick', st => {
+    t.test('start draw_polygon mode then doubleclick', st => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -610,7 +610,7 @@ test('draw_polygon interaction', t => {
         mouseClick(map, makeMouseEvent(0, 0));
 
         polygon = Draw.get(polygon.id);
-        st.deepEqual(polygon.geometry.coordinates, [[[0, 0], [20, 0], [20, 20], [0,20], [0, 0]]], 'and has right coordinates');
+        st.deepEqual(polygon.geometry.coordinates, [[[0, 0], [20, 0], [20, 20], [0, 20], [0, 0]]], 'and has right coordinates');
         Draw.deleteAll();
         st.end();
       });

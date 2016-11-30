@@ -1,8 +1,7 @@
-const truncatePoint = require('./truncate_point');
 
-var ModeHandler = function(mode, DrawContext) {
+const ModeHandler = function(mode, DrawContext) {
 
-  var handlers = {
+  const handlers = {
     drag: [],
     click: [],
     mousemove: [],
@@ -13,7 +12,7 @@ var ModeHandler = function(mode, DrawContext) {
     keyup: []
   };
 
-  var ctx = {
+  const ctx = {
     on: function(event, selector, fn) {
       if (handlers[event] === undefined) {
         throw new Error(`Invalid event type: ${event}`);
@@ -28,14 +27,11 @@ var ModeHandler = function(mode, DrawContext) {
     }
   };
 
-  var delegate = function (eventName, event) {
-    if (event.lngLat) {
-      event.lngLat = truncatePoint(event.lngLat);
-    }
-    var handles = handlers[eventName];
-    var iHandle = handles.length;
+  const delegate = function (eventName, event) {
+    const handles = handlers[eventName];
+    let iHandle = handles.length;
     while (iHandle--) {
-      var handle = handles[iHandle];
+      const handle = handles[iHandle];
       if (handle.selector(event)) {
         handle.fn.call(ctx, event);
         DrawContext.store.render();

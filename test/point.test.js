@@ -2,7 +2,7 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
 import Point from '../src/feature_types/point';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
@@ -72,17 +72,17 @@ test('Point#updateCoordinate, Point#getCoordinate', t => {
 test('Point integration test', t => {
   const pointCoordinates = [10, 10];
   const map = createMap();
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
-  map.on('load', function() {
+  map.on('load', () => {
     drawGeometry(map, Draw, 'Point', pointCoordinates, () => {
       const feats = Draw.getAll().features;
       t.equals(1, feats.length, 'only one');
       t.equals('Point', feats[0].geometry.type, 'of the right type');
       t.deepEquals([10, 10], feats[0].geometry.coordinates, 'in the right spot');
 
-      Draw.remove();
+      Draw.onRemove();
       t.end();
     });
   });

@@ -3,7 +3,7 @@
 To use Draw
 
 ```js
-var Draw = mapboxgl.Draw({ options });
+var Draw = new MapboxDraw({ options });
 map.addControl(Draw);
 ```
 
@@ -21,11 +21,11 @@ map.on('load', function() {
 
 option | values | function
 --- | --- | ---
-drawing | boolean | The ability to draw and delete features - default: `true`
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
 clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
+userProperties | boolean | If true, user properties will be present and prefixed with `user_` on the feature objects via styling. - default `false`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
@@ -79,7 +79,7 @@ Note that this mode can only be entered or exited via `.changeMode`
 
 ## API Methods
 
-`mapboxgl.Draw()` returns an instance of `Draw` which has the following API for working with your data:
+`new MapboxDraw()` returns an instance of `Draw` which has the following API for working with your data:
 
 ###`.add(Object: GeoJSON) -> [String]`
 
@@ -306,6 +306,12 @@ Returns Draw's current mode. For more about the modes, see below.
 }
 ```
 
+---
+
+### `.setFeatureProperty(String: featureId, String: property, Any: value) -> Draw`
+
+Sets the value of a property on the indicated feature. This is good if you are using Draw as your primary data store in your application.
+
 ## Events
 
 Draw fires off a number of events. All of these events are namespaced with `draw.` and are emitted from the map object.
@@ -489,6 +495,8 @@ active | true, false | A feature is active when it is 'selected' in the current 
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon, static | Indicates which mode Draw is currently in.
 
 Draw also provides a few more properties, but they should not be used for styling. For details on them, see `Using Draw with map.queryRenderFeatures`.
+
+If `opts.userProperties` is set to `true` the properties of a feature will also be available for styling. All user properties are prefixed with `user_` to make sure they do not clash with the Draw properties.
 
 ### Example Custom Styles
 

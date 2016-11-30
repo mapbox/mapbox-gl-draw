@@ -2,7 +2,7 @@ import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import Feature from '../src/feature_types/feature';
 import Polygon from '../src/feature_types/polygon';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
@@ -134,17 +134,17 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
 test('Polygon integration', t => {
   const polygonCoordinates = [[[0, 0], [30, 15], [30, 30], [15, 30], [0, 0]]];
   const map = createMap();
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
-  map.on('load', function() {
+  map.on('load', () => {
     drawGeometry(map, Draw, 'Polygon', polygonCoordinates, () => {
       const feats = Draw.getAll().features;
       t.equals(1, feats.length, 'only one');
       t.equals('Polygon', feats[0].geometry.type, 'of the right type');
       t.equals(feats[0].geometry.coordinates[0].length, polygonCoordinates[0].length, 'right number of points');
       t.deepEquals(feats[0].geometry.coordinates, polygonCoordinates, 'in the right spot');
-      Draw.remove();
+      Draw.onRemove();
       t.end();
     });
 

@@ -4,7 +4,7 @@ var browserify = require('browserify-middleware');
 
 
 app.get('/mapbox-gl-draw.js', browserify('./index.js', {
-    standalone: 'mapbox-gl-draw',
+    standalone: 'MapboxDraw',
     debug: true,
     cache: 'dynamic',
     minify: false

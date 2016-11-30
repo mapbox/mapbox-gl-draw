@@ -27,26 +27,26 @@ module.exports = function(ctx, options = {}) {
   };
 
   const fireActionable = () => {
-    var selectedFeatures = ctx.store.getSelected();
+    const selectedFeatures = ctx.store.getSelected();
 
-    var multiFeatures = selectedFeatures.filter(
+    const multiFeatures = selectedFeatures.filter(
       feature => feature instanceof MultiFeature
     );
 
-    var combineFeatures = false;
+    let combineFeatures = false;
 
     if (selectedFeatures.length > 1) {
       combineFeatures = true;
-      var featureType = selectedFeatures[0].type.replace('Multi','');
+      const featureType = selectedFeatures[0].type.replace('Multi', '');
       selectedFeatures.forEach(feature => {
-        if(feature.type.replace('Multi','') !== featureType) {
+        if (feature.type.replace('Multi', '') !== featureType) {
           combineFeatures = false;
         }
       });
     }
 
-    var uncombineFeatures = multiFeatures.length > 0;
-    var trash = selectedFeatures.length > 0;
+    const uncombineFeatures = multiFeatures.length > 0;
+    const trash = selectedFeatures.length > 0;
 
     ctx.events.actionable({
       combineFeatures, uncombineFeatures, trash
@@ -119,7 +119,7 @@ module.exports = function(ctx, options = {}) {
       });
 
       // Click (with or without shift) on a vertex
-      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), function(e) {
+      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), (e) => {
         // Enter direct select mode
         ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
@@ -169,7 +169,7 @@ module.exports = function(ctx, options = {}) {
           // Deselect it
           ctx.store.deselect(featureId);
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
-          if (selectedFeatureIds.length === 1 ) {
+          if (selectedFeatureIds.length === 1) {
             doubleClickZoom.enable(ctx);
           }
         // Shift-click on an unselected feature
@@ -190,7 +190,7 @@ module.exports = function(ctx, options = {}) {
       });
 
       // Dragging when drag move is enabled
-      this.on('drag', () => canDragMove, function(e) {
+      this.on('drag', () => canDragMove, (e) => {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
@@ -229,7 +229,7 @@ module.exports = function(ctx, options = {}) {
 
       if (ctx.options.boxSelect) {
         // Shift-mousedown anywhere
-        this.on('mousedown', CommonSelectors.isShiftMousedown, function(e) {
+        this.on('mousedown', CommonSelectors.isShiftMousedown, (e) => {
           stopExtendedInteractions();
           ctx.map.dragPan.disable();
           // Enable box select
@@ -238,7 +238,7 @@ module.exports = function(ctx, options = {}) {
         });
 
         // Drag when box select is enabled
-        this.on('drag', () => canBoxSelect, function(e) {
+        this.on('drag', () => canBoxSelect, (e) => {
           boxSelecting = true;
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
 
@@ -264,13 +264,12 @@ module.exports = function(ctx, options = {}) {
       }
     },
     render: function(geojson, push) {
-      geojson.properties.active = (ctx.store.isSelected(geojson.properties.id))
-        ? Constants.activeStates.ACTIVE
-        : Constants.activeStates.INACTIVE;
+      geojson.properties.active = (ctx.store.isSelected(geojson.properties.id)) ?
+        Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       push(geojson);
       fireActionable();
-      if (geojson.properties.active !== Constants.activeStates.ACTIVE
-        || geojson.geometry.type === Constants.geojsonTypes.POINT) return;
+      if (geojson.properties.active !== Constants.activeStates.ACTIVE ||
+        geojson.geometry.type === Constants.geojsonTypes.POINT) return;
       createSupplementaryPoints(geojson).forEach(push);
     },
     trash: function() {
@@ -278,21 +277,21 @@ module.exports = function(ctx, options = {}) {
       fireActionable();
     },
     combineFeatures: function() {
-      var selectedFeatures = ctx.store.getSelected();
+      const selectedFeatures = ctx.store.getSelected();
 
-      if(selectedFeatures.length === 0 || selectedFeatures.length < 2) return;
+      if (selectedFeatures.length === 0 || selectedFeatures.length < 2) return;
 
-      var coordinates = [], featuresCombined = [];
-      var featureType = selectedFeatures[0].type.replace('Multi','');
+      const coordinates = [], featuresCombined = [];
+      const featureType = selectedFeatures[0].type.replace('Multi', '');
 
-      for(var i = 0; i < selectedFeatures.length; i++) {
-        var feature = selectedFeatures[i];
+      for (let i = 0; i < selectedFeatures.length; i++) {
+        const feature = selectedFeatures[i];
 
-        if(feature.type.replace('Multi','') !== featureType) {
+        if (feature.type.replace('Multi', '') !== featureType) {
           return;
         }
-        if(feature.type.includes('Multi')) {
-          feature.getCoordinates().forEach(function(subcoords) {
+        if (feature.type.includes('Multi')) {
+          feature.getCoordinates().forEach((subcoords) => {
             coordinates.push(subcoords);
           });
         } else {
@@ -302,13 +301,13 @@ module.exports = function(ctx, options = {}) {
         featuresCombined.push(feature.toGeoJSON());
       }
 
-      if(featuresCombined.length > 1) {
+      if (featuresCombined.length > 1) {
 
-        var multiFeature = new MultiFeature(ctx, {
+        const multiFeature = new MultiFeature(ctx, {
           type: Constants.geojsonTypes.FEATURE,
           properties: featuresCombined[0].properties,
           geometry: {
-            type: 'Multi' + featureType,
+            type: `Multi${featureType}`,
             coordinates: coordinates
           }
         });
@@ -325,17 +324,17 @@ module.exports = function(ctx, options = {}) {
       fireActionable();
     },
     uncombineFeatures: function() {
-      var selectedFeatures = ctx.store.getSelected();
+      const selectedFeatures = ctx.store.getSelected();
       if (selectedFeatures.length === 0) return;
 
-      var createdFeatures = [];
-      var featuresUncombined = [];
+      const createdFeatures = [];
+      const featuresUncombined = [];
 
-      for(var i = 0; i < selectedFeatures.length; i++) {
-        var feature = selectedFeatures[i];
+      for (let i = 0; i < selectedFeatures.length; i++) {
+        const feature = selectedFeatures[i];
 
-        if(feature instanceof MultiFeature) {
-          feature.getFeatures().forEach(function(subFeature){
+        if (feature instanceof MultiFeature) {
+          feature.getFeatures().forEach((subFeature) => {
             ctx.store.add(subFeature);
             subFeature.properties = feature.properties;
             createdFeatures.push(subFeature.toGeoJSON());

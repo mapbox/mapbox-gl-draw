@@ -4,7 +4,7 @@ import test from 'tape';
 import xtend from 'xtend';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import createSyntheticEvent from 'synthetic-dom-events';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
 import createAfterNextRender from './utils/after_next_render';
@@ -15,7 +15,14 @@ document.body.appendChild(container);
 const map = createMap({ container });
 const fireSpy = spy(map, 'fire');
 const afterNextRender = createAfterNextRender(map);
-const Draw = GLDraw();
+const Draw = new MapboxDraw();
+const onAdd = Draw.onAdd.bind(Draw);
+let controlGroup = null;
+Draw.onAdd = function(m) {
+  controlGroup = onAdd(m);
+  return controlGroup;
+};
+
 map.addControl(Draw);
 
 map.on('load', runTests);
@@ -32,10 +39,10 @@ const escapeEvent = createSyntheticEvent('keyup', {
 });
 
 function runTests() {
-  const pointButton = container.getElementsByClassName('mapbox-gl-draw_point')[0];
-  const lineCutton = container.getElementsByClassName('mapbox-gl-draw_line')[0];
-  const trashButton = container.getElementsByClassName('mapbox-gl-draw_trash')[0];
-  const polygonEutton = container.getElementsByClassName('mapbox-gl-draw_polygon')[0];
+  const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
+  const lineCutton = controlGroup.getElementsByClassName('mapbox-gl-draw_line')[0];
+  const trashButton = controlGroup.getElementsByClassName('mapbox-gl-draw_trash')[0];
+  const polygonEutton = controlGroup.getElementsByClassName('mapbox-gl-draw_polygon')[0];
 
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.
@@ -136,7 +143,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
     afterNextRender(() => {
@@ -268,7 +275,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
     repeat(10, i => {
-      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(40, 0));
@@ -318,7 +325,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
     repeat(22, i => {
-      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(60, 40));
@@ -478,7 +485,7 @@ function runTests() {
     // Mouse down with the shift key
     map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
 
@@ -517,7 +524,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(20, -5));
@@ -602,7 +609,7 @@ function runTests() {
     map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
     repeat(20, i => {
-      map.fire('mousemove', makeMouseEvent(20 - i, 10, { which: 1 }));
+      map.fire('mousemove', makeMouseEvent(20 - i, 10, { buttons: 1 }));
     });
     // Release the mouse
     map.fire('mouseup', makeMouseEvent(0, 10));

@@ -41,6 +41,7 @@
 <div class='toggle'>
   <button id='addBtn'>add draw</button>
   <button id='removeBtn'>remove draw</button>
+  <button id='flipStyleBtn'>change style</button>
 </div>
 <script src='/mapbox-gl.js'></script>
 <script src='/mapbox-gl-draw.js'></script>
@@ -69,27 +70,33 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     style: 'mapbox://styles/mapbox/streets-v8'
   });
 
-  map.addControl(new (mapboxgl.NavigationControl || mapboxgl.Navigation)({
-    position: 'top-left'
-  }));
+  map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-  var Draw = window.Draw = mapboxgl.Draw({ position: 'bottom-right' });
-  map.addControl(Draw);
+  var Draw = window.Draw = new MapboxDraw();
+  var drawIsActive = true;
+  map.addControl(Draw, 'bottom-right');
 
   map.on('load', function() {
 
     // toggle
     var addButton = document.getElementById('addBtn');
     var removeButton = document.getElementById('removeBtn');
+    var flipStyleButton = document.getElementById('flipStyleBtn');
+    var currentStyle = 'streets-v9';
     addButton.onclick = function() {
-      if (Draw) return;
-      Draw = mapboxgl.Draw();
-      map.addControl(Draw);
+      if (drawIsActive) return;
+      drawIsActive = true;
+      map.addControl(Draw, 'bottom-right');
     }
     removeButton.onclick = function() {
-      if (!Draw) return;
-      Draw.remove();
-      Draw = null;
+      if (!drawIsActive) return;
+      drawIsActive = false;
+      map.removeControl(Draw);
+    }
+    flipStyleButton.onclick = function() {
+      var style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
+      map.setStyle('mapbox://styles/mapbox/' + style);
+      currentStyle = style;
     }
 
     var startPoint = document.getElementById('start-point');
