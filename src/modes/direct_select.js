@@ -26,8 +26,8 @@ module.exports = function(ctx, opts) {
   let canDragMove = false;
 
   let selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
-  var selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
-  ctx.store.setSelectedCoordinates(featureId, selectedCoordinates);
+  const selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
+  ctx.store.setSelectedCoordinates(selectedCoordinates);
 
   const fireUpdate = function() {
     ctx.map.fire(Constants.events.UPDATE, {
@@ -64,8 +64,8 @@ module.exports = function(ctx, opts) {
     } else if (isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths.push(about.coord_path);
     }
-    var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
-    ctx.store.setSelectedCoordinates(featureId, selectedCoordinates);
+    const selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
+    ctx.store.setSelectedCoordinates(selectedCoordinates);
     feature.changed();
   };
 
@@ -78,7 +78,7 @@ module.exports = function(ctx, opts) {
   };
 
   function pathsToCoordinates(featureId, paths) {
-    return paths.map(coord_path => { return { feature_id: featureId, coord_path, coordinates: feature.getCoordinate(coord_path) } });
+    return paths.map(coord_path => { return { feature_id: featureId, coord_path, coordinates: feature.getCoordinate(coord_path) }; });
   }
 
   const onFeature = function(e) {

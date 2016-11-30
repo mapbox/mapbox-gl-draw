@@ -56,14 +56,16 @@ module.exports = function render() {
   if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
       features: store.getSelected().map(feature => feature.toGeoJSON()),
-      points: store.getSelectedCoordinates().map(coordinate => { return {
-        type: Constants.geojsonTypes.FEATURE,
-        properties: {},
-        geometry: {
-          type: Constants.geojsonTypes.POINT,
-          coordinates: coordinate.coordinates
-        }
-      }})
+      points: store.getSelectedCoordinates().map(coordinate => {
+        return {
+          type: Constants.geojsonTypes.FEATURE,
+          properties: {},
+          geometry: {
+            type: Constants.geojsonTypes.POINT,
+            coordinates: coordinate.coordinates
+          }
+        };
+      })
     });
     store._emitSelectionChange = false;
   }

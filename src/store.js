@@ -170,7 +170,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
-    this._selectedCoordinates = this._selectedCoordinates.filter(point => point.feature_id != id);
+    this._selectedCoordinates = this._selectedCoordinates.filter(point => point.feature_id !== id);
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
