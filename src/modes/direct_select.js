@@ -26,9 +26,8 @@ module.exports = function(ctx, opts) {
   let canDragMove = false;
 
   let selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
-  var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
-  var selectedPoints = coordinatesToPoints(selectedCoordinates);
-  ctx.store.setSelectedPoints(featureId, selectedPoints);
+  var selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
+  ctx.store.setSelectedCoordinates(featureId, selectedCoordinates);
 
   const fireUpdate = function() {
     ctx.map.fire(Constants.events.UPDATE, {
@@ -66,8 +65,7 @@ module.exports = function(ctx, opts) {
       selectedCoordPaths.push(about.coord_path);
     }
     var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
-    var selectedPoints = coordinatesToPoints(selectedCoordinates);
-    ctx.store.setSelectedPoints(featureId, selectedPoints);
+    ctx.store.setSelectedCoordinates(featureId, selectedCoordinates);
     feature.changed();
   };
 
@@ -79,8 +77,6 @@ module.exports = function(ctx, opts) {
     selectedCoordPaths = [about.coord_path];
   };
 
-  function pathsToCoordinates(paths) {
-    return paths.map(coord_path => feature.getCoordinate(coord_path));
   }
 
   function coordinatesToPoints(coordinates) {
@@ -92,6 +88,7 @@ module.exports = function(ctx, opts) {
         coordinates: coords
       }
     }));
+  function pathsToCoordinates(featureId, paths) {
   }
 
   const onFeature = function(e) {

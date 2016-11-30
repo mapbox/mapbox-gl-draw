@@ -39,7 +39,14 @@ module.exports = function(ctx, api) {
   api.getSelectedPoints = function () {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
-      features: ctx.store.getSelectedPoints()
+      features: ctx.store.getSelectedCoordinates().map(coordinate => { return {
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      }})
     };
   };
 

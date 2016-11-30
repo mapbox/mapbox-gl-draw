@@ -7,8 +7,7 @@ const Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
-  this._selectedPoints = [];
-  this._selectedPointsFeatureId = null;
+  this._selectedCoordinates = [];
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
@@ -171,9 +170,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
-    if (this._selectedPointsFeatureId === id) {
-      this.clearSelectedPoints();
-    }
+    this._selectedCoordinates = this._selectedCoordinates.filter(point => point.feature_id != id);
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
@@ -217,27 +214,23 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
 };
 
 /**
- * Sets the store's points selection, clearing any prior values.
- * Expects to be passed the feature id that the points belong to.
- * @param {string} featureId
- * @param {Array<Array<string>>} points
+ * Sets the store's coordinates selection, clearing any prior values.
+ * @param {Array<Array<string>>} coordinates
  * @return {Store} this
  */
-Store.prototype.setSelectedPoints = function(featureId, points) {
-  this._selectedPointsFeatureId = featureId;
-  this._selectedPoints = points;
+Store.prototype.setSelectedCoordinates = function(coordinates) {
+  this._selectedCoordinates = coordinates;
   this._emitSelectionChange = true;
   return this;
 };
 
 /**
- * Clears the current points selection.
+ * Clears the current coordinates selection.
  * @param {Object} [options]
  * @return {Store} this
  */
-Store.prototype.clearSelectedPoints = function() {
-  this._selectedPointsFeatureId = null;
-  this._selectedPoints = [];
+Store.prototype.clearSelectedCoordinates = function() {
+  this._selectedCoordinates = [];
   this._emitSelectionChange = true;
   return this;
 };
@@ -259,11 +252,11 @@ Store.prototype.getSelected = function() {
 };
 
 /**
- * Returns selected points in the currently selected feature.
- * @return {Array<Object>} Selected points.
+ * Returns selected coordinates in the currently selected feature.
+ * @return {Array<Object>} Selected coordinates.
  */
-Store.prototype.getSelectedPoints = function() {
-  return this._selectedPoints;
+Store.prototype.getSelectedCoordinates = function() {
+  return this._selectedCoordinates;
 };
 
 /**
