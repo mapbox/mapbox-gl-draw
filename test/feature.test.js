@@ -25,7 +25,8 @@ test('Feature contrusctor and API', t => {
   t.equal(typeof Feature.prototype.getCoordinates, 'function', 'feature.getCoordinates');
   t.equal(typeof Feature.prototype.toGeoJSON, 'function', 'feature.toGeoJSON');
   t.equal(typeof Feature.prototype.internal, 'function', 'feature.internal');
-  t.equal(getPublicMemberKeys(Feature.prototype).length, 6, 'no unexpected prototype members');
+  t.equal(typeof Feature.prototype.setProperty, 'function', 'feature.setProperty');
+  t.equal(getPublicMemberKeys(Feature.prototype).length, 7, 'no unexpected prototype members');
 
   const simpleFeatureGeoJson = {
     type: 'Feature',
@@ -99,8 +100,31 @@ test('Feature#toGeoJSON', t => {
   t.end();
 });
 
-test('Feature#internal', t => {
-  const ctx = createMockCtx();
+test('Feature#internal - when userProperties is true', t => {
+  const ctx = createMockCtx({userProperties: true});
+  const polygon = createFeature('polygon');
+  const feature = new Feature(ctx, polygon);
+  t.deepEqual(feature.internal('foo'), {
+    type: 'Feature',
+    properties: {
+      user_a: 'b',
+      user_c: 'd',
+      id: feature.id,
+      meta: 'feature',
+      'meta:type': feature.type,
+      active: 'false',
+      mode: 'foo'
+    },
+    geometry: {
+      coordinates: feature.coordinates,
+      type: feature.type
+    }
+  });
+  t.end();
+
+});
+test('Feature#internal - when userProperties is false', t => {
+  const ctx = createMockCtx({userProperties: false});
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);
   t.deepEqual(feature.internal('foo'), {
@@ -117,5 +141,14 @@ test('Feature#internal', t => {
       type: feature.type
     }
   });
+  t.end();
+});
+
+test('Feature#setProperty', t => {
+  const ctx = createMockCtx();
+  const polygon = createFeature('polygon');
+  const feature = new Feature(ctx, polygon);
+  feature.setProperty('size', 200);
+  t.equal(feature.properties.size, 200);
   t.end();
 });

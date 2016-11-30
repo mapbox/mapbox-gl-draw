@@ -77,8 +77,7 @@ module.exports = function(ctx) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]
         });
-      }
-      else {
+      } else {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
@@ -105,7 +104,7 @@ module.exports = function(ctx) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
-        let endPos = geojson.geometry.coordinates[0].length - 3;
+        const endPos = geojson.geometry.coordinates[0].length - 3;
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
       }
 

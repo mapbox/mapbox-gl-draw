@@ -1,16 +1,16 @@
 function throttle(fn, time, context) {
-  var lock, args, wrapperFn, later;
+  let lock, args;
 
-  later = function () {
+  function later () {
     // reset lock and call if queued
     lock = false;
     if (args) {
       wrapperFn.apply(context, args);
       args = false;
     }
-  };
+  }
 
-  wrapperFn = function () {
+  function wrapperFn () {
     if (lock) {
       // called too soon, queue to call later
       args = arguments;
@@ -21,7 +21,7 @@ function throttle(fn, time, context) {
       fn.apply(context, arguments);
       setTimeout(later, time);
     }
-  };
+  }
 
   return wrapperFn;
 }

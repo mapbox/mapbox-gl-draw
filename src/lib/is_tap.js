@@ -11,6 +11,5 @@ module.exports = function isTap(start, end, options = {}) {
   start.time = start.time || end.time;
   const moveDistance = euclideanDistance(start.point, end.point);
 
-  return moveDistance < tolerance
-    && (end.time - start.time) < interval;
+  return moveDistance < tolerance && (end.time - start.time) < interval;
 };

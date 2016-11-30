@@ -1,5 +1,3 @@
-const Constants = require('../constants');
-
 module.exports = function(ctx) {
   return {
     stop: function() {},

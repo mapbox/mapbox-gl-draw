@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
@@ -145,7 +145,7 @@ test('draw_point mouse interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   map.on('load', () => {
@@ -218,7 +218,7 @@ test('draw_point touch interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
-  const Draw = GLDraw();
+  const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   map.on('load', () => {

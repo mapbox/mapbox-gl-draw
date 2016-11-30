@@ -1,21 +1,20 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import mapboxgl from 'mapbox-gl-js-mock';
-import GLDraw from '../';
+import MapboxDraw from '../';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 
 test('Options test', t => {
   t.test('no options', t => {
-    var Draw = GLDraw();
-    var defaultOptions = {
+    const Draw = new MapboxDraw();
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       touchEnabled: true,
       keybindings: true,
       clickBuffer: 2,
       touchBuffer: 25,
       displayControlsDefault: true,
       boxSelect: true,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -32,10 +31,9 @@ test('Options test', t => {
   });
 
   t.test('use custom clickBuffer', t => {
-    var Draw = GLDraw({ clickBuffer: 10 });
-    var defaultOptions = {
+    const Draw = new MapboxDraw({ clickBuffer: 10 });
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       touchEnabled: true,
       clickBuffer: 10,
@@ -43,6 +41,7 @@ test('Options test', t => {
       boxSelect: true,
       displayControlsDefault: true,
       styles: Draw.options.styles,
+      userProperties: false,
       controls: {
         point: true,
         line_string: true,
@@ -58,16 +57,16 @@ test('Options test', t => {
   });
 
   t.test('hide all controls', t => {
-    var Draw = GLDraw({displayControlsDefault: false});
-    var defaultOptions = {
+    const Draw = new MapboxDraw({displayControlsDefault: false});
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       touchEnabled: true,
       clickBuffer: 2,
       touchBuffer: 25,
       boxSelect: true,
       displayControlsDefault: false,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: false,
@@ -83,16 +82,16 @@ test('Options test', t => {
   });
 
   t.test('hide controls but show point', t => {
-    var Draw = GLDraw({displayControlsDefault: false, controls: {point:true}});
-    var defaultOptions = {
+    const Draw = new MapboxDraw({displayControlsDefault: false, controls: {point:true}});
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       touchEnabled: true,
       displayControlsDefault: false,
       clickBuffer: 2,
       touchBuffer: 25,
       boxSelect: true,
+      userProperties: false,
       styles: Draw.options.styles,
       controls: {
         point: true,
@@ -109,15 +108,15 @@ test('Options test', t => {
   });
 
   t.test('hide only point control', t => {
-    var Draw = GLDraw({ controls: {point:false}});
-    var defaultOptions = {
+    const Draw = new MapboxDraw({ controls: {point:false}});
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       keybindings: true,
       touchEnabled: true,
       displayControlsDefault: true,
       touchBuffer: 25,
       clickBuffer: 2,
+      userProperties: false,
       boxSelect: true,
       styles: Draw.options.styles,
       controls: {
@@ -135,15 +134,15 @@ test('Options test', t => {
   });
 
   t.test('disable touch interaction', t => {
-    var Draw = GLDraw({ touchEnabled: false });
-    var defaultOptions = {
+    const Draw = new MapboxDraw({ touchEnabled: false });
+    const defaultOptions = {
       defaultMode: 'simple_select',
-      position: 'top-left',
       touchEnabled: false,
       keybindings: true,
       clickBuffer: 2,
       touchBuffer: 25,
       displayControlsDefault: true,
+      userProperties: false,
       boxSelect: true,
       styles: Draw.options.styles,
       controls: {
@@ -161,7 +160,7 @@ test('Options test', t => {
   });
 
   t.test('custom styles', t => {
-    var Draw = GLDraw({styles: [{
+    const Draw = new MapboxDraw({styles: [{
       'id': 'custom-polygon',
       'type': 'fill',
       'filter': ['all', ['==', '$type', 'Polygon']],
@@ -177,7 +176,7 @@ test('Options test', t => {
       }
     }]});
 
-    var styles = [
+    const styles = [
       {
         'id': 'custom-polygon.cold',
         'source': 'mapbox-gl-draw-cold',

@@ -3,7 +3,6 @@ const Constants = require('./constants');
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
-  position: 'top-left',
   keybindings: true,
   touchEnabled: true,
   clickBuffer: 2,
@@ -11,7 +10,8 @@ const defaultOptions = {
   boxSelect: true,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
-  controls: {}
+  controls: {},
+  userProperties: false
 };
 
 const showControls = {
@@ -37,9 +37,7 @@ function addSources(styles, sourceBucket) {
     if (style.source) return style;
     return xtend(style, {
       id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot')
-        ? Constants.sources.HOT
-        : Constants.sources.COLD
+      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
     });
   });
 }

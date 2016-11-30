@@ -43,7 +43,7 @@ module.exports = function(geojsonFeatures, delta) {
   // These changes are not mutually exclusive: we might hit the inner
   // edge but also have hit the outer edge and therefore need
   // another readjustment
-  let constrainedDelta = delta;
+  const constrainedDelta = delta;
   if (northInnerEdge + constrainedDelta.lat > LAT_RENDERED_MAX) {
     constrainedDelta.lat = LAT_RENDERED_MAX - northInnerEdge;
   }
