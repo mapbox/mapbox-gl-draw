@@ -79,14 +79,21 @@ module.exports = function(ctx, opts) {
     selectedCoordPaths = [about.coord_path];
   };
 
-<<<<<<< HEAD
   function pathsToCoordinates(paths) {
     return paths.map(coord_path => feature.getCoordinate(coord_path));
   }
 
   function coordinatesToPoints(coordinates) {
     return coordinates.map(coords => ({
-=======
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.POINT,
+        coordinates: coords
+      }
+    }));
+  }
+
   const onFeature = function(e) {
     if (selectedCoordPaths.length === 0) startDragging(e);
     else stopDragging();
@@ -98,19 +105,8 @@ module.exports = function(ctx, opts) {
   };
 
   const dragVertex = (e, delta) => {
-    const selectedCoords = selectedCoordPaths.map(coord_path => feature.getCoordinate(coord_path));
-    const selectedCoordPoints = selectedCoords.map(coords => ({
->>>>>>> mapbox/master
-      type: Constants.geojsonTypes.FEATURE,
-      properties: {},
-      geometry: {
-        type: Constants.geojsonTypes.POINT,
-        coordinates: coords
-      }
-    }));
-<<<<<<< HEAD
-  }
-=======
+    var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
+    var selectedPoints = coordinatesToPoints(selectedCoordinates);
 
     const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
     for (let i = 0; i < selectedCoords.length; i++) {
@@ -120,7 +116,6 @@ module.exports = function(ctx, opts) {
       coord[1] + constrainedDelta.lat);
     }
   };
->>>>>>> mapbox/master
 
   return {
     start: function() {
@@ -148,10 +143,9 @@ module.exports = function(ctx, opts) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-<<<<<<< HEAD
         var selectedCoordinates = pathsToCoordinates(selectedCoordPaths);
         var selectedPoints = coordinatesToPoints(selectedCoordinates);
-        var delta = {
+        const delta = {
           lng: e.lngLat.lng - dragMoveLocation.lng,
           lat: e.lngLat.lat - dragMoveLocation.lat
         };
@@ -163,14 +157,9 @@ module.exports = function(ctx, opts) {
             coord[0] + constrainedDelta.lng,
             coord[1] + constrainedDelta.lat);
         }
-=======
-        const delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
+
         if (selectedCoordPaths.length > 0) dragVertex(e, delta);
         else dragFeature(e, delta);
->>>>>>> mapbox/master
 
         dragMoveLocation = e.lngLat;
       });
