@@ -146,6 +146,11 @@ This method returns the feature ids for all features currently in a selected sta
 This method returns a FeatureCollection of all the selected features. If nothing is selected, it will return an empty FeatureCollection.
 
 ---
+###`.getSelectedPoints() -> [Object: GeoJSON]`
+
+This method returns all vertices currently in a selected state in an array of GeoJSON points.
+
+---
 ###`.getAll() -> Object`
 
 This method returns all features added to Draw in a single GeoJSON FeatureCollection.
@@ -412,12 +417,16 @@ The event data is an object with the following shape:
 Fired when the selection is changed (one or more features are selected or deselected). The following will trigger this event:
 
 - Click on a feature to select it.
-- Create a box-selection that includes at least one feature.
 - When a feature is already selected, shift-click on another feature to add it to the selection.
+- Click on a vertex to select it.
+- When a vertex is already selected, shift-click on another vertex to add it to the selection.
+- Create a box-selection that includes at least one feature.
 - Click outside the selected feature(s) to deselect.
+- Click away from the selected vertex(s) to deselect.
 - Finish drawing a feature (features are selected just after they are created).
 - When a feature is already selected, invoke `Draw.changeMode()` such that the feature becomes deselected.
 - Use `Draw.changeMode('simple_select', { featureIds: [..] })` to switch to `simple_select` mode and immediately select the specified features.
+- Use `Draw.delete`, `Draw.deleteAll` or `Draw.trash` to delete feature(s).
 
 The event data is an object with the following shape:
 
