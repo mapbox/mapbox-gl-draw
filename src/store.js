@@ -120,6 +120,7 @@ Store.prototype.delete = function(featureIds, options = {}) {
     delete this._features[id];
     this.isDirty = true;
   });
+  refreshSelectedCoordinates.call(this, options);
   return this;
 };
 
@@ -170,11 +171,11 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
-    this._selectedCoordinates = this._selectedCoordinates.filter(point => point.feature_id !== id);
     if (!options.silent) {
       this._emitSelectionChange = true;
     }
   });
+  refreshSelectedCoordinates.call(this, options);
   return this;
 };
 
@@ -278,3 +279,11 @@ Store.prototype.setFeatureProperty = function(featureId, property, value) {
   this.get(featureId).setProperty(property, value);
   this.featureChanged(featureId);
 };
+
+function refreshSelectedCoordinates(options) {
+  const newSelectedCoordinates = this._selectedCoordinates.filter(point => this._selectedFeatureIds.has(point.feature_id));
+  if (this._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
+    this._emitSelectionChange = true;
+  }
+  this._selectedCoordinates = newSelectedCoordinates;
+}
