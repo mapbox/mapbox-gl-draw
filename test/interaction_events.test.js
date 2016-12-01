@@ -308,6 +308,18 @@ function runTests() {
         mode: 'direct_select'
       });
 
+      firedWith(t, 'draw.selectionchange', {
+        features: [lineB],
+        points: [{
+          geometry: {
+            coordinates: [ 40, 20 ],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }]
+      });
+
       t.deepEqual(flushDrawEvents(), [
         'draw.modechange',
         'draw.selectionchange'
@@ -589,6 +601,19 @@ function runTests() {
       firedWith(t, 'draw.modechange', {
         mode: 'direct_select'
       });
+
+      firedWith(t, 'draw.selectionchange', {
+        features: [polygonB],
+        points: [{
+          geometry: {
+            coordinates: [ 20, -20 ],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }]
+      });
+
       t.deepEqual(flushDrawEvents(), [
         'draw.modechange',
         'draw.selectionchange'
