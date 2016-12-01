@@ -161,6 +161,7 @@ module.exports = function(ctx, opts) {
       });
       this.on('click', CommonSelectors.isActiveFeature, () => {
         selectedCoordPaths = [];
+        ctx.store.clearSelectedCoordinates();
         feature.changed();
       });
     },
