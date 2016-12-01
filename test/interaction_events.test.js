@@ -197,7 +197,7 @@ function runTests() {
   };
 
   test('create a line', t => {
-    // Now in `draw_line_string` mode ...
+    // Now in `draw_line_string` mode...
     // Move around, then click and move to create the line
     map.fire('mousemove', makeMouseEvent(10, 10));
     map.fire('mousemove', makeMouseEvent(20, 20));
