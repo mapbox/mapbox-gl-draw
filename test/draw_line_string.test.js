@@ -274,18 +274,19 @@ test('draw_line_string interaction', t => {
       st.end();
     });
 
-    t.test('start a line but trash it before completion', st => {
+    t.test('start a line and then trash each point before completion until the feature is totally removed', st => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
       mouseClick(map, makeMouseEvent(1, 1));
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
+      Draw.trash();
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
-
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2]]);
       Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       mouseClick(map, makeMouseEvent(1, 1));

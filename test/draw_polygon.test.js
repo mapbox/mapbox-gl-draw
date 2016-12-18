@@ -332,18 +332,22 @@ test('draw_polygon interaction', t => {
       st.end();
     });
 
-    t.test('start a polygon but trash it before completion', st => {
+    t.test('start a polygon and then delete each point before completion until the feature is totally removed', st => {
       // Start a new polygon
       Draw.deleteAll();
       Draw.changeMode('draw_polygon');
       mouseClick(map, makeMouseEvent(1, 1));
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
+      mouseClick(map, makeMouseEvent(4, 4));
+      Draw.trash();
 
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
 
       Draw.trash();
+      Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       mouseClick(map, makeMouseEvent(1, 1));
