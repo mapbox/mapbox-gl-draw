@@ -124,8 +124,14 @@ module.exports = function(ctx) {
       });
     },
     trash() {
-      ctx.store.delete([polygon.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      if (currentVertexPosition > 2) {
+        //remove last added coordinate
+        currentVertexPosition--;
+        polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      } else {
+        ctx.store.delete([polygon.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+      }
     }
   };
 };

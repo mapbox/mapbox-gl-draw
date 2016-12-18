@@ -93,8 +93,14 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      ctx.store.delete([line.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      if (currentVertexPosition > 2) {
+        //remove the last point
+        currentVertexPosition--;
+        line.removeCoordinate(`${currentVertexPosition}`);
+      } else {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+      }
     }
   };
 };
