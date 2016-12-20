@@ -32,6 +32,7 @@ test('draw_line_string mode initialization', t => {
       coordinates: []
     }
   });
+
   // Strip ids for this comparison
   t.deepEqual(xtend(context.store.add.getCall(0).args[0], { id: null }),
     xtend(emptyLine, { id: null }), 'with a new line');
