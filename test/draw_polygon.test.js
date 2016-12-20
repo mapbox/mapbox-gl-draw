@@ -347,7 +347,6 @@ test('draw_polygon interaction', t => {
 
       Draw.trash();
       Draw.trash();
-
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       mouseClick(map, makeMouseEvent(1, 1));
