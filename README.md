@@ -9,7 +9,7 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 ### Installing
 
 ```
-npm install mapbox-gl-draw
+npm install @mapbox/mapbox-gl-draw
 ```
 
 Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
@@ -24,7 +24,7 @@ Draw ships with CSS, make sure you include it in your build. It can be found on 
 
 ```js
 var mapboxgl = require('mapbox-gl');
-var MapboxDraw = require('mapbox-gl-draw');
+var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 ```
 
 **When using a CDN**
