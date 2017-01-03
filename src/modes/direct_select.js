@@ -26,6 +26,8 @@ module.exports = function(ctx, opts) {
   let canDragMove = false;
 
   let selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
+  const selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
+  ctx.store.setSelectedCoordinates(selectedCoordinates);
 
   const fireUpdate = function() {
     ctx.map.fire(Constants.events.UPDATE, {
@@ -62,6 +64,8 @@ module.exports = function(ctx, opts) {
     } else if (isShiftDown(e) && selectedIndex === -1) {
       selectedCoordPaths.push(about.coord_path);
     }
+    const selectedCoordinates = pathsToCoordinates(featureId, selectedCoordPaths);
+    ctx.store.setSelectedCoordinates(selectedCoordinates);
     feature.changed();
   };
 
@@ -72,6 +76,10 @@ module.exports = function(ctx, opts) {
     fireUpdate();
     selectedCoordPaths = [about.coord_path];
   };
+
+  function pathsToCoordinates(featureId, paths) {
+    return paths.map(coord_path => { return { feature_id: featureId, coord_path, coordinates: feature.getCoordinate(coord_path) }; });
+  }
 
   const onFeature = function(e) {
     if (selectedCoordPaths.length === 0) startDragging(e);
@@ -169,11 +177,13 @@ module.exports = function(ctx, opts) {
       }
       function clickActiveFeature() {
         selectedCoordPaths = [];
+        ctx.store.clearSelectedCoordinates();
         feature.changed();
       }
     },
     stop: function() {
       doubleClickZoom.enable(ctx);
+      ctx.store.clearSelectedCoordinates();
     },
     render: function(geojson, push) {
       if (featureId === geojson.properties.id) {
@@ -197,6 +207,7 @@ module.exports = function(ctx, opts) {
         features: ctx.store.getSelected().map(f => f.toGeoJSON())
       });
       selectedCoordPaths = [];
+      ctx.store.clearSelectedCoordinates();
       fireActionable();
       if (feature.isValid() === false) {
         ctx.store.delete([featureId]);

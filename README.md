@@ -9,13 +9,13 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 ### Installing
 
 ```
-npm install mapbox-gl-draw
+npm install @mapbox/mapbox-gl-draw
 ```
 
 Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
 
 ```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.14.0/mapbox-gl-draw.css' type='text/css' />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Usage in your application
@@ -24,13 +24,13 @@ Draw ships with CSS, make sure you include it in your build. It can be found on 
 
 ```js
 var mapboxgl = require('mapbox-gl');
-var MapboxDraw = require('mapbox-gl-draw');
+var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 ```
 
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.14.0/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
 ```
 
 **Example setup**

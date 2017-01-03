@@ -7,6 +7,7 @@ const Store = module.exports = function(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
+  this._selectedCoordinates = [];
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
@@ -119,6 +120,7 @@ Store.prototype.delete = function(featureIds, options = {}) {
     delete this._features[id];
     this.isDirty = true;
   });
+  refreshSelectedCoordinates.call(this, options);
   return this;
 };
 
@@ -173,6 +175,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
       this._emitSelectionChange = true;
     }
   });
+  refreshSelectedCoordinates.call(this, options);
   return this;
 };
 
@@ -212,6 +215,28 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
 };
 
 /**
+ * Sets the store's coordinates selection, clearing any prior values.
+ * @param {Array<Array<string>>} coordinates
+ * @return {Store} this
+ */
+Store.prototype.setSelectedCoordinates = function(coordinates) {
+  this._selectedCoordinates = coordinates;
+  this._emitSelectionChange = true;
+  return this;
+};
+
+/**
+ * Clears the current coordinates selection.
+ * @param {Object} [options]
+ * @return {Store} this
+ */
+Store.prototype.clearSelectedCoordinates = function() {
+  this._selectedCoordinates = [];
+  this._emitSelectionChange = true;
+  return this;
+};
+
+/**
  * Returns the ids of features in the current selection.
  * @return {Array<string>} Selected feature ids.
  */
@@ -225,6 +250,14 @@ Store.prototype.getSelectedIds = function() {
  */
 Store.prototype.getSelected = function() {
   return this._selectedFeatureIds.values().map(id => this.get(id));
+};
+
+/**
+ * Returns selected coordinates in the currently selected feature.
+ * @return {Array<Object>} Selected coordinates.
+ */
+Store.prototype.getSelectedCoordinates = function() {
+  return this._selectedCoordinates;
 };
 
 /**
@@ -246,3 +279,11 @@ Store.prototype.setFeatureProperty = function(featureId, property, value) {
   this.get(featureId).setProperty(property, value);
   this.featureChanged(featureId);
 };
+
+function refreshSelectedCoordinates(options) {
+  const newSelectedCoordinates = this._selectedCoordinates.filter(point => this._selectedFeatureIds.has(point.feature_id));
+  if (this._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
+    this._emitSelectionChange = true;
+  }
+  this._selectedCoordinates = newSelectedCoordinates;
+}

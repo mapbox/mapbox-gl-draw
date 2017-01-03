@@ -84,7 +84,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [pointA]
+        features: [pointA],
+        points: []
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -104,7 +105,8 @@ function runTests() {
     click(map, makeMouseEvent(5, 5));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: []
+        features: [],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -121,7 +123,8 @@ function runTests() {
     click(map, makeMouseEvent(25, 25));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [pointA]
+        features: [pointA],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -194,7 +197,7 @@ function runTests() {
   };
 
   test('create a line', t => {
-    // Now in `draw_line_string` mode ...
+    // Now in `draw_line_string` mode...
     // Move around, then click and move to create the line
     map.fire('mousemove', makeMouseEvent(10, 10));
     map.fire('mousemove', makeMouseEvent(20, 20));
@@ -219,7 +222,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [lineA]
+        features: [lineA],
+        points: []
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -236,7 +240,8 @@ function runTests() {
     click(map, makeMouseEvent(5, 5));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: []
+        features: [],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -251,7 +256,8 @@ function runTests() {
     click(map, makeMouseEvent(30, 30));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [lineA]
+        features: [lineA],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -302,8 +308,21 @@ function runTests() {
         mode: 'direct_select'
       });
 
+      firedWith(t, 'draw.selectionchange', {
+        features: [lineB],
+        points: [{
+          geometry: {
+            coordinates: [ 40, 20 ],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }]
+      });
+
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange'
+        'draw.modechange',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -334,7 +353,8 @@ function runTests() {
         features: [lineC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -385,7 +405,8 @@ function runTests() {
         features: [lineE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -404,7 +425,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: []
+        features: [],
+        points: []
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -451,7 +473,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonA]
+        features: [polygonA],
+        points: []
       });
 
       t.deepEqual(flushDrawEvents(), [
@@ -468,7 +491,8 @@ function runTests() {
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: []
+        features: [],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -488,7 +512,8 @@ function runTests() {
 
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [lineE, polygonA]
+        features: [lineE, polygonA],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -544,7 +569,8 @@ function runTests() {
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: []
+        features: [],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -558,7 +584,8 @@ function runTests() {
     click(map, makeMouseEvent(48, 0));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonB]
+        features: [polygonB],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -574,8 +601,22 @@ function runTests() {
       firedWith(t, 'draw.modechange', {
         mode: 'direct_select'
       });
+
+      firedWith(t, 'draw.selectionchange', {
+        features: [polygonB],
+        points: [{
+          geometry: {
+            coordinates: [ 20, -20 ],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }]
+      });
+
       t.deepEqual(flushDrawEvents(), [
-        'draw.modechange'
+        'draw.modechange',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -585,7 +626,7 @@ function runTests() {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     afterNextRender(() => {
-      t.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
+      t.deepEqual(flushDrawEvents(), ['draw.selectionchange'], 'no unexpected draw events');
       t.end();
     });
   });
@@ -616,7 +657,8 @@ function runTests() {
         features: [polygonC]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -667,7 +709,8 @@ function runTests() {
         features: [polygonE]
       });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -683,7 +726,8 @@ function runTests() {
       click(map, makeMouseEvent(50, 10));
       afterNextRender(() => {
         firedWith(t, 'draw.selectionchange', {
-          features: [polygonE]
+          features: [polygonE],
+          points: []
         });
         t.deepEqual(flushDrawEvents(), [
           'draw.selectionchange'
@@ -699,7 +743,8 @@ function runTests() {
     click(map, makeMouseEvent(82, 22, { shiftKey: true }));
     afterNextRender(() => {
       firedWith(t, 'draw.selectionchange', {
-        features: [polygonE, lineF]
+        features: [polygonE, lineF],
+        points: []
       });
       t.deepEqual(flushDrawEvents(), [
         'draw.selectionchange'
@@ -820,7 +865,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [expectedLine]
+        features: [expectedLine],
+        points: []
       });
 
       firedWith(t, 'draw.modechange', {
@@ -875,7 +921,8 @@ function runTests() {
       });
 
       firedWith(t, 'draw.selectionchange', {
-        features: [expectedPolygon]
+        features: [expectedPolygon],
+        points: []
       });
 
       firedWith(t, 'draw.modechange', {

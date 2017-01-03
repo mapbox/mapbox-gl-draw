@@ -50,9 +50,12 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.isSelected, 'function', 'exposes store.isSelected');
   t.equal(typeof Store.prototype.delete, 'function', 'exposes store.delete');
   t.equal(typeof Store.prototype.setSelected, 'function', 'exposes store.setSelected');
+  t.equal(typeof Store.prototype.setSelectedCoordinates, 'function', 'exposes store.setSelectedCoordinates');
+  t.equal(typeof Store.prototype.getSelectedCoordinates, 'function', 'exposes store.getSelectedCoordinates');
+  t.equal(typeof Store.prototype.clearSelectedCoordinates, 'function', 'exposes store.clearSelectedCoordinates');
   t.equal(typeof Store.prototype.setFeatureProperty, 'function', 'exposes store.setFeatureProperty');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 18, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 21, 'no untested prototype members');
 
   t.end();
 });
