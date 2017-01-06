@@ -1,4 +1,4 @@
-const area = require('geojson-area');
+const area = require('@mapbox/geojson-area');
 const Constants = require('../constants');
 
 const FEATURE_SORT_RANKS = {
