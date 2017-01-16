@@ -28,6 +28,11 @@ displayControlsDefault | boolean | Sets default value for the control keys in th
 userProperties | boolean | If true, user properties will be present and prefixed with `user_` on the feature objects via styling. - default `false`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
+snapTo | boolean | If true, snaps to vertices and edges from other point/line/polygon features - default: `true`
+snapBuffer | number | On snap, the cursor buffer - default: `15`
+snapStyles | Array | An array of style ids. By default draw provides a style for you that allows snap to other point/line/polygon features within the draw tool.
+snapOverCircleStyle | Array | A style object. By default draw provides a style for you that defines the snap look for points in other features.
+snapOverLineStyle | Array | A style object. By default draw provides a style for you that defines the snap look for lines in other features.
 
 ## Modes
 

@@ -5,6 +5,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 const moveFeatures = require('../lib/move_features');
+const snapTo = require('../lib/snap_to');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -20,6 +21,9 @@ module.exports = function(ctx, opts) {
   if (feature.type === Constants.geojsonTypes.POINT) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
+
+  //snap setup
+  const buffer = ctx.options.snapBuffer;
 
   let dragMoveLocation = opts.startPos || null;
   let dragMoving = false;
@@ -137,14 +141,20 @@ module.exports = function(ctx, opts) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        const delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-        if (selectedCoordPaths.length > 0) dragVertex(e, delta);
-        else dragFeature(e, delta);
+        let evt = e;
 
-        dragMoveLocation = e.lngLat;
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, buffer, ctx, featureId);
+        }
+
+        const delta = {
+          lng: evt.lngLat.lng - dragMoveLocation.lng,
+          lat: evt.lngLat.lat - dragMoveLocation.lat
+        };
+        if (selectedCoordPaths.length > 0) dragVertex(evt, delta);
+        else dragFeature(evt, delta);
+
+        dragMoveLocation = evt.lngLat;
       });
       this.on('click', CommonSelectors.true, stopDragging);
       this.on('mouseup', CommonSelectors.true, () => {
