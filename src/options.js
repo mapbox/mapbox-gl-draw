@@ -5,11 +5,40 @@ const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
   clickBuffer: 2,
+  snapBuffer: 15,
   boxSelect: true,
+  snapTo: true,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
   controls: {},
-  userProperties: false
+  userProperties: false,
+  snapStyles: ['gl-draw-polygon-stroke-inactive.cold', 'gl-draw-line-inactive.cold', 'gl-draw-point-inactive.cold'],
+  snapOverCircleStyle: {
+    'id': 'gl-draw-circle-snap',
+    'type': 'circle',
+    'paint': {
+      'circle-radius': 3,
+      'circle-color': '#FF0',
+      'circle-stroke-width' : 1,
+      'circle-stroke-color' :'#000'
+    },
+    'filter': ['all', ["==", "id", ""]],
+    'source': 'mapbox-gl-draw-cold'
+  },
+  snapOverLineStyle: {
+    'id': 'gl-draw-line-snap',
+    'type': 'line',
+    'layout': {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    'paint': {
+      'line-color': '#00F',
+      'line-width': 1
+    },
+    'filter': ['all', ["==", "id", ""]],
+    'source': 'mapbox-gl-draw-cold'
+  }
 };
 
 const showControls = {

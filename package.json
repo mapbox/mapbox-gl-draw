@@ -52,7 +52,7 @@
     "eslint": "^3.0.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
-    "mapbox-gl": "^0.27.0",
+    "mapbox-gl": "^0.29.0",
     "mapbox-gl-js-mock": "^0.27.1",
     "mock-browser": "^0.92.10",
     "nyc": "^6.6.1",
@@ -64,9 +64,11 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.27.0 || ^0.28.0"
+    "mapbox-gl": "^0.29.0 || ^0.30.0 || ^0.31.0"
   },
   "dependencies": {
+    "@turf/distance": "^3.7.3",
+    "@turf/point-on-line": "^3.7.3",
     "geojson-area": "^0.2.1",
     "geojson-extent": "^0.3.2",
     "geojson-normalize": "0.0.1",
@@ -74,6 +76,8 @@
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.0.0",
+    "turf-meta": "^3.0.12",
+    "turf-point": "^2.0.1",
     "xtend": "^4.0.1"
   }
 }

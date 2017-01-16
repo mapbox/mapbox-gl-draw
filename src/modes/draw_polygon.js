@@ -4,6 +4,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
+const snapTo = require('../lib/snap_to');
 
 module.exports = function(ctx) {
 
@@ -21,6 +22,10 @@ module.exports = function(ctx) {
 
   ctx.store.add(polygon);
 
+  //snap setup
+  const buffer = ctx.options.snapBuffer;
+  let snapClickPoint;
+
   return {
     start() {
       ctx.store.clearSelected();
@@ -28,17 +33,24 @@ module.exports = function(ctx) {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
       this.on('mousemove', CommonSelectors.true, e => {
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
-        if (CommonSelectors.isVertex(e)) {
+        let evt = e;
+
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, buffer, ctx, polygon.id);
+        }
+        snapClickPoint = evt;
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
+        if (CommonSelectors.isVertex(evt)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
       this.on('click', CommonSelectors.true, (e) => {
-        if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
+        const evt = snapClickPoint || e;
+        if (currentVertexPosition > 0 && isEventAtCoordinates(evt, polygon.coordinates[0][currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
         currentVertexPosition++;
       });
       this.on('click', CommonSelectors.isVertex, () => {

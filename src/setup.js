@@ -90,6 +90,13 @@ module.exports = function(ctx) {
       ctx.options.styles.forEach(style => {
         ctx.map.removeLayer(style.id);
       });
+      //remove snap layers
+      if (ctx.map.getLayer(ctx.options.snapOverCircleStyle.id) !== undefined) {
+        ctx.map.removeLayer(ctx.options.snapOverCircleStyle.id);
+      }
+      if (ctx.map.getLayer(ctx.options.snapOverLineStyle.id) !== undefined) {
+        ctx.map.removeLayer(ctx.options.snapOverLineStyle.id);
+      }
 
       ctx.map.removeSource(Constants.sources.COLD);
       ctx.map.removeSource(Constants.sources.HOT);
