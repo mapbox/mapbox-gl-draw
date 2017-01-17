@@ -137,6 +137,7 @@ module.exports = function(ctx) {
     },
     trash() {
       if (currentVertexPosition > 2) {
+
         //remove last added coordinate
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);
