@@ -36,7 +36,7 @@ module.exports = function(ctx) {
       this.on('mousemove', CommonSelectors.true, (e) => {
         let evt = e;
 
-        if (evt.point && ctx.options.snapTo) {
+        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
           evt = snapTo(evt, buffer, ctx, line.id);
         }
         snapClickPoint = evt;

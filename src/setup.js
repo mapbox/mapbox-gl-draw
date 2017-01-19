@@ -11,6 +11,7 @@ module.exports = function(ctx) {
   ctx.container = null;
   ctx.store = null;
   ctx.ui = ui(ctx);
+  ctx.snapToOverride = false;
 
   let controlContainer = null;
 
