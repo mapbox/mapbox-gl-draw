@@ -1,8 +1,6 @@
 const StringSet = require('../lib/string_set');
 const coordEach = require('@turf/meta').coordEach;
-const point = require('@turf/helpers').point;
-const pointOnLine  = require('@turf/point-on-line');
-const distance = require('@turf/distance');
+const cheapRuler = require('cheap-ruler');
 
 
 // All are required
@@ -27,6 +25,8 @@ module.exports = function snapTo(evt, buffer, ctx, id) {
 
   const snapStyles = ctx.options.snapStyles;
   const snapFilterOff = ['all', ["==", "id", ""]];
+
+  const ruler = cheapRuler(evt.lngLat.lng);
 
   if (ctx.map.getLayer(snapOverLineStyleId) === undefined) {
     ctx.map.addLayer(ctx.options.snapOverLineStyle);
@@ -60,21 +60,21 @@ module.exports = function snapTo(evt, buffer, ctx, id) {
   //snapto line
   uniqueFeatures.forEach((feature) => {
     let type = feature.geometry.type,
-      snappedPt, dist, coords;
+      dist, coords;
 
     //change a polygon to a linestring
     if (type === "Polygon") {
       feature.geometry.coordinates = feature.geometry.coordinates[0];
       feature.geometry.type = "LineString";
       type = feature.geometry.type;
-    } else if (type === "LineString") {
-      snappedPt = pointOnLine(feature, point(evtCoords), "degrees");
-      dist = snappedPt.properties.dist;
-      coords = snappedPt.geometry.coordinates;
+    }
+
+    if (type === "LineString") {
+      coords = ruler.pointOnLine(feature.geometry.coordinates, evtCoords).point;
     } else if (type === "Point") {
-      dist = distance(feature, point(evtCoords), "degrees");
       coords = feature.geometry.coordinates;
     }
+    dist = ruler.distance(coords, evtCoords);
 
     if ((dist !== null) && (closestDistance === null || dist < closestDistance)) {
       feature.distance = dist;
