@@ -2,14 +2,14 @@
 
 Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps.
 
-[![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
+[![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=master)](https://travis-ci.org/mapbox/mapbox-gl-draw)
 
-**Requires [mapbox-gl-js@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016) or higher.**
+**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js) (version 0.27.0 – 0.29.x).**
 
 ### Installing
 
 ```
-npm install mapbox-gl-draw
+npm install @mapbox/mapbox-gl-draw
 ```
 
 Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
@@ -24,7 +24,7 @@ Draw ships with CSS, make sure you include it in your build. It can be found on 
 
 ```js
 var mapboxgl = require('mapbox-gl');
-var MapboxDraw = require('mapbox-gl-draw');
+var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 ```
 
 **When using a CDN**
