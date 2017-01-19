@@ -1,6 +1,6 @@
 const StringSet = require('../lib/string_set');
 const coordEach = require('@turf/meta').coordEach;
-const point = require('turf-point');
+const point = require('@turf/helpers').point;
 const pointOnLine  = require('@turf/point-on-line');
 const distance = require('@turf/distance');
 
