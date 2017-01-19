@@ -1,3 +1,9 @@
+## 0.16.1
+
+- Fixes bug where IE11 failed because it lacks `Array.find`.
+- Adds support for mapbox-gl-js 0.29.x.
+- Uses `@mapbox`-namespaced packages for dependencies.
+
 ## 0.16.0
 
 #### ⚠️ Breaking changes ⚠️

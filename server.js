@@ -10,11 +10,9 @@ app.get('/mapbox-gl-draw.js', browserify('./index.js', {
     minify: false
 }));
 
-app.get('/mapbox-gl.js', browserify('./node_modules/mapbox-gl/js/mapbox-gl.js',{
-    standalone: 'mapboxgl',
-    debug: true,
-    cache: 'dynamic'
-}));
+app.get('/mapbox-gl.js', function(req, res) {
+  res.sendFile(__dirname+'/node_modules/mapbox-gl/dist/mapbox-gl.js');
+});
 
 app.get('/mapbox-gl.css', function(req, res) {
     res.sendFile(__dirname+ '/node_modules/mapbox-gl/dist/mapbox-gl.css');
