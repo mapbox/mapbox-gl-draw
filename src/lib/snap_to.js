@@ -67,19 +67,16 @@ module.exports = function snapTo(evt, buffer, ctx, id) {
       feature.geometry.coordinates = feature.geometry.coordinates[0];
       feature.geometry.type = "LineString";
       type = feature.geometry.type;
-    }
-
-    if (type === "LineString") {
+    } else if (type === "LineString") {
       snappedPt = pointOnLine(feature, point(evtCoords), "degrees");
       dist = snappedPt.properties.dist;
       coords = snappedPt.geometry.coordinates;
-    } else {
-      //should be a point
+    } else if (type === "Point") {
       dist = distance(feature, point(evtCoords), "degrees");
       coords = feature.geometry.coordinates;
     }
 
-    if (closestDistance === null || dist < closestDistance) {
+    if ((dist !== null) && (closestDistance === null || dist < closestDistance)) {
       feature.distance = dist;
       closestFeature = feature;
       closestCoord = coords;
