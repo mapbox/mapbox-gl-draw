@@ -2,8 +2,10 @@ import test from 'tape';
 import xtend from 'xtend';
 import MapboxDraw from '../';
 import mouseClick from './utils/mouse_click';
+import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawPointMode from '../src/modes/draw_point';
 import Point from '../src/feature_types/point';
@@ -46,8 +48,9 @@ test('draw_point start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['point'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 3, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
 
@@ -138,7 +141,7 @@ test('draw_point render an inactive feature', t => {
   t.end();
 });
 
-test('draw_point interaction', t => {
+test('draw_point mouse interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -209,3 +212,38 @@ test('draw_point interaction', t => {
     t.end();
   });
 });
+
+
+test('draw_point touch interaction', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+
+  map.on('load', () => {
+    // The following sub-tests share state ...
+
+    t.test('tapping', st => {
+      Draw.deleteAll();
+      Draw.changeMode('draw_point');
+      touchTap(map, makeTouchEvent(10, 20));
+
+      const { features } = Draw.getAll();
+      st.equal(features.length, 1, 'point created');
+      const point = Draw.getAll().features[0];
+      st.equal(point.geometry.type, 'Point');
+
+      st.deepEqual(point.geometry.coordinates, [10, 20], 'coordinate added');
+
+      touchTap(map, makeTouchEvent(30, 30));
+      st.equal(features.length, 1, 'mode has changed, so another click does not create another point');
+
+      st.end();
+    });
+
+    document.body.removeChild(container);
+    t.end();
+  });
+});
+

@@ -10,10 +10,23 @@ const META_TYPES = [
 ];
 
 // Requires either event or bbox
-module.exports = function(event, bbox, ctx) {
+module.exports = {
+  click: featuresAtClick,
+  touch: featuresAtTouch
+};
+
+function featuresAtClick(event, bbox, ctx) {
+  return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
+}
+
+function featuresAtTouch(event, bbox, ctx) {
+  return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
+}
+
+function featuresAt(event, bbox, ctx, buffer) {
   if (ctx.map === null) return [];
 
-  const box = (event) ? mapEventToBoundingBox(event, ctx.options.clickBuffer) : bbox;
+  const box = (event) ? mapEventToBoundingBox(event, buffer) : bbox;
 
   const queryParams = {};
   if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
@@ -33,4 +46,4 @@ module.exports = function(event, bbox, ctx) {
   });
 
   return sortFeatures(uniqueFeatures);
-};
+}
