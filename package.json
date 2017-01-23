@@ -51,7 +51,7 @@
     "eslint": "^3.0.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
-    "mapbox-gl": "^0.29.0",
+    "mapbox-gl": "^0.31.0",
     "mapbox-gl-js-mock": "^0.27.1",
     "mock-browser": "^0.92.10",
     "nyc": "^6.6.1",
@@ -63,7 +63,7 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.27.0 || ^0.28.0 || ^0.29.0"
+    "mapbox-gl": ">=0.27.0 <=0.31.0"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
