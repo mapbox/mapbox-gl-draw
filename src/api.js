@@ -1,9 +1,9 @@
 const isEqual = require('lodash.isequal');
-const normalize = require('geojson-normalize');
+const normalize = require('@mapbox/geojson-normalize');
 const hat = require('hat');
 const featuresAt = require('./lib/features_at');
 const stringSetsAreEqual = require('./lib/string_sets_are_equal');
-const geojsonhint = require('geojsonhint');
+const geojsonhint = require('@mapbox/geojsonhint');
 const Constants = require('./constants');
 const StringSet = require('./lib/string_set');
 

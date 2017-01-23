@@ -2,9 +2,9 @@
 
 Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps.
 
-[![Circle CI](https://circleci.com/gh/mapbox/mapbox-gl-draw/tree/master.svg?style=svg)](https://circleci.com/gh/mapbox/gl-draw/tree/master)
+[![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=master)](https://travis-ci.org/mapbox/mapbox-gl-draw)
 
-**Requires [mapbox-gl-js@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016) or higher.**
+**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js) (version 0.27.0 – 0.29.x).**
 
 ### Installing
 

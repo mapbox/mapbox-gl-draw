@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
@@ -123,9 +124,9 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
   req.onerror = function() {
     throw new Error('Network Error');
   };
-  req.onload = () => {
+  req.onload = function() {
     var fc = JSON.parse(req.response);
-    fc.features.forEach(feature => {
+    fc.features.forEach(function(feature) {
       if(feature.geometry.type.startsWith('Multi') === false) {
         Draw.add(feature);
       }
