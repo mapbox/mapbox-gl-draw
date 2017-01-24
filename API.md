@@ -22,8 +22,10 @@ map.on('load', function() {
 option | values | function
 --- | --- | ---
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
+touchEnabled | boolean | If true, enables touch interaction - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
 clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
+touchBuffer | number | On touch, include features beyond the coordinates of the touch by touchBuffer value all directions - default: `25`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
 userProperties | boolean | If true, user properties will be present and prefixed with `user_` on the feature objects via styling. - default `false`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.

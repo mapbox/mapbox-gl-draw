@@ -3,11 +3,13 @@ import turfCentroid from '@turf/centroid';
 import test from 'tape';
 import MapboxDraw from '../';
 import click from './utils/mouse_click';
+import tap from './utils/touch_tap';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
 import Constants from '../src/constants';
 import createSyntheticEvent from 'synthetic-dom-events';
 
@@ -74,7 +76,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - should fire correct actionable when a vertex is selected', st => {
+  t.test('direct_select - should fire correct actionable when a vertex is selected by clicking', st => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -82,6 +84,28 @@ test('direct_select', t => {
     const clickAt = getGeoJSON('polygon').geometry.coordinates[0][0];
     afterNextRender(() => {
       click(map, makeMouseEvent(clickAt[0], clickAt[1]));
+      afterNextRender(() => {
+        const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
+        st.ok(actionableArgs.length > 0, 'should have fired an actionable event');
+        if (actionableArgs.length > 0) {
+          const actionable = actionableArgs[actionableArgs.length - 1][1];
+          st.equal(actionable.actions.combineFeatures, false, 'should fire correct combine actionable');
+          st.equal(actionable.actions.uncombineFeatures, false, 'should fire correct uncombine actionable');
+          st.equal(actionable.actions.trash, true, 'should fire correct trash actionable');
+        }
+        cleanUp(() => st.end());
+      });
+    });
+  });
+
+  t.test('direct_select - should fire correct actionable when a vertex is selected by tapping', st => {
+    const ids = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: ids[0]
+    });
+    const tapAt = getGeoJSON('polygon').geometry.coordinates[0][0];
+    afterNextRender(() => {
+      tap(map, makeTouchEvent(tapAt[0], tapAt[1]));
       afterNextRender(() => {
         const actionableArgs = getFireArgs().filter(arg => arg[0] === 'draw.actionable');
         st.ok(actionableArgs.length > 0, 'should have fired an actionable event');

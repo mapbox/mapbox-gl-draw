@@ -107,7 +107,14 @@ module.exports = function(ctx, options = {}) {
       this.on('mouseout', () => dragMoving, fireUpdate);
 
       // Click (with or without shift) on no feature
-      this.on('click', CommonSelectors.noTarget, function() {
+      this.on('click', CommonSelectors.noTarget, clickAnywhere);
+      this.on('tap', CommonSelectors.noTarget, clickAnywhere);
+
+      // Click (with or without shift) on a vertex
+      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), clickOnVertex);
+      this.on('tap', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), clickOnVertex);
+
+      function clickAnywhere() {
         // Clear the re-render selection
         const wasSelected = ctx.store.getSelectedIds();
         if (wasSelected.length) {
@@ -116,10 +123,9 @@ module.exports = function(ctx, options = {}) {
         }
         doubleClickZoom.enable(ctx);
         stopExtendedInteractions();
-      });
+      }
 
-      // Click (with or without shift) on a vertex
-      this.on('click', CommonSelectors.isOfMetaType(Constants.meta.VERTEX), (e) => {
+      function clickOnVertex(e) {
         // Enter direct select mode
         ctx.events.changeMode(Constants.modes.DIRECT_SELECT, {
           featureId: e.featureTarget.properties.parent,
@@ -127,10 +133,13 @@ module.exports = function(ctx, options = {}) {
           startPos: e.lngLat
         });
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.MOVE });
-      });
+      }
 
       // Mousedown on a selected feature
-      this.on('mousedown', CommonSelectors.isActiveFeature, function(e) {
+      this.on('mousedown', CommonSelectors.isActiveFeature, startOnActiveFeature);
+      this.on('touchstart', CommonSelectors.isActiveFeature, startOnActiveFeature);
+
+      function startOnActiveFeature(e) {
         // Stop any already-underway extended interactions
         stopExtendedInteractions();
 
@@ -143,10 +152,14 @@ module.exports = function(ctx, options = {}) {
         // Set up the state for drag moving
         canDragMove = true;
         dragMoveLocation = e.lngLat;
-      });
+      }
 
       // Click (with or without shift) on any feature
-      this.on('click', CommonSelectors.isFeature, function(e) {
+      this.on('click', CommonSelectors.isFeature, clickOnFeature);
+      this.on('tap', CommonSelectors.isFeature, clickOnFeature);
+
+
+      function clickOnFeature(e) {
         // Stop everything
         doubleClickZoom.disable(ctx);
         stopExtendedInteractions();
@@ -187,7 +200,7 @@ module.exports = function(ctx, options = {}) {
 
         // No matter what, re-render the clicked feature
         this.render(featureId);
-      });
+      }
 
       // Dragging when drag move is enabled
       this.on('drag', () => canDragMove, (e) => {
@@ -214,7 +227,7 @@ module.exports = function(ctx, options = {}) {
             boxSelectStartLocation,
             mouseEventPoint(e.originalEvent, ctx.container)
           ];
-          const featuresInBox = featuresAt(null, bbox, ctx);
+          const featuresInBox = featuresAt.click(null, bbox, ctx);
           const idsToSelect = getUniqueIds(featuresInBox)
             .filter(id => !ctx.store.isSelected(id));
 

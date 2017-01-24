@@ -33,17 +33,22 @@ module.exports = function(ctx) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
-      this.on('click', CommonSelectors.true, (e) => {
+      this.on('click', CommonSelectors.true, clickAnywhere);
+      this.on('click', CommonSelectors.isVertex, clickOnVertex);
+      this.on('tap', CommonSelectors.true, clickAnywhere);
+      this.on('tap', CommonSelectors.isVertex, clickOnVertex);
+
+      function clickAnywhere(e) {
         if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
-      });
-      this.on('click', CommonSelectors.isVertex, () => {
+      }
+      function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
-      });
+      }
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
