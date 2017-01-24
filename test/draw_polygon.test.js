@@ -691,6 +691,8 @@ test('draw_polygon touch interaction', t => {
       st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
 
       Draw.trash();
+      Draw.trash();
+      Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       touchTap(map, makeTouchEvent(1, 1));

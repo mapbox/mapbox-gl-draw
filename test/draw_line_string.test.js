@@ -551,7 +551,27 @@ test('draw_line_string touch interaction', t => {
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
 
+      container.dispatchEvent(escapeEvent);
+      st.equal(Draw.getAll().features.length, 0, 'no feature added');
+
+      touchTap(map, makeTouchEvent(100, 100));
+      st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
+
+      st.end();
+    });
+
+    t.test('start a line and then trash each point before completion until the feature is totally removed', st => {
+      // Start a new line
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      touchTap(map, makeTouchEvent(100, 100));
+      touchTap(map, makeTouchEvent(200, 200));
+      touchTap(map, makeTouchEvent(300, 300));
+
       Draw.trash();
+      Draw.trash();
+      Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       touchTap(map, makeTouchEvent(100, 100));
