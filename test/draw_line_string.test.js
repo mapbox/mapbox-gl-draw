@@ -282,10 +282,11 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
+      map.fire('mousemove', makeMouseEvent(5, 5));
       Draw.trash();
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2]]);
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [5, 5]]);
       Draw.trash();
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');

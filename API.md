@@ -29,6 +29,18 @@ userProperties | boolean | If true, user properties will be present and prefixed
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
 styles | Array | An array of style objects. By default draw provides a style for you. To override this see [Styling Draw](#styling-draw) further down.
 
+
+## Keyboard Shortcuts
+
+key | description 
+--- | --- 
+<1> | Point  
+<2> | Line
+<3> | Polygon
+<delete> or <backspace>  | While actively drawing a polygon or line this key will remove the last point.  If it is hit repeatedly it will gradually remove each point until the drawing is removed. When modifying a drawing (direct_select), The user can click on a point, then hit <delete> or <backspace> to delete only that point.
+<esc>  | While actively drawing a polygon, line, or point  this key will remove the entire drawing. 
+<enter> or <return> | Finishes the drawing.
+
 ## Modes
 
 The modes names are available as an enum at `Draw.modes`.

@@ -18,7 +18,11 @@ LineString.prototype.addCoordinate = function(path, lng, lat) {
 
 LineString.prototype.getCoordinate = function(path) {
   const id = parseInt(path, 10);
-  return JSON.parse(JSON.stringify(this.coordinates[id]));
+  const coords = this.coordinates[id];
+  if (coords === undefined) {
+    return undefined;
+  }
+  return JSON.parse(JSON.stringify(coords));
 };
 
 LineString.prototype.removeCoordinate = function(path) {

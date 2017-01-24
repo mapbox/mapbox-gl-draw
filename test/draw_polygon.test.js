@@ -340,10 +340,11 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
       mouseClick(map, makeMouseEvent(4, 4));
+      map.fire('mousemove', makeMouseEvent(5, 5));
       Draw.trash();
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [5, 5], [1, 1]]]);
 
       Draw.trash();
       Draw.trash();

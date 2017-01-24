@@ -94,6 +94,13 @@ module.exports = function(ctx) {
 
     trash() {
       if (currentVertexPosition > 2) {
+        let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
+
+        //a mousemove event has not happened so mimic one
+        if (cursorPosition === undefined) {
+          cursorPosition = line.getCoordinate(`${currentVertexPosition - 1}`);
+          line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
         //remove the last point
         currentVertexPosition--;
         line.removeCoordinate(`${currentVertexPosition}`);

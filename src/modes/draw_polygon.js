@@ -125,7 +125,13 @@ module.exports = function(ctx) {
     },
     trash() {
       if (currentVertexPosition > 2) {
+        let cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition}`);
 
+        //a mousemove event has not happened so mimic one
+        if (cursorPosition === undefined) {
+          cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition - 1}`);
+          polygon.updateCoordinate(`0.${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
         //remove last added coordinate
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);

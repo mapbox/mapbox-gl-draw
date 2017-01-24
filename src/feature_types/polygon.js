@@ -48,7 +48,11 @@ Polygon.prototype.removeCoordinate = function(path) {
 Polygon.prototype.getCoordinate = function(path) {
   const ids = path.split('.').map(x => parseInt(x, 10));
   const ring = this.coordinates[ids[0]];
-  return JSON.parse(JSON.stringify(ring[ids[1]]));
+  const coords = ring[ids[1]];
+  if (coords === undefined) {
+    return undefined;
+  }
+  return JSON.parse(JSON.stringify(coords));
 };
 
 Polygon.prototype.getCoordinates = function() {
