@@ -263,7 +263,7 @@ var ids = Draw.set({type: 'FeatureCollection', features: [{
 
 ### `.trash() -> Draw`
 
-This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
+This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this deletes the last point until it cancels the current process.
 
 This is different from `delete` or `deleteAll` in that it follows rules described by the current mode.
 
