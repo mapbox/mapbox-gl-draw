@@ -85,5 +85,5 @@ To add to CDN add the js and css files from the `dist` folder to [mapbox-gl-plug
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
 
-- http://turfjs.org/docs/
+- http://turfjs.org/docs.html
 - http://toblerity.org/shapely/manual.html
