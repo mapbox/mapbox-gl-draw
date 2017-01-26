@@ -38,7 +38,6 @@ module.exports = function(ctx) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
       });
-      
       this.on('click', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
       this.on('tap', CommonSelectors.true, clickAnywhere);
