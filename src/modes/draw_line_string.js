@@ -51,6 +51,11 @@ module.exports = function(ctx) {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
       }
 
+      function stopDrawingAndRemove() {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+      }
+
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
@@ -79,8 +84,7 @@ module.exports = function(ctx) {
           features: [line.toGeoJSON()]
         });
       } else {
-        ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+        stopDrawingAndRemove();
       }
     },
 
@@ -101,7 +105,7 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      if (currentVertexPosition > 2) {
+      if (currentVertexPosition > 2 ) {
         let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
 
         //a mousemove event has not happened so mimic one
@@ -113,8 +117,7 @@ module.exports = function(ctx) {
         currentVertexPosition--;
         line.removeCoordinate(`${currentVertexPosition}`);
       } else {
-        ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+        stopDrawingAndRemove();
       }
     }
   };

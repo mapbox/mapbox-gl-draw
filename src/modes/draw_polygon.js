@@ -49,6 +49,11 @@ module.exports = function(ctx) {
       function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
       }
+      function stopDrawingAndRemove() {
+        ctx.store.delete([polygon.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+      }
+
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
@@ -78,8 +83,7 @@ module.exports = function(ctx) {
           features: [polygon.toGeoJSON()]
         });
       } else {
-        ctx.store.delete([polygon.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+        stopDrawingAndRemove()
       }
     },
 
@@ -141,8 +145,7 @@ module.exports = function(ctx) {
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);
       } else {
-        ctx.store.delete([polygon.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+        stopDrawingAndRemove();
       }
     }
   };
