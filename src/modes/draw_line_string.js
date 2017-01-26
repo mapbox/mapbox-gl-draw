@@ -20,6 +20,11 @@ module.exports = function(ctx) {
 
   ctx.store.add(line);
 
+  function stopDrawingAndRemove() {
+    ctx.store.delete([line.id], { silent: true });
+    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+  }
+
   return {
     start: function() {
       ctx.store.clearSelected();
@@ -46,14 +51,8 @@ module.exports = function(ctx) {
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
       }
-
       function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-      }
-
-      function stopDrawingAndRemove() {
-        ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
 
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
@@ -105,7 +104,7 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      if (currentVertexPosition > 2 ) {
+      if (currentVertexPosition > 2) {
         let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
 
         //a mousemove event has not happened so mimic one
