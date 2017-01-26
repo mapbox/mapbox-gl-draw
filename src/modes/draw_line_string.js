@@ -22,8 +22,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(line);
 
-  //snap setup
-  const buffer = ctx.options.snapBuffer;
   let snapClickPoint;
 
   return {
@@ -37,7 +35,7 @@ module.exports = function(ctx) {
         let evt = e;
 
         if (evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, buffer, ctx, line.id);
+          evt = snapTo(evt, ctx, line.id);
         }
         snapClickPoint = evt;
         line.updateCoordinate(currentVertexPosition, evt.lngLat.lng, evt.lngLat.lat);

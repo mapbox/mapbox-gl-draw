@@ -6,9 +6,10 @@ const distance = require('@turf/distance');
 
 
 // All are required
-module.exports = function snapTo(evt, buffer, ctx, id) {
+module.exports = function snapTo(evt, ctx, id) {
   if (ctx.map === null) return [];
 
+  const buffer = ctx.options.snapBuffer;
   const box = [
     [evt.point.x - buffer, evt.point.y - buffer],
     [evt.point.x + buffer, evt.point.y + buffer]

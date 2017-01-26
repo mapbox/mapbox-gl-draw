@@ -22,8 +22,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(polygon);
 
-  //snap setup
-  const buffer = ctx.options.snapBuffer;
   let snapClickPoint;
 
   return {
@@ -36,7 +34,7 @@ module.exports = function(ctx) {
         let evt = e;
 
         if (evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, buffer, ctx, polygon.id);
+          evt = snapTo(evt, ctx, polygon.id);
         }
         snapClickPoint = evt;
         polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);

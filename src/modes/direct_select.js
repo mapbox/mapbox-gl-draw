@@ -22,9 +22,6 @@ module.exports = function(ctx, opts) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
-  //snap setup
-  const buffer = ctx.options.snapBuffer;
-
   let dragMoveLocation = opts.startPos || null;
   let dragMoving = false;
   let canDragMove = false;
@@ -144,7 +141,7 @@ module.exports = function(ctx, opts) {
         let evt = e;
 
         if (evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, buffer, ctx, featureId);
+          evt = snapTo(evt, ctx, featureId);
         }
 
         const delta = {
