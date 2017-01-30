@@ -21,11 +21,6 @@ module.exports = function(ctx) {
 
   ctx.store.add(line);
 
-  function stopDrawingAndRemove() {
-    ctx.store.delete([line.id], { silent: true });
-    ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
-  }
-
   return {
     start: function() {
       ctx.store.clearSelected();
@@ -85,7 +80,8 @@ module.exports = function(ctx) {
           features: [line.toGeoJSON()]
         });
       } else {
-        stopDrawingAndRemove();
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
       }
     },
 
@@ -123,7 +119,8 @@ module.exports = function(ctx) {
         currentVertexPosition--;
         line.removeCoordinate(`${currentVertexPosition}`);
       } else {
-        stopDrawingAndRemove();
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       }
     }
   };
