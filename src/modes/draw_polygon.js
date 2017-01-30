@@ -16,6 +16,7 @@ module.exports = function(ctx) {
     }
   });
   let currentVertexPosition = 0;
+  let heardMouseMove = false;
 
   if (ctx._test) ctx._test.polygon = polygon;
 
@@ -37,6 +38,7 @@ module.exports = function(ctx) {
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
       this.on('click', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
@@ -136,15 +138,21 @@ module.exports = function(ctx) {
       if (currentVertexPosition > 2) {
         let cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition}`);
 
-        //a mousemove event has not happened so mimic one
-        if (cursorPosition === undefined) {
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
           cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition - 1}`);
           polygon.updateCoordinate(`0.${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch which has no mousemove
+          polygon.removeCoordinate(`0.${currentVertexPosition}`);
+          currentVertexPosition--;
         }
         //remove last added coordinate
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);
-      } else {
+      }
+      if (currentVertexPosition < 3) {
         stopDrawingAndRemove();
       }
     }

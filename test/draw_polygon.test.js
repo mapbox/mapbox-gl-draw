@@ -686,9 +686,14 @@ test('draw_polygon touch interaction', t => {
       touchTap(map, makeTouchEvent(100, 100));
       touchTap(map, makeTouchEvent(200, 200));
       touchTap(map, makeTouchEvent(300, 300));
+      touchTap(map, makeTouchEvent(400, 400));
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [400, 400], [100, 100]]]);
+
+      Draw.trash();
+      const polygon2 = Draw.getAll().features[0];
+      st.deepEqual(polygon2.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
 
       Draw.trash();
       Draw.trash();

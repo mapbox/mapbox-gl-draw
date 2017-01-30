@@ -15,6 +15,7 @@ module.exports = function(ctx) {
     }
   });
   let currentVertexPosition = 0;
+  let heardMouseMove = false;
 
   if (ctx._test) ctx._test.line = line;
 
@@ -36,6 +37,7 @@ module.exports = function(ctx) {
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
 
       this.on('click', CommonSelectors.true, clickAnywhere);
@@ -107,10 +109,15 @@ module.exports = function(ctx) {
       if (currentVertexPosition > 2) {
         let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
 
-        //a mousemove event has not happened so mimic one
-        if (cursorPosition === undefined) {
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
           cursorPosition = line.getCoordinate(`${currentVertexPosition - 1}`);
           line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch with no mousemove
+          line.removeCoordinate(`${currentVertexPosition}`);
+          currentVertexPosition--;
         }
         //remove the last point
         currentVertexPosition--;

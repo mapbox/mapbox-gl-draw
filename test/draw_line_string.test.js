@@ -567,8 +567,13 @@ test('draw_line_string touch interaction', t => {
       touchTap(map, makeTouchEvent(100, 100));
       touchTap(map, makeTouchEvent(200, 200));
       touchTap(map, makeTouchEvent(300, 300));
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
 
       Draw.trash();
+      const line2 = Draw.getAll().features[0];
+      st.deepEqual(line2.geometry.coordinates, [[100, 100], [200, 200]]);
+
       Draw.trash();
       Draw.trash();
 
