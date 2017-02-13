@@ -140,7 +140,7 @@ module.exports = function(ctx, opts) {
 
         let evt = e;
 
-        if (evt.point && ctx.options.snapTo) {
+        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
           evt = snapTo(evt, ctx, featureId);
         }
 

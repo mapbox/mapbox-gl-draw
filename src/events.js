@@ -87,11 +87,19 @@ module.exports = function(ctx) {
     } else if (event.keyCode === 51 && ctx.options.controls.polygon) {
       changeMode(Constants.modes.DRAW_POLYGON);
     }
+
+    if (event.keyCode === 17) {
+      ctx.snapToOverride = true;
+    }
   };
 
   events.keyup = function(event) {
     if (isKeyModeValid(event.keyCode)) {
       currentMode.keyup(event);
+    }
+
+    if (event.keyCode === 17) {
+      ctx.snapToOverride = false;
     }
   };
 

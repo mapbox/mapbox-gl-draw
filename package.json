@@ -63,20 +63,18 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": "^0.29.0 || ^0.30.0 || ^0.31.0"
+    "mapbox-gl": "^0.27.0 || ^0.28.0 || ^0.29.0"
   },
   "dependencies": {
-    "@turf/distance": "^3.7.3",
-    "@turf/point-on-line": "^3.7.3",
-    "geojson-area": "^0.2.1",
-    "geojson-extent": "^0.3.2",
+    "@mapbox/geojson-area": "^0.2.1",
     "@mapbox/geojson-normalize": "0.0.1",
     "@mapbox/geojsonhint": "^2.0.0",
+    "@turf/meta": "^3.7.3",
+    "cheap-ruler": "^2.4.1",
+    "geojson-extent": "^0.3.2",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.0.0",
-    "turf-meta": "^3.0.12",
-    "turf-point": "^2.0.1",
     "xtend": "^4.0.1"
   }
 }

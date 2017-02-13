@@ -4,7 +4,6 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
-const snapTo = require('../lib/snap_to');
 
 module.exports = function(ctx) {
 
@@ -33,8 +32,8 @@ module.exports = function(ctx) {
       this.on('mousemove', CommonSelectors.true, e => {
         let evt = e;
 
-        if (evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, ctx, polygon.id);
+        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, buffer, ctx, polygon.id);
         }
         snapClickPoint = evt;
         polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
@@ -135,7 +134,6 @@ module.exports = function(ctx) {
     },
     trash() {
       if (currentVertexPosition > 2) {
-
         //remove last added coordinate
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);

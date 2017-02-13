@@ -27,14 +27,13 @@ module.exports = function(ctx) {
   return {
     start: function() {
       ctx.store.clearSelected();
-
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
       this.on('mousemove', CommonSelectors.true, (e) => {
         let evt = e;
 
-        if (evt.point && ctx.options.snapTo) {
+        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
           evt = snapTo(evt, ctx, line.id);
         }
         snapClickPoint = evt;
