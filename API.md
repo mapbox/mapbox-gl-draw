@@ -22,8 +22,10 @@ map.on('load', function() {
 option | values | function
 --- | --- | ---
 keybindings | boolean | Keyboard shortcuts for drawing - default: `true`
+touchEnabled | boolean | If true, enables touch interaction - default: `true`
 boxSelect | boolean | If true, shift + click to features. If false, click + select zooms to area - default: `true`
 clickBuffer | number | On click, include features beyond the coordinates of the click by clickBuffer value all directions - default: `2`
+touchBuffer | number | On touch, include features beyond the coordinates of the touch by touchBuffer value all directions - default: `25`
 displayControlsDefault | boolean | Sets default value for the control keys in the control option - default `true`
 userProperties | boolean | If true, user properties will be present and prefixed with `user_` on the feature objects via styling. - default `false`
 controls | Object | Lets you hide or show individual controls. See `displayControlsDefault` for default. Available options are: `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`.
@@ -33,6 +35,18 @@ snapBuffer | number | On snap, the cursor buffer in pixels - default: `15`
 snapStyles | Array | An array of style ids. By default draw provides a style for you that allows snap to other point/line/polygon features within the draw tool.
 snapOverCircleStyle | Array | A style object. By default draw provides a style for you that defines the snap look for points in other features.
 snapOverLineStyle | Array | A style object. By default draw provides a style for you that defines the snap look for lines in other features.
+
+
+## Keyboard Shortcuts
+
+key | description 
+--- | --- 
+<1> | Point  
+<2> | Line
+<3> | Polygon
+<delete> or <backspace>  | While actively drawing a polygon or line this key will remove the last point.  If it is hit repeatedly it will gradually remove each point until the drawing is removed. When modifying a drawing (direct_select), The user can click on a point, then hit <delete> or <backspace> to delete only that point.
+<esc>  | While actively drawing a polygon, line, or point  this key will remove the entire drawing. 
+<enter> or <return> | Finishes the drawing.
 
 ## Modes
 
@@ -254,7 +268,7 @@ var ids = Draw.set({type: 'FeatureCollection', features: [{
 
 ### `.trash() -> Draw`
 
-This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this cancels the current process.
+This invokes the current modes trash action. For the `simple_select` mode this deletes all active features. For the `direct_select` mode this deletes the active vertices. For the drawing modes, this deletes the last point until it cancels the current process.
 
 This is different from `delete` or `deleteAll` in that it follows rules described by the current mode.
 

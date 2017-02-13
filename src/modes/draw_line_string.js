@@ -17,6 +17,7 @@ module.exports = function(ctx) {
     }
   });
   let currentVertexPosition = 0;
+  let heardMouseMove = false;
 
   if (ctx._test) ctx._test.line = line;
 
@@ -41,8 +42,15 @@ module.exports = function(ctx) {
         if (CommonSelectors.isVertex(evt)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
-      this.on('click', CommonSelectors.true, (e) => {
+
+      this.on('click', CommonSelectors.true, clickAnywhere);
+      this.on('tap', CommonSelectors.true, clickAnywhere);
+      this.on('click', CommonSelectors.isVertex, clickOnVertex);
+      this.on('tap', CommonSelectors.isVertex, clickOnVertex);
+
+      function clickAnywhere(e) {
         const evt = snapClickPoint || e;
         if (currentVertexPosition > 0 && isEventAtCoordinates(evt, line.coordinates[currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
@@ -50,10 +58,11 @@ module.exports = function(ctx) {
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         line.updateCoordinate(currentVertexPosition, evt.lngLat.lng, evt.lngLat.lat);
         currentVertexPosition++;
-      });
-      this.on('click', CommonSelectors.isVertex, () => {
+      }
+      function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
-      });
+      }
+
       this.on('keyup', CommonSelectors.isEscapeKey, () => {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
@@ -105,12 +114,24 @@ module.exports = function(ctx) {
 
     trash() {
       if (currentVertexPosition > 2) {
+        let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
+
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
+          cursorPosition = line.getCoordinate(`${currentVertexPosition - 1}`);
+          line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch with no mousemove
+          line.removeCoordinate(`${currentVertexPosition}`);
+          currentVertexPosition--;
+        }
         //remove the last point
         currentVertexPosition--;
         line.removeCoordinate(`${currentVertexPosition}`);
       } else {
         ctx.store.delete([line.id], { silent: true });
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       }
     }
   };

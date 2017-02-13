@@ -37,6 +37,7 @@ module.exports = function(ctx) {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POINT);
       this.on('click', CommonSelectors.true, handleClick);
+      this.on('tap', CommonSelectors.true, handleClick);
       this.on('keyup', CommonSelectors.isEscapeKey, stopDrawingAndRemove);
       this.on('keyup', CommonSelectors.isEnterKey, stopDrawingAndRemove);
       ctx.events.actionable({

@@ -21,7 +21,7 @@ module.exports = function(ctx, api) {
   api.modes = Constants.modes;
 
   api.getFeatureIdsAt = function(point) {
-    const features = featuresAt({ point }, null, ctx);
+    const features = featuresAt.click({ point }, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 

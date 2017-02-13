@@ -2,8 +2,10 @@ import test from 'tape';
 import xtend from 'xtend';
 import MapboxDraw from '../';
 import mouseClick from './utils/mouse_click';
+import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawLineStringMode from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
@@ -54,12 +56,14 @@ test('draw_line_string start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['line_string'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 7, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.isVertex));
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.disable.callCount, 1);
@@ -211,7 +215,7 @@ test('draw_line_string render inactive feature', t => {
   t.end();
 });
 
-test('draw_line_string interaction', t => {
+test('draw_line_string mouse interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -282,10 +286,11 @@ test('draw_line_string interaction', t => {
       mouseClick(map, makeMouseEvent(1, 1));
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
+      map.fire('mousemove', makeMouseEvent(5, 5));
       Draw.trash();
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2]]);
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [5, 5]]);
       Draw.trash();
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -485,3 +490,103 @@ test('draw_line_string interaction', t => {
     t.end();
   });
 });
+
+test('draw_line_string touch interaction', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+
+  map.on('load', () => {
+    // The following sub-tests share state ...
+
+    Draw.changeMode('draw_line_string');
+    t.test('first tap', st => {
+      touchTap(map, makeTouchEvent(100, 200));
+
+      const { features } = Draw.getAll();
+      st.equal(features.length, 1, 'line created');
+      const line = Draw.getAll().features[0];
+      st.equal(line.geometry.type, 'LineString');
+
+      st.deepEqual(line.geometry.coordinates, [[100, 200]], 'starting coordinate added');
+
+      st.end();
+    });
+
+    t.test('tap to add another vertex', st => {
+      touchTap(map, makeTouchEvent(200, 400));
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[100, 200], [200, 400]], 'last coordinate replaced');
+      st.end();
+    });
+
+    t.test('add more points then tap on the last vertex to finish', st => {
+      touchTap(map, makeTouchEvent(400, 500));
+      touchTap(map, makeTouchEvent(300, 500));
+      touchTap(map, makeTouchEvent(200, 500));
+      touchTap(map, makeTouchEvent(200, 500));
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates,
+        [[100, 200], [200, 400], [400, 500], [300, 500], [200, 500]],
+        'all coordinates in place');
+
+      touchTap(map, makeTouchEvent(700, 700));
+      st.deepEqual(line.geometry.coordinates,
+        [[100, 200], [200, 400], [400, 500], [300, 500], [200, 500]],
+        'since we exited draw_line_string mode, another tap does not add a coordinate');
+
+      st.end();
+    });
+
+    t.test('start a line but trash it before completion', st => {
+      // Start a new line
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      touchTap(map, makeTouchEvent(100, 100));
+      touchTap(map, makeTouchEvent(200, 200));
+      touchTap(map, makeTouchEvent(300, 300));
+
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
+
+      container.dispatchEvent(escapeEvent);
+      st.equal(Draw.getAll().features.length, 0, 'no feature added');
+
+      touchTap(map, makeTouchEvent(100, 100));
+      st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
+
+      st.end();
+    });
+
+    t.test('start a line and then trash each point before completion until the feature is totally removed', st => {
+      // Start a new line
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      touchTap(map, makeTouchEvent(100, 100));
+      touchTap(map, makeTouchEvent(200, 200));
+      touchTap(map, makeTouchEvent(300, 300));
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
+
+      Draw.trash();
+      const line2 = Draw.getAll().features[0];
+      st.deepEqual(line2.geometry.coordinates, [[100, 100], [200, 200]]);
+
+      Draw.trash();
+      Draw.trash();
+
+      st.equal(Draw.getAll().features.length, 0, 'no feature added');
+
+      touchTap(map, makeTouchEvent(100, 100));
+      st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
+
+      st.end();
+    });
+
+    document.body.removeChild(container);
+    t.end();
+  });
+});
+

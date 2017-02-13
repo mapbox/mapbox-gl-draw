@@ -4,8 +4,10 @@ const Constants = require('./constants');
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
+  touchEnabled: true,
   clickBuffer: 2,
   snapBuffer: 15,
+  touchBuffer: 25,
   boxSelect: true,
   snapTo: true,
   displayControlsDefault: true,

@@ -8,8 +8,10 @@ test('Options test', t => {
     const Draw = new MapboxDraw();
     const defaultOptions = {
       defaultMode: 'simple_select',
+      touchEnabled: true,
       keybindings: true,
       clickBuffer: 2,
+      touchBuffer: 25,
       displayControlsDefault: true,
       boxSelect: true,
       userProperties: false,
@@ -33,7 +35,9 @@ test('Options test', t => {
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
+      touchEnabled: true,
       clickBuffer: 10,
+      touchBuffer: 25,
       boxSelect: true,
       displayControlsDefault: true,
       styles: Draw.options.styles,
@@ -57,7 +61,9 @@ test('Options test', t => {
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
+      touchEnabled: true,
       clickBuffer: 2,
+      touchBuffer: 25,
       boxSelect: true,
       displayControlsDefault: false,
       userProperties: false,
@@ -80,8 +86,10 @@ test('Options test', t => {
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
+      touchEnabled: true,
       displayControlsDefault: false,
       clickBuffer: 2,
+      touchBuffer: 25,
       boxSelect: true,
       userProperties: false,
       styles: Draw.options.styles,
@@ -104,7 +112,9 @@ test('Options test', t => {
     const defaultOptions = {
       defaultMode: 'simple_select',
       keybindings: true,
+      touchEnabled: true,
       displayControlsDefault: true,
+      touchBuffer: 25,
       clickBuffer: 2,
       userProperties: false,
       boxSelect: true,
@@ -120,6 +130,32 @@ test('Options test', t => {
     };
 
     t.deepEquals(defaultOptions, Draw.options);
+    t.end();
+  });
+
+  t.test('disable touch interaction', t => {
+    const Draw = new MapboxDraw({ touchEnabled: false });
+    const defaultOptions = {
+      defaultMode: 'simple_select',
+      touchEnabled: false,
+      keybindings: true,
+      clickBuffer: 2,
+      touchBuffer: 25,
+      displayControlsDefault: true,
+      userProperties: false,
+      boxSelect: true,
+      styles: Draw.options.styles,
+      controls: {
+        point: true,
+        line_string: true,
+        polygon: true,
+        trash: true,
+        combine_features: true,
+        uncombine_features: true
+      }
+    };
+    t.deepEquals(defaultOptions, Draw.options);
+    t.deepEquals(styleWithSourcesFixture, Draw.options.styles);
     t.end();
   });
 

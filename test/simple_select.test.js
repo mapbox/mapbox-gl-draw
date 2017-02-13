@@ -4,6 +4,7 @@ import MapboxDraw from '../';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 import createSyntheticEvent from 'synthetic-dom-events';
@@ -218,6 +219,29 @@ test('simple_select', t => {
     });
   });
 
+  t.test('simple_select - tap on a deselected feature', t => {
+    const id = Draw.add(getGeoJSON('polygon'))[0];
+    Draw.changeMode('simple_select');
+
+    afterNextRender(() => {
+      map.fire.reset();
+      map.doubleClickZoom.disable.reset();
+      map.fire('touchstart', makeTouchEvent(50, 30));
+      map.fire('touchend', makeTouchEvent(50, 30));
+
+      afterNextRender(() => {
+        let args = getFireArgs();
+        args = args.filter(arg => arg[0] === 'draw.selectionchange');
+        t.equal(args.length, 1, 'should have one and only one selectionchange event');
+        if (args.length > 0) {
+          t.equal(args[0][1].features.length, 1, 'should have only one feature selected');
+          t.equal(args[0][1].features[0].id, id, 'should be the feature we expect to be selected');
+        }
+        cleanUp(t.end);
+      });
+    });
+  });
+
   t.test('simple_select - click on a selected feature with shift down', t => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
@@ -301,6 +325,30 @@ test('simple_select', t => {
 
       afterNextRender(() => {
         t.equal(map.doubleClickZoom.enable.callCount, 1, 'double click zoom has been enabled');
+        let args = getFireArgs();
+        args = args.filter(arg => arg[0] === 'draw.modechange');
+        t.equal(args.length, 1, 'should have one and only one modechange event');
+        if (args.length > 0) {
+          t.equal(args[0][1].mode, 'direct_select', 'should change to direct select');
+        }
+        cleanUp(t.end);
+      });
+    });
+  });
+
+  t.test('simple_select - tap on a vertex to enter direct_select', t => {
+    const id = Draw.add(getGeoJSON('polygon'))[0];
+    Draw.changeMode('simple_select', { featureIds: [id] });
+
+    const tapPosition = getGeoJSON('polygon').geometry.coordinates[0][0];
+
+    afterNextRender(() => {
+      map.doubleClickZoom.enable.reset();
+      map.fire.reset();
+      map.fire('touchstart', makeTouchEvent(tapPosition[0], tapPosition[1]));
+      map.fire('touchend', makeTouchEvent(tapPosition[0], tapPosition[1]));
+
+      afterNextRender(() => {
         let args = getFireArgs();
         args = args.filter(arg => arg[0] === 'draw.modechange');
         t.equal(args.length, 1, 'should have one and only one modechange event');

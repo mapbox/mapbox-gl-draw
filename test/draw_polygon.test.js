@@ -3,7 +3,9 @@ import xtend from 'xtend';
 import MapboxDraw from '../';
 import createMap from './utils/create_map';
 import mouseClick from './utils/mouse_click';
+import touchTap from './utils/touch_tap';
 import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
 import CommonSelectors from '../src/lib/common_selectors';
 import drawPolygonMode from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
@@ -53,12 +55,14 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 5, 'this.on called');
+  t.equal(lifecycleContext.on.callCount, 7, 'this.on called');
   t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
   t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
   t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.isVertex));
+  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
 
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.disable.callCount, 1);
@@ -268,7 +272,7 @@ test('draw_polygon render inactive feature', t => {
   t.end();
 });
 
-test('draw_polygon interaction', t => {
+test('draw_polygon mouse interaction', t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -340,10 +344,11 @@ test('draw_polygon interaction', t => {
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
       mouseClick(map, makeMouseEvent(4, 4));
+      map.fire('mousemove', makeMouseEvent(5, 5));
       Draw.trash();
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [5, 5], [1, 1]]]);
 
       Draw.trash();
       Draw.trash();
@@ -617,6 +622,88 @@ test('draw_polygon interaction', t => {
         Draw.deleteAll();
         st.end();
       });
+    });
+
+    document.body.removeChild(container);
+    t.end();
+  });
+});
+
+
+test('draw_polygon touch interaction', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+
+  map.on('load', () => {
+    // The following sub-tests share state ...
+
+    Draw.changeMode('draw_polygon');
+    t.test('first tap', st => {
+      touchTap(map, makeTouchEvent(100, 200));
+
+      const { features } = Draw.getAll();
+      st.equal(features.length, 1, 'polygon created');
+      const polygon = Draw.getAll().features[0];
+      st.equal(polygon.geometry.type, 'Polygon');
+
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [100, 200]]], 'starting coordinate added');
+
+      st.end();
+    });
+
+    t.test('tap to add another vertex', st => {
+      touchTap(map, makeTouchEvent(135, 135));
+      const polygon = Draw.getAll().features[0];
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [135, 135], [100, 200]]], 'middle coordinate replaced');
+      st.end();
+    });
+
+    t.test('add more points then tap on the last vertex to finish', st => {
+      touchTap(map, makeTouchEvent(400, 400));
+      touchTap(map, makeTouchEvent(500, 500));
+      touchTap(map, makeTouchEvent(550, 550));
+      touchTap(map, makeTouchEvent(550, 550));
+      const polygon = Draw.getAll().features[0];
+      st.deepEqual(polygon.geometry.coordinates,
+        [[[100, 200], [135, 135], [400, 400], [500, 500], [550, 550], [100, 200]]],
+        'all coordinates in place');
+
+      touchTap(map, makeTouchEvent(400, 400));
+      st.deepEqual(polygon.geometry.coordinates,
+        [[[100, 200], [135, 135], [400, 400], [500, 500], [550, 550], [100, 200]]],
+        'since we exited draw_polygon mode, another tap does not add a coordinate');
+
+      st.end();
+    });
+
+    t.test('start a polygon but trash it before completion', st => {
+      // Start a new polygon
+      Draw.deleteAll();
+      Draw.changeMode('draw_polygon');
+      touchTap(map, makeTouchEvent(100, 100));
+      touchTap(map, makeTouchEvent(200, 200));
+      touchTap(map, makeTouchEvent(300, 300));
+      touchTap(map, makeTouchEvent(400, 400));
+
+      const polygon = Draw.getAll().features[0];
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [400, 400], [100, 100]]]);
+
+      Draw.trash();
+      const polygon2 = Draw.getAll().features[0];
+      st.deepEqual(polygon2.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
+
+      Draw.trash();
+      Draw.trash();
+      Draw.trash();
+      st.equal(Draw.getAll().features.length, 0, 'no feature added');
+
+      touchTap(map, makeTouchEvent(1, 1));
+      st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
+
+      st.end();
     });
 
     document.body.removeChild(container);

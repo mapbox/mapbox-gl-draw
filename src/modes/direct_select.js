@@ -132,8 +132,11 @@ module.exports = function(ctx, opts) {
       this.on('mouseout', () => dragMoving, fireUpdate);
 
       this.on('mousedown', isVertex, onVertex);
+      this.on('touchstart', isVertex, onVertex);
       this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
+      this.on('touchstart', CommonSelectors.isActiveFeature, onFeature);
       this.on('mousedown', isMidpoint, onMidpoint);
+      this.on('touchstart', isMidpoint, onMidpoint);
       this.on('drag', () => canDragMove, (e) => {
         dragMoving = true;
         e.originalEvent.stopPropagation();
@@ -160,17 +163,30 @@ module.exports = function(ctx, opts) {
         }
         stopDragging();
       });
-      this.on('click', noTarget, () => {
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      this.on('touchend', CommonSelectors.true, () => {
+        if (dragMoving) {
+          fireUpdate();
+        }
+        stopDragging();
       });
-      this.on('click', isInactiveFeature, () => {
+      this.on('click', noTarget, clickNoTarget);
+      this.on('tap', noTarget, clickNoTarget);
+      this.on('click', isInactiveFeature, clickInactive);
+      this.on('tap', isInactiveFeature, clickInactive);
+      this.on('click', CommonSelectors.isActiveFeature, clickActiveFeature);
+      this.on('tap', CommonSelectors.isActiveFeature, clickActiveFeature);
+
+      function clickNoTarget() {
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
-      });
-      this.on('click', CommonSelectors.isActiveFeature, () => {
+      }
+      function clickInactive() {
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      }
+      function clickActiveFeature() {
         selectedCoordPaths = [];
         ctx.store.clearSelectedCoordinates();
         feature.changed();
-      });
+      }
     },
     stop: function() {
       doubleClickZoom.enable(ctx);
