@@ -58,8 +58,8 @@ module.exports = function snapTo(evt, ctx, id) {
 
   //snapto line
   uniqueFeatures.forEach((feature) => {
-    let type = feature.geometry.type,
-      dist, coords;
+    let type = feature.geometry.type;
+    let coords;
 
     //change a polygon to a linestring
     if (type === "Polygon") {
@@ -76,7 +76,7 @@ module.exports = function snapTo(evt, ctx, id) {
     } else if (type === "Point") {
       coords = feature.geometry.coordinates;
     }
-    dist = ruler.distance(coords, evtCoords);
+    const dist = ruler.distance(coords, evtCoords);
 
     if ((dist !== null) && (closestDistance === null || dist < closestDistance)) {
       feature.distance = dist;
