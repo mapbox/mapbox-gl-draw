@@ -27,8 +27,6 @@ module.exports = function snapTo(evt, ctx, id) {
   const snapStyles = ctx.options.snapStyles;
   const snapFilterOff = ['all', ["==", "id", ""]];
 
-  const ruler = cheapRuler(evt.lngLat.lng);
-
   if (ctx.map.getLayer(snapOverLineStyleId) === undefined) {
     ctx.map.addLayer(ctx.options.snapOverLineStyle);
   }
@@ -70,6 +68,9 @@ module.exports = function snapTo(evt, ctx, id) {
       type = feature.geometry.type;
     }
 
+    //z is max map zoom of 20
+    const ruler = cheapRuler.fromTile(feature._vectorTileFeature._y, 20);
+
     if (type === "LineString") {
       coords = ruler.pointOnLine(feature.geometry.coordinates, evtCoords).point;
     } else if (type === "Point") {
@@ -100,6 +101,7 @@ module.exports = function snapTo(evt, ctx, id) {
     evt.lngLat.lng = closestCoord[0];
     evt.lngLat.lat = closestCoord[1];
     evt.point = ctx.map.project(closestCoord);
+    evt.snap = true;
 
     const circleFilterOn = ['all',
       ['any', ["==", "$type", "LineString"], ['==', '$type', 'Polygon'], ['==', '$type', 'Point']],

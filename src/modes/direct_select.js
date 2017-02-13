@@ -106,9 +106,13 @@ module.exports = function(ctx, opts) {
     const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
     for (let i = 0; i < selectedCoords.length; i++) {
       const coord = selectedCoords[i];
-      feature.updateCoordinate(selectedCoordPaths[i],
-      coord[0] + constrainedDelta.lng,
-      coord[1] + constrainedDelta.lat);
+      let lng = coord[0] + constrainedDelta.lng;
+      let lat = coord[1] + constrainedDelta.lat;
+      if (e.snap !== undefined) {
+        lng = e.lngLat.lng;
+        lat = e.lngLat.lat;
+      }
+      feature.updateCoordinate(selectedCoordPaths[i], lng, lat);
     }
   };
 
@@ -130,7 +134,6 @@ module.exports = function(ctx, opts) {
 
       // As soon as you mouse leaves the canvas, update the feature
       this.on('mouseout', () => dragMoving, fireUpdate);
-
       this.on('mousedown', isVertex, onVertex);
       this.on('touchstart', isVertex, onVertex);
       this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
