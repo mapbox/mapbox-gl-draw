@@ -30,7 +30,7 @@ mapbox.Draw({
       'filter': ['all',
         ['==', '$type', 'Point'],
         ['==', 'meta', 'feature'],
-        ['==', 'active', 'true']],
+        ['==', 'active', 'false']],
       'paint': {
         'circle-radius': 5,
         'circle-color': '#000088'
