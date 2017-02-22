@@ -14,5 +14,6 @@ deploy:
   local_dir: dist
   upload-dir: plugins/mapbox-gl-draw/$TRAVIS_TAG
   skip_cleanup: true
+  acl: public_read
   on:
     tags: true
