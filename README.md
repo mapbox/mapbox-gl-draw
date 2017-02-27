@@ -79,7 +79,7 @@ git push
 npm publish
 ```
 
-To add to CDN add the js and css files from the `dist` folder to [mapbox-gl-plugins](https://github.com/mapbox/mapbox-gl-plugins/tree/master/plugins/mapbox-gl-draw).
+Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/mb-pages/docs/_posts/examples/3400-01-25-mapbox-gl-draw.html).
 
 ### Naming actions
 
