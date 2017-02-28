@@ -109,9 +109,10 @@ Example with a specified feature id:
 
 ```js
 var feature = {
+  id: 'unique-id',
   type: 'Feature',
   properties: {},
-  geometry: { type: 'Point', coordinates: [0, 0], id: 'unique-id' }
+  geometry: { type: 'Point', coordinates: [0, 0] }
 };
 var featureIds = draw.add(feature);
 console.log(featureIds)
