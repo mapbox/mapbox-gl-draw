@@ -100,6 +100,9 @@ module.exports = function(ctx) {
 
       geojson.properties.meta = Constants.meta.FEATURE;
 
+      // if we're rendering it; mark it as selected
+      ctx.store.setSelected(polygon.id);
+
       if (coordinateCount > 4) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
