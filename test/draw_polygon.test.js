@@ -351,6 +351,13 @@ test('draw_polygon mouse interaction', t => {
       st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [5, 5], [1, 1]]]);
 
       Draw.trash();
+      const polygon1 = Draw.getAll().features[0];
+      st.deepEqual(polygon1.geometry.coordinates, [[[1, 1], [2, 2], [5, 5], [1, 1]]]);
+
+      Draw.trash();
+      const polygon2 = Draw.getAll().features[0];
+      st.deepEqual(polygon2.geometry.coordinates, [[[1, 1], [5, 5], [1, 1]]]);
+
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
@@ -696,7 +703,13 @@ test('draw_polygon touch interaction', t => {
       st.deepEqual(polygon2.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
 
       Draw.trash();
+      const polygon3 = Draw.getAll().features[0];
+      st.deepEqual(polygon3.geometry.coordinates, [[[100, 100], [200, 200], [100, 100]]]);
+
       Draw.trash();
+      const polygon4 = Draw.getAll().features[0];
+      st.deepEqual(polygon4.geometry.coordinates, [[[100, 100], [100, 100]]]);
+
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 

@@ -102,7 +102,7 @@ module.exports = function(ctx) {
     },
 
     trash() {
-      if (currentVertexPosition > 2) {
+      if (currentVertexPosition > 1) {
         let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
 
         if (cursorPosition === undefined && heardMouseMove === true) {

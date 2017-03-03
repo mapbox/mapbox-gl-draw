@@ -40,7 +40,7 @@ Polygon.prototype.removeCoordinate = function(path) {
   if (ring) {
     ring.splice(ids[1], 1);
     if (ring.length < 3) {
-      this.coordinates.splice(ids[0], 1);
+      this.coordinates.splice(ids[1], 0);
     }
   }
 };

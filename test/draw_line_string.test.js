@@ -293,6 +293,10 @@ test('draw_line_string mouse interaction', t => {
       st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [5, 5]]);
       Draw.trash();
 
+      const line2 = Draw.getAll().features[0];
+      st.deepEqual(line2.geometry.coordinates, [[1, 1], [5, 5]]);
+      Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       mouseClick(map, makeMouseEvent(1, 1));
@@ -575,6 +579,8 @@ test('draw_line_string touch interaction', t => {
       st.deepEqual(line2.geometry.coordinates, [[100, 100], [200, 200]]);
 
       Draw.trash();
+      const line3 = Draw.getAll().features[0];
+      st.deepEqual(line3.geometry.coordinates, [[100, 100]]);
       Draw.trash();
 
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
