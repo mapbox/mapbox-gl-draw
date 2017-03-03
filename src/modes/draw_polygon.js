@@ -141,7 +141,7 @@ module.exports = function(ctx) {
       });
     },
     trash() {
-      if (currentVertexPosition > 2) {
+      if (currentVertexPosition > 1) {
         let cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition}`);
 
         if (cursorPosition === undefined && heardMouseMove === true) {
@@ -157,8 +157,7 @@ module.exports = function(ctx) {
         //remove last added coordinate
         currentVertexPosition--;
         polygon.removeCoordinate(`0.${currentVertexPosition}`);
-      }
-      if (currentVertexPosition < 3) {
+      } else {
         ctx.store.delete([polygon.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
       }

@@ -79,11 +79,11 @@ git push
 npm publish
 ```
 
-To add to CDN add the js and css files from the `dist` folder to [mapbox-gl-plugins](https://github.com/mapbox/mapbox-gl-plugins/tree/master/plugins/mapbox-gl-draw).
+Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/mb-pages/docs/_posts/examples/3400-01-25-mapbox-gl-draw.html).
 
 ### Naming actions
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
 
-- http://turfjs.org/docs/
+- http://turfjs.org/docs.html
 - http://toblerity.org/shapely/manual.html
