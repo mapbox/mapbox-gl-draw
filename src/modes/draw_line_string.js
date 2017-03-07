@@ -5,20 +5,35 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
 
-module.exports = function(ctx) {
-  const line = new LineString(ctx, {
-    type: Constants.geojsonTypes.FEATURE,
-    properties: {},
-    geometry: {
-      type: Constants.geojsonTypes.LINE_STRING,
-      coordinates: []
+module.exports = function(ctx, opts) {
+  const featureId = opts.featureId;
+
+  let line, currentVertexPosition;
+  if (featureId) {
+    line = ctx.store.get(featureId);
+    if (!line) {
+      throw new Error('Could not find a feature with the provided featureId');
     }
-  });
-  let currentVertexPosition = 0;
+    // const from = opts.from;
+    // if (!from) {
+    //   throw new Error('Please use the `from` property to indicate which coordinate to continue the line from');
+    // }
+    currentVertexPosition = 0 //line.coordinates.length;
+  } else {
+    line = new LineString(ctx, {
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.LINE_STRING,
+        coordinates: []
+      }
+    });
+    currentVertexPosition = 0;
 
-  if (ctx._test) ctx._test.line = line;
+    if (ctx._test) ctx._test.line = line;
 
-  ctx.store.add(line);
+    ctx.store.add(line);
+  }
 
   return {
     start: function() {
