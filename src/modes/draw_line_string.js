@@ -14,11 +14,19 @@ module.exports = function(ctx, opts) {
     if (!line) {
       throw new Error('Could not find a feature with the provided featureId');
     }
-    // const from = opts.from;
-    // if (!from) {
-    //   throw new Error('Please use the `from` property to indicate which coordinate to continue the line from');
-    // }
-    currentVertexPosition = 0 //line.coordinates.length;
+    const from = opts.from;
+    if (!from) {
+      throw new Error('Please use the `from` property to indicate which coordinate to continue the line from');
+    }
+    if (from === 'end') {
+      currentVertexPosition = line.coordinates.length;
+    } else if (from === 'start') {
+      line.coordinates.reverse();
+      currentVertexPosition = line.coordinates.length;
+    } else {
+      throw new Error('`from` should be either \'start\' or \'end\'');
+    }
+
   } else {
     line = new LineString(ctx, {
       type: Constants.geojsonTypes.FEATURE,
