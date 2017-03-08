@@ -6,6 +6,7 @@ const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
 
 module.exports = function(ctx, opts) {
+  opts = opts || {};
   const featureId = opts.featureId;
 
   let line, currentVertexPosition;
