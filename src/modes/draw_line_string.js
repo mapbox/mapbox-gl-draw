@@ -93,6 +93,9 @@ module.exports = function(ctx) {
       if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
 
+      // if we're rendering it; mark it as selected
+      ctx.store.setSelected(line.id);
+
       if (geojson.geometry.coordinates.length >= 3) {
         callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length - 2], `${geojson.geometry.coordinates.length - 2}`, false));
       }

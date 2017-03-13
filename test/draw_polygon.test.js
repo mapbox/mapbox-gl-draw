@@ -699,3 +699,25 @@ test('draw_polygon touch interaction', t => {
     t.end();
   });
 });
+
+test('draw_polygon is selected while in progress', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+  const afterNextRender = setupAfterNextRender(map);
+
+  map.on('load', () => {
+    Draw.changeMode('draw_polygon');
+    mouseClick(map, makeMouseEvent(1, 1));
+    mouseClick(map, makeMouseEvent(2, 2));
+    mouseClick(map, makeMouseEvent(3, 3));
+    afterNextRender(() => {
+      t.equal(Draw.getSelected().features.length, 1, 'is selected');
+      Draw.changeMode('simple_select');
+      t.equal(Draw.getSelected().features.length, 0, 'no longer selected');
+    });
+  });
+  t.end();
+});

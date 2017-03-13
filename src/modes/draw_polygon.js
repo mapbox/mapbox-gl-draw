@@ -111,6 +111,8 @@ module.exports = function(ctx) {
       // If we have more than two positions (plus the closer),
       // render the Polygon
       if (coordinateCount > 3) {
+        // if we're rendering it; mark it as selected
+        ctx.store.setSelected(polygon.id);
         return callback(geojson);
       }
 

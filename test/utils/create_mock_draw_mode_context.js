@@ -15,7 +15,8 @@ export default function createMockDrawModeContext() {
       clearSelected: spy(),
       get: function(id) {
         return _store[id];
-      }
+      },
+      setSelected: spy()
     },
     events: {
       changeMode: spy(),
