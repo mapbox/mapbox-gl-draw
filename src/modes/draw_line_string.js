@@ -22,9 +22,13 @@ module.exports = function(ctx, opts) {
     }
     if (from === 'end') {
       currentVertexPosition = line.coordinates.length;
+      // add one new coordinate to continue from
+      line.addCoordinate(currentVertexPosition, ...line.coordinates[currentVertexPosition - 1]);
     } else if (from === 'start') {
       direction = 'backwards';
       currentVertexPosition = 0;
+      // add one new coordinate to continue from
+      line.addCoordinate(currentVertexPosition, ...line.coordinates[currentVertexPosition]);
     } else {
       throw new Error('`from` should be either \'start\' or \'end\'');
     }
@@ -126,8 +130,8 @@ module.exports = function(ctx, opts) {
       if (geojson.geometry.coordinates.length >= 3) {
         callback(createVertex(
           line.id,
-          geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 2],
-          `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 2}`,
+          geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
+          `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1}`,
           false
         ));
       }
