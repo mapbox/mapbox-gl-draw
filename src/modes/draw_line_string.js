@@ -10,6 +10,7 @@ module.exports = function(ctx, opts) {
   const featureId = opts.featureId;
 
   let line, currentVertexPosition;
+  let direction = 'forward';
   if (featureId) {
     line = ctx.store.get(featureId);
     if (!line) {
@@ -22,12 +23,11 @@ module.exports = function(ctx, opts) {
     if (from === 'end') {
       currentVertexPosition = line.coordinates.length;
     } else if (from === 'start') {
-      line.coordinates.reverse();
-      currentVertexPosition = line.coordinates.length;
+      direction = 'backwards';
+      currentVertexPosition = 0;
     } else {
       throw new Error('`from` should be either \'start\' or \'end\'');
     }
-
   } else {
     line = new LineString(ctx, {
       type: Constants.geojsonTypes.FEATURE,
@@ -50,6 +50,7 @@ module.exports = function(ctx, opts) {
       doubleClickZoom.disable(ctx);
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.LINE);
+
       this.on('mousemove', CommonSelectors.true, (e) => {
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (CommonSelectors.isVertex(e)) {
@@ -63,12 +64,17 @@ module.exports = function(ctx, opts) {
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
       function clickAnywhere(e) {
-        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1])) {
+        if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]) ||
+            direction === 'backwards' && isEventAtCoordinates(e, line.coordinates[currentVertexPosition + 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-        currentVertexPosition++;
+        if (direction === 'forward') {
+          line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+          currentVertexPosition++;
+        } else {
+          line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
+        }
       }
 
       function clickOnVertex() {
@@ -118,7 +124,12 @@ module.exports = function(ctx, opts) {
       geojson.properties.meta = Constants.meta.FEATURE;
 
       if (geojson.geometry.coordinates.length >= 3) {
-        callback(createVertex(line.id, geojson.geometry.coordinates[geojson.geometry.coordinates.length - 2], `${geojson.geometry.coordinates.length - 2}`, false));
+        callback(createVertex(
+          line.id,
+          geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 2],
+          `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 2}`,
+          false
+        ));
       }
 
       callback(geojson);
