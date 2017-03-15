@@ -17,20 +17,21 @@ module.exports = function(ctx, opts) {
       throw new Error('Could not find a feature with the provided featureId');
     }
     const from = opts.from;
-    if (!from) {
+    if (!from || !Array.isArray(from)) {
       throw new Error('Please use the `from` property to indicate which coordinate to continue the line from');
     }
-    if (from === 'end') {
-      currentVertexPosition = line.coordinates.length;
+    const lastCoord = line.coordinates.length - 1;
+    if (line.coordinates[lastCoord][0] === from[0] && line.coordinates[lastCoord][1] === from[1]) {
+      currentVertexPosition = lastCoord + 1;
       // add one new coordinate to continue from
-      line.addCoordinate(currentVertexPosition, ...line.coordinates[currentVertexPosition - 1]);
-    } else if (from === 'start') {
+      line.addCoordinate(currentVertexPosition, ...line.coordinates[lastCoord]);
+    } else if (line.coordinates[0][0] === from[0] && line.coordinates[0][1] === from[1]) {
       direction = 'backwards';
       currentVertexPosition = 0;
       // add one new coordinate to continue from
-      line.addCoordinate(currentVertexPosition, ...line.coordinates[currentVertexPosition]);
+      line.addCoordinate(currentVertexPosition, ...line.coordinates[0]);
     } else {
-      throw new Error('`from` should be either \'start\' or \'end\'');
+      throw new Error('`from` should match the coordinate at either the start or the end of the provided LineString');
     }
   } else {
     line = new LineString(ctx, {
