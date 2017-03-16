@@ -324,7 +324,7 @@ Changes Draw to another mode. Returns the draw instance for chaining.
 
 The `mode` argument must be one of the mode names described above and enumerated in `Draw.modes`.
 
-`simple_select` and `direct_select` modes accept an `options` object.
+`simple_select`, `direct_select`, and `draw_line_string` modes accept an `options` object.
 
 ```js
 // `simple_select` options
@@ -341,6 +341,15 @@ The `mode` argument must be one of the mode names described above and enumerated
   featureId: string
 }
 ```
+
+```js
+// `draw_line_string` options
+{
+  // The id of the LineString to continue drawing
+  featureId: string,
+  // The point to continue drawing from
+  from: Feature<Point>|Point|Array<number>
+}
 
 ---
 
