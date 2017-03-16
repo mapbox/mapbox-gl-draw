@@ -16,9 +16,15 @@ module.exports = function(ctx, opts) {
     if (!line) {
       throw new Error('Could not find a feature with the provided featureId');
     }
-    const from = opts.from;
+    let from = opts.from;
+    if (from.type === 'Feature' && from.geometry && from.geometry.type === 'Point') {
+      from = from.geometry;
+    }
+    if (from.type === 'Point' && from.coordinates && from.coordinates.length === 1) {
+      from = from.coordinates;
+    }
     if (!from || !Array.isArray(from)) {
-      throw new Error('Please use the `from` property to indicate which coordinate to continue the line from');
+      throw new Error('Please use the `from` property to indicate which point to continue the line from');
     }
     const lastCoord = line.coordinates.length - 1;
     if (line.coordinates[lastCoord][0] === from[0] && line.coordinates[lastCoord][1] === from[1]) {
@@ -31,7 +37,7 @@ module.exports = function(ctx, opts) {
       // add one new coordinate to continue from
       line.addCoordinate(currentVertexPosition, ...line.coordinates[0]);
     } else {
-      throw new Error('`from` should match the coordinate at either the start or the end of the provided LineString');
+      throw new Error('`from` should match the point at either the start or the end of the provided LineString');
     }
   } else {
     line = new LineString(ctx, {
