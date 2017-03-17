@@ -562,3 +562,46 @@ test('draw_line_string touch interaction', t => {
   });
 });
 
+test('draw_line_string continue LineString', t => {
+  const context = createMockDrawModeContext();
+  drawLineStringMode(context);
+
+  const coordinates = [[0, 0], [5, 5], [10, 10]];
+  const geojson = {
+    type: 'Feature',
+    id: 1,
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: coordinates
+    }
+  };
+  const line = new LineString(context, geojson);
+  context.store.add(line);
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 2 }),
+    /featureId/,
+    'wrong feature id'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1 }),
+    /from.*property/,
+    'no "from" prop'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: '[0, 0]' }),
+    /from.*property/,
+    'incorrect from prop'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: [-1, -1] }),
+    /start or the end/,
+    'not on line'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: [5, 5] }),
+    /start or the end/,
+    'not at line endpoint'
+  );
+  t.end();
+});

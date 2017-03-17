@@ -17,10 +17,10 @@ module.exports = function(ctx, opts) {
       throw new Error('Could not find a feature with the provided featureId');
     }
     let from = opts.from;
-    if (from.type === 'Feature' && from.geometry && from.geometry.type === 'Point') {
+    if (from && from.type === 'Feature' && from.geometry && from.geometry.type === 'Point') {
       from = from.geometry;
     }
-    if (from.type === 'Point' && from.coordinates && from.coordinates.length === 1) {
+    if (from && from.type === 'Point' && from.coordinates && from.coordinates.length === 1) {
       from = from.coordinates;
     }
     if (!from || !Array.isArray(from)) {
@@ -49,11 +49,10 @@ module.exports = function(ctx, opts) {
       }
     });
     currentVertexPosition = 0;
-
-    if (ctx._test) ctx._test.line = line;
-
     ctx.store.add(line);
   }
+
+  if (ctx._test) ctx._test.line = line;
 
   return {
     start: function() {
