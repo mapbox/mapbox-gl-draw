@@ -612,5 +612,18 @@ test('draw_line_string continue LineString', t => {
   t.deepEqual(context._test.line.coordinates, [[0, 0], ...coordinates, [10, 10]],
     'added one coordinate at the end endpoint');
 
+  t.doesNotThrow(
+    () => drawLineStringMode(context, { featureId: 1, from: { type: 'Point', coordinates: [0, 0] } }),
+    'initializes with Point'
+  );
+
+  t.doesNotThrow(
+    () => drawLineStringMode(context, {
+      featureId: 1,
+      from: { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }, properties: {} }
+    }),
+    'initializes with a Feature<Point>'
+  );
+
   t.end();
 });

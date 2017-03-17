@@ -20,7 +20,7 @@ module.exports = function(ctx, opts) {
     if (from && from.type === 'Feature' && from.geometry && from.geometry.type === 'Point') {
       from = from.geometry;
     }
-    if (from && from.type === 'Point' && from.coordinates && from.coordinates.length === 1) {
+    if (from && from.type === 'Point' && from.coordinates && from.coordinates.length === 2) {
       from = from.coordinates;
     }
     if (!from || !Array.isArray(from)) {
