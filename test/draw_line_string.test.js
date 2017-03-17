@@ -627,3 +627,42 @@ test('draw_line_string continue LineString', t => {
 
   t.end();
 });
+
+test('draw_line_string continue LineString mouseClick', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+  const afterNextRender = setupAfterNextRender(map);
+
+  map.on('load', () => {
+    const coordinates = [[0, 0], [5, 5], [10, 10]];
+    const geojson = {
+      type: 'Feature',
+      id: 1,
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: coordinates.slice(0)
+      }
+    };
+    Draw.add(geojson);
+
+    Draw.changeMode('draw_line_string', { featureId: 1, from: [0, 0] });
+    mouseClick(map, makeMouseEvent(-1, -1));
+    afterNextRender(() => {
+      const line = Draw.getAll().features[0];
+      t.deepEqual(line.geometry.coordinates, [[-1, -1], [-1, -1], ...coordinates], 'line continues from the start');
+      Draw.changeMode('draw_line_string', { featureId: 1, from: [10, 10] });
+      mouseClick(map, makeMouseEvent(12, 12));
+      afterNextRender(() => {
+        const line = Draw.getAll().features[0];
+        t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12]], 'line continues from the end');
+      });
+    });
+  });
+
+  document.body.removeChild(container);
+  t.end();
+});
