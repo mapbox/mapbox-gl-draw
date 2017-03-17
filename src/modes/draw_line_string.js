@@ -79,8 +79,8 @@ module.exports = function(ctx, opts) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
+        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (direction === 'forward') {
-          line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
           currentVertexPosition++;
         } else {
           line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
