@@ -573,7 +573,7 @@ test('draw_line_string continue LineString', t => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: coordinates
+      coordinates: coordinates.slice(0)
     }
   };
   const line = new LineString(context, geojson);
@@ -603,5 +603,14 @@ test('draw_line_string continue LineString', t => {
     /start or the end/,
     'not at line endpoint'
   );
+  drawLineStringMode(context, { featureId: 1, from: [0, 0] });
+  t.equal(context._test.line.id, 1, 'initialized with correct line');
+  t.deepEqual(context._test.line.coordinates, [[0, 0], ...coordinates],
+    'added one coordinate at the start endpoint');
+
+  drawLineStringMode(context, { featureId: 1, from: [10, 10] });
+  t.deepEqual(context._test.line.coordinates, [[0, 0], ...coordinates, [10, 10]],
+    'added one coordinate at the end endpoint');
+
   t.end();
 });
