@@ -82,7 +82,8 @@ Lets you draw a Point feature.
 
 Disables editing for all drawn features.
 
-Note that this mode can only be entered or exited programmatically with `Draw.changeMode`.
+Note that this mode can only be entered or exited programmatically with `Draw.
+`.
 
 ## API Methods
 
@@ -350,6 +351,7 @@ The `mode` argument must be one of the mode names described above and enumerated
   // The point to continue drawing from
   from: Feature<Point>|Point|Array<number>
 }
+```
 
 ---
 
