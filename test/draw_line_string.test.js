@@ -562,3 +562,107 @@ test('draw_line_string touch interaction', t => {
   });
 });
 
+test('draw_line_string continue LineString', t => {
+  const context = createMockDrawModeContext();
+  drawLineStringMode(context);
+
+  const coordinates = [[0, 0], [5, 5], [10, 10]];
+  const geojson = {
+    type: 'Feature',
+    id: 1,
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: coordinates.slice(0)
+    }
+  };
+  const line = new LineString(context, geojson);
+  context.store.add(line);
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 2 }),
+    /featureId/,
+    'wrong feature id'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1 }),
+    /from.*property/,
+    'no "from" prop'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: '[0, 0]' }),
+    /from.*property/,
+    'incorrect from prop'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: [-1, -1] }),
+    /start or the end/,
+    'not on line'
+  );
+  t.throws(
+    () => drawLineStringMode(context, { featureId: 1, from: [5, 5] }),
+    /start or the end/,
+    'not at line endpoint'
+  );
+  drawLineStringMode(context, { featureId: 1, from: [0, 0] });
+  t.equal(context._test.line.id, 1, 'initialized with correct line');
+  t.deepEqual(context._test.line.coordinates, [[0, 0], ...coordinates],
+    'added one coordinate at the start endpoint');
+
+  drawLineStringMode(context, { featureId: 1, from: [10, 10] });
+  t.deepEqual(context._test.line.coordinates, [[0, 0], ...coordinates, [10, 10]],
+    'added one coordinate at the end endpoint');
+
+  t.doesNotThrow(
+    () => drawLineStringMode(context, { featureId: 1, from: { type: 'Point', coordinates: [0, 0] } }),
+    'initializes with Point'
+  );
+
+  t.doesNotThrow(
+    () => drawLineStringMode(context, {
+      featureId: 1,
+      from: { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }, properties: {} }
+    }),
+    'initializes with a Feature<Point>'
+  );
+
+  t.end();
+});
+
+test('draw_line_string continue LineString mouseClick', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+  const afterNextRender = setupAfterNextRender(map);
+
+  map.on('load', () => {
+    const coordinates = [[0, 0], [5, 5], [10, 10]];
+    const geojson = {
+      type: 'Feature',
+      id: 1,
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: coordinates.slice(0)
+      }
+    };
+    Draw.add(geojson);
+
+    Draw.changeMode('draw_line_string', { featureId: 1, from: [0, 0] });
+    mouseClick(map, makeMouseEvent(-1, -1));
+    afterNextRender(() => {
+      const line = Draw.getAll().features[0];
+      t.deepEqual(line.geometry.coordinates, [[-1, -1], [-1, -1], ...coordinates], 'line continues from the start');
+      Draw.changeMode('draw_line_string', { featureId: 1, from: [10, 10] });
+      mouseClick(map, makeMouseEvent(12, 12));
+      afterNextRender(() => {
+        const line = Draw.getAll().features[0];
+        t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12]], 'line continues from the end');
+      });
+    });
+  });
+
+  document.body.removeChild(container);
+  t.end();
+});
