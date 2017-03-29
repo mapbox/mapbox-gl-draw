@@ -10,6 +10,7 @@ module.exports = function(ctx, opts) {
   const featureId = opts.featureId;
 
   let line, currentVertexPosition;
+  let lineContinuation = false;
   let direction = 'forward';
   if (featureId) {
     line = ctx.store.get(featureId);
@@ -39,6 +40,9 @@ module.exports = function(ctx, opts) {
     } else {
       throw new Error('`from` should match the point at either the start or the end of the provided LineString');
     }
+    // if line continuation was initializated properly, note that for the event
+    // to be fired on completion
+    lineContinuation = true;
   } else {
     line = new LineString(ctx, {
       type: Constants.geojsonTypes.FEATURE,
@@ -115,9 +119,16 @@ module.exports = function(ctx, opts) {
       //remove last added coordinate
       line.removeCoordinate(`${currentVertexPosition}`);
       if (line.isValid()) {
-        ctx.map.fire(Constants.events.CREATE, {
-          features: [line.toGeoJSON()]
-        });
+        if (lineContinuation) {
+          ctx.map.fire(Constants.events.UPDATE, {
+            features: [line.toGeoJSON()],
+            action: Constants.modes.DRAW_LINE_STRING
+          });
+        } else {
+          ctx.map.fire(Constants.events.CREATE, {
+            features: [line.toGeoJSON()]
+          });
+        }
       } else {
         ctx.store.delete([line.id], { silent: true });
         ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
