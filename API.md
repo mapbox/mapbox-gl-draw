@@ -441,6 +441,8 @@ Fired when one or more features are updated. The following interactions will tri
   - Finish moving one or more vertices of a selected feature in `direct_select` mode. The event will only fire when the movement is finished (i.e. when the user releases the mouse button or hits <kbd>Enter</kbd>, or her mouse leaves the map container).
   - Delete one or more vertices of a selected feature in `direct_select` mode, which can be done by hitting the <kbd>Backspace</kbd> or <kbd>Delete</kbd> keys, clicking the Trash button, or invoking `draw.trash()`.
   - Add a vertex to the selected feature by clicking a midpoint on that feature in `direct_select` mode.
+- `action: 'draw_line_string'`
+  - Complete a line string which was previously created but edited again by passing it as an option to `.changeMode('draw_line_string')`
 
 This event will *not* fire when a feature is created or deleted. To track those interactions, listen for `draw.create` and `draw.delete` events.
 
