@@ -5,7 +5,7 @@ const isClick = require('./lib/is_click');
 const isTap = require('./lib/is_tap');
 const Constants = require('./constants');
 
-const modes = {
+let modes = {
   [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
   [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
   [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
@@ -14,13 +14,29 @@ const modes = {
   [Constants.modes.STATIC]: require('./modes/static')
 };
 
-module.exports = function(ctx) {
+let metaTypes = [
+  Constants.meta.FEATURE,
+  Constants.meta.MIDPOINT,
+  Constants.meta.VERTEX
+];
+
+module.exports = function(ctx, options) {
+  modes = Object.assign({}, modes, options.modes);
+  if (options.disableDefaultModes) {
+    modes = options.modes;
+  }
+
+  if (!modes[options.defaultMode]) {
+    throw new Error('Please define default mode or enable draw default modes.');
+  }
+
+  metaTypes = [...metaTypes, ...options.metaTypes];
 
   let mouseDownInfo = {};
   let touchStartInfo = {};
   const events = {};
-  let currentModeName = Constants.modes.SIMPLE_SELECT;
-  let currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+  let currentModeName = options.defaultMode;
+  let currentMode = setupModeHandler(modes[options.defaultMode](ctx), ctx);
 
   events.drag = function(event, isDrag) {
     if (isDrag({
@@ -203,6 +219,7 @@ module.exports = function(ctx) {
   }
 
   const api = {
+    metaTypes,
     changeMode,
     actionable,
     currentModeName: function() {

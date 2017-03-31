@@ -3,9 +3,9 @@ const Store = require('./store');
 const ui = require('./ui');
 const Constants = require('./constants');
 
-module.exports = function(ctx) {
+module.exports = function(ctx, options) {
 
-  ctx.events = events(ctx);
+  ctx.events = events(ctx, options);
 
   ctx.map = null;
   ctx.container = null;
