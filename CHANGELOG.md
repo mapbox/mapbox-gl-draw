@@ -1,3 +1,7 @@
+## 0.17.0
+
+- Adds support for continuing lines via `draw.changeMode`. 
+
 ## 0.16.1
 
 - Fixes bug where IE11 failed because it lacks `Array.find`.
