@@ -8,6 +8,8 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 **Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js). Compatible versions are documented in the package.json**
 
+**On NPM this package has recently moved from `mapbox-gl-draw` to `@mapbox/mapbox-gl-draw`**
+
 ### Installing
 
 ```
