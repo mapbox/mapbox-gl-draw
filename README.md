@@ -1,4 +1,4 @@
-# mapbox-gl-draw.js
+# @mapbox/mapbox-gl-draw
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/mapbox/mapbox-gl-draw.svg)](https://greenkeeper.io/)
 
@@ -6,7 +6,7 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 [![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=master)](https://travis-ci.org/mapbox/mapbox-gl-draw)
 
-**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js) (version 0.27.0 – 0.29.x).**
+**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js). Compatible versions are documented in the package.json**
 
 ### Installing
 
