@@ -12,6 +12,7 @@ module.exports = function(ctx, opts) {
   let line, currentVertexPosition;
   let direction = 'forward';
   let heardMouseMove = false;
+
   if (featureId) {
     line = ctx.store.get(featureId);
     if (!line) {
