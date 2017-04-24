@@ -24,6 +24,7 @@ module.exports = function(ctx) {
   ctx.store.add(polygon);
 
   let snapClickPoint;
+  let snapOverSources = ctx.options.snapOverSources;
 
   return {
     start() {
@@ -34,8 +35,11 @@ module.exports = function(ctx) {
       this.on('mousemove', CommonSelectors.true, e => {
         let evt = e;
 
-        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, ctx, polygon.id);
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, ctx, polygon.id, snapOverSources);
+          if (JSON.stringify(ctx.options.snapOverSources) !== JSON.stringify(snapOverSources)) {
+            snapOverSources = ctx.options.snapOverSources;
+          }
         }
         snapClickPoint = evt;
         polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
@@ -85,6 +89,13 @@ module.exports = function(ctx) {
 
       //remove last added coordinate
       polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      if (ctx.options.snapTo) {
+        ctx.options.snapOverStyles.forEach(style => {
+          if (ctx.map.getLayer(style.id) !== undefined) {
+            ctx.map.removeLayer(style.id);
+          }
+        });
+      }
       if (polygon.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]

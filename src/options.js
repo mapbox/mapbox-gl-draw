@@ -1,5 +1,6 @@
 const xtend = require('xtend');
 const Constants = require('./constants');
+const themes = require('./lib/theme');
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
@@ -11,36 +12,12 @@ const defaultOptions = {
   boxSelect: true,
   snapTo: true,
   displayControlsDefault: true,
-  styles: require('./lib/theme'),
+  styles: themes.default,
   controls: {},
   userProperties: false,
   snapStyles: ['gl-draw-polygon-stroke-inactive.cold', 'gl-draw-line-inactive.cold', 'gl-draw-point-inactive.cold'],
-  snapOverCircleStyle: {
-    'id': 'gl-draw-circle-snap',
-    'type': 'circle',
-    'paint': {
-      'circle-radius': 3,
-      'circle-color': '#FF0',
-      'circle-stroke-width' : 1,
-      'circle-stroke-color' :'#000'
-    },
-    'filter': ['all', ["==", "id", ""]],
-    'source': 'mapbox-gl-draw-cold'
-  },
-  snapOverLineStyle: {
-    'id': 'gl-draw-line-snap',
-    'type': 'line',
-    'layout': {
-      'line-cap': 'round',
-      'line-join': 'round'
-    },
-    'paint': {
-      'line-color': '#00F',
-      'line-width': 1
-    },
-    'filter': ['all', ["==", "id", ""]],
-    'source': 'mapbox-gl-draw-cold'
-  }
+  snapOverSources: ['mapbox-gl-draw-cold'],
+  snapOverStyles: themes.snapOver
 };
 
 const showControls = {
@@ -71,6 +48,21 @@ function addSources(styles, sourceBucket) {
   });
 }
 
+function addSnapOverSources(styles, sources) {
+  let snapStyles = [];
+  sources.forEach((source) => {
+    snapStyles = snapStyles.concat(styles.map(style => {
+      if (style.source) return style;
+      return xtend(style, {
+        id: `${style.id}.${source}`,
+        source: `${source}`,
+        'source-layer': `${source}`
+      });
+    }));
+  });
+  return snapStyles;
+}
+
 module.exports = function(options = {}) {
   let withDefaults = xtend(options);
 
@@ -88,6 +80,9 @@ module.exports = function(options = {}) {
 
   // Layers with a shared source should be adjacent for performance reasons
   withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+
+  //create option snapOver
+  withDefaults.snapOver = addSnapOverSources(withDefaults.snapOverStyles, withDefaults.snapOverSources);
 
   return withDefaults;
 };

@@ -73,7 +73,222 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
 
   map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-  var Draw = window.Draw = new MapboxDraw();
+var styles = [
+    //static mode
+    {
+        'id': 'gl-draw-point-inactive',
+        'type': 'circle',
+        'filter': ['all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'Point'],
+            ['==', 'meta', 'feature'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 5,
+            'circle-color': '#3bb2d0',
+            'circle-stroke-width' : 1,
+            'circle-stroke-color' :'#fff'
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-fill-inactive',
+        'type': 'fill',
+        'filter': ['all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'fill-color': '#3bb2d0',
+            'fill-outline-color': '#3bb2d0',
+            'fill-opacity': 0.1
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-stroke-inactive',
+        'type': 'line',
+        'filter': ['all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static']
+        ],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#3bb2d0',
+            'line-width': 2
+        }
+    },
+    {
+        'id': 'gl-draw-line-inactive',
+        'type': 'line',
+        'filter': ['all',
+            ['==', 'active', 'false'],
+            ['==', '$type', 'LineString'],
+            ['!=', 'mode', 'static']
+        ],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#3bb2d0',
+            'line-width': 2
+        }
+    },
+    //edit mode
+    {
+        'id': 'gl-draw-polygon-fill-active',
+        'type': 'fill',
+        'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+        'paint': {
+            'fill-color': '#D20C0C',
+            'fill-outline-color': '#D20C0C',
+            'fill-opacity': 0.1
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-stroke-active',
+        'type': 'line',
+        'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#D20C0C',
+            'line-dasharray': [0.2, 2],
+            'line-width': 2
+        }
+    },
+    {
+        'id': 'gl-draw-line-active',
+        'type': 'line',
+        'filter': ['all',
+            ['==', '$type', 'LineString'],
+            ['==', 'active', 'true']
+        ],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#D20C0C',
+            'line-dasharray': [0.2, 2],
+            'line-width': 2
+        }
+    },
+    {
+        'id': 'gl-draw-point-active',
+        'type': 'circle',
+        'filter': ['all',
+            ['==', 'active', 'true']],
+        'paint': {
+            'circle-radius': 8,
+            'circle-color': '#D20C0C',
+            'circle-stroke-width' : 1,
+            'circle-stroke-color' :'#fff'
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-midpoint',
+        'type': 'circle',
+        'filter': ['all',
+            ['==', '$type', 'Point'],
+            ['==', 'meta', 'midpoint']],
+        'paint': {
+            'circle-radius': 3,
+            'circle-color': '#FF0',
+            'circle-stroke-width' : 1,
+            'circle-stroke-color' :'#000'
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-and-line-vertex-inactive',
+        'type': 'circle',
+        'filter': ['all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 3,
+            'circle-color': '#000',
+            'circle-stroke-width' : 1,
+            'circle-stroke-color' :'#fff'
+        }
+    },
+    {
+        'id': 'gl-draw-midpoint-active',
+        'type': 'circle',
+        'filter': ['all',
+            ['==', '$type', 'Point'],
+            ['!=', 'meta', 'midpoint'],
+            ['==', 'active', 'true']],
+        'paint': {
+            'circle-radius': 4,
+            'circle-color': '#D20C0C',
+            'circle-stroke-width' : 1,
+            'circle-stroke-color' :'#fff'
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-fill-static',
+        'type': 'fill',
+        'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
+        'paint': {
+            'fill-color': '#D20C0C',
+            'fill-outline-color': '#D20C0C',
+            'fill-opacity': 0.1
+        }
+    },
+    {
+        'id': 'gl-draw-polygon-stroke-static',
+        'type': 'line',
+        'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#D20C0C',
+            'line-width': 2
+        }
+    },
+    {
+        'id': 'gl-draw-line-static',
+        'type': 'line',
+        'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'LineString']],
+        'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        'paint': {
+            'line-color': '#D20C0C',
+            'line-width': 2
+        }
+    },
+    {
+        'id': 'gl-draw-point-static',
+        'type': 'circle',
+        'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Point']],
+        'paint': {
+            'circle-radius': 4,
+            'circle-color': '#D20C0C'
+        }
+    }
+];
+
+
+var Draw = window.Draw = new MapboxDraw({
+    displayControlsDefault: true,
+    styles: styles,
+    snapStyles: ["demodata"]
+});
+
   var drawIsActive = true;
   map.addControl(Draw, 'bottom-right');
 
@@ -116,6 +331,59 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
     startPolygon.onclick = function() {
       Draw.changeMode('draw_polygon');
     };
+
+      var demodata = {
+          "type": "Feature",
+          "properties": { "id": "bar"},
+          "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                  [
+                      9.236068725585938,
+                      49.141516414286166
+                  ],
+                  [
+                      9.226112365722656,
+                      49.16576720541831
+                  ],
+                  [
+                      9.270057678222656,
+                      49.181478970054584
+                  ],
+                  [
+                      9.295806884765625,
+                      49.1653182245806
+                  ],
+                  [
+                      9.271087646484375,
+                      49.1448852896622
+                  ],
+                  [
+                      9.243278503417969,
+                      49.139045760119835
+                  ]
+              ]
+          }
+      };
+
+      map.addSource("demodata", {type: "geojson", data: demodata } );
+
+      map.addLayer({
+          'id': 'demodata',
+          'type': 'line',
+          'source': 'demodata',
+          'layout': {},
+          'paint': {
+              "line-color": "#888",
+              "line-width": 4,
+              "line-opacity": 0.7
+          }
+      });
+
+      map.setCenter([
+          9.236068725585938,
+          49.141516414286166
+      ]);
 
   });
 

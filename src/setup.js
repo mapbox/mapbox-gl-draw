@@ -92,11 +92,12 @@ module.exports = function(ctx) {
         ctx.map.removeLayer(style.id);
       });
       //remove snap layers
-      if (ctx.map.getLayer(ctx.options.snapOverCircleStyle.id) !== undefined) {
-        ctx.map.removeLayer(ctx.options.snapOverCircleStyle.id);
-      }
-      if (ctx.map.getLayer(ctx.options.snapOverLineStyle.id) !== undefined) {
-        ctx.map.removeLayer(ctx.options.snapOverLineStyle.id);
+      if (ctx.options.snapOver) {
+        ctx.options.snapOver.forEach(style => {
+          if (ctx.map.getLayer(style.id) !== undefined) {
+            ctx.map.removeLayer(style.id);
+          }
+        });
       }
 
       ctx.map.removeSource(Constants.sources.COLD);

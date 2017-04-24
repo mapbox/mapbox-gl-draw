@@ -39,8 +39,6 @@ export default function createMap(mapOptions = {}) {
 
   container.className = classList.join(' ');
 
-  container.clientLeft = 0;
-  container.clientTop = 0;
   container.getBoundingClientRect = function() {
     return {
       left: 0,

@@ -13,6 +13,7 @@ const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 module.exports = function(ctx, opts) {
   const featureId = opts.featureId;
   const feature = ctx.store.get(featureId);
+  let snapOverSources = ctx.options.snapOverSources;
 
   if (!feature) {
     throw new Error('You must provide a featureId to enter direct_select mode');
@@ -146,8 +147,11 @@ module.exports = function(ctx, opts) {
 
         let evt = e;
 
-        if (!ctx.snapToOverride && evt.point && ctx.options.snapTo) {
-          evt = snapTo(evt, ctx, featureId);
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, ctx, featureId, snapOverSources);
+          if (JSON.stringify(ctx.options.snapOverSources) !== JSON.stringify(snapOverSources)) {
+            snapOverSources = ctx.options.snapOverSources;
+          }
         }
 
         const delta = {
