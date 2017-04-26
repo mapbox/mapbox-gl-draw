@@ -78,7 +78,7 @@ module.exports = function(ctx, opts) {
   };
 
   function pathsToCoordinates(featureId, paths) {
-    return paths.map(coord_path => { return { feature_id: featureId, coord_path, coordinates: feature.getCoordinate(coord_path) }; });
+    return paths.map(coord_path => { return { feature_id: featureId, coord_path }; });
   }
 
   const onFeature = function(e) {
