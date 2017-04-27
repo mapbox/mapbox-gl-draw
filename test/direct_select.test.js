@@ -221,6 +221,28 @@ test('direct_select', t => {
     });
   });
 
+  t.test('direct_select - dragging a selected vertex updates stored coordinates', st => {
+    const [lineId] = Draw.add(getGeoJSON('line'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: lineId
+    });
+    st.notOk(Draw.getSelectedPoints().features[0], 'no initial selection');
+
+    const startPosition = getGeoJSON('line').geometry.coordinates[0];
+    const endPosition = [startPosition[0] + 10, startPosition[1] + 10];
+    afterNextRender(() => {
+      map.fire.reset();
+      click(map, makeMouseEvent(startPosition[0], startPosition[1]));
+      st.deepEqual(Draw.getSelectedPoints().features[0].geometry.coordinates, startPosition, 'click saves selection');
+
+      map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
+      map.fire('mousemove', makeMouseEvent(endPosition[0], endPosition[1], { buttons: 1 }));
+      map.fire('mouseup', makeMouseEvent(endPosition[0], endPosition[1]));
+      st.deepEqual(Draw.getSelectedPoints().features[0].geometry.coordinates, endPosition, 'selection is accurate after dragging');
+      cleanUp(() => st.end());
+    });
+  });
+
   document.body.removeChild(mapContainer);
   t.end();
 });
