@@ -238,8 +238,10 @@ test('direct_select', t => {
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       map.fire('mousemove', makeMouseEvent(endPosition[0], endPosition[1], { buttons: 1 }));
       map.fire('mouseup', makeMouseEvent(endPosition[0], endPosition[1]));
-      st.deepEqual(Draw.getSelectedPoints().features[0].geometry.coordinates, endPosition, 'selection is accurate after dragging');
-      cleanUp(() => st.end());
+      afterNextRender(() => {
+        st.deepEqual(Draw.getSelectedPoints().features[0].geometry.coordinates, endPosition, 'selection is accurate after dragging');
+        cleanUp(() => st.end());
+      });
     });
   });
 
