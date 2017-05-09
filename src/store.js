@@ -257,7 +257,13 @@ Store.prototype.getSelected = function() {
  * @return {Array<Object>} Selected coordinates.
  */
 Store.prototype.getSelectedCoordinates = function() {
-  return this._selectedCoordinates;
+  const selected = this._selectedCoordinates.map(coordinate => {
+    const feature = this.get(coordinate.feature_id);
+    return {
+      coordinates: feature.getCoordinate(coordinate.coord_path)
+    };
+  });
+  return selected;
 };
 
 /**

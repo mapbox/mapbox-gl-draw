@@ -1,3 +1,7 @@
+## 0.17.4
+
+- Fix bug where selected points that are moved would still return the same coordinates
+
 ## 0.17.0
 
 - Adds support for continuing lines via `draw.changeMode`. 
