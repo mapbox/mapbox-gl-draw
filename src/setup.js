@@ -11,6 +11,7 @@ module.exports = function(ctx) {
   ctx.container = null;
   ctx.store = null;
   ctx.ui = ui(ctx);
+  ctx.snapToOverride = false;
 
   let controlContainer = null;
 
@@ -90,6 +91,14 @@ module.exports = function(ctx) {
       ctx.options.styles.forEach(style => {
         ctx.map.removeLayer(style.id);
       });
+      //remove snap layers
+      if (ctx.options.snapOver) {
+        ctx.options.snapOver.forEach(style => {
+          if (ctx.map.getLayer(style.id) !== undefined) {
+            ctx.map.removeLayer(style.id);
+          }
+        });
+      }
 
       ctx.map.removeSource(Constants.sources.COLD);
       ctx.map.removeSource(Constants.sources.HOT);

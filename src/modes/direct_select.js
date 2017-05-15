@@ -5,6 +5,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 const moveFeatures = require('../lib/move_features');
+const snapTo = require('../lib/snap_to');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -12,6 +13,7 @@ const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 module.exports = function(ctx, opts) {
   const featureId = opts.featureId;
   const feature = ctx.store.get(featureId);
+  let snapOverSources = ctx.options.snapOverSources;
 
   if (!feature) {
     throw new Error('You must provide a featureId to enter direct_select mode');
@@ -105,9 +107,13 @@ module.exports = function(ctx, opts) {
     const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
     for (let i = 0; i < selectedCoords.length; i++) {
       const coord = selectedCoords[i];
-      feature.updateCoordinate(selectedCoordPaths[i],
-      coord[0] + constrainedDelta.lng,
-      coord[1] + constrainedDelta.lat);
+      let lng = coord[0] + constrainedDelta.lng;
+      let lat = coord[1] + constrainedDelta.lat;
+      if (e.snap !== undefined) {
+        lng = e.lngLat.lng;
+        lat = e.lngLat.lat;
+      }
+      feature.updateCoordinate(selectedCoordPaths[i], lng, lat);
     }
   };
 
@@ -129,7 +135,6 @@ module.exports = function(ctx, opts) {
 
       // As soon as you mouse leaves the canvas, update the feature
       this.on('mouseout', () => dragMoving, fireUpdate);
-
       this.on('mousedown', isVertex, onVertex);
       this.on('touchstart', isVertex, onVertex);
       this.on('mousedown', CommonSelectors.isActiveFeature, onFeature);
@@ -140,14 +145,23 @@ module.exports = function(ctx, opts) {
         dragMoving = true;
         e.originalEvent.stopPropagation();
 
-        const delta = {
-          lng: e.lngLat.lng - dragMoveLocation.lng,
-          lat: e.lngLat.lat - dragMoveLocation.lat
-        };
-        if (selectedCoordPaths.length > 0) dragVertex(e, delta);
-        else dragFeature(e, delta);
+        let evt = e;
 
-        dragMoveLocation = e.lngLat;
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, ctx, featureId, snapOverSources);
+          if (JSON.stringify(ctx.options.snapOverSources) !== JSON.stringify(snapOverSources)) {
+            snapOverSources = ctx.options.snapOverSources;
+          }
+        }
+
+        const delta = {
+          lng: evt.lngLat.lng - dragMoveLocation.lng,
+          lat: evt.lngLat.lat - dragMoveLocation.lat
+        };
+        if (selectedCoordPaths.length > 0) dragVertex(evt, delta);
+        else dragFeature(evt, delta);
+
+        dragMoveLocation = evt.lngLat;
       });
       this.on('click', CommonSelectors.true, stopDragging);
       this.on('mouseup', CommonSelectors.true, () => {

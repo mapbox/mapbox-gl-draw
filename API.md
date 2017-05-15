@@ -34,6 +34,18 @@ All of the following options are optional.
 - `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
 
+
+## Keyboard Shortcuts
+
+key | description 
+--- | --- 
+<1> | Point  
+<2> | Line
+<3> | Polygon
+<delete> or <backspace>  | While actively drawing a polygon or line this key will remove the last point.  If it is hit repeatedly it will gradually remove each point until the drawing is removed. When modifying a drawing (direct_select), The user can click on a point, then hit <delete> or <backspace> to delete only that point.
+<esc>  | While actively drawing a polygon, line, or point  this key will remove the entire drawing. 
+<enter> or <return> | Finishes the drawing.
+
 ## Modes
 
 The mode name strings are available as an enum at `Draw.modes`.
@@ -267,7 +279,8 @@ var ids = draw.set({
 
 ### `trash(): draw`
 
-Invokes the current mode's `trash` action. Returns the draw instance for chaining.
+Invokes the current mode's `trash` action. Returns the draw instance for chaining.  
+For drawing modes, this deletes the last point until it cancels the current drawing process.
 
 In `simple_select` mode, this deletes all selected features.
 

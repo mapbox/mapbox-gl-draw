@@ -67,9 +67,11 @@
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
-    "geojson-extent": "^0.3.2",
     "@mapbox/geojson-normalize": "0.0.1",
     "@mapbox/geojsonhint": "^2.0.0",
+    "@turf/meta": "^3.7.3",
+    "cheap-ruler": "^2.4.1",
+    "geojson-extent": "^0.3.2",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.1.0",

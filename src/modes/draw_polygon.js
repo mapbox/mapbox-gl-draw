@@ -4,6 +4,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
+const snapTo = require('../lib/snap_to');
 
 module.exports = function(ctx) {
 
@@ -16,10 +17,14 @@ module.exports = function(ctx) {
     }
   });
   let currentVertexPosition = 0;
+  let heardMouseMove = false;
 
   if (ctx._test) ctx._test.polygon = polygon;
 
   ctx.store.add(polygon);
+
+  let snapClickPoint;
+  let snapOverSources = ctx.options.snapOverSources;
 
   return {
     start() {
@@ -28,10 +33,20 @@ module.exports = function(ctx) {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
       ctx.ui.setActiveButton(Constants.types.POLYGON);
       this.on('mousemove', CommonSelectors.true, e => {
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
-        if (CommonSelectors.isVertex(e)) {
+        let evt = e;
+
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, ctx, polygon.id, snapOverSources);
+          if (JSON.stringify(ctx.options.snapOverSources) !== JSON.stringify(snapOverSources)) {
+            snapOverSources = ctx.options.snapOverSources;
+          }
+        }
+        snapClickPoint = evt;
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
+        if (CommonSelectors.isVertex(evt)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
       this.on('click', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
@@ -39,11 +54,12 @@ module.exports = function(ctx) {
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
       function clickAnywhere(e) {
-        if (currentVertexPosition > 0 && isEventAtCoordinates(e, polygon.coordinates[0][currentVertexPosition - 1])) {
+        const evt = snapClickPoint || e;
+        if (currentVertexPosition > 0 && isEventAtCoordinates(evt, polygon.coordinates[0][currentVertexPosition - 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
         }
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, evt.lngLat.lng, evt.lngLat.lat);
         currentVertexPosition++;
       }
       function clickOnVertex() {
@@ -73,6 +89,13 @@ module.exports = function(ctx) {
 
       //remove last added coordinate
       polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      if (ctx.options.snapTo) {
+        ctx.options.snapOverStyles.forEach(style => {
+          if (ctx.map.getLayer(style.id) !== undefined) {
+            ctx.map.removeLayer(style.id);
+          }
+        });
+      }
       if (polygon.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [polygon.toGeoJSON()]
@@ -129,8 +152,26 @@ module.exports = function(ctx) {
       });
     },
     trash() {
-      ctx.store.delete([polygon.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      if (currentVertexPosition > 1) {
+        let cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition}`);
+
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
+          cursorPosition = polygon.getCoordinate(`0.${currentVertexPosition - 1}`);
+          polygon.updateCoordinate(`0.${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch which has no mousemove
+          polygon.removeCoordinate(`0.${currentVertexPosition}`);
+          currentVertexPosition--;
+        }
+        //remove last added coordinate
+        currentVertexPosition--;
+        polygon.removeCoordinate(`0.${currentVertexPosition}`);
+      } else {
+        ctx.store.delete([polygon.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      }
     }
   };
 };

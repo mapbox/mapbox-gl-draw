@@ -4,6 +4,8 @@ const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
+const snapTo = require('../lib/snap_to');
+
 
 module.exports = function(ctx, opts) {
   opts = opts || {};
@@ -54,6 +56,10 @@ module.exports = function(ctx, opts) {
 
   if (ctx._test) ctx._test.line = line;
 
+  let heardMouseMove = false;
+  let snapClickPoint;
+  let snapOverSources = ctx.options.snapOverSources;
+
   return {
     start: function() {
       ctx.store.clearSelected();
@@ -62,10 +68,20 @@ module.exports = function(ctx, opts) {
       ctx.ui.setActiveButton(Constants.types.LINE);
 
       this.on('mousemove', CommonSelectors.true, (e) => {
-        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-        if (CommonSelectors.isVertex(e)) {
+        let evt = e;
+
+        if (evt.point && ctx.options.snapTo) {
+          evt = snapTo(evt, ctx, line.id, snapOverSources);
+          if (JSON.stringify(ctx.options.snapOverSources) !== JSON.stringify(snapOverSources)) {
+            snapOverSources = ctx.options.snapOverSources;
+          }
+        }
+        snapClickPoint = evt;
+        line.updateCoordinate(currentVertexPosition, evt.lngLat.lng, evt.lngLat.lat);
+        if (CommonSelectors.isVertex(evt)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
 
       this.on('click', CommonSelectors.true, clickAnywhere);
@@ -75,15 +91,16 @@ module.exports = function(ctx, opts) {
 
       function clickAnywhere(e) {
         if (currentVertexPosition > 0 && isEventAtCoordinates(e, line.coordinates[currentVertexPosition - 1]) ||
-            direction === 'backwards' && isEventAtCoordinates(e, line.coordinates[currentVertexPosition + 1])) {
+          direction === 'backwards' && isEventAtCoordinates(e, line.coordinates[currentVertexPosition + 1])) {
           return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [line.id] });
         }
+        const evt = snapClickPoint || e;
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
-        line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+        line.updateCoordinate(currentVertexPosition, evt.lngLat.lng, evt.lngLat.lat);
         if (direction === 'forward') {
           currentVertexPosition++;
         } else {
-          line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
+          line.addCoordinate(0, evt.lngLat.lng, evt.lngLat.lat);
         }
       }
 
@@ -114,6 +131,13 @@ module.exports = function(ctx, opts) {
 
       //remove last added coordinate
       line.removeCoordinate(`${currentVertexPosition}`);
+      if (ctx.options.snapTo) {
+        ctx.options.snapOverStyles.forEach(style => {
+          if (ctx.map.getLayer(style.id) !== undefined) {
+            ctx.map.removeLayer(style.id);
+          }
+        });
+      }
       if (line.isValid()) {
         ctx.map.fire(Constants.events.CREATE, {
           features: [line.toGeoJSON()]
@@ -146,8 +170,26 @@ module.exports = function(ctx, opts) {
     },
 
     trash() {
-      ctx.store.delete([line.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      if (currentVertexPosition > 1) {
+        let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
+
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
+          cursorPosition = line.getCoordinate(`${currentVertexPosition - 1}`);
+          line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch with no mousemove
+          line.removeCoordinate(`${currentVertexPosition}`);
+          currentVertexPosition--;
+        }
+        //remove the last point
+        currentVertexPosition--;
+        line.removeCoordinate(`${currentVertexPosition}`);
+      } else {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      }
     }
   };
 };
