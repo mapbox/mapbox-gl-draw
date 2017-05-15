@@ -54,6 +54,8 @@ var Draw = new MapboxDraw();
 map.addControl(Draw)
 ```
 
+https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/
+
 ### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for complete reference.
 
 ### Developing and testing
