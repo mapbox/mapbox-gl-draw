@@ -59,7 +59,7 @@
     "sinon": "^2.1.0",
     "synthetic-dom-events": "^0.3.0",
     "tape": "^4.0.0",
-    "uglify-js": "^2.4.23",
+    "uglify-js": "^3.0.0",
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
