@@ -1,3 +1,8 @@
+## 0.18.0
+
+- Add support for mapbox-gl@0.37.0
+- Fix empty dist/mapbox-gl-draw.js file
+
 ## 0.17.4
 
 - Fix bug where selected points that are moved would still return the same coordinates
