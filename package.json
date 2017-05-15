@@ -51,7 +51,7 @@
     "eslint": "^3.0.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
-    "mapbox-gl": "^0.36.0",
+    "mapbox-gl": "0.37.0",
     "mapbox-gl-js-mock": "^0.28.0",
     "mock-browser": "^0.92.10",
     "nyc": "^10.2.0",
@@ -63,13 +63,13 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": ">=0.37.0"
+    "mapbox-gl": ">=0.27.0 <=0.37.0"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
-    "geojson-extent": "^0.3.2",
     "@mapbox/geojson-normalize": "0.0.1",
     "@mapbox/geojsonhint": "^2.0.0",
+    "geojson-extent": "^0.3.2",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "point-geometry": "0.1.0",
