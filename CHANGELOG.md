@@ -1,3 +1,7 @@
+## 0.18.1
+
+- Fixes bug with draw controls adding `false` to the tooltip when keybinding are turned off
+
 ## 0.18.0
 
 - Add support for mapbox-gl@0.37.0
