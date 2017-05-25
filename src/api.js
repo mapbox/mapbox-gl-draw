@@ -103,7 +103,10 @@ module.exports = function(ctx, api) {
       return feature.id;
     });
 
-    ctx.store.render();
+    if (ids.length) {
+      ctx.store.render();
+    }
+
     return ids;
   };
 
