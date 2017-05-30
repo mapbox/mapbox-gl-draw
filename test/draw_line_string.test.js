@@ -167,8 +167,8 @@ test('draw_line_string render active line with 2 coordinates', t => {
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
-  t.deepEqual(memo[0], {
+  t.equal(memo.length, 2, 'does render');
+  t.deepEqual(memo[1], {
     type: 'Feature',
     properties: {
       id: context._test.line.id,
@@ -507,7 +507,7 @@ test('draw_line_string touch interaction', t => {
       const line = Draw.getAll().features[0];
       st.equal(line.geometry.type, 'LineString');
 
-      st.deepEqual(line.geometry.coordinates, [[100, 200]], 'starting coordinate added');
+      st.deepEqual(line.geometry.coordinates, [[100, 200], [100, 200]], 'starting coordinate added');
 
       st.end();
     });
