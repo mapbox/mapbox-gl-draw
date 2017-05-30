@@ -292,7 +292,7 @@ test('draw_polygon mouse interaction', t => {
       const polygon = Draw.getAll().features[0];
       st.equal(polygon.geometry.type, 'Polygon');
 
-      st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [10, 20]]], 'starting coordinate added');
+      st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [10, 20], [10, 20]]], 'starting coordinate added');
 
       st.end();
     });
@@ -314,7 +314,7 @@ test('draw_polygon mouse interaction', t => {
     t.test('click to add another vertex', st => {
       mouseClick(map, makeMouseEvent(35, 35));
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [35, 35], [10, 20]]], 'middle coordinate replaced');
+      st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [35, 35], [35, 35], [10, 20]]], 'middle coordinate replaced');
       st.end();
     });
 
@@ -345,7 +345,7 @@ test('draw_polygon mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [3, 3], [1, 1]]]);
 
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -365,7 +365,7 @@ test('draw_polygon mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [3, 3], [1, 1]]]);
 
       container.dispatchEvent(escapeEvent);
 
@@ -388,7 +388,7 @@ test('draw_polygon mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [1, 1]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[1, 1], [2, 2], [3, 3], [3, 3], [1, 1]]]);
 
       container.dispatchEvent(enterEvent);
 
@@ -653,7 +653,7 @@ test('draw_polygon touch interaction', t => {
     t.test('tap to add another vertex', st => {
       touchTap(map, makeTouchEvent(135, 135));
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [135, 135], [100, 200]]], 'middle coordinate replaced');
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [135, 135], [135, 135], [100, 200]]], 'middle coordinate replaced');
       st.end();
     });
 
@@ -684,7 +684,7 @@ test('draw_polygon touch interaction', t => {
       touchTap(map, makeTouchEvent(300, 300));
 
       const polygon = Draw.getAll().features[0];
-      st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [100, 100]]]);
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 100], [200, 200], [300, 300], [300, 300], [100, 100]]]);
 
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
