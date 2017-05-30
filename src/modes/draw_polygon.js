@@ -35,7 +35,15 @@ module.exports = function(ctx) {
       });
       this.on('click', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
-      this.on('tap', CommonSelectors.true, clickAnywhere);
+      this.on('tap', CommonSelectors.true, e => {
+        const vertexZero = currentVertexPosition === 0;
+        clickAnywhere(e);
+        if (vertexZero) {
+          // this fake mousemove causes the initial rendering of the first point
+          // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
+          ctx.events.fire('mousemove', e);
+        }
+      });
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
       function clickAnywhere(e) {
@@ -93,11 +101,11 @@ module.exports = function(ctx) {
       if (geojson.geometry.coordinates.length === 0) return;
 
       const coordinateCount = geojson.geometry.coordinates[0].length;
-
-      // If we have fewer than two positions (plus the closer),
-      // it's not yet a shape to render
-      if (coordinateCount < 3) return;
-
+      // 2 coordinates after selecting a draw type
+      // 3 after creating the first point
+      if (coordinateCount < 3) {
+        return;
+      }
       geojson.properties.meta = Constants.meta.FEATURE;
 
       if (coordinateCount > 4) {
@@ -119,6 +127,9 @@ module.exports = function(ctx) {
       const lineCoordinates = [
         [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
       ];
+
+      // create an initial vertex so that we can track the first point on mobile devices
+      callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
       return callback({
         type: Constants.geojsonTypes.FEATURE,
         properties: geojson.properties,

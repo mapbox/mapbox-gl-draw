@@ -69,7 +69,15 @@ module.exports = function(ctx, opts) {
       });
 
       this.on('click', CommonSelectors.true, clickAnywhere);
-      this.on('tap', CommonSelectors.true, clickAnywhere);
+      this.on('tap', CommonSelectors.true, e => {
+        const vertexZero = currentVertexPosition === 0;
+        clickAnywhere(e);
+        if (vertexZero) {
+          // this fake mousemove causes the initial rendering of the first point
+          // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
+          ctx.events.fire('mousemove', e);
+        }
+      });
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
@@ -128,12 +136,10 @@ module.exports = function(ctx, opts) {
       const isActiveLine = geojson.properties.id === line.id;
       geojson.properties.active = (isActiveLine) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
       if (!isActiveLine) return callback(geojson);
-
       // Only render the line if it has at least one real coordinate
       if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
-
-      if (geojson.geometry.coordinates.length >= 3) {
+      if (geojson.geometry.coordinates.length >= 2) {
         callback(createVertex(
           line.id,
           geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
