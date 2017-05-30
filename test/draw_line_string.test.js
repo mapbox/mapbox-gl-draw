@@ -234,7 +234,7 @@ test('draw_line_string mouse interaction', t => {
       const line = Draw.getAll().features[0];
       st.equal(line.geometry.type, 'LineString');
 
-      st.deepEqual(line.geometry.coordinates, [[10, 20]], 'starting coordinate added');
+      st.deepEqual(line.geometry.coordinates, [[10, 20], [10, 20]], 'starting coordinate added');
 
       st.end();
     });
@@ -256,7 +256,7 @@ test('draw_line_string mouse interaction', t => {
     t.test('click to add another vertex', st => {
       mouseClick(map, makeMouseEvent(35, 35));
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35]], 'last coordinate replaced');
+      st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35], [35, 35]], 'last coordinate replaced');
       st.end();
     });
 
@@ -287,7 +287,7 @@ test('draw_line_string mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3], [3, 3]]);
 
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -307,7 +307,7 @@ test('draw_line_string mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3], [3, 3]]);
 
       container.dispatchEvent(escapeEvent);
 
@@ -332,7 +332,7 @@ test('draw_line_string mouse interaction', t => {
       mouseClick(map, makeMouseEvent(3, 3));
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3], [3, 3]]);
 
       container.dispatchEvent(enterEvent);
 
@@ -515,7 +515,7 @@ test('draw_line_string touch interaction', t => {
     t.test('tap to add another vertex', st => {
       touchTap(map, makeTouchEvent(200, 400));
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[100, 200], [200, 400]], 'last coordinate replaced');
+      st.deepEqual(line.geometry.coordinates, [[100, 200], [200, 400], [200, 400]], 'last coordinate replaced');
       st.end();
     });
 
@@ -546,7 +546,7 @@ test('draw_line_string touch interaction', t => {
       touchTap(map, makeTouchEvent(300, 300));
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
+      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300], [300, 300]]);
 
       Draw.trash();
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
@@ -658,7 +658,7 @@ test('draw_line_string continue LineString mouseClick', t => {
       mouseClick(map, makeMouseEvent(12, 12));
       afterNextRender(() => {
         const line = Draw.getAll().features[0];
-        t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12]], 'line continues from the end');
+        t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12], [12, 12]], 'line continues from the end');
       });
     });
   });

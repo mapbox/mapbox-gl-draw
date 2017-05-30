@@ -69,15 +69,7 @@ module.exports = function(ctx, opts) {
       });
 
       this.on('click', CommonSelectors.true, clickAnywhere);
-      this.on('tap', CommonSelectors.true, e => {
-        const vertexZero = currentVertexPosition === 0;
-        clickAnywhere(e);
-        if (vertexZero) {
-          // this fake mousemove causes the initial rendering of the first point
-          // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
-          ctx.events.fire('mousemove', e);
-        }
-      });
+      this.on('tap', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
@@ -93,6 +85,9 @@ module.exports = function(ctx, opts) {
         } else {
           line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
         }
+        // this fake mousemove causes the initial rendering of the visible point
+        // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
+        ctx.events.fire('mousemove', e);
       }
 
       function clickOnVertex() {
@@ -139,14 +134,12 @@ module.exports = function(ctx, opts) {
       // Only render the line if it has at least one real coordinate
       if (geojson.geometry.coordinates.length < 2) return;
       geojson.properties.meta = Constants.meta.FEATURE;
-      if (geojson.geometry.coordinates.length >= 2) {
-        callback(createVertex(
-          line.id,
-          geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
-          `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1}`,
-          false
-        ));
-      }
+      callback(createVertex(
+        line.id,
+        geojson.geometry.coordinates[direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
+        `${direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1}`,
+        false
+      ));
 
       callback(geojson);
     },

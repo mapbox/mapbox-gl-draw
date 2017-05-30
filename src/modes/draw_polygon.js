@@ -35,15 +35,7 @@ module.exports = function(ctx) {
       });
       this.on('click', CommonSelectors.true, clickAnywhere);
       this.on('click', CommonSelectors.isVertex, clickOnVertex);
-      this.on('tap', CommonSelectors.true, e => {
-        const vertexZero = currentVertexPosition === 0;
-        clickAnywhere(e);
-        if (vertexZero) {
-          // this fake mousemove causes the initial rendering of the first point
-          // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
-          ctx.events.fire('mousemove', e);
-        }
-      });
+      this.on('tap', CommonSelectors.true, clickAnywhere);
       this.on('tap', CommonSelectors.isVertex, clickOnVertex);
 
       function clickAnywhere(e) {
@@ -53,6 +45,9 @@ module.exports = function(ctx) {
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
+        // this fake mousemove causes the initial rendering of the visible vertices
+        // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
+        ctx.events.fire('mousemove', e);
       }
       function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
@@ -108,7 +103,7 @@ module.exports = function(ctx) {
       }
       geojson.properties.meta = Constants.meta.FEATURE;
 
-      if (coordinateCount > 4) {
+      if (coordinateCount > 3) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
