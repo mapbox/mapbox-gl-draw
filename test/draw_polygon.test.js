@@ -167,8 +167,8 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', t => 
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 1, 'does render');
-  t.deepEqual(memo[0], {
+  t.equal(memo.length, 2, 'does render');
+  t.deepEqual(memo[1], {
     type: 'Feature',
     properties: {
       id: context._test.polygon.id,
@@ -645,7 +645,7 @@ test('draw_polygon touch interaction', t => {
       const polygon = Draw.getAll().features[0];
       st.equal(polygon.geometry.type, 'Polygon');
 
-      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [100, 200]]], 'starting coordinate added');
+      st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [100, 200], [100, 200]]], 'starting coordinate added');
 
       st.end();
     });
