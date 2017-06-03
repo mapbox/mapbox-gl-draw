@@ -54,7 +54,7 @@
     "mapbox-gl": "0.37.0",
     "mapbox-gl-js-mock": "^0.28.0",
     "mock-browser": "^0.92.10",
-    "nyc": "^10.2.0",
+    "nyc": "^11.0.2",
     "opener": "^1.4.1",
     "sinon": "^2.1.0",
     "synthetic-dom-events": "^0.3.0",
