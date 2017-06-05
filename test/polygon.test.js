@@ -132,21 +132,20 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
 });
 
 test('Polygon integration', t => {
-  const polygonCoordinates = [[[0, 0], [30, 15], [30, 30], [15, 30], [0, 0]]];
+  const polygonCoordinates = [[[0, 0], [30, 15], [32, 35], [15, 30], [0, 0]]];
   const map = createMap();
   const Draw = new MapboxDraw();
   map.addControl(Draw);
 
   map.on('load', () => {
     drawGeometry(map, Draw, 'Polygon', polygonCoordinates, () => {
-      console.log('t ', t);
-      // const feats = Draw.getAll().features;
-      // t.equals(1, feats.length, 'only one');
-      // t.equals('Polygon', feats[0].geometry.type, 'of the right type');
-      // t.equals(feats[0].geometry.coordinates[0].length, polygonCoordinates[0].length, 'right number of points');
-      // t.deepEquals(feats[0].geometry.coordinates, polygonCoordinates, 'in the right spot');
-      // Draw.onRemove();
-      // t.end();
+      const feats = Draw.getAll().features;
+      t.equals(1, feats.length, 'only one');
+      t.equals('Polygon', feats[0].geometry.type, 'of the right type');
+      t.equals(feats[0].geometry.coordinates[0].length, polygonCoordinates[0].length, 'right number of points');
+      t.deepEquals(feats[0].geometry.coordinates, polygonCoordinates, 'in the right spot');
+      Draw.onRemove();
+      t.end();
     });
 
   });
