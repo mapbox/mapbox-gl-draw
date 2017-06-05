@@ -167,8 +167,8 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', t => 
     }
   };
   mode.render(geojson, x => memo.push(x));
-  t.equal(memo.length, 2, 'does render');
-  t.deepEqual(memo[1], {
+  t.equal(memo.length, 4, 'does render');
+  t.deepEqual(memo[2], {
     type: 'Feature',
     properties: {
       id: context._test.polygon.id,
