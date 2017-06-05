@@ -102,37 +102,32 @@ module.exports = function(ctx) {
         return;
       }
       geojson.properties.meta = Constants.meta.FEATURE;
-
+      callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
       if (coordinateCount > 3) {
         // Add a start position marker to the map, clicking on this will finish the feature
         // This should only be shown when we're in a valid spot
-        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
         const endPos = geojson.geometry.coordinates[0].length - 3;
         callback(createVertex(polygon.id, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
       }
-
-      // If we have more than two positions (plus the closer),
-      // render the Polygon
-      if (coordinateCount > 3) {
-        return callback(geojson);
+      if (coordinateCount <= 4) {
+        // If we've only drawn two positions (plus the closer),
+        // make a LineString instead of a Polygon
+        const lineCoordinates = [
+          [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
+        ];
+        // create an initial vertex so that we can track the first point on mobile devices
+        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
+        callback({
+          type: Constants.geojsonTypes.FEATURE,
+          properties: geojson.properties,
+          geometry: {
+            coordinates: lineCoordinates,
+            type: Constants.geojsonTypes.LINE_STRING
+          }
+        });
       }
-
-      // If we've only drawn two positions (plus the closer),
-      // make a LineString instead of a Polygon
-      const lineCoordinates = [
-        [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
-      ];
-
-      // create an initial vertex so that we can track the first point on mobile devices
-      callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
-      return callback({
-        type: Constants.geojsonTypes.FEATURE,
-        properties: geojson.properties,
-        geometry: {
-          coordinates: lineCoordinates,
-          type: Constants.geojsonTypes.LINE_STRING
-        }
-      });
+      // render the Polygon
+      return callback(geojson);
     },
     trash() {
       ctx.store.delete([polygon.id], { silent: true });
