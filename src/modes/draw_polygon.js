@@ -116,7 +116,6 @@ module.exports = function(ctx) {
           [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]], [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
         ];
         // create an initial vertex so that we can track the first point on mobile devices
-        callback(createVertex(polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
         callback({
           type: Constants.geojsonTypes.FEATURE,
           properties: geojson.properties,
@@ -125,6 +124,9 @@ module.exports = function(ctx) {
             type: Constants.geojsonTypes.LINE_STRING
           }
         });
+        if (coordinateCount === 3) {
+          return;
+        }
       }
       // render the Polygon
       return callback(geojson);
