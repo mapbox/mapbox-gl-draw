@@ -11,6 +11,8 @@ module.exports = function(ctx, opts) {
 
   let line, currentVertexPosition;
   let direction = 'forward';
+  let heardMouseMove = false;
+
   if (featureId) {
     line = ctx.store.get(featureId);
     if (!line) {
@@ -66,6 +68,7 @@ module.exports = function(ctx, opts) {
         if (CommonSelectors.isVertex(e)) {
           ctx.ui.queueMapClasses({ mouse: Constants.cursors.POINTER });
         }
+        heardMouseMove = true;
       });
 
       this.on('click', CommonSelectors.true, clickAnywhere);
@@ -146,8 +149,32 @@ module.exports = function(ctx, opts) {
     },
 
     trash() {
-      ctx.store.delete([line.id], { silent: true });
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      let cursorPosition = line.getCoordinate(`${currentVertexPosition}`);
+      if (direction === 'forward' && currentVertexPosition > 1) {
+        if (cursorPosition === undefined && heardMouseMove === true) {
+          //a mousemove event has not recently happened so mimic one
+          cursorPosition = line.getCoordinate(`${currentVertexPosition - 1}`);
+          line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+        }
+        if (cursorPosition !== undefined && heardMouseMove === false) {
+          //should be a touch with no mousemove
+          line.removeCoordinate(`${currentVertexPosition}`);
+          currentVertexPosition--;
+        }
+        //remove the last point
+        currentVertexPosition--;
+        line.removeCoordinate(`${currentVertexPosition}`);
+      } else if (direction === 'backwards' && line.coordinates.length > 2) {
+        //remove the first point
+        line.removeCoordinate(`${currentVertexPosition}`);
+        if (heardMouseMove === false) {
+          cursorPosition = line.getCoordinate(`${currentVertexPosition + 1}`);
+        }
+        line.updateCoordinate(`${currentVertexPosition}`, cursorPosition[0], cursorPosition[1]);
+      } else {
+        ctx.store.delete([line.id], { silent: true });
+        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT);
+      }
     }
   };
 };

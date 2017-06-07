@@ -34,6 +34,7 @@ test('draw_line_string mode initialization', t => {
       coordinates: []
     }
   });
+
   // Strip ids for this comparison
   t.deepEqual(xtend(context.store.add.getCall(0).args[0], { id: null }),
     xtend(emptyLine, { id: null }), 'with a new line');
@@ -278,18 +279,24 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start a line but trash it before completion', st => {
+    t.test('start a line and then trash each point before completion until the feature is totally removed', st => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
       mouseClick(map, makeMouseEvent(1, 1));
       mouseClick(map, makeMouseEvent(2, 2));
       mouseClick(map, makeMouseEvent(3, 3));
+      map.fire('mousemove', makeMouseEvent(5, 5));
+      Draw.trash();
 
       const line = Draw.getAll().features[0];
-      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [3, 3]]);
-
+      st.deepEqual(line.geometry.coordinates, [[1, 1], [2, 2], [5, 5]]);
       Draw.trash();
+
+      const line2 = Draw.getAll().features[0];
+      st.deepEqual(line2.geometry.coordinates, [[1, 1], [5, 5]]);
+      Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       mouseClick(map, makeMouseEvent(1, 1));
@@ -548,7 +555,34 @@ test('draw_line_string touch interaction', t => {
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
 
+      container.dispatchEvent(escapeEvent);
+      st.equal(Draw.getAll().features.length, 0, 'no feature added');
+
+      touchTap(map, makeTouchEvent(100, 100));
+      st.equal(Draw.getAll().features.length, 0, 'no longer drawing');
+
+      st.end();
+    });
+
+    t.test('start a line and then trash each point before completion until the feature is totally removed', st => {
+      // Start a new line
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      touchTap(map, makeTouchEvent(100, 100));
+      touchTap(map, makeTouchEvent(200, 200));
+      touchTap(map, makeTouchEvent(300, 300));
+      const line = Draw.getAll().features[0];
+      st.deepEqual(line.geometry.coordinates, [[100, 100], [200, 200], [300, 300]]);
+
       Draw.trash();
+      const line2 = Draw.getAll().features[0];
+      st.deepEqual(line2.geometry.coordinates, [[100, 100], [200, 200]]);
+
+      Draw.trash();
+      const line3 = Draw.getAll().features[0];
+      st.deepEqual(line3.geometry.coordinates, [[100, 100]]);
+      Draw.trash();
+
       st.equal(Draw.getAll().features.length, 0, 'no feature added');
 
       touchTap(map, makeTouchEvent(100, 100));
@@ -659,6 +693,55 @@ test('draw_line_string continue LineString mouseClick', t => {
       afterNextRender(() => {
         const line = Draw.getAll().features[0];
         t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12]], 'line continues from the end');
+      });
+    });
+  });
+
+  document.body.removeChild(container);
+  t.end();
+});
+
+
+test('draw_line_string continue LineString mouseClick and delete 2 points', t => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+  const afterNextRender = setupAfterNextRender(map);
+
+  map.on('load', () => {
+    const coordinates = [[0, 0], [5, 5], [10, 10]];
+    const geojson = {
+      type: 'Feature',
+      id: 1,
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: coordinates.slice(0)
+      }
+    };
+    Draw.add(geojson);
+
+    Draw.changeMode('draw_line_string', { featureId: 1, from: [0, 0] });
+    mouseClick(map, makeMouseEvent(-1, -1));
+    afterNextRender(() => {
+      const line = Draw.getAll().features[0];
+      t.deepEqual(line.geometry.coordinates, [[-1, -1], [-1, -1], ...coordinates], 'line continues from the start');
+      Draw.trash();
+      Draw.trash();
+      const line2 = Draw.getAll().features[0];
+      t.deepEqual(line2.geometry.coordinates, [[5, 5], [5, 5], [10, 10]]);
+
+      Draw.changeMode('draw_line_string', { featureId: 1, from: [10, 10] });
+      mouseClick(map, makeMouseEvent(12, 12));
+      afterNextRender(() => {
+        const line = Draw.getAll().features[0];
+        t.deepEqual(line.geometry.coordinates, [[5, 5], [10, 10], [12, 12]], 'line continues from the end');
+        Draw.trash();
+        Draw.trash();
+        const line2 = Draw.getAll().features[0];
+        t.deepEqual(line2.geometry.coordinates, [[5, 5]]);
       });
     });
   });
