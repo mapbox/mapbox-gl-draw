@@ -77,6 +77,7 @@ npm run test
 To github and npm
 
 ```
+npm run prepublish
 npm version (major|minor|patch)
 git push --tags
 git push
