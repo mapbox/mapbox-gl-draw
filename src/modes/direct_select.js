@@ -201,18 +201,9 @@ module.exports = function(ctx, opts) {
       fireActionable();
     },
     trash: function() {
-      selectedCoordPaths.sort().reverse().forEach(id => feature.removeCoordinate(id));
-      ctx.map.fire(Constants.events.UPDATE, {
-        action: Constants.updateActions.CHANGE_COORDINATES,
-        features: ctx.store.getSelected().map(f => f.toGeoJSON())
-      });
-      selectedCoordPaths = [];
-      ctx.store.clearSelectedCoordinates();
+      ctx.store.delete(ctx.store.getSelectedIds());
       fireActionable();
-      if (feature.isValid() === false) {
-        ctx.store.delete([featureId]);
-        ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {});
-      }
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, {});
     }
   };
 };
