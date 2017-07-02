@@ -5,7 +5,7 @@
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
   "license": "ISC",
-  "main": "index.js",
+  "main": "dist/mapbox-gl-draw.js",
   "browserify": {
     "transform": [
       "babelify"
