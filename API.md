@@ -365,6 +365,12 @@ This is helpful if you are using Draw's features as your primary data store in y
 
 Draw fires a number of events. All of these events are namespaced with `draw.` and are emitted from the Mapbox GL JS map object. All events are all triggered by user interaction.
 
+```js
+map.on('draw.create', function (e) {
+  console.log(e.features);
+});
+```
+
 **If you programatically invoke a function in the Draw API, any event that *directly corresponds with* that function will not be fired.** For example, if you invoke `draw.delete()`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `draw.changeMode('draw_polygon')`, you will *not* see a `draw.modechange` event (because that directly corresponds with the invoked function) but you *will* see a `draw.selectionchange` event, since by changing the mode you indirectly deselected a feature.
 
 ### `draw.create`
