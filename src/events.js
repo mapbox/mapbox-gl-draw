@@ -19,17 +19,19 @@ module.exports = function(ctx) {
   let mouseDownInfo = {};
   let touchStartInfo = {};
   const events = {};
-  let currentModeName = Constants.modes.SIMPLE_SELECT;
-  let currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+  let currentModeName = null;
+  let currentMode = null;
 
   events.drag = function(event, isDrag) {
     if (isDrag({
       point: event.point,
       time: new Date().getTime()
     })) {
+      console.log('dragging');
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     } else {
+      console.log('click was dragged');
       event.originalEvent.stopPropagation();
     }
   };
@@ -203,6 +205,10 @@ module.exports = function(ctx) {
   }
 
   const api = {
+    start: function() {
+      currentModeName = Constants.modes.SIMPLE_SELECT;
+      currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+    },
     changeMode,
     actionable,
     currentModeName: function() {

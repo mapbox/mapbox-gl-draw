@@ -169,7 +169,7 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       afterNextRender(() => {
-        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
+        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 1, 'there should be one draw.selectionchange event');
         cleanUp(t.end);
       });
     });
@@ -466,7 +466,7 @@ test('simple_select', t => {
       t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], getGeoJSON('multiPolygon').geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
       t.equal(countPositions(movedMultiPolygon), countPositions(getGeoJSON('multiPolygon')), 'multiPolygon has same number of postions');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 
@@ -487,7 +487,7 @@ test('simple_select', t => {
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 
@@ -504,12 +504,14 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
 
       const movedPoint = Draw.get(pointId);
+      const fa = getFireArgs();
+      console.log(fa);
       const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
       t.equal(args.length, 1, 'draw.update called once');
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 
