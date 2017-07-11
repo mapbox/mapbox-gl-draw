@@ -28,9 +28,7 @@ function sortFeatures(features) {
       });
     }
     return feature;
-  })
-  .sort(comparator)
-  .map(feature => {
+  }).sort(comparator).map(feature => {
     delete feature.area;
     return feature;
   });

@@ -105,9 +105,7 @@ module.exports = function(ctx, opts) {
     const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
     for (let i = 0; i < selectedCoords.length; i++) {
       const coord = selectedCoords[i];
-      feature.updateCoordinate(selectedCoordPaths[i],
-      coord[0] + constrainedDelta.lng,
-      coord[1] + constrainedDelta.lat);
+      feature.updateCoordinate(selectedCoordPaths[i], coord[0] + constrainedDelta.lng, coord[1] + constrainedDelta.lat);
     }
   };
 
