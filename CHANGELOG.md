@@ -1,3 +1,7 @@
+## 0.19.1
+
+- Fixes bug with safari where the map would move when drawing (#665).
+
 ## 0.19.0
 
 - Improves mobile data support (thanks @z0d14c)
