@@ -3,6 +3,10 @@ const Constants = require('./constants');
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
+  disableDefaultModes: false,
+  modes: {},
+  modesConstants: {},
+  metaTypes: [],
   keybindings: true,
   touchEnabled: true,
   clickBuffer: 2,

@@ -10,10 +10,10 @@ const setupDraw = function(options, api) {
     options: options
   };
 
-  api = setupAPI(ctx, api);
+  api = setupAPI(ctx, api, options);
   ctx.api = api;
 
-  const setup = runSetup(ctx);
+  const setup = runSetup(ctx, options);
 
   api.onAdd = setup.onAdd;
   api.onRemove = setup.onRemove;

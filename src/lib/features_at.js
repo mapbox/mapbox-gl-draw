@@ -3,12 +3,6 @@ const mapEventToBoundingBox = require('./map_event_to_bounding_box');
 const Constants = require('../constants');
 const StringSet = require('./string_set');
 
-const META_TYPES = [
-  Constants.meta.FEATURE,
-  Constants.meta.MIDPOINT,
-  Constants.meta.VERTEX
-];
-
 // Requires either event or bbox
 module.exports = {
   click: featuresAtClick,
@@ -33,7 +27,7 @@ function featuresAt(event, bbox, ctx, buffer) {
 
   const features = ctx.map.queryRenderedFeatures(box, queryParams)
     .filter((feature) => {
-      return META_TYPES.indexOf(feature.properties.meta) !== -1;
+      return ctx.events.metaTypes.indexOf(feature.properties.meta) !== -1;
     });
 
   const featureIds = new StringSet();
