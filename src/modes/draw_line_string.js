@@ -82,12 +82,10 @@ module.exports = function(ctx, opts) {
         line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (direction === 'forward') {
           currentVertexPosition++;
+          line.updateCoordinate(currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         } else {
           line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
         }
-        // this fake mousemove causes the initial rendering of the visible point
-        // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
-        ctx.events.fire('mousemove', e);
       }
 
       function clickOnVertex() {

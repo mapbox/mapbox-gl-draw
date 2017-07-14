@@ -45,9 +45,7 @@ module.exports = function(ctx) {
         ctx.ui.queueMapClasses({ mouse: Constants.cursors.ADD });
         polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
         currentVertexPosition++;
-        // this fake mousemove causes the initial rendering of the visible vertices
-        // necessary for decent mobile UX; if theres a better way to do this, please feel free to optimize
-        ctx.events.fire('mousemove', e);
+        polygon.updateCoordinate(`0.${currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
       }
       function clickOnVertex() {
         return ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [polygon.id] });
