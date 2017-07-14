@@ -5,7 +5,7 @@ const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
-const toOld = require('./to_old');
+const toMode = require('./object_to_mode');
 
 const SimpleSelect = {};
 
@@ -191,7 +191,7 @@ SimpleSelect.clickOnFeature = function(state, e) {
   // Click (without shift) on an unselected feature
   } else if (!isFeatureSelected && !isShiftClick) {
     // Make it the only selected feature
-    selectedFeatureIds.forEach(this.doRender);
+    selectedFeatureIds.forEach(id => this.doRender(id));
     this.setSelected(featureId);
     this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   }
@@ -218,7 +218,7 @@ SimpleSelect.onTouchStart = function(state, e) {
 };
 
 SimpleSelect.onDrag = function(state, e) {
-  if (state.canDragMove) return SimpleSelect.dragMove(state, e);
+  if (state.canDragMove) return this.dragMove(state, e);
   if (this.drawConfig.boxSelect && state.canBoxSelect) return this.whileBoxSelect(state, e);
 };
 
@@ -276,7 +276,7 @@ SimpleSelect.onMouseUp = function(state, e) {
 
     if (idsToSelect.length) {
       this.select(idsToSelect);
-      idsToSelect.forEach(this.doRender);
+      idsToSelect.forEach(id => this.doRender(id));
       this.updateUIClasses({ mouse: Constants.cursors.MOVE });
     }
   }
@@ -376,4 +376,4 @@ SimpleSelect.onUncombineFeatures = function() {
   this.fireActionable();
 };
 
-module.exports = toOld(SimpleSelect);
+module.exports = toMode(SimpleSelect);
