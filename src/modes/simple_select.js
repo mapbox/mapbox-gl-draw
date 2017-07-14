@@ -283,7 +283,7 @@ SimpleSelect.onMouseUp = function(state, e) {
   this.stopExtendedInteractions(state);
 };
 
-SimpleSelect.toDisplayFeatures = function(geojson, display) {
+SimpleSelect.toDisplayFeatures = function(state, geojson, display) {
   geojson.properties.active = (this.isSelected(geojson.properties.id)) ?
     Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
   display(geojson);

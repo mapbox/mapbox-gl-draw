@@ -8,12 +8,22 @@ const MultiFeature = require('../feature_types/multi_feature');
 module.exports = function(mode) {
   if (mode.toDisplayFeatures === undefined) throw new Error("modes must have a toDisplayFeatures function");
 
-
   return function(ctx, startOpts = {}) {
     let state = {};
     // add default methods onto mode
     mode.setSelected = function(features) {
       return ctx.store.setSelected(features);
+    };
+
+    mode.setSelectedCoordinates = function(coords) {
+      ctx.store.setSelectedCoordinates(coords);
+      coords.reduce((m, c) => {
+        if (m[c.feature_id] === undefined) {
+          m[c.feature_id] = true;
+          ctx.store.get(c.feature_id).changed();
+        }
+        return m;
+      }, {});
     };
 
     mode.getSelected = function() {
@@ -50,6 +60,10 @@ module.exports = function(mode) {
 
     mode.clearSelectedFeatures = function() {
       return ctx.store.clearSelected();
+    };
+
+    mode.clearSelectedCoordinates = function() {
+      return ctx.store.clearSelectedCoordinates();
     };
 
     mode.setActionableState = function(actions) {
@@ -135,7 +149,7 @@ module.exports = function(mode) {
         }
       },
       render: function(geojson, push) {
-        mode.toDisplayFeatures(geojson, push);
+        mode.toDisplayFeatures(state, geojson, push);
       }
     };
   };
