@@ -27,11 +27,9 @@ module.exports = function(ctx) {
       point: event.point,
       time: new Date().getTime()
     })) {
-      console.log('dragging');
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     } else {
-      console.log('click was dragged');
       event.originalEvent.stopPropagation();
     }
   };

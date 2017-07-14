@@ -169,7 +169,7 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
       afterNextRender(() => {
-        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 1, 'there should be one draw.selectionchange event');
+        t.equal(getFireArgs().filter(arg => arg[0] === 'draw.selectionchange').length, 0, 'there should be no draw.selectionchange event');
         cleanUp(t.end);
       });
     });

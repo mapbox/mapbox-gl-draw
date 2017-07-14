@@ -85,10 +85,10 @@ SimpleSelect.stopExtendedInteractions = function(state) {
 
   this.map.dragPan.enable();
 
-  this.boxSelecting = false;
-  this.canBoxSelect = false;
-  this.dragMoving = false;
-  this.canDragMove = false;
+  state.boxSelecting = false;
+  state.canBoxSelect = false;
+  state.dragMoving = false;
+  state.canDragMove = false;
 };
 
 SimpleSelect.onStop = function() {
@@ -100,13 +100,13 @@ SimpleSelect.onMouseUp = function(state, e) {
   if (CommonSelectors.true(e)) return this.stopExtendedInteractions(state);
 };
 
-SimpleSelect.onMouseMove = function(state, e) {
+SimpleSelect.onMouseMove = function(state) {
   // On mousemove that is not a drag, stop extended interactions.
   // This is useful if you drag off the canvas, release the button,
   // then move the mouse back over the canvas --- we don't allow the
   // interaction to continue then, but we do let it continue if you held
   // the mouse button that whole time
-  if (CommonSelectors.true(e)) return this.stopExtendedInteractions(state);
+  return this.stopExtendedInteractions(state);
 };
 
 SimpleSelect.onMouseOut = function(state) {
