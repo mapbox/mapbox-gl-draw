@@ -13,6 +13,9 @@ export default function createMockDrawModeContext() {
       },
       featureChanged: spy(),
       clearSelected: spy(),
+      getAllIds: function() {
+        return Object.keys(_store);
+      },
       get: function(id) {
         return _store[id];
       }

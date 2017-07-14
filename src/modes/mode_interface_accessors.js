@@ -7,7 +7,7 @@ const MultiFeature = require('../feature_types/multi_feature');
 
 const ModeInterface = module.exports = function(ctx) {
   this.map = ctx.map;
-  this.drawConfig = JSON.parse(JSON.stringify(ctx.options));
+  this.drawConfig = JSON.parse(JSON.stringify(ctx.options || {}));
   this._ctx = ctx;
 };
 
@@ -88,8 +88,8 @@ ModeInterface.prototype.deselect = function(id) {
  * Delete a feature from draw
  * @param {String} id - a feature id
  */
-ModeInterface.prototype.deleteFeature = function(id) {
-  return this._ctx.store.delete(id);
+ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
+  return this._ctx.store.delete(id, opts);
 };
 
 /**
@@ -138,6 +138,14 @@ ModeInterface.prototype.changeMode = function(mode, opts) {
  */
 ModeInterface.prototype.updateUIClasses = function(opts) {
   return this._ctx.ui.queueMapClasses(opts);
+};
+
+/**
+ * If a name is provided it makes that button active, else if makes all buttons inactive
+ * @param {String?} name - name of the button to make active, leave as undefined to set buttons to be inactive
+ */
+ModeInterface.prototype.activateUIButton = function(name) {
+  return this._ctx.ui.setActiveButton(name);
 };
 
 /**

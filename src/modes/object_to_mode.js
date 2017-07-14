@@ -34,24 +34,16 @@ module.exports = function(modeObject) {
         this.on('tap', () => true, wrapper('onTap'));
       },
       stop: function() {
-        if (mode.onStop) {
-          mode.onStop(state);
-        }
+        mode.onStop(state);
       },
       trash: function() {
-        if (mode.onTrash) {
-          mode.onTrash(state);
-        }
+        mode.onTrash(state);
       },
       combineFeatures: function() {
-        if (mode.onCombineFeatures) {
-          mode.onCombineFeatures(state);
-        }
+        mode.onCombineFeatures(state);
       },
       uncombineFeatures: function() {
-        if (mode.onUncombineFeatures) {
-          mode.onUncombineFeatures(state);
-        }
+        mode.onUncombineFeatures(state);
       },
       render: function(geojson, push) {
         mode.toDisplayFeatures(state, geojson, push);
