@@ -9,7 +9,7 @@ const toMode = require('./object_to_mode');
 
 const SimpleSelect = {};
 
-SimpleSelect.setup = function(opts) {
+SimpleSelect.onSetup = function(opts) {
   // turn the opts into state.
   const state = {
     dragMoveLocation: null,

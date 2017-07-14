@@ -19,7 +19,7 @@ module.exports = function(modeObject) {
 
     return {
       start: function() {
-        state = mode.setup(startOpts); // this should set ui buttons
+        state = mode.onSetup(startOpts); // this should set ui buttons
         this.on('drag', () => true, wrapper('onDrag'));
         this.on('click', () => true, wrapper('onClick'));
         this.on('mousemove', () => true, wrapper('onMouseMove'));

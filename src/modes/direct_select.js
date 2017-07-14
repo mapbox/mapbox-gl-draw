@@ -112,7 +112,7 @@ DirectSelect.clickActiveFeature = function (state) {
 
 // EXTERNAL FUNCTIONS
 
-DirectSelect.setup = function(opts) {
+DirectSelect.onSetup = function(opts) {
   const featureId = opts.featureId;
   const feature = this.getFeature(featureId);
 
