@@ -4,17 +4,14 @@ const featuresAt = require('./lib/features_at');
 const isClick = require('./lib/is_click');
 const isTap = require('./lib/is_tap');
 const Constants = require('./constants');
-
-const modes = {
-  [Constants.modes.SIMPLE_SELECT]: require('./modes/simple_select'),
-  [Constants.modes.DIRECT_SELECT]: require('./modes/direct_select'),
-  [Constants.modes.DRAW_POINT]: require('./modes/draw_point'),
-  [Constants.modes.DRAW_LINE_STRING]: require('./modes/draw_line_string'),
-  [Constants.modes.DRAW_POLYGON]: require('./modes/draw_polygon'),
-  [Constants.modes.STATIC]: require('./modes/static')
-};
+const objectToMode = require('./modes/object_to_mode');
 
 module.exports = function(ctx) {
+
+  const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
+    m[k] = objectToMode(ctx.options.modes[k]);
+    return m;
+  }, {});
 
   let mouseDownInfo = {};
   let touchStartInfo = {};
@@ -204,8 +201,8 @@ module.exports = function(ctx) {
 
   const api = {
     start: function() {
-      currentModeName = Constants.modes.SIMPLE_SELECT;
-      currentMode = setupModeHandler(modes.simple_select(ctx), ctx);
+      currentModeName = ctx.options.defaultMode;
+      currentMode = setupModeHandler(modes[currentModeName](ctx), ctx);
     },
     changeMode,
     actionable,

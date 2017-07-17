@@ -6,7 +6,6 @@ import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
-import Constants from '../src/constants';
 
 test('static', t => {
 
@@ -15,7 +14,13 @@ test('static', t => {
   map.dragPan.disable.restore();
   spy(map.dragPan, 'disable');
 
-  const Draw = new MapboxDraw();
+  const opts = {
+    modes: {
+      static: require('@mapbox/mapbox-gl-draw-static-mode')
+    },
+    defaultMode: 'static'
+  };
+  const Draw = new MapboxDraw(opts);
   map.addControl(Draw);
 
   const afterNextRender = setupAfterNextRender(map);
@@ -50,7 +55,6 @@ test('static', t => {
   t.test('static - box select', t => {
     Draw.add(getGeoJSON('negativePoint'));
     Draw.add(getGeoJSON('point'));
-    Draw.changeMode(Constants.modes.STATIC);
     map.fire.reset();
 
     afterNextRender(() => {

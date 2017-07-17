@@ -5,7 +5,6 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 const moveFeatures = require('../lib/move_features');
-const toMode = require('./object_to_mode');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -237,5 +236,5 @@ DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function(state) {
   this.stopDragging(state);
 };
 
-module.exports = toMode(DirectSelect);
+module.exports = DirectSelect;
 

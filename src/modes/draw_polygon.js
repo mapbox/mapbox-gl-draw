@@ -3,7 +3,6 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
-const objectToMode = require('./object_to_mode');
 
 const DrawPolygon = {};
 
@@ -139,4 +138,4 @@ DrawPolygon.onTrash = function(state) {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-module.exports = objectToMode(DrawPolygon);
+module.exports = DrawPolygon;

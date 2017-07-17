@@ -41,6 +41,7 @@
     "instrument": false
   },
   "devDependencies": {
+    "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/centroid": "^4.0.0",
     "babel-core": "^6.9.1",
     "babel-eslint": "^7.1.0",

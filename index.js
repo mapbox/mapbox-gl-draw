@@ -26,3 +26,5 @@ const setupDraw = function(options, api) {
 module.exports = function(options) {
   setupDraw(options, this);
 };
+
+module.exports.modes = require('./src/modes');

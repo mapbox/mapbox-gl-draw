@@ -6,11 +6,14 @@ import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';
-import drawLineStringMode from '../src/modes/draw_line_string';
+import drawLineStringModeObject from '../src/modes/draw_line_string';
 import LineString from '../src/feature_types/line_string';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import setupAfterNextRender from './utils/after_next_render';
+import objectToMode from '../src/modes/object_to_mode';
+const drawLineStringMode = objectToMode(drawLineStringModeObject);
+
 import {
   enterEvent,
   startPointEvent,

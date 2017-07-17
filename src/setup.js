@@ -5,7 +5,6 @@ const Constants = require('./constants');
 
 module.exports = function(ctx) {
 
-
   let controlContainer = null;
 
   const setup = {

@@ -3,7 +3,6 @@ const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const createVertex = require('../lib/create_vertex');
-const objectToMode = require('./object_to_mode');
 
 const DrawLineString = {};
 
@@ -150,4 +149,4 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
   display(geojson);
 };
 
-module.exports = objectToMode(DrawLineString);
+module.exports = DrawLineString;

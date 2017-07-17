@@ -5,7 +5,6 @@ const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
 const Constants = require('../constants');
-const toMode = require('./object_to_mode');
 
 const SimpleSelect = {};
 
@@ -382,4 +381,4 @@ SimpleSelect.onUncombineFeatures = function() {
   this.fireActionable();
 };
 
-module.exports = toMode(SimpleSelect);
+module.exports = SimpleSelect;

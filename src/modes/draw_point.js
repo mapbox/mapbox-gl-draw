@@ -1,6 +1,5 @@
 const CommonSelectors = require('../lib/common_selectors');
 const Constants = require('../constants');
-const objectToMode = require('./object_to_mode');
 
 const DrawPoint = {};
 
@@ -63,4 +62,4 @@ DrawPoint.onKeyUp = function(state, e) {
   }
 };
 
-module.exports = objectToMode(DrawPoint);
+module.exports = DrawPoint;

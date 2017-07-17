@@ -6,11 +6,13 @@ import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';
-import drawPointMode from '../src/modes/draw_point';
+import drawPointModeObject from '../src/modes/draw_point';
 import Point from '../src/feature_types/point';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import {escapeEvent, enterEvent} from './utils/key_events';
+import objectToMode from '../src/modes/object_to_mode';
+const drawPointMode = objectToMode(drawPointModeObject);
 
 test('draw_point mode initialization', t => {
   const context = createMockDrawModeContext();
