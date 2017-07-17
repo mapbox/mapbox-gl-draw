@@ -120,11 +120,11 @@ ModeInterface.prototype.clearSelectedCoordinates = function() {
  * @param {Object} actions
  */
 ModeInterface.prototype.setActionableState = function(actions = {}) {
-  var newSet = {
+  const newSet = {
     trash: actions.trash || false,
     combineFeatures: actions.combineFeatures || false,
     uncombineFeatures: actions.uncombineFeatures || false
-  }
+  };
   return this._ctx.events.actionable(newSet);
 };
 

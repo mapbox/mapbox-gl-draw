@@ -1,5 +1,5 @@
 
-var modes = [
+const modes = [
   'simple_select',
   'direct_select',
   'draw_point',

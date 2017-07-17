@@ -504,7 +504,6 @@ test('simple_select', t => {
       map.fire('mouseup', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25));
 
       const movedPoint = Draw.get(pointId);
-      const fa = getFireArgs();
       const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
       t.equal(args.length, 1, 'draw.update called once');
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
