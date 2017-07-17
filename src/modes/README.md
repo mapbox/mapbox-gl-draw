@@ -1,4 +1,48 @@
-# Create a new mode for Mapbox Draw
+# Creating modes for Mapbox Draw
+
+In Mapbox Draw, modes are used to group sets of user interactions into one behavior. Internally Draw has the `draw_polygon` mode, which controls a bunch of interactions for drawing a polygon. Draw also has the `simple_select` mode which controls interactions when zero, one or many features are selected including transitioning to `direct_select` mode when a users interactions imply that they want to do detailed edits of a single feature.
+
+To help developers have more control of their Mapbox Draw powered application, Draw provides an interface for writing and hooking in custom modes. Below we will see how to write these modes by working though a small example.
+
+## Writing Custom Modes
+
+We're going to create a custom mode called `LotsOfPointsMode`. When active, this mode will create a new point each time a user clicks on the map and will transition to the default mode when the user hits the esc key.
+
+```js
+var LotsOfPointsMode = {};
+
+LotsOfPointsMode.onSetup = function(opts) {
+  var state = {};
+  state.count = opts.count || 0;
+  return state;
+};
+
+LotsOfPointsMode.onClick = function(state, e) {
+  var point = this.newFeature({
+    type: 'Feature',
+    properties: {
+      count: state.count
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: [e.lngLat.lng, e.lngLat.lat]
+    }
+  });
+  this.addFeature(point);
+};
+
+LotsOfPointsMode.onKeyUp = function(state, e) {
+  if (e.keyCode === 27) return this.changeMode('simple_select');
+};
+
+LotsOfPointsMode.toDisplayFeatures = function(state, geojson, display) {
+  display(geojson);
+};
+```
+
+## Available Custom Modes
+
+-   [Static Mode](https://github.com/mapbox/mapbox-gl-draw-static-mode): Turn off interactions
 
 ## Life Cycle Functions
 

@@ -36,6 +36,8 @@ All of the following options are optional.
 
 ## Modes
 
+By defult MapboxDraw ships with a few modes. These modes aim to cover the basic needed functionaly for MapboxDraw to create the core GeoJSON feature types. Along with these, MapboxDraw also supports [custom modes. Click here for more details](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md).
+
 The mode name strings are available as an enum at `Draw.modes`.
 
 ### `simple_select`
@@ -75,15 +77,6 @@ Lets you draw a Polygon feature.
 `Draw.modes.DRAW_POINT === 'draw_point'`
 
 Lets you draw a Point feature.
-
-### `static`
-
-`Draw.modes.STATIC === 'static'`
-
-Disables editing for all drawn features.
-
-Note that this mode can only be entered or exited programmatically with `Draw.
-`.
 
 ## API Methods
 
@@ -545,7 +538,7 @@ property | values | function
 --- | --- | ---
 meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features.
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
-mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon, static | Indicates which mode Draw is currently in.
+mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
 
 Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderFeatures`" below.
 
