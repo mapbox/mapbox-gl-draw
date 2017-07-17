@@ -240,6 +240,7 @@ Delete a feature from draw
 **Parameters**
 
 -   `id` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** a feature id
+-   `opts`   (optional, default `{}`)
 
 ### addFeature
 
@@ -273,7 +274,8 @@ Trigger a mode change
 **Parameters**
 
 -   `mode` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** the mode to transition into
--   `opts` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** the options object to pass to the new mode
+-   `opts` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** the options object to pass to the new mode (optional, default `{}`)
+-   `eventOpts` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** used to control what kind of events are emitted. (optional, default `{}`)
 
 ### updateUIClasses
 
@@ -282,6 +284,14 @@ Update the state of draw map classes
 **Parameters**
 
 -   `opts` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** 
+
+### activateUIButton
+
+If a name is provided it makes that button active, else if makes all buttons inactive
+
+**Parameters**
+
+-   `name` **[String](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)?** name of the button to make active, leave as undefined to set buttons to be inactive
 
 ### featuresAt
 
