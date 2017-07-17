@@ -21,8 +21,6 @@ DrawPoint.onSetup = function() {
   this.activateUIButton(Constants.types.POINT);
 
   this.setActionableState({
-    combineFeatures: false,
-    uncombineFeatures: false,
     trash: true
   });
 

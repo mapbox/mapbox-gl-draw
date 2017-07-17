@@ -137,6 +137,10 @@ DirectSelect.onSetup = function(opts) {
   this.setSelected(featureId);
   doubleClickZoom.disable(this);
 
+  this.setActionableState({
+    trash: true
+  });
+
   return state;
 };
 

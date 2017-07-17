@@ -116,11 +116,16 @@ ModeInterface.prototype.clearSelectedCoordinates = function() {
 
 /**
  * Indicate if the different action are currently possible with your mode
- * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions.
+ * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
  * @param {Object} actions
  */
-ModeInterface.prototype.setActionableState = function(actions) {
-  return this._ctx.events.actionable(actions);
+ModeInterface.prototype.setActionableState = function(actions = {}) {
+  var newSet = {
+    trash: actions.trash || false,
+    combineFeatures: actions.combineFeatures || false,
+    uncombineFeatures: actions.uncombineFeatures || false
+  }
+  return this._ctx.events.actionable(newSet);
 };
 
 /**

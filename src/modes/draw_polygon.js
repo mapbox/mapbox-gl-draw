@@ -24,8 +24,6 @@ DrawPolygon.onSetup = function() {
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
   this.activateUIButton(Constants.types.POLYGON);
   this.setActionableState({
-    combineFeatures: false,
-    uncombineFeatures: false,
     trash: true
   });
 

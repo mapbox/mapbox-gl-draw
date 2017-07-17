@@ -59,8 +59,6 @@ DrawLineString.onSetup = function(opts) {
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
   this.activateUIButton(Constants.types.LINE);
   this.setActionableState({
-    combineFeatures: false,
-    uncombineFeatures: false,
     trash: true
   });
 

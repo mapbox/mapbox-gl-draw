@@ -28,6 +28,12 @@ SimpleSelect.onSetup = function(opts) {
   this.fireActionable();
   this.setSelected(state.initiallySelectedFeatureIds);
 
+  this.setActionableState({
+    combineFeatures: true,
+    uncombineFeatures: true,
+    trash: true
+  });
+
   return state;
 };
 
