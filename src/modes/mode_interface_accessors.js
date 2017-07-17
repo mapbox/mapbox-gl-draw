@@ -127,9 +127,10 @@ ModeInterface.prototype.setActionableState = function(actions) {
  * Trigger a mode change
  * @param {String} mode - the mode to transition into
  * @param {Object} opts - the options object to pass to the new mode
+ * @param {Object} eventOpts - used to control what kind of events are emitted.
  */
-ModeInterface.prototype.changeMode = function(mode, opts) {
-  return this._ctx.events.changeMode(mode, opts);
+ModeInterface.prototype.changeMode = function(mode, opts = {}, eventOpts = {}) {
+  return this._ctx.events.changeMode(mode, opts, eventOpts);
 };
 
 /**
