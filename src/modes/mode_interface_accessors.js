@@ -13,7 +13,8 @@ const ModeInterface = module.exports = function(ctx) {
 
 /**
  * Sets Draw's interal selected state
- * @param {DrawFeature[]} - whats selected
+ * @name this.setSelected
+ * @param {DrawFeature[]} - whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
  */
 ModeInterface.prototype.setSelected = function(features) {
   return this._ctx.store.setSelected(features);
@@ -21,6 +22,7 @@ ModeInterface.prototype.setSelected = function(features) {
 
 /**
  * Sets Draw's internal selected coordinate state
+ * @name this.setSelectedCoordinates
  * @param {Object[]} coords - a array of {coord_path: 'string', featureId: 'string'}
  */
 ModeInterface.prototype.setSelectedCoordinates = function(coords) {
@@ -35,7 +37,8 @@ ModeInterface.prototype.setSelectedCoordinates = function(coords) {
 };
 
 /**
- * Get all selected features
+ * Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+ * @name this.getSelected
  * @returns {DrawFeature[]}
  */
 ModeInterface.prototype.getSelected = function() {
@@ -44,6 +47,7 @@ ModeInterface.prototype.getSelected = function() {
 
 /**
  * Get the ids of all currently selected features
+ * @name this.getSelectedIds
  * @returns {String[]}
  */
 ModeInterface.prototype.getSelectedIds = function() {
@@ -52,6 +56,7 @@ ModeInterface.prototype.getSelectedIds = function() {
 
 /**
  * Check if a feature is selected
+ * @name this.isSelected
  * @param {String} id - a feature id
  * @returns {Boolean}
  */
@@ -60,7 +65,8 @@ ModeInterface.prototype.isSelected = function(id) {
 };
 
 /**
- * Get a feature by its id
+ * Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) by its id
+ * @name this.getFeature
  * @param {String} id - a feature id
  * @returns {DrawFeature}
  */
@@ -70,6 +76,7 @@ ModeInterface.prototype.getFeature = function(id) {
 
 /**
  * Add a feature to draw's internal selected state
+ * @name this.select
  * @param {String} id
  */
 ModeInterface.prototype.select = function(id) {
@@ -78,6 +85,7 @@ ModeInterface.prototype.select = function(id) {
 
 /**
  * Remove a feature from draw's internal selected state
+ * @name this.delete
  * @param {String} id
  */
 ModeInterface.prototype.deselect = function(id) {
@@ -86,6 +94,7 @@ ModeInterface.prototype.deselect = function(id) {
 
 /**
  * Delete a feature from draw
+ * @name this.deleteFeature
  * @param {String} id - a feature id
  */
 ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
@@ -93,7 +102,9 @@ ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
 };
 
 /**
- * Add a feature to Draw
+ * Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) to draw.
+ * See `this.newFeature` for converting geojson into a DrawFeature
+ * @name this.addFeature
  * @param {DrawFeature} feature - the feature to add
  */
 ModeInterface.prototype.addFeature = function(feature) {
@@ -117,6 +128,7 @@ ModeInterface.prototype.clearSelectedCoordinates = function() {
 /**
  * Indicate if the different action are currently possible with your mode
  * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
+ * @name this.setActionableState
  * @param {Object} actions
  */
 ModeInterface.prototype.setActionableState = function(actions = {}) {
@@ -130,6 +142,7 @@ ModeInterface.prototype.setActionableState = function(actions = {}) {
 
 /**
  * Trigger a mode change
+ * @name this.changeMode
  * @param {String} mode - the mode to transition into
  * @param {Object} opts - the options object to pass to the new mode
  * @param {Object} eventOpts - used to control what kind of events are emitted.
@@ -140,6 +153,7 @@ ModeInterface.prototype.changeMode = function(mode, opts = {}, eventOpts = {}) {
 
 /**
  * Update the state of draw map classes
+ * @name this.updateUIClasses
  * @param {Object} opts
  */
 ModeInterface.prototype.updateUIClasses = function(opts) {
@@ -148,6 +162,7 @@ ModeInterface.prototype.updateUIClasses = function(opts) {
 
 /**
  * If a name is provided it makes that button active, else if makes all buttons inactive
+ * @name this.activateUIButton
  * @param {String?} name - name of the button to make active, leave as undefined to set buttons to be inactive
  */
 ModeInterface.prototype.activateUIButton = function(name) {
@@ -156,6 +171,7 @@ ModeInterface.prototype.activateUIButton = function(name) {
 
 /**
  * Get the features at the location of an event object or in a bbox
+ * @name this.featuresAt
  * @param {Event||NULL} event - a mapbox-gl event object
  * @param {BBOX||NULL} bbox - the area to get features from
  * @param {String} bufferType - is this `click` or `tap` event, defaults to click
@@ -166,7 +182,8 @@ ModeInterface.prototype.featuresAt = function(event, bbox, bufferType = 'click')
 };
 
 /**
- * Create a new {DrawFeature} from geojson
+ * Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) from geojson
+ * @name this.newFeature
  * @param {GeoJSONFeature} geojson 
  * @returns {DrawFeature}
  */
@@ -179,7 +196,8 @@ ModeInterface.prototype.newFeature = function(geojson) {
 };
 
 /**
- * Check is an object is an instance of a {DrawFeature}
+ * Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+ * @name this.isInstanceOf
  * @param {String} type - `Point`, `LineString`, `Polygon`, `MultiFeature`
  * @param {Object} feature - the object that needs to be checked
  * @returns {Boolean}
@@ -194,6 +212,7 @@ ModeInterface.prototype.isInstanceOf = function(type, feature) {
 
 /**
  * Force draw to rerender the feature of the provided id
+ * @name this.doRender
  * @param {String} id - a feature id
  */
 ModeInterface.prototype.doRender = function(id) {
