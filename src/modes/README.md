@@ -1,8 +1,8 @@
 # Creating modes for Mapbox Draw
 
-In Mapbox Draw, modes are used to group sets of user interactions into one behavior. Internally Draw has the `draw_polygon` mode, which controls a bunch of interactions for drawing a polygon. Draw also has the `simple_select` mode which controls interactions when zero, one or many features are selected including transitioning to `direct_select` mode when a users interactions imply that they want to do detailed edits of a single feature.
+In Mapbox Draw, modes are used to group sets of user interactions into one behavior. Internally Draw has the `draw_polygon` mode, which controls a bunch of interactions for drawing a polygon. Draw also has the `simple_select` mode which controls interactions when zero, one or many features are selected including transitioning to `direct_select` mode when a user's interactions imply that they want to do detailed edits of a single feature.
 
-To help developers have more control of their Mapbox Draw powered application, Draw provides an interface for writing and hooking in custom modes. Below we will see how to write these modes by working though a small example.
+To help developers have more control of their Mapbox Draw powered application, Draw provides an interface for writing and hooking in custom modes. Below we will see how to write these modes by working through a small example.
 
 ## Writing Custom Modes
 
@@ -43,7 +43,7 @@ LotsOfPointsMode.onKeyUp = function(state, e) {
 
 // This is the only required function for a mode.
 // It decides which features currently in Draw's data store will be rendered on the map.
-// All features passed to `display` will be rendered, so you can pass mutliple display features per internal feature.
+// All features passed to `display` will be rendered, so you can pass multiple display features per internal feature.
 // See `styling-draw` in `API.md` for advice on making display features
 LotsOfPointsMode.toDisplayFeatures = function(state, geojson, display) {
   display(geojson);
@@ -53,6 +53,8 @@ LotsOfPointsMode.toDisplayFeatures = function(state, geojson, display) {
 For more info on how to handle map interactions see [Life Cycle Functions](#life-cycle-functions). For more info on how to interact with Draw's internal state see [Setters & Getters](#setters-and-getters).
 
 ## Available Custom Modes
+
+_please feel free to add your own modes to this list via a PR_
 
 -   [Static Mode](https://github.com/mapbox/mapbox-gl-draw-static-mode): Turn off interactions
 
@@ -153,7 +155,7 @@ Triggered when a touch event is started
 
 ### MODE.onTouchMove
 
-Triggered when one drags thier finger on a mobile device
+Triggered when one drags their finger on a mobile device
 
 **Parameters**
 
@@ -171,7 +173,7 @@ Triggered when one removes their finger from the map
 
 ### MODE.onTap
 
-Triggered when one quicly taps the map
+Triggered when one quickly taps the map
 
 **Parameters**
 
@@ -227,7 +229,7 @@ See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#s
 
 ### this.setSelected
 
-Sets Draw's interal selected state
+Sets Draw's internal selected state
 
 **Parameters**
 
@@ -318,7 +320,7 @@ Clear all selected coordinates
 
 ### this.setActionableState
 
-Indicate if the different action are currently possible with your mode
+Indicate if the different actions are currently possible with your mode
 See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
 
 **Parameters**

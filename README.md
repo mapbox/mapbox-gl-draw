@@ -60,6 +60,12 @@ https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/
 
 ### See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for complete reference.
 
+### Enhancements and New Interactions
+
+For additional functionality [check out our list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#available-custom-modes).
+
+Mapbox Draw accepts functionality changes after the functionality has been proven out via a [custom mode](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#creating-modes-for-mapbox-draw). This lets users experiment and validate their mode before entering a review process, hopefully promoting innovation. When you write a custom mode, please open a PR adding it to our [list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#available-custom-modes).
+
 ### Developing and testing
 
 Install dependencies, build the source files and crank up a server via:
@@ -91,7 +97,7 @@ Update the version number in [the GL JS example](https://github.com/mapbox/mapbo
 
 ### Naming actions
 
-We're trying to follow standards when naming things. Here is a collection of links where we look for inspriation.
+We're trying to follow standards when naming things. Here is a collection of links where we look for inspiration.
 
 - http://turfjs.org/docs.html
 - http://toblerity.org/shapely/manual.html
