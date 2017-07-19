@@ -1,3 +1,9 @@
+## 1.0.0
+
+- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md)
+- Drops `static` mode, which can now be found [in its own repo](https://github.com/mapbox/mapbox-gl-draw-static-mode)
+- Fixes bug where `MapboxDraw` would prevent `MapboxGeocoder` delete actions (#673)
+
 ## 0.19.1
 
 - Fixes bug with safari where the map would move when drawing (#665).
