@@ -3,7 +3,6 @@
 import test from 'tape';
 import xtend from 'xtend';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-import createSyntheticEvent from 'synthetic-dom-events';
 import MapboxDraw from '../';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
@@ -28,15 +27,11 @@ map.addControl(Draw);
 map.on('load', runTests);
 document.body.removeChild(container);
 
-const backspaceEvent = createSyntheticEvent('keydown', {
-  keyCode: 8
-});
-const enterEvent = createSyntheticEvent('keyup', {
-  keyCode: 13
-});
-const escapeEvent = createSyntheticEvent('keyup', {
-  keyCode: 27
-});
+import {
+  backspaceEvent,
+  enterEvent,
+  escapeEvent
+} from './utils/key_events';
 
 function runTests() {
   const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
