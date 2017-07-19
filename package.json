@@ -12,6 +12,9 @@
     ]
   },
   "scripts": {
+    "docs": "npm run docs-modes-life-cycle && npm run docs-modes-get-and-set",
+    "docs-modes-get-and-set": "documentation readme --readme-file ./src/modes/README.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
+    "docs-modes-life-cycle": "documentation readme --readme-file ./src/modes/README.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
     "test": "npm run lint && npm run tape",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
@@ -38,6 +41,7 @@
     "instrument": false
   },
   "devDependencies": {
+    "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/centroid": "^4.0.0",
     "babel-core": "^6.9.1",
     "babel-eslint": "^7.1.0",

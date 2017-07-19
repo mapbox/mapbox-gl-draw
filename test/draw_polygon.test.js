@@ -6,12 +6,14 @@ import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';
-import CommonSelectors from '../src/lib/common_selectors';
-import drawPolygonMode from '../src/modes/draw_polygon';
+import drawPolygonModeObject from '../src/modes/draw_polygon';
 import Polygon from '../src/feature_types/polygon';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import setupAfterNextRender from './utils/after_next_render';
+import objectToMode from '../src/modes/object_to_mode';
+const drawPolygonMode = objectToMode(drawPolygonModeObject);
+
 import {
   enterEvent,
   startPointEvent,
@@ -22,7 +24,9 @@ import {
 
 test('draw_polygon mode initialization', t => {
   const context = createMockDrawModeContext();
-  drawPolygonMode(context);
+  const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
 
@@ -55,15 +59,6 @@ test('draw_polygon start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['polygon'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 7, 'this.on called');
-  t.ok(lifecycleContext.on.calledWith('mousemove', CommonSelectors.true));
-  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.isVertex));
-  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
-  t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
-  t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
-  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.isVertex));
-  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
-
   setTimeout(() => {
     t.equal(context.map.doubleClickZoom.disable.callCount, 1);
     t.end();
@@ -73,13 +68,16 @@ test('draw_polygon start', t => {
 test('draw_polygon stop with valid polygon', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   // Fake a valid polygon
-  context._test.polygon.isValid = () => true;
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
+  testPolygon.isValid = () => true;
 
   mode.stop.call();
-  t.equal(context.ui.setActiveButton.callCount, 1, 'ui.setActiveButton called');
-  t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
+  t.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
+  t.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 0, 'store.delete not called');
 
@@ -89,17 +87,20 @@ test('draw_polygon stop with valid polygon', t => {
 test('draw_polygon stop with invalid polygon', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   // Fake an invalid polygon
-  context._test.polygon.isValid = () => false;
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
+  testPolygon.isValid = () => false;
 
   mode.stop.call();
-  t.equal(context.ui.setActiveButton.callCount, 1, 'ui.setActiveButton called');
-  t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
+  t.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
+  t.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
   t.deepEqual(context.store.delete.getCall(0).args, [
-    [context._test.polygon.id],
+    [testPolygon.id],
     { silent: true }
   ], 'store.delete received correct arguments');
 
@@ -112,12 +113,15 @@ test('draw_polygon stop with invalid polygon', t => {
 test('draw_polygon render active polygon with no coordinates', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
 
   const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id
+      id: testPolygon.id
     },
     geometry: {
       type: 'Polygon',
@@ -133,12 +137,15 @@ test('draw_polygon render active polygon with no coordinates', t => {
 test('draw_polygon render active polygon with 1 coordinate (and closer)', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
 
   const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id
+      id: testPolygon.id
     },
     geometry: {
       type: 'Polygon',
@@ -154,12 +161,15 @@ test('draw_polygon render active polygon with 1 coordinate (and closer)', t => {
 test('draw_polygon render active polygon with 2 coordinates (and closer)', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
 
   const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id
+      id: testPolygon.id
     },
     geometry: {
       type: 'Polygon',
@@ -171,7 +181,7 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', t => 
   t.deepEqual(memo[1], {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id,
+      id: testPolygon.id,
       active: 'true',
       meta: 'feature'
     },
@@ -186,12 +196,15 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', t => 
 test('draw_polygon render active polygon with 3 coordinates (and closer)', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+  const testPolygon = context.store.get(context.store.getAllIds()[0]);
 
   const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id
+      id: testPolygon.id
     },
     geometry: {
       type: 'Polygon',
@@ -203,7 +216,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
   t.deepEqual(memo[0], {
     type: 'Feature',
     properties: {
-      parent: context._test.polygon.id,
+      parent: testPolygon.id,
       meta: 'vertex',
       coord_path: '0.0',
       active: 'false'
@@ -216,7 +229,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
   t.deepEqual(memo[1], {
     type: 'Feature',
     properties: {
-      parent: context._test.polygon.id,
+      parent: testPolygon.id,
       meta: 'vertex',
       coord_path: '0.2',
       active: 'false'
@@ -229,7 +242,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
   t.deepEqual(memo[2], {
     type: 'Feature',
     properties: {
-      id: context._test.polygon.id,
+      id: testPolygon.id,
       active: 'true',
       meta: 'feature'
     },
@@ -244,6 +257,8 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
 test('draw_polygon render inactive feature', t => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   const memo = [];
   const geojson = {

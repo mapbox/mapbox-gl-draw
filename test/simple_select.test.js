@@ -466,7 +466,7 @@ test('simple_select', t => {
       t.equal(movedMultiPolygon.geometry.coordinates[0][0][0][1], getGeoJSON('multiPolygon').geometry.coordinates[0][0][0][1] + 25, 'multiPolygon lat moved');
       t.equal(countPositions(movedMultiPolygon), countPositions(getGeoJSON('multiPolygon')), 'multiPolygon has same number of postions');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 
@@ -487,7 +487,7 @@ test('simple_select', t => {
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 
@@ -509,7 +509,7 @@ test('simple_select', t => {
       t.equal(movedPoint.geometry.coordinates[0], startPosition[0] + 15, 'point lng moved only the first amount');
       t.equal(movedPoint.geometry.coordinates[1], startPosition[1] + 15, 'point lat moved only the first amount');
 
-      t.end();
+      cleanUp(t.end);
     });
   });
 

@@ -5,13 +5,6 @@ const Constants = require('./constants');
 
 module.exports = function(ctx) {
 
-  ctx.events = events(ctx);
-
-  ctx.map = null;
-  ctx.container = null;
-  ctx.store = null;
-  ctx.ui = ui(ctx);
-
   let controlContainer = null;
 
   const setup = {
@@ -30,6 +23,8 @@ module.exports = function(ctx) {
     },
     onAdd: function(map) {
       ctx.map = map;
+      ctx.events = events(ctx);
+      ctx.ui = ui(ctx);
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
 
@@ -59,6 +54,7 @@ module.exports = function(ctx) {
         intervalId = setInterval(() => { if (map.loaded()) connect(); }, 16);
       }
 
+      ctx.events.start();
       return controlContainer;
     },
     addLayers: function() {

@@ -6,16 +6,19 @@ import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';
-import CommonSelectors from '../src/lib/common_selectors';
-import drawPointMode from '../src/modes/draw_point';
+import drawPointModeObject from '../src/modes/draw_point';
 import Point from '../src/feature_types/point';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import {escapeEvent, enterEvent} from './utils/key_events';
+import objectToMode from '../src/modes/object_to_mode';
+const drawPointMode = objectToMode(drawPointModeObject);
 
 test('draw_point mode initialization', t => {
   const context = createMockDrawModeContext();
-  drawPointMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  const mode = drawPointMode(context);
+  mode.start.call(lifecycleContext);
 
   t.equal(context.store.add.callCount, 1, 'store.add called');
 
@@ -38,8 +41,8 @@ test('draw_point start', t => {
   const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
-
   mode.start.call(lifecycleContext);
+
   t.equal(context.store.clearSelected.callCount, 1, 'store.clearSelected called');
   t.equal(context.ui.queueMapClasses.callCount, 1, 'ui.queueMapClasses called');
   t.deepEqual(context.ui.queueMapClasses.getCall(0).args, [{ mouse: 'add' }],
@@ -48,11 +51,7 @@ test('draw_point start', t => {
   t.deepEqual(context.ui.setActiveButton.getCall(0).args, ['point'],
     'ui.setActiveButton received correct arguments');
 
-  t.equal(lifecycleContext.on.callCount, 4, 'this.on called');
-  t.ok(lifecycleContext.on.calledWith('click', CommonSelectors.true));
-  t.ok(lifecycleContext.on.calledWith('tap', CommonSelectors.true));
-  t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEscapeKey));
-  t.ok(lifecycleContext.on.calledWith('keyup', CommonSelectors.isEnterKey));
+  t.equal(lifecycleContext.on.callCount, 12, 'this.on called');
 
   t.end();
 });
@@ -60,13 +59,17 @@ test('draw_point start', t => {
 test('draw_point stop with point placed', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   // Fake a placed point
-  context._test.point.updateCoordinate(10, 20);
+  const id = context.store.getAllIds()[0];
+  const point = context.store.get(id);
+  point.updateCoordinate(10, 20);
 
   mode.stop.call();
-  t.equal(context.ui.setActiveButton.callCount, 1, 'ui.setActiveButton called');
-  t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
+  t.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
+  t.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 0, 'store.delete not called');
 
@@ -76,14 +79,21 @@ test('draw_point stop with point placed', t => {
 test('draw_point stop with no point placed', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+
+  const id = context.store.getAllIds()[0];
+  const point = context.store.get(id);
 
   mode.stop.call();
-  t.equal(context.ui.setActiveButton.callCount, 1, 'ui.setActiveButton called');
-  t.deepEqual(context.ui.setActiveButton.getCall(0).args, [],
+
+
+  t.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
+  t.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
     'ui.setActiveButton received correct arguments');
   t.equal(context.store.delete.callCount, 1, 'store.delete called');
   t.deepEqual(context.store.delete.getCall(0).args, [
-    [context._test.point.id],
+    [point.id],
     { silent: true }
   ], 'store.delete received correct arguments');
 
@@ -93,12 +103,17 @@ test('draw_point stop with no point placed', t => {
 test('draw_point render the active point', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
+
+  const id = context.store.getAllIds()[0];
+  const point = context.store.get(id);
 
   const memo = [];
   const geojson = {
     type: 'Feature',
     properties: {
-      id: context._test.point.id
+      id: point.id
     },
     geometry: {
       type: 'Point',
@@ -113,6 +128,8 @@ test('draw_point render the active point', t => {
 test('draw_point render an inactive feature', t => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
+  const lifecycleContext = createMockLifecycleContext();
+  mode.start.call(lifecycleContext);
 
   const memo = [];
   const geojson = {

@@ -50,6 +50,10 @@ var map = new mapboxgl.Map({
 var Draw = new MapboxDraw();
 
 map.addControl(Draw)
+
+map.on('load', function() {
+  // ALL YOUR APPLICATION CODE
+});
 ```
 
 https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/

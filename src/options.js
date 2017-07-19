@@ -10,6 +10,7 @@ const defaultOptions = {
   boxSelect: true,
   displayControlsDefault: true,
   styles: require('./lib/theme'),
+  modes: require('./modes'),
   controls: {},
   userProperties: false
 };
