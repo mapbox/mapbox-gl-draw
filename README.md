@@ -62,9 +62,9 @@ https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/
 
 ### Enhancements and New Interactions
 
-For additional functionality [check out our list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#available-custom-modes).
+For additional functionality [check out our list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/modes/README.md#available-custom-modes).
 
-Mapbox Draw accepts functionality changes after the functionality has been proven out via a [custom mode](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#creating-modes-for-mapbox-draw). This lets users experiment and validate their mode before entering a review process, hopefully promoting innovation. When you write a custom mode, please open a PR adding it to our [list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/modes/README.md#available-custom-modes).
+Mapbox Draw accepts functionality changes after the functionality has been proven out via a [custom mode](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/modes/README.md#creating-modes-for-mapbox-draw). This lets users experiment and validate their mode before entering a review process, hopefully promoting innovation. When you write a custom mode, please open a PR adding it to our [list of custom modes](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/modes/README.md#available-custom-modes).
 
 ### Developing and testing
 
