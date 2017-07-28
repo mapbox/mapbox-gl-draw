@@ -548,7 +548,7 @@ If `opts.userProperties` is set to `true` the properties of a feature will also 
 
 ### Example Custom Styles
 
-See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/EXAMPLES.md) for examples of custom styles.
+See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/EXAMPLES.md) for examples of custom styles.
 
 ## Using Draw with Mapbox GL JS's `queryRenderFeatures`
 
