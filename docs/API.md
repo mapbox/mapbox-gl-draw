@@ -139,7 +139,7 @@ Notice that the `point` argument requires `x`, `y` coordinates from pixel space,
 With this function, you can use the coordinates provided by mouse events to get information out of Draw.
 
 ```js
-var featureIds = Draw.getFeatureIdsAt(20, 20);
+var featureIds = Draw.getFeatureIdsAt({x: 20, y: 20});
 console.log(featureIds)
 //=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
