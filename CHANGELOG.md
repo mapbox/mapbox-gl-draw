@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Moves some of the doc files around which fixes a bug with webpack (#675)
+
 ## 1.0.0
 
 - Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md)
