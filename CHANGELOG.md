@@ -1,3 +1,9 @@
+## 1.0.2
+
+- Fixes double click when drawing a line or polygon crashing bug (#680 via @AliceR)
+- Adds support for mapbox-gl@0.39.0
+- Adds support for mapbox-gl@0.40.0
+
 ## 1.0.1
 
 - Moves some of the doc files around which fixes a bug with webpack (#675)
