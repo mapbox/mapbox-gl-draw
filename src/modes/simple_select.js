@@ -25,7 +25,6 @@ SimpleSelect.onSetup = function(opts) {
     return this.getFeature(id) !== undefined;
   }));
   this.fireActionable();
-  this.setSelected(state.initiallySelectedFeatureIds, { silent: true });
 
   this.setActionableState({
     combineFeatures: true,
