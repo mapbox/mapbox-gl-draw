@@ -184,7 +184,7 @@ ModeInterface.prototype.featuresAt = function(event, bbox, bufferType = 'click')
 /**
  * Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) from geojson
  * @name this.newFeature
- * @param {GeoJSONFeature} geojson 
+ * @param {GeoJSONFeature} geojson
  * @returns {DrawFeature}
  */
 ModeInterface.prototype.newFeature = function(geojson) {

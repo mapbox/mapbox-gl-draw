@@ -4,13 +4,15 @@ import MapboxDraw from '../';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
+import mouseClick from './utils/mouse_click';
 import makeTouchEvent from './utils/make_touch_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 import createSyntheticEvent from 'synthetic-dom-events';
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 
 test('simple_select', t => {
-
+  const context = createMockDrawModeContext();
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
   const map = createMap({ container: mapContainer });
@@ -533,6 +535,27 @@ test('simple_select', t => {
 
       t.end();
     });
+  });
+
+  t.test('simple_select - on closing invalid line', t => {
+    Draw.changeMode('draw_line_string');
+    mouseClick(map, makeMouseEvent(1, 1));
+    mouseClick(map, makeMouseEvent(1, 1));
+    t.equal(Draw.getMode(), 'simple_select', 'should be in simple_select mode');
+    t.equal(Draw.getSelected().features.length, 0, 'should not get any selected features');
+    t.equal(context.store._emitSelectionChange, undefined, 'should not emit selection change');
+    cleanUp(t.end);
+  });
+
+  t.test('simple_select - on closing invalid polygon', t => {
+    Draw.changeMode('draw_polygon');
+    mouseClick(map, makeMouseEvent(1, 1));
+    mouseClick(map, makeMouseEvent(16, 16));
+    mouseClick(map, makeMouseEvent(16, 16));
+    t.equal(Draw.getMode(), 'simple_select', 'should be in simple_select mode');
+    t.equal(Draw.getSelected().features.length, 0, 'should not get any selected features');
+    t.equal(context.store._emitSelectionChange, undefined, 'should not emit selection change');
+    cleanUp(t.end);
   });
 
   document.body.removeChild(mapContainer);
