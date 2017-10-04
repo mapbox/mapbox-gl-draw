@@ -37,7 +37,7 @@ DirectSelect.startDragging = function(state, e) {
 };
 
 DirectSelect.stopDragging = function(state) {
-  if (state.initialDragPanState) {
+  if (state.canDragMove && state.initialDragPanState === true) {
     this.map.dragPan.enable();
   }
   state.dragMoving = false;
@@ -134,7 +134,7 @@ DirectSelect.onSetup = function(opts) {
     dragMoving: false,
     canDragMove: false,
     selectedCoordPaths: opts.coordPath ? [opts.coordPath] : [],
-    initialDragPanState: this.map.dragPan.isEnabled()
+    desiredDragPanState: null
   };
 
   this.setSelectedCoordinates(this.pathsToCoordinates(featureId, state.selectedCoordPaths));
