@@ -86,7 +86,7 @@ SimpleSelect.stopExtendedInteractions = function(state) {
     state.boxSelectElement = null;
   }
 
-  if (state.initialDragPanState !== false) {
+  if ((state.canDragMove || state.canBoxSelect) && state.initialDragPanState === true) {
     this.map.dragPan.enable();
   }
 
