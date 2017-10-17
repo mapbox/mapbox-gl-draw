@@ -11,6 +11,7 @@ const Store = module.exports = function(ctx) {
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
+  this._mapInitialConfig = new Map();
   this.ctx = ctx;
   this.sources = {
     hot: [],
@@ -293,3 +294,28 @@ function refreshSelectedCoordinates(options) {
   }
   this._selectedCoordinates = newSelectedCoordinates;
 }
+
+/**
+ * Stores the initial config for a map, so that we can set it again after we're done.
+*/
+Store.prototype.storeMapconfig = function(constants) {
+  constants.interactions.forEach((interaction) => {
+    const interactionSet = this.ctx.map[interaction];
+    if (interactionSet) {
+      this._mapInitialConfig[interaction] = this.ctx.map.options[interaction];
+    }
+  });
+};
+
+/**
+ * Restores the initial config for a map, ensuring all is well.
+*/
+Store.prototype.restoreMapConfig = function() {
+  for (const key of this._mapInitialConfig.entries()) {
+    if (this._mapInitialConfig[key]) {
+      this.ctx.map[key].enable();
+    } else {
+      this.ctx.map[key].disable();
+    }
+  }
+};

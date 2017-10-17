@@ -10,6 +10,7 @@ module.exports = function(ctx) {
   const setup = {
     onRemove: function() {
       setup.removeLayers();
+      ctx.store.restoreMapConfig(Constants);
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.map = null;
@@ -28,6 +29,7 @@ module.exports = function(ctx) {
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
 
+
       controlContainer = ctx.ui.addButtons();
 
       if (ctx.options.boxSelect) {
@@ -44,6 +46,7 @@ module.exports = function(ctx) {
         map.off('load', connect);
         clearInterval(intervalId);
         setup.addLayers();
+        ctx.store.storeMapconfig(Constants);
         ctx.events.addEventListeners();
       };
 
