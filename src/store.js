@@ -302,7 +302,7 @@ Store.prototype.storeMapconfig = function(constants) {
   constants.interactions.forEach((interaction) => {
     const interactionSet = this.ctx.map[interaction];
     if (interactionSet) {
-      this._mapInitialConfig[interaction] = this.ctx.map.options[interaction];
+      this._mapInitialConfig[interaction] = this.ctx.map[interaction].isEnabled();
     }
   });
 };
@@ -317,5 +317,20 @@ Store.prototype.restoreMapConfig = function() {
     } else {
       this.ctx.map[key].disable();
     }
+  }
+};
+
+/**
+ * Returns the initial state of an interaction setting.
+ * @param {string} interaction
+ * @return {boolean} `true` if the interaction is enabled, `false` if not. 
+ * Defaults to `true`. (Todo: include defaults.)
+*/
+Store.prototype.getInitialConfigValue = function(interaction) {
+  if (this._mapInitialConfig[interaction]) {
+    return this._mapInitialConfig[interaction];
+  } else {
+    // This needs to be set to whatever the default is for that interaction
+    return false;
   }
 };
