@@ -1,3 +1,9 @@
+## 1.0.3
+
+- Adds support for mapbox-gl@0.41.0 (#700 via @mike-marcacci)
+- Uses `@mapbox`-namespaced packages for geojson-extent and point-geometry. (#700 via @mike-marcacci)
+- Bump sinon@^4.0.0 and babelify@^8.0.0 versions
+
 ## 1.0.2
 
 - Fixes double click when drawing a line or polygon crashing bug (#680 via @AliceR)
@@ -38,7 +44,7 @@
 
 ## 0.17.0
 
-- Adds support for continuing lines via `draw.changeMode`. 
+- Adds support for continuing lines via `draw.changeMode`.
 
 ## 0.16.1
 
