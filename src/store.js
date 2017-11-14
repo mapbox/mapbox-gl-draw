@@ -2,6 +2,7 @@ const throttle = require('./lib/throttle');
 const toDenseArray = require('./lib/to_dense_array');
 const StringSet = require('./lib/string_set');
 const render = require('./render');
+const interactions = require('./constants').interactions;
 
 const Store = module.exports = function(ctx) {
   this._features = {};
@@ -298,8 +299,8 @@ function refreshSelectedCoordinates(options) {
 /**
  * Stores the initial config for a map, so that we can set it again after we're done.
 */
-Store.prototype.storeMapConfig = function(constants) {
-  constants.interactions.forEach((interaction) => {
+Store.prototype.storeMapConfig = function() {
+  interactions.forEach((interaction) => {
     const interactionSet = this.ctx.map[interaction];
     if (interactionSet) {
       this._mapInitialConfig[interaction] = this.ctx.map[interaction].isEnabled();

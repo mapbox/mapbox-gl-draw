@@ -46,7 +46,7 @@ module.exports = function(ctx) {
         map.off('load', connect);
         clearInterval(intervalId);
         setup.addLayers();
-        ctx.store.storeMapConfig(Constants);
+        ctx.store.storeMapConfig();
         ctx.events.addEventListeners();
       };
 
