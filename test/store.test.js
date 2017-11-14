@@ -54,8 +54,11 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.getSelectedCoordinates, 'function', 'exposes store.getSelectedCoordinates');
   t.equal(typeof Store.prototype.clearSelectedCoordinates, 'function', 'exposes store.clearSelectedCoordinates');
   t.equal(typeof Store.prototype.setFeatureProperty, 'function', 'exposes store.setFeatureProperty');
+  t.equal(typeof Store.prototype.storeMapConfig, 'function', 'exposes store.storeMapConfig');
+  t.equal(typeof Store.prototype.restoreMapConfig, 'function', 'exposes store.restoreMapConfig');
+  t.equal(typeof Store.prototype.getInitialConfigValue, 'function', 'exposes store.getInitialConfigValue');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 21, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 24, 'no untested prototype members');
 
   t.end();
 });
