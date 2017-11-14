@@ -10,7 +10,7 @@ module.exports = function(ctx) {
   const setup = {
     onRemove: function() {
       setup.removeLayers();
-      ctx.store.restoreMapConfig(Constants);
+      ctx.store.restoreMapConfig();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.map = null;
@@ -46,7 +46,7 @@ module.exports = function(ctx) {
         map.off('load', connect);
         clearInterval(intervalId);
         setup.addLayers();
-        ctx.store.storeMapconfig(Constants);
+        ctx.store.storeMapConfig(Constants);
         ctx.events.addEventListeners();
       };
 
