@@ -1,4 +1,5 @@
 import mapboxgl from 'mapbox-gl-js-mock';
+import { interactions } from '../../src/constants';
 
 export default function createMap(mapOptions = {}) {
 
@@ -12,6 +13,15 @@ export default function createMap(mapOptions = {}) {
   if (mapOptions.container) {
     map.getContainer = () => mapOptions.container;
   }
+
+  // Mock up the interaction functions
+  interactions.forEach((interaction) => {
+    map[interaction] = {
+      disable: function () {},
+      enable: function () {},
+      isEnabled: function () { return true; },
+    };
+  });
 
   map.getCanvas = function() {
     return map.getContainer();
