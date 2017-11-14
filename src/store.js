@@ -312,13 +312,13 @@ Store.prototype.storeMapConfig = function() {
  * Restores the initial config for a map, ensuring all is well.
 */
 Store.prototype.restoreMapConfig = function() {
-  for (const key of this._mapInitialConfig.entries()) {
-    if (this._mapInitialConfig[key] !== undefined) {
+  Object.entries(this._mapInitialConfig).forEach(([key, value]) => {
+    if (value) {
       this.ctx.map[key].enable();
     } else {
       this.ctx.map[key].disable();
     }
-  }
+  });
 };
 
 /**
@@ -328,7 +328,7 @@ Store.prototype.restoreMapConfig = function() {
  * Defaults to `true`. (Todo: include defaults.)
 */
 Store.prototype.getInitialConfigValue = function(interaction) {
-  if (this._mapInitialConfig[interaction]) {
+  if (this._mapInitialConfig[interaction] !== undefined) {
     return this._mapInitialConfig[interaction];
   } else {
     // This needs to be set to whatever the default is for that interaction
