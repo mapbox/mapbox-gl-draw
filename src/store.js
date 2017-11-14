@@ -298,7 +298,7 @@ function refreshSelectedCoordinates(options) {
 /**
  * Stores the initial config for a map, so that we can set it again after we're done.
 */
-Store.prototype.storeMapconfig = function(constants) {
+Store.prototype.storeMapConfig = function(constants) {
   constants.interactions.forEach((interaction) => {
     const interactionSet = this.ctx.map[interaction];
     if (interactionSet) {
@@ -312,7 +312,7 @@ Store.prototype.storeMapconfig = function(constants) {
 */
 Store.prototype.restoreMapConfig = function() {
   for (const key of this._mapInitialConfig.entries()) {
-    if (this._mapInitialConfig[key]) {
+    if (this._mapInitialConfig[key] !== undefined) {
       this.ctx.map[key].enable();
     } else {
       this.ctx.map[key].disable();
@@ -331,6 +331,7 @@ Store.prototype.getInitialConfigValue = function(interaction) {
     return this._mapInitialConfig[interaction];
   } else {
     // This needs to be set to whatever the default is for that interaction
-    return false;
+    // It seems to be true for all cases currently, so let's send back `true`.
+    return true;
   }
 };
