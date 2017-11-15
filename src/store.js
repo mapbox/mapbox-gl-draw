@@ -12,7 +12,7 @@ const Store = module.exports = function(ctx) {
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
-  this._mapInitialConfig = new Map();
+  this._mapInitialConfig = {};
   this.ctx = ctx;
   this.sources = {
     hot: [],
@@ -312,7 +312,8 @@ Store.prototype.storeMapConfig = function() {
  * Restores the initial config for a map, ensuring all is well.
 */
 Store.prototype.restoreMapConfig = function() {
-  Object.entries(this._mapInitialConfig).forEach(([key, value]) => {
+  Object.keys(this._mapInitialConfig).forEach(key => {
+    const value = this._mapInitialConfig[key];
     if (value) {
       this.ctx.map[key].enable();
     } else {
