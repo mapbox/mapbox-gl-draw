@@ -6,7 +6,7 @@ import createMap from './utils/create_map';
 
 function createStore() {
   const map = createMap();
-  const ctx = { map };
+  const ctx = { map: map };
   return new Store(ctx);
 }
 
@@ -27,6 +27,7 @@ test('Store constructor and public API', t => {
     cold: []
   }, 'exposes store.sources');
   t.equal(store.ctx, ctx, 'exposes store.ctx');
+  t.equal(store.ctx.map, map, 'exposes store.ctx.map');
   t.equal(store.isDirty, false, 'exposes store.isDirty');
   t.equal(typeof store.render, 'function', 'exposes store.render');
 
