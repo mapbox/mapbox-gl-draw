@@ -258,3 +258,21 @@ test('Store#setFeatureProperty', t => {
   t.end();
 });
 
+test('Store#storeAndRestoreMapConfig', t => {
+  const map = createMap();
+  // Disable doubleClickZoom
+  map.doubleClickZoom.disable();
+  // Check it's disabled
+  t.equal(map.doubleClickZoom.isEnabled(), false, 'Disables doubleClickZoom on the map');
+  const ctx = { map: map };
+  const store = new Store(ctx);
+  store.storeMapConfig();
+  // Check we can get the initial state of it
+  console.log(store);
+  t.equal(store.getInitialConfigValue('doubleClickZoom'), false, 'Retrieves the initial value for the doubleClickZoom');
+  // Enable it again, byt then use restore to reset the initial state
+  map.doubleClickZoom.enable();
+  store.restoreMapConfig();
+  t.equal(map.doubleClickZoom.isEnabled(), false, 'Restores doubleClickZoom on the map');
+  t.end();
+});
