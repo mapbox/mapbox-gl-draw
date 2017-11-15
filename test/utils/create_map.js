@@ -17,9 +17,10 @@ export default function createMap(mapOptions = {}) {
   // Mock up the interaction functions
   interactions.forEach((interaction) => {
     map[interaction] = {
-      disable: function () {},
-      enable: function () {},
-      isEnabled: function () { return true; },
+      enabled: true,
+      disable: function () { this.enabled = false; },
+      enable: function () { this.enabled = true; },
+      isEnabled: function () { return this.enabled; },
     };
   });
 
