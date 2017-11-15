@@ -1,5 +1,5 @@
 import test from 'tape';
-import Point from 'point-geometry';
+import Point from '@mapbox/point-geometry';
 import mouseEventPoint from '../src/lib/mouse_event_point';
 
 test('mouseEventPoint', t => {

@@ -1,4 +1,4 @@
-const Point = require('point-geometry');
+const Point = require('@mapbox/point-geometry');
 
 /**
  * Returns a Point representing a mouse event's position
