@@ -19,7 +19,7 @@ Draw ships with CSS, make sure you include it in your build.
  ```js
 require('@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css')
 // or
-import @mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
  ```
 
 **When using CDN**
