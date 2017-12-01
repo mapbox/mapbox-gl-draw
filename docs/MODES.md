@@ -57,6 +57,7 @@ For more info on how to handle map interactions see [Life Cycle Functions](#life
 _please feel free to add your own modes to this list via a PR_
 
 -   [Static Mode](https://github.com/mapbox/mapbox-gl-draw-static-mode): Turn off interactions
+-   [Cut/Split Line Mode](https://github.com/BrunoSalerno/mapbox-gl-draw-cut-line-mode): Cut/split lineStrings functionality
 
 ## Life Cycle Functions
 
