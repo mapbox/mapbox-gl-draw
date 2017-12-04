@@ -18,6 +18,7 @@ SimpleSelect.onSetup = function(opts) {
     canBoxSelect: false,
     dragMoveing: false,
     canDragMove: false,
+    initialDragPanState: this.map.dragPan.isEnabled(),
     initiallySelectedFeatureIds: opts.featureIds || []
   };
 
@@ -87,7 +88,9 @@ SimpleSelect.stopExtendedInteractions = function(state) {
     state.boxSelectElement = null;
   }
 
-  this.map.dragPan.enable();
+  if ((state.canDragMove || state.canBoxSelect) && state.initialDragPanState === true) {
+    this.map.dragPan.enable();
+  }
 
   state.boxSelecting = false;
   state.canBoxSelect = false;
@@ -205,6 +208,7 @@ SimpleSelect.clickOnFeature = function(state, e) {
 };
 
 SimpleSelect.onMouseDown = function(state, e) {
+  state.initialDragPanState = this.map.dragPan.isEnabled();
   if (CommonSelectors.isActiveFeature(e)) return this.startOnActiveFeature(state, e);
   if (this.drawConfig.boxSelect && CommonSelectors.isShiftMousedown(e)) return this.startBoxSelect(state, e);
 };
