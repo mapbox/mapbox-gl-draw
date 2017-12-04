@@ -106,10 +106,7 @@ test('draw_line_string stop with invalid line', t => {
     ], 'store.delete received correct arguments');
   }
 
-  setTimeout(() => {
-    t.equal(context.map.doubleClickZoom.enable.callCount, 1);
-    t.end();
-  }, 10);
+  t.end();
 });
 
 test('draw_line_string render active line with 0 coordinates', t => {

@@ -73,6 +73,15 @@ module.exports = {
     ACTIVE: 'true',
     INACTIVE: 'false'
   },
+  interactions: [
+    'scrollZoom',
+    'boxZoom',
+    'dragRotate',
+    'dragPan',
+    'keyboard',
+    'doubleClickZoom',
+    'touchZoomRotate'
+  ],
   LAT_MIN: -90,
   LAT_RENDERED_MIN: -85,
   LAT_MAX: 90,

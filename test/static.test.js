@@ -11,7 +11,7 @@ test('static', t => {
 
   const map = createMap();
   spy(map, 'fire');
-  map.dragPan.disable.restore();
+  map.dragPan.disable();
   spy(map.dragPan, 'disable');
 
   const opts = {

@@ -1,3 +1,8 @@
+## 1.0.4
+
+- Fixes bug where map interaction setting were oven written by Draw even after Draw was removed ([#696](https://github.com/mapbox/mapbox-gl-draw/pull/696) via @alexgleith)
+- Updated readme to include `import` syntax (#706 via @thiagoxvo)
+
 ## 1.0.3
 
 - Adds support for mapbox-gl@0.41.0 (#700 via @mike-marcacci)

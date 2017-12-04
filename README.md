@@ -19,12 +19,12 @@ Draw ships with CSS, make sure you include it in your build.
  ```js
 require('@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css')
 // or
-import @mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
  ```
 
 **When using CDN**
 ```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.3/mapbox-gl-draw.css' type='text/css' />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Usage in your application
@@ -39,7 +39,7 @@ var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.3/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.js'></script>
 ```
 
 **Example setup**

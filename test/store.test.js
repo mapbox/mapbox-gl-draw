@@ -6,7 +6,7 @@ import createMap from './utils/create_map';
 
 function createStore() {
   const map = createMap();
-  const ctx = { map };
+  const ctx = { map: map };
   return new Store(ctx);
 }
 
@@ -27,6 +27,7 @@ test('Store constructor and public API', t => {
     cold: []
   }, 'exposes store.sources');
   t.equal(store.ctx, ctx, 'exposes store.ctx');
+  t.equal(store.ctx.map, map, 'exposes store.ctx.map');
   t.equal(store.isDirty, false, 'exposes store.isDirty');
   t.equal(typeof store.render, 'function', 'exposes store.render');
 
@@ -54,8 +55,11 @@ test('Store constructor and public API', t => {
   t.equal(typeof Store.prototype.getSelectedCoordinates, 'function', 'exposes store.getSelectedCoordinates');
   t.equal(typeof Store.prototype.clearSelectedCoordinates, 'function', 'exposes store.clearSelectedCoordinates');
   t.equal(typeof Store.prototype.setFeatureProperty, 'function', 'exposes store.setFeatureProperty');
+  t.equal(typeof Store.prototype.storeMapConfig, 'function', 'exposes store.storeMapConfig');
+  t.equal(typeof Store.prototype.restoreMapConfig, 'function', 'exposes store.restoreMapConfig');
+  t.equal(typeof Store.prototype.getInitialConfigValue, 'function', 'exposes store.getInitialConfigValue');
 
-  t.equal(getPublicMemberKeys(Store.prototype).length, 21, 'no untested prototype members');
+  t.equal(getPublicMemberKeys(Store.prototype).length, 24, 'no untested prototype members');
 
   t.end();
 });
@@ -254,3 +258,21 @@ test('Store#setFeatureProperty', t => {
   t.end();
 });
 
+test('Store#storeAndRestoreMapConfig', t => {
+  const map = createMap();
+  // Disable doubleClickZoom
+  map.doubleClickZoom.disable();
+  // Check it's disabled
+  t.equal(map.doubleClickZoom.isEnabled(), false, 'Disables doubleClickZoom on the map');
+  const ctx = { map: map };
+  const store = new Store(ctx);
+  store.storeMapConfig();
+  // Check we can get the initial state of it
+  console.log(store);
+  t.equal(store.getInitialConfigValue('doubleClickZoom'), false, 'Retrieves the initial value for the doubleClickZoom');
+  // Enable it again, byt then use restore to reset the initial state
+  map.doubleClickZoom.enable();
+  store.restoreMapConfig();
+  t.equal(map.doubleClickZoom.isEnabled(), false, 'Restores doubleClickZoom on the map');
+  t.end();
+});
