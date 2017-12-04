@@ -268,7 +268,6 @@ test('Store#storeAndRestoreMapConfig', t => {
   const store = new Store(ctx);
   store.storeMapConfig();
   // Check we can get the initial state of it
-  console.log(store);
   t.equal(store.getInitialConfigValue('doubleClickZoom'), false, 'Retrieves the initial value for the doubleClickZoom');
   // Enable it again, byt then use restore to reset the initial state
   map.doubleClickZoom.enable();
