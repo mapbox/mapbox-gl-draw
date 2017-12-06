@@ -100,19 +100,6 @@ module.exports = [
     }
   },
   {
-    'id': 'gl-draw-polygon-and-line-vertex-stroke-inactive',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', 'meta', 'vertex'],
-      ['==', '$type', 'Point'],
-      ['!=', 'mode', 'static']
-    ],
-    'paint': {
-      'circle-radius': 5,
-      'circle-color': '#fff'
-    }
-  },
-  {
     'id': 'gl-draw-polygon-and-line-vertex-inactive',
     'type': 'circle',
     'filter': ['all',
@@ -122,22 +109,9 @@ module.exports = [
     ],
     'paint': {
       'circle-radius': 3,
-      'circle-color': '#fbb03b'
-    }
-  },
-  {
-    'id': 'gl-draw-point-point-stroke-inactive',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', 'active', 'false'],
-      ['==', '$type', 'Point'],
-      ['==', 'meta', 'feature'],
-      ['!=', 'mode', 'static']
-    ],
-    'paint': {
-      'circle-radius': 5,
-      'circle-opacity': 1,
-      'circle-color': '#fff'
+      'circle-color': '#fbb03b',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff'
     }
   },
   {
@@ -151,20 +125,9 @@ module.exports = [
     ],
     'paint': {
       'circle-radius': 3,
-      'circle-color': '#3bb2d0'
-    }
-  },
-  {
-    'id': 'gl-draw-point-stroke-active',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'active', 'true'],
-      ['!=', 'meta', 'midpoint']
-    ],
-    'paint': {
-      'circle-radius': 7,
-      'circle-color': '#fff'
+      'circle-color': '#3bb2d0',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff'
     }
   },
   {
@@ -176,7 +139,9 @@ module.exports = [
       ['==', 'active', 'true']],
     'paint': {
       'circle-radius': 5,
-      'circle-color': '#fbb03b'
+      'circle-color': '#fbb03b',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff'
     }
   },
   {
