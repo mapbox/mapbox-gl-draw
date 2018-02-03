@@ -55,7 +55,7 @@ var draw = new MapboxDraw({
   modes: {
     lots_of_points: LotsOfPointsMode,
   },
-})
+});
 ```
 
 For more info on how to handle map interactions see [Life Cycle Functions](#life-cycle-functions). For more info on how to interact with Draw's internal state see [Setters & Getters](#setters-and-getters).
