@@ -48,6 +48,15 @@ LotsOfPointsMode.onKeyUp = function(state, e) {
 LotsOfPointsMode.toDisplayFeatures = function(state, geojson, display) {
   display(geojson);
 };
+
+// Add the new draw mode to the MapboxDraw object
+var draw = new MapboxDraw({
+  defaultMode: 'lots_of_points',
+  // Adds the LotsOfPointsMode to the built-in set of modes
+  modes: Object.assign({
+    lots_of_points: LotsOfPointsMode,
+  }, MapboxDraw.modes),
+});
 ```
 
 For more info on how to handle map interactions see [Life Cycle Functions](#life-cycle-functions). For more info on how to interact with Draw's internal state see [Setters & Getters](#setters-and-getters).
