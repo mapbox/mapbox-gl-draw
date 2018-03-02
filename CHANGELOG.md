@@ -1,3 +1,9 @@
+## 1.0.5
+
+- update browserify to version 15.0.0 [#731](https://github.com/mapbox/mapbox-gl-draw/pull/731)
+- update babel-eslint to version 8.0.3 [#715](https://github.com/mapbox/mapbox-gl-draw/pull/715)
+- update @turf/centroid to version 6.0.0 [#747](https://github.com/mapbox/mapbox-gl-draw/pull/747)
+
 ## 1.0.4
 
 - Fixes bug where map interaction setting were oven written by Draw even after Draw was removed ([#696](https://github.com/mapbox/mapbox-gl-draw/pull/696) via @alexgleith)
