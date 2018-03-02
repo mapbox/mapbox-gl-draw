@@ -56,7 +56,11 @@ var map = new mapboxgl.Map({
 
 var Draw = new MapboxDraw();
 
-map.addControl(Draw)
+// Map#addControl takes an optional second argument to set the position of the control.
+// If no position is specified the control defaults to `top-right`. See the docs 
+// for more details: https://www.mapbox.com/mapbox-gl-js/api/map#addcontrol
+
+map.addControl(Draw, 'top-left');
 
 map.on('load', function() {
   // ALL YOUR APPLICATION CODE

@@ -2,7 +2,7 @@
 
 ## Styling
 
-See [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md) for a complete styling reference.
+See [API.md#styling-draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#styling-draw) for a complete styling reference.
 
 ### points
 

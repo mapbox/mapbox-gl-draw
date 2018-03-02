@@ -6,6 +6,7 @@
   "author": "mapbox",
   "license": "ISC",
   "main": "index.js",
+  "style": "dist/mapbox-gl-draw.css",
   "browserify": {
     "transform": [
       "babelify"
@@ -42,7 +43,7 @@
   },
   "devDependencies": {
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
-    "@turf/centroid": "^5.0.4",
+    "@turf/centroid": "^6.0.0",
     "babel-core": "^6.9.1",
     "babel-eslint": "^8.0.3",
     "babel-plugin-__coverage__": "^11.0.0",
