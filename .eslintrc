@@ -26,7 +26,8 @@
     "quotes": "off",
     "space-before-function-paren": "off",
     "template-curly-spacing": "error",
-    "camelcase": 0
+    "camelcase": 0,
+    "no-console": ["error", { "allow": ["warn", "error"] }]
   },
   "env": {
     "es6": true,

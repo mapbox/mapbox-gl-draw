@@ -104,10 +104,7 @@ test('draw_polygon stop with invalid polygon', t => {
     { silent: true }
   ], 'store.delete received correct arguments');
 
-  setTimeout(() => {
-    t.equal(context.map.doubleClickZoom.enable.callCount, 1);
-    t.end();
-  }, 10);
+  t.end();
 });
 
 test('draw_polygon render active polygon with no coordinates', t => {

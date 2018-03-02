@@ -2,6 +2,7 @@ const throttle = require('./lib/throttle');
 const toDenseArray = require('./lib/to_dense_array');
 const StringSet = require('./lib/string_set');
 const render = require('./render');
+const interactions = require('./constants').interactions;
 
 const Store = module.exports = function(ctx) {
   this._features = {};
@@ -11,6 +12,7 @@ const Store = module.exports = function(ctx) {
   this._changedFeatureIds = new StringSet();
   this._deletedFeaturesToEmit = [];
   this._emitSelectionChange = false;
+  this._mapInitialConfig = {};
   this.ctx = ctx;
   this.sources = {
     hot: [],
@@ -293,3 +295,45 @@ function refreshSelectedCoordinates(options) {
   }
   this._selectedCoordinates = newSelectedCoordinates;
 }
+
+/**
+ * Stores the initial config for a map, so that we can set it again after we're done.
+*/
+Store.prototype.storeMapConfig = function() {
+  interactions.forEach((interaction) => {
+    const interactionSet = this.ctx.map[interaction];
+    if (interactionSet) {
+      this._mapInitialConfig[interaction] = this.ctx.map[interaction].isEnabled();
+    }
+  });
+};
+
+/**
+ * Restores the initial config for a map, ensuring all is well.
+*/
+Store.prototype.restoreMapConfig = function() {
+  Object.keys(this._mapInitialConfig).forEach(key => {
+    const value = this._mapInitialConfig[key];
+    if (value) {
+      this.ctx.map[key].enable();
+    } else {
+      this.ctx.map[key].disable();
+    }
+  });
+};
+
+/**
+ * Returns the initial state of an interaction setting.
+ * @param {string} interaction
+ * @return {boolean} `true` if the interaction is enabled, `false` if not. 
+ * Defaults to `true`. (Todo: include defaults.)
+*/
+Store.prototype.getInitialConfigValue = function(interaction) {
+  if (this._mapInitialConfig[interaction] !== undefined) {
+    return this._mapInitialConfig[interaction];
+  } else {
+    // This needs to be set to whatever the default is for that interaction
+    // It seems to be true for all cases currently, so let's send back `true`.
+    return true;
+  }
+};

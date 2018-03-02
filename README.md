@@ -14,10 +14,17 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 npm install @mapbox/mapbox-gl-draw
 ```
 
-Draw ships with CSS, make sure you include it in your build. It can be found on our CDN or at `require('mapbox-gl-draw/dist/mapbox-gl-draw.css')`.
+Draw ships with CSS, make sure you include it in your build.  
+**When using modules**
+ ```js
+require('@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css')
+// or
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+ ```
 
+**When using CDN**
 ```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.19.0/mapbox-gl-draw.css' type='text/css' />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Usage in your application
@@ -32,7 +39,7 @@ var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.19.0/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.js'></script>
 ```
 
 **Example setup**
@@ -49,7 +56,11 @@ var map = new mapboxgl.Map({
 
 var Draw = new MapboxDraw();
 
-map.addControl(Draw)
+// Map#addControl takes an optional second argument to set the position of the control.
+// If no position is specified the control defaults to `top-right`. See the docs 
+// for more details: https://www.mapbox.com/mapbox-gl-js/api/map#addcontrol
+
+map.addControl(Draw, 'top-left');
 
 map.on('load', function() {
   // ALL YOUR APPLICATION CODE
