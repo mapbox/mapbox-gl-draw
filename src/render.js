@@ -79,8 +79,8 @@ module.exports = function render() {
     });
   }
 
-  store.ctx.map.fire(Constants.events.RENDER, {});
   cleanup();
+  store.ctx.map.fire(Constants.events.RENDER, {});
 
   function cleanup() {
     store.isDirty = false;
