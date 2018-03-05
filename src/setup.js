@@ -83,6 +83,7 @@ module.exports = function(ctx) {
         ctx.map.addLayer(style);
       });
 
+      ctx.store.setDirty(true);
       ctx.store.render();
     },
     removeLayers: function() {
