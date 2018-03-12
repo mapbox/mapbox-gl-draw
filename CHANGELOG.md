@@ -1,3 +1,7 @@
+## 1.0.6
+
+- Fixes bug where event.srcElement is not defined in Firefox  [#752](https://github.com/mapbox/mapbox-gl-draw/pull/752) via [@pastcompute](https://github.com/pastcompute)
+
 ## 1.0.5
 
 - update browserify to version 15.0.0 [#731](https://github.com/mapbox/mapbox-gl-draw/pull/731)
