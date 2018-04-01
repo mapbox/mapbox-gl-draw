@@ -61,7 +61,7 @@
     "mock-browser": "^0.92.10",
     "nyc": "^11.0.2",
     "opener": "^1.4.1",
-    "sinon": "^4.0.0",
+    "sinon": "^5.0.0",
     "synthetic-dom-events": "^0.3.0",
     "tape": "^4.0.0",
     "uglify-js": "^3.0.22",
