@@ -41,6 +41,7 @@
   <div id='start-polygon'>POLYGON</div>
 </div>
 <div class='toggle'>
+  <button id='doubleClickZoom'>disable dblclick zoom</button>
   <button id='addBtn'>add draw</button>
   <button id='removeBtn'>remove draw</button>
   <button id='flipStyleBtn'>change style</button>
@@ -86,10 +87,12 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
   map.on('load', function() {
 
     // toggle
+    var doubleClickZoom = document.getElementById('doubleClickZoom');
     var addButton = document.getElementById('addBtn');
     var removeButton = document.getElementById('removeBtn');
     var flipStyleButton = document.getElementById('flipStyleBtn');
     var currentStyle = 'streets-v9';
+    var doubleClickZoomOn = true;
     addButton.onclick = function() {
       if (drawIsActive) return;
       drawIsActive = true;
@@ -104,6 +107,17 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
       var style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
       map.setStyle('mapbox://styles/mapbox/' + style);
       currentStyle = style;
+    }
+    doubleClickZoom.onclick = function() {
+      if (doubleClickZoomOn) {
+        doubleClickZoomOn = false;
+        map.doubleClickZoom.disable();
+        doubleClickZoom.innerText = 'enable dblclick zoom'
+      } else {
+        map.doubleClickZoom.enable();
+        doubleClickZoomOn = true;
+        doubleClickZoom.innerText = 'disable dblclick zoom'
+      }
     }
 
     var startPoint = document.getElementById('start-point');

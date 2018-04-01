@@ -1,3 +1,30 @@
+## 1.0.6
+
+- Fixes bug where event.srcElement is not defined in Firefox  [#752](https://github.com/mapbox/mapbox-gl-draw/pull/752) via [@pastcompute](https://github.com/pastcompute)
+
+## 1.0.5
+
+- update browserify to version 15.0.0 [#731](https://github.com/mapbox/mapbox-gl-draw/pull/731)
+- update babel-eslint to version 8.0.3 [#715](https://github.com/mapbox/mapbox-gl-draw/pull/715)
+- update @turf/centroid to version 6.0.0 [#747](https://github.com/mapbox/mapbox-gl-draw/pull/747)
+
+## 1.0.4
+
+- Fixes bug where map interaction setting were oven written by Draw even after Draw was removed ([#696](https://github.com/mapbox/mapbox-gl-draw/pull/696) via @alexgleith)
+- Updated readme to include `import` syntax (#706 via @thiagoxvo)
+
+## 1.0.3
+
+- Adds support for mapbox-gl@0.41.0 (#700 via @mike-marcacci)
+- Uses `@mapbox`-namespaced packages for geojson-extent and point-geometry. (#700 via @mike-marcacci)
+- Bump sinon@^4.0.0 and babelify@^8.0.0 versions
+
+## 1.0.2
+
+- Fixes double click when drawing a line or polygon crashing bug (#680 via @AliceR)
+- Adds support for mapbox-gl@0.39.0
+- Adds support for mapbox-gl@0.40.0
+
 ## 1.0.1
 
 - Moves some of the doc files around which fixes a bug with webpack (#675)
@@ -32,7 +59,7 @@
 
 ## 0.17.0
 
-- Adds support for continuing lines via `draw.changeMode`. 
+- Adds support for continuing lines via `draw.changeMode`.
 
 ## 0.16.1
 

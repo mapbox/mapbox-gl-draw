@@ -1,4 +1,4 @@
-const extent = require('geojson-extent');
+const extent = require('@mapbox/geojson-extent');
 const Constants = require('../constants');
 
 const {

@@ -15,6 +15,7 @@ module.exports = function(ctx) {
       clearInterval(mapLoadedInterval);
 
       setup.removeLayers();
+      ctx.store.restoreMapConfig();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.map = null;
@@ -30,6 +31,7 @@ module.exports = function(ctx) {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
+      ctx.store.storeMapConfig();
       ctx.events.addEventListeners();
     },
     onAdd: function(map) {
@@ -38,6 +40,7 @@ module.exports = function(ctx) {
       ctx.ui = ui(ctx);
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
+
 
       controlContainer = ctx.ui.addButtons();
 
