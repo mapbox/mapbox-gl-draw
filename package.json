@@ -51,7 +51,7 @@
     "babel-register": "^6.5.2",
     "babelify": "^8.0.0",
     "browserify": "^15.0.0",
-    "browserify-middleware": "^7.0.0",
+    "browserify-middleware": "^8.1.0",
     "envify": "^4.0.0",
     "eslint": "^4.2.0",
     "eslint-config-mourner": "^2.0.1",
