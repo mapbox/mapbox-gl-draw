@@ -6,9 +6,14 @@ const Constants = require('./constants');
 module.exports = function(ctx) {
 
   let controlContainer = null;
+  let mapLoadedInterval = null;
 
   const setup = {
     onRemove: function() {
+      // Stop connect attempt in the event that control is removed before map is loaded
+      ctx.map.off('load', setup.connect);
+      clearInterval(mapLoadedInterval);
+
       setup.removeLayers();
       ctx.store.restoreMapConfig();
       ctx.ui.removeButtons();
@@ -21,6 +26,13 @@ module.exports = function(ctx) {
       controlContainer = null;
 
       return this;
+    },
+    connect: function() {
+      ctx.map.off('load', setup.connect);
+      clearInterval(mapLoadedInterval);
+      setup.addLayers();
+      ctx.store.storeMapConfig();
+      ctx.events.addEventListeners();
     },
     onAdd: function(map) {
       ctx.map = map;
@@ -40,21 +52,11 @@ module.exports = function(ctx) {
         map.dragPan.enable();
       }
 
-      let intervalId = null;
-
-      const connect = () => {
-        map.off('load', connect);
-        clearInterval(intervalId);
-        setup.addLayers();
-        ctx.store.storeMapConfig();
-        ctx.events.addEventListeners();
-      };
-
       if (map.loaded()) {
-        connect();
+        setup.connect();
       } else {
-        map.on('load', connect);
-        intervalId = setInterval(() => { if (map.loaded()) connect(); }, 16);
+        map.on('load', setup.connect);
+        mapLoadedInterval = setInterval(() => { if (map.loaded()) setup.connect(); }, 16);
       }
 
       ctx.events.start();
@@ -83,15 +85,25 @@ module.exports = function(ctx) {
         ctx.map.addLayer(style);
       });
 
+      ctx.store.setDirty(true);
       ctx.store.render();
     },
+    // Check for layers and sources before attempting to remove
+    // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
     removeLayers: function() {
       ctx.options.styles.forEach(style => {
-        ctx.map.removeLayer(style.id);
+        if (ctx.map.getLayer(style.id)) {
+          ctx.map.removeLayer(style.id);
+        }
       });
 
-      ctx.map.removeSource(Constants.sources.COLD);
-      ctx.map.removeSource(Constants.sources.HOT);
+      if (ctx.map.getSource(Constants.sources.COLD)) {
+        ctx.map.removeSource(Constants.sources.COLD);
+      }
+
+      if (ctx.map.getSource(Constants.sources.HOT)) {
+        ctx.map.removeSource(Constants.sources.HOT);
+      }
     }
   };
 
