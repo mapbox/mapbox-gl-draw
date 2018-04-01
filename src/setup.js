@@ -85,6 +85,7 @@ module.exports = function(ctx) {
         ctx.map.addLayer(style);
       });
 
+      ctx.store.setDirty(true);
       ctx.store.render();
     },
     // Check for layers and sources before attempting to remove
