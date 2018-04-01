@@ -1,3 +1,10 @@
+## Changelog
+
+## 1.0.7
+
+- Handle early control removal by canceling connect and checking for sources/layers [#685](https://github.com/mapbox/mapbox-gl-draw/pull/685) via [@gpbmike](https://github.com/gpbmike)
+- Race condition loading shapes [#749](https://github.com/mapbox/mapbox-gl-draw/pull/749) via [nigelsim](https://github.com/nigelsim)
+
 ## 1.0.6
 
 - Fixes bug where event.srcElement is not defined in Firefox  [#752](https://github.com/mapbox/mapbox-gl-draw/pull/752) via [@pastcompute](https://github.com/pastcompute)
