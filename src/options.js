@@ -46,6 +46,10 @@ function addSources(styles, sourceBucket) {
 module.exports = function(options = {}) {
   let withDefaults = xtend(options);
 
+  if (!options.mapboxglVersion) {
+    throw new Error('mapboxglVersion is required');
+  }
+
   if (!options.controls) {
     withDefaults.controls = {};
   }

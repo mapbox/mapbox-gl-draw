@@ -325,7 +325,7 @@ Store.prototype.restoreMapConfig = function() {
 /**
  * Returns the initial state of an interaction setting.
  * @param {string} interaction
- * @return {boolean} `true` if the interaction is enabled, `false` if not. 
+ * @return {boolean} `true` if the interaction is enabled, `false` if not.
  * Defaults to `true`. (Todo: include defaults.)
 */
 Store.prototype.getInitialConfigValue = function(interaction) {

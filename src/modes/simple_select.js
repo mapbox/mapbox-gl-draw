@@ -4,6 +4,7 @@ const createSupplementaryPoints = require('../lib/create_supplementary_points');
 const StringSet = require('../lib/string_set');
 const doubleClickZoom = require('../lib/double_click_zoom');
 const moveFeatures = require('../lib/move_features');
+const emit = require('../lib/emit');
 const Constants = require('../constants');
 
 const SimpleSelect = {};
@@ -36,10 +37,11 @@ SimpleSelect.onSetup = function(opts) {
 };
 
 SimpleSelect.fireUpdate = function() {
-  this.map.fire(Constants.events.UPDATE, {
+  emit({
+    type: Constants.events.UPDATE,
     action: Constants.updateActions.MOVE,
     features: this.getSelected().map(f => f.toGeoJSON())
-  });
+  }, this._ctx);
 };
 
 SimpleSelect.fireActionable = function() {
@@ -341,10 +343,11 @@ SimpleSelect.onCombineFeatures = function() {
     this.deleteFeature(this.getSelectedIds(), { silent: true });
     this.setSelected([multiFeature.id]);
 
-    this.map.fire(Constants.events.COMBINE_FEATURES, {
+    emit({
+      type: Constants.events.COMBINE_FEATURES,
       createdFeatures: [multiFeature.toGeoJSON()],
       deletedFeatures: featuresCombined
-    });
+    }, this._ctx);
   }
   this.fireActionable();
 };
@@ -372,10 +375,11 @@ SimpleSelect.onUncombineFeatures = function() {
   }
 
   if (createdFeatures.length > 1) {
-    this.map.fire(Constants.events.UNCOMBINE_FEATURES, {
+    emit({
+      type: Constants.events.UNCOMBINE_FEATURES,
       createdFeatures: createdFeatures,
       deletedFeatures: featuresUncombined
-    });
+    }, this._ctx);
   }
   this.fireActionable();
 };
