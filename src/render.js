@@ -1,4 +1,5 @@
 const Constants = require('./constants');
+const emit = require('./lib/emit');
 
 module.exports = function render() {
   const store = this;
@@ -53,7 +54,8 @@ module.exports = function render() {
   });
 
   if (store._emitSelectionChange) {
-    store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
+    emit({
+      type: Constants.events.SELECTION_CHANGE,
       features: store.getSelected().map(feature => feature.toGeoJSON()),
       points: store.getSelectedCoordinates().map(coordinate => {
         return {
@@ -65,7 +67,7 @@ module.exports = function render() {
           }
         };
       })
-    });
+    }, store.ctx);
     store._emitSelectionChange = false;
   }
 
@@ -74,13 +76,16 @@ module.exports = function render() {
 
     store._deletedFeaturesToEmit = [];
 
-    store.ctx.map.fire(Constants.events.DELETE, {
+    emit({
+      type: Constants.events.DELETE,
       features: geojsonToEmit
-    });
+    }, store.ctx);
   }
 
   cleanup();
-  store.ctx.map.fire(Constants.events.RENDER, {});
+  emit({
+    type: Constants.events.RENDER
+  }, store.ctx);
 
   function cleanup() {
     store.isDirty = false;

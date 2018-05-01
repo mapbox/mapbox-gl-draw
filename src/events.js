@@ -3,6 +3,7 @@ const getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 const featuresAt = require('./lib/features_at');
 const isClick = require('./lib/is_click');
 const isTap = require('./lib/is_tap');
+const emit = require('./lib/emit');
 const Constants = require('./constants');
 const objectToMode = require('./modes/object_to_mode');
 
@@ -177,7 +178,10 @@ module.exports = function(ctx) {
     currentMode = setupModeHandler(mode, ctx);
 
     if (!eventOptions.silent) {
-      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename});
+      emit({
+        type: Constants.events.MODE_CHANGE,
+        mode: modename
+      }, ctx);
     }
 
     ctx.store.setDirty();
@@ -197,7 +201,10 @@ module.exports = function(ctx) {
       if (actionState[action] !== actions[action]) changed = true;
       actionState[action] = actions[action];
     });
-    if (changed) ctx.map.fire(Constants.events.ACTIONABLE, { actions: actionState });
+    if (changed) emit({
+      type: Constants.events.ACTIONABLE,
+      actions: actionState
+    }, ctx);
   }
 
   const api = {

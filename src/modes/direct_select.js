@@ -5,6 +5,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const CommonSelectors = require('../lib/common_selectors');
 const moveFeatures = require('../lib/move_features');
+const emit = require('../lib/emit');
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -14,10 +15,11 @@ const DirectSelect = {};
 // INTERNAL FUCNTIONS
 
 DirectSelect.fireUpdate = function() {
-  this.map.fire(Constants.events.UPDATE, {
+  emit({
+    type: Constants.events.UPDATE,
     action: Constants.updateActions.CHANGE_COORDINATES,
     features: this.getSelected().map(f => f.toGeoJSON())
-  });
+  }, this._ctx);
 };
 
 DirectSelect.fireActionable = function(state) {
@@ -166,10 +168,11 @@ DirectSelect.toDisplayFeatures = function(state, geojson, push) {
 
 DirectSelect.onTrash = function(state) {
   state.selectedCoordPaths.sort().reverse().forEach(id => state.feature.removeCoordinate(id));
-  this.map.fire(Constants.events.UPDATE, {
+  emit({
+    type: Constants.events.UPDATE,
     action: Constants.updateActions.CHANGE_COORDINATES,
     features: this.getSelected().map(f => f.toGeoJSON())
-  });
+  }, this._ctx);
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
   this.fireActionable(state);

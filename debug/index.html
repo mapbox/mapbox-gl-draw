@@ -80,7 +80,10 @@ location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
 
   map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-  var Draw = window.Draw = new MapboxDraw();
+  var Draw = window.Draw = new MapboxDraw({
+    mapboxglVersion: mapboxgl.version
+  });
+
   var drawIsActive = true;
   map.addControl(Draw, 'bottom-right');
 

@@ -3,6 +3,7 @@ const doubleClickZoom = require('../lib/double_click_zoom');
 const Constants = require('../constants');
 const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
 const createVertex = require('../lib/create_vertex');
+const emit = require('../lib/emit');
 
 const DrawPolygon = {};
 
@@ -78,9 +79,10 @@ DrawPolygon.onStop = function(state) {
   //remove last added coordinate
   state.polygon.removeCoordinate(`0.${state.currentVertexPosition}`);
   if (state.polygon.isValid()) {
-    this.map.fire(Constants.events.CREATE, {
+    emit({
+      type: Constants.events.CREATE,
       features: [state.polygon.toGeoJSON()]
-    });
+    }, this._ctx);
   } else {
     this.deleteFeature([state.polygon.id], { silent: true });
     this.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });

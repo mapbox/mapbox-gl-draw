@@ -1,4 +1,5 @@
 const CommonSelectors = require('../lib/common_selectors');
+const emit = require('../lib/emit');
 const Constants = require('../constants');
 
 const DrawPoint = {};
@@ -34,9 +35,10 @@ DrawPoint.stopDrawingAndRemove = function(state) {
 DrawPoint.onTap = DrawPoint.onClick = function(state, e) {
   this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   state.point.updateCoordinate('', e.lngLat.lng, e.lngLat.lat);
-  this.map.fire(Constants.events.CREATE, {
+  emit({
+    type: Constants.events.CREATE,
     features: [state.point.toGeoJSON()]
-  });
+  }, this._ctx);
   this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.point.id] });
 };
 
