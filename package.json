@@ -9,6 +9,7 @@
   "style": "dist/mapbox-gl-draw.css",
   "browserify": {
     "transform": [
+      "envify",
       "babelify"
     ]
   },
@@ -16,7 +17,7 @@
     "docs": "npm run docs-modes-life-cycle && npm run docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
-    "test": "npm run lint && npm run tape",
+    "test": "NODE_ENV=test npm run lint && npm run tape",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
@@ -57,18 +58,18 @@
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
     "mapbox-gl": "0.41.0",
-    "mapbox-gl-js-mock": "^0.28.0",
+    "mapbox-gl-js-mock": "0.28.0",
     "mock-browser": "^0.92.10",
     "nyc": "^11.0.2",
     "opener": "^1.4.1",
-    "sinon": "^5.0.0",
-    "synthetic-dom-events": "^0.3.0",
+    "sinon": "5.0.0",
+    "synthetic-dom-events": "0.3.0",
     "tape": "^4.0.0",
     "uglify-js": "^3.0.22",
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": ">=0.27.0 <=0.41.0"
+    "mapbox-gl": ">=0.27.0 <=0.45.0"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
