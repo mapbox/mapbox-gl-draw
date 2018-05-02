@@ -3,7 +3,7 @@ const getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
 const featuresAt = require('./lib/features_at');
 const isClick = require('./lib/is_click');
 const isTap = require('./lib/is_tap');
-const Constants = require('./constants');
+// const Constants = require('./constants');
 const objectToMode = require('./modes/object_to_mode');
 
 module.exports = function(ctx) {

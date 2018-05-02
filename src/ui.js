@@ -1,5 +1,5 @@
 const xtend = require('xtend');
-const Constants = require('./constants');
+// const Constants = require('./constants');
 
 const classTypes = ['mode', 'feature', 'mouse'];
 

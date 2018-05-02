@@ -1,7 +1,7 @@
 const events = require('./events');
 const Store = require('./store');
 const ui = require('./ui');
-const Constants = require('./constants');
+// const Constants = require('./constants');
 
 module.exports = function(ctx) {
 
