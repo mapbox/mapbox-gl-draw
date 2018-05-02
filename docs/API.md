@@ -38,7 +38,7 @@ All of the following options are optional.
 
 ## Modes
 
-By defult MapboxDraw ships with a few modes. These modes aim to cover the basic needed functionaly for MapboxDraw to create the core GeoJSON feature types. Along with these, MapboxDraw also supports [custom modes. Click here for more details](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
+By default MapboxDraw ships with a few modes. These modes aim to cover the basic needed functionaly for MapboxDraw to create the core GeoJSON feature types. Along with these, MapboxDraw also supports [custom modes. Click here for more details](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
 
 The mode name strings are available as an enum at `Draw.modes`.
 
