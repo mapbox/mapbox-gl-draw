@@ -12,7 +12,7 @@
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
     .start-draw {
-      width: 237px;
+      width: 315px;
       position: absolute;
       left :10px;
       bottom: 10px;
@@ -29,13 +29,15 @@
     .toggle {
       position: absolute;
       bottom: 20px;
-      right: 10px;
+      right: 50px;
+      width: 100px;
     }
   </style>
 </head>
 <body>
 <div id='map'></div>
 <div class='start-draw' >
+  <div id='start-static'>STATIC</div>
   <div id='start-point'>POINT</div>
   <div id='start-line'>LINE</div>
   <div id='start-polygon'>POLYGON</div>
@@ -47,126 +49,13 @@
   <button id='flipStyleBtn'>change style</button>
 </div>
 <script src='/mapbox-gl.js'></script>
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.min.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.css' type='text/css' />
 <script src='/mapbox-gl-draw.js'></script>
+<script src='/app.js'></script>
 <script type='text/javascript'>
-// making run more like github.com/mapbox/mapbox-gl-js
-//eg http://127.0.0.1:9966/debug/?access_token=<the-token>#13/37.76/-122.42
-var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
-mapboxgl.accessToken = args.access_token || localStorage.accessToken;
-// could work this further but going off the above example
-location.hash.replace(/^#/,'').split('/').reduce(function(args, val, i, hash){
-  switch(i){
-  case 0: args.zoom = val; break;
-  case 1: args.latitude = val; break;
-  case 2:
-    args.longitude = val;
-    if(args.latitude) args.latlng = [val, args.latitude];
-  break;
-  };
-  return args;
-}, args);
-
-  var map = new mapboxgl.Map({
-    container: 'map',
-    zoom: args.zoom || 1,
-    center: args.latlng || [0, 0],
-    style: 'mapbox://styles/mapbox/streets-v8'
-  });
-
-  map.addControl(new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken
-  }));
-
-  map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-
-  var Draw = window.Draw = new MapboxDraw();
-  var drawIsActive = true;
-  map.addControl(Draw, 'bottom-right');
-
-  map.on('load', function() {
-
-    // toggle
-    var doubleClickZoom = document.getElementById('doubleClickZoom');
-    var addButton = document.getElementById('addBtn');
-    var removeButton = document.getElementById('removeBtn');
-    var flipStyleButton = document.getElementById('flipStyleBtn');
-    var currentStyle = 'streets-v9';
-    var doubleClickZoomOn = true;
-    addButton.onclick = function() {
-      if (drawIsActive) return;
-      drawIsActive = true;
-      map.addControl(Draw, 'bottom-right');
-    }
-    removeButton.onclick = function() {
-      if (!drawIsActive) return;
-      drawIsActive = false;
-      map.removeControl(Draw);
-    }
-    flipStyleButton.onclick = function() {
-      var style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
-      map.setStyle('mapbox://styles/mapbox/' + style);
-      currentStyle = style;
-    }
-    doubleClickZoom.onclick = function() {
-      if (doubleClickZoomOn) {
-        doubleClickZoomOn = false;
-        map.doubleClickZoom.disable();
-        doubleClickZoom.innerText = 'enable dblclick zoom'
-      } else {
-        map.doubleClickZoom.enable();
-        doubleClickZoomOn = true;
-        doubleClickZoom.innerText = 'disable dblclick zoom'
-      }
-    }
-
-    var startPoint = document.getElementById('start-point');
-    var startLine = document.getElementById('start-line');
-    var startPolygon = document.getElementById('start-polygon');
-
-
-    startPoint.onclick = function() {
-      Draw.changeMode('draw_point');
-    };
-
-    startLine.onclick = function() {
-      Draw.changeMode('draw_line_string');
-    };
-
-    startPolygon.onclick = function() {
-      Draw.changeMode('draw_polygon');
-    };
-
-  });
-
-  var loadData = function(uri) {
-  var req = new XMLHttpRequest();
-  req.onerror = function() {
-    throw new Error('Network Error');
-  };
-  req.onload = function() {
-    var fc = JSON.parse(req.response);
-    fc.features.forEach(function(feature) {
-      if(feature.geometry.type.startsWith('Multi') === false) {
-        Draw.add(feature);
-      }
-    });
-
-  };
-  req.open('GET', uri);
-  req.send();
-}
-
-// loadData('https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson');
-
-console.log('use `loadData(url)` to load in FeatureCollections to Draw via url');
-console.log('5.51MB Polygons - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson');
-
-console.log('4.99MB LineStrings - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_rivers_north_america.geojson');
-
-console.log('4.03MB Points - https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_admin_1_label_points.geojson');
-
-  (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right:0;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
+// Adds in the FPS graph to the top of the page.
+(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right: 500px;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>
 </body>
 </html>

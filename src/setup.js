@@ -2,6 +2,7 @@ const events = require('./events');
 const Store = require('./store');
 const ui = require('./ui');
 const Constants = require('./constants');
+const xtend = require('xtend');
 
 module.exports = function(ctx) {
 
@@ -35,6 +36,21 @@ module.exports = function(ctx) {
       ctx.events.addEventListeners();
     },
     onAdd: function(map) {
+      if (process.env.NODE_ENV !== 'test') {
+        // Monkey patch to resolve breaking change to `fire` introduced by
+        // mapbox-gl-js. See mapbox/mapbox-gl-draw/issues/766.
+        const _fire = map.fire;
+        map.fire = function(type, event) {
+          let args = arguments;
+
+          if (_fire.length === 1 && arguments.length !== 1) {
+            args = [xtend({}, { type: type }, event)];
+          }
+
+          return _fire.apply(map, args);
+        };
+      }
+
       ctx.map = map;
       ctx.events = events(ctx);
       ctx.ui = ui(ctx);
