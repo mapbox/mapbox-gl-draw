@@ -1,5 +1,22 @@
 const ModeInterface = require('./mode_interface');
 
+const eventMapper = {
+  drag: 'onDrag',
+  click: 'onClick',
+  mousemove: 'onMouseMove',
+  mousedown: 'onMouseDown',
+  mouseup: 'onMouseUp',
+  mouseout: 'onMouseOut',
+  keyup: 'onKeyUp',
+  keydown: 'onKeyDown',
+  touchstart: 'onTouchStart',
+  touchmove: 'onTouchMove',
+  touchend: 'onTouchEnd',
+  tap: 'onTap'
+};
+
+const eventKeys = Object.keys(eventMapper);
+
 module.exports = function(modeObject) {
   const modeObjectKeys = Object.keys(modeObject);
 
@@ -20,18 +37,21 @@ module.exports = function(modeObject) {
     return {
       start: function() {
         state = mode.onSetup(startOpts); // this should set ui buttons
-        this.on('drag', () => true, wrapper('onDrag'));
-        this.on('click', () => true, wrapper('onClick'));
-        this.on('mousemove', () => true, wrapper('onMouseMove'));
-        this.on('mousedown', () => true, wrapper('onMouseDown'));
-        this.on('mouseup', () => true, wrapper('onMouseUp'));
-        this.on('mouseout', () => true, wrapper('onMouseOut'));
-        this.on('keyup', () => true, wrapper('onKeyUp'));
-        this.on('keydown', () => true, wrapper('onKeyDown'));
-        this.on('touchstart', () => true, wrapper('onTouchStart'));
-        this.on('touchmove', () => true, wrapper('onTouchMove'));
-        this.on('touchend', () => true, wrapper('onTouchEnd'));
-        this.on('tap', () => true, wrapper('onTap'));
+
+        // Adds event handlers for all event options
+        // add sets the selector to false for all
+        // handlers that are not present in the mode
+        // to reduce on render calls for functions that
+        // have no logic
+        eventKeys.forEach(key => {
+          const modeHandler = eventMapper[key];
+          let selector = () => false;
+          if (modeObject[modeHandler]) {
+            selector = () => true;
+          }
+          this.on(key, selector, wrapper(modeHandler));
+        });
+
       },
       stop: function() {
         mode.onStop(state);
