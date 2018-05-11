@@ -166,10 +166,7 @@ DirectSelect.toDisplayFeatures = function(state, geojson, push) {
 
 DirectSelect.onTrash = function(state) {
   state.selectedCoordPaths.sort().reverse().forEach(id => state.feature.removeCoordinate(id));
-  this.map.fire(Constants.events.UPDATE, {
-    action: Constants.updateActions.CHANGE_COORDINATES,
-    features: this.getSelected().map(f => f.toGeoJSON())
-  });
+  this.fireUpdate();
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
   this.fireActionable(state);
