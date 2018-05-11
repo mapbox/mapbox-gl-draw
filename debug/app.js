@@ -1,3 +1,6 @@
+var StaticMode = require('@mapbox/mapbox-gl-draw-static-mode');
+
+
 // Parse the access_token out of the url
 var args = location.search.replace(/^\?/,'').split('&').reduce(function(o, param){ var keyvalue=param.split('='); o[keyvalue[0]] = keyvalue[1]; return o; }, {});
 
@@ -16,7 +19,9 @@ map.addControl(new MapboxGeocoder({
 
 map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-var Draw = window.Draw = new MapboxDraw();
+var modes = MapboxDraw.modes;
+modes.static = StaticMode;
+var Draw = window.Draw = new MapboxDraw({ modes: modes });
 var drawIsActive = true;
 map.addControl(Draw, 'bottom-right');
 
@@ -78,6 +83,12 @@ map.on('load', function() {
   var startPolygon = document.getElementById('start-polygon');
   startPolygon.onclick = function() {
     Draw.changeMode('draw_polygon');
+  };
+
+  // Jump into static mode via a custom UI element
+  var startStatic = document.getElementById('start-static');
+  startStatic.onclick = function() {
+    Draw.changeMode('static');
   };
 
 });
