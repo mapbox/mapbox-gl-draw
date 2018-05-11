@@ -21,6 +21,11 @@ module.exports = function(ctx) {
     mouse: null
   };
 
+  function clearMapClasses() {
+    queueMapClasses({mode:null, feature:null, mouse:null});
+    updateMapClasses();
+  }
+
   function queueMapClasses(options) {
     nextMapClasses = xtend(nextMapClasses, options);
   }
@@ -176,6 +181,7 @@ module.exports = function(ctx) {
     setActiveButton,
     queueMapClasses,
     updateMapClasses,
+    clearMapClasses,
     addButtons,
     removeButtons
   };

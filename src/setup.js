@@ -19,6 +19,7 @@ module.exports = function(ctx) {
       ctx.store.restoreMapConfig();
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
+      ctx.ui.clearMapClasses();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
