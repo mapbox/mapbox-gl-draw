@@ -1,5 +1,9 @@
 ## Changelog
 
+## 1.0.9
+
+- Fix a bug where GeoJSON features with numeric ids would not rerender correctly [#769](https://github.com/mapbox/mapbox-gl-draw/pull/769).
+
 ## 1.0.8
 
 - Patch `map.fire` to support function signature changes in Mapbox GL JS 0.45.0 [#772](https://github.com/mapbox/mapbox-gl-draw/pull/772).
