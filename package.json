@@ -54,7 +54,7 @@
     "browserify": "^16.1.1",
     "browserify-middleware": "^8.1.0",
     "envify": "^4.0.0",
-    "eslint": "^4.2.0",
+    "eslint": "^5.0.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
     "mapbox-gl": "0.45.0",
