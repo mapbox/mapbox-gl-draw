@@ -21,7 +21,7 @@
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
-    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw.js",
+    "build": "./scripts/build.sh",
     "prepublish": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
     "start": "node server.js"
   },
@@ -45,6 +45,7 @@
   "devDependencies": {
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/centroid": "^6.0.0",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.9.1",
     "babel-eslint": "^8.0.3",
     "babel-plugin-__coverage__": "^11.0.0",
