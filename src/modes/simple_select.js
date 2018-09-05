@@ -16,7 +16,7 @@ SimpleSelect.onSetup = function(opts) {
     boxSelectElement: undefined,
     boxSelecting: false,
     canBoxSelect: false,
-    dragMoveing: false,
+    dragMoving: false,
     canDragMove: false,
     initiallySelectedFeatureIds: opts.featureIds || []
   };
