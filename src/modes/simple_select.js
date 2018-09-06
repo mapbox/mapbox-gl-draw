@@ -99,11 +99,6 @@ SimpleSelect.onStop = function() {
   doubleClickZoom.enable(this);
 };
 
-SimpleSelect.onMouseUp = function(state, e) {
-  // Any mouseup should stop box selecting and dragMoving
-  if (CommonSelectors.true(e)) return this.stopExtendedInteractions(state);
-};
-
 SimpleSelect.onMouseMove = function(state) {
   // On mousemove that is not a drag, stop extended interactions.
   // This is useful if you drag off the canvas, release the button,
