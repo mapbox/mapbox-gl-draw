@@ -4,3 +4,4 @@ npm-debug.log
 dist/mapbox-gl-draw.js
 coverage/
 .nyc_output/
+debug/access_token_generated.js
