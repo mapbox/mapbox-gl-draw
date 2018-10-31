@@ -22,8 +22,9 @@
     "tape": "tape -r ./test/mock-browser.js -r @babel/register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
     "build-token": "node build/generate-access-token-script.js",
-    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw.js",
-    "prepublish": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw-unminified.js",
+    "build-min": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "prepublish": "npm run build && npm run build-min",
     "start": "npm run build-token && node server.js"
   },
   "repository": {
