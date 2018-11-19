@@ -69,6 +69,8 @@ _please feel free to add your own modes to this list via a PR_
 -   [Cut/Split Line Mode](https://github.com/BrunoSalerno/mapbox-gl-draw-cut-line-mode): Cut/split lineStrings functionality
 -   [Freehand Mode](https://github.com/bemky/mapbox-gl-draw-freehand-mode): Add Freehand functionality to draw polygon mode
 -   [Rotate Mode](https://github.com/mapstertech/mapbox-gl-draw-rotate-mode): Add ability to Rotate GL Draw features
+-   [Radius Mode](https://gist.github.com/chriswhong/694779bc1f1e5d926e47bab7205fa559): Draws a polygon circle based on a center vertex and radius line
+-   [Rectangle Mode](https://github.com/edgespatial/mapbox-gl-draw-rectangle-mode)
 
 ## Life Cycle Functions
 
