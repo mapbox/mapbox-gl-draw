@@ -18,10 +18,11 @@ test('direct_select', t => {
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
   const map = createMap({ container: mapContainer });
-  spy(map, 'fire');
 
   const Draw = new MapboxDraw();
   map.addControl(Draw);
+
+  spy(map, 'fire');
 
   const afterNextRender = setupAfterNextRender(map);
 
