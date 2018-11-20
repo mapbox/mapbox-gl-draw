@@ -1,5 +1,14 @@
 ## Changelog
 
+## 1.1.0
+
+- add unminified build
+- clear draw classes on remove (#785)
+- don't run render on unused event handlers (#783)
+- Remove overridden/dupe onMouseUp in SimpleSelect (#816)
+- Include userProperties in Options section of docs (#817)
+- change ordering of spy creation to avoid overwrites (#839)
+
 ## 1.0.9
 
 - Fix a bug where GeoJSON features with numeric ids would not rerender correctly [#769](https://github.com/mapbox/mapbox-gl-draw/pull/769).
