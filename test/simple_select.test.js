@@ -16,14 +16,15 @@ test('simple_select', t => {
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
   const map = createMap({ container: mapContainer });
+
+  const Draw = new MapboxDraw();
+  map.addControl(Draw);
+
   spy(map, 'fire');
   spy(map.doubleClickZoom, 'enable');
   spy(map.doubleClickZoom, 'disable');
   spy(map.dragPan, 'enable');
   spy(map.dragPan, 'disable');
-
-  const Draw = new MapboxDraw();
-  map.addControl(Draw);
 
   const afterNextRender = setupAfterNextRender(map);
 

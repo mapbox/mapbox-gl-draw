@@ -1,6 +1,6 @@
 {
   "name": "@mapbox/mapbox-gl-draw",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
@@ -19,11 +19,13 @@
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
     "test": "NODE_ENV=test npm run lint && npm run tape",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
-    "tape": "tape -r ./test/mock-browser.js -r babel-register test/*.test.js",
+    "tape": "tape -r ./test/mock-browser.js -r @babel/register test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
-    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw.js",
-    "prepublish": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
-    "start": "node server.js"
+    "build-token": "node build/generate-access-token-script.js",
+    "build": "NODE_ENV=production browserify index.js --standalone MapboxDraw > dist/mapbox-gl-draw-unminified.js",
+    "build-min": "NODE_ENV=production browserify index.js --standalone MapboxDraw | uglifyjs -c -m > dist/mapbox-gl-draw.js",
+    "prepublish": "npm run build && npm run build-min",
+    "start": "npm run build-token && node server.js"
   },
   "repository": {
     "type": "git",
@@ -43,12 +45,17 @@
     "instrument": false
   },
   "devDependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/register": "^7.0.0",
     "@babel/core": "^7.1.6",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@turf/centroid": "^6.0.0",
     "babel-eslint": "^8.0.3",
     "babel-plugin-__coverage__": "^11.0.0",
+    "babel-preset-es2015": "^6.3.13",
     "babel-register": "^6.5.2",
+    "babel-plugin-istanbul": "^5.1.0",
     "babelify": "^10.0.0",
     "browserify": "^16.1.1",
     "browserify-middleware": "^8.1.0",
@@ -56,7 +63,7 @@
     "eslint": "^4.2.0",
     "eslint-config-mourner": "^2.0.1",
     "express": "^4.13.4",
-    "mapbox-gl": "0.45.0",
+    "mapbox-gl": "0.51.0",
     "mapbox-gl-js-mock": "0.28.0",
     "mock-browser": "^0.92.10",
     "nyc": "^12.0.1",
@@ -71,7 +78,6 @@
     "mapbox-gl": ">=0.27.0 <=0.45.0"
   },
   "dependencies": {
-    "@babel/preset-env": "^7.1.6",
     "@mapbox/geojson-area": "^0.2.1",
     "@mapbox/geojson-extent": "^0.3.2",
     "@mapbox/geojson-normalize": "0.0.1",

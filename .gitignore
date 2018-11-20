@@ -2,5 +2,7 @@ node_modules/
 npm-debug.log
 .vscode/
 dist/mapbox-gl-draw.js
+dist/mapbox-gl-draw-unminified.js
 coverage/
 .nyc_output/
+debug/access_token_generated.js
