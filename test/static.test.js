@@ -10,10 +10,6 @@ import createMap from './utils/create_map';
 test('static', t => {
 
   const map = createMap();
-  spy(map, 'fire');
-  map.dragPan.disable();
-  spy(map.dragPan, 'disable');
-
   const opts = {
     modes: {
       static: require('@mapbox/mapbox-gl-draw-static-mode')
@@ -22,6 +18,10 @@ test('static', t => {
   };
   const Draw = new MapboxDraw(opts);
   map.addControl(Draw);
+
+  spy(map, 'fire');
+  map.dragPan.disable();
+  spy(map.dragPan, 'disable');
 
   const afterNextRender = setupAfterNextRender(map);
 
