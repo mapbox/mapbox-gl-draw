@@ -71,7 +71,7 @@
     "unassertify": "^2.0.3"
   },
   "peerDependencies": {
-    "mapbox-gl": ">=0.27.0 <=0.45.0"
+    "mapbox-gl": ">=0.27.0 <=0.51.0"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
