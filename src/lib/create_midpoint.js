@@ -1,5 +1,15 @@
 const Constants = require('../constants');
 
+/**
+ * Returns GeoJSON for a Point representing the
+ * midpoint of another feature.
+ *
+ * @param {GeoJSON} parent
+ * @param {GeoJSON} startVertex
+ * @param {GeoJSON} endVertex
+ * @param {Object} map
+ * @return {GeoJSON} Point
+ */
 module.exports = function(parent, startVertex, endVertex, map) {
   const startCoord = startVertex.geometry.coordinates;
   const endCoord = endVertex.geometry.coordinates;
@@ -17,11 +27,12 @@ module.exports = function(parent, startVertex, endVertex, map) {
   const ptB = map.project([ endCoord[0], endCoord[1] ]);
   const mid = map.unproject([ (ptA.x + ptB.x) / 2, (ptA.y + ptB.y) / 2 ]);
 
-  return {
+  const midpoint = {
     type: Constants.geojsonTypes.FEATURE,
     properties: {
+      ...parent.properties,
       meta: Constants.meta.MIDPOINT,
-      parent: parent,
+      parent: parent.properties && parent.properties.id,
       lng: mid.lng,
       lat: mid.lat,
       coord_path: endVertex.properties.coord_path
@@ -31,4 +42,6 @@ module.exports = function(parent, startVertex, endVertex, map) {
       coordinates: [mid.lng, mid.lat]
     }
   };
+  delete midpoint.properties.id;
+  return midpoint;
 };

@@ -140,7 +140,7 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
   if (geojson.geometry.coordinates.length < 2) return;
   geojson.properties.meta = Constants.meta.FEATURE;
   display(createVertex(
-    state.line.id,
+    geojson,
     geojson.geometry.coordinates[state.direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1],
     `${state.direction === 'forward' ? geojson.geometry.coordinates.length - 2 : 1}`,
     false

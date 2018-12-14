@@ -103,12 +103,12 @@ DrawPolygon.toDisplayFeatures = function(state, geojson, display) {
     return;
   }
   geojson.properties.meta = Constants.meta.FEATURE;
-  display(createVertex(state.polygon.id, geojson.geometry.coordinates[0][0], '0.0', false));
+  display(createVertex(geojson, geojson.geometry.coordinates[0][0], '0.0', false));
   if (coordinateCount > 3) {
     // Add a start position marker to the map, clicking on this will finish the feature
     // This should only be shown when we're in a valid spot
     const endPos = geojson.geometry.coordinates[0].length - 3;
-    display(createVertex(state.polygon.id, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
+    display(createVertex(geojson, geojson.geometry.coordinates[0][endPos], `0.${endPos}`, false));
   }
   if (coordinateCount <= 4) {
     // If we've only drawn two positions (plus the closer),
