@@ -52,7 +52,7 @@ Feature.prototype.internal = function(mode) {
   };
 
   if (this.ctx.options.userProperties) {
-    for (const name in this.properties) {
+    for (let name in this.properties) {
       properties[`user_${name}`] = this.properties[name];
     }
   }
