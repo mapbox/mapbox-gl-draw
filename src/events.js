@@ -78,9 +78,6 @@ module.exports = function(ctx) {
   };
 
   events.touchstart = function(event) {
-    // Prevent emulated mouse events because we will fully handle the touch here.
-    // This does not stop the touch events from propogating to mapbox though.
-    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -90,6 +87,16 @@ module.exports = function(ctx) {
       point: event.point
     };
     const target = featuresAt.touch(event, null, ctx)[0];
+    
+    // If there are no mapbox targets nearby, let the event propagate through
+    if (!target) {
+      return;
+    }
+    
+    // Prevent emulated mouse events because we will fully handle the touch here.
+    // This does not stop the touch events from propogating to mapbox though. (because of the lines above)
+    event.originalEvent.preventDefault();
+    
     event.featureTarget = target;
     currentMode.touchstart(event);
   };
@@ -105,12 +112,19 @@ module.exports = function(ctx) {
   };
 
   events.touchend = function(event) {
-    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
 
     const target = featuresAt.touch(event, null, ctx)[0];
+    
+    // If there are no mapbox targets nearby, let the event propagate through
+    if (!target) {
+      return;
+    }
+    
+    event.originalEvent.preventDefault();
+    
     event.featureTarget = target;
     if (isTap(touchStartInfo, {
       time: new Date().getTime(),
