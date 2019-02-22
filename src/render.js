@@ -41,16 +41,12 @@ module.exports = function render() {
   }
 
   if (coldChanged) {
-    store.ctx.map.getSource(Constants.sources.COLD).setData({
-      type: Constants.geojsonTypes.FEATURE_COLLECTION,
-      features: store.sources.cold
-    });
+    // Call a monkey-patched top-level API method, setSourceData, instead of the
+    // native MapboxGL method. This supports usage with react-map-gl.
+    store.ctx.map.setSourceData(Constants.geojsonTypes.FEATURE_COLLECTION, store.sources.cold)
   }
 
-  store.ctx.map.getSource(Constants.sources.HOT).setData({
-    type: Constants.geojsonTypes.FEATURE_COLLECTION,
-    features: store.sources.hot
-  });
+  store.ctx.map.setSourceData(Constants.geojsonTypes.FEATURE_COLLECTION, store.sources.hot)
 
   if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
