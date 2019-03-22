@@ -6,6 +6,7 @@
   "author": "mapbox",
   "license": "ISC",
   "main": "index.js",
+  "types": "index.d.ts",
   "style": "dist/mapbox-gl-draw.css",
   "browserify": {
     "transform": [
