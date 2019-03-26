@@ -76,7 +76,7 @@
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.1",
     "@mapbox/geojson-normalize": "0.0.1",
-    "@mapbox/geojsonhint": "^2.0.0",
+    "@mapbox/geojsonhint": "^3.0.0",
     "@mapbox/geojson-extent": "^0.3.2",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
