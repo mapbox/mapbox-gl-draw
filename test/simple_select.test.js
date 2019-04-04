@@ -363,6 +363,35 @@ test('simple_select', t => {
     });
   });
 
+  t.test('simple_select - tap dragging fires an update event', t => {
+    const point = getGeoJSON('point');
+    const pointId = Draw.add(point)[0];
+    const translatePosition = (point, d) => [point[0] + d, point[1] + d];
+
+    const startPosition = point.geometry.coordinates;
+    const endPosition = translatePosition(startPosition, 25);
+
+    Draw.changeMode('simple_select', {
+      featureIds: [pointId]
+    });
+
+    afterNextRender(() => {
+      map.fire.reset();
+      map.fire('touchstart', makeTouchEvent(...startPosition));
+      map.fire('touchmove', makeTouchEvent(...translatePosition(startPosition, 15)));
+      map.fire('touchmove', makeTouchEvent(...endPosition));
+      map.fire('touchend', makeTouchEvent(...endPosition));
+
+      const movedPoint = Draw.get(pointId);
+      const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
+      t.equal(args.length, 1, 'draw.update called once');
+      t.equal(movedPoint.geometry.coordinates[0], endPosition[0], 'point lng moved to touchend location');
+      t.equal(movedPoint.geometry.coordinates[1], endPosition[1], 'point lat moved to touchend location');
+
+      t.end();
+    });
+  });
+
   t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     const id = Draw.add(getGeoJSON('polygon'))[0];
