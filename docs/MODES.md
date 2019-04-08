@@ -71,6 +71,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Rotate Mode](https://github.com/mapstertech/mapbox-gl-draw-rotate-mode): Add ability to Rotate GL Draw features
 -   [Radius Mode](https://gist.github.com/chriswhong/694779bc1f1e5d926e47bab7205fa559): Draws a polygon circle based on a center vertex and radius line
 -   [Rectangle Mode](https://github.com/edgespatial/mapbox-gl-draw-rectangle-mode)
+-   [Circle Mode](https://github.com/iamanvesh/mapbox-gl-draw-circle)
 
 ## Life Cycle Functions
 
