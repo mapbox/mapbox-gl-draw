@@ -30,7 +30,7 @@ All of the following options are optional.
 - `boxSelect`, boolean (default `true`): Whether or not to enable box selection of features with `shift`+`click`+drag. If `false`, `shift`+`click`+drag zooms into an area.
 - `clickBuffer`, number (default: `2`): Number of pixels around any feature or vertex (in every direction) that will respond to a click.
 - `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every directoin) that will respond to a touch.
-- `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
+- `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`. Also you can add you custom controls, see the [Custom controls](#custom-controls)
 - `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
 - `modes`, Object: over ride the default modes with your own. `MapboxDraw.modes` can be used to see the default values. More information on custom modes [can be found here](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
@@ -356,6 +356,27 @@ The `mode` argument must be one of the mode names described above and enumerated
 Sets the value of a property on the feature with the specified id. Returns the draw instance for chaining.
 
 This is helpful if you are using Draw's features as your primary data store in your application.
+
+## Custom controls
+
+You can add custom controls for calling custom mods or something else.
+To do this, you need to pass to controls props object with control options.
+
+```js
+const Draw = new MapboxDraw({
+  modes: modes,
+  controls: {
+    point: false, // you can enable / disable defaults controls as usual
+    download: {
+      type: 'myBTN',
+      className: 'my-btn',
+      title: 'My custom control',
+      onActivate: ctx => ctx.events.changeMode('draw_point'), // whatever
+      icon: './icon.svg'
+    }
+  }
+});
+```
 
 ## Events
 
