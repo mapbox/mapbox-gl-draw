@@ -21,8 +21,20 @@ map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
 var modes = MapboxDraw.modes;
 modes.static = StaticMode;
-var Draw = window.Draw = new MapboxDraw({ modes: modes });
-var drawIsActive = true;
+var Draw = window.Draw = new MapboxDraw({
+  modes: modes,
+  controls: {
+    point: true,
+    download: {
+      type: 'download',
+      className: 'downloadBTN',
+      title: 'download tool',
+      onActivate: ctx => ctx.events.changeMode('draw_point'),
+      icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRA9DJGEs0drLffSMJDxGwFMRo-mIzxAnWWTuwZr8Q0sqI8gAZV'
+    }
+  },
+});
+var drawIsActive = false;
 map.addControl(Draw, 'bottom-right');
 
 map.on('load', function() {
