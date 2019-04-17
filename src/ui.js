@@ -5,6 +5,44 @@ const classTypes = ['mode', 'feature', 'mouse'];
 
 module.exports = function(ctx) {
 
+  const defaultControls = {
+    [Constants.types.LINE]: {
+      type: Constants.types.LINE,
+      className: Constants.classes.CONTROL_BUTTON_LINE,
+      title: options => `LineString tool ${options.keybindings ? '(l)' : ''}`,
+      onActivate: ctx => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING),
+    },
+    [Constants.types.POLYGON]: {
+      type: Constants.types.POLYGON,
+      className: Constants.classes.CONTROL_BUTTON_POLYGON,
+      title: options => `Polygon tool ${options.keybindings ? '(p)' : ''}`,
+      onActivate: ctx => ctx.events.changeMode(Constants.modes.DRAW_POLYGON),
+    },
+    [Constants.types.POINT]: {
+      type: Constants.types.POINT,
+      className: Constants.classes.CONTROL_BUTTON_POINT,
+      title: options => `Marker tool ${options.keybindings ? '(m)' : ''}`,
+      onActivate: ctx => ctx.events.changeMode(Constants.modes.DRAW_POINT),
+    },
+    trash: {
+      type: 'trash',
+      className: Constants.classes.CONTROL_BUTTON_TRASH,
+      title: 'Delete',
+      onActivate: ctx => ctx.events.trash(),
+    },
+    combine_features: {
+      type: 'combine_features', // Constants.types.LINE
+      className: Constants.classes.CONTROL_BUTTON_COMBINE_FEATURES,
+      title: 'Combine',
+      onActivate: ctx => ctx.events.combineFeatures(),
+    },
+    uncombine_features: {
+      type: 'uncombine_features', // Constants.types.LINE
+      className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
+      title: 'Uncombine',
+      onActivate: ctx => ctx.events.uncombineFeatures(),
+    }
+  };
 
   const buttonElements = {};
   let activeButton = null;
@@ -60,6 +98,9 @@ module.exports = function(ctx) {
     const button = document.createElement('button');
     button.className = `${Constants.classes.CONTROL_BUTTON} ${options.className}`;
     button.setAttribute('title', options.title);
+    if (options.icon) {
+      button.setAttribute('style', `background-image: url(${options.icon}); background-size: contain;`);
+    }
     options.container.appendChild(button);
 
     button.addEventListener('click', (e) => {
@@ -101,68 +142,37 @@ module.exports = function(ctx) {
     const controls = ctx.options.controls;
     const controlGroup = document.createElement('div');
     controlGroup.className = `${Constants.classes.CONTROL_GROUP} ${Constants.classes.CONTROL_BASE}`;
-
+    let controlBar = [];
     if (!controls) return controlGroup;
 
-    if (controls[Constants.types.LINE]) {
-      buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_LINE,
-        title: `LineString tool ${ctx.options.keybindings ? '(l)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING)
-      });
-    }
-
-    if (controls[Constants.types.POLYGON]) {
-      buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_POLYGON,
-        title: `Polygon tool ${ctx.options.keybindings ? '(p)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON)
-      });
-    }
-
-    if (controls[Constants.types.POINT]) {
-      buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_POINT,
-        title: `Marker tool ${ctx.options.keybindings ? '(m)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT)
-      });
-    }
-
-    if (controls.trash) {
-      buttonElements.trash = createControlButton('trash', {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_TRASH,
-        title: 'Delete',
-        onActivate: () => {
-          ctx.events.trash();
+    if (String(controls) === '[object Object]') {
+      Object.entries(controls).forEach(([key, val]) => {
+        if (typeof val === 'boolean' && val) {
+          controlBar.push(key);
+        }
+        if (String(val) === '[object Object]') {
+          val.type = key;
+          controlBar.push(val);
         }
       });
     }
 
-    if (controls.combine_features) {
-      buttonElements.combine_features = createControlButton('combineFeatures', {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_COMBINE_FEATURES,
-        title: 'Combine',
-        onActivate: () => {
-          ctx.events.combineFeatures();
-        }
-      });
+    if (Array.isArray(controls)) {
+      controlBar = [...controls];
     }
 
-    if (controls.uncombine_features) {
-      buttonElements.uncombine_features = createControlButton('uncombineFeatures', {
+    controlBar.forEach(c => {
+      const control = typeof c === 'string' ? defaultControls[c] : c;
+      if (!control) return;
+      buttonElements[control.type] = createControlButton(control.type, {
         container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
-        title: 'Uncombine',
-        onActivate: () => {
-          ctx.events.uncombineFeatures();
-        }
+        className: control.className,
+        title: typeof control.title === 'function' ?
+          control.title(ctx.options) : control.title,
+        onActivate: () => control.onActivate(ctx),
+        icon: control.icon
       });
-    }
+    });
 
     return controlGroup;
   }
