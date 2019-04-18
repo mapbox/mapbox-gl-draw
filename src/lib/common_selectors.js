@@ -10,9 +10,9 @@ module.exports = {
     };
   },
   isShiftMousedown: function(e) {
-    if (!e.originalEvent) return false;
-    if (!e.originalEvent.shiftKey) return false;
-    return e.originalEvent.button === 0;
+    if (!e.srcEvent) return false;
+    if (!e.srcEvent.shiftKey) return false;
+    return e.srcEvent.button === 0;
   },
   isActiveFeature: function(e) {
     if (!e.featureTarget) return false;
@@ -41,8 +41,8 @@ module.exports = {
     return featureTarget.properties.meta === Constants.meta.VERTEX;
   },
   isShiftDown: function(e) {
-    if (!e.originalEvent) return false;
-    return e.originalEvent.shiftKey === true;
+    if (!e.srcEvent) return false;
+    return e.srcEvent.shiftKey === true;
   },
   isEscapeKey: function(e) {
     return e.keyCode === 27;

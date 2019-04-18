@@ -7,7 +7,7 @@ const MultiFeature = require('../feature_types/multi_feature');
 
 const ModeInterface = module.exports = function(ctx) {
   this.map = ctx.map;
-  this.drawConfig = JSON.parse(JSON.stringify(ctx.options || {}));
+  this.drawConfig = JSON.parse(JSON.stringify(Object.assign({}, ctx.options, { eventProxy: undefined }) || {}));
   this._ctx = ctx;
 };
 

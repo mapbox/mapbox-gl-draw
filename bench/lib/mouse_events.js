@@ -4,7 +4,7 @@ module.exports = function(map) {
   events.push = function(event, point, dp) {
     var payload = {
       dropPoint: dp === undefined ? false : dp,
-      originalEvent: {
+      srcEvent: {
         isShiftKey: false,
         stopPropagation: function() {}
       },

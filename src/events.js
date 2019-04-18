@@ -27,7 +27,7 @@ module.exports = function(ctx) {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     } else {
-      event.originalEvent.stopPropagation();
+      event.srcEvent.stopPropagation();
     }
   };
 
@@ -40,7 +40,7 @@ module.exports = function(ctx) {
   };
 
   events.mousemove = function(event) {
-    const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
+    const button = event.srcEvent.buttons !== undefined ? event.srcEvent.buttons : event.srcEvent.which;
     if (button === 1) {
       return events.mousedrag(event);
     }
@@ -80,7 +80,7 @@ module.exports = function(ctx) {
   events.touchstart = function(event) {
     // Prevent emulated mouse events because we will fully handle the touch here.
     // This does not stop the touch events from propogating to mapbox though.
-    event.originalEvent.preventDefault();
+    event.srcEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -95,7 +95,7 @@ module.exports = function(ctx) {
   };
 
   events.touchmove = function(event) {
-    event.originalEvent.preventDefault();
+    event.srcEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -105,7 +105,7 @@ module.exports = function(ctx) {
   };
 
   events.touchend = function(event) {
-    event.originalEvent.preventDefault();
+    event.srcEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -219,14 +219,15 @@ module.exports = function(ctx) {
       }
     },
     addEventListeners: function() {
-      ctx.map.on('mousemove', events.mousemove);
-      ctx.map.on('mousedown', events.mousedown);
-      ctx.map.on('mouseup', events.mouseup);
-      ctx.map.on('data', events.data);
+      const eventProxy = ctx.options.eventProxy || ctx.map;
+      eventProxy.on('mousemove', events.mousemove);
+      eventProxy.on('mousedown', events.mousedown);
+      eventProxy.on('mouseup', events.mouseup);
+      eventProxy.on('data', events.data);
 
-      ctx.map.on('touchmove', events.touchmove);
-      ctx.map.on('touchstart', events.touchstart);
-      ctx.map.on('touchend', events.touchend);
+      eventProxy.on('touchmove', events.touchmove);
+      eventProxy.on('touchstart', events.touchstart);
+      eventProxy.on('touchend', events.touchend);
 
       ctx.container.addEventListener('mouseout', events.mouseout);
 
@@ -236,14 +237,15 @@ module.exports = function(ctx) {
       }
     },
     removeEventListeners: function() {
-      ctx.map.off('mousemove', events.mousemove);
-      ctx.map.off('mousedown', events.mousedown);
-      ctx.map.off('mouseup', events.mouseup);
-      ctx.map.off('data', events.data);
+      const eventProxy = ctx.options.eventProxy || ctx.map;
+      eventProxy.off('mousemove', events.mousemove);
+      eventProxy.off('mousedown', events.mousedown);
+      eventProxy.off('mouseup', events.mouseup);
+      eventProxy.off('data', events.data);
 
-      ctx.map.off('touchmove', events.touchmove);
-      ctx.map.off('touchstart', events.touchstart);
-      ctx.map.off('touchend', events.touchend);
+      eventProxy.off('touchmove', events.touchmove);
+      eventProxy.off('touchstart', events.touchstart);
+      eventProxy.off('touchend', events.touchend);
 
       ctx.container.removeEventListener('mouseout', events.mouseout);
 

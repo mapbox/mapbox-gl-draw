@@ -1,6 +1,6 @@
 function isEventAtCoordinates(event, coordinates) {
-  if (!event.lngLat) return false;
-  return event.lngLat.lng === coordinates[0] && event.lngLat.lat === coordinates[1];
+  if (!event.latLng) return false;
+  return event.latLng[1] === coordinates[0] && event.latLng[0] === coordinates[1];
 }
 
 module.exports = isEventAtCoordinates;

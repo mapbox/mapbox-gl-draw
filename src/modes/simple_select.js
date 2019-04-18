@@ -133,10 +133,11 @@ SimpleSelect.clickAnywhere = function (state) {
 
 SimpleSelect.clickOnVertex = function(state, e) {
   // Enter direct select mode
+  const [lat, lng] = e.latLng;
   this.changeMode(Constants.modes.DIRECT_SELECT, {
     featureId: e.featureTarget.properties.parent,
     coordPath: e.featureTarget.properties.coord_path,
-    startPos: e.lngLat
+    startPos: {lat, lng}
   });
   this.updateUIClasses({ mouse: Constants.cursors.MOVE });
 };
@@ -153,7 +154,8 @@ SimpleSelect.startOnActiveFeature = function(state, e) {
 
   // Set up the state for drag moving
   state.canDragMove = true;
-  state.dragMoveLocation = e.lngLat;
+  const [lat, lng] = e.latLng;
+  state.dragMoveLocation = {lat, lng};
 };
 
 SimpleSelect.clickOnFeature = function(state, e) {
@@ -208,7 +210,7 @@ SimpleSelect.startBoxSelect = function(state, e) {
   this.stopExtendedInteractions(state);
   this.map.dragPan.disable();
   // Enable box select
-  state.boxSelectStartLocation = mouseEventPoint(e.originalEvent, this.map.getContainer());
+  state.boxSelectStartLocation = mouseEventPoint(e.srcEvent, this.map.getContainer());
   state.canBoxSelect = true;
 };
 
@@ -233,7 +235,7 @@ SimpleSelect.whileBoxSelect = function(state, e) {
   }
 
   // Adjust the box node's width and xy position
-  const current = mouseEventPoint(e.originalEvent, this.map.getContainer());
+  const current = mouseEventPoint(e.srcEvent, this.map.getContainer());
   const minX = Math.min(state.boxSelectStartLocation.x, current.x);
   const maxX = Math.max(state.boxSelectStartLocation.x, current.x);
   const minY = Math.min(state.boxSelectStartLocation.y, current.y);
@@ -248,16 +250,15 @@ SimpleSelect.whileBoxSelect = function(state, e) {
 SimpleSelect.dragMove = function(state, e) {
   // Dragging when drag move is enabled
   state.dragMoving = true;
-  e.originalEvent.stopPropagation();
-
+  e.srcEvent.stopPropagation();
+  const [lat, lng] = e.latLng;
   const delta = {
-    lng: e.lngLat.lng - state.dragMoveLocation.lng,
-    lat: e.lngLat.lat - state.dragMoveLocation.lat
+    lng: lng - state.dragMoveLocation.lng,
+    lat: lat - state.dragMoveLocation.lat
   };
 
   moveFeatures(this.getSelected(), delta);
-
-  state.dragMoveLocation = e.lngLat;
+  state.dragMoveLocation = {lat, lng};
 };
 
 SimpleSelect.onMouseUp = function(state, e) {
@@ -267,7 +268,7 @@ SimpleSelect.onMouseUp = function(state, e) {
   } else if (state.boxSelecting) {
     const bbox = [
       state.boxSelectStartLocation,
-      mouseEventPoint(e.originalEvent, this.map.getContainer())
+      mouseEventPoint(e.srcEvent, this.map.getContainer())
     ];
     const featuresInBox = this.featuresAt(null, bbox, 'click');
     const idsToSelect = this.getUniqueIds(featuresInBox)

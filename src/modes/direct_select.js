@@ -31,7 +31,8 @@ DirectSelect.fireActionable = function(state) {
 DirectSelect.startDragging = function(state, e) {
   this.map.dragPan.disable();
   state.canDragMove = true;
-  state.dragMoveLocation = e.lngLat;
+  const [lat, lng] = e.latLng;
+  state.dragMoveLocation = {lng, lat};
 };
 
 DirectSelect.stopDragging = function(state) {
@@ -74,7 +75,8 @@ DirectSelect.onFeature = function(state, e) {
 
 DirectSelect.dragFeature = function(state, e, delta) {
   moveFeatures(this.getSelected(), delta);
-  state.dragMoveLocation = e.lngLat;
+  const [lat, lng] = e.latLng;
+  state.dragMoveLocation = {lng, lat};
 };
 
 DirectSelect.dragVertex = function(state, e, delta) {
@@ -201,16 +203,16 @@ DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {
 DirectSelect.onDrag = function(state, e) {
   if (state.canDragMove !== true) return;
   state.dragMoving = true;
-  e.originalEvent.stopPropagation();
-
+  e.srcEvent.stopPropagation();
+  const [lat, lng] = e.latLng;
   const delta = {
-    lng: e.lngLat.lng - state.dragMoveLocation.lng,
-    lat: e.lngLat.lat - state.dragMoveLocation.lat
+    lng: lng - state.dragMoveLocation.lng,
+    lat: lat - state.dragMoveLocation.lat
   };
   if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
   else this.dragFeature(state, e, delta);
 
-  state.dragMoveLocation = e.lngLat;
+  state.dragMoveLocation = {lng, lat};
 };
 
 DirectSelect.onClick = function(state, e) {
