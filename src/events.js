@@ -127,8 +127,6 @@ module.exports = function(ctx) {
   const isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas') return; // we only handle events on the map
-
     if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
       event.preventDefault();
       currentMode.trash();
@@ -229,11 +227,11 @@ module.exports = function(ctx) {
       eventProxy.on('touchstart', events.touchstart);
       eventProxy.on('touchend', events.touchend);
 
-      ctx.container.addEventListener('mouseout', events.mouseout);
+      document.addEventListener('mouseout', events.mouseout);
 
       if (ctx.options.keybindings) {
-        ctx.container.addEventListener('keydown', events.keydown);
-        ctx.container.addEventListener('keyup', events.keyup);
+        document.addEventListener('keydown', events.keydown);
+        document.addEventListener('keyup', events.keyup);
       }
     },
     removeEventListeners: function() {
@@ -247,11 +245,11 @@ module.exports = function(ctx) {
       eventProxy.off('touchstart', events.touchstart);
       eventProxy.off('touchend', events.touchend);
 
-      ctx.container.removeEventListener('mouseout', events.mouseout);
+      document.removeEventListener('mouseout', events.mouseout);
 
       if (ctx.options.keybindings) {
-        ctx.container.removeEventListener('keydown', events.keydown);
-        ctx.container.removeEventListener('keyup', events.keyup);
+        document.removeEventListener('keydown', events.keydown);
+        document.removeEventListener('keyup', events.keyup);
       }
     },
     trash: function(options) {
