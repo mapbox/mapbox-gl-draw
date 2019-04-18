@@ -146,7 +146,8 @@ module.exports = function(ctx) {
     if (!controls) return controlGroup;
 
     if (String(controls) === '[object Object]') {
-      Object.entries(controls).forEach(([key, val]) => {
+      Object.keys(controls).forEach(key => {
+        const val = controls[key];
         if (typeof val === 'boolean' && val) {
           controlBar.push(key);
         }
