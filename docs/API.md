@@ -29,7 +29,7 @@ All of the following options are optional.
 - `touchEnabled`, boolean (default `true`): Whether or not to enable touch interactions for drawing.
 - `boxSelect`, boolean (default `true`): Whether or not to enable box selection of features with `shift`+`click`+drag. If `false`, `shift`+`click`+drag zooms into an area.
 - `clickBuffer`, number (default: `2`): Number of pixels around any feature or vertex (in every direction) that will respond to a click.
-- `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every directoin) that will respond to a touch.
+- `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every direction) that will respond to a touch.
 - `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
 - `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
@@ -39,7 +39,7 @@ All of the following options are optional.
 
 ## Modes
 
-By default MapboxDraw ships with a few modes. These modes aim to cover the basic needed functionaly for MapboxDraw to create the core GeoJSON feature types. Along with these, MapboxDraw also supports [custom modes. Click here for more details](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
+By default MapboxDraw ships with a few modes. These modes aim to cover the basic needed functionally for MapboxDraw to create the core GeoJSON feature types. Along with these, MapboxDraw also supports [custom modes. Click here for more details](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
 
 The mode name strings are available as an enum at `Draw.modes`.
 
@@ -367,7 +367,7 @@ map.on('draw.create', function (e) {
 });
 ```
 
-**If you programatically invoke a function in the Draw API, any event that *directly corresponds with* that function will not be fired.** For example, if you invoke `draw.delete()`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `draw.changeMode('draw_polygon')`, you will *not* see a `draw.modechange` event (because that directly corresponds with the invoked function) but you *will* see a `draw.selectionchange` event, since by changing the mode you indirectly deselected a feature.
+**If you programmatically invoke a function in the Draw API, any event that *directly corresponds with* that function will not be fired.** For example, if you invoke `draw.delete()`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `draw.changeMode('draw_polygon')`, you will *not* see a `draw.modechange` event (because that directly corresponds with the invoked function) but you *will* see a `draw.selectionchange` event, since by changing the mode you indirectly deselected a feature.
 
 ### `draw.create`
 
@@ -556,7 +556,7 @@ See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/EXAM
 property | values | function
 --- | --- | ---
 id | string | only available when `meta` is `feature`
-parent | string | only avaible when `meta` is not `feature`
-coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates
+parent | string | only available when `meta` is not `feature`
+coord_path | string | a `.` separated path to one [lon, lat] entity in the parents coordinates
 lon | number | the longitude value of a handle. Only available when `meta` is `midpoint`.
 lat | number | the latitude value of a handle. Only available when `meta` is `midpoint`.
