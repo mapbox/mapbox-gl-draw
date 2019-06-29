@@ -61,6 +61,9 @@ DirectSelect.onMidpoint = function(state, e) {
   state.feature.addCoordinate(about.coord_path, about.lng, about.lat);
   this.fireUpdate();
   state.selectedCoordPaths = [about.coord_path];
+
+  const selectedCoordinates = this.pathsToCoordinates(state.featureId, state.selectedCoordPaths);
+  this.setSelectedCoordinates(selectedCoordinates);
 };
 
 DirectSelect.pathsToCoordinates = function(featureId, paths) {
