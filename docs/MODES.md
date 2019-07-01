@@ -72,6 +72,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Radius Mode](https://gist.github.com/chriswhong/694779bc1f1e5d926e47bab7205fa559): Draws a polygon circle based on a center vertex and radius line
 -   [Rectangle Mode](https://github.com/edgespatial/mapbox-gl-draw-rectangle-mode)
 -   [Circle Mode](https://github.com/iamanvesh/mapbox-gl-draw-circle)
+-   [Assisted Rectangle Mode](https://github.com/geostarters/mapbox-gl-draw-assisted-rectangle-mode)
 
 ## Life Cycle Functions
 

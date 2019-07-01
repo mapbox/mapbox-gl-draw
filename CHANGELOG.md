@@ -1,5 +1,9 @@
 ## Changelog
 
+## 1.1.2
+
+- update mapbox-gl peer dependency
+
 ## 1.1.1
 
 - update mapbox-gl peer dependency
