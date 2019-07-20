@@ -26,7 +26,7 @@ test('Feature contrusctor and API', t => {
   t.equal(typeof Feature.prototype.toGeoJSON, 'function', 'feature.toGeoJSON');
   t.equal(typeof Feature.prototype.internal, 'function', 'feature.internal');
   t.equal(typeof Feature.prototype.setProperty, 'function', 'feature.setProperty');
-  t.equal(getPublicMemberKeys(Feature.prototype).length, 7, 'no unexpected prototype members');
+  t.equal(getPublicMemberKeys(Feature.prototype).length, 9, 'no unexpected prototype members');
 
   const simpleFeatureGeoJson = {
     type: 'Feature',
