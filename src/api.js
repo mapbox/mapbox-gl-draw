@@ -13,7 +13,8 @@ const featureTypes = {
   Point: require('./feature_types/point'),
   MultiPolygon: require('./feature_types/multi_feature'),
   MultiLineString: require('./feature_types/multi_feature'),
-  MultiPoint: require('./feature_types/multi_feature')
+  MultiPoint: require('./feature_types/multi_feature'),
+  GeometryCollection: require('./feature_types/geometryCollection').default
 };
 
 module.exports = function(ctx, api) {
@@ -25,18 +26,18 @@ module.exports = function(ctx, api) {
     return features.map(feature => feature.properties.id);
   };
 
-  api.getSelectedIds = function () {
+  api.getSelectedIds = function() {
     return ctx.store.getSelectedIds();
   };
 
-  api.getSelected = function () {
+  api.getSelected = function() {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getSelectedIds().map(id => ctx.store.get(id)).map(feature => feature.toGeoJSON())
     };
   };
 
-  api.getSelectedPoints = function () {
+  api.getSelectedPoints = function() {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getSelectedCoordinates().map(coordinate => {
@@ -70,7 +71,7 @@ module.exports = function(ctx, api) {
     return newIds;
   };
 
-  api.add = function (geojson) {
+  api.add = function(geojson) {
     const errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
     if (errors.length) {
       throw new Error(errors[0].message);
@@ -96,8 +97,8 @@ module.exports = function(ctx, api) {
         // If a feature of that id has already been created, and we are swapping it out ...
         const internalFeature = ctx.store.get(feature.id);
         internalFeature.properties = feature.properties;
-        if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
-          internalFeature.incomingCoords(feature.geometry.coordinates);
+        if (!internalFeature.isEqual(feature)) {
+          internalFeature.update(feature);
         }
       }
       return feature.id;
@@ -108,7 +109,7 @@ module.exports = function(ctx, api) {
   };
 
 
-  api.get = function (id) {
+  api.get = function(id) {
     const feature = ctx.store.get(id);
     if (feature) {
       return feature.toGeoJSON();

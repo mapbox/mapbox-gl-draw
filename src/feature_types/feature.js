@@ -1,5 +1,6 @@
 const hat = require('hat');
 const Constants = require('../constants');
+const isEqual = require('lodash.isequal');
 
 const Feature = function(ctx, geojson) {
   this.ctx = ctx;
@@ -65,6 +66,16 @@ Feature.prototype.internal = function(mode) {
       type: this.type
     }
   };
+};
+
+Feature.prototype.isEqual = function(feature) {
+  return isEqual(this.getCoordinates(), feature.geometry.coordinates);
+};
+
+Feature.prototype.update = function(feature) {
+  if (!this.isEqual(feature)) {
+    this.incomingCoords(feature.geometry.coordinates);
+  }
 };
 
 module.exports = Feature;
