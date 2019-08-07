@@ -104,7 +104,7 @@ git push
 npm publish
 ```
 
-Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/mb-pages/docs/pages/example/mapbox-gl-draw.html).
+Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/publisher-production/docs/pages/example/mapbox-gl-draw.html).
 
 ### Naming actions
 
