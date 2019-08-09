@@ -13,7 +13,7 @@ var draw = new MapboxDraw(drawOptions);
 map.addControl(draw);
 ```
 
-**Draw only works after the Mapbox GL JS map has loaded**, so you must interact with Draw only *after* your map's `load` event:
+**Draw only works after the Mapbox GL JS map has loaded**, so you must interact with Draw only _after_ your map's `load` event:
 
 ```js
 map.on('load', function() {
@@ -27,11 +27,12 @@ All of the following options are optional.
 
 - `keybindings`, boolean (default `true`): Whether or not to enable keyboard interactions for drawing.
 - `touchEnabled`, boolean (default `true`): Whether or not to enable touch interactions for drawing.
+- `canDrag`, boolean (default `true`): Whether or not to enable features drag.
 - `boxSelect`, boolean (default `true`): Whether or not to enable box selection of features with `shift`+`click`+drag. If `false`, `shift`+`click`+drag zooms into an area.
 - `clickBuffer`, number (default: `2`): Number of pixels around any feature or vertex (in every direction) that will respond to a click.
 - `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every directoin) that will respond to a touch.
 - `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
-- `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
+- `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be _off_ by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
 - `modes`, Object: over ride the default modes with your own. `MapboxDraw.modes` can be used to see the default values. More information on custom modes [can be found here](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md).
 - `defaultMode`, String (default: `'simple_select'`): the mode (from `modes`) that user will first land in.
@@ -89,7 +90,7 @@ Lets you draw a Point feature.
 
 This method takes either a GeoJSON Feature, FeatureCollection, or Geometry and adds it to Draw. It returns an array of ids for interacting with the added features. If a feature does not have its own id, one is automatically generated.
 
-The supported GeoJSON feature types are supported: `Point`, `LineString`, `Polygon`, `MultiPoint`,  `MultiLineString`, and `MultiPolygon`.
+The supported GeoJSON feature types are supported: `Point`, `LineString`, `Polygon`, `MultiPoint`, `MultiLineString`, and `MultiPolygon`.
 
 If you `add()` a feature with an id that is already in use, the existing feature will be updated and no new feature will be added.
 
@@ -112,11 +113,12 @@ var feature = {
   geometry: { type: 'Point', coordinates: [0, 0] }
 };
 var featureIds = draw.add(feature);
-console.log(featureIds)
+console.log(featureIds);
 //=> ['unique-id']
 ```
 
 ---
+
 ### `get(featureId: string): ?Feature`
 
 Returns the GeoJSON feature in Draw with the specified id, or `undefined` if the id matches no feature.
@@ -131,6 +133,7 @@ console.log(draw.get(pointId));
 ```
 
 ---
+
 ### `getFeatureIdsAt(point: { x: number, y: number }): Array<string>`
 
 Returns an array of feature ids for features currently rendered at the specified point.
@@ -140,26 +143,31 @@ Notice that the `point` argument requires `x`, `y` coordinates from pixel space,
 With this function, you can use the coordinates provided by mouse events to get information out of Draw.
 
 ```js
-var featureIds = Draw.getFeatureIdsAt({x: 20, y: 20});
-console.log(featureIds)
+var featureIds = Draw.getFeatureIdsAt({ x: 20, y: 20 });
+console.log(featureIds);
 //=> ['top-feature-at-20-20', 'another-feature-at-20-20']
 ```
+
 ---
+
 ### `getSelectedIds(): Array<string>`
 
 Returns an array of feature ids for features currently selected.
 
 ---
+
 ### `getSelected(): FeatureCollection`
 
 Returns a FeatureCollection of all the features currently selected.
 
 ---
+
 ### `getSelectedPoints(): FeatureCollection`
 
 Returns a FeatureCollection of Points representing all the vertices currently selected.
 
 ---
+
 ### `getAll(): FeatureCollection`
 
 Returns a FeatureCollection of all features.
@@ -201,6 +209,7 @@ console.log(draw.getAll());
 //   ]
 // }
 ```
+
 ---
 
 ### `delete(ids: string | Array<string>): draw`
@@ -214,9 +223,7 @@ Example:
 ```js
 var feature = { type: 'Point', coordinates: [0, 0] };
 var ids = draw.add(feature);
-draw
-  .delete(ids)
-  .getAll();
+draw.delete(ids).getAll();
 // { type: 'FeatureCollection', features: [] }
 ```
 
@@ -230,9 +237,7 @@ Example:
 
 ```js
 draw.add({ type: 'Point', coordinates: [0, 0] });
-draw
-  .deleteAll()
-  .getAll();
+draw.deleteAll().getAll();
 // { type: 'FeatureCollection', features: [] }
 ```
 
@@ -249,12 +254,14 @@ Example:
 ```js
 var ids = draw.set({
   type: 'FeatureCollection',
-  features: [{
-    type: 'Feature',
-    properties: {},
-    id: 'example-id',
-    geometry: { type: 'Point', coordinates: [0, 0] }
-  }]
+  features: [
+    {
+      type: 'Feature',
+      properties: {},
+      id: 'example-id',
+      geometry: { type: 'Point', coordinates: [0, 0] }
+    }
+  ]
 });
 // ['example-id']
 ```
@@ -279,7 +286,7 @@ If you want to delete features regardless of the current mode, use the `delete` 
 
 Invokes the current mode's `combineFeatures` action. Returns the draw instance for chaining.
 
-In `simple_select` mode, this combines all selected features into a single Multi* feature, *as long as they are all of the same geometry type*. For example:
+In `simple_select` mode, this combines all selected features into a single Multi* feature, *as long as they are all of the same geometry type\*. For example:
 
 - Selection is two LineStrings => MultiLineString
 - Selection is a MultiLineString and a LineString => MultiLineString
@@ -298,7 +305,7 @@ In `direct_select` mode and drawing modes, no action is taken.
 
 Invokes the current mode's `uncombineFeatures` action. Returns the draw instance for chaining.
 
-In `simple_select` mode, this splits each selected Multi* feature into its component feature parts, and leaves non-multifeatures untouched. For example:
+In `simple_select` mode, this splits each selected Multi\* feature into its component feature parts, and leaves non-multifeatures untouched. For example:
 
 - Selection is MultiLineString of two parts => LineString, LineString
 - Selection is MultiLineString of three parts => LineString, LineString, LineString
@@ -335,7 +342,7 @@ The `mode` argument must be one of the mode names described above and enumerated
 // `direct_select` options
 {
   // The id of the feature that will be directly selected (required)
-  featureId: string
+  featureId: string;
 }
 ```
 
@@ -362,12 +369,12 @@ This is helpful if you are using Draw's features as your primary data store in y
 Draw fires a number of events. All of these events are namespaced with `draw.` and are emitted from the Mapbox GL JS map object. All events are all triggered by user interaction.
 
 ```js
-map.on('draw.create', function (e) {
+map.on('draw.create', function(e) {
   console.log(e.features);
 });
 ```
 
-**If you programatically invoke a function in the Draw API, any event that *directly corresponds with* that function will not be fired.** For example, if you invoke `draw.delete()`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `draw.changeMode('draw_polygon')`, you will *not* see a `draw.modechange` event (because that directly corresponds with the invoked function) but you *will* see a `draw.selectionchange` event, since by changing the mode you indirectly deselected a feature.
+**If you programatically invoke a function in the Draw API, any event that _directly corresponds with_ that function will not be fired.** For example, if you invoke `draw.delete()`, there will be no corresponding `draw.delete` event, since you already know what you've done. Subsequent events may fire, though, that do not directly correspond to the invoked function. For example, if you have a one feature selected and then invoke `draw.changeMode('draw_polygon')`, you will _not_ see a `draw.modechange` event (because that directly corresponds with the invoked function) but you _will_ see a `draw.selectionchange` event, since by changing the mode you indirectly deselected a feature.
 
 ### `draw.create`
 
@@ -444,12 +451,12 @@ Fired when one or more features are updated. The following interactions will tri
   - Delete one or more vertices of a selected feature in `direct_select` mode, which can be done by hitting the <kbd>Backspace</kbd> or <kbd>Delete</kbd> keys, clicking the Trash button, or invoking `draw.trash()`.
   - Add a vertex to the selected feature by clicking a midpoint on that feature in `direct_select` mode.
 
-This event will *not* fire when a feature is created or deleted. To track those interactions, listen for `draw.create` and `draw.delete` events.
+This event will _not_ fire when a feature is created or deleted. To track those interactions, listen for `draw.create` and `draw.delete` events.
 
 The event data is an object with the following shape:
 
 ```js
-{  
+{
   features: Array<Feature>, // Array of features that were updated
   action: string // Name of the action that triggered the update
 }
@@ -493,8 +500,8 @@ This event is fired just after the current mode stops and just before the next m
 The event data is an object with the following shape:
 
 ```js
-{  
-  mode: string // The next mode, i.e. the mode that Draw is changing to
+{
+  mode: string; // The next mode, i.e. the mode that Draw is changing to
 }
 ```
 
@@ -503,7 +510,6 @@ The event data is an object with the following shape:
 ### `draw.render`
 
 Fired just after Draw calls `setData()` on the Mapbox GL JS map. This does not imply that the set data call has finished updating the map, just that the map is being updated.
-
 
 ### `draw.actionable`
 
@@ -537,11 +543,11 @@ The GL Style Spec also requires an id. **You must provide an id**. Draw will the
 
 In your custom style, you will want to use the following feature properties:
 
-property | values | function
---- | --- | ---
-meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features.
-active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
-mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
+| property | values                                                                   | function                                                                                                                                 |
+| -------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| meta     | feature, midpoint, vertex                                                | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features. |
+| active   | true, false                                                              | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.                                           |
+| mode     | simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.                                                                                               |
 
 Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderFeatures`" below.
 
@@ -553,10 +559,10 @@ See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/EXAM
 
 ## Using Draw with Mapbox GL JS's `queryRenderFeatures`
 
-property | values | function
---- | --- | ---
-id | string | only available when `meta` is `feature`
-parent | string | only avaible when `meta` is not `feature`
-coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates
-lon | number | the longitude value of a handle. Only available when `meta` is `midpoint`.
-lat | number | the latitude value of a handle. Only available when `meta` is `midpoint`.
+| property   | values | function                                                                   |
+| ---------- | ------ | -------------------------------------------------------------------------- |
+| id         | string | only available when `meta` is `feature`                                    |
+| parent     | string | only avaible when `meta` is not `feature`                                  |
+| coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates   |
+| lon        | number | the longitude value of a handle. Only available when `meta` is `midpoint`. |
+| lat        | number | the latitude value of a handle. Only available when `meta` is `midpoint`.  |

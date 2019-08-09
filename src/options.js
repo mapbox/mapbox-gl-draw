@@ -5,6 +5,7 @@ const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
   touchEnabled: true,
+  canDrag: true,
   clickBuffer: 2,
   touchBuffer: 25,
   boxSelect: true,

@@ -7,7 +7,6 @@ const Constants = require('./constants');
 const objectToMode = require('./modes/object_to_mode');
 
 module.exports = function(ctx) {
-
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
     return m;
@@ -20,10 +19,13 @@ module.exports = function(ctx) {
   let currentMode = null;
 
   events.drag = function(event, isDrag) {
-    if (isDrag({
-      point: event.point,
-      time: new Date().getTime()
-    })) {
+    if (!ctx.options.canDrag) return;
+    if (
+      isDrag({
+        point: event.point,
+        time: new Date().getTime()
+      })
+    ) {
       ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
       currentMode.drag(event);
     } else {
@@ -32,15 +34,18 @@ module.exports = function(ctx) {
   };
 
   events.mousedrag = function(event) {
-    events.drag(event, (endInfo) => !isClick(mouseDownInfo, endInfo));
+    events.drag(event, endInfo => !isClick(mouseDownInfo, endInfo));
   };
 
   events.touchdrag = function(event) {
-    events.drag(event, (endInfo) => !isTap(touchStartInfo, endInfo));
+    events.drag(event, endInfo => !isTap(touchStartInfo, endInfo));
   };
 
   events.mousemove = function(event) {
-    const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
+    const button =
+      event.originalEvent.buttons !== undefined ?
+        event.originalEvent.buttons :
+        event.originalEvent.which;
     if (button === 1) {
       return events.mousedrag(event);
     }
@@ -63,10 +68,12 @@ module.exports = function(ctx) {
     const target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
 
-    if (isClick(mouseDownInfo, {
-      point: event.point,
-      time: new Date().getTime()
-    })) {
+    if (
+      isClick(mouseDownInfo, {
+        point: event.point,
+        time: new Date().getTime()
+      })
+    ) {
       currentMode.click(event);
     } else {
       currentMode.mouseup(event);
@@ -112,10 +119,12 @@ module.exports = function(ctx) {
 
     const target = featuresAt.touch(event, null, ctx)[0];
     event.featureTarget = target;
-    if (isTap(touchStartInfo, {
-      time: new Date().getTime(),
-      point: event.point
-    })) {
+    if (
+      isTap(touchStartInfo, {
+        time: new Date().getTime(),
+        point: event.point
+      })
+    ) {
       currentMode.tap(event);
     } else {
       currentMode.touchend(event);
@@ -124,12 +133,17 @@ module.exports = function(ctx) {
 
   // 8 - Backspace
   // 46 - Delete
-  const isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
+  const isKeyModeValid = code =>
+    !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas') return; // we only handle events on the map
+    if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas')
+      return; // we only handle events on the map
 
-    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
+    if (
+      (event.keyCode === 8 || event.keyCode === 46) &&
+      ctx.options.controls.trash
+    ) {
       event.preventDefault();
       currentMode.trash();
     } else if (isKeyModeValid(event.keyCode)) {
@@ -177,7 +191,7 @@ module.exports = function(ctx) {
     currentMode = setupModeHandler(mode, ctx);
 
     if (!eventOptions.silent) {
-      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename});
+      ctx.map.fire(Constants.events.MODE_CHANGE, { mode: modename });
     }
 
     ctx.store.setDirty();
@@ -193,11 +207,13 @@ module.exports = function(ctx) {
   function actionable(actions) {
     let changed = false;
     Object.keys(actions).forEach(action => {
-      if (actionState[action] === undefined) throw new Error('Invalid action type');
+      if (actionState[action] === undefined)
+        throw new Error('Invalid action type');
       if (actionState[action] !== actions[action]) changed = true;
       actionState[action] = actions[action];
     });
-    if (changed) ctx.map.fire(Constants.events.ACTIONABLE, { actions: actionState });
+    if (changed)
+      ctx.map.fire(Constants.events.ACTIONABLE, { actions: actionState });
   }
 
   const api = {
