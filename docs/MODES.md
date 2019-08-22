@@ -258,7 +258,7 @@ Sets Draw's internal selected coordinate state
 
 **Parameters**
 
--   `coords` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>** a array of {coord_path: 'string', featureId: 'string'}
+-   `coords` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)>** a array of {coord_path: 'string', feature_id: 'string'}
 
 ### this.getSelected
 
