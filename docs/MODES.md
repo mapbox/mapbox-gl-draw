@@ -206,7 +206,7 @@ Triggered when the mode is being exited, to be used for cleaning up artifacts su
 
 ### MODE.onTrash
 
-Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#trash-draw) is called.
+Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#trash-draw) is called.
 
 **Parameters**
 
@@ -214,7 +214,7 @@ Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/mast
 
 ### MODE.onCombineFeature
 
-Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#combinefeatures-draw) is called.
+Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#combinefeatures-draw) is called.
 
 **Parameters**
 
@@ -222,7 +222,7 @@ Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw
 
 ### MODE.onUncombineFeature
 
-Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#uncombinefeatures-draw) is called.
+Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#uncombinefeatures-draw) is called.
 
 **Parameters**
 
@@ -231,7 +231,7 @@ Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-dr
 ### MODE.toDisplayFeatures
 
 Triggered per feature on render to convert raw features into set of features for display on the map
-See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
+See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
 
 **Parameters**
 
@@ -337,7 +337,7 @@ Clear all selected coordinates
 ### this.setActionableState
 
 Indicate if the different actions are currently possible with your mode
-See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
+See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
 
 **Parameters**
 
