@@ -14,6 +14,9 @@ module.exports = function getFeatureAtAndSetCursors(event, ctx) {
   if (ctx.events.currentModeName().indexOf('draw') !== -1) {
     classes.mouse = Constants.cursors.ADD;
   }
+  if (ctx.events.currentModeName().indexOf('drag_circle') !== -1) {
+    classes.mouse = Constants.cursors.ADD;
+  }
 
   ctx.ui.queueMapClasses(classes);
   ctx.ui.updateMapClasses();
