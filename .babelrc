@@ -1,10 +1,10 @@
 {
-  "presets": ["es2015"],
+  "presets": ["@babel/preset-env"],
   "env": {
     "test": {
       "sourceMaps": "inline",
       "plugins": [
-        "__coverage__"
+        "istanbul"
       ]
     }
   }

@@ -24,7 +24,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 
 **When using CDN**
 ```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.css' type='text/css' />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Usage in your application
@@ -39,7 +39,7 @@ var MapboxDraw = require('@mapbox/mapbox-gl-draw');
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js'></script>
 ```
 
 **Example setup**
@@ -83,8 +83,8 @@ Install dependencies, build the source files and crank up a server via:
 
 ```
 git clone git@github.com:mapbox/mapbox-gl-draw.git
-npm install
-npm start & open http://localhost:9967/debug/?access_token=<token>
+yarn install
+yarn start & open "http://localhost:9967/debug/?access_token=<token>"
 ```
 
 ### Testing
@@ -104,11 +104,11 @@ git push
 npm publish
 ```
 
-Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/mb-pages/docs/_posts/examples/3400-01-25-mapbox-gl-draw.html).
+Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/publisher-production/docs/pages/example/mapbox-gl-draw.html).
 
 ### Naming actions
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspiration.
 
-- http://turfjs.org/docs.html
-- http://toblerity.org/shapely/manual.html
+- http://turfjs.org
+- https://shapely.readthedocs.io/en/latest/manual.html
