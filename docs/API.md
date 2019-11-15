@@ -61,7 +61,7 @@ Lets you select, delete, and drag vertices; and drag features.
 
 `direct_select` mode does not apply to point features, because they have no vertices.
 
-Draw enters `direct_select` mode when the user clicks a vertex of an selected line or polygon. So `direct_select` mode typically follows `simple_select` mode.
+Draw enters `direct_select` mode when the user clicks a vertex of a selected line or polygon. So `direct_select` mode typically follows `simple_select` mode.
 
 ### `draw_line_string`
 
