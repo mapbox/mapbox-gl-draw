@@ -557,6 +557,6 @@ property | values | function
 --- | --- | ---
 id | string | only available when `meta` is `feature`
 parent | string | only avaible when `meta` is not `feature`
-coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates
+coord_path | string | a `.` separated path to one [lon, lat] entity in the parents coordinates
 lon | number | the longitude value of a handle. Only available when `meta` is `midpoint`.
 lat | number | the latitude value of a handle. Only available when `meta` is `midpoint`.
