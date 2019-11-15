@@ -543,7 +543,7 @@ meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points ad
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
 
-Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderFeatures`" below.
+Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderedFeatures`" below.
 
 If `opts.userProperties` is set to `true` the properties of a feature will also be available for styling. All user properties are prefixed with `user_` to make sure they do not clash with the Draw properties.
 
@@ -551,7 +551,7 @@ If `opts.userProperties` is set to `true` the properties of a feature will also 
 
 See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/EXAMPLES.md) for examples of custom styles.
 
-## Using Draw with Mapbox GL JS's `queryRenderFeatures`
+## Using Draw with Mapbox GL JS's `queryRenderedFeatures`
 
 property | values | function
 --- | --- | ---
