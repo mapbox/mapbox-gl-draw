@@ -25,7 +25,7 @@ module.exports = function(geojsonFeatures, delta) {
   let westEdge = LNG_MAX;
   let eastEdge = LNG_MIN;
 
-  geojsonFeatures.forEach(feature => {
+  geojsonFeatures.forEach((feature) => {
     const bounds = extent(feature);
     const featureSouthEdge = bounds[1];
     const featureNorthEdge = bounds[3];

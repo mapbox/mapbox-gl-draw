@@ -10,7 +10,7 @@ const testOptions = {
   interval: 250
 };
 
-test('isTap easy', t => {
+test('isTap easy', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -25,7 +25,7 @@ test('isTap easy', t => {
   t.end();
 });
 
-test('isTap when moving barely at all, same times', t => {
+test('isTap when moving barely at all, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -38,7 +38,7 @@ test('isTap when moving barely at all, same times', t => {
   t.end();
 });
 
-test('isTap when moving just under the distance limit, same times', t => {
+test('isTap when moving just under the distance limit, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -52,7 +52,7 @@ test('isTap when moving just under the distance limit, same times', t => {
   t.end();
 });
 
-test('isTap when moving just over the distance limit, same times', t => {
+test('isTap when moving just over the distance limit, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -66,7 +66,7 @@ test('isTap when moving just over the distance limit, same times', t => {
   t.end();
 });
 
-test('isTap when moving barely at all, just before the time limit', t => {
+test('isTap when moving barely at all, just before the time limit', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -79,7 +79,7 @@ test('isTap when moving barely at all, just before the time limit', t => {
   t.end();
 });
 
-test('isTap when moving just under the limit, just after the time limit', t => {
+test('isTap when moving just under the limit, just after the time limit', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -93,7 +93,7 @@ test('isTap when moving just under the limit, just after the time limit', t => {
   t.end();
 });
 
-test('isTap when moving just over the limit, same times', t => {
+test('isTap when moving just over the limit, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1

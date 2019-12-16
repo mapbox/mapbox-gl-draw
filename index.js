@@ -7,7 +7,7 @@ const setupDraw = function(options, api) {
   options = setupOptions(options);
 
   const ctx = {
-    options: options
+    options
   };
 
   api = setupAPI(ctx, api);

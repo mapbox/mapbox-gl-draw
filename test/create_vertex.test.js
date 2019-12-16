@@ -1,7 +1,7 @@
 import test from 'tape';
 import createVertex from '../src/lib/create_vertex';
 
-test('createVertex', t => {
+test('createVertex', (t) => {
   t.deepEqual(createVertex('foo', [1, 2], '3.4.5', true), {
     type: 'Feature',
     properties: {

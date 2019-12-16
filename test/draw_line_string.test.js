@@ -22,7 +22,7 @@ import {
   escapeEvent
 } from './utils/key_events';
 
-test('draw_line_string mode initialization', t => {
+test('draw_line_string mode initialization', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -45,7 +45,7 @@ test('draw_line_string mode initialization', t => {
   t.end();
 });
 
-test('draw_line_string start', t => {
+test('draw_line_string start', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -65,7 +65,7 @@ test('draw_line_string start', t => {
   }, 10);
 });
 
-test('draw_line_string stop with valid line', t => {
+test('draw_line_string stop with valid line', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -84,7 +84,7 @@ test('draw_line_string stop with valid line', t => {
   t.end();
 });
 
-test('draw_line_string stop with invalid line', t => {
+test('draw_line_string stop with invalid line', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -109,7 +109,7 @@ test('draw_line_string stop with invalid line', t => {
   t.end();
 });
 
-test('draw_line_string render active line with 0 coordinates', t => {
+test('draw_line_string render active line with 0 coordinates', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -133,7 +133,7 @@ test('draw_line_string render active line with 0 coordinates', t => {
   t.end();
 });
 
-test('draw_line_string render active line with 1 coordinate', t => {
+test('draw_line_string render active line with 1 coordinate', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -157,7 +157,7 @@ test('draw_line_string render active line with 1 coordinate', t => {
   t.end();
 });
 
-test('draw_line_string render active line with 2 coordinates', t => {
+test('draw_line_string render active line with 2 coordinates', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -193,7 +193,7 @@ test('draw_line_string render active line with 2 coordinates', t => {
   t.end();
 });
 
-test('draw_line_string render inactive feature', t => {
+test('draw_line_string render inactive feature', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -226,7 +226,7 @@ test('draw_line_string render inactive feature', t => {
   t.end();
 });
 
-test('draw_line_string mouse interaction', t => {
+test('draw_line_string mouse interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -238,7 +238,7 @@ test('draw_line_string mouse interaction', t => {
     // The following sub-tests share state ...
 
     Draw.changeMode('draw_line_string');
-    t.test('first click', st => {
+    t.test('first click', (st) => {
       mouseClick(map, makeMouseEvent(10, 20));
 
       const { features } = Draw.getAll();
@@ -251,28 +251,28 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('move mouse', st => {
+    t.test('move mouse', (st) => {
       map.fire('mousemove', makeMouseEvent(15, 23));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [15, 23]], 'last coordinate added');
       st.end();
     });
 
-    t.test('move mouse again', st => {
+    t.test('move mouse again', (st) => {
       map.fire('mousemove', makeMouseEvent(30, 33));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [30, 33]], 'last coordinate replaced');
       st.end();
     });
 
-    t.test('click to add another vertex', st => {
+    t.test('click to add another vertex', (st) => {
       mouseClick(map, makeMouseEvent(35, 35));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[10, 20], [35, 35], [35, 35]], 'last coordinate replaced');
       st.end();
     });
 
-    t.test('add more points then click on the last vertex to finish', st => {
+    t.test('add more points then click on the last vertex to finish', (st) => {
       mouseClick(map, makeMouseEvent(40, 40));
       mouseClick(map, makeMouseEvent(50, 50));
       mouseClick(map, makeMouseEvent(55, 55));
@@ -290,7 +290,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start a line but trash it before completion', st => {
+    t.test('start a line but trash it before completion', (st) => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
@@ -310,7 +310,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start a line but trash it with Escape before completion', st => {
+    t.test('start a line but trash it with Escape before completion', (st) => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
@@ -334,7 +334,7 @@ test('draw_line_string mouse interaction', t => {
 
     // ZERO CLICK TESTS
 
-    t.test('start a line and end it with Enter', st => {
+    t.test('start a line and end it with Enter', (st) => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
@@ -358,7 +358,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then changemode before a click', st => {
+    t.test('start draw_line_string mode then changemode before a click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -375,7 +375,7 @@ test('draw_line_string mouse interaction', t => {
 
     // ONE CLICK TESTS
 
-    t.test('start draw_line_string mode then enter after one click', st => {
+    t.test('start draw_line_string mode then enter after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -393,7 +393,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then start a point after one click', st => {
+    t.test('start draw_line_string mode then start a point after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -411,7 +411,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then start a line_string after one click', st => {
+    t.test('start draw_line_string mode then start a line_string after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -429,7 +429,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then start a polygon after one click', st => {
+    t.test('start draw_line_string mode then start a polygon after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -447,7 +447,7 @@ test('draw_line_string mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_line_string mode then double click', st => {
+    t.test('start draw_line_string mode then double click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -463,7 +463,7 @@ test('draw_line_string mouse interaction', t => {
 
     // THREE CLICK TEST
 
-    t.test('start draw_line_string mode then double click', st => {
+    t.test('start draw_line_string mode then double click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -500,7 +500,7 @@ test('draw_line_string mouse interaction', t => {
   });
 });
 
-test('draw_line_string touch interaction', t => {
+test('draw_line_string touch interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -511,7 +511,7 @@ test('draw_line_string touch interaction', t => {
     // The following sub-tests share state ...
 
     Draw.changeMode('draw_line_string');
-    t.test('first tap', st => {
+    t.test('first tap', (st) => {
       touchTap(map, makeTouchEvent(100, 200));
 
       const { features } = Draw.getAll();
@@ -524,14 +524,14 @@ test('draw_line_string touch interaction', t => {
       st.end();
     });
 
-    t.test('tap to add another vertex', st => {
+    t.test('tap to add another vertex', (st) => {
       touchTap(map, makeTouchEvent(200, 400));
       const line = Draw.getAll().features[0];
       st.deepEqual(line.geometry.coordinates, [[100, 200], [200, 400], [200, 400]], 'last coordinate replaced');
       st.end();
     });
 
-    t.test('add more points then tap on the last vertex to finish', st => {
+    t.test('add more points then tap on the last vertex to finish', (st) => {
       touchTap(map, makeTouchEvent(400, 500));
       touchTap(map, makeTouchEvent(300, 500));
       touchTap(map, makeTouchEvent(200, 500));
@@ -549,7 +549,7 @@ test('draw_line_string touch interaction', t => {
       st.end();
     });
 
-    t.test('start a line but trash it before completion', st => {
+    t.test('start a line but trash it before completion', (st) => {
       // Start a new line
       Draw.deleteAll();
       Draw.changeMode('draw_line_string');
@@ -574,7 +574,7 @@ test('draw_line_string touch interaction', t => {
   });
 });
 
-test('draw_line_string continue LineString', t => {
+test('draw_line_string continue LineString', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -645,7 +645,7 @@ test('draw_line_string continue LineString', t => {
   t.end();
 });
 
-test('draw_line_string continue LineString mouseClick', t => {
+test('draw_line_string continue LineString mouseClick', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });

@@ -42,7 +42,7 @@ function runTests() {
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.
 
-  test('enter draw_point mode', t => {
+  test('enter draw_point mode', (t) => {
     fireSpy.reset();
 
     // Click the line button
@@ -63,7 +63,7 @@ function runTests() {
     }
   };
 
-  test('create a point', t => {
+  test('create a point', (t) => {
     // Now in `draw_point` mode ...
     // Move around, then click to create the point
     map.fire('mousemove', makeMouseEvent(10, 10));
@@ -92,7 +92,7 @@ function runTests() {
     });
   });
 
-  test('deselect that point', t => {
+  test('deselect that point', (t) => {
     // Now in `simple_select` mode ...
     // Move around, then click away from the selected point
     map.fire('mousemove', makeMouseEvent(10, 10));
@@ -110,7 +110,7 @@ function runTests() {
     });
   });
 
-  test('re-select that point', t => {
+  test('re-select that point', (t) => {
     // Now in `simple_select` mode ...
     // Move around, then click the existing point
     map.fire('mousemove', makeMouseEvent(10, 10));
@@ -137,10 +137,10 @@ function runTests() {
     }
   };
 
-  test('drag that point', t => {
+  test('drag that point', (t) => {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
-    repeat(10, i => {
+    repeat(10, (i) => {
       map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
@@ -156,7 +156,7 @@ function runTests() {
     });
   });
 
-  test('delete that point with the Trash button', t => {
+  test('delete that point with the Trash button', (t) => {
     // Now in `simple_select` mode ...
     trashButton.click();
     afterNextRender(() => {
@@ -170,7 +170,7 @@ function runTests() {
     });
   });
 
-  test('enter draw_line_string mode', t => {
+  test('enter draw_line_string mode', (t) => {
     // Click the line button
     lineCutton.click();
     firedWith(t, 'draw.modechange', {
@@ -191,17 +191,17 @@ function runTests() {
     }
   };
 
-  test('create a line', t => {
+  test('create a line', (t) => {
     // Now in `draw_line_string` mode...
     // Move around, then click and move to create the line
     map.fire('mousemove', makeMouseEvent(10, 10));
     map.fire('mousemove', makeMouseEvent(20, 20));
     click(map, makeMouseEvent(10, 10));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(10 + i, 10 + i));
     });
     click(map, makeMouseEvent(30, 30));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(30 + i, 30 + i));
     });
     click(map, makeMouseEvent(50, 50));
@@ -230,7 +230,7 @@ function runTests() {
     });
   });
 
-  test('deselect that line', t => {
+  test('deselect that line', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(5, 5));
     afterNextRender(() => {
@@ -245,7 +245,7 @@ function runTests() {
     });
   });
 
-  test('re-select that line', t => {
+  test('re-select that line', (t) => {
     // Now in `simple_select` mode ...
     // Click somewhere on the line
     click(map, makeMouseEvent(30, 30));
@@ -270,12 +270,12 @@ function runTests() {
     }
   };
 
-  test('move the line', t => {
+  test('move the line', (t) => {
     // Now in `simple_select` mode ...
     // Mousedown anywhere on the line, not vertex
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
-    repeat(10, i => {
+    repeat(10, (i) => {
       map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { buttons: 1 }));
     });
     // Release the mouse
@@ -294,7 +294,7 @@ function runTests() {
     });
   });
 
-  test('select a vertex', t => {
+  test('select a vertex', (t) => {
     // Now in `simple_select` mode ...
     // Click a vertex
     click(map, makeMouseEvent(40, 20));
@@ -332,12 +332,12 @@ function runTests() {
     }
   };
 
-  test('move the vertex', t => {
+  test('move the vertex', (t) => {
     // Now in `direct_select` mode ...
     // Click the vertex again
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
-    repeat(22, i => {
+    repeat(22, (i) => {
       map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { buttons: 1 }));
     });
     // Release the mouse
@@ -364,7 +364,7 @@ function runTests() {
     }
   };
 
-  test('add another vertex', t => {
+  test('add another vertex', (t) => {
     // Now in `direct_select` mode ...
     // Click a midpoint of lineC
     click(map, makeMouseEvent(41, 21));
@@ -389,7 +389,7 @@ function runTests() {
     }
   };
 
-  test('delete a vertex with Backspace', t => {
+  test('delete a vertex with Backspace', (t) => {
     // Now in `direct_select` mode ...
     // Click a vertex
     click(map, makeMouseEvent(41, 21));
@@ -410,7 +410,7 @@ function runTests() {
   // Leaving that line in place while moving on to
   // mess with polygons
 
-  test('enter draw_polygon mode', t => {
+  test('enter draw_polygon mode', (t) => {
     // Click the polygon button
     polygonEutton.click();
 
@@ -441,18 +441,18 @@ function runTests() {
     }
   };
 
-  test('create a polygon', t => {
+  test('create a polygon', (t) => {
     // Now in `draw_polygon` mode ...
     click(map, makeMouseEvent(0, 0));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(0, 0 + i));
     });
     click(map, makeMouseEvent(0, 30));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(0 + i, 30));
     });
     click(map, makeMouseEvent(30, 30));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(30, 30 - i));
     });
     click(map, makeMouseEvent(30, 0));
@@ -481,7 +481,7 @@ function runTests() {
     });
   });
 
-  test('deselect the polygon', t => {
+  test('deselect the polygon', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
@@ -496,11 +496,11 @@ function runTests() {
     });
   });
 
-  test('box-select the line and the polygon', t => {
+  test('box-select the line and the polygon', (t) => {
     // Now in `simple_select` mode ...
     // Mouse down with the shift key
     map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
@@ -535,12 +535,12 @@ function runTests() {
     }
   };
 
-  test('move the line and the polygon', t => {
+  test('move the line and the polygon', (t) => {
     // Now in `simple_select` mode ...
     // Mousedown anywhere on either feature, not a vertex
     map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { buttons: 1 }));
     });
     // Release the mouse
@@ -559,7 +559,7 @@ function runTests() {
     });
   });
 
-  test('deselect both', t => {
+  test('deselect both', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(-10, -10));
     afterNextRender(() => {
@@ -574,7 +574,7 @@ function runTests() {
     });
   });
 
-  test('select the polygon', t => {
+  test('select the polygon', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(48, 0));
     afterNextRender(() => {
@@ -589,7 +589,7 @@ function runTests() {
     });
   });
 
-  test('select a vertex', t => {
+  test('select a vertex', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, -20));
     afterNextRender(() => {
@@ -617,7 +617,7 @@ function runTests() {
     });
   });
 
-  test('add another vertex to the selection', t => {
+  test('add another vertex to the selection', (t) => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     afterNextRender(() => {
@@ -635,12 +635,12 @@ function runTests() {
     }
   };
 
-  test('move the vertices', t => {
+  test('move the vertices', (t) => {
     // Now in `direct_select` mode ...
     // Click a vertex again
     map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
-    repeat(20, i => {
+    repeat(20, (i) => {
       map.fire('mousemove', makeMouseEvent(20 - i, 10, { buttons: 1 }));
     });
     // Release the mouse
@@ -668,7 +668,7 @@ function runTests() {
     }
   };
 
-  test('add another vertex', t => {
+  test('add another vertex', (t) => {
     // Now in `direct_select` mode ...
     // Click a midpoint
     click(map, makeMouseEvent(25, 10));
@@ -693,7 +693,7 @@ function runTests() {
     }
   };
 
-  test('select then delete two vertices with Draw.trash()', t => {
+  test('select then delete two vertices with Draw.trash()', (t) => {
     // Now in `direct_select` mode ...
     click(map, makeMouseEvent(0, -20));
     click(map, makeMouseEvent(25, 10, { shiftKey: true }));
@@ -711,7 +711,7 @@ function runTests() {
     });
   });
 
-  test('select the polygon', t => {
+  test('select the polygon', (t) => {
     // Deselect everything
     click(map, makeMouseEvent(-200, -200));
     afterNextRender(() => {
@@ -732,7 +732,7 @@ function runTests() {
     });
   });
 
-  test('add the line to the selection', t => {
+  test('add the line to the selection', (t) => {
     // Now in `simple_select` mode ...
     // shift-click to add to selection
     click(map, makeMouseEvent(82, 22, { shiftKey: true }));
@@ -750,7 +750,7 @@ function runTests() {
 
   // Below are tests to ensure that API usage to modify data does not
   // trigger events, only user interactions
-  test('API usage does not trigger events', t => {
+  test('API usage does not trigger events', (t) => {
     Draw.deleteAll();
     Draw.add({
       type: 'Feature',
@@ -781,7 +781,7 @@ function runTests() {
     });
   });
 
-  test('except when the API function does not directly correspond to the event', t => {
+  test('except when the API function does not directly correspond to the event', (t) => {
     const line = {
       type: 'Feature',
       properties: {},
@@ -808,7 +808,7 @@ function runTests() {
     });
   });
 
-  test('start draw_point mode then exit with Enter', t => {
+  test('start draw_point mode then exit with Enter', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_point');
     container.dispatchEvent(enterEvent);
@@ -824,7 +824,7 @@ function runTests() {
     });
   });
 
-  test('start draw_point mode then exit with Escape', t => {
+  test('start draw_point mode then exit with Escape', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_point');
     container.dispatchEvent(escapeEvent);
@@ -840,7 +840,7 @@ function runTests() {
     });
   });
 
-  test('start draw_line_string mode and drawing a line then finish with Enter', t => {
+  test('start draw_line_string mode and drawing a line then finish with Enter', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_line_string');
     click(map, makeMouseEvent(240, 240));
@@ -877,7 +877,7 @@ function runTests() {
     });
   });
 
-  test('start draw_line_string mode then exit with Escape', t => {
+  test('start draw_line_string mode then exit with Escape', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_line_string');
     click(map, makeMouseEvent(0, 0));
@@ -895,7 +895,7 @@ function runTests() {
     });
   });
 
-  test('start draw_polygon mode and drawing a polygon then finish with Enter', t => {
+  test('start draw_polygon mode and drawing a polygon then finish with Enter', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_polygon');
     click(map, makeMouseEvent(240, 240));
@@ -933,7 +933,7 @@ function runTests() {
     });
   });
 
-  test('start draw_polygon mode then exit with Escape', t => {
+  test('start draw_polygon mode then exit with Escape', (t) => {
     Draw.deleteAll();
     Draw.changeMode('draw_polygon');
     click(map, makeMouseEvent(0, 0));
@@ -952,7 +952,7 @@ function runTests() {
     });
   });
 
-  test('box selection includes no features', t => {
+  test('box selection includes no features', (t) => {
     Draw.deleteAll();
     Draw.changeMode('simple_select');
     click(map, makeMouseEvent(0, 0, { shiftKey: true }));

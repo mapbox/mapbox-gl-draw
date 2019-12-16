@@ -53,7 +53,7 @@ MultiFeature.prototype.getCoordinate = function(path) {
 };
 
 MultiFeature.prototype.getCoordinates = function() {
-  return JSON.parse(JSON.stringify(this.features.map(f => {
+  return JSON.parse(JSON.stringify(this.features.map((f) => {
     if (f.type === Constants.geojsonTypes.POLYGON) return f.getCoordinates();
     return f.coordinates;
   })));

@@ -17,16 +17,16 @@ const ModeHandler = function(mode, DrawContext) {
   };
 
   const ctx = {
-    on: function(event, selector, fn) {
+    on(event, selector, fn) {
       if (handlers[event] === undefined) {
         throw new Error(`Invalid event type: ${event}`);
       }
       handlers[event].push({
-        selector: selector,
-        fn: fn
+        selector,
+        fn
       });
     },
-    render: function(id) {
+    render(id) {
       DrawContext.store.featureChanged(id);
     }
   };
@@ -53,59 +53,59 @@ const ModeHandler = function(mode, DrawContext) {
 
   return {
     render: mode.render,
-    stop: function() {
+    stop() {
       if (mode.stop) mode.stop();
     },
-    trash: function() {
+    trash() {
       if (mode.trash) {
         mode.trash();
         DrawContext.store.render();
       }
     },
-    combineFeatures: function() {
+    combineFeatures() {
       if (mode.combineFeatures) {
         mode.combineFeatures();
       }
     },
-    uncombineFeatures: function() {
+    uncombineFeatures() {
       if (mode.uncombineFeatures) {
         mode.uncombineFeatures();
       }
     },
-    drag: function(event) {
+    drag(event) {
       delegate('drag', event);
     },
-    click: function(event) {
+    click(event) {
       delegate('click', event);
     },
-    mousemove: function(event) {
+    mousemove(event) {
       delegate('mousemove', event);
     },
-    mousedown: function(event) {
+    mousedown(event) {
       delegate('mousedown', event);
     },
-    mouseup: function(event) {
+    mouseup(event) {
       delegate('mouseup', event);
     },
-    mouseout: function(event) {
+    mouseout(event) {
       delegate('mouseout', event);
     },
-    keydown: function(event) {
+    keydown(event) {
       delegate('keydown', event);
     },
-    keyup: function(event) {
+    keyup(event) {
       delegate('keyup', event);
     },
-    touchstart: function(event) {
+    touchstart(event) {
       delegate('touchstart', event);
     },
-    touchmove: function(event) {
+    touchmove(event) {
       delegate('touchmove', event);
     },
-    touchend: function(event) {
+    touchend(event) {
       delegate('touchend', event);
     },
-    tap: function(event) {
+    tap(event) {
       delegate('tap', event);
     }
   };

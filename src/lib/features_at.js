@@ -32,9 +32,7 @@ function featuresAt(event, bbox, ctx, buffer) {
   if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
 
   const features = ctx.map.queryRenderedFeatures(box, queryParams)
-    .filter((feature) => {
-      return META_TYPES.indexOf(feature.properties.meta) !== -1;
-    });
+    .filter(feature => META_TYPES.indexOf(feature.properties.meta) !== -1);
 
   const featureIds = new StringSet();
   const uniqueFeatures = [];

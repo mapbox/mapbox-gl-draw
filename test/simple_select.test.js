@@ -11,7 +11,7 @@ import createMap from './utils/create_map';
 import createSyntheticEvent from 'synthetic-dom-events';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 
-test('simple_select', t => {
+test('simple_select', (t) => {
   const context = createMockDrawModeContext();
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
@@ -42,7 +42,7 @@ test('simple_select', t => {
     return args;
   };
 
-  t.test('simple_select - init map for tests', t => {
+  t.test('simple_select - init map for tests', (t) => {
     const done = function() {
       map.off('load', done);
       t.end();
@@ -55,7 +55,7 @@ test('simple_select', t => {
   });
 
 
-  t.test('simple_select - box select', t => {
+  t.test('simple_select - box select', (t) => {
     Draw.add(getGeoJSON('negativePoint'));
     const id = Draw.add(getGeoJSON('point'))[0];
     map.fire.reset();
@@ -98,14 +98,14 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - box select many features', t => {
+  t.test('simple_select - box select many features', (t) => {
     const features = [];
     for (let i = 0; i < 5; i++) {
       features.push(getGeoJSON('point'));
     }
     const ids = Draw.add({
       type: 'FeatureCollection',
-      features: features
+      features
     });
     map.fire.reset();
 
@@ -140,7 +140,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - box select over no points', t => {
+  t.test('simple_select - box select over no points', (t) => {
 
     Draw.add(getGeoJSON('point'));
     map.fire.reset();
@@ -160,7 +160,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - box select then mousemove', t => {
+  t.test('simple_select - box select then mousemove', (t) => {
     Draw.add(getGeoJSON('point'));
     map.fire.reset();
 
@@ -178,7 +178,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - deselect', t => {
+  t.test('simple_select - deselect', (t) => {
     const id = Draw.add(getGeoJSON('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
@@ -198,7 +198,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a deselected feature', t => {
+  t.test('simple_select - click on a deselected feature', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select');
 
@@ -222,7 +222,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - tap on a deselected feature', t => {
+  t.test('simple_select - tap on a deselected feature', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select');
 
@@ -245,7 +245,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a selected feature with shift down', t => {
+  t.test('simple_select - click on a selected feature with shift down', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
@@ -269,7 +269,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - delete selected features', t => {
+  t.test('simple_select - delete selected features', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
     map.fire.reset();
@@ -287,7 +287,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a selected feature with shift up to enter direct_select', t => {
+  t.test('simple_select - click on a selected feature with shift up to enter direct_select', (t) => {
     Draw.deleteAll();
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
@@ -314,7 +314,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a vertex to enter direct_select', t => {
+  t.test('simple_select - click on a vertex to enter direct_select', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
@@ -339,7 +339,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - tap on a vertex to enter direct_select', t => {
+  t.test('simple_select - tap on a vertex to enter direct_select', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
 
@@ -363,7 +363,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a deselected feature with shift down while having another feature selected', t => {
+  t.test('simple_select - click on a deselected feature with shift down while having another feature selected', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
@@ -390,7 +390,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', t => {
+  t.test('simple_select - click on a deselected feature with shift up, while having another feature selected', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
@@ -416,7 +416,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - drag every feature type', t => {
+  t.test('simple_select - drag every feature type', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     const multiPointId = Draw.add(getGeoJSON('multiPoint'))[0];
     const lineStringId = Draw.add(getGeoJSON('line'))[0];
@@ -473,7 +473,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - interrupt drag move with mousemove', t => {
+  t.test('simple_select - interrupt drag move with mousemove', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
@@ -494,7 +494,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - fire one update when dragging mouse leaves container and button is released outside', t => {
+  t.test('simple_select - fire one update when dragging mouse leaves container and button is released outside', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
@@ -516,7 +516,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - fire two update when dragging mouse leaves container then returns and button is released inside', t => {
+  t.test('simple_select - fire two update when dragging mouse leaves container then returns and button is released inside', (t) => {
     const pointId = Draw.add(getGeoJSON('point'))[0];
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
@@ -538,7 +538,7 @@ test('simple_select', t => {
     });
   });
 
-  t.test('simple_select - on closing invalid line', t => {
+  t.test('simple_select - on closing invalid line', (t) => {
     Draw.changeMode('draw_line_string');
     mouseClick(map, makeMouseEvent(1, 1));
     mouseClick(map, makeMouseEvent(1, 1));
@@ -548,7 +548,7 @@ test('simple_select', t => {
     cleanUp(t.end);
   });
 
-  t.test('simple_select - on closing invalid polygon', t => {
+  t.test('simple_select - on closing invalid polygon', (t) => {
     Draw.changeMode('draw_polygon');
     mouseClick(map, makeMouseEvent(1, 1));
     mouseClick(map, makeMouseEvent(16, 16));

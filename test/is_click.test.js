@@ -11,7 +11,7 @@ const testOptions = {
   interval: 500
 };
 
-test('isClick easy', t => {
+test('isClick easy', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -26,7 +26,7 @@ test('isClick easy', t => {
   t.end();
 });
 
-test('isClick when start/end have same time, very close coordinates', t => {
+test('isClick when start/end have same time, very close coordinates', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -39,7 +39,7 @@ test('isClick when start/end have same time, very close coordinates', t => {
   t.end();
 });
 
-test('isClick when start/end have same coordinates, distant times', t => {
+test('isClick when start/end have same coordinates, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -52,7 +52,7 @@ test('isClick when start/end have same coordinates, distant times', t => {
   t.end();
 });
 
-test('isClick when start/end have very close coordinates, distant times', t => {
+test('isClick when start/end have very close coordinates, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -66,7 +66,7 @@ test('isClick when start/end have very close coordinates, distant times', t => {
 });
 
 
-test('isClick when moving just under 4, same times', t => {
+test('isClick when moving just under 4, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -80,7 +80,7 @@ test('isClick when moving just under 4, same times', t => {
   t.end();
 });
 
-test('isClick when moving just under 4, distant times', t => {
+test('isClick when moving just under 4, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -94,7 +94,7 @@ test('isClick when moving just under 4, distant times', t => {
   t.end();
 });
 
-test('isClick when moving just above 4, same times', t => {
+test('isClick when moving just above 4, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -108,7 +108,7 @@ test('isClick when moving just above 4, same times', t => {
   t.end();
 });
 
-test('isClick when moving just above 4, very close times', t => {
+test('isClick when moving just above 4, very close times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -122,7 +122,7 @@ test('isClick when moving just above 4, very close times', t => {
   t.end();
 });
 
-test('isClick when moving just above 4, distant times', t => {
+test('isClick when moving just above 4, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -136,7 +136,7 @@ test('isClick when moving just above 4, distant times', t => {
   t.end();
 });
 
-test('isClick when moving just above 4, barely too distant times', t => {
+test('isClick when moving just above 4, barely too distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -150,7 +150,7 @@ test('isClick when moving just above 4, barely too distant times', t => {
   t.end();
 });
 
-test('isClick when moving just below 12, same times', t => {
+test('isClick when moving just below 12, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -164,7 +164,7 @@ test('isClick when moving just below 12, same times', t => {
   t.end();
 });
 
-test('isClick when moving just below 12, very close times', t => {
+test('isClick when moving just below 12, very close times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -178,7 +178,7 @@ test('isClick when moving just below 12, very close times', t => {
   t.end();
 });
 
-test('isClick when moving just below 12, distant times', t => {
+test('isClick when moving just below 12, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -192,7 +192,7 @@ test('isClick when moving just below 12, distant times', t => {
   t.end();
 });
 
-test('isClick when moving just below 12, barely too distant times', t => {
+test('isClick when moving just below 12, barely too distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -206,7 +206,7 @@ test('isClick when moving just below 12, barely too distant times', t => {
   t.end();
 });
 
-test('isClick when moving just above 12, same times', t => {
+test('isClick when moving just above 12, same times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -220,7 +220,7 @@ test('isClick when moving just above 12, same times', t => {
   t.end();
 });
 
-test('isClick when moving just above 12, distant times', t => {
+test('isClick when moving just above 12, distant times', (t) => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
