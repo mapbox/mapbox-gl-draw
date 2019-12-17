@@ -48,7 +48,7 @@ Feature.prototype.internal = function(mode) {
     meta: Constants.meta.FEATURE,
     'meta:type': this.type,
     active: Constants.activeStates.INACTIVE,
-    mode: mode
+    mode
   };
 
   if (this.ctx.options.userProperties) {
@@ -59,7 +59,7 @@ Feature.prototype.internal = function(mode) {
 
   return {
     type: Constants.geojsonTypes.FEATURE,
-    properties: properties,
+    properties,
     geometry: {
       coordinates: this.getCoordinates(),
       type: this.type

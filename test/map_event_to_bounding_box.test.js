@@ -1,7 +1,7 @@
 import test from 'tape';
 import mapEventToBoundingBox from '../src/lib/map_event_to_bounding_box';
 
-test('mapEventToBoundingBox', t => {
+test('mapEventToBoundingBox', (t) => {
   t.deepEqual(mapEventToBoundingBox({
     point: {
       x: 1,

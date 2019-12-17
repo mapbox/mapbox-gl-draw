@@ -2,7 +2,7 @@ import test from 'tape';
 import Point from '@mapbox/point-geometry';
 import mouseEventPoint from '../src/lib/mouse_event_point';
 
-test('mouseEventPoint', t => {
+test('mouseEventPoint', (t) => {
   const mockContainer = {
     clientLeft: 2,
     clientTop: 1,

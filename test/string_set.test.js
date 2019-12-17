@@ -1,7 +1,7 @@
 import test from 'tape';
 import StringSet from '../src/lib/string_set';
 
-test('StringSet constructor and API', t => {
+test('StringSet constructor and API', (t) => {
   const set = new StringSet();
   t.deepEqual(set.values(), [], 'empty by default');
   t.equal(Object.keys(set).filter(k => k[0] !== '_').length, 0, 'no unexpected properties');
@@ -19,7 +19,7 @@ test('StringSet constructor and API', t => {
   t.end();
 });
 
-test('StringSet#add', t => {
+test('StringSet#add', (t) => {
   const set = new StringSet();
   t.deepEqual(set.values(), []);
   set.add('a');
@@ -33,7 +33,7 @@ test('StringSet#add', t => {
   t.end();
 });
 
-test('StringSet#delete', t => {
+test('StringSet#delete', (t) => {
   const subject = ['a', 'b', 2];
   const set = new StringSet(subject);
   set.delete('a');
@@ -50,7 +50,7 @@ test('StringSet#delete', t => {
   t.end();
 });
 
-test('StringSet#has', t => {
+test('StringSet#has', (t) => {
   const set = new StringSet(['a', 'b', 2]);
   t.equal(set.has('a'), true);
   t.equal(set.has('b'), true);
@@ -60,7 +60,7 @@ test('StringSet#has', t => {
   t.end();
 });
 
-test('StringSet#values', t => {
+test('StringSet#values', (t) => {
   const subject = ['a', 'b'];
   const set = new StringSet(subject);
   t.deepEqual(set.values(), ['a', 'b']);
@@ -68,7 +68,7 @@ test('StringSet#values', t => {
   t.end();
 });
 
-test('StringSet#clear', t => {
+test('StringSet#clear', (t) => {
   const set = new StringSet(['a', 'b']);
   set.clear();
   t.deepEqual(set.values(), []);

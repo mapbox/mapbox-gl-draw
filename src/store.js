@@ -110,7 +110,7 @@ Store.prototype.add = function(feature) {
  * @return {Store} this
  */
 Store.prototype.delete = function(featureIds, options = {}) {
-  toDenseArray(featureIds).forEach(id => {
+  toDenseArray(featureIds).forEach((id) => {
     if (!this._featureIds.has(id)) return;
     this._featureIds.delete(id);
     this._selectedFeatureIds.delete(id);
@@ -122,7 +122,7 @@ Store.prototype.delete = function(featureIds, options = {}) {
     delete this._features[id];
     this.isDirty = true;
   });
-  refreshSelectedCoordinates.call(this, options);
+  refreshSelectedCoordinates(this, options);
   return this;
 };
 
@@ -150,7 +150,7 @@ Store.prototype.getAll = function() {
  * @return {Store} this
  */
 Store.prototype.select = function(featureIds, options = {}) {
-  toDenseArray(featureIds).forEach(id => {
+  toDenseArray(featureIds).forEach((id) => {
     if (this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.add(id);
     this._changedFeatureIds.add(id);
@@ -169,7 +169,7 @@ Store.prototype.select = function(featureIds, options = {}) {
  * @return {Store} this
  */
 Store.prototype.deselect = function(featureIds, options = {}) {
-  toDenseArray(featureIds).forEach(id => {
+  toDenseArray(featureIds).forEach((id) => {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
@@ -177,7 +177,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
       this._emitSelectionChange = true;
     }
   });
-  refreshSelectedCoordinates.call(this, options);
+  refreshSelectedCoordinates(this, options);
   return this;
 };
 
@@ -204,14 +204,10 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
   featureIds = toDenseArray(featureIds);
 
   // Deselect any features not in the new selection
-  this.deselect(this._selectedFeatureIds.values().filter(id => {
-    return featureIds.indexOf(id) === -1;
-  }), { silent: options.silent });
+  this.deselect(this._selectedFeatureIds.values().filter(id => featureIds.indexOf(id) === -1), { silent: options.silent });
 
   // Select any features in the new selection that were not already selected
-  this.select(featureIds.filter(id => {
-    return !this._selectedFeatureIds.has(id);
-  }), { silent: options.silent });
+  this.select(featureIds.filter(id => !this._selectedFeatureIds.has(id)), { silent: options.silent });
 
   return this;
 };
@@ -259,7 +255,7 @@ Store.prototype.getSelected = function() {
  * @return {Array<Object>} Selected coordinates.
  */
 Store.prototype.getSelectedCoordinates = function() {
-  const selected = this._selectedCoordinates.map(coordinate => {
+  const selected = this._selectedCoordinates.map((coordinate) => {
     const feature = this.get(coordinate.feature_id);
     return {
       coordinates: feature.getCoordinate(coordinate.coord_path)
@@ -288,12 +284,12 @@ Store.prototype.setFeatureProperty = function(featureId, property, value) {
   this.featureChanged(featureId);
 };
 
-function refreshSelectedCoordinates(options) {
-  const newSelectedCoordinates = this._selectedCoordinates.filter(point => this._selectedFeatureIds.has(point.feature_id));
-  if (this._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
-    this._emitSelectionChange = true;
+function refreshSelectedCoordinates(store, options) {
+  const newSelectedCoordinates = store._selectedCoordinates.filter(point => store._selectedFeatureIds.has(point.feature_id));
+  if (store._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
+    store._emitSelectionChange = true;
   }
-  this._selectedCoordinates = newSelectedCoordinates;
+  store._selectedCoordinates = newSelectedCoordinates;
 }
 
 /**
@@ -312,7 +308,7 @@ Store.prototype.storeMapConfig = function() {
  * Restores the initial config for a map, ensuring all is well.
 */
 Store.prototype.restoreMapConfig = function() {
-  Object.keys(this._mapInitialConfig).forEach(key => {
+  Object.keys(this._mapInitialConfig).forEach((key) => {
     const value = this._mapInitialConfig[key];
     if (value) {
       this.ctx.map[key].enable();

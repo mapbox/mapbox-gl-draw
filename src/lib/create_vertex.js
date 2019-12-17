@@ -22,7 +22,7 @@ module.exports = function(parentId, coordinates, path, selected) {
     },
     geometry: {
       type: Constants.geojsonTypes.POINT,
-      coordinates: coordinates
+      coordinates
     }
   };
 };

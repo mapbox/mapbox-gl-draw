@@ -64,7 +64,7 @@ DirectSelect.onMidpoint = function(state, e) {
 };
 
 DirectSelect.pathsToCoordinates = function(featureId, paths) {
-  return paths.map(coord_path => { return { feature_id: featureId, coord_path }; });
+  return paths.map(coord_path => ({ feature_id: featureId, coord_path }));
 };
 
 DirectSelect.onFeature = function(state, e) {

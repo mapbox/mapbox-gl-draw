@@ -22,7 +22,7 @@ import {
   escapeEvent
 } from './utils/key_events';
 
-test('draw_polygon mode initialization', t => {
+test('draw_polygon mode initialization', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -45,7 +45,7 @@ test('draw_polygon mode initialization', t => {
   t.end();
 });
 
-test('draw_polygon start', t => {
+test('draw_polygon start', (t) => {
   const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPolygonMode(context);
@@ -65,7 +65,7 @@ test('draw_polygon start', t => {
   }, 10);
 });
 
-test('draw_polygon stop with valid polygon', t => {
+test('draw_polygon stop with valid polygon', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -84,7 +84,7 @@ test('draw_polygon stop with valid polygon', t => {
   t.end();
 });
 
-test('draw_polygon stop with invalid polygon', t => {
+test('draw_polygon stop with invalid polygon', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -107,7 +107,7 @@ test('draw_polygon stop with invalid polygon', t => {
   t.end();
 });
 
-test('draw_polygon render active polygon with no coordinates', t => {
+test('draw_polygon render active polygon with no coordinates', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -131,7 +131,7 @@ test('draw_polygon render active polygon with no coordinates', t => {
   t.end();
 });
 
-test('draw_polygon render active polygon with 1 coordinate (and closer)', t => {
+test('draw_polygon render active polygon with 1 coordinate (and closer)', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -155,7 +155,7 @@ test('draw_polygon render active polygon with 1 coordinate (and closer)', t => {
   t.end();
 });
 
-test('draw_polygon render active polygon with 2 coordinates (and closer)', t => {
+test('draw_polygon render active polygon with 2 coordinates (and closer)', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -190,7 +190,7 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', t => 
   t.end();
 });
 
-test('draw_polygon render active polygon with 3 coordinates (and closer)', t => {
+test('draw_polygon render active polygon with 3 coordinates (and closer)', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -251,7 +251,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', t => 
   t.end();
 });
 
-test('draw_polygon render inactive feature', t => {
+test('draw_polygon render inactive feature', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -284,7 +284,7 @@ test('draw_polygon render inactive feature', t => {
   t.end();
 });
 
-test('draw_polygon mouse interaction', t => {
+test('draw_polygon mouse interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -296,7 +296,7 @@ test('draw_polygon mouse interaction', t => {
     const afterNextRender = setupAfterNextRender(map);
 
     Draw.changeMode('draw_polygon');
-    t.test('first click', st => {
+    t.test('first click', (st) => {
       mouseClick(map, makeMouseEvent(10, 20));
 
       const { features } = Draw.getAll();
@@ -309,28 +309,28 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('move mouse', st => {
+    t.test('move mouse', (st) => {
       map.fire('mousemove', makeMouseEvent(15, 23));
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [15, 23], [10, 20]]], 'middle coordinate added');
       st.end();
     });
 
-    t.test('move mouse again', st => {
+    t.test('move mouse again', (st) => {
       map.fire('mousemove', makeMouseEvent(30, 33));
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [30, 33], [10, 20]]], 'middle coordinate replaced');
       st.end();
     });
 
-    t.test('click to add another vertex', st => {
+    t.test('click to add another vertex', (st) => {
       mouseClick(map, makeMouseEvent(35, 35));
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[10, 20], [35, 35], [35, 35], [10, 20]]], 'middle coordinate replaced');
       st.end();
     });
 
-    t.test('add more points then click on the last vertex to finish', st => {
+    t.test('add more points then click on the last vertex to finish', (st) => {
       mouseClick(map, makeMouseEvent(40, 40));
       mouseClick(map, makeMouseEvent(50, 50));
       mouseClick(map, makeMouseEvent(55, 55));
@@ -348,7 +348,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start a polygon but trash it before completion', st => {
+    t.test('start a polygon but trash it before completion', (st) => {
       // Start a new polygon
       Draw.deleteAll();
       Draw.changeMode('draw_polygon');
@@ -368,7 +368,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start a polygon but trash it with Escape before completion', st => {
+    t.test('start a polygon but trash it with Escape before completion', (st) => {
       // Start a new polygon
       Draw.deleteAll();
       Draw.changeMode('draw_polygon');
@@ -391,7 +391,7 @@ test('draw_polygon mouse interaction', t => {
 
     // ZERO CLICK TESTS
 
-    t.test('start a polygon and end it with Enter', st => {
+    t.test('start a polygon and end it with Enter', (st) => {
       // Start a new polygon
       Draw.deleteAll();
       Draw.changeMode('draw_polygon');
@@ -413,7 +413,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then changemode before a click', st => {
+    t.test('start draw_polygon mode then changemode before a click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -430,7 +430,7 @@ test('draw_polygon mouse interaction', t => {
 
     // ONE CLICK TESTS
 
-    t.test('start draw_polygon mode then enter after one click', st => {
+    t.test('start draw_polygon mode then enter after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -448,7 +448,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a point after one click', st => {
+    t.test('start draw_polygon mode then start a point after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -466,7 +466,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a line_string after one click', st => {
+    t.test('start draw_polygon mode then start a line_string after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -484,7 +484,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a new polygon after one click', st => {
+    t.test('start draw_polygon mode then start a new polygon after one click', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -502,7 +502,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then doubleclick', st => {
+    t.test('start draw_polygon mode then doubleclick', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -518,7 +518,7 @@ test('draw_polygon mouse interaction', t => {
 
     // TWO CLICK TESTS
 
-    t.test('start draw_polygon mode then enter after two clicks', st => {
+    t.test('start draw_polygon mode then enter after two clicks', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -536,7 +536,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a point after two clicks', st => {
+    t.test('start draw_polygon mode then start a point after two clicks', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -555,7 +555,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a line_string after two clicks', st => {
+    t.test('start draw_polygon mode then start a line_string after two clicks', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -574,7 +574,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then start a new polygon after two clicks', st => {
+    t.test('start draw_polygon mode then start a new polygon after two clicks', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -593,7 +593,7 @@ test('draw_polygon mouse interaction', t => {
       st.end();
     });
 
-    t.test('start draw_polygon mode then doubleclick', st => {
+    t.test('start draw_polygon mode then doubleclick', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
 
@@ -610,7 +610,7 @@ test('draw_polygon mouse interaction', t => {
 
     // FIVE CLICK TEST
 
-    t.test('end draw_polygon mode by clicking on the start point', st => {
+    t.test('end draw_polygon mode by clicking on the start point', (st) => {
       Draw.deleteAll();
       st.equal(Draw.getAll().features.length, 0, 'no features yet');
       Draw.changeMode('draw_polygon');
@@ -638,7 +638,7 @@ test('draw_polygon mouse interaction', t => {
 });
 
 
-test('draw_polygon touch interaction', t => {
+test('draw_polygon touch interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -649,7 +649,7 @@ test('draw_polygon touch interaction', t => {
     // The following sub-tests share state ...
 
     Draw.changeMode('draw_polygon');
-    t.test('first tap', st => {
+    t.test('first tap', (st) => {
       touchTap(map, makeTouchEvent(100, 200));
 
       const { features } = Draw.getAll();
@@ -662,14 +662,14 @@ test('draw_polygon touch interaction', t => {
       st.end();
     });
 
-    t.test('tap to add another vertex', st => {
+    t.test('tap to add another vertex', (st) => {
       touchTap(map, makeTouchEvent(135, 135));
       const polygon = Draw.getAll().features[0];
       st.deepEqual(polygon.geometry.coordinates, [[[100, 200], [135, 135], [135, 135], [100, 200]]], 'middle coordinate replaced');
       st.end();
     });
 
-    t.test('add more points then tap on the last vertex to finish', st => {
+    t.test('add more points then tap on the last vertex to finish', (st) => {
       touchTap(map, makeTouchEvent(400, 400));
       touchTap(map, makeTouchEvent(500, 500));
       touchTap(map, makeTouchEvent(550, 550));
@@ -687,7 +687,7 @@ test('draw_polygon touch interaction', t => {
       st.end();
     });
 
-    t.test('start a polygon but trash it before completion', st => {
+    t.test('start a polygon but trash it before completion', (st) => {
       // Start a new polygon
       Draw.deleteAll();
       Draw.changeMode('draw_polygon');

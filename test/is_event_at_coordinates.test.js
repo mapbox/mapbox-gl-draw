@@ -1,7 +1,7 @@
 import test from 'tape';
 import isEventAtCoordinates from '../src/lib/is_event_at_coordinates';
 
-test('isEventAtCoordinates', t => {
+test('isEventAtCoordinates', (t) => {
   t.ok(isEventAtCoordinates({
     lngLat: {
       lng: 3,

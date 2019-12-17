@@ -37,7 +37,7 @@ function getButtons(div) {
   return Array.prototype.slice.call(div.getElementsByClassName('mapbox-gl-draw_ctrl-draw-btn'));
 }
 
-test('ui container classes', t => {
+test('ui container classes', (t) => {
   const { context, cleanup } = createMockContext();
   const testUi = ui(context);
 
@@ -45,7 +45,7 @@ test('ui container classes', t => {
 
   // Each sub-test relies on state from the prior sub-tests
 
-  t.test('update all classes', st => {
+  t.test('update all classes', (st) => {
     testUi.queueMapClasses({
       mode: 'direct_select',
       feature: 'vertex',
@@ -58,7 +58,7 @@ test('ui container classes', t => {
     st.end();
   });
 
-  t.test('update only feature class', st => {
+  t.test('update only feature class', (st) => {
     testUi.queueMapClasses({
       feature: 'midpoint'
     });
@@ -69,7 +69,7 @@ test('ui container classes', t => {
     st.end();
   });
 
-  t.test('update mode and mouse classes', st => {
+  t.test('update mode and mouse classes', (st) => {
     testUi.queueMapClasses({
       mode: 'foo',
       mouse: 'bar'
@@ -81,7 +81,7 @@ test('ui container classes', t => {
     st.end();
   });
 
-  t.test('remove only feature class', st => {
+  t.test('remove only feature class', (st) => {
     testUi.queueMapClasses({
       feature: null
     });
@@ -92,7 +92,7 @@ test('ui container classes', t => {
     st.end();
   });
 
-  t.test('remove all classes', st => {
+  t.test('remove all classes', (st) => {
     testUi.queueMapClasses({
       feature: null,
       mode: null,
@@ -109,7 +109,7 @@ test('ui container classes', t => {
   t.end();
 });
 
-test('ui buttons with no options.controls', t => {
+test('ui buttons with no options.controls', (t) => {
   const { context, cleanup } = createMockContext();
   const testUi = ui(context);
 
@@ -120,7 +120,7 @@ test('ui buttons with no options.controls', t => {
   t.end();
 });
 
-test('ui buttons with one options.controls', t => {
+test('ui buttons with one options.controls', (t) => {
   /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
@@ -140,7 +140,7 @@ test('ui buttons with one options.controls', t => {
   t.end();
 });
 
-test('ui buttons control group container inserted above attribution control, in control container, by addButtons', t => {
+test('ui buttons control group container inserted above attribution control, in control container, by addButtons', (t) => {
   const { context, cleanup, getControlContainer } = createMockContext({
     controls: {
       trash: true
@@ -160,7 +160,7 @@ test('ui buttons control group container inserted above attribution control, in 
   t.end();
 });
 
-test('ui buttons with all options.controls, no attribution control', t => {
+test('ui buttons with all options.controls, no attribution control', (t) => {
   /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
@@ -196,7 +196,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
   t.equal(buttons[3].parentNode, controlGroup, 'fourth button is in controlGroup');
   const trashButton = buttons[3];
 
-  t.test('click line button', st => {
+  t.test('click line button', (st) => {
     lineButton.click();
 
     st.ok(lineButton.classList.contains('active'), 'line button is active');
@@ -211,7 +211,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.end();
   });
 
-  t.test('click polygon button', st => {
+  t.test('click polygon button', (st) => {
     polygonButton.click();
 
     st.notOk(lineButton.classList.contains('active'), 'line button is inactive');
@@ -226,7 +226,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.end();
   });
 
-  t.test('programmatically activate point button, then programmatically deactivate', st => {
+  t.test('programmatically activate point button, then programmatically deactivate', (st) => {
     testUi.setActiveButton('point');
 
     st.notOk(lineButton.classList.contains('active'), 'line button is inactive');
@@ -246,7 +246,7 @@ test('ui buttons with all options.controls, no attribution control', t => {
     st.end();
   });
 
-  t.test('click trash button', st => {
+  t.test('click trash button', (st) => {
     trashButton.click();
 
     st.notOk(lineButton.classList.contains('active'), 'line button is inactive');

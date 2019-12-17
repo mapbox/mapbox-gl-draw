@@ -51,7 +51,7 @@ function createMockContext() {
   };
 }
 
-test('featuresAt with click bounding box', t => {
+test('featuresAt with click bounding box', (t) => {
   const mockContext = createMockContext();
   const result = featuresAt.click(null, [[10, 10], [20, 20]], mockContext);
 
@@ -85,7 +85,7 @@ test('featuresAt with click bounding box', t => {
   t.end();
 });
 
-test('featuresAt with touch bounding box', t => {
+test('featuresAt with touch bounding box', (t) => {
   const mockContext = createMockContext();
   const result = featuresAt.touch(null, [[10, 10], [20, 20]], mockContext);
 

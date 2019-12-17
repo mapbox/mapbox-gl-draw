@@ -35,7 +35,7 @@ module.exports = function(modeObject) {
     }
 
     return {
-      start: function() {
+      start() {
         state = mode.onSetup(startOpts); // this should set ui buttons
 
         // Adds event handlers for all event options
@@ -43,7 +43,7 @@ module.exports = function(modeObject) {
         // handlers that are not present in the mode
         // to reduce on render calls for functions that
         // have no logic
-        eventKeys.forEach(key => {
+        eventKeys.forEach((key) => {
           const modeHandler = eventMapper[key];
           let selector = () => false;
           if (modeObject[modeHandler]) {
@@ -53,19 +53,19 @@ module.exports = function(modeObject) {
         });
 
       },
-      stop: function() {
+      stop() {
         mode.onStop(state);
       },
-      trash: function() {
+      trash() {
         mode.onTrash(state);
       },
-      combineFeatures: function() {
+      combineFeatures() {
         mode.onCombineFeatures(state);
       },
-      uncombineFeatures: function() {
+      uncombineFeatures() {
         mode.onUncombineFeatures(state);
       },
-      render: function(geojson, push) {
+      render(geojson, push) {
         mode.toDisplayFeatures(state, geojson, push);
       }
     };

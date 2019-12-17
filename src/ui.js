@@ -46,11 +46,11 @@ module.exports = function(ctx) {
     });
 
     if (classesToRemove.length > 0) {
-      ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
+      ctx.container.classList.remove(...classesToRemove);
     }
 
     if (classesToAdd.length > 0) {
-      ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
+      ctx.container.classList.add(...classesToAdd);
     }
 
     currentMapClasses = xtend(currentMapClasses, nextMapClasses);
@@ -172,7 +172,7 @@ module.exports = function(ctx) {
   }
 
   function removeButtons() {
-    Object.keys(buttonElements).forEach(buttonId => {
+    Object.keys(buttonElements).forEach((buttonId) => {
       const button = buttonElements[buttonId];
       if (button.parentNode) {
         button.parentNode.removeChild(button);
