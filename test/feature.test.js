@@ -47,7 +47,7 @@ test('Feature#changed', (t) => {
   const featureGeoJson = createFeature('point');
   const feature = new Feature(ctx, featureGeoJson);
 
-  ctx.store.featureChanged.reset();
+  ctx.store.featureChanged.resetHistory();
   feature.changed();
   t.equal(ctx.store.featureChanged.callCount, 1, 'called function on store');
   t.deepEqual(ctx.store.featureChanged.getCall(0).args, [featureGeoJson.id], 'with correct args');

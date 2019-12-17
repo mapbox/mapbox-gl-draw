@@ -43,7 +43,7 @@ function runTests() {
   // in the prior tests. These variables keep track of bits of that state.
 
   test('enter draw_point mode', (t) => {
-    fireSpy.reset();
+    fireSpy.resetHistory();
 
     // Click the line button
     pointButton.click();
@@ -975,7 +975,7 @@ function flushDrawEvents() {
     if (eventName === 'draw.actionable') continue;
     drawEvents.push(eventName);
   }
-  fireSpy.reset();
+  fireSpy.resetHistory();
   return drawEvents;
 }
 

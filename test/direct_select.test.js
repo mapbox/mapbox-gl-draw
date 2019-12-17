@@ -28,7 +28,7 @@ test('direct_select', (t) => {
 
   const cleanUp = function(cb) {
     Draw.deleteAll();
-    map.fire.reset();
+    map.fire.resetHistory();
     if (cb) {
       afterNextRender(cb);
     }
@@ -151,7 +151,7 @@ test('direct_select', (t) => {
     afterNextRender(() => {
       click(map, makeMouseEvent(startPosition[0], startPosition[1]));
       afterNextRender(() => {
-        map.fire.reset();
+        map.fire.resetHistory();
         map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
         map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
         mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
@@ -179,7 +179,7 @@ test('direct_select', (t) => {
     afterNextRender(() => {
       click(map, makeMouseEvent(startPosition[0], startPosition[1]));
       afterNextRender(() => {
-        map.fire.reset();
+        map.fire.resetHistory();
         map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
         map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
         mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
@@ -206,7 +206,7 @@ test('direct_select', (t) => {
     const startPosition = getGeoJSON('polygon').geometry.coordinates[0][1];
     const centroid = turfCentroid(getGeoJSON('polygon')).geometry.coordinates;
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       click(map, makeMouseEvent(centroid[0], centroid[1]));
       map.fire('mousedown', makeMouseEvent(centroid[0], centroid[1]));
       map.fire('mousemove', makeMouseEvent(centroid[0] + 15, centroid[1] + 15, { buttons: 1 }));
@@ -232,7 +232,7 @@ test('direct_select', (t) => {
     const startPosition = getGeoJSON('line').geometry.coordinates[0];
     const endPosition = [startPosition[0] + 10, startPosition[1] + 10];
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       click(map, makeMouseEvent(startPosition[0], startPosition[1]));
       st.deepEqual(Draw.getSelectedPoints().features[0].geometry.coordinates, startPosition, 'click saves selection');
 

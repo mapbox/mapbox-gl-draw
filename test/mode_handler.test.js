@@ -66,7 +66,7 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
   t.equal(drawContext.ui.updateMapClasses.callCount, 1, 'updateMapClasses called if handler fires');
 
   const mousedownFailSpy = spy();
-  mousedownSpy.reset();
+  mousedownSpy.resetHistory();
   startContext.on('mousedown', e => !e.three, mousedownFailSpy);
   mh.mousedown({ three: 3 });
   t.equal(mousedownFailSpy.callCount, 0, 'delegation only calls callbacks with selectors returning true');

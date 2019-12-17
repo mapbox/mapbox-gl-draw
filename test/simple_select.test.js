@@ -30,7 +30,7 @@ test('simple_select', (t) => {
 
   const cleanUp = function(cb) {
     Draw.deleteAll();
-    map.fire.reset();
+    map.fire.resetHistory();
     if (cb) cb();
   };
 
@@ -58,11 +58,11 @@ test('simple_select', (t) => {
   t.test('simple_select - box select', (t) => {
     Draw.add(getGeoJSON('negativePoint'));
     const id = Draw.add(getGeoJSON('point'))[0];
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
-      map.dragPan.enable.reset();
-      map.dragPan.disable.reset();
+      map.dragPan.enable.resetHistory();
+      map.dragPan.disable.resetHistory();
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       t.equal(map.dragPan.disable.callCount, 1, 'disable dragPan');
       map.fire('mousemove', makeMouseEvent(15, 15, {
@@ -107,10 +107,10 @@ test('simple_select', (t) => {
       type: 'FeatureCollection',
       features
     });
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
-      map.dragPan.enable.reset();
+      map.dragPan.enable.resetHistory();
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       map.fire('mousemove', makeMouseEvent(15, 15, {
         shiftKey: true,
@@ -143,7 +143,7 @@ test('simple_select', (t) => {
   t.test('simple_select - box select over no points', (t) => {
 
     Draw.add(getGeoJSON('point'));
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
@@ -162,7 +162,7 @@ test('simple_select', (t) => {
 
   t.test('simple_select - box select then mousemove', (t) => {
     Draw.add(getGeoJSON('point'));
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
@@ -183,7 +183,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(15, 15));
       map.fire('mouseup', makeMouseEvent(15, 15));
 
@@ -203,8 +203,8 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select');
 
     afterNextRender(() => {
-      map.fire.reset();
-      map.doubleClickZoom.disable.reset();
+      map.fire.resetHistory();
+      map.doubleClickZoom.disable.resetHistory();
       map.fire('mousedown', makeMouseEvent(50, 30));
       map.fire('mouseup', makeMouseEvent(50, 30));
 
@@ -227,8 +227,8 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select');
 
     afterNextRender(() => {
-      map.fire.reset();
-      map.doubleClickZoom.disable.reset();
+      map.fire.resetHistory();
+      map.doubleClickZoom.disable.resetHistory();
       map.fire('touchstart', makeTouchEvent(50, 30));
       map.fire('touchend', makeTouchEvent(50, 30));
 
@@ -250,8 +250,8 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
-      map.fire.reset();
-      map.doubleClickZoom.disable.reset();
+      map.fire.resetHistory();
+      map.doubleClickZoom.disable.resetHistory();
       map.fire('mousedown', makeMouseEvent(50, 30, { shiftKey: true }));
       map.fire('mouseup', makeMouseEvent(50, 30, { shiftKey: true }));
 
@@ -272,7 +272,7 @@ test('simple_select', (t) => {
   t.test('simple_select - delete selected features', (t) => {
     const id = Draw.add(getGeoJSON('polygon'))[0];
     Draw.changeMode('simple_select', { featureIds: [id] });
-    map.fire.reset();
+    map.fire.resetHistory();
     Draw.trash();
     afterNextRender(() => {
       let args = getFireArgs();
@@ -293,9 +293,9 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [id] });
 
     afterNextRender(() => {
-      map.doubleClickZoom.enable.reset();
-      map.fire.reset();
-      map.doubleClickZoom.disable.reset();
+      map.doubleClickZoom.enable.resetHistory();
+      map.fire.resetHistory();
+      map.doubleClickZoom.disable.resetHistory();
       map.fire('mousedown', makeMouseEvent(50, 30, false));
       map.fire('mouseup', makeMouseEvent(50, 30, false));
 
@@ -321,8 +321,8 @@ test('simple_select', (t) => {
     const clickPosition = getGeoJSON('polygon').geometry.coordinates[0][0];
 
     afterNextRender(() => {
-      map.doubleClickZoom.enable.reset();
-      map.fire.reset();
+      map.doubleClickZoom.enable.resetHistory();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(clickPosition[0], clickPosition[1]));
       map.fire('mouseup', makeMouseEvent(clickPosition[0], clickPosition[1]));
 
@@ -346,8 +346,8 @@ test('simple_select', (t) => {
     const tapPosition = getGeoJSON('polygon').geometry.coordinates[0][0];
 
     afterNextRender(() => {
-      map.doubleClickZoom.enable.reset();
-      map.fire.reset();
+      map.doubleClickZoom.enable.resetHistory();
+      map.fire.resetHistory();
       map.fire('touchstart', makeTouchEvent(tapPosition[0], tapPosition[1]));
       map.fire('touchend', makeTouchEvent(tapPosition[0], tapPosition[1]));
 
@@ -369,7 +369,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(50, 30, { shiftKey: true }));
       map.fire('mouseup', makeMouseEvent(50, 30, { shiftKey: true }));
 
@@ -396,7 +396,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [pointId] });
 
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(50, 30, false));
       map.fire('mouseup', makeMouseEvent(50, 30, false));
 
@@ -433,7 +433,7 @@ test('simple_select', (t) => {
       featureIds: [pointId, multiPointId, lineStringId, multiLineStringId, polygonId, multiPolygonId]
     });
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 25, startPosition[1] + 25, { buttons: 1 }));
@@ -478,7 +478,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       // Dragging
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
@@ -499,7 +499,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
       mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));
@@ -521,7 +521,7 @@ test('simple_select', (t) => {
     Draw.changeMode('simple_select', { featureIds: [pointId] });
     const startPosition = getGeoJSON('point').geometry.coordinates;
     afterNextRender(() => {
-      map.fire.reset();
+      map.fire.resetHistory();
       map.fire('mousedown', makeMouseEvent(startPosition[0], startPosition[1]));
       map.fire('mousemove', makeMouseEvent(startPosition[0] + 15, startPosition[1] + 15, { buttons: 1 }));
       mapContainer.dispatchEvent(createSyntheticEvent('mouseout'));

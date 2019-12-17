@@ -90,7 +90,7 @@ test('Polygon#addCoordinate, Polygon#removeCoordinate', (t) => {
   const polygon = new Polygon(createMockCtx(), rawPolygon);
   const changedSpy = spy(polygon, 'changed');
 
-  changedSpy.reset();
+  changedSpy.resetHistory();
   polygon.addCoordinate('1.1', 99, 100);
   t.equal(changedSpy.callCount, 1, 'polygon.changed was called');
   t.deepEqual(polygon.getCoordinates(), [
@@ -98,7 +98,7 @@ test('Polygon#addCoordinate, Polygon#removeCoordinate', (t) => {
     [[2, 1], [99, 100], [3, 2], [4, 3], [5, 4], [2, 1]]
   ], 'new coordinate added at right place in right ring');
 
-  changedSpy.reset();
+  changedSpy.resetHistory();
   polygon.removeCoordinate('0.3');
   t.equal(changedSpy.callCount, 1, 'polygon.changed was called');
   t.deepEqual(polygon.getCoordinates(), [
@@ -118,7 +118,7 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', (t) => {
   const polygon = new Polygon(createMockCtx(), rawPolygon);
   const changedSpy = spy(polygon, 'changed');
 
-  changedSpy.reset();
+  changedSpy.resetHistory();
   t.deepEqual(polygon.getCoordinate('1.2'), [4, 3], 'getCoordinate returns right one');
   polygon.updateCoordinate('1.2', 99, 100);
   t.equal(changedSpy.callCount, 1, 'polygon.changed was called');

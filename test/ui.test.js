@@ -206,7 +206,7 @@ test('ui buttons with all options.controls, no attribution control', (t) => {
 
     st.equal(context.events.changeMode.callCount, 1, 'changeMode called');
     st.deepEqual(context.events.changeMode.getCall(0).args, ['draw_line_string'], 'with correct arguments');
-    context.events.changeMode.reset();
+    context.events.changeMode.resetHistory();
 
     st.end();
   });
@@ -221,7 +221,7 @@ test('ui buttons with all options.controls, no attribution control', (t) => {
 
     st.equal(context.events.changeMode.callCount, 1, 'changeMode called');
     st.deepEqual(context.events.changeMode.getCall(0).args, ['draw_polygon'], 'with correct arguments');
-    context.events.changeMode.reset();
+    context.events.changeMode.resetHistory();
 
     st.end();
   });

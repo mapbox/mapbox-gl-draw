@@ -105,8 +105,8 @@ test('Draw.set', (t) => {
     'all features loaded');
 
   // Then set to another
-  addSpy.reset();
-  deleteSpy.reset();
+  addSpy.resetHistory();
+  deleteSpy.resetHistory();
   const nextCollection = {
     type: 'FeatureCollection',
     features: [polygon]
@@ -131,8 +131,8 @@ test('Draw.set', (t) => {
 
   // Then set to another that contains a feature
   // with an already-used id
-  addSpy.reset();
-  deleteSpy.reset();
+  addSpy.resetHistory();
+  deleteSpy.resetHistory();
   const newLine = getGeoJSON('line');
   const overlappingPolygon = getGeoJSON('polygon');
   overlappingPolygon.id = nextPolygonId;
