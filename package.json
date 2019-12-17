@@ -59,7 +59,7 @@
     "eslint": "6.7.2",
     "eslint-config-mourner": "3.0.0",
     "express": "^4.13.4",
-    "mapbox-gl": "0.51.0",
+    "mapbox-gl": "^1.6.0",
     "mapbox-gl-js-mock": "0.28.0",
     "mock-browser": "^0.92.10",
     "nyc": "14.1.1",
