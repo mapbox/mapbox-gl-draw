@@ -1,4 +1,3 @@
-const throttle = require('./lib/throttle');
 const toDenseArray = require('./lib/to_dense_array');
 const StringSet = require('./lib/string_set');
 const render = require('./render');
@@ -18,7 +17,17 @@ const Store = module.exports = function(ctx) {
     hot: [],
     cold: []
   };
-  this.render = throttle(render, 16, this);
+
+  // Deduplicate requests to render and tie them to animation frames.
+  let renderRequest;
+  this.render = () => {
+    if (!renderRequest) {
+      renderRequest = requestAnimationFrame(() => {
+        renderRequest = null;
+        render.call(this);
+      });
+    }
+  };
   this.isDirty = false;
 };
 
