@@ -16,14 +16,12 @@ SimpleSelect.onSetup = function(opts) {
     boxSelectElement: undefined,
     boxSelecting: false,
     canBoxSelect: false,
-    dragMoveing: false,
+    dragMoving: false,
     canDragMove: false,
     initiallySelectedFeatureIds: opts.featureIds || []
   };
 
-  this.setSelected(state.initiallySelectedFeatureIds.filter(id => {
-    return this.getFeature(id) !== undefined;
-  }));
+  this.setSelected(state.initiallySelectedFeatureIds.filter(id => this.getFeature(id) !== undefined));
   this.fireActionable();
 
   this.setActionableState({
@@ -54,7 +52,7 @@ SimpleSelect.fireActionable = function() {
   if (selectedFeatures.length > 1) {
     combineFeatures = true;
     const featureType = selectedFeatures[0].type.replace('Multi', '');
-    selectedFeatures.forEach(feature => {
+    selectedFeatures.forEach((feature) => {
       if (feature.type.replace('Multi', '') !== featureType) {
         combineFeatures = false;
       }
@@ -170,7 +168,7 @@ SimpleSelect.clickOnFeature = function(state, e) {
   if (!isShiftClick && isFeatureSelected && this.getFeature(featureId).type !== Constants.geojsonTypes.POINT) {
     // Enter direct select mode
     return this.changeMode(Constants.modes.DIRECT_SELECT, {
-      featureId: featureId
+      featureId
     });
   }
 
@@ -328,7 +326,7 @@ SimpleSelect.onCombineFeatures = function() {
       properties: featuresCombined[0].properties,
       geometry: {
         type: `Multi${featureType}`,
-        coordinates: coordinates
+        coordinates
       }
     });
 
@@ -368,7 +366,7 @@ SimpleSelect.onUncombineFeatures = function() {
 
   if (createdFeatures.length > 1) {
     this.map.fire(Constants.events.UNCOMBINE_FEATURES, {
-      createdFeatures: createdFeatures,
+      createdFeatures,
       deletedFeatures: featuresUncombined
     });
   }

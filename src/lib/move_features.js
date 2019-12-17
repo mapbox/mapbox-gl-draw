@@ -4,7 +4,7 @@ const Constants = require('../constants');
 module.exports = function(features, delta) {
   const constrainedDelta = constrainFeatureMovement(features.map(feature => feature.toGeoJSON()), delta);
 
-  features.forEach(feature => {
+  features.forEach((feature) => {
     const currentCoordinates = feature.getCoordinates();
 
     const moveCoordinate = (coord) => {
@@ -14,8 +14,8 @@ module.exports = function(features, delta) {
       };
       return [point.lng, point.lat];
     };
-    const moveRing = (ring) => ring.map(coord => moveCoordinate(coord));
-    const moveMultiPolygon = (multi) => multi.map(ring => moveRing(ring));
+    const moveRing = ring => ring.map(coord => moveCoordinate(coord));
+    const moveMultiPolygon = multi => multi.map(ring => moveRing(ring));
 
     let nextCoordinates;
     if (feature.type === Constants.geojsonTypes.POINT) {

@@ -9,7 +9,7 @@ import createMockCtx from './utils/create_mock_feature_context';
 import drawGeometry from './utils/draw_geometry';
 import createMap from './utils/create_map';
 
-test('Polygon constructor and API', t => {
+test('Polygon constructor and API', (t) => {
   const rawPolygon = createFeature('polygon');
   rawPolygon.geometry.coordinates = [[[1, 2], [3, 4], [5, 6], [7, 8], [1, 2]]];
   const ctx = createMockCtx();
@@ -40,7 +40,7 @@ test('Polygon constructor and API', t => {
   t.end();
 });
 
-test('Polygon#isValid', t => {
+test('Polygon#isValid', (t) => {
   const validRawPolygon = createFeature('polygon');
   const validPolygon = new Polygon(createMockCtx(), validRawPolygon);
   t.equal(validPolygon.isValid(), true, 'returns true for valid polygons');
@@ -53,7 +53,7 @@ test('Polygon#isValid', t => {
   t.end();
 });
 
-test('Polygon#incomingCoords, Polygon#getCoordinates', t => {
+test('Polygon#incomingCoords, Polygon#getCoordinates', (t) => {
   const rawPolygon = createFeature('polygon');
   const polygon = new Polygon(createMockCtx(), rawPolygon);
   const changedSpy = spy(polygon, 'changed');
@@ -68,7 +68,7 @@ test('Polygon#incomingCoords, Polygon#getCoordinates', t => {
   t.end();
 });
 
-test('Polygon#setCoordinates', t => {
+test('Polygon#setCoordinates', (t) => {
   const rawPolygon = createFeature('polygon');
   const polygon = new Polygon(createMockCtx(), rawPolygon);
   const changedSpy = spy(polygon, 'changed');
@@ -81,7 +81,7 @@ test('Polygon#setCoordinates', t => {
   t.end();
 });
 
-test('Polygon#addCoordinate, Polygon#removeCoordinate', t => {
+test('Polygon#addCoordinate, Polygon#removeCoordinate', (t) => {
   const rawPolygon = createFeature('polygon');
   rawPolygon.geometry.coordinates = [
     [[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]],
@@ -109,7 +109,7 @@ test('Polygon#addCoordinate, Polygon#removeCoordinate', t => {
   t.end();
 });
 
-test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
+test('Polygon#updateCoordinate, Polygon#getCoordinate', (t) => {
   const rawPolygon = createFeature('polygon');
   rawPolygon.geometry.coordinates = [
     [[1, 1], [2, 2], [3, 3], [4, 4], [1, 1]],
@@ -131,7 +131,7 @@ test('Polygon#updateCoordinate, Polygon#getCoordinate', t => {
   t.end();
 });
 
-test('Polygon integration', t => {
+test('Polygon integration', (t) => {
   const polygonCoordinates = [[[0, 0], [30, 15], [32, 35], [15, 30], [0, 0]]];
   const map = createMap();
   const Draw = new MapboxDraw();

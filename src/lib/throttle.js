@@ -13,11 +13,13 @@ function throttle(fn, time, context) {
   function wrapperFn () {
     if (lock) {
       // called too soon, queue to call later
+      // eslint-disable-next-line
       args = arguments;
 
     } else {
       // lock until later then call
       lock = true;
+      // eslint-disable-next-line
       fn.apply(context, arguments);
       setTimeout(later, time);
     }

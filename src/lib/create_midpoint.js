@@ -21,7 +21,7 @@ module.exports = function(parent, startVertex, endVertex, map) {
     type: Constants.geojsonTypes.FEATURE,
     properties: {
       meta: Constants.meta.MIDPOINT,
-      parent: parent,
+      parent,
       lng: mid.lng,
       lat: mid.lat,
       coord_path: endVertex.properties.coord_path

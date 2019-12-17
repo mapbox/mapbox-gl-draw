@@ -2,7 +2,7 @@ import test from 'tape';
 import createMap from './utils/create_map';
 import createSupplementaryPoints from '../src/lib/create_supplementary_points';
 
-test('createSupplementaryPoints with a point', t => {
+test('createSupplementaryPoints with a point', (t) => {
   const point = {
     type: 'Point',
     properties: {
@@ -33,7 +33,7 @@ test('createSupplementaryPoints with a point', t => {
   t.end();
 });
 
-test('createSupplementaryPoints with a line, no midpoints', t => {
+test('createSupplementaryPoints with a line, no midpoints', (t) => {
   const line = {
     type: 'Feature',
     properties: {
@@ -88,7 +88,7 @@ test('createSupplementaryPoints with a line, no midpoints', t => {
   t.end();
 });
 
-test('createSupplementaryPoints with a polygon, no midpoints', t => {
+test('createSupplementaryPoints with a polygon, no midpoints', (t) => {
   const polygon = {
     type: 'Feature',
     properties: {
@@ -154,7 +154,7 @@ test('createSupplementaryPoints with a polygon, no midpoints', t => {
   t.end();
 });
 
-test('createSupplementaryPoints with line, midpoints, selected coordinate', t => {
+test('createSupplementaryPoints with line, midpoints, selected coordinate', (t) => {
   const line = {
     type: 'Feature',
     properties: {
@@ -240,7 +240,7 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', t =>
   t.end();
 });
 
-test('createSupplementaryPoints with polygon, midpoints, selection', t => {
+test('createSupplementaryPoints with polygon, midpoints, selection', (t) => {
   const polygon = {
     type: 'Feature',
     properties: {
@@ -365,7 +365,7 @@ test('createSupplementaryPoints with polygon, midpoints, selection', t => {
   t.end();
 });
 
-test('createSupplementaryPoints with MultiLineString, midpoints, selected coordinate', t => {
+test('createSupplementaryPoints with MultiLineString, midpoints, selected coordinate', (t) => {
   const line = {
     type: 'Feature',
     properties: {
@@ -516,7 +516,7 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
   t.end();
 });
 
-test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude north limit', t => {
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude north limit', (t) => {
   const line = {
     type: 'Feature',
     properties: {
@@ -588,7 +588,7 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
 });
 
 
-test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude south limit', t => {
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude south limit', (t) => {
   const line = {
     type: 'Feature',
     properties: {

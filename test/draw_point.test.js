@@ -14,7 +14,7 @@ import {escapeEvent, enterEvent} from './utils/key_events';
 import objectToMode from '../src/modes/object_to_mode';
 const drawPointMode = objectToMode(drawPointModeObject);
 
-test('draw_point mode initialization', t => {
+test('draw_point mode initialization', (t) => {
   const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
@@ -37,7 +37,7 @@ test('draw_point mode initialization', t => {
   t.end();
 });
 
-test('draw_point start', t => {
+test('draw_point start', (t) => {
   const context = createMockDrawModeContext();
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
@@ -56,7 +56,7 @@ test('draw_point start', t => {
   t.end();
 });
 
-test('draw_point stop with point placed', t => {
+test('draw_point stop with point placed', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -76,7 +76,7 @@ test('draw_point stop with point placed', t => {
   t.end();
 });
 
-test('draw_point stop with no point placed', t => {
+test('draw_point stop with no point placed', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -100,7 +100,7 @@ test('draw_point stop with no point placed', t => {
   t.end();
 });
 
-test('draw_point render the active point', t => {
+test('draw_point render the active point', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -125,7 +125,7 @@ test('draw_point render the active point', t => {
   t.end();
 });
 
-test('draw_point render an inactive feature', t => {
+test('draw_point render an inactive feature', (t) => {
   const context = createMockDrawModeContext();
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
@@ -158,7 +158,7 @@ test('draw_point render an inactive feature', t => {
   t.end();
 });
 
-test('draw_point mouse interaction', t => {
+test('draw_point mouse interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -168,7 +168,7 @@ test('draw_point mouse interaction', t => {
   map.on('load', () => {
     // The following sub-tests share state ...
 
-    t.test('clicking', st => {
+    t.test('clicking', (st) => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
       mouseClick(map, makeMouseEvent(10, 20));
@@ -186,7 +186,7 @@ test('draw_point mouse interaction', t => {
       st.end();
     });
 
-    t.test('exist before clicking by hitting Escape', st => {
+    t.test('exist before clicking by hitting Escape', (st) => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
 
@@ -199,7 +199,7 @@ test('draw_point mouse interaction', t => {
       st.end();
     });
 
-    t.test('exist before clicking by hitting Enter', st => {
+    t.test('exist before clicking by hitting Enter', (st) => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
 
@@ -212,7 +212,7 @@ test('draw_point mouse interaction', t => {
       st.end();
     });
 
-    t.test('exist before clicking with Trash', st => {
+    t.test('exist before clicking with Trash', (st) => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
 
@@ -231,7 +231,7 @@ test('draw_point mouse interaction', t => {
 });
 
 
-test('draw_point touch interaction', t => {
+test('draw_point touch interaction', (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -241,7 +241,7 @@ test('draw_point touch interaction', t => {
   map.on('load', () => {
     // The following sub-tests share state ...
 
-    t.test('tapping', st => {
+    t.test('tapping', (st) => {
       Draw.deleteAll();
       Draw.changeMode('draw_point');
       touchTap(map, makeTouchEvent(10, 20));

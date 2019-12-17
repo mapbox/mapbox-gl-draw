@@ -3,7 +3,7 @@ cache:
   directories:
     - node_modules
 node_js:
-  - "6"
+  - "12"
 env:
   - NODE_ENV=test
 deploy:

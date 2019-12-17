@@ -16,9 +16,7 @@ module.exports = function render() {
     newColdIds = store.getAllIds();
   } else {
     newHotIds = store.getChangedIds().filter(id => store.get(id) !== undefined);
-    newColdIds = store.sources.hot.filter((geojson) => {
-      return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined;
-    }).map(geojson => geojson.properties.id);
+    newColdIds = store.sources.hot.filter(geojson => geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined).map(geojson => geojson.properties.id);
   }
 
   store.sources.hot = [];
@@ -55,16 +53,14 @@ module.exports = function render() {
   if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
       features: store.getSelected().map(feature => feature.toGeoJSON()),
-      points: store.getSelectedCoordinates().map(coordinate => {
-        return {
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coordinate.coordinates
-          }
-        };
-      })
+      points: store.getSelectedCoordinates().map(coordinate => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      }))
     });
     store._emitSelectionChange = false;
   }

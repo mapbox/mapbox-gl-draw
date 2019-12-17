@@ -13,7 +13,7 @@ import makeTouchEvent from './utils/make_touch_event';
 import Constants from '../src/constants';
 import createSyntheticEvent from 'synthetic-dom-events';
 
-test('direct_select', t => {
+test('direct_select', (t) => {
 
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
@@ -42,7 +42,7 @@ test('direct_select', t => {
     return args;
   };
 
-  t.test('direct_select - init map for tests', st => {
+  t.test('direct_select - init map for tests', (st) => {
     const done = function() {
       map.off('load', done);
       st.end();
@@ -54,7 +54,7 @@ test('direct_select', t => {
     }
   });
 
-  t.test('direct_select - should fire correct actionable when no vertices selected', st => {
+  t.test('direct_select - should fire correct actionable when no vertices selected', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.SIMPLE_SELECT, {
       featureIds: ids
@@ -77,7 +77,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - should fire correct actionable when a vertex is selected by clicking', st => {
+  t.test('direct_select - should fire correct actionable when a vertex is selected by clicking', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -99,7 +99,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - should fire correct actionable when a vertex is selected by tapping', st => {
+  t.test('direct_select - should fire correct actionable when a vertex is selected by tapping', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -121,7 +121,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - a click on a vertex and than dragging the map shouldn\'t drag the vertex', st => {
+  t.test('direct_select - a click on a vertex and than dragging the map shouldn\'t drag the vertex', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -141,7 +141,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - fire one update when dragging mouse leaves container and button is released outside', st => {
+  t.test('direct_select - fire one update when dragging mouse leaves container and button is released outside', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -169,7 +169,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - fire two updates when dragging mouse leaves container then returns and button is released inside', st => {
+  t.test('direct_select - fire two updates when dragging mouse leaves container then returns and button is released inside', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: ids[0]
@@ -197,7 +197,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - drag feature if no vertices are selected', st => {
+  t.test('direct_select - drag feature if no vertices are selected', (st) => {
     const [polygonId] = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: polygonId
@@ -222,7 +222,7 @@ test('direct_select', t => {
     });
   });
 
-  t.test('direct_select - dragging a selected vertex updates stored coordinates', st => {
+  t.test('direct_select - dragging a selected vertex updates stored coordinates', (st) => {
     const [lineId] = Draw.add(getGeoJSON('line'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
       featureId: lineId

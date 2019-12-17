@@ -29,7 +29,7 @@ All of the following options are optional.
 - `touchEnabled`, boolean (default `true`): Whether or not to enable touch interactions for drawing.
 - `boxSelect`, boolean (default `true`): Whether or not to enable box selection of features with `shift`+`click`+drag. If `false`, `shift`+`click`+drag zooms into an area.
 - `clickBuffer`, number (default: `2`): Number of pixels around any feature or vertex (in every direction) that will respond to a click.
-- `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every directoin) that will respond to a touch.
+- `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every direction) that will respond to a touch.
 - `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
 - `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify a whitelist with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
@@ -61,7 +61,7 @@ Lets you select, delete, and drag vertices; and drag features.
 
 `direct_select` mode does not apply to point features, because they have no vertices.
 
-Draw enters `direct_select` mode when the user clicks a vertex of an selected line or polygon. So `direct_select` mode typically follows `simple_select` mode.
+Draw enters `direct_select` mode when the user clicks a vertex of a selected line or polygon. So `direct_select` mode typically follows `simple_select` mode.
 
 ### `draw_line_string`
 
@@ -543,7 +543,7 @@ meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points ad
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
 mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
 
-Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderFeatures`" below.
+Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderedFeatures`" below.
 
 If `opts.userProperties` is set to `true` the properties of a feature will also be available for styling. All user properties are prefixed with `user_` to make sure they do not clash with the Draw properties.
 
@@ -551,12 +551,12 @@ If `opts.userProperties` is set to `true` the properties of a feature will also 
 
 See [EXAMPLES.md](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/EXAMPLES.md) for examples of custom styles.
 
-## Using Draw with Mapbox GL JS's `queryRenderFeatures`
+## Using Draw with Mapbox GL JS's `queryRenderedFeatures`
 
 property | values | function
 --- | --- | ---
 id | string | only available when `meta` is `feature`
 parent | string | only avaible when `meta` is not `feature`
-coord_path | string | a `.` seporated path to one [lon, lat] entity in the parents coordinates
+coord_path | string | a `.` separated path to one [lon, lat] entity in the parents coordinates
 lon | number | the longitude value of a handle. Only available when `meta` is `midpoint`.
 lat | number | the latitude value of a handle. Only available when `meta` is `midpoint`.

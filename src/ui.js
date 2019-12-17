@@ -46,11 +46,11 @@ module.exports = function(ctx) {
     });
 
     if (classesToRemove.length > 0) {
-      ctx.container.classList.remove.apply(ctx.container.classList, classesToRemove);
+      ctx.container.classList.remove(...classesToRemove);
     }
 
     if (classesToAdd.length > 0) {
-      ctx.container.classList.add.apply(ctx.container.classList, classesToAdd);
+      ctx.container.classList.add(...classesToAdd);
     }
 
     currentMapClasses = xtend(currentMapClasses, nextMapClasses);
@@ -69,6 +69,7 @@ module.exports = function(ctx) {
       const clickedButton = e.target;
       if (clickedButton === activeButton) {
         deactivateButtons();
+        options.onDeactivate();
         return;
       }
 
@@ -109,7 +110,8 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_LINE,
         title: `LineString tool ${ctx.options.keybindings ? '(l)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING),
+        onDeactivate: () => ctx.events.trash()
       });
     }
 
@@ -118,7 +120,8 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_POLYGON,
         title: `Polygon tool ${ctx.options.keybindings ? '(p)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON),
+        onDeactivate: () => ctx.events.trash()
       });
     }
 
@@ -127,7 +130,8 @@ module.exports = function(ctx) {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_POINT,
         title: `Marker tool ${ctx.options.keybindings ? '(m)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT)
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT),
+        onDeactivate: () => ctx.events.trash()
       });
     }
 
@@ -168,7 +172,7 @@ module.exports = function(ctx) {
   }
 
   function removeButtons() {
-    Object.keys(buttonElements).forEach(buttonId => {
+    Object.keys(buttonElements).forEach((buttonId) => {
       const button = buttonElements[buttonId];
       if (button.parentNode) {
         button.parentNode.removeChild(button);

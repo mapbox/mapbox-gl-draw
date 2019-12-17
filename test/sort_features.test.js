@@ -1,7 +1,7 @@
 import test from 'tape';
 import sortFeatures from '../src/lib/sort_features';
 
-test('sortFeatures', t => {
+test('sortFeatures', (t) => {
   const features = [
     {
       geometry: { type: 'LineString' },

@@ -9,7 +9,7 @@ import createMockCtx from './utils/create_mock_feature_context';
 import drawGeometry from './utils/draw_geometry';
 import createMap from './utils/create_map';
 
-test('LineString constructor and API', t => {
+test('LineString constructor and API', (t) => {
   const rawLine = createFeature('line');
   const ctx = createMockCtx();
   const lineString = new LineString(ctx, rawLine);
@@ -35,7 +35,7 @@ test('LineString constructor and API', t => {
   t.end();
 });
 
-test('LineString#isValid', t => {
+test('LineString#isValid', (t) => {
   const validRawLine = createFeature('line');
   const validLineString = new LineString(createMockCtx(), validRawLine);
   t.equal(validLineString.isValid(), true, 'returns true when valid');
@@ -53,7 +53,7 @@ test('LineString#isValid', t => {
   t.end();
 });
 
-test('LineString#addCoordinate', t => {
+test('LineString#addCoordinate', (t) => {
   const rawLine = createFeature('line');
   rawLine.geometry.coordinates = [[1, 2], [3, 4]];
   const lineString = new LineString(createMockCtx(), rawLine);
@@ -70,7 +70,7 @@ test('LineString#addCoordinate', t => {
   t.end();
 });
 
-test('LineString#getCoordinate', t => {
+test('LineString#getCoordinate', (t) => {
   const rawLine = createFeature('line');
   rawLine.geometry.coordinates = [[1, 2], [3, 4]];
   const lineString = new LineString(createMockCtx(), rawLine);
@@ -81,7 +81,7 @@ test('LineString#getCoordinate', t => {
   t.end();
 });
 
-test('LineString#removeCoordinate', t => {
+test('LineString#removeCoordinate', (t) => {
   const rawLine = createFeature('line');
   rawLine.geometry.coordinates = [[1, 2], [3, 4]];
   const lineString = new LineString(createMockCtx(), rawLine);
@@ -94,7 +94,7 @@ test('LineString#removeCoordinate', t => {
   t.end();
 });
 
-test('LineString#updateCoordinate', t => {
+test('LineString#updateCoordinate', (t) => {
   const rawLine = createFeature('line');
   rawLine.geometry.coordinates = [[1, 2], [3, 4], [5, 6]];
   const lineString = new LineString(createMockCtx(), rawLine);
@@ -107,7 +107,7 @@ test('LineString#updateCoordinate', t => {
   t.end();
 });
 
-test('LineString integration', t => {
+test('LineString integration', (t) => {
   const lineStringCoordinates = [[0, 0], [40, 20], [20, 40]];
   const map = createMap();
   const Draw = new MapboxDraw();
