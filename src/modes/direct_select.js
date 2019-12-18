@@ -165,7 +165,11 @@ DirectSelect.toDisplayFeatures = function(state, geojson, push) {
 };
 
 DirectSelect.onTrash = function(state) {
-  state.selectedCoordPaths.sort().reverse().forEach(id => state.feature.removeCoordinate(id));
+  // Uses number-aware sorting to make sure '9' < '10'. Comparison is reversed because we want them
+  // in reverse order so that we can remove by index safely.
+  state.selectedCoordPaths
+    .sort((a, b) => b.localeCompare(a, 'en', { numeric: true }))
+    .forEach(id => state.feature.removeCoordinate(id));
   this.fireUpdate();
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
