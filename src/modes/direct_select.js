@@ -185,11 +185,17 @@ DirectSelect.onMouseMove = function(state, e) {
   else if (onVertex && !noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else this.updateUIClasses({ mouse: Constants.cursors.NONE });
   this.stopDragging(state);
+
+  // Skip render
+  return true;
 };
 
 DirectSelect.onMouseOut = function(state) {
   // As soon as you mouse leaves the canvas, update the feature
   if (state.dragMoving) this.fireUpdate();
+
+  // Skip render
+  return true;
 };
 
 DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {

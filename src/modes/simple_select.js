@@ -103,12 +103,18 @@ SimpleSelect.onMouseMove = function(state) {
   // then move the mouse back over the canvas --- we don't allow the
   // interaction to continue then, but we do let it continue if you held
   // the mouse button that whole time
-  return this.stopExtendedInteractions(state);
+  this.stopExtendedInteractions(state);
+
+  // Skip render
+  return true;
 };
 
 SimpleSelect.onMouseOut = function(state) {
   // As soon as you mouse leaves the canvas, update the feature
   if (state.dragMoving) return this.fireUpdate();
+
+  // Skip render
+  return true;
 };
 
 SimpleSelect.onTap = SimpleSelect.onClick = function(state, e) {
