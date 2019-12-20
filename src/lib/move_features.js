@@ -1,7 +1,7 @@
-const constrainFeatureMovement = require('./constrain_feature_movement');
-const Constants = require('../constants');
+import constrainFeatureMovement from './constrain_feature_movement';
+import * as Constants from '../constants';
 
-module.exports = function(features, delta) {
+export default function(features, delta) {
   const constrainedDelta = constrainFeatureMovement(features.map(feature => feature.toGeoJSON()), delta);
 
   features.forEach((feature) => {
@@ -30,4 +30,4 @@ module.exports = function(features, delta) {
 
     feature.incomingCoords(nextCoordinates);
   });
-};
+}

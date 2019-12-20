@@ -1,5 +1,5 @@
-const hat = require('hat');
-const Constants = require('../constants');
+import hat from 'hat';
+import * as Constants from '../constants';
 
 const Feature = function(ctx, geojson) {
   this.ctx = ctx;
@@ -67,4 +67,4 @@ Feature.prototype.internal = function(mode) {
   };
 };
 
-module.exports = Feature;
+export default Feature;

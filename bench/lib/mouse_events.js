@@ -1,36 +1,35 @@
-module.exports = function(map) {
-  var events = [];
+export default function(map) {
+  const events = [];
 
   events.push = function(event, point, dp) {
-    var payload = {
+    const payload = {
       dropPoint: dp === undefined ? false : dp,
       originalEvent: {
         isShiftKey: false,
-        stopPropagation: function() {}
+        stopPropagation() {}
       },
-      point: point,
+      point,
       lngLat: map.unproject([point.x, point.y])
     };
-    events[events.length] =[event, payload];
-  }
+    events[events.length] = [event, payload];
+  };
 
   events.run = function(cb) {
-    var one = 100/events.length;
-    var runner = function(i) {
-      var event = events[i];
+    const one = 100 / events.length;
+    const runner = function(i) {
+      const event = events[i];
       if (event === undefined) {
         cb();
-      }
-      else {
+      } else {
         map.fire(event[0], event[1]);
-        map.fire('progress', {done:Math.ceil(one*i)});
-        setTimeout(function() {
-          runner(i+1);
+        map.fire('progress', {done:Math.ceil(one * i)});
+        setTimeout(() => {
+          runner(i + 1);
         }, 0);
       }
-    }
+    };
     runner(0);
-  }
+  };
 
   return events;
 }

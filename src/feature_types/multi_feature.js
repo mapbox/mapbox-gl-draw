@@ -1,11 +1,15 @@
-const Feature = require('./feature');
-const Constants = require('../constants');
-const hat = require('hat');
+import Feature from './feature';
+import * as Constants from '../constants';
+import hat from 'hat';
+
+import MultiPoint from './point';
+import MultiLineString from './line_string';
+import MultiPolygon from './polygon';
 
 const models = {
-  MultiPoint: require('./point'),
-  MultiLineString: require('./line_string'),
-  MultiPolygon: require('./polygon')
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon
 };
 
 const takeAction = (features, action, path, lng, lat) => {
@@ -78,4 +82,4 @@ MultiFeature.prototype.getFeatures = function() {
   return this.features;
 };
 
-module.exports = MultiFeature;
+export default MultiFeature;

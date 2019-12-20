@@ -1,4 +1,4 @@
-const ModeInterface = require('./mode_interface');
+import ModeInterface from './mode_interface';
 
 const eventMapper = {
   drag: 'onDrag',
@@ -17,7 +17,7 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-module.exports = function(modeObject) {
+export default function(modeObject) {
   const modeObjectKeys = Object.keys(modeObject);
 
   return function(ctx, startOpts = {}) {
@@ -70,4 +70,4 @@ module.exports = function(modeObject) {
       }
     };
   };
-};
+}

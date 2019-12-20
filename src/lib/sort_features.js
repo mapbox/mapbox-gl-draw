@@ -1,5 +1,5 @@
-const area = require('@mapbox/geojson-area');
-const Constants = require('../constants');
+import area from '@mapbox/geojson-area';
+import * as Constants from '../constants';
 
 const FEATURE_SORT_RANKS = {
   Point: 0,
@@ -34,4 +34,4 @@ function sortFeatures(features) {
   });
 }
 
-module.exports = sortFeatures;
+export default sortFeatures;

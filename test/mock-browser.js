@@ -1,5 +1,5 @@
-const MockBrowser = require('mock-browser').mocks.MockBrowser;
-const mock = new MockBrowser();
+import {mocks} from 'mock-browser';
+const mock = new mocks.MockBrowser();
 
 global.document = mock.getDocument();
 global.window = {};

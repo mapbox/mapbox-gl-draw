@@ -1,12 +1,12 @@
-const setupModeHandler = require('./lib/mode_handler');
-const getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
-const featuresAt = require('./lib/features_at');
-const isClick = require('./lib/is_click');
-const isTap = require('./lib/is_tap');
-const Constants = require('./constants');
-const objectToMode = require('./modes/object_to_mode');
+import setupModeHandler from './lib/mode_handler';
+import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
+import featuresAt from './lib/features_at';
+import isClick from './lib/is_click';
+import isTap from './lib/is_tap';
+import * as Constants from './constants';
+import objectToMode from './modes/object_to_mode';
 
-module.exports = function(ctx) {
+export default function(ctx) {
 
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
@@ -267,4 +267,4 @@ module.exports = function(ctx) {
   };
 
   return api;
-};
+}

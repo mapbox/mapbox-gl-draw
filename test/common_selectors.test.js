@@ -1,5 +1,5 @@
 import test from 'tape';
-import commonSelectors from '../src/lib/common_selectors';
+import * as commonSelectors from '../src/lib/common_selectors';
 
 test('commonSelectors.isOfMetaType', (t) => {
   const isFoo = commonSelectors.isOfMetaType('foo');
@@ -265,7 +265,7 @@ test('commonSelectors.isEnterKey', (t) => {
 });
 
 test('commonSelectors.true', (t) => {
-  t.ok(commonSelectors.true());
-  t.ok(commonSelectors.true(false));
+  t.ok(commonSelectors.isTrue());
+  t.ok(commonSelectors.isTrue(false));
   t.end();
 });

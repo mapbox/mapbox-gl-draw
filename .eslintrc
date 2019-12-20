@@ -1,14 +1,24 @@
 {
-  "extends": "mourner",
+  "extends": [
+    "mourner",
+    "plugin:import/recommended"
+  ],
   "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
   },
+  "plugins": [
+    "import"
+  ],
   "globals": {
     "document": true
   },
   "rules": {
+    "no-duplicate-imports": "off",
+    "import/no-duplicates": "error",
+    "import/no-commonjs": "error",
+
     "indent": [2,2],
     "array-bracket-spacing": "off",
     "block-scoped-var": "error",

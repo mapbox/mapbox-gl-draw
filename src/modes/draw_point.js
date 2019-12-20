@@ -1,5 +1,5 @@
-const CommonSelectors = require('../lib/common_selectors');
-const Constants = require('../constants');
+import * as CommonSelectors from '../lib/common_selectors';
+import * as Constants from '../constants';
 
 const DrawPoint = {};
 
@@ -62,4 +62,4 @@ DrawPoint.onKeyUp = function(state, e) {
   }
 };
 
-module.exports = DrawPoint;
+export default DrawPoint;

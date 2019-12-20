@@ -1,7 +1,7 @@
-var mouseEvents = require('./mouse_events');
-var mousePath = require('./mouse_path');
+import mouseEvents from './mouse_events'
+import mousePath from './mouse_path'
 
-module.exports = function(start, map) {
+export default function(start, map) {
 
   var path = mousePath(start);
 

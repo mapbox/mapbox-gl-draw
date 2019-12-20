@@ -52,4 +52,4 @@ StringSet.prototype.clear = function() {
   return this;
 };
 
-module.exports = StringSet;
+export default StringSet;

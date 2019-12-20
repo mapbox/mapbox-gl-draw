@@ -1,4 +1,4 @@
-const Feature = require('./feature');
+import Feature from './feature';
 
 const LineString = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
@@ -32,4 +32,4 @@ LineString.prototype.updateCoordinate = function(path, lng, lat) {
   this.changed();
 };
 
-module.exports = LineString;
+export default LineString;

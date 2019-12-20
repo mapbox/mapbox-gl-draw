@@ -1,6 +1,7 @@
-const Constants = require('./constants');
+import * as Constants from './constants';
 
-module.exports = function render() {
+export default function render() {
+  // eslint-disable-next-line no-invalid-this
   const store = this;
   const mapExists = store.ctx.map && store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
   if (!mapExists) return cleanup();
@@ -82,4 +83,4 @@ module.exports = function render() {
     store.isDirty = false;
     store.clearChangedIds();
   }
-};
+}

@@ -1,4 +1,5 @@
-const ModeInterface = module.exports = require('./mode_interface_accessors');
+import ModeInterface from './mode_interface_accessors';
+export default ModeInterface;
 
 /**
  * Triggered while a mode is being transitioned into.
