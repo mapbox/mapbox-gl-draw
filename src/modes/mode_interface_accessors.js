@@ -1,15 +1,15 @@
-const Constants = require('../constants');
-const featuresAt = require('../lib/features_at');
-const Point = require('../feature_types/point');
-const LineString = require('../feature_types/line_string');
-const Polygon = require('../feature_types/polygon');
-const MultiFeature = require('../feature_types/multi_feature');
+import * as Constants from '../constants';
+import featuresAt from '../lib/features_at';
+import Point from '../feature_types/point';
+import LineString from '../feature_types/line_string';
+import Polygon from '../feature_types/polygon';
+import MultiFeature from '../feature_types/multi_feature';
 
-const ModeInterface = module.exports = function(ctx) {
+export default function ModeInterface(ctx) {
   this.map = ctx.map;
   this.drawConfig = JSON.parse(JSON.stringify(ctx.options || {}));
   this._ctx = ctx;
-};
+}
 
 /**
  * Sets Draw's interal selected state

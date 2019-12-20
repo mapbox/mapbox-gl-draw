@@ -8,4 +8,4 @@ function toDenseArray(x) {
   return [].concat(x).filter(y => y !== undefined);
 }
 
-module.exports = toDenseArray;
+export default toDenseArray;

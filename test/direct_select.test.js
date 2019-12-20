@@ -10,7 +10,7 @@ import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by 
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';
-import Constants from '../src/constants';
+import * as Constants from '../src/constants';
 import createSyntheticEvent from 'synthetic-dom-events';
 
 test('direct_select', (t) => {

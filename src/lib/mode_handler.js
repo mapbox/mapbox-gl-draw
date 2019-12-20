@@ -111,4 +111,4 @@ const ModeHandler = function(mode, DrawContext) {
   };
 };
 
-module.exports = ModeHandler;
+export default ModeHandler;

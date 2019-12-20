@@ -1,6 +1,6 @@
-var mouseEvents = require('./mouse_events');
+import mouseEvents from './mouse_events'
 
-module.exports = function(ring, map) {
+export default function(ring, map) {
 
   var events = mouseEvents(map);
 

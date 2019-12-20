@@ -1,9 +1,9 @@
-const toDenseArray = require('./lib/to_dense_array');
-const StringSet = require('./lib/string_set');
-const render = require('./render');
-const interactions = require('./constants').interactions;
+import toDenseArray from './lib/to_dense_array';
+import StringSet from './lib/string_set';
+import render from './render';
+import {interactions} from './constants';
 
-const Store = module.exports = function(ctx) {
+export default function Store(ctx) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();
@@ -29,7 +29,7 @@ const Store = module.exports = function(ctx) {
     }
   };
   this.isDirty = false;
-};
+}
 
 
 /**

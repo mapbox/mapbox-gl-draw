@@ -1,5 +1,8 @@
-const xtend = require('xtend');
-const Constants = require('./constants');
+import xtend from 'xtend';
+import * as Constants from './constants';
+
+import styles from './lib/theme';
+import modes from './modes/index';
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
@@ -9,8 +12,8 @@ const defaultOptions = {
   touchBuffer: 25,
   boxSelect: true,
   displayControlsDefault: true,
-  styles: require('./lib/theme'),
-  modes: require('./modes'),
+  styles,
+  modes,
   controls: {},
   userProperties: false
 };
@@ -43,7 +46,7 @@ function addSources(styles, sourceBucket) {
   });
 }
 
-module.exports = function(options = {}) {
+export default function(options = {}) {
   let withDefaults = xtend(options);
 
   if (!options.controls) {
@@ -62,4 +65,4 @@ module.exports = function(options = {}) {
   withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
 
   return withDefaults;
-};
+}

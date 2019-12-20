@@ -1,22 +1,27 @@
-const isEqual = require('lodash.isequal');
-const normalize = require('@mapbox/geojson-normalize');
-const hat = require('hat');
-const featuresAt = require('./lib/features_at');
-const stringSetsAreEqual = require('./lib/string_sets_are_equal');
-const geojsonhint = require('@mapbox/geojsonhint');
-const Constants = require('./constants');
-const StringSet = require('./lib/string_set');
+import isEqual from 'lodash.isequal';
+import normalize from '@mapbox/geojson-normalize';
+import hat from 'hat';
+import featuresAt from './lib/features_at';
+import stringSetsAreEqual from './lib/string_sets_are_equal';
+import geojsonhint from '@mapbox/geojsonhint';
+import * as Constants from './constants';
+import StringSet from './lib/string_set';
+
+import Polygon from './feature_types/polygon';
+import LineString from './feature_types/line_string';
+import Point from './feature_types/point';
+import MultiFeature from './feature_types/multi_feature';
 
 const featureTypes = {
-  Polygon: require('./feature_types/polygon'),
-  LineString: require('./feature_types/line_string'),
-  Point: require('./feature_types/point'),
-  MultiPolygon: require('./feature_types/multi_feature'),
-  MultiLineString: require('./feature_types/multi_feature'),
-  MultiPoint: require('./feature_types/multi_feature')
+  Polygon,
+  LineString,
+  Point,
+  MultiPolygon: MultiFeature,
+  MultiLineString: MultiFeature,
+  MultiPoint: MultiFeature
 };
 
-module.exports = function(ctx, api) {
+export default function(ctx, api) {
 
   api.modes = Constants.modes;
 
@@ -191,4 +196,4 @@ module.exports = function(ctx, api) {
   };
 
   return api;
-};
+}

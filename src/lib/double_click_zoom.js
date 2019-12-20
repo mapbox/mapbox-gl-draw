@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   enable(ctx) {
     setTimeout(() => {
       // First check we've got a map and some context.

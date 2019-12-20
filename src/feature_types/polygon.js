@@ -1,4 +1,4 @@
-const Feature = require('./feature');
+import Feature from './feature';
 
 const Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
@@ -68,4 +68,4 @@ Polygon.prototype.updateCoordinate = function(path, lng, lat) {
   this.coordinates[ringId][coordId] = [lng, lat];
 };
 
-module.exports = Polygon;
+export default Polygon;

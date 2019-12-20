@@ -1,9 +1,9 @@
-const xtend = require('xtend');
-const Constants = require('./constants');
+import xtend from 'xtend';
+import * as Constants from './constants';
 
 const classTypes = ['mode', 'feature', 'mouse'];
 
-module.exports = function(ctx) {
+export default function(ctx) {
 
 
   const buttonElements = {};
@@ -189,4 +189,4 @@ module.exports = function(ctx) {
     addButtons,
     removeButtons
   };
-};
+}

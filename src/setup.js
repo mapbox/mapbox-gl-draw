@@ -1,10 +1,10 @@
-const events = require('./events');
-const Store = require('./store');
-const ui = require('./ui');
-const Constants = require('./constants');
-const xtend = require('xtend');
+import events from './events';
+import Store from './store';
+import ui from './ui';
+import * as Constants from './constants';
+import xtend from 'xtend';
 
-module.exports = function(ctx) {
+export default function(ctx) {
 
   let controlContainer = null;
   let mapLoadedInterval = null;
@@ -128,4 +128,4 @@ module.exports = function(ctx) {
   ctx.setup = setup;
 
   return setup;
-};
+}
