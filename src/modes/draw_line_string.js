@@ -6,6 +6,8 @@ const createVertex = require('../lib/create_vertex');
 
 const DrawLineString = {};
 
+const turf = require('@turf/turf');
+
 DrawLineString.onSetup = function(opts) {
   opts = opts || {};
   const featureId = opts.featureId;
@@ -60,6 +62,7 @@ DrawLineString.onSetup = function(opts) {
   this.setActionableState({
     trash: true
   });
+  this.enableSnapping();
 
   return {
     line,
@@ -69,17 +72,18 @@ DrawLineString.onSetup = function(opts) {
 };
 
 DrawLineString.clickAnywhere = function(state, e) {
+  const snapped = this.snapCoord(e.lngLat);
   if (state.currentVertexPosition > 0 && isEventAtCoordinates(e, state.line.coordinates[state.currentVertexPosition - 1]) ||
       state.direction === 'backwards' && isEventAtCoordinates(e, state.line.coordinates[state.currentVertexPosition + 1])) {
     return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.line.id] });
   }
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
-  state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+  state.line.updateCoordinate(state.currentVertexPosition, snapped.lng, snapped.lat);
   if (state.direction === 'forward') {
     state.currentVertexPosition++;
-    state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+    state.line.updateCoordinate(state.currentVertexPosition, snapped.lng, snapped.lat);
   } else {
-    state.line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
+    state.line.addCoordinate(0, snapped.lng, snapped.lat);
   }
 };
 
@@ -87,8 +91,38 @@ DrawLineString.clickOnVertex = function(state) {
   return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.line.id] });
 };
 
+DrawLineString.snapCoord = function snapCoord(lngLat) {
+  if (this.snappedGeometry) {
+    const hoverPoint = {
+      type: 'Point',
+      coordinates: [lngLat.lng, lngLat.lat]
+    };
+    let snapPoint;
+    if (this.snappedGeometry.type === 'Point') {
+      snapPoint = { type: 'Feature', geometry: this.snappedGeometry };
+    } else if (this.snappedGeometry.type === 'LineString' || this.snappedGeometry.type === 'MultiLineString') {
+      snapPoint = turf.nearestPointOnLine(this.snappedGeometry, hoverPoint);
+      // TODO support polygon
+    }  else {
+      console.log('Uh oh', this.snappedGeometry);
+    }
+    // console.log(snapPoint);
+    this.map.getSource('_snap_vertex').setData(snapPoint);
+    return {
+      lng: snapPoint.geometry.coordinates[0],
+      lat: snapPoint.geometry.coordinates[1],
+
+    };
+  } else {
+    // console.log(this);
+    this.map.getSource('_snap_vertex').setData({ type: 'FeatureCollection', features: []});
+
+    return lngLat;
+  }
+}
+
 DrawLineString.onMouseMove = function(state, e) {
-  state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+  state.line.updateCoordinate(state.currentVertexPosition, this.snapCoord(e.lngLat).lng, this.snapCoord(e.lngLat).lat);
   if (CommonSelectors.isVertex(e)) {
     this.updateUIClasses({ mouse: Constants.cursors.POINTER });
   }
@@ -111,6 +145,8 @@ DrawLineString.onKeyUp = function(state, e) {
 DrawLineString.onStop = function(state) {
   doubleClickZoom.enable(this);
   this.activateUIButton();
+
+  this.disableSnapping();
 
   // check to see if we've deleted this feature
   if (this.getFeature(state.line.id) === undefined) return;
@@ -147,6 +183,114 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
   ));
 
   display(geojson);
+};
+
+DrawLineString.setSnapHoverState = function(f, state) {
+  if (f.id !== undefined) {
+    this.map.setFeatureState({ 
+      id: f.id,
+      source: f.source,
+      ...(f.sourceLayer && {sourceLayer: f.sourceLayer}),
+    }, { 'snap-hover': state});
+  }
+};
+
+DrawLineString.enableSnapping = function() {
+  this._overHandler = e => {
+    const f = e.features[0];
+    if (this.snappedFeature) {
+      if (this.snappedFeature.layer !== f.layer) {
+        this.setSnapHoverState(this.snappedFeature, false);
+      } else {
+        return;
+      }
+
+    }
+    console.log('Now over ', f);
+    this.snappedGeometry = f.geometry;
+    this.snappedFeature = f;
+    this.setSnapHoverState(this.snappedFeature, true);
+  };
+  this._outHandler = e => {
+    console.log('out', e);
+    if (this.snappedFeature) {
+      this.setSnapHoverState(this.snappedFeature, false);
+      this.snappedGeometry = undefined;
+      this.snappedFeature = undefined;
+    }
+  };
+
+
+  this.drawConfig.snapping.layers.forEach(layerId => {
+    const bufferLayerId = `_${layerId}_buffer`;
+    const layerDef = this.map.getLayer(layerId);
+    
+    const newLayer = {
+      id: bufferLayerId,
+      source: layerDef.source,
+    };
+    if (layerDef.type === 'line') {
+      newLayer.type = 'line';
+    } else if (layerDef.type === 'circle' || layerDef.type === 'symbol') {
+      newLayer.type = 'circle';
+    } else {
+      console.error(`Unsupported snap layer type ${layerDef.type} for layer ${layerDef.id}`);
+      return
+    };
+
+    if (layerDef.sourceLayer) {
+      newLayer['source-layer'] = layerDef.sourceLayer;
+    }
+    if (layerDef.filter) {
+      newLayer.filter = layerDef.filter;
+    }
+    if (newLayer.type === 'circle') {
+      newLayer.paint = {
+        'circle-color': 'hsla(0,100%,50%,0.001)',
+        'circle-radius': 20, // TODO configurable
+      }
+    } else {
+      newLayer.paint = {
+        'line-color': 'hsla(0,100%,50%,0.001)',
+        'line-width': 40, // TODO configurable
+      }
+    }
+    map.addLayer(newLayer);
+    this.map.on('mousemove', bufferLayerId, this._overHandler);
+    this.map.on('mouseout', bufferLayerId, this._outHandler);
+  });
+  this.map.addSource('_snap_vertex', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: []
+    }
+  });
+  this.map.addLayer({
+    id: '_snap_vertex',
+    type: 'circle',
+    source: '_snap_vertex',
+    paint: {
+      'circle-color': 'transparent',
+      'circle-radius': 5,
+      'circle-stroke-width': 3,
+      'circle-stroke-color': 'orange'
+    }
+  });
+};
+
+DrawLineString.disableSnapping = function() {
+  this.drawConfig.snapping.layers.forEach(layerId => {
+    const bufferLayerId = `_${layerId}_buffer`;
+    this.map.off('mouseover', bufferLayerId, this._overHandler);
+    this.map.off('mouseout', bufferLayerId, this._outHandler);
+
+    this.map.removeLayer(bufferLayerId);
+  });
+  this.map.removeLayer('_snap_vertex');
+  this.map.removeSource('_snap_vertex');
+
+
 };
 
 module.exports = DrawLineString;
