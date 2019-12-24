@@ -12,7 +12,10 @@ const defaultOptions = {
   styles: require('./lib/theme'),
   modes: require('./modes'),
   controls: {},
-  userProperties: false
+  userProperties: false,
+  snapping: {
+    layers: []
+  }
 };
 
 const showControls = {
