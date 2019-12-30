@@ -100,26 +100,20 @@ DrawLineString.snapCoord = function snapCoord(lngLat) {
     let snapPoint;
     if (this.snappedGeometry.type === 'Point') {
       snapPoint = { type: 'Feature', geometry: this.snappedGeometry };
-    } else if (this.snappedGeometry.type === 'LineString' || this.snappedGeometry.type === 'MultiLineString') {
+    } else {
       snapPoint = turf.nearestPointOnLine(this.snappedGeometry, hoverPoint);
-      // TODO support polygon
-    }  else {
-      console.log('Uh oh', this.snappedGeometry);
     }
-    // console.log(snapPoint);
     this.map.getSource('_snap_vertex').setData(snapPoint);
     return {
       lng: snapPoint.geometry.coordinates[0],
       lat: snapPoint.geometry.coordinates[1],
-
     };
   } else {
-    // console.log(this);
     this.map.getSource('_snap_vertex').setData({ type: 'FeatureCollection', features: []});
 
     return lngLat;
   }
-}
+};
 
 DrawLineString.onMouseMove = function(state, e) {
   state.line.updateCoordinate(state.currentVertexPosition, this.snapCoord(e.lngLat).lng, this.snapCoord(e.lngLat).lat);
@@ -229,14 +223,14 @@ DrawLineString.enableSnapping = function() {
       id: bufferLayerId,
       source: layerDef.source,
     };
-    if (layerDef.type === 'line') {
+    if (layerDef.type === 'line' || layerDef.type === 'fill' || layerDef.type === 'fill-extrusion') {
       newLayer.type = 'line';
     } else if (layerDef.type === 'circle' || layerDef.type === 'symbol') {
       newLayer.type = 'circle';
     } else {
       console.error(`Unsupported snap layer type ${layerDef.type} for layer ${layerDef.id}`);
-      return
-    };
+      return;
+    }
 
     if (layerDef.sourceLayer) {
       newLayer['source-layer'] = layerDef.sourceLayer;
