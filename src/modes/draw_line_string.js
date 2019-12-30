@@ -190,35 +190,9 @@ DrawLineString.setSnapHoverState = function(f, state) {
 };
 
 DrawLineString.enableSnapping = function() {
-  this._overHandler = e => {
-    const f = e.features[0];
-    if (this.snappedFeature) {
-      if (this.snappedFeature.layer !== f.layer) {
-        this.setSnapHoverState(this.snappedFeature, false);
-      } else {
-        return;
-      }
-
-    }
-    console.log('Now over ', f);
-    this.snappedGeometry = f.geometry;
-    this.snappedFeature = f;
-    this.setSnapHoverState(this.snappedFeature, true);
-  };
-  this._outHandler = e => {
-    console.log('out', e);
-    if (this.snappedFeature) {
-      this.setSnapHoverState(this.snappedFeature, false);
-      this.snappedGeometry = undefined;
-      this.snappedFeature = undefined;
-    }
-  };
-
-
-  this.drawConfig.snapping.layers.forEach(layerId => {
+  const createBufferLayer = (layerId) => {
     const bufferLayerId = `_${layerId}_buffer`;
     const layerDef = this.map.getLayer(layerId);
-    
     const newLayer = {
       id: bufferLayerId,
       source: layerDef.source,
@@ -249,10 +223,39 @@ DrawLineString.enableSnapping = function() {
         'line-width': 40, // TODO configurable
       }
     }
-    map.addLayer(newLayer);
+    this.map.addLayer(newLayer);
     this.map.on('mousemove', bufferLayerId, this._overHandler);
     this.map.on('mouseout', bufferLayerId, this._outHandler);
-  });
+  };
+
+  this._overHandler = e => {
+    const f = e.features[0];
+    if (this.snappedFeature) {
+      if (this.snappedFeature.layer !== f.layer) {
+        this.setSnapHoverState(this.snappedFeature, false);
+      } else {
+        return;
+      }
+
+    }
+    if (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon') {
+      this.snappedGeometry = turf.polygonToLine(f.geometry).geometry;
+    } else {
+      this.snappedGeometry = f.geometry;
+    }
+    this.snappedFeature = f;
+    this.setSnapHoverState(this.snappedFeature, true);
+  };
+  this._outHandler = e => {
+    if (this.snappedFeature) {
+      this.setSnapHoverState(this.snappedFeature, false);
+      this.snappedGeometry = undefined;
+      this.snappedFeature = undefined;
+    }
+  };
+
+
+  this.drawConfig.snapLayers.forEach(createBufferLayer);
   this.map.addSource('_snap_vertex', {
     type: 'geojson',
     data: {
@@ -274,7 +277,7 @@ DrawLineString.enableSnapping = function() {
 };
 
 DrawLineString.disableSnapping = function() {
-  this.drawConfig.snapping.layers.forEach(layerId => {
+  this.drawConfig.snapLayers.forEach(layerId => {
     const bufferLayerId = `_${layerId}_buffer`;
     this.map.off('mouseover', bufferLayerId, this._overHandler);
     this.map.off('mouseout', bufferLayerId, this._outHandler);
@@ -283,8 +286,6 @@ DrawLineString.disableSnapping = function() {
   });
   this.map.removeLayer('_snap_vertex');
   this.map.removeSource('_snap_vertex');
-
-
 };
 
 module.exports = DrawLineString;
