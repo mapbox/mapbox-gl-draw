@@ -215,13 +215,13 @@ DrawLineString.enableSnapping = function() {
     if (newLayer.type === 'circle') {
       newLayer.paint = {
         'circle-color': 'hsla(0,100%,50%,0.001)',
-        'circle-radius': 20, // TODO configurable
+        'circle-radius': this.drawConfig.snapDistance,
       }
     } else {
       newLayer.paint = {
         'line-color': 'hsla(0,100%,50%,0.001)',
-        'line-width': 40, // TODO configurable
-      }
+        'line-width': this.drawConfig.snapDistance * 2
+      };
     }
     this.map.addLayer(newLayer);
     this.map.on('mousemove', bufferLayerId, this._overHandler);

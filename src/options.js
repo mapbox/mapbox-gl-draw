@@ -13,6 +13,8 @@ const defaultOptions = {
   modes: require('./modes'),
   controls: {},
   userProperties: false,
+  snapLayers: [],
+  snapDistance: 20,
   snapping: {
     layers: []
   }
