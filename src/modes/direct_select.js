@@ -212,15 +212,21 @@ DirectSelect.onDrag = function(state, e) {
   if (state.canDragMove !== true) return;
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
+  let lngLat = e.lngLat;
+
+  if (state.selectedCoordPaths.length === 1) {
+    lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+  }
 
   const delta = {
-    lng: e.lngLat.lng - state.dragMoveLocation.lng,
-    lat: e.lngLat.lat - state.dragMoveLocation.lat
+    lng: lngLat.lng - state.dragMoveLocation.lng,
+    lat: lngLat.lat - state.dragMoveLocation.lat
   };
+
   if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
   else this.dragFeature(state, e, delta);
 
-  state.dragMoveLocation = e.lngLat;
+  state.dragMoveLocation = lngLat;
 };
 
 DirectSelect.onClick = function(state, e) {
