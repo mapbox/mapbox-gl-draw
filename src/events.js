@@ -129,7 +129,7 @@ module.exports = function(ctx) {
   events.keydown = function(event) {
     if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas') return; // we only handle events on the map
 
-    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
+    if (event.keyCode === 8 || event.keyCode === 46) {
       event.preventDefault();
       currentMode.trash();
     } else if (isKeyModeValid(event.keyCode)) {
