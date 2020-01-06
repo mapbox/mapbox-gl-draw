@@ -7,6 +7,22 @@ module.exports = {
       Properties: {
         Policies: [
           {
+            "PolicyName": "list",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3:::mapbox-gl-js"
+                  ]
+                }
+              ]
+            }
+          },
+          {
             PolicyName: 'main',
             PolicyDocument: {
               Statement: [
