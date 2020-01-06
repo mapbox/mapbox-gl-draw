@@ -19,7 +19,7 @@ module.exports = {
                   ],
                   "Effect": "Allow",
                   "Resource": [
-                    "arn:aws:s3:::mapbox-gl-js/plugins/mapbox-gl-draw/*",
+                    "arn:aws:s3:::mapbox-gl-js/plugins/mapbox-gl-draw/*"
                   ]
                 }
               ]
