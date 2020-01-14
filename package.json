@@ -67,6 +67,7 @@
     "envify": "^4.0.0",
     "eslint": "6.7.2",
     "eslint-config-mourner": "3.0.0",
+    "eslint-plugin-import": "^2.19.1",
     "express": "^4.13.4",
     "mapbox-gl": "^1.6.0",
     "mapbox-gl-js-mock": "0.28.0",
@@ -93,7 +94,6 @@
     "@mapbox/geojson-normalize": "0.0.1",
     "@mapbox/geojsonhint": "3.0.0",
     "@mapbox/point-geometry": "0.1.0",
-    "eslint-plugin-import": "^2.19.1",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "xtend": "^4.0.1"
