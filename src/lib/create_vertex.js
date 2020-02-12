@@ -1,4 +1,4 @@
-import * as Constants from "../constants";
+import * as Constants from '../constants';
 
 /**
  * Returns GeoJSON for a Point representing the
@@ -19,9 +19,9 @@ export default function(parent, coordinates, path, selected) {
       meta: Constants.meta.VERTEX,
       parent: parent.properties && parent.properties.id,
       coord_path: path,
-      active: selected
-        ? Constants.activeStates.ACTIVE
-        : Constants.activeStates.INACTIVE
+      active: selected ?
+        Constants.activeStates.ACTIVE :
+        Constants.activeStates.INACTIVE
     },
     geometry: {
       type: Constants.geojsonTypes.POINT,

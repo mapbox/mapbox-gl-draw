@@ -1,4 +1,4 @@
-import * as Constants from "../constants";
+import * as Constants from '../constants';
 
 /**
  * Returns GeoJSON for a Point representing the

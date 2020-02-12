@@ -659,7 +659,7 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
   t.end();
 });
 
-test('createSupplementaryPoints with line, midpoints, selected coordinate, userProperties', t => {
+test('createSupplementaryPoints with line, midpoints, selected coordinate, userProperties', (t) => {
   const line = {
     type: 'Feature',
     properties: {
