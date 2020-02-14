@@ -29,9 +29,7 @@ export default function(modeObject) {
     }, new ModeInterface(ctx));
 
     function wrapper(eh) {
-      return function(e) {
-        mode[eh](state, e);
-      };
+      return e => mode[eh](state, e);
     }
 
     return {
