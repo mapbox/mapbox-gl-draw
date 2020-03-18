@@ -273,6 +273,24 @@ test('direct_select', (t) => {
     });
   });
 
+  t.test('direct_select - pinch zooming on a vertex does not make it selected', (st) => {
+    const [lineId] = Draw.add(getGeoJSON('line'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: lineId
+    });
+    st.notOk(Draw.getSelectedPoints().features[0], 'no initial selection');
+
+    const pointPosition = getGeoJSON('line').geometry.coordinates[0];
+    const positionSecondFinger = { x: pointPosition[0] + 1, y: pointPosition[1] + 1 };
+    afterNextRender(() => {
+      map.fire('touchstart', makeTouchEvent(pointPosition[0], pointPosition[1], {}, [positionSecondFinger]));
+      afterNextRender(() => {
+        st.notOk(Draw.getSelectedPoints().features[0], 'no initial selection');
+        cleanUp(() => st.end());
+      });
+    });
+  });
+
   document.body.removeChild(mapContainer);
   t.end();
 });
