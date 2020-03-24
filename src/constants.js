@@ -63,7 +63,8 @@ export const events = {
   ACTIONABLE: 'draw.actionable',
   RENDER: 'draw.render',
   COMBINE_FEATURES: 'draw.combine',
-  UNCOMBINE_FEATURES: 'draw.uncombine'
+  UNCOMBINE_FEATURES: 'draw.uncombine',
+  DRAWING: 'draw.drawing',
 };
 
 export const updateActions = {

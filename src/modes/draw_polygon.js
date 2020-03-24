@@ -40,6 +40,10 @@ DrawPolygon.clickAnywhere = function(state, e) {
   state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
   state.currentVertexPosition++;
   state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+
+  this.map.fire(Constants.events.DRAWING, {
+    features: [state.polygon.toGeoJSON()]
+  });
 };
 
 DrawPolygon.clickOnVertex = function(state) {
