@@ -25,7 +25,8 @@ test('Options test', (t) => {
         trash: true,
         combine_features: true,
         uncombine_features: true
-      }
+      },
+      insertBeforeLayerId: undefined
     };
     t.deepEquals(defaultOptions, Draw.options);
     t.deepEquals(styleWithSourcesFixture, Draw.options.styles);
@@ -52,7 +53,8 @@ test('Options test', (t) => {
         trash: true,
         combine_features: true,
         uncombine_features: true
-      }
+      },
+      insertBeforeLayerId: undefined
     };
 
     t.deepEquals(defaultOptions, Draw.options);
@@ -79,7 +81,8 @@ test('Options test', (t) => {
         trash: false,
         combine_features: false,
         uncombine_features: false
-      }
+      },
+      insertBeforeLayerId: undefined
     };
     t.deepEquals(defaultOptions, Draw.options);
     t.end();
@@ -105,7 +108,8 @@ test('Options test', (t) => {
         trash: false,
         combine_features: false,
         uncombine_features: false
-      }
+      },
+      insertBeforeLayerId: undefined
     };
 
     t.deepEquals(defaultOptions, Draw.options);
@@ -132,7 +136,8 @@ test('Options test', (t) => {
         trash: true,
         combine_features: true,
         uncombine_features: true
-      }
+      },
+      insertBeforeLayerId: undefined
     };
 
     t.deepEquals(defaultOptions, Draw.options);
@@ -159,10 +164,38 @@ test('Options test', (t) => {
         trash: true,
         combine_features: true,
         uncombine_features: true
-      }
+      },
+      insertBeforeLayerId: undefined
     };
     t.deepEquals(defaultOptions, Draw.options);
     t.deepEquals(styleWithSourcesFixture, Draw.options.styles);
+    t.end();
+  });
+
+  t.test('disable set insertBeforeLayerId', (t) => {
+    const Draw = new MapboxDraw({ insertBeforeLayerId: 'layerId' });
+    const defaultOptions = {
+      defaultMode: 'simple_select',
+      modes,
+      touchEnabled: true,
+      keybindings: true,
+      clickBuffer: 2,
+      touchBuffer: 25,
+      displayControlsDefault: true,
+      boxSelect: true,
+      userProperties: false,
+      styles: Draw.options.styles,
+      controls: {
+        point: true,
+        line_string: true,
+        polygon: true,
+        trash: true,
+        combine_features: true,
+        uncombine_features: true
+      },
+      insertBeforeLayerId: 'layerId'
+    };
+    t.deepEquals(defaultOptions, Draw.options);
     t.end();
   });
 

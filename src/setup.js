@@ -100,7 +100,7 @@ export default function(ctx) {
       });
 
       ctx.options.styles.forEach((style) => {
-        ctx.map.addLayer(style);
+        ctx.map.addLayer(style, ctx.options.insertBeforeLayerId);
       });
 
       ctx.store.setDirty(true);

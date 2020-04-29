@@ -15,7 +15,8 @@ const defaultOptions = {
   styles,
   modes,
   controls: {},
-  userProperties: false
+  userProperties: false,
+  insertBeforeLayerId: undefined,
 };
 
 const showControls = {
