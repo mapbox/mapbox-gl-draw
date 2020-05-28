@@ -1,5 +1,5 @@
-const xtend = require('xtend');
-const Constants = require('./constants');
+const xtend = require("xtend");
+const Constants = require("./constants");
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
@@ -9,15 +9,16 @@ const defaultOptions = {
   touchBuffer: 25,
   boxSelect: true,
   displayControlsDefault: true,
-  styles: require('./lib/theme'),
-  modes: require('./modes'),
+  styles: require("./lib/theme"),
+  modes: require("./modes"),
   controls: {},
   userProperties: false,
   snapLayers: [],
+  snapFeatureFilter: undefined,
   snapDistance: 20,
   snapping: {
-    layers: []
-  }
+    layers: [],
+  },
 };
 
 const showControls = {
@@ -26,7 +27,7 @@ const showControls = {
   polygon: true,
   trash: true,
   combine_features: true,
-  uncombine_features: true
+  uncombine_features: true,
 };
 
 const hideControls = {
@@ -35,7 +36,7 @@ const hideControls = {
   polygon: false,
   trash: false,
   combine_features: false,
-  uncombine_features: false
+  uncombine_features: false,
 };
 
 function addSources(styles, sourceBucket) {
@@ -43,12 +44,13 @@ function addSources(styles, sourceBucket) {
     if (style.source) return style;
     return xtend(style, {
       id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
+      source:
+        sourceBucket === "hot" ? Constants.sources.HOT : Constants.sources.COLD,
     });
   });
 }
 
-module.exports = function(options = {}) {
+module.exports = function (options = {}) {
   let withDefaults = xtend(options);
 
   if (!options.controls) {
@@ -64,7 +66,9 @@ module.exports = function(options = {}) {
   withDefaults = xtend(defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
-  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+  withDefaults.styles = addSources(withDefaults.styles, "cold").concat(
+    addSources(withDefaults.styles, "hot")
+  );
 
   return withDefaults;
 };
