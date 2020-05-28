@@ -257,14 +257,15 @@ SimpleSelect.dragMove = function(state, e) {
   // TODO more efficient
   if (this.getSelected().length === 1 && this.getSelected()[0].type === 'Point') {
     lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+    this.getSelected()[0].incomingCoords([lngLat.lng, lngLat.lat])
+  } else {
+    const delta = {
+      lng: lngLat.lng - state.dragMoveLocation.lng,
+      lat: lngLat.lat - state.dragMoveLocation.lat
+    };
+
+    moveFeatures(this.getSelected(), delta);
   }
-  const delta = {
-    lng: lngLat.lng - state.dragMoveLocation.lng,
-    lat: lngLat.lat - state.dragMoveLocation.lat
-  };
-
-  moveFeatures(this.getSelected(), delta);
-
   state.dragMoveLocation = lngLat;
 };
 
