@@ -216,16 +216,19 @@ DirectSelect.onDrag = function(state, e) {
 
   if (state.selectedCoordPaths.length === 1) {
     lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+    // following the dragVertex() path below seems to cause a lag where our point
+    // ends up one step behind the snapped location
+    state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+  } else {
+
+    const delta = {
+      lng: lngLat.lng - state.dragMoveLocation.lng,
+      lat: lngLat.lat - state.dragMoveLocation.lat
+    };
+
+    if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
+    else this.dragFeature(state, e, delta);
   }
-
-  const delta = {
-    lng: lngLat.lng - state.dragMoveLocation.lng,
-    lat: lngLat.lat - state.dragMoveLocation.lat
-  };
-
-  if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
-  else this.dragFeature(state, e, delta);
-
   state.dragMoveLocation = lngLat;
 };
 

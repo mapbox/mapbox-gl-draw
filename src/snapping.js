@@ -31,6 +31,10 @@ const Snapping = (module.exports = function (ctx) {
     this.ctx.options.snapFeatureFilter = snapFeatureFilter;
   };
 
+  this.ctx.api.clearSnapCoord = () => {
+    this.clearSnapCoord();
+  };
+
   this.map.on("styledata", () => {
     this.updateSnapLayers();
   });
@@ -223,10 +227,14 @@ Snapping.prototype.snapCoord = function snapCoord(lngLat, featureFilter) {
       snappedFeature: this.snappedFeature,
     };
   } else {
-    this.map
-      .getSource("_snap_vertex")
-      .setData({ type: "FeatureCollection", features: [] });
-
+    this.clearSnapCoord();
     return lngLat;
+  }
+};
+
+Snapping.prototype.clearSnapCoord = function clearSnapCoord() {
+  const source = this.map.getSource("_snap_vertex");
+  if (source) {
+    source.setData({ type: "FeatureCollection", features: [] });
   }
 };
