@@ -1,5 +1,5 @@
 {
-  "name": "@mapbox/mapbox-gl-draw",
+  "name": "@luizasfight/mapbox-gl-draw",
   "version": "1.3.0-dev",
   "description": "A drawing component for Mapbox GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
