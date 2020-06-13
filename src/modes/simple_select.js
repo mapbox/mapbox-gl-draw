@@ -253,15 +253,20 @@ SimpleSelect.dragMove = function(state, e) {
   // Dragging when drag move is enabled
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
+  let lngLat = e.lngLat;
+  // TODO more efficient
+  if (this.getSelected().length === 1 && this.getSelected()[0].type === 'Point') {
+    lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+    this.getSelected()[0].incomingCoords([lngLat.lng, lngLat.lat])
+  } else {
+    const delta = {
+      lng: lngLat.lng - state.dragMoveLocation.lng,
+      lat: lngLat.lat - state.dragMoveLocation.lat
+    };
 
-  const delta = {
-    lng: e.lngLat.lng - state.dragMoveLocation.lng,
-    lat: e.lngLat.lat - state.dragMoveLocation.lat
-  };
-
-  moveFeatures(this.getSelected(), delta);
-
-  state.dragMoveLocation = e.lngLat;
+    moveFeatures(this.getSelected(), delta);
+  }
+  state.dragMoveLocation = lngLat;
 };
 
 SimpleSelect.onMouseUp = function(state, e) {

@@ -37,10 +37,10 @@ DrawPolygon.clickAnywhere = function(state, e) {
     return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.polygon.id] });
   }
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
-  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+  const lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, lngLat.lng, lngLat.lat);
   state.currentVertexPosition++;
-  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
-
+  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, lngLat.lng, lngLat.lat);
   this.map.fire(Constants.events.DRAWING, {
     features: [state.polygon.toGeoJSON()]
   });
@@ -48,10 +48,12 @@ DrawPolygon.clickAnywhere = function(state, e) {
 
 DrawPolygon.clickOnVertex = function(state) {
   return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.polygon.id] });
+
 };
 
 DrawPolygon.onMouseMove = function(state, e) {
-  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, e.lngLat.lng, e.lngLat.lat);
+  const lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+  state.polygon.updateCoordinate(`0.${state.currentVertexPosition}`, lngLat.lng, lngLat.lat);
   if (CommonSelectors.isVertex(e)) {
     this.updateUIClasses({ mouse: Constants.cursors.POINTER });
   }

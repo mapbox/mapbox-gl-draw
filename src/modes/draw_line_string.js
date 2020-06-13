@@ -70,16 +70,17 @@ DrawLineString.onSetup = function(opts) {
 
 DrawLineString.clickAnywhere = function(state, e) {
   if (state.currentVertexPosition > 0 && isEventAtCoordinates(e, state.line.coordinates[state.currentVertexPosition - 1]) ||
-      state.direction === 'backwards' && isEventAtCoordinates(e, state.line.coordinates[state.currentVertexPosition + 1])) {
+  state.direction === 'backwards' && isEventAtCoordinates(e, state.line.coordinates[state.currentVertexPosition + 1])) {
     return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.line.id] });
   }
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
-  state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+  const lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+  state.line.updateCoordinate(state.currentVertexPosition, lngLat.lng, lngLat.lat);
   if (state.direction === 'forward') {
     state.currentVertexPosition++;
-    state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+    state.line.updateCoordinate(state.currentVertexPosition, lngLat.lng, lngLat.lat);
   } else {
-    state.line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
+    state.line.addCoordinate(0, lngLat.lng, lngLat.lat);
   }
 };
 
@@ -87,8 +88,10 @@ DrawLineString.clickOnVertex = function(state) {
   return this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.line.id] });
 };
 
+
 DrawLineString.onMouseMove = function(state, e) {
-  state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
+  const lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+  state.line.updateCoordinate(state.currentVertexPosition, lngLat.lng, lngLat.lat);
   if (CommonSelectors.isVertex(e)) {
     this.updateUIClasses({ mouse: Constants.cursors.POINTER });
   }
@@ -149,4 +152,5 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
   display(geojson);
 };
 
-export default DrawLineString;
+
+module.exports = DrawLineString;

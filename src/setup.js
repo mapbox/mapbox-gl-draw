@@ -1,8 +1,9 @@
-import events from './events';
-import Store from './store';
-import ui from './ui';
-import * as Constants from './constants';
-import xtend from 'xtend';
+const events = require('./events');
+const Store = require('./store');
+const ui = require('./ui');
+const Constants = require('./constants');
+const xtend = require('xtend');
+const Snapping = require('./snapping');
 
 export default function(ctx) {
 
@@ -23,6 +24,7 @@ export default function(ctx) {
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
+      ctx.snapping.disableSnapping();
 
       if (controlContainer && controlContainer.parentNode) controlContainer.parentNode.removeChild(controlContainer);
       controlContainer = null;
@@ -33,6 +35,7 @@ export default function(ctx) {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
+      (new Snapping(ctx)).enableSnapping();
       ctx.store.storeMapConfig();
       ctx.events.addEventListeners();
     },
