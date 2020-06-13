@@ -153,4 +153,4 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
 };
 
 
-module.exports = DrawLineString;
+export default DrawLineString;
