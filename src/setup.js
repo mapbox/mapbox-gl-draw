@@ -1,9 +1,9 @@
-const events = require('./events');
-const Store = require('./store');
-const ui = require('./ui');
-const Constants = require('./constants');
-const xtend = require('xtend');
-const Snapping = require('./snapping');
+import events from './events';
+import Store from './store';
+import ui from './ui';
+import * as Constants from './constants';
+import xtend from 'xtend';
+import Snapping from './snapping';
 
 export default function(ctx) {
 
@@ -35,7 +35,7 @@ export default function(ctx) {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
-      (new Snapping(ctx)).enableSnapping();
+      new Snapping(ctx);
       ctx.store.storeMapConfig();
       ctx.events.addEventListeners();
     },

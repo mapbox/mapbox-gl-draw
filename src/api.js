@@ -195,5 +195,17 @@ export default function(ctx, api) {
     return api;
   };
 
+  api.enableSnapping = function(snapLayers) {
+    if (snapLayers) {
+      ctx.api.setSnapLayers(snapLayers);
+    }
+
+    ctx.snapping.enableSnapping();
+  }
+
+  api.disableSnapping = function() {
+    ctx.snapping.disableSnapping();
+  }
+
   return api;
 }

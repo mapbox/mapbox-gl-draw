@@ -107,51 +107,55 @@ function getBufferLayerId(layerId) {
 }
 
 Snapping.prototype.addSnapBuffer = function (layerId) {
-  console.log("snap on ", layerId);
   const bufferLayerId = getBufferLayerId(layerId);
   const layerDef = this.map.getLayer(layerId);
   if (!layerDef) {
     console.error(`Layer ${layerId} does not exist in map; can't snap to it.`);
     return;
   }
-  const newLayer = {
-    id: bufferLayerId,
-    source: layerDef.source,
-  };
-  if (
-    layerDef.type === "line" ||
-    layerDef.type === "fill" ||
-    layerDef.type === "fill-extrusion"
-  ) {
-    newLayer.type = "line";
-  } else if (layerDef.type === "circle" || layerDef.type === "symbol") {
-    newLayer.type = "circle";
-  } else {
-    console.error(
-      `Unsupported snap layer type ${layerDef.type} for layer ${layerDef.id}`
-    );
-    return;
-  }
-  if (layerDef.sourceLayer) {
-    newLayer["source-layer"] = layerDef.sourceLayer;
-  }
-  if (layerDef.filter) {
-    newLayer.filter = layerDef.filter;
-  }
-  if (newLayer.type === "circle") {
-    newLayer.paint = {
-      "circle-color": "hsla(0,100%,50%,0.001)",
-      "circle-radius": this.ctx.options.snapDistance,
+
+  const existingBufferLayerId = this.map.getLayer(getBufferLayerId(layerId));
+
+  if (!existingBufferLayerId) {
+    const newLayer = {
+      id: bufferLayerId,
+      source: layerDef.source,
     };
-  } else {
-    newLayer.paint = {
-      "line-color": "hsla(0,100%,50%,0.001)",
-      "line-width": this.ctx.options.snapDistance * 2,
-    };
+    if (
+      layerDef.type === "line" ||
+      layerDef.type === "fill" ||
+      layerDef.type === "fill-extrusion"
+    ) {
+      newLayer.type = "line";
+    } else if (layerDef.type === "circle" || layerDef.type === "symbol") {
+      newLayer.type = "circle";
+    } else {
+      console.error(
+        `Unsupported snap layer type ${layerDef.type} for layer ${layerDef.id}`
+      );
+      return;
+    }
+    if (layerDef.sourceLayer) {
+      newLayer["source-layer"] = layerDef.sourceLayer;
+    }
+    if (layerDef.filter) {
+      newLayer.filter = layerDef.filter;
+    }
+    if (newLayer.type === "circle") {
+      newLayer.paint = {
+        "circle-color": "hsla(0,100%,50%,0.001)",
+        "circle-radius": this.ctx.options.snapDistance,
+      };
+    } else {
+      newLayer.paint = {
+        "line-color": "hsla(0,100%,50%,0.001)",
+        "line-width": this.ctx.options.snapDistance * 2,
+      };
+    }
+    this.map.addLayer(newLayer);
+    this.map.on("mousemove", bufferLayerId, this.mouseoverHandler);
+    this.map.on("mouseout", bufferLayerId, this.mouseoutHandler);
   }
-  this.map.addLayer(newLayer);
-  this.map.on("mousemove", bufferLayerId, this.mouseoverHandler);
-  this.map.on("mouseout", bufferLayerId, this.mouseoutHandler);
 };
 
 Snapping.prototype.removeSnapBuffer = function (layerId) {
@@ -162,7 +166,6 @@ Snapping.prototype.removeSnapBuffer = function (layerId) {
 };
 
 Snapping.prototype.enableSnapping = function () {
-  console.log("snap on");
   this.snappableLayers().forEach((l) => this.addSnapBuffer(l));
   this.map.addSource("_snap_vertex", {
     type: "geojson",
