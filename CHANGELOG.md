@@ -63,7 +63,7 @@
 
 ## 1.0.0
 
-- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md)
+- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/MODES.md)
 - Drops `static` mode, which can now be found [in its own repo](https://github.com/mapbox/mapbox-gl-draw-static-mode)
 - Fixes bug where `MapboxDraw` would prevent `MapboxGeocoder` delete actions (#673)
 
@@ -119,7 +119,7 @@
 
 #### ⚠️ Breaking changes ⚠️
 
-- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016).
+- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#0270-november-11-2016).
 - Detects style changes and reapplies Draw if it has been removed.
 - Fixes UMD support.
 - Changes `mapboxgl.Draw` to `mapboxglDraw` when in global scope.

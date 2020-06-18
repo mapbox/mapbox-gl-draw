@@ -206,7 +206,7 @@ Triggered when the mode is being exited, to be used for cleaning up artifacts su
 
 ### MODE.onTrash
 
-Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#trash-draw) is called.
+Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#trash-draw) is called.
 
 **Parameters**
 
@@ -214,7 +214,7 @@ Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/mast
 
 ### MODE.onCombineFeature
 
-Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#combinefeatures-draw) is called.
+Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#combinefeatures-draw) is called.
 
 **Parameters**
 
@@ -222,7 +222,7 @@ Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw
 
 ### MODE.onUncombineFeature
 
-Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#uncombinefeatures-draw) is called.
+Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#uncombinefeatures-draw) is called.
 
 **Parameters**
 
@@ -231,7 +231,7 @@ Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-dr
 ### MODE.toDisplayFeatures
 
 Triggered per feature on render to convert raw features into set of features for display on the map
-See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
+See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
 
 **Parameters**
 
@@ -250,7 +250,7 @@ Sets Draw's internal selected state
 **Parameters**
 
 -   `features`  
--   `null-null` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;DrawFeature>** whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+-   `null-null` **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;DrawFeature>** whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
 
 ### this.setSelectedCoordinates
 
@@ -262,7 +262,7 @@ Sets Draw's internal selected coordinate state
 
 ### this.getSelected
 
-Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
 
 Returns **[Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;DrawFeature>** 
 
@@ -284,7 +284,7 @@ Returns **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 
 ### this.getFeature
 
-Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) by its id
+Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) by its id
 
 **Parameters**
 
@@ -319,7 +319,7 @@ Delete a feature from draw
 
 ### this.addFeature
 
-Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) to draw.
+Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) to draw.
 See `this.newFeature` for converting geojson into a DrawFeature
 
 **Parameters**
@@ -337,7 +337,7 @@ Clear all selected coordinates
 ### this.setActionableState
 
 Indicate if the different actions are currently possible with your mode
-See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
+See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
 
 **Parameters**
 
@@ -381,7 +381,7 @@ Get the features at the location of an event object or in a bbox
 
 ### this.newFeature
 
-Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) from geojson
+Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) from geojson
 
 **Parameters**
 
@@ -391,7 +391,7 @@ Returns **DrawFeature**
 
 ### this.isInstanceOf
 
-Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
 
 **Parameters**
 
