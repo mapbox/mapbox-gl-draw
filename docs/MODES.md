@@ -73,7 +73,8 @@ _please feel free to add your own modes to this list via a PR_
 -   [Rectangle Mode](https://github.com/edgespatial/mapbox-gl-draw-rectangle-mode)
 -   [Circle Mode](https://github.com/iamanvesh/mapbox-gl-draw-circle)
 -   [Assisted Rectangle Mode](https://github.com/geostarters/mapbox-gl-draw-assisted-rectangle-mode)
--   [Rotate/scale Rectangle Mode](https://github.com/drykovanov/mapbox-gl-draw-rotate-scale-rect-mode)
+-   [Rotate/Scale Rectangle Mode](https://github.com/drykovanov/mapbox-gl-draw-rotate-scale-rect-mode)
+-   [Rectangle Restrict Area Mode](https://github.com/dqunbp/mapbox-gl-draw-rectangle-restrict-area): Drawing a rectangle with a limited area
 
 ## Life Cycle Functions
 
