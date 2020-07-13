@@ -1,5 +1,16 @@
 ## Changelog
 
+## 1.2.0
+
+- Upgrade all dependencies
+- Upgrade to Node v12
+- Upgrade to ES6
+- Change bundler to rollup for smaller bundles
+- Switch from Uglify to buble in order to produce better and more compatible code
+
+### Bug fixes:
+- Trash correct vertices by changing sort to be numeric-aware [#943](https://github.com/mapbox/mapbox-gl-draw/pull/943)
+
 ## 1.1.2
 
 - update mapbox-gl peer dependency
