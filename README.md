@@ -31,9 +31,16 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 
 **When using modules**
 
+***When using require***
 ```js
 var mapboxgl = require('mapbox-gl');
-var MapboxDraw = require('@mapbox/mapbox-gl-draw');
+// As v1.2.0 uses ES6, you need to add .default
+var MapboxDraw = require('@mapbox/mapbox-gl-draw').default;
+```
+
+***When using import***
+```js
+import MapboxDraw from '@mapbox/mapbox-gl-draw'
 ```
 
 **When using a CDN**
