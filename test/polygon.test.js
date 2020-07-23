@@ -53,6 +53,17 @@ test('Polygon#isValid', (t) => {
   t.end();
 });
 
+test('Polygon#getCoordinate', (t) => {
+  const rawPolygon = createFeature('polygon');
+  rawPolygon.geometry.coordinates = [[[1, 2], [3, 4], [5, 6], [1, 2]]];
+  const polygon = new Polygon(createMockCtx(), rawPolygon);
+
+  t.deepEqual(polygon.getCoordinate('0.0'), [1, 2], 'getCoordinate returns the first coordinate');
+  t.deepEqual(polygon.getCoordinate('0.3'), [1, 2], 'getCoordinate returns the first coordinate as the last coordinate');
+
+  t.end();
+});
+
 test('Polygon#incomingCoords, Polygon#getCoordinates', (t) => {
   const rawPolygon = createFeature('polygon');
   const polygon = new Polygon(createMockCtx(), rawPolygon);
