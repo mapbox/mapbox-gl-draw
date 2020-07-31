@@ -104,6 +104,16 @@ git push
 npm publish
 ```
 
+To CDN
+
+```
+# make sure you are authenticated for AWS
+git checkout v{x.y.z}
+npm install
+npm run build
+aws s3 cp --recursive --acl public-read dist s3://mapbox-gl-js/plugins/mapbox-gl-draw/v{x.y.z}
+```
+
 Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/publisher-production/docs/pages/example/mapbox-gl-draw.html).
 
 ### Naming actions
