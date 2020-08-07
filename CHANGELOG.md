@@ -1,5 +1,16 @@
 ## Changelog
 
+## 1.2.0
+
+- Upgrade all dependencies
+- Upgrade to Node v12
+- Upgrade to ES6
+- Change bundler to rollup for smaller bundles
+- Switch from Uglify to buble in order to produce better and more compatible code
+
+### Bug fixes:
+- Trash correct vertices by changing sort to be numeric-aware [#943](https://github.com/mapbox/mapbox-gl-draw/pull/943)
+
 ## 1.1.2
 
 - update mapbox-gl peer dependency
@@ -63,7 +74,7 @@
 
 ## 1.0.0
 
-- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md)
+- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/MODES.md)
 - Drops `static` mode, which can now be found [in its own repo](https://github.com/mapbox/mapbox-gl-draw-static-mode)
 - Fixes bug where `MapboxDraw` would prevent `MapboxGeocoder` delete actions (#673)
 
@@ -119,7 +130,7 @@
 
 #### ⚠️ Breaking changes ⚠️
 
-- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016).
+- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#0270-november-11-2016).
 - Detects style changes and reapplies Draw if it has been removed.
 - Fixes UMD support.
 - Changes `mapboxgl.Draw` to `mapboxglDraw` when in global scope.
