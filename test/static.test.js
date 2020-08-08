@@ -1,6 +1,6 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';

@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import createMap from './utils/create_map';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
