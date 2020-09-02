@@ -7,6 +7,7 @@ import buble from '@rollup/plugin-buble';
 import {terser} from 'rollup-plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import shim from 'rollup-plugin-shim';
 
 export default {
   input: ['index.js'],
@@ -18,15 +19,15 @@ export default {
     indent: false
   },
   treeshake: true,
-  external: [
-    // geojsonlint-lines has a main function that requires the path and fs module.
-    // We never call it.
-    'fs',
-    'path'
-  ],
   plugins: [
     replace({
       'process.env.NODE_ENV': "'browser'"
+    }),
+    shim({
+      // geojsonlint-lines has a main function that requires the fs and path modules.
+      // We never call it.
+      fs: 'export default {}',
+      path: 'export default {}',
     }),
     buble({transforms: {dangerousForOf: true}, objectAssign: "Object.assign"}),
     minified ? terser() : false,
