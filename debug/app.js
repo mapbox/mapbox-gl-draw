@@ -99,6 +99,12 @@ map.on('load', () => {
     Draw.changeMode('draw_polygon');
   };
 
+  // Jump into draw polygon mode via a custom UI element
+  const startLasso = document.getElementById('start-lasso');
+  startLasso.onclick = function() {
+    Draw.changeMode('draw_lasso');
+  };
+
   // Jump into static mode via a custom UI element
   const startStatic = document.getElementById('start-static');
   startStatic.onclick = function() {

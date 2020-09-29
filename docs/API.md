@@ -30,7 +30,7 @@ All of the following options are optional.
 - `boxSelect`, boolean (default `true`): Whether or not to enable box selection of features with `shift`+`click`+drag. If `false`, `shift`+`click`+drag zooms into an area.
 - `clickBuffer`, number (default: `2`): Number of pixels around any feature or vertex (in every direction) that will respond to a click.
 - `touchBuffer`, number (default: `25`): Number of pixels around any feature of vertex (in every direction) that will respond to a touch.
-- `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
+- `controls`, Object: Hide or show individual controls. Each property's name is a control, and value is a boolean indicating whether the control is on or off. Available control names are `point`, `line_string`, `polygon`, `lasso`, `trash`, `combine_features` and `uncombine_features`. By default, all controls are on. To change that default, use `displayControlsDefault`.
 - `displayControlsDefault`, boolean (default: `true`): The default value for `controls`. For example, if you would like all controls to be *off* by default, and specify an allowed list with `controls`, use `displayControlsDefault: false`.
 - `styles`, Array\<Object\>: An array of map style objects. By default, Draw provides a map style for you. To learn about overriding styles, see the [Styling Draw](#styling-draw) section below.
 - `modes`, Object: over ride the default modes with your own. `MapboxDraw.modes` can be used to see the default values. More information on custom modes [can be found here](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/MODES.md).
@@ -74,6 +74,12 @@ Lets you draw a LineString feature.
 `Draw.modes.DRAW_POLYGON === 'draw_polygon'`
 
 Lets you draw a Polygon feature.
+
+### `draw_lasso`
+
+`Draw.modes.DRAW_LASSO === 'draw_lasso'`
+
+Lets you draw a Polygon feature with the Lasso tool.
 
 ### `draw_point`
 
@@ -541,7 +547,7 @@ property | values | function
 --- | --- | ---
 meta | feature, midpoint, vertex | `midpoint` and `vertex` are used on points added to the map to communicate polygon and line handles. `feature` is used for all features.
 active | true, false | A feature is active when it is 'selected' in the current mode. `true` and `false` are strings.
-mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon | Indicates which mode Draw is currently in.
+mode |  simple_select, direct_select, draw_point, draw_line_string, draw_polygon, draw_lasso | Indicates which mode Draw is currently in.
 
 Draw also provides a few more properties on features, but they should not be used for styling. For details on them, see "Using Draw with Mapbox GL JS's `queryRenderedFeatures`" below.
 

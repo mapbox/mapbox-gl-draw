@@ -22,6 +22,7 @@ const showControls = {
   point: true,
   line_string: true,
   polygon: true,
+  lasso: true,
   trash: true,
   combine_features: true,
   uncombine_features: true
@@ -31,6 +32,7 @@ const hideControls = {
   point: false,
   line_string: false,
   polygon: false,
+  lasso: false,
   trash: false,
   combine_features: false,
   uncombine_features: false
