@@ -83,6 +83,7 @@ Install dependencies, build the source files and crank up a server via:
 ```
 git clone git@github.com:mapbox/mapbox-gl-draw.git
 yarn install
+node server.js
 yarn start & open "http://localhost:9967/debug/?access_token=<token>"
 ```
 
