@@ -1,4 +1,3 @@
-import turfSimplify from '@turf/simplify';
 import * as CommonSelectors from '../lib/common_selectors';
 import doubleClickZoom from '../lib/double_click_zoom';
 import * as Constants from '../constants';
