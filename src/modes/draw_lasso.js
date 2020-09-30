@@ -1,3 +1,5 @@
+import turfSimplify from '@turf/simplify';
+
 import * as CommonSelectors from '../lib/common_selectors';
 import doubleClickZoom from '../lib/double_click_zoom';
 import * as Constants from '../constants';
@@ -56,6 +58,24 @@ DrawLasso.onMouseMove = function(state, e) {
 
 DrawLasso.onTap = DrawLasso.onClick = function(state, e) {
   state.toggled = !state.toggled;
+  if (!state.toggled) {
+    // We have just finished drawing with lasso
+    let tolerance = (3 / ((this.map.getZoom() - 4) * 150)) - 0.001; // https://www.desmos.com/calculator/b3zi8jqskw
+    if (tolerance < 0 || !(isFinite(tolerance))) {
+      // Tolerance cannot be negative
+      tolerance = 0;
+    }
+
+    // Simplify the polygon because mouseMove events result in tons of points that build up the resulting polygon
+    turfSimplify(state.polygon, {
+      tolerance,
+      mutate: true,
+      highQuality: true
+    });
+    this.fireUpdate();
+
+    this.changeMode(Constants.modes.SIMPLE_SELECT, { featureIds: [state.polygon.id] });
+  }
   if (CommonSelectors.isVertex(e)) return this.clickOnVertex(state, e);
   return this.clickAnywhere(state, e);
 };
@@ -138,6 +158,14 @@ DrawLasso.toDisplayFeatures = function(state, geojson, display) {
 DrawLasso.onTrash = function(state) {
   this.deleteFeature([state.polygon.id], { silent: true });
   this.changeMode(Constants.modes.SIMPLE_SELECT);
+};
+
+
+DrawLasso.fireUpdate = function() {
+  this.map.fire(Constants.events.UPDATE, {
+    action: Constants.updateActions.MOVE,
+    features: this.getSelected().map(f => f.toGeoJSON())
+  });
 };
 
 export default DrawLasso;
