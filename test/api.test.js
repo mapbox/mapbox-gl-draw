@@ -418,7 +418,7 @@ test('Draw.modes', (t) => {
   t.equal(Draw.modes.DRAW_LINE_STRING, Constants.modes.DRAW_LINE_STRING, 'draw_line_string');
   t.equal(Draw.modes.DRAW_POLYGON, Constants.modes.DRAW_POLYGON, 'draw_polygon');
   t.equal(Draw.modes.STATIC, Constants.modes.STATIC, 'static');
-  t.equal(getPublicMemberKeys(Draw.modes).length, 6, 'no unexpected modes');
+  t.equal(getPublicMemberKeys(Draw.modes).length, 7, 'no unexpected modes');
   t.end();
 });
 
