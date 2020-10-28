@@ -5,7 +5,7 @@ import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
 
-test('Feature contrusctor and API', t => {
+test('Feature contrusctor and API', (t) => {
   const featureGeoJson = createFeature('line');
   const ctx = createMockCtx();
   const feature = new Feature(ctx, featureGeoJson);
@@ -42,12 +42,12 @@ test('Feature contrusctor and API', t => {
   t.end();
 });
 
-test('Feature#changed', t => {
+test('Feature#changed', (t) => {
   const ctx = createMockCtx();
   const featureGeoJson = createFeature('point');
   const feature = new Feature(ctx, featureGeoJson);
 
-  ctx.store.featureChanged.reset();
+  ctx.store.featureChanged.resetHistory();
   feature.changed();
   t.equal(ctx.store.featureChanged.callCount, 1, 'called function on store');
   t.deepEqual(ctx.store.featureChanged.getCall(0).args, [featureGeoJson.id], 'with correct args');
@@ -55,7 +55,7 @@ test('Feature#changed', t => {
   t.end();
 });
 
-test('Feature#incomingCoords', t => {
+test('Feature#incomingCoords', (t) => {
   const ctx = createMockCtx();
   const featureGeoJson = createFeature('point');
   featureGeoJson.geometry.coordinates = [9, 10];
@@ -68,7 +68,7 @@ test('Feature#incomingCoords', t => {
   t.end();
 });
 
-test('Feature#setCoordinates, Feature#setCoordinates', t => {
+test('Feature#setCoordinates, Feature#setCoordinates', (t) => {
   const ctx = createMockCtx();
   const featureGeoJson = createFeature('point');
   featureGeoJson.geometry.coordinates = [9, 10];
@@ -84,7 +84,7 @@ test('Feature#setCoordinates, Feature#setCoordinates', t => {
   t.end();
 });
 
-test('Feature#toGeoJSON', t => {
+test('Feature#toGeoJSON', (t) => {
   const ctx = createMockCtx();
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);
@@ -100,7 +100,7 @@ test('Feature#toGeoJSON', t => {
   t.end();
 });
 
-test('Feature#internal - when userProperties is true', t => {
+test('Feature#internal - when userProperties is true', (t) => {
   const ctx = createMockCtx({userProperties: true});
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);
@@ -123,7 +123,7 @@ test('Feature#internal - when userProperties is true', t => {
   t.end();
 
 });
-test('Feature#internal - when userProperties is false', t => {
+test('Feature#internal - when userProperties is false', (t) => {
   const ctx = createMockCtx({userProperties: false});
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);
@@ -144,7 +144,7 @@ test('Feature#internal - when userProperties is false', t => {
   t.end();
 });
 
-test('Feature#setProperty', t => {
+test('Feature#setProperty', (t) => {
   const ctx = createMockCtx();
   const polygon = createFeature('polygon');
   const feature = new Feature(ctx, polygon);

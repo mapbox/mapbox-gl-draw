@@ -1,8 +1,8 @@
-const CommonSelectors = require('../lib/common_selectors');
-const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const Constants = require('../constants');
-const createVertex = require('../lib/create_vertex');
+import * as CommonSelectors from '../lib/common_selectors';
+import isEventAtCoordinates from '../lib/is_event_at_coordinates';
+import doubleClickZoom from '../lib/double_click_zoom';
+import * as Constants from '../constants';
+import createVertex from '../lib/create_vertex';
 
 const DrawLineString = {};
 
@@ -149,4 +149,4 @@ DrawLineString.toDisplayFeatures = function(state, geojson, display) {
   display(geojson);
 };
 
-module.exports = DrawLineString;
+export default DrawLineString;

@@ -11,4 +11,4 @@ function mapEventToBoundingBox(mapEvent, buffer = 0) {
   ];
 }
 
-module.exports = mapEventToBoundingBox;
+export default mapEventToBoundingBox;

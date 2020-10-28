@@ -1,14 +1,15 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import MapboxDraw from '../';
+import modes from '../src/modes/index';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 
-test('Options test', t => {
-  t.test('no options', t => {
+test('Options test', (t) => {
+  t.test('no options', (t) => {
     const Draw = new MapboxDraw();
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       touchEnabled: true,
       keybindings: true,
       clickBuffer: 2,
@@ -31,11 +32,11 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('use custom clickBuffer', t => {
+  t.test('use custom clickBuffer', (t) => {
     const Draw = new MapboxDraw({ clickBuffer: 10 });
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       keybindings: true,
       touchEnabled: true,
       clickBuffer: 10,
@@ -58,11 +59,11 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('hide all controls', t => {
+  t.test('hide all controls', (t) => {
     const Draw = new MapboxDraw({displayControlsDefault: false});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       keybindings: true,
       touchEnabled: true,
       clickBuffer: 2,
@@ -84,11 +85,11 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('hide controls but show point', t => {
+  t.test('hide controls but show point', (t) => {
     const Draw = new MapboxDraw({displayControlsDefault: false, controls: {point:true}});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       keybindings: true,
       touchEnabled: true,
       displayControlsDefault: false,
@@ -111,11 +112,11 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('hide only point control', t => {
+  t.test('hide only point control', (t) => {
     const Draw = new MapboxDraw({ controls: {point:false}});
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       keybindings: true,
       touchEnabled: true,
       displayControlsDefault: true,
@@ -138,11 +139,11 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('disable touch interaction', t => {
+  t.test('disable touch interaction', (t) => {
     const Draw = new MapboxDraw({ touchEnabled: false });
     const defaultOptions = {
       defaultMode: 'simple_select',
-      modes: MapboxDraw.modes,
+      modes,
       touchEnabled: false,
       keybindings: true,
       clickBuffer: 2,
@@ -165,7 +166,7 @@ test('Options test', t => {
     t.end();
   });
 
-  t.test('custom styles', t => {
+  t.test('custom styles', (t) => {
     const Draw = new MapboxDraw({styles: [{
       'id': 'custom-polygon',
       'type': 'fill',

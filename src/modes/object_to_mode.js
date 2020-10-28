@@ -1,4 +1,4 @@
-const ModeInterface = require('./mode_interface');
+import ModeInterface from './mode_interface';
 
 const eventMapper = {
   drag: 'onDrag',
@@ -17,7 +17,7 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-module.exports = function(modeObject) {
+export default function(modeObject) {
   const modeObjectKeys = Object.keys(modeObject);
 
   return function(ctx, startOpts = {}) {
@@ -29,13 +29,11 @@ module.exports = function(modeObject) {
     }, new ModeInterface(ctx));
 
     function wrapper(eh) {
-      return function(e) {
-        mode[eh](state, e);
-      };
+      return e => mode[eh](state, e);
     }
 
     return {
-      start: function() {
+      start() {
         state = mode.onSetup(startOpts); // this should set ui buttons
 
         // Adds event handlers for all event options
@@ -43,7 +41,7 @@ module.exports = function(modeObject) {
         // handlers that are not present in the mode
         // to reduce on render calls for functions that
         // have no logic
-        eventKeys.forEach(key => {
+        eventKeys.forEach((key) => {
           const modeHandler = eventMapper[key];
           let selector = () => false;
           if (modeObject[modeHandler]) {
@@ -53,21 +51,21 @@ module.exports = function(modeObject) {
         });
 
       },
-      stop: function() {
+      stop() {
         mode.onStop(state);
       },
-      trash: function() {
+      trash() {
         mode.onTrash(state);
       },
-      combineFeatures: function() {
+      combineFeatures() {
         mode.onCombineFeatures(state);
       },
-      uncombineFeatures: function() {
+      uncombineFeatures() {
         mode.onUncombineFeatures(state);
       },
-      render: function(geojson, push) {
+      render(geojson, push) {
         mode.toDisplayFeatures(state, geojson, push);
       }
     };
   };
-};
+}

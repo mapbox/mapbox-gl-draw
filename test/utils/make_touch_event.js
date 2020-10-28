@@ -1,17 +1,17 @@
-const xtend = require('xtend');
+import xtend from 'xtend';
 
-module.exports = function(lng = 0, lat = 0, eventProperties = {}) {
+export default function(lng = 0, lat = 0, eventProperties = {}) {
   const e = {
     originalEvent: xtend({
-      stopPropagation: function() {},
-      preventDefault: function() {},
+      stopPropagation() {},
+      preventDefault() {},
       button: 0,
       clientX: lng,
       clientY: lat
     }, eventProperties),
     point: {x: lng, y:lat},
-    lngLat: {lng: lng, lat: lat}
+    lngLat: {lng, lat}
   };
 
   return e;
-};
+}

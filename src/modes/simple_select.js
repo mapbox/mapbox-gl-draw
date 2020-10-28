@@ -1,10 +1,10 @@
-const CommonSelectors = require('../lib/common_selectors');
-const mouseEventPoint = require('../lib/mouse_event_point');
-const createSupplementaryPoints = require('../lib/create_supplementary_points');
-const StringSet = require('../lib/string_set');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const moveFeatures = require('../lib/move_features');
-const Constants = require('../constants');
+import * as CommonSelectors from '../lib/common_selectors';
+import mouseEventPoint from '../lib/mouse_event_point';
+import createSupplementaryPoints from '../lib/create_supplementary_points';
+import StringSet from '../lib/string_set';
+import doubleClickZoom from '../lib/double_click_zoom';
+import moveFeatures from '../lib/move_features';
+import * as Constants from '../constants';
 
 const SimpleSelect = {};
 
@@ -16,14 +16,12 @@ SimpleSelect.onSetup = function(opts) {
     boxSelectElement: undefined,
     boxSelecting: false,
     canBoxSelect: false,
-    dragMoveing: false,
+    dragMoving: false,
     canDragMove: false,
     initiallySelectedFeatureIds: opts.featureIds || []
   };
 
-  this.setSelected(state.initiallySelectedFeatureIds.filter(id => {
-    return this.getFeature(id) !== undefined;
-  }));
+  this.setSelected(state.initiallySelectedFeatureIds.filter(id => this.getFeature(id) !== undefined));
   this.fireActionable();
 
   this.setActionableState({
@@ -54,7 +52,7 @@ SimpleSelect.fireActionable = function() {
   if (selectedFeatures.length > 1) {
     combineFeatures = true;
     const featureType = selectedFeatures[0].type.replace('Multi', '');
-    selectedFeatures.forEach(feature => {
+    selectedFeatures.forEach((feature) => {
       if (feature.type.replace('Multi', '') !== featureType) {
         combineFeatures = false;
       }
@@ -105,12 +103,18 @@ SimpleSelect.onMouseMove = function(state) {
   // then move the mouse back over the canvas --- we don't allow the
   // interaction to continue then, but we do let it continue if you held
   // the mouse button that whole time
-  return this.stopExtendedInteractions(state);
+  this.stopExtendedInteractions(state);
+
+  // Skip render
+  return true;
 };
 
 SimpleSelect.onMouseOut = function(state) {
   // As soon as you mouse leaves the canvas, update the feature
   if (state.dragMoving) return this.fireUpdate();
+
+  // Skip render
+  return true;
 };
 
 SimpleSelect.onTap = SimpleSelect.onClick = function(state, e) {
@@ -170,7 +174,7 @@ SimpleSelect.clickOnFeature = function(state, e) {
   if (!isShiftClick && isFeatureSelected && this.getFeature(featureId).type !== Constants.geojsonTypes.POINT) {
     // Enter direct select mode
     return this.changeMode(Constants.modes.DIRECT_SELECT, {
-      featureId: featureId
+      featureId
     });
   }
 
@@ -328,7 +332,7 @@ SimpleSelect.onCombineFeatures = function() {
       properties: featuresCombined[0].properties,
       geometry: {
         type: `Multi${featureType}`,
-        coordinates: coordinates
+        coordinates
       }
     });
 
@@ -368,11 +372,11 @@ SimpleSelect.onUncombineFeatures = function() {
 
   if (createdFeatures.length > 1) {
     this.map.fire(Constants.events.UNCOMBINE_FEATURES, {
-      createdFeatures: createdFeatures,
+      createdFeatures,
       deletedFeatures: featuresUncombined
     });
   }
   this.fireActionable();
 };
 
-module.exports = SimpleSelect;
+export default SimpleSelect;

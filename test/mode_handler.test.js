@@ -5,7 +5,7 @@ import modeHandler from '../src/lib/mode_handler';
 import createMockModeHandlerContext from './utils/create_mock_mode_handler_context';
 import createMockMode from './utils/create_mock_mode';
 
-test('returned API', t => {
+test('returned API', (t) => {
   const mh = modeHandler(createMockMode(), createMockModeHandlerContext());
   t.equal(typeof mh.render, 'function', 'exposes render');
   t.equal(typeof mh.stop, 'function', 'exposes stop');
@@ -28,9 +28,10 @@ test('returned API', t => {
   t.end();
 });
 
-test('ModeHandler calling mode.start with context, and delegation functionality', t => {
+test('ModeHandler calling mode.start with context, and delegation functionality', (t) => {
   let startContext;
   function handleStart() {
+    // eslint-disable-next-line
     startContext = this;
   }
   const handleStartSpy = spy(handleStart);
@@ -65,7 +66,7 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
   t.equal(drawContext.ui.updateMapClasses.callCount, 1, 'updateMapClasses called if handler fires');
 
   const mousedownFailSpy = spy();
-  mousedownSpy.reset();
+  mousedownSpy.resetHistory();
   startContext.on('mousedown', e => !e.three, mousedownFailSpy);
   mh.mousedown({ three: 3 });
   t.equal(mousedownFailSpy.callCount, 0, 'delegation only calls callbacks with selectors returning true');
@@ -135,7 +136,7 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
   t.end();
 });
 
-test('ModeHandler#stop calling mode.stop', t => {
+test('ModeHandler#stop calling mode.stop', (t) => {
   const mode = createMockMode();
   const mh = modeHandler(mode, createMockModeHandlerContext());
 
@@ -145,7 +146,7 @@ test('ModeHandler#stop calling mode.stop', t => {
   t.end();
 });
 
-test('ModeHandler#stop not calling nonexistent mode.stop', t => {
+test('ModeHandler#stop not calling nonexistent mode.stop', (t) => {
   const mode = createMockMode();
   delete mode.stop;
   const mh = modeHandler(mode, createMockModeHandlerContext());
@@ -157,7 +158,7 @@ test('ModeHandler#stop not calling nonexistent mode.stop', t => {
   t.end();
 });
 
-test('Modehandler#trash', t => {
+test('Modehandler#trash', (t) => {
   const mode = createMockMode();
   const drawContext = createMockModeHandlerContext();
   const mh = modeHandler(mode, drawContext);
@@ -169,7 +170,7 @@ test('Modehandler#trash', t => {
   t.end();
 });
 
-test('Modehandler#trash without a mode.trash', t => {
+test('Modehandler#trash without a mode.trash', (t) => {
   const mode = createMockMode();
   delete mode.trash;
   const drawContext = createMockModeHandlerContext();

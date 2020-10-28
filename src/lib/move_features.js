@@ -1,10 +1,10 @@
-const constrainFeatureMovement = require('./constrain_feature_movement');
-const Constants = require('../constants');
+import constrainFeatureMovement from './constrain_feature_movement';
+import * as Constants from '../constants';
 
-module.exports = function(features, delta) {
+export default function(features, delta) {
   const constrainedDelta = constrainFeatureMovement(features.map(feature => feature.toGeoJSON()), delta);
 
-  features.forEach(feature => {
+  features.forEach((feature) => {
     const currentCoordinates = feature.getCoordinates();
 
     const moveCoordinate = (coord) => {
@@ -14,8 +14,8 @@ module.exports = function(features, delta) {
       };
       return [point.lng, point.lat];
     };
-    const moveRing = (ring) => ring.map(coord => moveCoordinate(coord));
-    const moveMultiPolygon = (multi) => multi.map(ring => moveRing(ring));
+    const moveRing = ring => ring.map(coord => moveCoordinate(coord));
+    const moveMultiPolygon = multi => multi.map(ring => moveRing(ring));
 
     let nextCoordinates;
     if (feature.type === Constants.geojsonTypes.POINT) {
@@ -30,4 +30,4 @@ module.exports = function(features, delta) {
 
     feature.incomingCoords(nextCoordinates);
   });
-};
+}

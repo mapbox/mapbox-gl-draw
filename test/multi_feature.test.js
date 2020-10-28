@@ -8,7 +8,7 @@ import MultiFeature from '../src/feature_types/multi_feature';
 import createMockCtx from './utils/create_mock_feature_context';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 
-test('MultiPoint via MultiFeature', t => {
+test('MultiPoint via MultiFeature', (t) => {
   t.ok(MultiFeature.prototype instanceof Feature, 'inherits from Feature');
 
   // Prototype members
@@ -26,7 +26,7 @@ test('MultiPoint via MultiFeature', t => {
   t.end();
 });
 
-test('MultiPoint', t => {
+test('MultiPoint', (t) => {
   const rawMultiPoint = {
     type: 'Feature',
     id: 'wahoo',
@@ -119,7 +119,7 @@ test('MultiPoint', t => {
 
 // Tests below less in depth becuase we know the
 // inner-workings are the same
-test('MultiPolygon via MultiFeature', t => {
+test('MultiPolygon via MultiFeature', (t) => {
   const rawMultiPolygon = {
     type: 'Feature',
     id: 'zing',
@@ -163,7 +163,7 @@ test('MultiPolygon via MultiFeature', t => {
   t.end();
 });
 
-test('MultiLineString via MultiFeature', t => {
+test('MultiLineString via MultiFeature', (t) => {
   const rawMultiLineString = {
     type: 'Feature',
     id: 'lineline',
@@ -207,7 +207,7 @@ test('MultiLineString via MultiFeature', t => {
   t.end();
 });
 
-test('Invalid MultiFeature type', t => {
+test('Invalid MultiFeature type', (t) => {
   const rawThing = {
     type: 'Feature',
     id: 'blergh',

@@ -7,7 +7,7 @@ import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 
-test('static', t => {
+test('static', (t) => {
 
   const map = createMap();
   const opts = {
@@ -27,7 +27,7 @@ test('static', t => {
 
   const cleanUp = function(cb) {
     Draw.deleteAll();
-    map.fire.reset();
+    map.fire.resetHistory();
     if (cb) cb();
   };
 
@@ -39,7 +39,7 @@ test('static', t => {
     return args;
   };
 
-  t.test('static - init map for tests', t => {
+  t.test('static - init map for tests', (t) => {
     const done = function() {
       map.off('load', done);
       t.end();
@@ -52,13 +52,13 @@ test('static', t => {
   });
 
 
-  t.test('static - box select', t => {
+  t.test('static - box select', (t) => {
     Draw.add(getGeoJSON('negativePoint'));
     Draw.add(getGeoJSON('point'));
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
-      map.dragPan.disable.reset();
+      map.dragPan.disable.resetHistory();
       map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
       t.equal(map.dragPan.disable.callCount, 0, 'dragPan is still enabled');
       map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
@@ -70,13 +70,13 @@ test('static', t => {
     });
   });
 
-  t.test('static - try clicking many features', t => {
+  t.test('static - try clicking many features', (t) => {
     const features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
     Draw.add({
       type: 'FeatureCollection',
-      features: features
+      features
     });
-    map.fire.reset();
+    map.fire.resetHistory();
 
     afterNextRender(() => {
       map.fire('mousedown', makeMouseEvent(10, 10));

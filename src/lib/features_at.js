@@ -1,7 +1,7 @@
-const sortFeatures = require('./sort_features');
-const mapEventToBoundingBox = require('./map_event_to_bounding_box');
-const Constants = require('../constants');
-const StringSet = require('./string_set');
+import sortFeatures from './sort_features';
+import mapEventToBoundingBox from './map_event_to_bounding_box';
+import * as Constants from '../constants';
+import StringSet from './string_set';
 
 const META_TYPES = [
   Constants.meta.FEATURE,
@@ -10,7 +10,7 @@ const META_TYPES = [
 ];
 
 // Requires either event or bbox
-module.exports = {
+export default {
   click: featuresAtClick,
   touch: featuresAtTouch
 };
@@ -32,9 +32,7 @@ function featuresAt(event, bbox, ctx, buffer) {
   if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
 
   const features = ctx.map.queryRenderedFeatures(box, queryParams)
-    .filter((feature) => {
-      return META_TYPES.indexOf(feature.properties.meta) !== -1;
-    });
+    .filter(feature => META_TYPES.indexOf(feature.properties.meta) !== -1);
 
   const featureIds = new StringSet();
   const uniqueFeatures = [];

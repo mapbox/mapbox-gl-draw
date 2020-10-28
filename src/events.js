@@ -1,12 +1,12 @@
-const setupModeHandler = require('./lib/mode_handler');
-const getFeaturesAndSetCursor = require('./lib/get_features_and_set_cursor');
-const featuresAt = require('./lib/features_at');
-const isClick = require('./lib/is_click');
-const isTap = require('./lib/is_tap');
-const Constants = require('./constants');
-const objectToMode = require('./modes/object_to_mode');
+import setupModeHandler from './lib/mode_handler';
+import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
+import featuresAt from './lib/features_at';
+import isClick from './lib/is_click';
+import isTap from './lib/is_tap';
+import * as Constants from './constants';
+import objectToMode from './modes/object_to_mode';
 
-module.exports = function(ctx) {
+export default function(ctx) {
 
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
@@ -32,11 +32,11 @@ module.exports = function(ctx) {
   };
 
   events.mousedrag = function(event) {
-    events.drag(event, (endInfo) => !isClick(mouseDownInfo, endInfo));
+    events.drag(event, endInfo => !isClick(mouseDownInfo, endInfo));
   };
 
   events.touchdrag = function(event) {
-    events.drag(event, (endInfo) => !isTap(touchStartInfo, endInfo));
+    events.drag(event, endInfo => !isTap(touchStartInfo, endInfo));
   };
 
   events.mousemove = function(event) {
@@ -138,7 +138,7 @@ module.exports = function(ctx) {
 
   // 8 - Backspace
   // 46 - Delete
-  const isKeyModeValid = (code) => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
+  const isKeyModeValid = code => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
     if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas') return; // we only handle events on the map
@@ -206,7 +206,7 @@ module.exports = function(ctx) {
 
   function actionable(actions) {
     let changed = false;
-    Object.keys(actions).forEach(action => {
+    Object.keys(actions).forEach((action) => {
       if (actionState[action] === undefined) throw new Error('Invalid action type');
       if (actionState[action] !== actions[action]) changed = true;
       actionState[action] = actions[action];
@@ -215,24 +215,24 @@ module.exports = function(ctx) {
   }
 
   const api = {
-    start: function() {
+    start() {
       currentModeName = ctx.options.defaultMode;
       currentMode = setupModeHandler(modes[currentModeName](ctx), ctx);
     },
     changeMode,
     actionable,
-    currentModeName: function() {
+    currentModeName() {
       return currentModeName;
     },
-    currentModeRender: function(geojson, push) {
+    currentModeRender(geojson, push) {
       return currentMode.render(geojson, push);
     },
-    fire: function(name, event) {
+    fire(name, event) {
       if (events[name]) {
         events[name](event);
       }
     },
-    addEventListeners: function() {
+    addEventListeners() {
       ctx.map.on('mousemove', events.mousemove);
       ctx.map.on('mousedown', events.mousedown);
       ctx.map.on('mouseup', events.mouseup);
@@ -249,7 +249,7 @@ module.exports = function(ctx) {
         ctx.container.addEventListener('keyup', events.keyup);
       }
     },
-    removeEventListeners: function() {
+    removeEventListeners() {
       ctx.map.off('mousemove', events.mousemove);
       ctx.map.off('mousedown', events.mousedown);
       ctx.map.off('mouseup', events.mouseup);
@@ -266,19 +266,19 @@ module.exports = function(ctx) {
         ctx.container.removeEventListener('keyup', events.keyup);
       }
     },
-    trash: function(options) {
+    trash(options) {
       currentMode.trash(options);
     },
-    combineFeatures: function() {
+    combineFeatures() {
       currentMode.combineFeatures();
     },
-    uncombineFeatures: function() {
+    uncombineFeatures() {
       currentMode.uncombineFeatures();
     },
-    getMode: function() {
+    getMode() {
       return currentModeName;
     }
   };
 
   return api;
-};
+}

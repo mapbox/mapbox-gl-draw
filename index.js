@@ -1,13 +1,13 @@
-const runSetup = require('./src/setup');
-const setupOptions = require('./src/options');
-const setupAPI = require('./src/api');
-const Constants = require('./src/constants');
+import runSetup from './src/setup';
+import setupOptions from './src/options';
+import setupAPI from './src/api';
+import * as Constants from './src/constants';
 
 const setupDraw = function(options, api) {
   options = setupOptions(options);
 
   const ctx = {
-    options: options
+    options
   };
 
   api = setupAPI(ctx, api);
@@ -23,8 +23,11 @@ const setupDraw = function(options, api) {
   return api;
 };
 
-module.exports = function(options) {
+function MapboxDraw(options) {
   setupDraw(options, this);
-};
+}
 
-module.exports.modes = require('./src/modes');
+import modes from './src/modes/index';
+MapboxDraw.modes = modes;
+
+export default MapboxDraw;

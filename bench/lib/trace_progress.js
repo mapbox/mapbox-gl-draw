@@ -1,4 +1,4 @@
-module.exports = function(features, map) {
+export default function(features, map) {
   var sizes = [];
   var total = 0;
   features.forEach(feature => {

@@ -1,7 +1,7 @@
 import test from 'tape';
-import commonSelectors from '../src/lib/common_selectors';
+import * as commonSelectors from '../src/lib/common_selectors';
 
-test('commonSelectors.isOfMetaType', t => {
+test('commonSelectors.isOfMetaType', (t) => {
   const isFoo = commonSelectors.isOfMetaType('foo');
   t.equal(typeof isFoo, 'function');
   t.ok(isFoo({
@@ -23,7 +23,7 @@ test('commonSelectors.isOfMetaType', t => {
   t.end();
 });
 
-test('commonSelectors.isShiftMousedown', t => {
+test('commonSelectors.isShiftMousedown', (t) => {
   t.ok(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: true,
@@ -52,7 +52,7 @@ test('commonSelectors.isShiftMousedown', t => {
   t.end();
 });
 
-test('commonSelectors.isActiveFeature', t => {
+test('commonSelectors.isActiveFeature', (t) => {
   t.ok(commonSelectors.isActiveFeature({
     featureTarget: {
       properties: {
@@ -104,7 +104,7 @@ test('commonSelectors.isActiveFeature', t => {
   t.end();
 });
 
-test('commonSelectors.isInactiveFeature', t => {
+test('commonSelectors.isInactiveFeature', (t) => {
   t.ok(commonSelectors.isInactiveFeature({
     featureTarget: {
       properties: {
@@ -156,7 +156,7 @@ test('commonSelectors.isInactiveFeature', t => {
   t.end();
 });
 
-test('commonSelectors.noTarget', t => {
+test('commonSelectors.noTarget', (t) => {
   t.ok(commonSelectors.noTarget({
     something: 1
   }));
@@ -176,7 +176,7 @@ test('commonSelectors.noTarget', t => {
   t.end();
 });
 
-test('commonSelectors.isFeature', t => {
+test('commonSelectors.isFeature', (t) => {
   t.ok(commonSelectors.isFeature({
     featureTarget: {
       properties: {
@@ -208,7 +208,7 @@ test('commonSelectors.isFeature', t => {
   t.end();
 });
 
-test('commonSelectors.isShiftDown', t => {
+test('commonSelectors.isShiftDown', (t) => {
   t.ok(commonSelectors.isShiftDown({
     originalEvent: {
       shiftKey: true
@@ -232,7 +232,7 @@ test('commonSelectors.isShiftDown', t => {
   t.end();
 });
 
-test('commonSelectors.isEscapeKey', t => {
+test('commonSelectors.isEscapeKey', (t) => {
   t.ok(commonSelectors.isEscapeKey({
     keyCode: 27
   }));
@@ -248,7 +248,7 @@ test('commonSelectors.isEscapeKey', t => {
   t.end();
 });
 
-test('commonSelectors.isEnterKey', t => {
+test('commonSelectors.isEnterKey', (t) => {
   t.ok(commonSelectors.isEnterKey({
     keyCode: 13
   }));
@@ -264,8 +264,8 @@ test('commonSelectors.isEnterKey', t => {
   t.end();
 });
 
-test('commonSelectors.true', t => {
-  t.ok(commonSelectors.true());
-  t.ok(commonSelectors.true(false));
+test('commonSelectors.true', (t) => {
+  t.ok(commonSelectors.isTrue());
+  t.ok(commonSelectors.isTrue(false));
   t.end();
 });

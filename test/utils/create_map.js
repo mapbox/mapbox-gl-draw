@@ -18,9 +18,9 @@ export default function createMap(mapOptions = {}) {
   interactions.forEach((interaction) => {
     map[interaction] = {
       enabled: true,
-      disable: function () { this.enabled = false; },
-      enable: function () { this.enabled = true; },
-      isEnabled: function () { return this.enabled; },
+      disable () { this.enabled = false; },
+      enable () { this.enabled = true; },
+      isEnabled () { return this.enabled; },
     };
   });
 
@@ -32,7 +32,7 @@ export default function createMap(mapOptions = {}) {
   const container = map.getContainer();
   container.classList.add = function(names) {
     names = names || '';
-    names.split(' ').forEach(name => {
+    names.split(' ').forEach((name) => {
       if (classList.indexOf(name) === -1) {
         classList.push(name);
       }
@@ -42,7 +42,7 @@ export default function createMap(mapOptions = {}) {
 
   container.classList.remove = function(names) {
     names = names || '';
-    names.split(' ').forEach(name => {
+    names.split(' ').forEach((name) => {
       classList = classList.filter(n => n !== name);
     });
     container.className = classList.join(' ');

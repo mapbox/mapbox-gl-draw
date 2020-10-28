@@ -6,17 +6,17 @@ import createMap from './utils/create_map';
 
 function createStore() {
   const map = createMap();
-  const ctx = { map: map };
+  const ctx = { map };
   return new Store(ctx);
 }
 
-test('Store has correct properties', t => {
+test('Store has correct properties', (t) => {
   t.ok(Store, 'store exists');
   t.ok(typeof Store === 'function', 'store is a function');
   t.end();
 });
 
-test('Store constructor and public API', t => {
+test('Store constructor and public API', (t) => {
   const map = createMap();
   const ctx = { map };
   const store = new Store(ctx);
@@ -64,7 +64,7 @@ test('Store constructor and public API', t => {
   t.end();
 });
 
-test('Store#setDirty', t => {
+test('Store#setDirty', (t) => {
   const store = createStore();
   t.equal(store.isDirty, false);
   store.setDirty();
@@ -72,7 +72,7 @@ test('Store#setDirty', t => {
   t.end();
 });
 
-test('Store#createRenderBatch', t => {
+test('Store#createRenderBatch', (t) => {
   const store = createStore();
   let numRenders = 0;
   store.render = function() {
@@ -95,7 +95,7 @@ test('Store#createRenderBatch', t => {
   t.end();
 });
 
-test('Store#featureChanged, Store#getChangedIds, Store#clearChangedIds', t => {
+test('Store#featureChanged, Store#getChangedIds, Store#clearChangedIds', (t) => {
   const store = createStore();
   t.deepEqual(store.getChangedIds(), []);
   store.featureChanged('x');
@@ -109,7 +109,7 @@ test('Store#featureChanged, Store#getChangedIds, Store#clearChangedIds', t => {
   t.end();
 });
 
-test('Store#add, Store#get, Store#getAll', t => {
+test('Store#add, Store#get, Store#getAll', (t) => {
   const store = createStore();
   t.equal(store.get(1), undefined);
   t.deepEqual(store.getAll(), []);
@@ -129,7 +129,7 @@ test('Store#add, Store#get, Store#getAll', t => {
   t.end();
 });
 
-test('selection methods', t => {
+test('selection methods', (t) => {
   const store = createStore();
   const f1 = createFeature('point');
   store.add(f1);
@@ -142,7 +142,7 @@ test('selection methods', t => {
 
   t.deepEqual(store.getSelectedIds(), []);
 
-  t.test('select one feature', st => {
+  t.test('select one feature', (st) => {
     store.select(f1.id);
     st.deepEqual(store.getSelectedIds(), [f1.id], 'f1 returns in selected ids array');
     st.deepEqual(store.getSelected(), [f1.toGeoJSON()], 'f1 returns in selected array');
@@ -151,7 +151,7 @@ test('selection methods', t => {
     st.end();
   });
 
-  t.test('select a second feature', st => {
+  t.test('select a second feature', (st) => {
     store.select(f2.id);
     st.deepEqual(store.getSelectedIds(), [f1.id, f2.id], 'f1 and f2 return in selected ids array');
     st.deepEqual(store.getSelected(), [f1, f2], 'f1 and f2 return in selected array');
@@ -160,37 +160,37 @@ test('selection methods', t => {
     st.end();
   });
 
-  t.test('try to re-select first feature', st => {
+  t.test('try to re-select first feature', (st) => {
     store.select(f1.id);
     st.end();
   });
 
-  t.test('deselect a feature', st => {
+  t.test('deselect a feature', (st) => {
     store.deselect(f1.id);
     st.deepEqual(store.getSelectedIds(), [f2.id], 'deselection of f1 clears it from selected array');
     st.end();
   });
 
-  t.test('serially select more features', st => {
+  t.test('serially select more features', (st) => {
     store.select(f3.id);
     store.select(f4.id);
     st.deepEqual(store.getSelectedIds(), [f2.id, f3.id, f4.id], 'serial selection of f3 and f4 reflected in selected array');
     st.end();
   });
 
-  t.test('clear selection', st => {
+  t.test('clear selection', (st) => {
     store.clearSelected();
     st.deepEqual(store.getSelectedIds(), []);
     st.end();
   });
 
-  t.test('select an array of features', st => {
+  t.test('select an array of features', (st) => {
     store.select([f1.id, f3.id, f4.id]);
     st.deepEqual(store.getSelectedIds(), [f1.id, f3.id, f4.id]);
     st.end();
   });
 
-  t.test('deselect an array of features', st => {
+  t.test('deselect an array of features', (st) => {
     store.deselect([f1.id, f4.id]);
     st.deepEqual(store.getSelectedIds(), [f3.id]);
     st.end();
@@ -199,7 +199,7 @@ test('selection methods', t => {
   t.end();
 });
 
-test('Store#delete', t => {
+test('Store#delete', (t) => {
   const store = createStore();
   const point = createFeature('point');
   const line = createFeature('line');
@@ -224,7 +224,7 @@ test('Store#delete', t => {
   t.end();
 });
 
-test('Store#setSelected', t => {
+test('Store#setSelected', (t) => {
   const store = createStore();
   const point = createFeature('point');
   const line = createFeature('line');
@@ -245,7 +245,7 @@ test('Store#setSelected', t => {
   t.end();
 });
 
-test('Store#setFeatureProperty', t => {
+test('Store#setFeatureProperty', (t) => {
   const store = createStore();
   const point = createFeature('point');
 
@@ -258,13 +258,13 @@ test('Store#setFeatureProperty', t => {
   t.end();
 });
 
-test('Store#storeAndRestoreMapConfig', t => {
+test('Store#storeAndRestoreMapConfig', (t) => {
   const map = createMap();
   // Disable doubleClickZoom
   map.doubleClickZoom.disable();
   // Check it's disabled
   t.equal(map.doubleClickZoom.isEnabled(), false, 'Disables doubleClickZoom on the map');
-  const ctx = { map: map };
+  const ctx = { map };
   const store = new Store(ctx);
   store.storeMapConfig();
   // Check we can get the initial state of it
