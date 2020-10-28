@@ -89,7 +89,7 @@ export default function(ctx) {
     const target = featuresAt.touch(event, null, ctx)[0];
 
     // If there are no mapbox targets nearby, let the event propagate through
-    if (!target) {
+    if (!target && currentModeName === 'simple_select') {
       return;
     }
 
@@ -119,7 +119,7 @@ export default function(ctx) {
     const target = featuresAt.touch(event, null, ctx)[0];
 
     // If there are no mapbox targets nearby, let the event propagate through
-    if (!target) {
+    if (!target && currentModeName === 'simple_select') {
       return;
     }
 
