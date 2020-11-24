@@ -76,6 +76,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Rotate/Scale Rectangle Mode](https://github.com/drykovanov/mapbox-gl-draw-rotate-scale-rect-mode)
 -   [Rectangle Restrict Area Mode](https://github.com/dqunbp/mapbox-gl-draw-rectangle-restrict-area): Drawing a rectangle with a limited area
 -   [Geodesic Modes](https://github.com/zakjan/mapbox-gl-draw-geodesic): Draw geodesic lines, polygons and circles
+-   [Snapping Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Add snapping ability while drawing features
 
 ## Life Cycle Functions
 
