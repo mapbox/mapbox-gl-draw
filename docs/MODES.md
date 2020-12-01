@@ -76,9 +76,10 @@ _please feel free to add your own modes to this list via a PR_
 -   [Rotate/Scale Rectangle Mode](https://github.com/drykovanov/mapbox-gl-draw-rotate-scale-rect-mode)
 -   [Rectangle Restrict Area Mode](https://github.com/dqunbp/mapbox-gl-draw-rectangle-restrict-area): Drawing a rectangle with a limited area
 -   [Geodesic Modes](https://github.com/zakjan/mapbox-gl-draw-geodesic): Draw geodesic lines, polygons and circles
--   [Cut/Split Line](https://github.com/ReyhaneMasumi/mapbox-gl-draw-split-line-mode): Cut/Split linestrings/Multilinestrings with linestring, point or polygon
--   [Cut Polygon](https://github.com/ReyhaneMasumi/mapbox-gl-draw-cut-polygon-mode): Cut polygons/Multipolygons with a polygon
--   [Split Polygon](https://github.com/ReyhaneMasumi/mapbox-gl-draw-split-polygon-mode): Split polygons/Multipolygons with a linestring
+-   [Cut/Split Line Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-split-line-mode): Cut/Split linestrings/Multilinestrings with linestring, point or polygon
+-   [Cut Polygon Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-cut-polygon-mode): Cut polygons/Multipolygons with a polygon
+-   [Split Polygon Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-split-polygon-mode): Split polygons/Multipolygons with a linestring
+-   [Scale/Rotate Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-scale-rotate-mode): Scale and Rotate polygons and lines
 
 ## Life Cycle Functions
 
