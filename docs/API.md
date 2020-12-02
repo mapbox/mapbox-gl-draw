@@ -529,11 +529,11 @@ The GL Style Spec requires each layer to have a source. However, **do not provid
 
 Draw moves features between sources in order to fine-tune performance. Because of this, **Draw will provide a `source` for you automatically**.
 
-The `source`s that Draw provides are named `mapbox-gl-draw-hot` and `mapbox-gl-draw-cold`.
+The `source` that Draw provides is named `mapbox-gl-draw`.
 
 **id**
 
-The GL Style Spec also requires an id. **You must provide an id**. Draw will then add the suffixes `.hot` and `.cold` to your id.
+The GL Style Spec also requires an id. **You must provide an id**.
 
 In your custom style, you will want to use the following feature properties:
 

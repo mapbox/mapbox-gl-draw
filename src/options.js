@@ -36,12 +36,12 @@ const hideControls = {
   uncombine_features: false
 };
 
-function addSources(styles, sourceBucket) {
+function addSources(styles) {
   return styles.map((style) => {
     if (style.source) return style;
     return xtend(style, {
-      id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
+      id: `${style.id}`,
+      source: Constants.SOURCE
     });
   });
 }
@@ -62,7 +62,7 @@ export default function(options = {}) {
   withDefaults = xtend(defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
-  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+  withDefaults.styles = addSources(withDefaults.styles);
 
   return withDefaults;
 }
