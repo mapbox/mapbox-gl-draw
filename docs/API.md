@@ -525,11 +525,7 @@ Draw uses a map style that adheres to the [Mapbox GL Style Spec](https://www.map
 
 **source**
 
-The GL Style Spec requires each layer to have a source. However, **do not provide a `source`** when styling Draw.
-
-Draw moves features between sources in order to fine-tune performance. Because of this, **Draw will provide a `source` for you automatically**.
-
-The `source` that Draw provides is named `mapbox-gl-draw`.
+The GL Style Spec requires each layer to have a source. However, **do not provide a `source`** when styling Draw. **Draw will provide a `source` for you automatically**. The `source` that Draw provides is named `mapbox-gl-draw`.
 
 **id**
 
