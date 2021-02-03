@@ -1,5 +1,12 @@
 ## Changelog
 
+# 1.2.1
+
+### Bug Fixes:
+- Upgrade `peerDependencies` to allow `mapbox-gl@2.0.0+` to be used with gl-draw.
+- Update `package.json` so that usage of library from npm always results in pulling in the built bundle.
+- Remove `require()`'ing of unsed node builtins like `fs` and `path` from the bundle.
+
 ## 1.2.0
 
 - Upgrade all dependencies
