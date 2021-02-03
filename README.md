@@ -56,7 +56,7 @@ var map = new mapboxgl.Map({
 var Draw = new MapboxDraw();
 
 // Map#addControl takes an optional second argument to set the position of the control.
-// If no position is specified the control defaults to `top-right`. See the docs 
+// If no position is specified the control defaults to `top-right`. See the docs
 // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
 
 map.addControl(Draw, 'top-left');
@@ -108,8 +108,8 @@ To CDN
 ```
 # make sure you are authenticated for AWS
 git checkout v{x.y.z}
-npm install
-npm run build
+yarn install
+yarn run prepublish
 aws s3 cp --recursive --acl public-read dist s3://mapbox-gl-js/plugins/mapbox-gl-draw/v{x.y.z}
 ```
 
