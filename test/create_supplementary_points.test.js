@@ -658,3 +658,95 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
 
   t.end();
 });
+
+test('createSupplementaryPoints with line, midpoints, selected coordinate, userProperties', (t) => {
+  const line = {
+    type: 'Feature',
+    properties: {
+      id: 'foo',
+      bar: 'baz'
+    },
+    geometry: {
+      type: 'LineString',
+      coordinates: [[0, 0], [4, 4], [8, 8]]
+    }
+  };
+  const map = createMap();
+
+  const results = createSupplementaryPoints(line, {
+    map,
+    midpoints: true,
+    selectedPaths: '1'
+  });
+
+  t.deepEqual(results, [{
+    geometry: {
+      coordinates: [0, 0],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '0',
+      meta: 'vertex',
+      parent: 'foo',
+      bar: 'baz'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [2, 2],
+      type: 'Point'
+    },
+    properties: {
+      coord_path: '1',
+      lat: 2,
+      lng: 2,
+      meta: 'midpoint',
+      parent: 'foo',
+      bar: 'baz'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [4, 4],
+      type: 'Point'
+    },
+    properties: {
+      active: 'true',
+      coord_path: '1',
+      meta: 'vertex',
+      parent: 'foo',
+      bar: 'baz'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [6, 6],
+      type: 'Point'
+    },
+    properties: {
+      coord_path: '2',
+      lat: 6,
+      lng: 6,
+      meta: 'midpoint',
+      parent: 'foo',
+      bar: 'baz'
+    },
+    type: 'Feature'
+  }, {
+    geometry: {
+      coordinates: [8, 8],
+      type: 'Point'
+    },
+    properties: {
+      active: 'false',
+      coord_path: '2',
+      meta: 'vertex',
+      parent: 'foo',
+      bar: 'baz'
+    },
+    type: 'Feature'
+  }], 'adds vertices and midpoints with userProperties');
+
+  t.end();
+});
