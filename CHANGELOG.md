@@ -1,5 +1,10 @@
 ## Changelog
 
+# 1.2.2
+
+### Bug Fixes:
+- Fix midpoint calculation when using mapbox-gl-draw with 3d terrain
+
 # 1.2.1
 
 ### Bug Fixes:
