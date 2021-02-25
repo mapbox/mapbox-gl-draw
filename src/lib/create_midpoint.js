@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export default function(parent, startVertex, endVertex, map) {
+export default function(parent, startVertex, endVertex) {
   const startCoord = startVertex.geometry.coordinates;
   const endCoord = endVertex.geometry.coordinates;
 
