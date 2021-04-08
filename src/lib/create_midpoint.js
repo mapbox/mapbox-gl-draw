@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export default function(parent, startVertex, endVertex, map) {
+export default function(parent, startVertex, endVertex) {
   const startCoord = startVertex.geometry.coordinates;
   const endCoord = endVertex.geometry.coordinates;
 
@@ -13,9 +13,10 @@ export default function(parent, startVertex, endVertex, map) {
     return null;
   }
 
-  const ptA = map.project([ startCoord[0], startCoord[1] ]);
-  const ptB = map.project([ endCoord[0], endCoord[1] ]);
-  const mid = map.unproject([ (ptA.x + ptB.x) / 2, (ptA.y + ptB.y) / 2 ]);
+  const mid = {
+    lng: (startCoord[0] + endCoord[0]) / 2,
+    lat: (startCoord[1] + endCoord[1]) / 2
+  };
 
   return {
     type: Constants.geojsonTypes.FEATURE,
