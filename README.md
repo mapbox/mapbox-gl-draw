@@ -16,6 +16,15 @@ npm install @mapbox/mapbox-gl-draw
 
 Draw ships with CSS, make sure you include it in your build.
 
+
+### Typescript 
+
+Typescript definition files are available as part of the [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mapbox__mapbox-gl-draw) package. 
+
+```
+npm install @types/mapbox__mapbox-gl-draw
+```
+
 **When using modules**
  ```js
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
