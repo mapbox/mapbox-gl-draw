@@ -95,6 +95,7 @@
     "@mapbox/geojson-normalize": "0.0.1",
     "@mapbox/geojsonhint": "3.0.0",
     "@mapbox/point-geometry": "0.1.0",
+    "@turf/simplify": "^5.1.5",
     "hat": "0.0.3",
     "lodash.isequal": "^4.2.0",
     "xtend": "^4.0.1"

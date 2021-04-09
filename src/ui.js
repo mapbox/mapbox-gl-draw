@@ -125,6 +125,16 @@ export default function(ctx) {
       });
     }
 
+    if (controls[Constants.types.LASSO]) {
+      buttonElements[Constants.types.LASSO] = createControlButton(Constants.types.LASSO, {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_LASSO,
+        title: `Lasso tool ${ctx.options.keybindings ? '(s)' : ''}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LASSO),
+        onDeactivate: () => ctx.events.trash()
+      });
+    }
+
     if (controls[Constants.types.POINT]) {
       buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
         container: controlGroup,

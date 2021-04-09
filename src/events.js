@@ -140,6 +140,8 @@ export default function(ctx) {
       changeMode(Constants.modes.DRAW_LINE_STRING);
     } else if (event.keyCode === 51 && ctx.options.controls.polygon) {
       changeMode(Constants.modes.DRAW_POLYGON);
+    } else if (event.keyCode === 83 && ctx.options.controls.lasso) {
+      changeMode(Constants.modes.DRAW_LASSO);
     }
   };
 
