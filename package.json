@@ -87,17 +87,13 @@
     "uglify-js": "^3.0.22",
     "unassertify": "^2.0.3"
   },
-  "peerDependencies": {
-    "mapbox-gl": ">=0.27.0"
-  },
   "dependencies": {
-    "@mapbox/geojson-area": "^0.2.1",
-    "@mapbox/geojson-extent": "^0.3.2",
-    "@mapbox/geojson-normalize": "0.0.1",
-    "@mapbox/geojsonhint": "3.0.0",
-    "@mapbox/point-geometry": "0.1.0",
+    "@mapbox/geojson-area": "^0.2.2",
+    "@mapbox/geojson-extent": "^1.0.0",
+    "@mapbox/geojson-normalize": "^0.0.1",
+    "@mapbox/point-geometry": "^0.1.0",
     "hat": "0.0.3",
-    "lodash.isequal": "^4.2.0",
-    "xtend": "^4.0.1"
+    "lodash.isequal": "^4.5.0",
+    "xtend": "^4.0.2"
   }
 }
