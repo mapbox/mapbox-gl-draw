@@ -16,6 +16,15 @@ npm install @mapbox/mapbox-gl-draw
 
 Draw ships with CSS, make sure you include it in your build.
 
+
+### Typescript 
+
+Typescript definition files are available as part of the [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mapbox__mapbox-gl-draw) package. 
+
+```
+npm install @types/mapbox__mapbox-gl-draw
+```
+
 **When using modules**
  ```js
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
@@ -56,7 +65,7 @@ var map = new mapboxgl.Map({
 var Draw = new MapboxDraw();
 
 // Map#addControl takes an optional second argument to set the position of the control.
-// If no position is specified the control defaults to `top-right`. See the docs 
+// If no position is specified the control defaults to `top-right`. See the docs
 // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
 
 map.addControl(Draw, 'top-left');
@@ -101,6 +110,16 @@ npm version (major|minor|patch)
 git push --tags
 git push
 npm publish
+```
+
+To CDN
+
+```
+# make sure you are authenticated for AWS
+git checkout v{x.y.z}
+yarn install
+yarn run prepublish
+aws s3 cp --recursive --acl public-read dist s3://mapbox-gl-js/plugins/mapbox-gl-draw/v{x.y.z}
 ```
 
 Update the version number in [the GL JS example](https://github.com/mapbox/mapbox-gl-js/blob/publisher-production/docs/pages/example/mapbox-gl-draw.html).
