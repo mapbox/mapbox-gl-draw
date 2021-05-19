@@ -3,7 +3,6 @@ import normalize from '@mapbox/geojson-normalize';
 import hat from 'hat';
 import featuresAt from './lib/features_at';
 import stringSetsAreEqual from './lib/string_sets_are_equal';
-import geojsonhint from '@mapbox/geojsonhint';
 import * as Constants from './constants';
 import StringSet from './lib/string_set';
 
@@ -74,10 +73,6 @@ export default function(ctx, api) {
   };
 
   api.add = function (geojson) {
-    const errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
-    if (errors.length) {
-      throw new Error(errors[0].message);
-    }
     const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
     const ids = featureCollection.features.map((feature) => {

@@ -207,20 +207,6 @@ test('Draw.add -- GeometryCollection', (t) => {
   t.end();
 });
 
-test('Draw.add -- Invalid geojson', (t) => {
-  t.throws(() => {
-    Draw.add({
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Point',
-        coordinates: 7
-      }
-    });
-  }, /coordinates/, 'Invalid GeoJSON throws an error');
-  t.end();
-});
-
 test('Draw.add - accept lots of decimal percision', (t) => {
   for (let i = 0; i < 30; i++) {
     const div = Math.pow(10, i);
