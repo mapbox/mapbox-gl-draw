@@ -28,7 +28,8 @@
     "prepublish": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start": "run-p build-token watch watch-bench"
+    "start-server": "node server.js",
+    "start": "run-p build-token watch watch-bench start-server"
   },
   "repository": {
     "type": "git",
