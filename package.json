@@ -31,6 +31,9 @@
     "start-server": "node server.js",
     "start": "run-p build-token watch watch-bench start-server"
   },
+  "files": [
+    "dist/mapbox-gl-draw*"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/mapbox/mapbox-gl-draw.git"
