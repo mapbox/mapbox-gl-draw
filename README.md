@@ -1,12 +1,10 @@
 # @mapbox/mapbox-gl-draw
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/mapbox/mapbox-gl-draw.svg)](https://greenkeeper.io/) [![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=main)](https://travis-ci.org/mapbox/mapbox-gl-draw)
+[![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=main)](https://travis-ci.org/mapbox/mapbox-gl-draw)
 
 Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps. [See a live example here](https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/)
 
-**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js). Compatible versions are documented in the package.json**
-
-**On NPM this package has recently moved from `mapbox-gl-draw` to `@mapbox/mapbox-gl-draw`**
+**Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js).**
 
 ### Installing
 
@@ -16,26 +14,9 @@ npm install @mapbox/mapbox-gl-draw
 
 Draw ships with CSS, make sure you include it in your build.
 
-
-### Typescript 
-
-Typescript definition files are available as part of the [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mapbox__mapbox-gl-draw) package. 
-
-```
-npm install @types/mapbox__mapbox-gl-draw
-```
-
-**When using modules**
- ```js
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
- ```
-
-**When using CDN**
-```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.css' type='text/css' />
-```
-
 ### Usage in your application
+
+#### JavaScript
 
 **When using modules**
 
@@ -47,17 +28,37 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.js'></script>
 ```
 
-**Example setup**
+#### CSS
+
+**When using modules**
+ ```js
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
+ ```
+
+**When using CDN**
+```html
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css' type='text/css' />
+```
+
+### Typescript
+
+Typescript definition files are available as part of the [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mapbox__mapbox-gl-draw) package.
+
+```
+npm install @types/mapbox__mapbox-gl-draw
+```
+
+### Example usage
 
 ```js
 mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
 
 var map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/streets-v8',
+  style: 'mapbox://styles/mapbox/streets-v11',
   center: [40, -74.50],
   zoom: 9
 });
@@ -103,7 +104,7 @@ npm run test
 
 ### Publishing
 
-To github and npm
+To GitHub and NPM:
 
 ```
 npm version (major|minor|patch)
@@ -112,7 +113,7 @@ git push
 npm publish
 ```
 
-To CDN
+To CDN:
 
 ```
 # make sure you are authenticated for AWS
