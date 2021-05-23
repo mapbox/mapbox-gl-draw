@@ -148,6 +148,19 @@ test('direct_select', (t) => {
     });
   });
 
+  t.test('direct_select - trashing with no vertices selected should delete the feature', (st) => {
+    const ids = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: ids[0]
+    });
+    afterNextRender(() => {
+      Draw.trash();
+      const afterTrash = Draw.get(ids[0]);
+      st.equal(afterTrash, undefined);
+      cleanUp(() => st.end());
+    });
+  });
+
   t.test('direct_select - a click on a vertex and than dragging the map shouldn\'t drag the vertex', (st) => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.DIRECT_SELECT, {
