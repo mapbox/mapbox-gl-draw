@@ -202,9 +202,11 @@ DirectSelect.onMouseOut = function(state) {
 };
 
 DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {
-  if (isVertex(e)) return this.onVertex(state, e);
-  if (isActiveFeature(e)) return this.onFeature(state, e);
-  if (isMidpoint(e)) return this.onMidpoint(state, e);
+  if (e.points == null || e.points.length === 1) {
+    if (isVertex(e)) return this.onVertex(state, e);
+    if (isActiveFeature(e)) return this.onFeature(state, e);
+    if (isMidpoint(e)) return this.onMidpoint(state, e);
+  }
 };
 
 DirectSelect.onDrag = function(state, e) {

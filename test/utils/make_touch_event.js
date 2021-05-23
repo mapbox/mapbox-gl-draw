@@ -1,6 +1,7 @@
 import xtend from 'xtend';
 
-export default function(lng = 0, lat = 0, eventProperties = {}) {
+export default function(lng = 0, lat = 0, eventProperties = {}, additionalPoints = []) {
+  const point = {x: lng, y:lat};
   const e = {
     originalEvent: xtend({
       stopPropagation() {},
@@ -9,7 +10,8 @@ export default function(lng = 0, lat = 0, eventProperties = {}) {
       clientX: lng,
       clientY: lat
     }, eventProperties),
-    point: {x: lng, y:lat},
+    point,
+    points: [point].concat(additionalPoints),
     lngLat: {lng, lat}
   };
 
