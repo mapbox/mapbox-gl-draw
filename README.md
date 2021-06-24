@@ -129,5 +129,5 @@ Update the version number in [the GL JS example](https://github.com/mapbox/mapbo
 
 We're trying to follow standards when naming things. Here is a collection of links where we look for inspiration.
 
-- http://turfjs.org
+- https://turfjs.org
 - https://shapely.readthedocs.io/en/latest/manual.html
