@@ -77,7 +77,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Rectangle Restrict Area Mode](https://github.com/dqunbp/mapbox-gl-draw-rectangle-restrict-area): Drawing a rectangle with a limited area
 -   [Geodesic Modes](https://github.com/zakjan/mapbox-gl-draw-geodesic): Draw geodesic lines, polygons and circles
 -   [Snapping Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Add snapping ability while drawing features
--   [Pinning Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Pin shared coordinates together during edit
+-   [Pinning Mode](https://github.com/mhsattarian/mapbox-gl-draw-pinning-mode): Pin shared coordinates together during edit
 -   [Passing Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Add ability to draw features but don't add them
 
 ## Life Cycle Functions
