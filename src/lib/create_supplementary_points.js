@@ -34,7 +34,7 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
       // vertex before this one. If so, add a midpoint
       // between that vertex and this one.
       if (options.midpoints && lastVertex) {
-        const midpoint = createMidpoint(featureId, lastVertex, vertex, options.map);
+        const midpoint = createMidpoint(featureId, lastVertex, vertex);
         if (midpoint) {
           supplementaryPoints.push(midpoint);
         }

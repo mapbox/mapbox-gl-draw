@@ -2,7 +2,7 @@
 import test from 'tape';
 import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
 import * as Constants from '../src/constants';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import createMap from './utils/create_map';
 import getGeoJSON from './utils/get_geojson';
 import setupAfterNextRender from './utils/after_next_render';
@@ -204,20 +204,6 @@ test('Draw.add -- GeometryCollection', (t) => {
   t.throws(() => {
     Draw.add(getGeoJSON('geometryCollection'));
   }, 'geometry collections are not valid in Draw');
-  t.end();
-});
-
-test('Draw.add -- Invalid geojson', (t) => {
-  t.throws(() => {
-    Draw.add({
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Point',
-        coordinates: 7
-      }
-    });
-  }, /coordinates/, 'Invalid GeoJSON throws an error');
   t.end();
 });
 

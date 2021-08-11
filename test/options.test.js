@@ -1,6 +1,6 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import modes from '../src/modes/index';
 import styleWithSourcesFixture from './fixtures/style_with_sources.json';
 
