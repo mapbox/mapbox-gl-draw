@@ -81,6 +81,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Split Polygon Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-split-polygon-mode): Split polygons/Multipolygons with a linestring
 -   [Scale/Rotate Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-scale-rotate-mode): Scale and Rotate polygons and lines
 -   [Waypoint Mode](https://github.com/zakjan/mapbox-gl-draw-waypoint): Allow user to drag vertices only, prevent dragging features
+-   [Bezier Curve Mode](https://github.com/Jeff-Numix/mapbox-gl-draw-bezier-curve-mode): Draw and edit bezier curves
 
 
 ## Life Cycle Functions
