@@ -4,8 +4,7 @@ export default [
     'type': 'fill',
     'filter': ['all',
       ['==', 'active', 'false'],
-      ['==', '$type', 'Polygon'],
-      ['!=', 'mode', 'static']
+      ['==', '$type', 'Polygon']
     ],
     'paint': {
       'fill-color': '#3bb2d0',
@@ -39,8 +38,7 @@ export default [
     'type': 'line',
     'filter': ['all',
       ['==', 'active', 'false'],
-      ['==', '$type', 'Polygon'],
-      ['!=', 'mode', 'static']
+      ['==', '$type', 'Polygon']
     ],
     'layout': {
       'line-cap': 'round',
@@ -70,8 +68,7 @@ export default [
     'type': 'line',
     'filter': ['all',
       ['==', 'active', 'false'],
-      ['==', '$type', 'LineString'],
-      ['!=', 'mode', 'static']
+      ['==', '$type', 'LineString']
     ],
     'layout': {
       'line-cap': 'round',
@@ -104,8 +101,7 @@ export default [
     'type': 'circle',
     'filter': ['all',
       ['==', 'meta', 'vertex'],
-      ['==', '$type', 'Point'],
-      ['!=', 'mode', 'static']
+      ['==', '$type', 'Point']
     ],
     'paint': {
       'circle-radius': 5,
@@ -117,8 +113,7 @@ export default [
     'type': 'circle',
     'filter': ['all',
       ['==', 'meta', 'vertex'],
-      ['==', '$type', 'Point'],
-      ['!=', 'mode', 'static']
+      ['==', '$type', 'Point']
     ],
     'paint': {
       'circle-radius': 3,
@@ -131,8 +126,7 @@ export default [
     'filter': ['all',
       ['==', 'active', 'false'],
       ['==', '$type', 'Point'],
-      ['==', 'meta', 'feature'],
-      ['!=', 'mode', 'static']
+      ['==', 'meta', 'feature']
     ],
     'paint': {
       'circle-radius': 5,
@@ -146,8 +140,7 @@ export default [
     'filter': ['all',
       ['==', 'active', 'false'],
       ['==', '$type', 'Point'],
-      ['==', 'meta', 'feature'],
-      ['!=', 'mode', 'static']
+      ['==', 'meta', 'feature']
     ],
     'paint': {
       'circle-radius': 3,
@@ -177,51 +170,6 @@ export default [
     'paint': {
       'circle-radius': 5,
       'circle-color': '#fbb03b'
-    }
-  },
-  {
-    'id': 'gl-draw-polygon-fill-static',
-    'type': 'fill',
-    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
-    'paint': {
-      'fill-color': '#404040',
-      'fill-outline-color': '#404040',
-      'fill-opacity': 0.1
-    }
-  },
-  {
-    'id': 'gl-draw-polygon-stroke-static',
-    'type': 'line',
-    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
-    'layout': {
-      'line-cap': 'round',
-      'line-join': 'round'
-    },
-    'paint': {
-      'line-color': '#404040',
-      'line-width': 2
-    }
-  },
-  {
-    'id': 'gl-draw-line-static',
-    'type': 'line',
-    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'LineString']],
-    'layout': {
-      'line-cap': 'round',
-      'line-join': 'round'
-    },
-    'paint': {
-      'line-color': '#404040',
-      'line-width': 2
-    }
-  },
-  {
-    'id': 'gl-draw-point-static',
-    'type': 'circle',
-    'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Point']],
-    'paint': {
-      'circle-radius': 5,
-      'circle-color': '#404040'
     }
   }
 ];
