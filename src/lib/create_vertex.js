@@ -11,6 +11,7 @@ import * as Constants from '../constants.js';
  * @param {boolean} selected
  * @return {GeoJSON} Point
  */
+
 export default function(parentId, coordinates, path, selected) {
   return {
     type: Constants.geojsonTypes.FEATURE,
