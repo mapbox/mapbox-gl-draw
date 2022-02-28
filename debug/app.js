@@ -99,6 +99,12 @@ map.on('load', () => {
     Draw.changeMode('draw_polygon');
   };
 
+  // Jump into draw rectangle mode via a custom UI element
+  const startRectangle = document.getElementById('start-rectangle');
+  startRectangle.onclick = function() {
+    Draw.changeMode('draw_rectangle');
+  };
+
   // Jump into static mode via a custom UI element
   const startStatic = document.getElementById('start-static');
   startStatic.onclick = function() {

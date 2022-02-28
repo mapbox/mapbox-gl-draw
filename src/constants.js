@@ -28,6 +28,7 @@ export const cursors = {
 };
 
 export const types = {
+  RECTANGLE: 'rectangle',
   POLYGON: 'polygon',
   LINE: 'line_string',
   POINT: 'point'
@@ -47,6 +48,7 @@ export const geojsonTypes = {
 
 export const modes = {
   DRAW_LINE_STRING: 'draw_line_string',
+  DRAW_RECTANGLE: 'draw_rectangle',
   DRAW_POLYGON: 'draw_polygon',
   DRAW_POINT: 'draw_point',
   SIMPLE_SELECT: 'simple_select',

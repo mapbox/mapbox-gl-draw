@@ -18,7 +18,7 @@ SimpleSelect.onSetup = function(opts) {
     canBoxSelect: false,
     dragMoving: false,
     canDragMove: false,
-    initiallySelectedFeatureIds: opts.featureIds || []
+    initiallySelectedFeatureIds: opts.featureIds || [],
   };
 
   this.setSelected(state.initiallySelectedFeatureIds.filter(id => this.getFeature(id) !== undefined));
@@ -140,7 +140,7 @@ SimpleSelect.clickOnVertex = function(state, e) {
   this.changeMode(Constants.modes.DIRECT_SELECT, {
     featureId: e.featureTarget.properties.parent,
     coordPath: e.featureTarget.properties.coord_path,
-    startPos: e.lngLat
+    startPos: e.lngLat,
   });
   this.updateUIClasses({ mouse: Constants.cursors.MOVE });
 };
@@ -186,12 +186,12 @@ SimpleSelect.clickOnFeature = function(state, e) {
     if (selectedFeatureIds.length === 1) {
       doubleClickZoom.enable(this);
     }
-  // Shift-click on an unselected feature
+    // Shift-click on an unselected feature
   } else if (!isFeatureSelected && isShiftClick) {
     // Add it to the selection
     this.select(featureId);
     this.updateUIClasses({ mouse: Constants.cursors.MOVE });
-  // Click (without shift) on an unselected feature
+    // Click (without shift) on an unselected feature
   } else if (!isFeatureSelected && !isShiftClick) {
     // Make it the only selected feature
     selectedFeatureIds.forEach(id => this.doRender(id));
@@ -221,8 +221,8 @@ SimpleSelect.onTouchStart = function(state, e) {
 };
 
 SimpleSelect.onDrag = function(state, e) {
-  if (state.canDragMove) return this.dragMove(state, e);
-  if (this.drawConfig.boxSelect && state.canBoxSelect) return this.whileBoxSelect(state, e);
+  // if (state.canDragMove) return this.dragMove(state, e);
+  // if (this.drawConfig.boxSelect && state.canBoxSelect) return this.whileBoxSelect(state, e);
 };
 
 SimpleSelect.whileBoxSelect = function(state, e) {
