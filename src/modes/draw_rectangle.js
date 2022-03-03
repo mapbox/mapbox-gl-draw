@@ -26,7 +26,7 @@ const doubleClickZoom = {
 
 const DrawRectangle = {
   // When the mode starts this function will be called.
-  onSetup(opts) {
+  onSetup() {
     const rectangle = this.newFeature({
       type: "Feature",
       properties: {isRectangle: true},

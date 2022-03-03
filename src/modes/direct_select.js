@@ -89,12 +89,12 @@ DirectSelect.dragFeature = function(state, e, delta) {
 };
 
 DirectSelect.dragVertex = function(state, e, delta) {
-  const selectedCoords = state.selectedCoordPaths.map(coord_path =>
-    state.feature.getCoordinate(coord_path)
+  const selectedCoords = state.selectedCoordPaths.map(coord_path => state.feature.getCoordinate(coord_path)
   );
   // START added for rectangle edit
   if (CommonSelectors.isRectangle(state)) {
-    // must be == to work
+    // has be == to work
+    // eslint-disable-next-line eqeqeq
     if (state.selectedCoordPaths == "0.0") {
       state.feature.updateCoordinate(
         "0.1",
@@ -106,6 +106,7 @@ DirectSelect.dragVertex = function(state, e, delta) {
         selectedCoords[0][0],
         state.feature.getCoordinate("0.3")[1]
       );
+      // eslint-disable-next-line eqeqeq
     } else if (state.selectedCoordPaths == "0.1") {
       state.feature.updateCoordinate(
         "0.0",
@@ -117,6 +118,7 @@ DirectSelect.dragVertex = function(state, e, delta) {
         selectedCoords[0][0],
         state.feature.getCoordinate("0.2")[1]
       );
+      // eslint-disable-next-line eqeqeq
     } else if (state.selectedCoordPaths == "0.2") {
       state.feature.updateCoordinate(
         "0.3",
@@ -128,6 +130,7 @@ DirectSelect.dragVertex = function(state, e, delta) {
         selectedCoords[0][0],
         state.feature.getCoordinate("0.1")[1]
       );
+      // eslint-disable-next-line eqeqeq
     } else if (state.selectedCoordPaths == "0.3") {
       state.feature.updateCoordinate(
         "0.2",

@@ -220,9 +220,8 @@ SimpleSelect.onTouchStart = function(state, e) {
   if (CommonSelectors.isActiveFeature(e)) return this.startOnActiveFeature(state, e);
 };
 
-SimpleSelect.onDrag = function(state, e) {
-  // if (state.canDragMove) return this.dragMove(state, e);
-  // if (this.drawConfig.boxSelect && state.canBoxSelect) return this.whileBoxSelect(state, e);
+SimpleSelect.onDrag = function() {
+  // do nothing
 };
 
 SimpleSelect.whileBoxSelect = function(state, e) {
