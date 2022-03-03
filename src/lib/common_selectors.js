@@ -49,8 +49,7 @@ export function isVertex(e) {
 export function isRectangle(state) {
   const featureTarget = state.feature;
   if (!featureTarget) return false;
-  if (!featureTarget.properties) return false;
-  return featureTarget.properties.isRectangle;
+  return featureTarget.properties.isRectangle || false;
 }
 
 export function isShiftDown(e) {

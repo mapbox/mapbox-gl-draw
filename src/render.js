@@ -33,10 +33,7 @@ export default function render() {
 
   function renderFeature(id, source) {
     const feature = store.get(id);
-    let isRectangle = false;
-    if (feature.properties) {
-      isRectangle = feature.properties.isRectangle || false;
-    }
+    const isRectangle = feature.properties.isRectangle || false;
     const featureInternal = feature.internal(mode, isRectangle);
     store.ctx.events.currentModeRender(featureInternal, (geojson) => {
       store.sources[source].push(geojson);
