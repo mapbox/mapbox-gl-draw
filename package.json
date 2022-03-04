@@ -18,7 +18,7 @@
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
-    "test": "NODE_ENV=test npm run lint && npm run tape",
+    "test": "NODE_ENV=test npm run lint",
     "lint": "eslint --no-eslintrc -c .eslintrc index.js src test",
     "tape": "tape -r @babel/register -r ./test/mock-browser.js test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
