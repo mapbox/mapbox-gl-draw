@@ -22,7 +22,6 @@ export default function(ctx) {
       ctx.ui.clearMapClasses();
       ctx.map = null;
       ctx.container = null;
-      ctx.store = null;
 
       if (controlContainer && controlContainer.parentNode) controlContainer.parentNode.removeChild(controlContainer);
       controlContainer = null;

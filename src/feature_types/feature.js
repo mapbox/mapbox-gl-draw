@@ -42,12 +42,13 @@ Feature.prototype.toGeoJSON = function() {
   }));
 };
 
-Feature.prototype.internal = function(mode) {
+Feature.prototype.internal = function(mode, isRectangle) {
   const properties = {
     id: this.id,
     meta: Constants.meta.FEATURE,
     'meta:type': this.type,
     active: Constants.activeStates.INACTIVE,
+    isRectangle,
     mode
   };
 
