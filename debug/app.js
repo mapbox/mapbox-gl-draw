@@ -1,16 +1,5 @@
 /* global mapboxgl, MapboxGeocoder, MapboxDraw */
 
-const StaticMode = {};
-
-StaticMode.onSetup = function() {
-  this.setActionableState(); // default actionable state is false for all actions
-  return {};
-};
-
-StaticMode.toDisplayFeatures = function(state, geojson, display) {
-  display(geojson);
-};
-
 // Parse the access_token out of the url
 const args = location.search.replace(/^\?/, '').split('&').reduce((o, param) => {
   const keyvalue = param.split('=');
@@ -34,7 +23,6 @@ map.addControl(new MapboxGeocoder({
 map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
 const modes = MapboxDraw.modes;
-modes.static = StaticMode;
 const Draw = window.Draw = new MapboxDraw({ modes });
 let drawIsActive = true;
 map.addControl(Draw, 'bottom-right');
