@@ -121,14 +121,17 @@ DirectSelect.onSetup = function(opts) {
   if (feature.type === Constants.geojsonTypes.POINT) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
-
+  let selectedCoordPaths = opts.coordPath ? [opts.coordPath] : [];
+  if (Array.isArray(opts.coordPath)) {
+    selectedCoordPaths = opts.coordPath;
+  }
   const state = {
     featureId,
     feature,
     dragMoveLocation: opts.startPos || null,
     dragMoving: false,
     canDragMove: false,
-    selectedCoordPaths: opts.coordPath ? [opts.coordPath] : []
+    selectedCoordPaths
   };
 
   this.setSelectedCoordinates(this.pathsToCoordinates(featureId, state.selectedCoordPaths));
