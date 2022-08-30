@@ -1,14 +1,6 @@
 var express = require('express');
 var app = express();
 
-app.get('/mapbox-gl.js', function(req, res) {
-  res.sendFile(__dirname+'/node_modules/mapbox-gl/dist/mapbox-gl.js');
-});
-
-app.get('/mapbox-gl.css', function(req, res) {
-    res.sendFile(__dirname+ '/node_modules/mapbox-gl/dist/mapbox-gl.css');
-});
-
 app.get('/bench/:name', function(req, res) {
     res.sendFile(__dirname + '/bench/index.html');
 });
