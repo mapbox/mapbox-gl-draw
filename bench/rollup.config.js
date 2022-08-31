@@ -14,12 +14,6 @@ export default {
     indent: false
   },
   treeshake: true,
-  external: [
-    // geojsonlint-lines has a main function that requires the path and fs module.
-    // We never call it.
-    'fs',
-    'path'
-  ],
   plugins: [
     json(),
     replace({
