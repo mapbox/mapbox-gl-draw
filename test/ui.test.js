@@ -1,6 +1,6 @@
 import test from 'tape';
 import ui from '../src/ui';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import spy from 'sinon/lib/sinon/spy.js'; // avoid babel-register-related error by importing only spy
 
 function createMockContext({ position, controls } = {}) {
   const container = document.createElement('div');

@@ -3,7 +3,7 @@ import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
 import buble from '@rollup/plugin-buble';
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import commonjs from '@rollup/plugin-commonjs';
 
 export default {
   input: ['bench/index.js'],
@@ -19,6 +19,7 @@ export default {
     replace({
       'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken),
       'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN),
+      preventAssignment: true
     }),
     buble({transforms: {dangerousForOf: true}, objectAssign: "Object.assign"}),
     resolve({

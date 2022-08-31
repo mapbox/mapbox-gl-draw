@@ -676,10 +676,10 @@ test('draw_line_string continue LineString mouseClick', (t) => {
       afterNextRender(() => {
         const line = Draw.getAll().features[0];
         t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12], [12, 12]], 'line continues from the end');
+
+        document.body.removeChild(container);
+        t.end();
       });
     });
   });
-
-  document.body.removeChild(container);
-  t.end();
 });
