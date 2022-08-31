@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import spy from 'sinon/lib/sinon/spy.js'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import modeHandler from '../src/lib/mode_handler';
 import createMockModeHandlerContext from './utils/create_mock_mode_handler_context';
 import createMockMode from './utils/create_mock_mode';

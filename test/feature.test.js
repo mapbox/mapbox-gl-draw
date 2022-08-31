@@ -1,5 +1,5 @@
 import test from 'tape';
-import spy from 'sinon/lib/sinon/spy.js'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import Feature from '../src/feature_types/feature';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';

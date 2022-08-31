@@ -1,4 +1,4 @@
-import spy from 'sinon/lib/sinon/spy.js'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 
 /**
  * Returns an mock ctx object with just those properties a Feature

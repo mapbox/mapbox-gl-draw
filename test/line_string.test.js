@@ -1,5 +1,5 @@
 import test from 'tape';
-import spy from 'sinon/lib/sinon/spy.js'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import Feature from '../src/feature_types/feature';
 import LineString from '../src/feature_types/line_string';
 import MapboxDraw from '../index';
