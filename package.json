@@ -13,7 +13,7 @@
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
     "test": "NODE_ENV=test npm run lint && npm run tape",
-    "lint": "eslint index.js src test",
+    "lint": "eslint index.js src test bench",
     "tape": "tape -r @babel/register -r ./test/mock-browser.js test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
     "build-token": "node build/generate-access-token-script.js",
