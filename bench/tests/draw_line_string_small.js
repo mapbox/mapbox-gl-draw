@@ -1,6 +1,6 @@
 'use strict';
 
-import {Evented} from 'mapbox-gl/src/util/evented';
+import Evented from '../lib/evented';
 import formatNumber from '../lib/format_number';
 import fpsRunner from '../lib/fps';
 import DrawMouse from '../lib/mouse_draw';
