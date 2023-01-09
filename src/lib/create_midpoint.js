@@ -1,4 +1,5 @@
 import * as Constants from '../constants';
+import { mercatorYfromLat, latFromMercatorY } from 'mapbox-gl/geo/mercator_coordinate'
 
 export default function(parent, startVertex, endVertex) {
   const startCoord = startVertex.geometry.coordinates;
@@ -15,7 +16,7 @@ export default function(parent, startVertex, endVertex) {
 
   const mid = {
     lng: (startCoord[0] + endCoord[0]) / 2,
-    lat: (startCoord[1] + endCoord[1]) / 2
+    lat: latFromMercatorY((mercatorYfromLat(startCoord[1]) + mercatorYfromLat(endCoord[1])) / 2)
   };
 
   return {
