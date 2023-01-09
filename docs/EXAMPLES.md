@@ -76,14 +76,15 @@ mapbox.Draw({
     },
     // polygon mid points
     {
-    'id': 'gl-draw-polygon-midpoint',
-    'type': 'circle',
-    'filter': ['all',
-      ['==', '$type', 'Point'],
-      ['==', 'meta', 'midpoint']],
-    'paint': {
-      'circle-radius': 3,
-      'circle-color': '#fbb03b'
+      'id': 'gl-draw-polygon-midpoint',
+      'type': 'circle',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['==', 'meta', 'midpoint']],
+      'paint': {
+        'circle-radius': 3,
+        'circle-color': '#fbb03b'
+      }
     },
     // polygon outline stroke
     // This doesn't style the first edge of the polygon, which uses the line stroke styling instead

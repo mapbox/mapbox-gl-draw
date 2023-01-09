@@ -1,5 +1,5 @@
 import test from 'tape';
-import stub from 'sinon/lib/sinon/stub'; // avoid babel-register-related error by importing only stub
+import {stub} from 'sinon';
 import featuresAt from '../src/lib/features_at';
 
 function createMockContext() {
