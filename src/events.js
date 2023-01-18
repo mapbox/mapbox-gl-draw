@@ -78,9 +78,6 @@ export default function(ctx) {
   };
 
   events.touchstart = function(event) {
-    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
-      event.originalEvent.preventDefault();
-    }
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -95,9 +92,6 @@ export default function(ctx) {
   };
 
   events.touchmove = function(event) {
-    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
-      event.originalEvent.preventDefault();
-    }
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -107,9 +101,6 @@ export default function(ctx) {
   };
 
   events.touchend = function(event) {
-    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
-      event.originalEvent.preventDefault();
-    }
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -228,9 +219,9 @@ export default function(ctx) {
       ctx.map.on('mouseup', events.mouseup);
       ctx.map.on('data', events.data);
 
-      ctx.map.on('touchmove', events.touchmove);
-      ctx.map.on('touchstart', events.touchstart);
-      ctx.map.on('touchend', events.touchend);
+      ctx.map.on('touchmove', events.touchmove, {passive:true});
+      ctx.map.on('touchstart', events.touchstart, {passive:true});
+      ctx.map.on('touchend', events.touchend, {passive:true});
 
       ctx.container.addEventListener('mouseout', events.mouseout);
 
