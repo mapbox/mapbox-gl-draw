@@ -78,6 +78,9 @@ export default function(ctx) {
   };
 
   events.touchstart = function(event) {
+    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
+      event.originalEvent.preventDefault();
+    }
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -92,6 +95,9 @@ export default function(ctx) {
   };
 
   events.touchmove = function(event) {
+    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
+      event.originalEvent.preventDefault();
+    }
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -101,6 +107,9 @@ export default function(ctx) {
   };
 
   events.touchend = function(event) {
+    if (!navigator.userAgent.match(/chrome|chromium|crios/i)) {
+      event.originalEvent.preventDefault();
+    }
     if (!ctx.options.touchEnabled) {
       return;
     }
