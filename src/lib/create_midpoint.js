@@ -1,6 +1,4 @@
 import * as Constants from '../constants';
-import {properties} from "sinon/lib/sinon/util/core/default-config";
-
 
 /**
  * Returns GeoJSON for a Point representing the
@@ -30,7 +28,7 @@ export default function(parent, startVertex, endVertex) {
     lat: (startCoord[1] + endCoord[1]) / 2
   };
 
-  const {id, ...rest} = properties;
+  const {id, ...rest} = parent.properties;
 
   return {
     type: Constants.geojsonTypes.FEATURE,
