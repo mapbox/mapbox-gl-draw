@@ -1,5 +1,17 @@
 import * as Constants from '../constants';
+import {properties} from "sinon/lib/sinon/util/core/default-config";
 
+
+/**
+ * Returns GeoJSON for a Point representing the
+ * midpoint of another feature.
+ *
+ * @param {GeoJSON} parent
+ * @param {GeoJSON} startVertex
+ * @param {GeoJSON} endVertex
+ * @param {Object} map
+ * @return {GeoJSON} Point
+ */
 export default function(parent, startVertex, endVertex) {
   const startCoord = startVertex.geometry.coordinates;
   const endCoord = endVertex.geometry.coordinates;
@@ -18,11 +30,14 @@ export default function(parent, startVertex, endVertex) {
     lat: (startCoord[1] + endCoord[1]) / 2
   };
 
+  const {id, ...rest} = properties;
+
   return {
     type: Constants.geojsonTypes.FEATURE,
     properties: {
+      ...rest,
       meta: Constants.meta.MIDPOINT,
-      parent,
+      parent: {id, ...rest},
       lng: mid.lng,
       lat: mid.lat,
       coord_path: endVertex.properties.coord_path

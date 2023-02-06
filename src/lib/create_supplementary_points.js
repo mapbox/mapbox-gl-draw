@@ -4,13 +4,12 @@ import * as Constants from '../constants';
 
 function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   const { type, coordinates } = geojson.geometry;
-  const featureId = geojson.properties && geojson.properties.id;
 
   let supplementaryPoints = [];
 
   if (type === Constants.geojsonTypes.POINT) {
     // For points, just create a vertex
-    supplementaryPoints.push(createVertex(featureId, coordinates, basePath, isSelectedPath(basePath)));
+    supplementaryPoints.push(createVertex(geojson, coordinates, basePath, isSelectedPath(basePath)));
   } else if (type === Constants.geojsonTypes.POLYGON) {
     // Cycle through a Polygon's rings and
     // process each line
@@ -28,13 +27,13 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
     let lastVertex = null;
     line.forEach((point, pointIndex) => {
       const pointPath = (lineBasePath !== undefined && lineBasePath !== null) ? `${lineBasePath}.${pointIndex}` : String(pointIndex);
-      const vertex = createVertex(featureId, point, pointPath, isSelectedPath(pointPath));
+      const vertex = createVertex(geojson, point, pointPath, isSelectedPath(pointPath));
 
       // If we're creating midpoints, check if there was a
       // vertex before this one. If so, add a midpoint
       // between that vertex and this one.
       if (options.midpoints && lastVertex) {
-        const midpoint = createMidpoint(featureId, lastVertex, vertex);
+        const midpoint = createMidpoint(geojson, lastVertex, vertex);
         if (midpoint) {
           supplementaryPoints.push(midpoint);
         }
