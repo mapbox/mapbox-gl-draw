@@ -35,7 +35,7 @@ export default function(parent, startVertex, endVertex) {
     properties: {
       ...rest,
       meta: Constants.meta.MIDPOINT,
-      parent: {id, ...rest},
+      parent: parent.properties && parent.properties.id,
       lng: mid.lng,
       lat: mid.lat,
       coord_path: endVertex.properties.coord_path

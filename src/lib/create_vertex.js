@@ -19,7 +19,7 @@ export default function(parent, coordinates, path, selected) {
     properties: {
       ...rest,
       meta: Constants.meta.VERTEX,
-      parent: {id, ...rest},
+      parent: parent.properties && parent.properties.id,
       coord_path: path,
       active: (selected) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE
     },
