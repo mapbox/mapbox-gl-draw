@@ -12,14 +12,14 @@ import * as Constants from '../constants';
  * @return {GeoJSON} Point
  */
 export default function(parent, coordinates, path, selected) {
-  const {id, ...rest} = parent.properties;
+  const {id, ...rest} = (parent?.properties ?? {});
 
   return {
     type: Constants.geojsonTypes.FEATURE,
     properties: {
       ...rest,
       meta: Constants.meta.VERTEX,
-      parent: {id, ...rest},
+      parent: parent?.properties && id,
       coord_path: path,
       active: (selected) ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE
     },
