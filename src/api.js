@@ -4,6 +4,7 @@ import hat from 'hat';
 import featuresAt from './lib/features_at';
 import stringSetsAreEqual from './lib/string_sets_are_equal';
 import * as Constants from './constants';
+import events from './events';
 import StringSet from './lib/string_set';
 
 import Polygon from './feature_types/polygon';
@@ -21,6 +22,7 @@ const featureTypes = {
 };
 
 export default function(ctx, api) {
+  ctx.events = events(ctx);
 
   api.modes = Constants.modes;
 
