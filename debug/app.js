@@ -106,9 +106,5 @@ map.on('load', () => {
     Draw.changeMode('static');
   };
 
-  map.on('draw.update', (e) => {
-    console.log('draw.update', e.features);
-  });
-
 });
 
