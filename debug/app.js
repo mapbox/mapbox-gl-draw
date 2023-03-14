@@ -28,7 +28,8 @@ const map = new mapboxgl.Map({
 });
 
 map.addControl(new MapboxGeocoder({
-  accessToken: mapboxgl.accessToken
+  accessToken: mapboxgl.accessToken,
+  mapboxgl
 }));
 
 map.addControl(new mapboxgl.NavigationControl(), 'top-left');
@@ -105,4 +106,9 @@ map.on('load', () => {
     Draw.changeMode('static');
   };
 
+  map.on('draw.update', (e) => {
+    console.log('draw.update', e.features);
+  });
+
 });
+
