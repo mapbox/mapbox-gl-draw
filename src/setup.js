@@ -64,7 +64,7 @@ export default function(ctx) {
       controlContainer = ctx.ui.addButtons();
 
       if (ctx.options.boxSelect) {
-        ctx.boxZoomInitial = map.boxZoom._enabled;
+        ctx.boxZoomInitial = map.boxZoom.isEnabled();
         map.boxZoom.disable();
         // Need to toggle dragPan on and off or else first
         // dragPan disable attempt in simple_select doesn't work
