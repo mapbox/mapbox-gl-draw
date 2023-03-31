@@ -6,6 +6,8 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 **Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js).**
 
+**If you are developing with `mapbox-gl-draw`, see [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md) for documentation.**
+
 ### Installing
 
 ```
