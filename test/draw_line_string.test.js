@@ -1,6 +1,6 @@
 import test from 'tape';
 import xtend from 'xtend';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
@@ -676,10 +676,10 @@ test('draw_line_string continue LineString mouseClick', (t) => {
       afterNextRender(() => {
         const line = Draw.getAll().features[0];
         t.deepEqual(line.geometry.coordinates, [[-1, -1], ...coordinates, [12, 12], [12, 12]], 'line continues from the end');
+
+        document.body.removeChild(container);
+        t.end();
       });
     });
   });
-
-  document.body.removeChild(container);
-  t.end();
 });

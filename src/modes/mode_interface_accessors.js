@@ -23,7 +23,7 @@ ModeInterface.prototype.setSelected = function(features) {
 /**
  * Sets Draw's internal selected coordinate state
  * @name this.setSelectedCoordinates
- * @param {Object[]} coords - a array of {coord_path: 'string', featureId: 'string'}
+ * @param {Object[]} coords - a array of {coord_path: 'string', feature_id: 'string'}
  */
 ModeInterface.prototype.setSelectedCoordinates = function(coords) {
   this._ctx.store.setSelectedCoordinates(coords);

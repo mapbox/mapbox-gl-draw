@@ -1,7 +1,7 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import MapboxDraw from '../';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import MapboxDraw from '../index';
+import {spy} from 'sinon';
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import mouseClick from './utils/mouse_click';
@@ -10,6 +10,7 @@ import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 import createSyntheticEvent from 'synthetic-dom-events';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import { TAP_INTERVAL, TAP_TOLERANCE } from '../src/lib/is_tap';
 
 test('simple_select', (t) => {
   const context = createMockDrawModeContext();
@@ -559,6 +560,28 @@ test('simple_select', (t) => {
     cleanUp(t.end);
   });
 
+  t.test('simple_select - fire one update after moving point with touch', (t) => {
+    const pointId = Draw.add(getGeoJSON('point'))[0];
+    Draw.changeMode('simple_select', { featureIds: [pointId] });
+    const startPosition = getGeoJSON('point').geometry.coordinates;
+    const endPosition = [startPosition[0] + TAP_TOLERANCE, startPosition[1] + TAP_TOLERANCE];
+    afterNextRender(() => {
+      map.fire.resetHistory();
+      map.doubleClickZoom.disable.resetHistory();
+      map.fire('touchstart', makeTouchEvent(startPosition[0], startPosition[1]));
+      setTimeout(() => {
+        map.fire('touchmove', makeTouchEvent(endPosition[0], endPosition[1]));
+        map.fire('touchend', makeTouchEvent(endPosition[0], endPosition[1]));
+
+        const movedPoint = Draw.get(pointId);
+        const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
+        t.equal(args.length, 1, 'draw.update called once');
+        t.equal(movedPoint.geometry.coordinates[0], endPosition[0], 'point lng moved to the last touchmove position');
+        t.equal(movedPoint.geometry.coordinates[1], endPosition[1], 'point lat moved the last touchmove position');
+        cleanUp(t.end);
+      }, TAP_INTERVAL);
+    });
+  });
   document.body.removeChild(mapContainer);
 
   t.end();

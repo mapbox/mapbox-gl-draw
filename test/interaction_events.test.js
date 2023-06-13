@@ -2,8 +2,8 @@
 
 import test from 'tape';
 import xtend from 'xtend';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
-import MapboxDraw from '../';
+import {spy} from 'sinon';
+import MapboxDraw from '../index';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
 import createAfterNextRender from './utils/after_next_render';

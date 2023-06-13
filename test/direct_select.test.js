@@ -1,12 +1,12 @@
 /* eslint no-shadow:[0] */
 import turfCentroid from '@turf/centroid';
 import test from 'tape';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import click from './utils/mouse_click';
 import tap from './utils/touch_tap';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import setupAfterNextRender from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import makeTouchEvent from './utils/make_touch_event';

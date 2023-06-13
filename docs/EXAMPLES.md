@@ -10,7 +10,9 @@ With this style, all Point features are blue and have a black halo when active.
 No other features are rendered, even if they are present.
 
 ```js
-mapbox.Draw({
+var draw = new MapboxDraw({
+  // other draw options here
+  // ...
   styles: [
     {
       'id': 'highlight-active-points',
@@ -45,7 +47,9 @@ mapbox.Draw({
 With this style, all line and polygon features are have dashed red outline and transparent fill while being drawn, including the point vertices. When the Draw mode is changed the 'static', these features will be drawn with solid black outline and transparent fill. Point vertices use the same point filter, and render these points twice: once as a larger-radius halo, and again as the vertex inset point.
 
 ```js
-mapbox.Draw({
+var draw = new MapboxDraw({
+  // other draw options here
+  // ...
   styles: [
     // ACTIVE (being drawn)
     // line stroke
@@ -72,6 +76,18 @@ mapbox.Draw({
         "fill-color": "#D20C0C",
         "fill-outline-color": "#D20C0C",
         "fill-opacity": 0.1
+      }
+    },
+    // polygon mid points
+    {
+      'id': 'gl-draw-polygon-midpoint',
+      'type': 'circle',
+      'filter': ['all',
+        ['==', '$type', 'Point'],
+        ['==', 'meta', 'midpoint']],
+      'paint': {
+        'circle-radius': 3,
+        'circle-color': '#fbb03b'
       }
     },
     // polygon outline stroke

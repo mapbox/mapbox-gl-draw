@@ -1,4 +1,37 @@
-## Changelog
+# Changelog
+
+## 1.4.1
+
+* Revert use of passive event listeners instead of `preventDefault` in https://github.com/mapbox/mapbox-gl-draw/pull/1158
+
+## 1.4.0
+
+* Reduce NPM package size and big dependency and dev environment cleanup by @mourner in https://github.com/mapbox/mapbox-gl-draw/pull/1119 https://github.com/mapbox/mapbox-gl-draw/pull/1053
+* Add Bezier Curve mode by @Jeff-Numix in https://github.com/mapbox/mapbox-gl-draw/pull/1068
+* Update control buttons styles by @chriswhong in https://github.com/mapbox/mapbox-gl-draw/pull/1125
+* Use passive event listeners instead of `preventDefault` by @danielsippel in https://github.com/mapbox/mapbox-gl-draw/pull/1146
+* Adding sorting rank value for MultiLineString by @zhangchn in https://github.com/mapbox/mapbox-gl-draw/pull/1142
+* Expose constants and lib APIs to make it easier to write custom draw modes by @thaddmt in https://github.com/mapbox/mapbox-gl-draw/pull/1100
+
+## 1.3.0
+
+- ⚠️ Removed GeoJSON validation in `draw.add` — responsibility for valid input is now on the user. #1052
+- Fixed NPM security warnings about dependencies. #1052
+- Fixed midpoint calculation when terrain is enabled. #1039
+- Reduced the size of the plugin's CSS code from 33KB to 5KB. #1038 (h/t @johanrd)
+- Fixed `simple_select` mode handling on touch devices. #1008 (h/t @corinv)
+
+## 1.2.2
+
+### Bug Fixes:
+- Fix midpoint calculation when using mapbox-gl-draw with 3d terrain
+
+## 1.2.1
+
+### Bug Fixes:
+- Upgrade `peerDependencies` to allow `mapbox-gl@2.0.0+` to be used with gl-draw.
+- Update `package.json` so that usage of library from npm always results in pulling in the built bundle.
+- Remove `require()`'ing of unsed node builtins like `fs` and `path` from the bundle.
 
 ## 1.2.0
 

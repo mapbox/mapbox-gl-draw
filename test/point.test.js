@@ -1,8 +1,8 @@
 import test from 'tape';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import Feature from '../src/feature_types/feature';
 import Point from '../src/feature_types/point';
-import MapboxDraw from '../';
+import MapboxDraw from '../index';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
