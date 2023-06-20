@@ -7,6 +7,7 @@ import modes from './modes/index';
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
+  className: '',
   touchEnabled: true,
   clickBuffer: 2,
   touchBuffer: 25,

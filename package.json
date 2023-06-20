@@ -1,13 +1,13 @@
 {
-  "name": "@mapbox/mapbox-gl-draw",
+  "name": "@hyvilo/maplibre-gl-draw",
   "version": "1.4.1",
-  "description": "A drawing component for Mapbox GL JS",
+  "description": "A drawing component for Maplibre GL JS",
   "homepage": "https://github.com/mapbox/mapbox-gl-draw",
-  "author": "mapbox",
+  "author": "hyvilo",
   "license": "ISC",
-  "main": "dist/mapbox-gl-draw.js",
-  "browser": "dist/mapbox-gl-draw.js",
-  "style": "dist/mapbox-gl-draw.css",
+  "main": "dist/maplibre-gl-draw.js",
+  "browser": "dist/maplibre-gl-draw.js",
+  "style": "dist/maplibre-gl-draw.css",
   "scripts": {
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
@@ -26,20 +26,20 @@
     "start": "run-p build-token watch watch-bench start-server"
   },
   "files": [
-    "dist/mapbox-gl-draw*"
+    "dist/maplibre-gl-draw*"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/mapbox/mapbox-gl-draw.git"
+    "url": "git://github.com/hyvilo/maplibre-gl-draw.git"
   },
   "keywords": [
     "webgl",
-    "mapbox",
+    "maplibre",
     "draw",
     "drawing"
   ],
   "bugs": {
-    "url": "https://github.com/mapbox/mapbox-gl-draw/issues"
+    "url": "https://github.com/hyvilo/maplibre-gl-draw/issues"
   },
   "nyc": {
     "sourceMap": false,

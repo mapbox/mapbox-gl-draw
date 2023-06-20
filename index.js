@@ -24,13 +24,13 @@ const setupDraw = function(options, api) {
   return api;
 };
 
-function MapboxDraw(options) {
+function MapLibreDraw(options) {
   setupDraw(options, this);
 }
 
 import modes from './src/modes/index';
-MapboxDraw.modes = modes;
-MapboxDraw.constants = Constants;
-MapboxDraw.lib = lib;
+MapLibreDraw.modes = modes;
+MapLibreDraw.constants = Constants;
+MapLibreDraw.lib = lib;
 
-export default MapboxDraw;
+export default MapLibreDraw;

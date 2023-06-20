@@ -1,6 +1,6 @@
 const {MINIFY} = process.env;
 const minified = MINIFY === 'true';
-const outputFile = minified ? 'dist/mapbox-gl-draw.js' : 'dist/mapbox-gl-draw-unminified.js';
+const outputFile = minified ? 'dist/maplibre-gl-draw.js' : 'dist/maplibre-gl-draw-unminified.js';
 
 import replace from '@rollup/plugin-replace';
 import buble from '@rollup/plugin-buble';
@@ -11,7 +11,7 @@ import commonjs from '@rollup/plugin-commonjs';
 export default {
   input: ['index.js'],
   output: {
-    name: 'MapboxDraw',
+    name: 'MapLibreDraw',
     file: outputFile,
     format: 'umd',
     sourcemap: true,
