@@ -183,10 +183,15 @@ DirectSelect.onMouseMove = function(state, e) {
   // On mousemove that is not a drag, stop vertex movement.
   const isFeature = isActiveFeature(e);
   const onVertex = isVertex(e);
+  const isMidPoint = isMidpoint(e);
   const noCoords = state.selectedCoordPaths.length === 0;
   if (isFeature && noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else if (onVertex && !noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else this.updateUIClasses({ mouse: Constants.cursors.NONE });
+
+  const isDraggableItem = onVertex || isFeature || isMidPoint;
+  if (isDraggableItem && state.dragMoving) this.fireUpdate();
+
   this.stopDragging(state);
 
   // Skip render

@@ -82,6 +82,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Scale/Rotate Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-scale-rotate-mode): Scale and Rotate polygons and lines
 -   [Waypoint Mode](https://github.com/zakjan/mapbox-gl-draw-waypoint): Allow user to drag vertices only, prevent dragging features
 -   [Bezier Curve Mode](https://github.com/Jeff-Numix/mapbox-gl-draw-bezier-curve-mode): Draw and edit bezier curves
+-   [Paint Mode](https://github.com/piraveenankirupakaran/mapbox-gl-draw-paint-mode): Allows users to paint freestyle on the map
 
 
 ## Life Cycle Functions

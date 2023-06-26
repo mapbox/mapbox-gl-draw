@@ -78,6 +78,9 @@ export default function(ctx) {
   };
 
   events.touchstart = function(event) {
+    // Prevent emulated mouse events because we will fully handle the touch here.
+    // This does not stop the touch events from propogating to mapbox though.
+    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -92,6 +95,7 @@ export default function(ctx) {
   };
 
   events.touchmove = function(event) {
+    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -101,6 +105,7 @@ export default function(ctx) {
   };
 
   events.touchend = function(event) {
+    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -122,7 +127,8 @@ export default function(ctx) {
   const isKeyModeValid = code => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    if ((event.srcElement || event.target).classList[0] !== 'mapboxgl-canvas') return; // we only handle events on the map
+    const isMapElement = (event.srcElement || event.target).classList.contains('mapboxgl-canvas');
+    if (!isMapElement) return; // we only handle events on the map
 
     if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
       event.preventDefault();
@@ -219,9 +225,9 @@ export default function(ctx) {
       ctx.map.on('mouseup', events.mouseup);
       ctx.map.on('data', events.data);
 
-      ctx.map.on('touchmove', events.touchmove, {passive:true});
-      ctx.map.on('touchstart', events.touchstart, {passive:true});
-      ctx.map.on('touchend', events.touchend, {passive:true});
+      ctx.map.on('touchmove', events.touchmove);
+      ctx.map.on('touchstart', events.touchstart);
+      ctx.map.on('touchend', events.touchend);
 
       ctx.container.addEventListener('mouseout', events.mouseout);
 

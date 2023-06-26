@@ -6,6 +6,8 @@ Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapb
 
 **Requires [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js).**
 
+**If you are developing with `mapbox-gl-draw`, see [API.md](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md) for documentation.**
+
 ### Installing
 
 ```
@@ -28,7 +30,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 **When using a CDN**
 
 ```html
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.js'></script>
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.1/mapbox-gl-draw.js'></script>
 ```
 
 #### CSS
@@ -40,7 +42,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 
 **When using CDN**
 ```html
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.3.0/mapbox-gl-draw.css' type='text/css' />
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.1/mapbox-gl-draw.css' type='text/css' />
 ```
 
 ### Typescript
@@ -58,7 +60,7 @@ mapboxgl.accessToken = 'YOUR_ACCESS_TOKEN';
 
 var map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/streets-v11',
+  style: 'mapbox://styles/mapbox/streets-v12',
   center: [40, -74.50],
   zoom: 9
 });
