@@ -132,7 +132,7 @@ var draw = new MapboxDraw({
     {
         "id": "gl-draw-line-static",
         "type": "line",
-        "filter": ["all", ["==", "$type", "LineString"], ["==", "mode", "static"]],
+        "filter": ["all", ["==", "$type", "LineString"], ['==', 'active', 'false']],
         "layout": {
           "line-cap": "round",
           "line-join": "round"
@@ -146,7 +146,7 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-fill-static",
       "type": "fill",
-      "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+      "filter": ["all", ["==", "$type", "Polygon"], ['==', 'active', 'false']],
       "paint": {
         "fill-color": "#000",
         "fill-outline-color": "#000",
@@ -157,7 +157,7 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-stroke-static",
       "type": "line",
-      "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
+      "filter": ["all", ["==", "$type", "Polygon"], ['==', 'active', 'false']],
       "layout": {
         "line-cap": "round",
         "line-join": "round"
