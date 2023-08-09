@@ -20,6 +20,7 @@ export default function(ctx) {
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.ui.clearMapClasses();
+      if (ctx.boxZoomInitial) ctx.map.boxZoom.enable();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
@@ -64,7 +65,7 @@ export default function(ctx) {
 
       if (ctx.options.boxSelect) {
         const dragPanState = map.dragPan.isEnabled();
-
+        ctx.boxZoomInitial = map.boxZoom.isEnabled();
         map.boxZoom.disable();
         if (!dragPanState) {
           // Need to toggle dragPan on and off or else first

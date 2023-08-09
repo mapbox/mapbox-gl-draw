@@ -119,7 +119,7 @@ function createMap(options) {
 
   const map = new mapboxgl.Map(Object.assign({
     container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v8'
+    style: 'mapbox://styles/mapbox/streets-v12'
   }, options));
 
   const draw = new MapboxDraw(options);
