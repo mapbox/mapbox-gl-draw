@@ -7,6 +7,16 @@ class MockMap extends Evented {
     super();
 
     this.sources = {};
+    this.style = {
+      _layers: {},
+      getLayer: id => this.style._layers[id],
+      addSource: (id, source) => {
+        this.style._layers[id] = source;
+      },
+      removeSource: (id) => {
+        delete this.style._layers[id];
+      },
+    };
     this.options = {
       container: document.createElement('div'),
       ...options
@@ -39,6 +49,7 @@ class MockMap extends Evented {
   }
 
   addSource(name, source) {
+    this.style.addSource(name, source);
     this.sources[name] = source;
   }
   removeSource(name) {
