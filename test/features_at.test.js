@@ -5,7 +5,7 @@ import * as Constants from '../src/constants';
 import setupOptions from '../src/options';
 
 /**
- * Copy of the addLayers function in setup
+ * Mock of the addLayers function in setup
  */
 function addLayers(ctx) {
   // drawn features style
@@ -72,7 +72,7 @@ function addLayers(ctx) {
 }
 
 /**
- * Setup mock context to match mapbox gl's map in a simplified manner
+ * Mock context with a simplified mapbox-gl-js map (including some source/style/layer interactions)
  */
 function createMockContext() {
   const _layers = {};
@@ -131,6 +131,7 @@ function createMockContext() {
         style.removeSource(id);
         delete sources[id];
       },
+      getLayer: id => style.getLayer(id),
       addLayer: (layer) => {
         style.addLayer(layer);
       },

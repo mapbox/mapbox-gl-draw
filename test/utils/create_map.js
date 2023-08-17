@@ -44,6 +44,10 @@ class MockMap extends Evented {
     return true;
   }
 
+  getLayer(id) {
+    return this.style.getLayer(id);
+  }
+
   getContainer() {
     return this.options.container;
   }
@@ -66,7 +70,6 @@ class MockMap extends Evented {
   }
 
   addLayer() {}
-  getLayer() {}
 
   queryRenderedFeatures([p0, p1]) {
     if (!Array.isArray(p0)) p0 = [p0.x, p0.y];
