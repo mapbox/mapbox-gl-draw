@@ -94,6 +94,9 @@ export default function(ctx, api) {
         // If a feature of that id has already been created, and we are swapping it out ...
         const internalFeature = ctx.store.get(feature.id);
         internalFeature.properties = feature.properties;
+        if (!isEqual(internalFeature.properties, feature.properties)) {
+          ctx.store.featureChanged(internalFeature.id);
+        }
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);
         }
