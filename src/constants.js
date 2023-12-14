@@ -1,4 +1,5 @@
 export const classes = {
+  CANVAS: 'mapboxgl-canvas',
   CONTROL_BASE: 'mapboxgl-ctrl',
   CONTROL_PREFIX: 'mapboxgl-ctrl-',
   CONTROL_BUTTON: 'mapbox-gl-draw_ctrl-draw-btn',
