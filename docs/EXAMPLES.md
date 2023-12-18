@@ -44,7 +44,7 @@ var draw = new MapboxDraw({
 
 ### lines and polygons
 
-With this style, all line and polygon features are have dashed red outline and transparent fill while being drawn, including the point vertices. When the Draw mode is changed the 'static', these features will be drawn with solid black outline and transparent fill. Point vertices use the same point filter, and render these points twice: once as a larger-radius halo, and again as the vertex inset point.
+With this style, all line and polygon features are have dashed red outline and transparent fill while being drawn, including the point vertices. Point vertices use the same point filter, and render these points twice: once as a larger-radius halo, and again as the vertex inset point.
 
 ```js
 var draw = new MapboxDraw({
@@ -56,7 +56,7 @@ var draw = new MapboxDraw({
     {
         "id": "gl-draw-line",
         "type": "line",
-        "filter": ["all", ["==", "$type", "LineString"], ["!=", "mode", "static"]],
+        "filter": ["all", ["==", "$type", "LineString"]],
         "layout": {
           "line-cap": "round",
           "line-join": "round"
@@ -71,7 +71,7 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-fill",
       "type": "fill",
-      "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+      "filter": ["all", ["==", "$type", "Polygon"]],
       "paint": {
         "fill-color": "#D20C0C",
         "fill-outline-color": "#D20C0C",
@@ -95,7 +95,7 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-stroke-active",
       "type": "line",
-      "filter": ["all", ["==", "$type", "Polygon"], ["!=", "mode", "static"]],
+      "filter": ["all", ["==", "$type", "Polygon"]],
       "layout": {
         "line-cap": "round",
         "line-join": "round"
@@ -110,7 +110,7 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-and-line-vertex-halo-active",
       "type": "circle",
-      "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+      "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"]],
       "paint": {
         "circle-radius": 5,
         "circle-color": "#FFF"
@@ -120,51 +120,10 @@ var draw = new MapboxDraw({
     {
       "id": "gl-draw-polygon-and-line-vertex-active",
       "type": "circle",
-      "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"], ["!=", "mode", "static"]],
+      "filter": ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"]],
       "paint": {
         "circle-radius": 3,
         "circle-color": "#D20C0C",
-      }
-    },
-
-    // INACTIVE (static, already drawn)
-    // line stroke
-    {
-        "id": "gl-draw-line-static",
-        "type": "line",
-        "filter": ["all", ["==", "$type", "LineString"], ["==", "mode", "static"]],
-        "layout": {
-          "line-cap": "round",
-          "line-join": "round"
-        },
-        "paint": {
-          "line-color": "#000",
-          "line-width": 3
-        }
-    },
-    // polygon fill
-    {
-      "id": "gl-draw-polygon-fill-static",
-      "type": "fill",
-      "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
-      "paint": {
-        "fill-color": "#000",
-        "fill-outline-color": "#000",
-        "fill-opacity": 0.1
-      }
-    },
-    // polygon outline
-    {
-      "id": "gl-draw-polygon-stroke-static",
-      "type": "line",
-      "filter": ["all", ["==", "$type", "Polygon"], ["==", "mode", "static"]],
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-color": "#000",
-        "line-width": 3
       }
     }
   ]

@@ -35,6 +35,7 @@ export default function render() {
     const feature = store.get(id);
     const featureInternal = feature.internal(mode);
     store.ctx.events.currentModeRender(featureInternal, (geojson) => {
+      geojson.properties.mode = mode;
       store.sources[source].push(geojson);
     });
   }
