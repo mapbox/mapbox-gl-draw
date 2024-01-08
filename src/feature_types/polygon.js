@@ -47,12 +47,16 @@ Polygon.prototype.removeCoordinate = function(path) {
 
 Polygon.prototype.getCoordinate = function(path) {
   const ids = path.split('.').map(x => parseInt(x, 10));
-  const ring = this.coordinates[ids[0]];
+  const coords = this.coordinates[ids[0]];
+  const ring = coords.concat([coords[0]]);
   return JSON.parse(JSON.stringify(ring[ids[1]]));
 };
 
 Polygon.prototype.getCoordinates = function() {
-  return this.coordinates.map(coords => coords.concat([coords[0]]));
+  return this.coordinates.map((coords) => {
+    const ring = coords.concat([coords[0]]);
+    return ring;
+  });
 };
 
 Polygon.prototype.updateCoordinate = function(path, lng, lat) {
