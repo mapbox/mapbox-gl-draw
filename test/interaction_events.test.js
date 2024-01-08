@@ -373,8 +373,20 @@ function runTests() {
         action: 'change_coordinates',
         features: [lineD]
       });
+      firedWith(t, 'draw.selectionchange', {
+        points: [{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [41, 21]
+          }
+        }],
+        features: [lineD]
+      });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
@@ -677,8 +689,20 @@ function runTests() {
         action: 'change_coordinates',
         features: [polygonD]
       });
+      firedWith(t, 'draw.selectionchange', {
+        points: [{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [25, 10]
+          }
+        }],
+        features: [polygonD]
+      });
       t.deepEqual(flushDrawEvents(), [
-        'draw.update'
+        'draw.update',
+        'draw.selectionchange'
       ], 'no unexpected draw events');
       t.end();
     });
