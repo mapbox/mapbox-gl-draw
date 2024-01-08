@@ -128,7 +128,7 @@ export default function(ctx) {
     const isMapElement = (event.srcElement || event.target).classList.contains('mapboxgl-canvas');
     if (!isMapElement) return; // we only handle events on the map
 
-    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
+    if (event.keyCode === 8 || event.keyCode === 46) {
       event.preventDefault();
       currentMode.trash();
     } else if (isKeyModeValid(event.keyCode)) {
