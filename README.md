@@ -1,6 +1,6 @@
 # @mapbox/mapbox-gl-draw
 
-[![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=main)](https://travis-ci.org/mapbox/mapbox-gl-draw)
+![Build Status](https://github.com/mapbox/mapbox-gl-draw/actions/workflows/main.yml/badge.svg)
 
 Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps. [See a live example here](https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/)
 
