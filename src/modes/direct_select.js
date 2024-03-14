@@ -133,7 +133,6 @@ DirectSelect.onSetup = function(opts) {
     dragMoving: false,
     canDragMove: false,
     selectedCoordPaths: opts.coordPath ? [opts.coordPath] : [],
-    desiredDragPanState: null
   };
 
   this.setSelectedCoordinates(this.pathsToCoordinates(featureId, state.selectedCoordPaths));
