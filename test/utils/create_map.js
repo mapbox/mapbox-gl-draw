@@ -1,65 +1,110 @@
-import mapboxgl from 'mapbox-gl-js-mock';
 import { interactions } from '../../src/constants';
+import Evented from '../../bench/lib/evented';
+import bboxClip from '@turf/bbox-clip';
 
-export default function createMap(mapOptions = {}) {
+class MockMap extends Evented {
+  constructor(options = {}) {
+    super();
 
-  const map = new mapboxgl.Map(Object.assign({
-    container: document.createElement('div'),
-    style: 'mapbox://styles/mapbox/streets-v8'
-  }, mapOptions));
-  // Some mock project/unproject functions
-  map.project = ([y, x]) => ({ x, y });
-  map.unproject = ([x, y]) => ({ lng: y, lat: x });
-  if (mapOptions.container) {
-    map.getContainer = () => mapOptions.container;
+    this.sources = {};
+    this.style = {
+      _layers: {},
+      getLayer: id => this.style._layers[id],
+      addSource: (id, source) => {
+        this.style._layers[id] = source;
+      },
+      removeSource: (id) => {
+        delete this.style._layers[id];
+      },
+    };
+    this.options = {
+      container: document.createElement('div'),
+      ...options
+    };
+
+    for (const interaction of interactions) {
+      this[interaction] = {
+        enabled: true,
+        disable() { this.enabled = false; },
+        enable() { this.enabled = true; },
+        isEnabled() { return this.enabled; },
+      };
+    }
+
+    setTimeout(() => {
+      this.fire('load');
+    }, 0);
   }
 
-  // Mock up the interaction functions
-  interactions.forEach((interaction) => {
-    map[interaction] = {
-      enabled: true,
-      disable () { this.enabled = false; },
-      enable () { this.enabled = true; },
-      isEnabled () { return this.enabled; },
-    };
-  });
+  addControl(control) {
+    control.onAdd(this);
+  }
 
-  map.getCanvas = function() {
-    return map.getContainer();
-  };
+  loaded() {
+    return true;
+  }
 
-  let classList = [];
-  const container = map.getContainer();
-  container.classList.add = function(names) {
-    names = names || '';
-    names.split(' ').forEach((name) => {
-      if (classList.indexOf(name) === -1) {
-        classList.push(name);
-      }
-    });
-    container.className = classList.join(' ');
-  };
+  getLayer(id) {
+    return this.style.getLayer(id);
+  }
 
-  container.classList.remove = function(names) {
-    names = names || '';
-    names.split(' ').forEach((name) => {
-      classList = classList.filter(n => n !== name);
-    });
-    container.className = classList.join(' ');
-  };
+  getContainer() {
+    return this.options.container;
+  }
 
-  container.className = classList.join(' ');
-
-  container.getBoundingClientRect = function() {
+  addSource(name, source) {
+    this.style.addSource(name, source);
+    this.sources[name] = source;
+  }
+  removeSource(name) {
+    delete this.sources[name];
+  }
+  getSource(name) {
+    const source = this.sources[name];
     return {
-      left: 0,
-      top: 0
+      ...source,
+      setData(data) {
+        source.data = data;
+      }
     };
-  };
+  }
 
-  map.getContainer = function() {
-    return container;
-  };
+  addLayer() {}
 
-  return map;
+  queryRenderedFeatures([p0, p1]) {
+    if (!Array.isArray(p0)) p0 = [p0.x, p0.y];
+    if (!Array.isArray(p1)) p1 = [p1.x, p1.y];
+    const minX = Math.min(p0[0], p1[0]);
+    const minY = Math.min(p0[1], p1[1]);
+    const maxX = Math.max(p0[0], p1[0]);
+    const maxY = Math.max(p0[1], p1[1]);
+    const bbox = [minX, minY, maxX, maxY];
+    const features = [];
+
+    for (const source of Object.values(this.sources)) {
+      for (const feature of source.data.features) {
+        if (feature.geometry.type === 'Point') {
+          const [x, y] = feature.geometry.coordinates;
+          if (x >= minX && x <= maxX && y >= minY && y <= maxY) features.push(feature);
+
+        } else if (feature.geometry.type === 'MultiPoint') {
+          for (const [x, y] of feature.geometry.coordinates) {
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+              features.push(feature);
+              break;
+            }
+          }
+
+        } else {
+          const clipped = bboxClip(feature, bbox);
+          if (clipped.geometry.coordinates.length) features.push(feature);
+        }
+      }
+    }
+    return features;
+  }
+}
+
+export default function createMap(mapOptions) {
+  return new MockMap(mapOptions);
 }

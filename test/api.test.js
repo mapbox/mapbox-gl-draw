@@ -1,6 +1,6 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
-import spy from 'sinon/lib/sinon/spy'; // avoid babel-register-related error by importing only spy
+import {spy} from 'sinon';
 import * as Constants from '../src/constants';
 import MapboxDraw from '../index';
 import createMap from './utils/create_map';

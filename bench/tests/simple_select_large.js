@@ -1,6 +1,6 @@
 'use strict';
 
-import {Evented} from 'mapbox-gl/src/util/evented';
+import Evented from '../lib/evented';
 import SouthAmerica from '../fixtures/south-america.json';
 import formatNumber from '../lib/format_number';
 import fpsRunner from '../lib/fps';
