@@ -15,7 +15,9 @@ const defaultOptions = {
   styles,
   modes,
   controls: {},
-  userProperties: false
+  userProperties: false,
+  coldSourceOptions: {},
+  hotSourceOptions: {}
 };
 
 const showControls = {
