@@ -60,7 +60,7 @@
     "@turf/bbox-clip": "^6.5.0",
     "@turf/centroid": "^6.5.0",
     "babel-plugin-istanbul": "^6.1.1",
-    "eslint": "8.49.0",
+    "eslint": "8.57.0",
     "eslint-config-mourner": "3.0.0",
     "eslint-plugin-import": "^2.28.1",
     "mock-browser": "^0.92.14",
