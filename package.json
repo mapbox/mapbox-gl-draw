@@ -50,7 +50,7 @@
     "@babel/eslint-parser": "^7.22.15",
     "@babel/preset-env": "^7.22.20",
     "@babel/register": "^7.22.15",
-    "@mapbox/cloudfriend": "^6.0.0",
+    "@mapbox/cloudfriend": "^8.1.0",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@rollup/plugin-buble": "^1.0.2",
     "@rollup/plugin-commonjs": "^24.1.0",
