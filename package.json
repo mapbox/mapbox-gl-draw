@@ -46,10 +46,9 @@
     "instrument": false
   },
   "devDependencies": {
-    "@babel/core": "^7.22.20",
-    "@babel/eslint-parser": "^7.22.15",
-    "@babel/preset-env": "^7.22.20",
-    "@babel/register": "^7.22.15",
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/register": "^7.24.6",
     "@mapbox/cloudfriend": "^8.1.0",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
     "@rollup/plugin-commonjs": "^26.0.1",

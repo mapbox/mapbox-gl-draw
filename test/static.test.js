@@ -1,5 +1,7 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
+import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
+
 import MapboxDraw from '../index';
 import {spy} from 'sinon';
 import setupAfterNextRender from './utils/after_next_render';
@@ -12,7 +14,7 @@ test('static', (t) => {
   const map = createMap();
   const opts = {
     modes: {
-      static: require('@mapbox/mapbox-gl-draw-static-mode')
+      static: StaticMode
     },
     defaultMode: 'static'
   };
