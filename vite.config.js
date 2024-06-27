@@ -7,4 +7,11 @@ export default {
     port: 9967,
     strictPort: true,
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    }
+  }
 };
