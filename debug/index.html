@@ -5,9 +5,6 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
-  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css' rel='stylesheet'>
-  <link href='/dist/mapbox-gl-draw.css' rel='stylesheet' />
   <style>
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
@@ -50,16 +47,20 @@
   <button id='flipStyleBtn'>change style</button>
 </div>
 
-<script src='/dist/mapbox-gl-draw-unminified.js'></script>
 <script type='text/javascript'>
 // Adds in the FPS graph to the top of the page.
 (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right: 500px;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>
 
 <script type='module'>
-  /* global MapboxGeocoder, MapboxDraw */
   import mapboxgl from 'mapbox-gl';
   import 'mapbox-gl/dist/mapbox-gl.css';
+
+  import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+  import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+
+  import MapboxDraw from '../index.js';
+  import '../dist/mapbox-gl-draw.css';
 
   import {getAccessToken} from './access_token_generated.js';
 

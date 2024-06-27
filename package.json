@@ -22,8 +22,9 @@
     "prepublishOnly": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start-server": "vite --host 0.0.0.0 --port 9967 --strictPort .",
-    "start": "run-p build-token watch watch-bench start-server"
+    "start-server": "vite --config vite.config.js",
+    "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
+    "start": "run-p build-token start-server"
   },
   "files": [
     "dist/mapbox-gl-draw*"
@@ -51,6 +52,7 @@
     "@babel/register": "^7.24.6",
     "@mapbox/cloudfriend": "^8.1.0",
     "@mapbox/mapbox-gl-draw-static-mode": "^1.0.1",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.2",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.2.1",
