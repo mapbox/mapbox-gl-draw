@@ -13,10 +13,7 @@ export default function Store(ctx) {
   this._emitSelectionChange = false;
   this._mapInitialConfig = {};
   this.ctx = ctx;
-  this.sources = {
-    hot: [],
-    cold: []
-  };
+  this.source = [];
 
   // Deduplicate requests to render and tie them to animation frames.
   let renderRequest;

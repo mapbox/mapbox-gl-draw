@@ -22,10 +22,7 @@ test('Store constructor and public API', (t) => {
   const store = new Store(ctx);
 
   // instance members
-  t.deepEqual(store.sources, {
-    hot: [],
-    cold: []
-  }, 'exposes store.sources');
+  t.deepEqual(store.source, [], 'exposes store.source');
   t.equal(store.ctx, ctx, 'exposes store.ctx');
   t.equal(store.ctx.map, map, 'exposes store.ctx.map');
   t.equal(store.isDirty, false, 'exposes store.isDirty');

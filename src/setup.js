@@ -84,16 +84,7 @@ export default function(ctx) {
     },
     addLayers() {
       // drawn features style
-      ctx.map.addSource(Constants.sources.COLD, {
-        data: {
-          type: Constants.geojsonTypes.FEATURE_COLLECTION,
-          features: []
-        },
-        type: 'geojson'
-      });
-
-      // hot features style
-      ctx.map.addSource(Constants.sources.HOT, {
+      ctx.map.addSource(Constants.SOURCE, {
         data: {
           type: Constants.geojsonTypes.FEATURE_COLLECTION,
           features: []
@@ -117,12 +108,8 @@ export default function(ctx) {
         }
       });
 
-      if (ctx.map.getSource(Constants.sources.COLD)) {
-        ctx.map.removeSource(Constants.sources.COLD);
-      }
-
-      if (ctx.map.getSource(Constants.sources.HOT)) {
-        ctx.map.removeSource(Constants.sources.HOT);
+      if (ctx.map.getSource(Constants.SOURCE)) {
+        ctx.map.removeSource(Constants.SOURCE);
       }
     }
   };
