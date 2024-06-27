@@ -7,7 +7,7 @@ Benchmarks help us catch performance regressions and improve performance.
 Start the benchmark server
 
 ```bash
-MAPBOX_ACCESS_TOKEN={YOUR MAPBOX ACCESS TOKEN} yarn start-bench
+MAPBOX_ACCESS_TOKEN={YOUR MAPBOX ACCESS TOKEN} npm run start-bench
 ```
 
 Open a benchmark runner page
