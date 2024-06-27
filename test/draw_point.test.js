@@ -1,5 +1,4 @@
 import test from 'tape';
-import xtend from 'xtend';
 import MapboxDraw from '../index';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
@@ -31,8 +30,8 @@ test('draw_point mode initialization', (t) => {
     }
   });
   // Strip ids for this comparison
-  t.deepEqual(xtend(context.store.add.getCall(0).args[0], { id: null }),
-    xtend(emptypoint, { id: null }), 'with a new line');
+  t.deepEqual(Object.assign({}, context.store.add.getCall(0).args[0], { id: null }),
+    Object.assign({}, emptypoint, { id: null }), 'with a new line');
 
   t.end();
 });

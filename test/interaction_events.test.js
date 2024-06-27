@@ -1,7 +1,6 @@
 // These tests ensure that user interactions fire the right events
 
 import test from 'tape';
-import xtend from 'xtend';
 import {spy} from 'sinon';
 import MapboxDraw from '../index';
 import click from './utils/mouse_click';
@@ -993,7 +992,7 @@ function firedWith(tester, eventName, expectedEventData) {
     return {};
   }
   tester.pass(`${eventName} called`);
-  const actualEventData = xtend(call.args[1]);
+  const actualEventData = Object.assign({}, call.args[1]);
 
   if (actualEventData.features) {
     actualEventData.features = actualEventData.features.map(withoutId);
@@ -1003,7 +1002,7 @@ function firedWith(tester, eventName, expectedEventData) {
 }
 
 function withoutId(obj) {
-  const clone = xtend(obj);
+  const clone = Object.assign({}, obj);
   delete clone.id;
   return clone;
 }

@@ -1,5 +1,4 @@
 import test from 'tape';
-import xtend from 'xtend';
 import {spy} from 'sinon';
 import modeHandler from '../src/lib/mode_handler';
 import createMockModeHandlerContext from './utils/create_mock_mode_handler_context';
@@ -35,7 +34,7 @@ test('ModeHandler calling mode.start with context, and delegation functionality'
     startContext = this;
   }
   const handleStartSpy = spy(handleStart);
-  const mode = xtend(createMockMode(), {
+  const mode = Object.assign(createMockMode(), {
     start: handleStartSpy
   });
   const drawContext = createMockModeHandlerContext();

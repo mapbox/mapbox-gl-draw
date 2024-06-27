@@ -1,5 +1,4 @@
 import test from 'tape';
-import xtend from 'xtend';
 import MapboxDraw from '../index';
 import createMap from './utils/create_map';
 import mouseClick from './utils/mouse_click';
@@ -39,8 +38,8 @@ test('draw_polygon mode initialization', (t) => {
     }
   });
   // Strip ids for this comparison
-  t.deepEqual(xtend(context.store.add.getCall(0).args[0], { id: null }),
-    xtend(emptyPolygon, { id: null }), 'with a new polygon');
+  t.deepEqual(Object.assign({}, context.store.add.getCall(0).args[0], { id: null }),
+    Object.assign({}, emptyPolygon, { id: null }), 'with a new polygon');
 
   t.end();
 });
