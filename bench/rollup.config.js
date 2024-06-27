@@ -1,5 +1,4 @@
 import commonjs from '@rollup/plugin-commonjs';
-import esbuild from 'rollup-plugin-esbuild';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
@@ -19,11 +18,6 @@ export default {
       'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken),
       'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN),
       preventAssignment: true
-    }),
-    esbuild({
-      target: 'esnext',
-      minify: false,
-      sourceMap: true,
     }),
     resolve({
       browser: true,
