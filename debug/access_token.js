@@ -1,9 +1,4 @@
-/* global mapboxgl */
-'use strict';
-
-mapboxgl.accessToken = getAccessToken();
-
-function getAccessToken() {
+export function getAccessToken() {
   const accessToken =
     process.env.MapboxAccessToken ||
     process.env.MAPBOX_ACCESS_TOKEN ||

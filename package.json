@@ -22,7 +22,7 @@
     "prepublishOnly": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start-server": "st --no-cache -H 0.0.0.0 --port 9967 --index index.html .",
+    "start-server": "vite .",
     "start": "run-p build-token watch watch-bench start-server"
   },
   "files": [
@@ -63,6 +63,7 @@
     "eslint": "8.57.0",
     "eslint-config-mourner": "3.0.0",
     "eslint-plugin-import": "^2.28.1",
+    "mapbox-gl": "^3.4.0",
     "mock-browser": "^0.92.14",
     "npm-run-all": "^4.1.5",
     "nyc": "17.0.0",
@@ -72,7 +73,8 @@
     "sinon": "^18.0.0",
     "st": "^3.0.0",
     "synthetic-dom-events": "0.3.0",
-    "tape": "5.8.1"
+    "tape": "5.8.1",
+    "vite": "^5.3.1"
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.2",
