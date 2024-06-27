@@ -22,7 +22,7 @@
     "prepublishOnly": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start-server": "vite .",
+    "start-server": "vite --host 0.0.0.0 --port 9967 --strictPort .",
     "start": "run-p build-token watch watch-bench start-server"
   },
   "files": [
@@ -71,7 +71,6 @@
     "rollup": "^2.79.0",
     "rollup-plugin-esbuild": "^6.1.1",
     "sinon": "^18.0.0",
-    "st": "^3.0.0",
     "synthetic-dom-events": "0.3.0",
     "tape": "5.8.1",
     "vite": "^5.3.1"

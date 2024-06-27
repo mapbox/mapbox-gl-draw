@@ -12,8 +12,7 @@ MAPBOX_ACCESS_TOKEN={YOUR MAPBOX ACCESS TOKEN} npm start
 
 Open a benchmark runner page
 
- - **buffer benchmark** http://localhost:9966/bench/buffer
- - **fps benchmark** http://localhost:9966/bench/fps
+ - http://localhost:9967/bench/
 
 ## Writing a Benchmark
 
