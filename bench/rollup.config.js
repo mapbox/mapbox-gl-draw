@@ -1,9 +1,8 @@
-
-import replace from '@rollup/plugin-replace';
-import json from '@rollup/plugin-json';
-import buble from '@rollup/plugin-buble';
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import esbuild from 'rollup-plugin-esbuild';
+import json from '@rollup/plugin-json';
+import replace from '@rollup/plugin-replace';
+import resolve from '@rollup/plugin-node-resolve';
 
 export default {
   input: ['bench/index.js'],
@@ -21,7 +20,11 @@ export default {
       'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN),
       preventAssignment: true
     }),
-    buble({transforms: {dangerousForOf: true}, objectAssign: "Object.assign"}),
+    esbuild({
+      target: 'esnext',
+      minify: false,
+      sourceMap: true,
+    }),
     resolve({
       browser: true,
       preferBuiltins: false

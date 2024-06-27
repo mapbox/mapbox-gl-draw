@@ -2,11 +2,11 @@ const {MINIFY} = process.env;
 const minified = MINIFY === 'true';
 const outputFile = minified ? 'dist/mapbox-gl-draw.js' : 'dist/mapbox-gl-draw-unminified.js';
 
-import replace from '@rollup/plugin-replace';
-import buble from '@rollup/plugin-buble';
-import {terser} from 'rollup-plugin-terser';
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import esbuild from 'rollup-plugin-esbuild';
+import replace from '@rollup/plugin-replace';
+import resolve from '@rollup/plugin-node-resolve';
+import terser from '@rollup/plugin-terser';
 
 export default {
   input: ['index.js'],
@@ -23,8 +23,17 @@ export default {
       'process.env.NODE_ENV': "'browser'",
       preventAssignment: true
     }),
-    buble({transforms: {dangerousForOf: true}, objectAssign: "Object.assign"}),
-    minified ? terser() : false,
+    esbuild({
+      // We target `esnext` and disable minification so esbuild
+      // doesn't transform the code, which we'll minify later with the terser
+      target: 'esnext',
+      minify: false,
+      sourceMap: true,
+    }),
+    minified ? terser({
+      ecma: 2020,
+      module: true,
+    }) : false,
     resolve({
       browser: true,
       preferBuiltins: true
