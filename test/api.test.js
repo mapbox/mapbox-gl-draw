@@ -1,12 +1,12 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import {spy} from 'sinon';
-import * as Constants from '../src/constants';
-import MapboxDraw from '../index';
-import createMap from './utils/create_map';
-import getGeoJSON from './utils/get_geojson';
-import setupAfterNextRender from './utils/after_next_render';
-import getPublicMemberKeys from './utils/get_public_member_keys';
+import * as Constants from '../src/constants.js';
+import MapboxDraw from '../index.js';
+import createMap from './utils/create_map.js';
+import getGeoJSON from './utils/get_geojson.js';
+import setupAfterNextRender from './utils/after_next_render.js';
+import getPublicMemberKeys from './utils/get_public_member_keys.js';
 
 const map = createMap();
 const afterNextRender = setupAfterNextRender(map);

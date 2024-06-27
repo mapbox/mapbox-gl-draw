@@ -1,5 +1,5 @@
 import test from 'tape';
-import sortFeatures from '../src/lib/sort_features';
+import sortFeatures from '../src/lib/sort_features.js';
 
 test('sortFeatures', (t) => {
   const features = [

@@ -1,6 +1,6 @@
 import test from 'tape';
-import createMap from './utils/create_map';
-import createSupplementaryPoints from '../src/lib/create_supplementary_points';
+import createMap from './utils/create_map.js';
+import createSupplementaryPoints from '../src/lib/create_supplementary_points.js';
 
 test('createSupplementaryPoints with a point', (t) => {
   const point = {

@@ -1,5 +1,5 @@
-import getGeoJSON from './get_geojson';
 import hat from 'hat';
+import getGeoJSON from './get_geojson.js';
 
 const hatRack = hat.rack();
 

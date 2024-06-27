@@ -1,6 +1,7 @@
 import test from 'tape';
-import ui from '../src/ui';
 import {spy} from 'sinon';
+
+import ui from '../src/ui.js';
 
 function createMockContext({ position, controls } = {}) {
   const container = document.createElement('div');
@@ -124,7 +125,7 @@ test('ui buttons with one options.controls', (t) => {
   /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
-      line_string: true 
+      line_string: true
     }
   });
   /* eslint-enable */

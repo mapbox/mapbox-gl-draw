@@ -1,8 +1,8 @@
 import test from 'tape';
 import {spy} from 'sinon';
-import modeHandler from '../src/lib/mode_handler';
-import createMockModeHandlerContext from './utils/create_mock_mode_handler_context';
-import createMockMode from './utils/create_mock_mode';
+import modeHandler from '../src/lib/mode_handler.js';
+import createMockModeHandlerContext from './utils/create_mock_mode_handler_context.js';
+import createMockMode from './utils/create_mock_mode.js';
 
 test('returned API', (t) => {
   const mh = modeHandler(createMockMode(), createMockModeHandlerContext());

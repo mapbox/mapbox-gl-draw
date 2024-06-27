@@ -1,12 +1,12 @@
 import test from 'tape';
 import {spy} from 'sinon';
-import Feature from '../src/feature_types/feature';
-import Point from '../src/feature_types/point';
-import Polygon from '../src/feature_types/polygon';
-import LineString from '../src/feature_types/line_string';
-import MultiFeature from '../src/feature_types/multi_feature';
-import createMockCtx from './utils/create_mock_feature_context';
-import getPublicMemberKeys from './utils/get_public_member_keys';
+import Feature from '../src/feature_types/feature.js';
+import Point from '../src/feature_types/point.js';
+import Polygon from '../src/feature_types/polygon.js';
+import LineString from '../src/feature_types/line_string.js';
+import MultiFeature from '../src/feature_types/multi_feature.js';
+import createMockCtx from './utils/create_mock_feature_context.js';
+import getPublicMemberKeys from './utils/get_public_member_keys.js';
 
 test('MultiPoint via MultiFeature', (t) => {
   t.ok(MultiFeature.prototype instanceof Feature, 'inherits from Feature');

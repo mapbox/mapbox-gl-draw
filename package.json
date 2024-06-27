@@ -2,9 +2,24 @@
   "name": "@mapbox/mapbox-gl-draw",
   "version": "1.4.3",
   "description": "A drawing component for Mapbox GL JS",
-  "homepage": "https://github.com/mapbox/mapbox-gl-draw",
   "author": "mapbox",
   "license": "ISC",
+  "homepage": "https://github.com/mapbox/mapbox-gl-draw",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/mapbox-gl-draw.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mapbox/mapbox-gl-draw/issues"
+  },
+  "keywords": [
+    "webgl",
+    "mapbox",
+    "draw",
+    "drawing"
+  ],
+  "type": "module",
+  "exports": "./index.js",
   "main": "dist/mapbox-gl-draw.js",
   "browser": "dist/mapbox-gl-draw.js",
   "style": "dist/mapbox-gl-draw.css",
@@ -14,7 +29,7 @@
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
     "test": "NODE_ENV=test npm run lint && npm run tape",
     "lint": "eslint index.js src test bench",
-    "tape": "tape -r @babel/register -r ./test/mock-browser.js test/*.test.js",
+    "tape": "node --import ./test/mock-browser.js ./node_modules/.bin/tape test/*.test.js",
     "coverage": "NODE_ENV=test nyc --reporter html npm run tape && opener coverage/index.html",
     "build-token": "node build/generate-access-token-script.js",
     "build": "rollup -c",
@@ -25,26 +40,6 @@
     "start-server": "vite --config vite.config.js",
     "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
     "start": "run-p build-token start-server"
-  },
-  "files": [
-    "dist/mapbox-gl-draw*"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/mapbox/mapbox-gl-draw.git"
-  },
-  "keywords": [
-    "webgl",
-    "mapbox",
-    "draw",
-    "drawing"
-  ],
-  "bugs": {
-    "url": "https://github.com/mapbox/mapbox-gl-draw/issues"
-  },
-  "nyc": {
-    "sourceMap": false,
-    "instrument": false
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",
@@ -83,5 +78,14 @@
     "@mapbox/point-geometry": "^0.1.0",
     "fast-deep-equal": "^3.1.3",
     "hat": "0.0.3"
+  },
+  "files": [
+    "src",
+    "index.js",
+    "dist/mapbox-gl-draw*"
+  ],
+  "nyc": {
+    "sourceMap": false,
+    "instrument": false
   }
 }

@@ -1,9 +1,9 @@
 import test from 'tape';
 import {spy} from 'sinon';
-import Feature from '../src/feature_types/feature';
-import createFeature from './utils/create_feature';
-import getPublicMemberKeys from './utils/get_public_member_keys';
-import createMockCtx from './utils/create_mock_feature_context';
+import Feature from '../src/feature_types/feature.js';
+import createFeature from './utils/create_feature.js';
+import getPublicMemberKeys from './utils/get_public_member_keys.js';
+import createMockCtx from './utils/create_mock_feature_context.js';
 
 test('Feature contrusctor and API', (t) => {
   const featureGeoJson = createFeature('line');

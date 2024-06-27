@@ -1,5 +1,5 @@
 import test from 'tape';
-import isTap from '../src/lib/is_tap';
+import isTap from '../src/lib/is_tap.js';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak

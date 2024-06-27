@@ -1,17 +1,18 @@
 /* eslint no-shadow:[0] */
-import turfCentroid from '@turf/centroid';
 import test from 'tape';
-import MapboxDraw from '../index';
-import click from './utils/mouse_click';
-import tap from './utils/touch_tap';
-import getGeoJSON from './utils/get_geojson';
-import createMap from './utils/create_map';
-import {spy} from 'sinon';
-import setupAfterNextRender from './utils/after_next_render';
-import makeMouseEvent from './utils/make_mouse_event';
-import makeTouchEvent from './utils/make_touch_event';
-import * as Constants from '../src/constants';
+import turfCentroid from '@turf/centroid';
 import createSyntheticEvent from 'synthetic-dom-events';
+import {spy} from 'sinon';
+
+import MapboxDraw from '../index.js';
+import click from './utils/mouse_click.js';
+import tap from './utils/touch_tap.js';
+import getGeoJSON from './utils/get_geojson.js';
+import createMap from './utils/create_map.js';
+import setupAfterNextRender from './utils/after_next_render.js';
+import makeMouseEvent from './utils/make_mouse_event.js';
+import makeTouchEvent from './utils/make_touch_event.js';
+import * as Constants from '../src/constants.js';
 
 test('direct_select', (t) => {
 

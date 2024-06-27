@@ -1,13 +1,13 @@
 /* eslint no-shadow:[0] */
 import test from 'tape';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
-
-import MapboxDraw from '../index';
 import {spy} from 'sinon';
-import setupAfterNextRender from './utils/after_next_render';
-import makeMouseEvent from './utils/make_mouse_event';
-import getGeoJSON from './utils/get_geojson';
-import createMap from './utils/create_map';
+
+import MapboxDraw from '../index.js';
+import setupAfterNextRender from './utils/after_next_render.js';
+import makeMouseEvent from './utils/make_mouse_event.js';
+import getGeoJSON from './utils/get_geojson.js';
+import createMap from './utils/create_map.js';
 
 test('static', (t) => {
 

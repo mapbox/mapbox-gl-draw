@@ -1,5 +1,5 @@
 import test from 'tape';
-import StringSet from '../src/lib/string_set';
+import StringSet from '../src/lib/string_set.js';
 
 test('StringSet constructor and API', (t) => {
   const set = new StringSet();

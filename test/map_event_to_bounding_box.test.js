@@ -1,5 +1,5 @@
 import test from 'tape';
-import mapEventToBoundingBox from '../src/lib/map_event_to_bounding_box';
+import mapEventToBoundingBox from '../src/lib/map_event_to_bounding_box.js';
 
 test('mapEventToBoundingBox', (t) => {
   t.deepEqual(mapEventToBoundingBox({

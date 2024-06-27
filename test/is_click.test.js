@@ -1,5 +1,5 @@
 import test from 'tape';
-import isClick from '../src/lib/is_click';
+import isClick from '../src/lib/is_click.js';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak

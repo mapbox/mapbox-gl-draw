@@ -1,5 +1,5 @@
 import test from 'tape';
-import euclideanDistance from '../src/lib/euclidean_distance';
+import euclideanDistance from '../src/lib/euclidean_distance.js';
 
 test('euclideanDistance', (t) => {
   t.equal(euclideanDistance({ x: 1, y: 1 }, { x: 4, y: 4 }), 4.242640687119285);

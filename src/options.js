@@ -1,7 +1,7 @@
-import * as Constants from './constants';
+import * as Constants from './constants.js';
 
-import styles from './lib/theme';
-import modes from './modes/index';
+import styles from './lib/theme.js';
+import modes from './modes/index.js';
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,

@@ -1,5 +1,5 @@
 import test from 'tape';
-import * as commonSelectors from '../src/lib/common_selectors';
+import * as commonSelectors from '../src/lib/common_selectors.js';
 
 test('commonSelectors.isOfMetaType', (t) => {
   const isFoo = commonSelectors.isOfMetaType('foo');

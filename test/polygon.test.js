@@ -1,13 +1,13 @@
 import test from 'tape';
 import {spy} from 'sinon';
-import Feature from '../src/feature_types/feature';
-import Polygon from '../src/feature_types/polygon';
-import MapboxDraw from '../index';
-import createFeature from './utils/create_feature';
-import getPublicMemberKeys from './utils/get_public_member_keys';
-import createMockCtx from './utils/create_mock_feature_context';
-import drawGeometry from './utils/draw_geometry';
-import createMap from './utils/create_map';
+import Feature from '../src/feature_types/feature.js';
+import Polygon from '../src/feature_types/polygon.js';
+import MapboxDraw from '../index.js';
+import createFeature from './utils/create_feature.js';
+import getPublicMemberKeys from './utils/get_public_member_keys.js';
+import createMockCtx from './utils/create_mock_feature_context.js';
+import drawGeometry from './utils/draw_geometry.js';
+import createMap from './utils/create_map.js';
 
 test('Polygon constructor and API', (t) => {
   const rawPolygon = createFeature('polygon');

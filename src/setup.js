@@ -1,7 +1,7 @@
-import events from './events';
-import Store from './store';
-import ui from './ui';
-import * as Constants from './constants';
+import events from './events.js';
+import Store from './store.js';
+import ui from './ui.js';
+import * as Constants from './constants.js';
 
 export default function(ctx) {
 

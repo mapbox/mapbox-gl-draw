@@ -1,5 +1,5 @@
 import test from 'tape';
-import createVertex from '../src/lib/create_vertex';
+import createVertex from '../src/lib/create_vertex.js';
 
 test('createVertex', (t) => {
   t.deepEqual(createVertex('foo', [1, 2], '3.4.5', true), {

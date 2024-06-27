@@ -1,6 +1,6 @@
 import test from 'tape';
-import getGeoJSON from './utils/get_geojson';
-import constrainFeatureMovement from '../src/lib/constrain_feature_movement';
+import getGeoJSON from './utils/get_geojson.js';
+import constrainFeatureMovement from '../src/lib/constrain_feature_movement.js';
 
 test('constrainFeatureMovement point, no constraint', (t) => {
   const point = getGeoJSON('point');

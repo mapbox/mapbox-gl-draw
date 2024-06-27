@@ -1,5 +1,5 @@
 import test from 'tape';
-import isEventAtCoordinates from '../src/lib/is_event_at_coordinates';
+import isEventAtCoordinates from '../src/lib/is_event_at_coordinates.js';
 
 test('isEventAtCoordinates', (t) => {
   t.ok(isEventAtCoordinates({

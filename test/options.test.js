@@ -1,8 +1,14 @@
 /* eslint no-shadow:[0] */
+import fs from 'fs';
+import path from 'path';
 import test from 'tape';
-import MapboxDraw from '../index';
-import modes from '../src/modes/index';
-import styleWithSourcesFixture from './fixtures/style_with_sources.json';
+import {fileURLToPath} from 'url';
+
+import MapboxDraw from '../index.js';
+import modes from '../src/modes/index.js';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const styleWithSourcesFixture = JSON.parse(fs.readFileSync(path.join(__dirname, './fixtures/style_with_sources.json')));
 
 test('Options test', (t) => {
   t.test('no options', (t) => {

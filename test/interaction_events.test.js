@@ -2,11 +2,17 @@
 
 import test from 'tape';
 import {spy} from 'sinon';
-import MapboxDraw from '../index';
-import click from './utils/mouse_click';
-import createMap from './utils/create_map';
-import createAfterNextRender from './utils/after_next_render';
-import makeMouseEvent from './utils/make_mouse_event';
+import MapboxDraw from '../index.js';
+import click from './utils/mouse_click.js';
+import createMap from './utils/create_map.js';
+import createAfterNextRender from './utils/after_next_render.js';
+import makeMouseEvent from './utils/make_mouse_event.js';
+
+import {
+  backspaceEvent,
+  enterEvent,
+  escapeEvent
+} from './utils/key_events.js';
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -25,12 +31,6 @@ map.addControl(Draw);
 
 map.on('load', runTests);
 document.body.removeChild(container);
-
-import {
-  backspaceEvent,
-  enterEvent,
-  escapeEvent
-} from './utils/key_events';
 
 function runTests() {
   const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
