@@ -1,4 +1,4 @@
-import isEqual from 'lodash.isequal';
+import isEqual from 'fast-deep-equal';
 import normalize from '@mapbox/geojson-normalize';
 import hat from 'hat';
 import featuresAt from './lib/features_at';
