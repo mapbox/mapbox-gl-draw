@@ -1,15 +1,15 @@
-import isEqual from 'lodash.isequal';
+import isEqual from 'fast-deep-equal';
 import normalize from '@mapbox/geojson-normalize';
 import hat from 'hat';
-import featuresAt from './lib/features_at';
-import stringSetsAreEqual from './lib/string_sets_are_equal';
-import * as Constants from './constants';
-import StringSet from './lib/string_set';
+import featuresAt from './lib/features_at.js';
+import stringSetsAreEqual from './lib/string_sets_are_equal.js';
+import * as Constants from './constants.js';
+import StringSet from './lib/string_set.js';
 
-import Polygon from './feature_types/polygon';
-import LineString from './feature_types/line_string';
-import Point from './feature_types/point';
-import MultiFeature from './feature_types/multi_feature';
+import Polygon from './feature_types/polygon.js';
+import LineString from './feature_types/line_string.js';
+import Point from './feature_types/point.js';
+import MultiFeature from './feature_types/multi_feature.js';
 
 const featureTypes = {
   Polygon,
@@ -93,7 +93,11 @@ export default function(ctx, api) {
       } else {
         // If a feature of that id has already been created, and we are swapping it out ...
         const internalFeature = ctx.store.get(feature.id);
+        const originalProperties = internalFeature.properties;
         internalFeature.properties = feature.properties;
+        if (!isEqual(originalProperties, feature.properties)) {
+          ctx.store.featureChanged(internalFeature.id);
+        }
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);
         }

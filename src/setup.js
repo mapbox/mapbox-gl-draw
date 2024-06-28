@@ -1,8 +1,7 @@
-import events from './events';
-import Store from './store';
-import ui from './ui';
-import * as Constants from './constants';
-import xtend from 'xtend';
+import events from './events.js';
+import Store from './store.js';
+import ui from './ui.js';
+import * as Constants from './constants.js';
 
 export default function(ctx) {
 
@@ -47,7 +46,7 @@ export default function(ctx) {
           let args = arguments;
 
           if (_fire.length === 1 && arguments.length !== 1) {
-            args = [xtend({}, { type }, event)];
+            args = [Object.assign({}, { type }, event)];
           }
 
           return _fire.apply(map, args);

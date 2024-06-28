@@ -1,10 +1,10 @@
-import setupModeHandler from './lib/mode_handler';
-import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
-import featuresAt from './lib/features_at';
-import isClick from './lib/is_click';
-import isTap from './lib/is_tap';
-import * as Constants from './constants';
-import objectToMode from './modes/object_to_mode';
+import setupModeHandler from './lib/mode_handler.js';
+import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor.js';
+import featuresAt from './lib/features_at.js';
+import isClick from './lib/is_click.js';
+import isTap from './lib/is_tap.js';
+import * as Constants from './constants.js';
+import objectToMode from './modes/object_to_mode.js';
 
 export default function(ctx) {
 
@@ -78,9 +78,6 @@ export default function(ctx) {
   };
 
   events.touchstart = function(event) {
-    // Prevent emulated mouse events because we will fully handle the touch here.
-    // This does not stop the touch events from propogating to mapbox though.
-    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -95,7 +92,6 @@ export default function(ctx) {
   };
 
   events.touchmove = function(event) {
-    event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;
     }
@@ -105,6 +101,8 @@ export default function(ctx) {
   };
 
   events.touchend = function(event) {
+    // Prevent emulated mouse events because we will fully handle the touch here.
+    // This does not stop the touch events from propogating to mapbox though.
     event.originalEvent.preventDefault();
     if (!ctx.options.touchEnabled) {
       return;

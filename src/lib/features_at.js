@@ -1,7 +1,7 @@
-import sortFeatures from './sort_features';
-import mapEventToBoundingBox from './map_event_to_bounding_box';
-import * as Constants from '../constants';
-import StringSet from './string_set';
+import sortFeatures from './sort_features.js';
+import mapEventToBoundingBox from './map_event_to_bounding_box.js';
+import * as Constants from '../constants.js';
+import StringSet from './string_set.js';
 
 const META_TYPES = [
   Constants.meta.FEATURE,
@@ -29,7 +29,8 @@ function featuresAt(event, bbox, ctx, buffer) {
   const box = (event) ? mapEventToBoundingBox(event, buffer) : bbox;
 
   const queryParams = {};
-  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id);
+
+  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id).filter(id => ctx.map.getLayer(id) != null);
 
   const features = ctx.map.queryRenderedFeatures(box, queryParams)
     .filter(feature => META_TYPES.indexOf(feature.properties.meta) !== -1);
