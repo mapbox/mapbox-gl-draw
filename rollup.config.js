@@ -3,7 +3,6 @@ const minified = MINIFY === 'true';
 const outputFile = minified ? 'dist/mapbox-gl-draw.js' : 'dist/mapbox-gl-draw-unminified.js';
 
 import commonjs from '@rollup/plugin-commonjs';
-import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 
@@ -18,10 +17,6 @@ export default {
   },
   treeshake: true,
   plugins: [
-    replace({
-      'process.env.NODE_ENV': "'browser'",
-      preventAssignment: true
-    }),
     minified ? terser({
       ecma: 2020,
       module: true,
