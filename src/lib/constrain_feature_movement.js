@@ -1,5 +1,4 @@
-const extent = require('@mapbox/geojson-extent');
-const Constants = require('../constants');
+import * as Constants from '../constants.js';
 
 const {
   LAT_MIN,
@@ -7,14 +6,31 @@ const {
   LAT_RENDERED_MIN,
   LAT_RENDERED_MAX,
   LNG_MIN,
-  LNG_MAX
+  LNG_MAX,
 } = Constants;
+function extent(feature) {
+  const depth = {
+    Point: 0,
+    LineString: 1,
+    Polygon: 2,
+    MultiPoint: 1,
+    MultiLineString: 2,
+    MultiPolygon: 3,
+  }[feature.geometry.type];
+
+  const coords = [feature.geometry.coordinates].flat(depth);
+  const lngs = coords.map(coord => coord[0]);
+  const lats = coords.map(coord => coord[1]);
+  const min = vals => Math.min.apply(null, vals);
+  const max = vals => Math.max.apply(null, vals);
+  return [min(lngs), min(lats), max(lngs), max(lats)];
+}
 
 // Ensure that we do not drag north-south far enough for
 // - any part of any feature to exceed the poles
 // - any feature to be completely lost in the space between the projection's
 //   edge and the poles, such that it couldn't be re-selected and moved back
-module.exports = function(geojsonFeatures, delta) {
+export default function(geojsonFeatures, delta) {
   // "inner edge" = a feature's latitude closest to the equator
   let northInnerEdge = LAT_MIN;
   let southInnerEdge = LAT_MAX;
@@ -25,7 +41,7 @@ module.exports = function(geojsonFeatures, delta) {
   let westEdge = LNG_MAX;
   let eastEdge = LNG_MIN;
 
-  geojsonFeatures.forEach(feature => {
+  geojsonFeatures.forEach((feature) => {
     const bounds = extent(feature);
     const featureSouthEdge = bounds[1];
     const featureNorthEdge = bounds[3];
@@ -64,4 +80,4 @@ module.exports = function(geojsonFeatures, delta) {
   }
 
   return constrainedDelta;
-};
+}

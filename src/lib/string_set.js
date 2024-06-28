@@ -35,10 +35,10 @@ StringSet.prototype.has = function(x) {
 
 StringSet.prototype.values = function() {
   const values = [];
-  Object.keys(this._items).forEach(k => {
-    values.push({ k: k, v: this._items[k] });
+  Object.keys(this._items).forEach((k) => {
+    values.push({ k, v: this._items[k] });
   });
-  Object.keys(this._nums).forEach(k => {
+  Object.keys(this._nums).forEach((k) => {
     values.push({ k: JSON.parse(k), v: this._nums[k] });
   });
 
@@ -52,4 +52,4 @@ StringSet.prototype.clear = function() {
   return this;
 };
 
-module.exports = StringSet;
+export default StringSet;

@@ -1,21 +1,20 @@
-var mouseEvents = require('./mouse_events');
-var mousePath = require('./mouse_path');
+import mouseEvents from './mouse_events';
+import mousePath from './mouse_path';
 
-module.exports = function(start, map) {
+export default function(start, map) {
 
-  var path = mousePath(start);
-
-  var events = mouseEvents(map);
+  const path = mousePath(start);
+  const events = mouseEvents(map);
 
   events.push('mousedown', {
     x: start.x,
     y: start.y
   }, true);
 
-  for (var i=0; i<path.length; i++) {
+  for (let i = 0; i < path.length; i++) {
     events.push('mousemove', path[i]);
   }
-  for (var i=path.length-1; i>=0; i--) {
+  for (let i = path.length - 1; i >= 0; i--) {
     events.push('mousemove', path[i]);
   }
 
@@ -26,5 +25,5 @@ module.exports = function(start, map) {
 
   return function(cb) {
     events.run(cb);
-  }
+  };
 }

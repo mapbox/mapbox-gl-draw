@@ -1,14 +1,24 @@
 {
-  "extends": "mourner",
-  "parser": "babel-eslint",
+  "extends": [
+    "mourner",
+    "plugin:import/recommended"
+  ],
+  "parser": "espree",
   "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaVersion": 2020
   },
+  "plugins": [
+    "import"
+  ],
   "globals": {
     "document": true
   },
   "rules": {
+    "no-duplicate-imports": "off",
+    "import/no-duplicates": "error",
+    "import/no-commonjs": "error",
+
     "indent": [2,2],
     "array-bracket-spacing": "off",
     "block-scoped-var": "error",
@@ -31,6 +41,6 @@
   },
   "env": {
     "es6": true,
-    "browser": false
+    "browser": true
   }
 }

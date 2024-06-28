@@ -1,7 +1,7 @@
-const featuresAt = require('./features_at');
-const Constants = require('../constants');
+import featuresAt from './features_at.js';
+import * as Constants from '../constants.js';
 
-module.exports = function getFeatureAtAndSetCursors(event, ctx) {
+export default function getFeatureAtAndSetCursors(event, ctx) {
   const features = featuresAt.click(event, null, ctx);
   const classes = { mouse: Constants.cursors.NONE };
 
@@ -19,4 +19,4 @@ module.exports = function getFeatureAtAndSetCursors(event, ctx) {
   ctx.ui.updateMapClasses();
 
   return features[0];
-};
+}

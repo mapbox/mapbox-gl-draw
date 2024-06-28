@@ -1,16 +1,15 @@
-const events = require('./events');
-const Store = require('./store');
-const ui = require('./ui');
-const Constants = require('./constants');
-const xtend = require('xtend');
+import events from './events.js';
+import Store from './store.js';
+import ui from './ui.js';
+import * as Constants from './constants.js';
 
-module.exports = function(ctx) {
+export default function(ctx) {
 
   let controlContainer = null;
   let mapLoadedInterval = null;
 
   const setup = {
-    onRemove: function() {
+    onRemove() {
       // Stop connect attempt in the event that control is removed before map is loaded
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
@@ -20,6 +19,7 @@ module.exports = function(ctx) {
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.ui.clearMapClasses();
+      if (ctx.boxZoomInitial) ctx.map.boxZoom.enable();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
@@ -29,29 +29,14 @@ module.exports = function(ctx) {
 
       return this;
     },
-    connect: function() {
+    connect() {
       ctx.map.off('load', setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
       ctx.store.storeMapConfig();
       ctx.events.addEventListeners();
     },
-    onAdd: function(map) {
-      if (process.env.NODE_ENV !== 'test') {
-        // Monkey patch to resolve breaking change to `fire` introduced by
-        // mapbox-gl-js. See mapbox/mapbox-gl-draw/issues/766.
-        const _fire = map.fire;
-        map.fire = function(type, event) {
-          let args = arguments;
-
-          if (_fire.length === 1 && arguments.length !== 1) {
-            args = [xtend({}, { type: type }, event)];
-          }
-
-          return _fire.apply(map, args);
-        };
-      }
-
+    onAdd(map) {
       ctx.map = map;
       ctx.events = events(ctx);
       ctx.ui = ui(ctx);
@@ -62,6 +47,7 @@ module.exports = function(ctx) {
       controlContainer = ctx.ui.addButtons();
 
       if (ctx.options.boxSelect) {
+        ctx.boxZoomInitial = map.boxZoom.isEnabled();
         map.boxZoom.disable();
         // Need to toggle dragPan on and off or else first
         // dragPan disable attempt in simple_select doesn't work
@@ -79,7 +65,7 @@ module.exports = function(ctx) {
       ctx.events.start();
       return controlContainer;
     },
-    addLayers: function() {
+    addLayers() {
       // drawn features style
       ctx.map.addSource(Constants.sources.COLD, {
         data: {
@@ -98,7 +84,7 @@ module.exports = function(ctx) {
         type: 'geojson'
       });
 
-      ctx.options.styles.forEach(style => {
+      ctx.options.styles.forEach((style) => {
         ctx.map.addLayer(style);
       });
 
@@ -107,8 +93,8 @@ module.exports = function(ctx) {
     },
     // Check for layers and sources before attempting to remove
     // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
-    removeLayers: function() {
-      ctx.options.styles.forEach(style => {
+    removeLayers() {
+      ctx.options.styles.forEach((style) => {
         if (ctx.map.getLayer(style.id)) {
           ctx.map.removeLayer(style.id);
         }
@@ -127,4 +113,4 @@ module.exports = function(ctx) {
   ctx.setup = setup;
 
   return setup;
-};
+}

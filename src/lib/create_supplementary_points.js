@@ -1,6 +1,6 @@
-const createVertex = require('./create_vertex');
-const createMidpoint = require('./create_midpoint');
-const Constants = require('../constants');
+import createVertex from './create_vertex.js';
+import createMidpoint from './create_midpoint.js';
+import * as Constants from '../constants.js';
 
 function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   const { type, coordinates } = geojson.geometry;
@@ -34,7 +34,7 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
       // vertex before this one. If so, add a midpoint
       // between that vertex and this one.
       if (options.midpoints && lastVertex) {
-        const midpoint = createMidpoint(featureId, lastVertex, vertex, options.map);
+        const midpoint = createMidpoint(featureId, lastVertex, vertex);
         if (midpoint) {
           supplementaryPoints.push(midpoint);
         }
@@ -80,4 +80,4 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
   return supplementaryPoints;
 }
 
-module.exports = createSupplementaryPoints;
+export default createSupplementaryPoints;

@@ -3,4 +3,4 @@ function isEventAtCoordinates(event, coordinates) {
   return event.lngLat.lng === coordinates[0] && event.lngLat.lat === coordinates[1];
 }
 
-module.exports = isEventAtCoordinates;
+export default isEventAtCoordinates;

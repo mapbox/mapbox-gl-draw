@@ -1,24 +1,24 @@
-module.exports = function() {
-  var frameCount = 0;
-  var start = null;
-  var running = false;
+export default function() {
+  let frameCount = 0;
+  let start = null;
+  let running = false;
 
-  var frameCounter = function() {
-    if(running) {
+  const frameCounter = function() {
+    if (running) {
       frameCount++;
       requestAnimationFrame(frameCounter);
     }
-  }
+  };
 
   return {
-    start: function() {
+    start() {
       running = true;
       start = performance.now();
       requestAnimationFrame(frameCounter);
     },
-    stop: function() {
-      var end = performance.now();
+    stop() {
+      const end = performance.now();
       return frameCount / ((end - start) / 1000);
     }
-  }
+  };
 }

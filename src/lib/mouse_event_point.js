@@ -1,4 +1,4 @@
-const Point = require('@mapbox/point-geometry');
+import Point from '@mapbox/point-geometry';
 
 /**
  * Returns a Point representing a mouse event's position
@@ -16,4 +16,4 @@ function mouseEventPoint(mouseEvent, container) {
   );
 }
 
-module.exports = mouseEventPoint;
+export default mouseEventPoint;

@@ -1,14 +1,14 @@
-var mouseEvents = require('./mouse_events');
+import mouseEvents from './mouse_events';
 
-module.exports = function(ring, map) {
+export default function(ring, map) {
 
-  var events = mouseEvents(map);
+  const events = mouseEvents(map);
 
-  var lastPoint = null;
+  let lastPoint = null;
 
-  for (var c=0; c<ring.length; c++) {
-    var coord = ring[c];
-    var point = map.project({
+  for (let c = 0; c < ring.length; c++) {
+    const coord = ring[c];
+    const point = map.project({
       lng: coord[0],
       lat: coord[1]
     });
@@ -26,6 +26,5 @@ module.exports = function(ring, map) {
 
   return function(cb) {
     events.run(cb);
-  }
-
+  };
 }

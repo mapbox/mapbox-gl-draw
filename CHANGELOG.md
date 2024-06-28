@@ -1,4 +1,64 @@
-## Changelog
+# Changelog
+
+## 1.4.3
+
+* Fix for layer not found error in `featuresAt` function by @caldwellc in https://github.com/mapbox/mapbox-gl-draw/pull/1194
+* Trigger `featureChanged` on feature props change by @wyozi in https://github.com/mapbox/mapbox-gl-draw/pull/1196
+* Remove `preventDefault()` on `touchstart` and `touchmove` events by @Archetylator in https://github.com/mapbox/mapbox-gl-draw/pull/1195
+
+## 1.4.2
+
+* Fix key event handler checks for `mapboxgl-canvas` by @neodescis in https://github.com/mapbox/mapbox-gl-draw/pull/1165
+* Fix draw updates not firing consistently by @gynekolog in https://github.com/mapbox/mapbox-gl-draw/pull/1160
+* Fix boxZoom restoring after removal by @kibala145 in https://github.com/mapbox/mapbox-gl-draw/pull/1017
+
+## 1.4.1
+
+* Revert use of passive event listeners instead of `preventDefault` in https://github.com/mapbox/mapbox-gl-draw/pull/1158
+
+## 1.4.0
+
+* Reduce NPM package size and big dependency and dev environment cleanup by @mourner in https://github.com/mapbox/mapbox-gl-draw/pull/1119 https://github.com/mapbox/mapbox-gl-draw/pull/1053
+* Add Bezier Curve mode by @Jeff-Numix in https://github.com/mapbox/mapbox-gl-draw/pull/1068
+* Update control buttons styles by @chriswhong in https://github.com/mapbox/mapbox-gl-draw/pull/1125
+* Use passive event listeners instead of `preventDefault` by @danielsippel in https://github.com/mapbox/mapbox-gl-draw/pull/1146
+* Adding sorting rank value for MultiLineString by @zhangchn in https://github.com/mapbox/mapbox-gl-draw/pull/1142
+* Expose constants and lib APIs to make it easier to write custom draw modes by @thaddmt in https://github.com/mapbox/mapbox-gl-draw/pull/1100
+
+## 1.3.0
+
+- ⚠️ Removed GeoJSON validation in `draw.add` — responsibility for valid input is now on the user. #1052
+- Fixed NPM security warnings about dependencies. #1052
+- Fixed midpoint calculation when terrain is enabled. #1039
+- Reduced the size of the plugin's CSS code from 33KB to 5KB. #1038 (h/t @johanrd)
+- Fixed `simple_select` mode handling on touch devices. #1008 (h/t @corinv)
+
+## 1.2.2
+
+### Bug Fixes:
+- Fix midpoint calculation when using mapbox-gl-draw with 3d terrain
+
+## 1.2.1
+
+### Bug Fixes:
+- Upgrade `peerDependencies` to allow `mapbox-gl@2.0.0+` to be used with gl-draw.
+- Update `package.json` so that usage of library from npm always results in pulling in the built bundle.
+- Remove `require()`'ing of unsed node builtins like `fs` and `path` from the bundle.
+
+## 1.2.0
+
+- Upgrade all dependencies
+- Upgrade to Node v12
+- Upgrade to ES6
+- Change bundler to rollup for smaller bundles
+- Switch from Uglify to buble in order to produce better and more compatible code
+
+### Bug fixes:
+- Trash correct vertices by changing sort to be numeric-aware [#943](https://github.com/mapbox/mapbox-gl-draw/pull/943)
+
+## 1.1.2
+
+- update mapbox-gl peer dependency
 
 ## 1.1.1
 
@@ -59,7 +119,7 @@
 
 ## 1.0.0
 
-- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/master/docs/MODES.md)
+- Adds [Custom Mode support](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/MODES.md)
 - Drops `static` mode, which can now be found [in its own repo](https://github.com/mapbox/mapbox-gl-draw-static-mode)
 - Fixes bug where `MapboxDraw` would prevent `MapboxGeocoder` delete actions (#673)
 
@@ -115,7 +175,7 @@
 
 #### ⚠️ Breaking changes ⚠️
 
-- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/master/CHANGELOG.md#0270-november-11-2016).
+- Requires [mapbox-gl@0.27.0](https://github.com/mapbox/mapbox-gl-js/blob/main/CHANGELOG.md#0270-november-11-2016).
 - Detects style changes and reapplies Draw if it has been removed.
 - Fixes UMD support.
 - Changes `mapboxgl.Draw` to `mapboxglDraw` when in global scope.

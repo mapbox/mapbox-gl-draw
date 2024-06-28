@@ -1,21 +1,15 @@
-module.exports = function(start) {
-  var path = [];
+export default function(start) {
+  const path = [];
 
-  for (var i = 0; i<7; i+=.04) {
-    var A = 3;
-    var B = Math.PI/2;
-    var SIZE = 100;
-    var OFFSET = 5;
+  for (let i = 0; i < 7; i += .04) {
+    const A = 3;
+    const B = Math.PI / 2;
+    const SIZE = 100;
+    const OFFSET = 5;
 
-    var x = start.x + (Math.sin(i) * SIZE) + (i*OFFSET);
-    var y = start.y + (Math.sin(A*i + B) * SIZE) + (i*OFFSET);
-
-    var point = {
-      x: x,
-      y: y
-    }
-
-    path.push(point);
+    const x = start.x + (Math.sin(i) * SIZE) + (i * OFFSET);
+    const y = start.y + (Math.sin(A * i + B) * SIZE) + (i * OFFSET);
+    path.push({x, y});
   }
 
   return path;

@@ -1,1 +1,524 @@
-[{"id":"gl-draw-polygon-fill-inactive.cold","type":"fill","filter":["all",["==","active","false"],["==","$type","Polygon"],["!=","mode","static"]],"paint":{"fill-color":"#3bb2d0","fill-outline-color":"#3bb2d0","fill-opacity":0.1},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-fill-active.cold","type":"fill","filter":["all",["==","active","true"],["==","$type","Polygon"]],"paint":{"fill-color":"#fbb03b","fill-outline-color":"#fbb03b","fill-opacity":0.1},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-midpoint.cold","type":"circle","filter":["all",["==","$type","Point"],["==","meta","midpoint"]],"paint":{"circle-radius":3,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-stroke-inactive.cold","type":"line","filter":["all",["==","active","false"],["==","$type","Polygon"],["!=","mode","static"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#3bb2d0","line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-stroke-active.cold","type":"line","filter":["all",["==","active","true"],["==","$type","Polygon"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#fbb03b","line-dasharray":[0.2,2],"line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-line-inactive.cold","type":"line","filter":["all",["==","active","false"],["==","$type","LineString"],["!=","mode","static"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#3bb2d0","line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-line-active.cold","type":"line","filter":["all",["==","$type","LineString"],["==","active","true"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#fbb03b","line-dasharray":[0.2,2],"line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-and-line-vertex-stroke-inactive.cold","type":"circle","filter":["all",["==","meta","vertex"],["==","$type","Point"],["!=","mode","static"]],"paint":{"circle-radius":5,"circle-color":"#fff"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-and-line-vertex-inactive.cold","type":"circle","filter":["all",["==","meta","vertex"],["==","$type","Point"],["!=","mode","static"]],"paint":{"circle-radius":3,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-point-point-stroke-inactive.cold","type":"circle","filter":["all",["==","active","false"],["==","$type","Point"],["==","meta","feature"],["!=","mode","static"]],"paint":{"circle-radius":5,"circle-opacity":1,"circle-color":"#fff"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-point-inactive.cold","type":"circle","filter":["all",["==","active","false"],["==","$type","Point"],["==","meta","feature"],["!=","mode","static"]],"paint":{"circle-radius":3,"circle-color":"#3bb2d0"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-point-stroke-active.cold","type":"circle","filter":["all",["==","$type","Point"],["==","active","true"],["!=","meta","midpoint"]],"paint":{"circle-radius":7,"circle-color":"#fff"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-point-active.cold","type":"circle","filter":["all",["==","$type","Point"],["!=","meta","midpoint"],["==","active","true"]],"paint":{"circle-radius":5,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-fill-static.cold","type":"fill","filter":["all",["==","mode","static"],["==","$type","Polygon"]],"paint":{"fill-color":"#404040","fill-outline-color":"#404040","fill-opacity":0.1},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-stroke-static.cold","type":"line","filter":["all",["==","mode","static"],["==","$type","Polygon"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#404040","line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-line-static.cold","type":"line","filter":["all",["==","mode","static"],["==","$type","LineString"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#404040","line-width":2},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-point-static.cold","type":"circle","filter":["all",["==","mode","static"],["==","$type","Point"]],"paint":{"circle-radius":5,"circle-color":"#404040"},"source":"mapbox-gl-draw-cold"},{"id":"gl-draw-polygon-fill-inactive.hot","type":"fill","filter":["all",["==","active","false"],["==","$type","Polygon"],["!=","mode","static"]],"paint":{"fill-color":"#3bb2d0","fill-outline-color":"#3bb2d0","fill-opacity":0.1},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-fill-active.hot","type":"fill","filter":["all",["==","active","true"],["==","$type","Polygon"]],"paint":{"fill-color":"#fbb03b","fill-outline-color":"#fbb03b","fill-opacity":0.1},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-midpoint.hot","type":"circle","filter":["all",["==","$type","Point"],["==","meta","midpoint"]],"paint":{"circle-radius":3,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-stroke-inactive.hot","type":"line","filter":["all",["==","active","false"],["==","$type","Polygon"],["!=","mode","static"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#3bb2d0","line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-stroke-active.hot","type":"line","filter":["all",["==","active","true"],["==","$type","Polygon"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#fbb03b","line-dasharray":[0.2,2],"line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-line-inactive.hot","type":"line","filter":["all",["==","active","false"],["==","$type","LineString"],["!=","mode","static"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#3bb2d0","line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-line-active.hot","type":"line","filter":["all",["==","$type","LineString"],["==","active","true"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#fbb03b","line-dasharray":[0.2,2],"line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-and-line-vertex-stroke-inactive.hot","type":"circle","filter":["all",["==","meta","vertex"],["==","$type","Point"],["!=","mode","static"]],"paint":{"circle-radius":5,"circle-color":"#fff"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-and-line-vertex-inactive.hot","type":"circle","filter":["all",["==","meta","vertex"],["==","$type","Point"],["!=","mode","static"]],"paint":{"circle-radius":3,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-point-point-stroke-inactive.hot","type":"circle","filter":["all",["==","active","false"],["==","$type","Point"],["==","meta","feature"],["!=","mode","static"]],"paint":{"circle-radius":5,"circle-opacity":1,"circle-color":"#fff"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-point-inactive.hot","type":"circle","filter":["all",["==","active","false"],["==","$type","Point"],["==","meta","feature"],["!=","mode","static"]],"paint":{"circle-radius":3,"circle-color":"#3bb2d0"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-point-stroke-active.hot","type":"circle","filter":["all",["==","$type","Point"],["==","active","true"],["!=","meta","midpoint"]],"paint":{"circle-radius":7,"circle-color":"#fff"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-point-active.hot","type":"circle","filter":["all",["==","$type","Point"],["!=","meta","midpoint"],["==","active","true"]],"paint":{"circle-radius":5,"circle-color":"#fbb03b"},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-fill-static.hot","type":"fill","filter":["all",["==","mode","static"],["==","$type","Polygon"]],"paint":{"fill-color":"#404040","fill-outline-color":"#404040","fill-opacity":0.1},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-polygon-stroke-static.hot","type":"line","filter":["all",["==","mode","static"],["==","$type","Polygon"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#404040","line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-line-static.hot","type":"line","filter":["all",["==","mode","static"],["==","$type","LineString"]],"layout":{"line-cap":"round","line-join":"round"},"paint":{"line-color":"#404040","line-width":2},"source":"mapbox-gl-draw-hot"},{"id":"gl-draw-point-static.hot","type":"circle","filter":["all",["==","mode","static"],["==","$type","Point"]],"paint":{"circle-radius":5,"circle-color":"#404040"},"source":"mapbox-gl-draw-hot"}]
+[
+  {
+    "id": "gl-draw-polygon-fill.cold",
+    "type": "fill",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Polygon"
+      ]
+    ],
+    "paint": {
+      "fill-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ],
+      "fill-opacity": 0.1
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-lines.cold",
+    "type": "line",
+    "filter": [
+      "any",
+      [
+        "==",
+        "$type",
+        "LineString"
+      ],
+      [
+        "==",
+        "$type",
+        "Polygon"
+      ]
+    ],
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ],
+      "line-dasharray": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        [
+          0.2,
+          2
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "line-width": 2
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-point-outer.cold",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "feature"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        7,
+        5
+      ],
+      "circle-color": "#fff"
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-point-inner.cold",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "feature"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        5,
+        3
+      ],
+      "circle-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ]
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-vertex-outer.cold",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "vertex"
+      ],
+      [
+        "!=",
+        "mode",
+        "simple_select"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        7,
+        5
+      ],
+      "circle-color": "#fff"
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-vertex-inner.cold",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "vertex"
+      ],
+      [
+        "!=",
+        "mode",
+        "simple_select"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        5,
+        3
+      ],
+      "circle-color": "#fbb03b"
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-midpoint.cold",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "meta",
+        "midpoint"
+      ]
+    ],
+    "paint": {
+      "circle-radius": 3,
+      "circle-color": "#fbb03b"
+    },
+    "source": "mapbox-gl-draw-cold"
+  },
+  {
+    "id": "gl-draw-polygon-fill.hot",
+    "type": "fill",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Polygon"
+      ]
+    ],
+    "paint": {
+      "fill-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ],
+      "fill-opacity": 0.1
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-lines.hot",
+    "type": "line",
+    "filter": [
+      "any",
+      [
+        "==",
+        "$type",
+        "LineString"
+      ],
+      [
+        "==",
+        "$type",
+        "Polygon"
+      ]
+    ],
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ],
+      "line-dasharray": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        [
+          0.2,
+          2
+        ],
+        [
+          2,
+          0
+        ]
+      ],
+      "line-width": 2
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-point-outer.hot",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "feature"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        7,
+        5
+      ],
+      "circle-color": "#fff"
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-point-inner.hot",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "feature"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        5,
+        3
+      ],
+      "circle-color": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        "#fbb03b",
+        "#3bb2d0"
+      ]
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-vertex-outer.hot",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "vertex"
+      ],
+      [
+        "!=",
+        "mode",
+        "simple_select"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        7,
+        5
+      ],
+      "circle-color": "#fff"
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-vertex-inner.hot",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "$type",
+        "Point"
+      ],
+      [
+        "==",
+        "meta",
+        "vertex"
+      ],
+      [
+        "!=",
+        "mode",
+        "simple_select"
+      ]
+    ],
+    "paint": {
+      "circle-radius": [
+        "case",
+        [
+          "==",
+          [
+            "get",
+            "active"
+          ],
+          "true"
+        ],
+        5,
+        3
+      ],
+      "circle-color": "#fbb03b"
+    },
+    "source": "mapbox-gl-draw-hot"
+  },
+  {
+    "id": "gl-draw-midpoint.hot",
+    "type": "circle",
+    "filter": [
+      "all",
+      [
+        "==",
+        "meta",
+        "midpoint"
+      ]
+    ],
+    "paint": {
+      "circle-radius": 3,
+      "circle-color": "#fbb03b"
+    },
+    "source": "mapbox-gl-draw-hot"
+  }
+]

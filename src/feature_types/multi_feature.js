@@ -1,11 +1,15 @@
-const Feature = require('./feature');
-const Constants = require('../constants');
-const hat = require('hat');
+import hat from 'hat';
+import Feature from './feature.js';
+import * as Constants from '../constants.js';
+
+import MultiPoint from './point.js';
+import MultiLineString from './line_string.js';
+import MultiPolygon from './polygon.js';
 
 const models = {
-  MultiPoint: require('./point'),
-  MultiLineString: require('./line_string'),
-  MultiPolygon: require('./polygon')
+  MultiPoint,
+  MultiLineString,
+  MultiPolygon
 };
 
 const takeAction = (features, action, path, lng, lat) => {
@@ -53,7 +57,7 @@ MultiFeature.prototype.getCoordinate = function(path) {
 };
 
 MultiFeature.prototype.getCoordinates = function() {
-  return JSON.parse(JSON.stringify(this.features.map(f => {
+  return JSON.parse(JSON.stringify(this.features.map((f) => {
     if (f.type === Constants.geojsonTypes.POLYGON) return f.getCoordinates();
     return f.coordinates;
   })));
@@ -78,4 +82,4 @@ MultiFeature.prototype.getFeatures = function() {
   return this.features;
 };
 
-module.exports = MultiFeature;
+export default MultiFeature;

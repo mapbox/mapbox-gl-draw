@@ -1,6 +1,7 @@
-const Constants = require('./constants');
+import * as Constants from './constants.js';
 
-module.exports = function render() {
+export default function render() {
+  // eslint-disable-next-line no-invalid-this
   const store = this;
   const mapExists = store.ctx.map && store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
   if (!mapExists) return cleanup();
@@ -16,9 +17,7 @@ module.exports = function render() {
     newColdIds = store.getAllIds();
   } else {
     newHotIds = store.getChangedIds().filter(id => store.get(id) !== undefined);
-    newColdIds = store.sources.hot.filter((geojson) => {
-      return geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined;
-    }).map(geojson => geojson.properties.id);
+    newColdIds = store.sources.hot.filter(geojson => geojson.properties.id && newHotIds.indexOf(geojson.properties.id) === -1 && store.get(geojson.properties.id) !== undefined).map(geojson => geojson.properties.id);
   }
 
   store.sources.hot = [];
@@ -36,6 +35,7 @@ module.exports = function render() {
     const feature = store.get(id);
     const featureInternal = feature.internal(mode);
     store.ctx.events.currentModeRender(featureInternal, (geojson) => {
+      geojson.properties.mode = mode;
       store.sources[source].push(geojson);
     });
   }
@@ -55,16 +55,14 @@ module.exports = function render() {
   if (store._emitSelectionChange) {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
       features: store.getSelected().map(feature => feature.toGeoJSON()),
-      points: store.getSelectedCoordinates().map(coordinate => {
-        return {
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coordinate.coordinates
-          }
-        };
-      })
+      points: store.getSelectedCoordinates().map(coordinate => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      }))
     });
     store._emitSelectionChange = false;
   }
@@ -86,4 +84,4 @@ module.exports = function render() {
     store.isDirty = false;
     store.clearChangedIds();
   }
-};
+}

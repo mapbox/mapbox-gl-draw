@@ -1,8 +1,8 @@
-const CommonSelectors = require('../lib/common_selectors');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const Constants = require('../constants');
-const isEventAtCoordinates = require('../lib/is_event_at_coordinates');
-const createVertex = require('../lib/create_vertex');
+import * as CommonSelectors from '../lib/common_selectors.js';
+import doubleClickZoom from '../lib/double_click_zoom.js';
+import * as Constants from '../constants.js';
+import isEventAtCoordinates from '../lib/is_event_at_coordinates.js';
+import createVertex from '../lib/create_vertex.js';
 
 const DrawPolygon = {};
 
@@ -138,4 +138,4 @@ DrawPolygon.onTrash = function(state) {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-module.exports = DrawPolygon;
+export default DrawPolygon;

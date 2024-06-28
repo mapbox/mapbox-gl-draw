@@ -1,10 +1,9 @@
-const {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
-const createSupplementaryPoints = require('../lib/create_supplementary_points');
-const constrainFeatureMovement = require('../lib/constrain_feature_movement');
-const doubleClickZoom = require('../lib/double_click_zoom');
-const Constants = require('../constants');
-const CommonSelectors = require('../lib/common_selectors');
-const moveFeatures = require('../lib/move_features');
+import { noTarget, isOfMetaType, isActiveFeature, isInactiveFeature, isShiftDown } from '../lib/common_selectors.js';
+import createSupplementaryPoints from '../lib/create_supplementary_points.js';
+import constrainFeatureMovement from '../lib/constrain_feature_movement.js';
+import doubleClickZoom from '../lib/double_click_zoom.js';
+import * as Constants from '../constants.js';
+import moveFeatures from '../lib/move_features.js';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -64,7 +63,7 @@ DirectSelect.onMidpoint = function(state, e) {
 };
 
 DirectSelect.pathsToCoordinates = function(featureId, paths) {
-  return paths.map(coord_path => { return { feature_id: featureId, coord_path }; });
+  return paths.map(coord_path => ({ feature_id: featureId, coord_path }));
 };
 
 DirectSelect.onFeature = function(state, e) {
@@ -165,7 +164,11 @@ DirectSelect.toDisplayFeatures = function(state, geojson, push) {
 };
 
 DirectSelect.onTrash = function(state) {
-  state.selectedCoordPaths.sort().reverse().forEach(id => state.feature.removeCoordinate(id));
+  // Uses number-aware sorting to make sure '9' < '10'. Comparison is reversed because we want them
+  // in reverse order so that we can remove by index safely.
+  state.selectedCoordPaths
+    .sort((a, b) => b.localeCompare(a, 'en', { numeric: true }))
+    .forEach(id => state.feature.removeCoordinate(id));
   this.fireUpdate();
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
@@ -178,23 +181,34 @@ DirectSelect.onTrash = function(state) {
 
 DirectSelect.onMouseMove = function(state, e) {
   // On mousemove that is not a drag, stop vertex movement.
-  const isFeature = CommonSelectors.isActiveFeature(e);
+  const isFeature = isActiveFeature(e);
   const onVertex = isVertex(e);
+  const isMidPoint = isMidpoint(e);
   const noCoords = state.selectedCoordPaths.length === 0;
   if (isFeature && noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else if (onVertex && !noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else this.updateUIClasses({ mouse: Constants.cursors.NONE });
+
+  const isDraggableItem = onVertex || isFeature || isMidPoint;
+  if (isDraggableItem && state.dragMoving) this.fireUpdate();
+
   this.stopDragging(state);
+
+  // Skip render
+  return true;
 };
 
 DirectSelect.onMouseOut = function(state) {
   // As soon as you mouse leaves the canvas, update the feature
   if (state.dragMoving) this.fireUpdate();
+
+  // Skip render
+  return true;
 };
 
 DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {
   if (isVertex(e)) return this.onVertex(state, e);
-  if (CommonSelectors.isActiveFeature(e)) return this.onFeature(state, e);
+  if (isActiveFeature(e)) return this.onFeature(state, e);
   if (isMidpoint(e)) return this.onMidpoint(state, e);
 };
 
@@ -215,14 +229,14 @@ DirectSelect.onDrag = function(state, e) {
 
 DirectSelect.onClick = function(state, e) {
   if (noTarget(e)) return this.clickNoTarget(state, e);
-  if (CommonSelectors.isActiveFeature(e)) return this.clickActiveFeature(state, e);
+  if (isActiveFeature(e)) return this.clickActiveFeature(state, e);
   if (isInactiveFeature(e)) return this.clickInactive(state, e);
   this.stopDragging(state);
 };
 
 DirectSelect.onTap = function(state, e) {
   if (noTarget(e)) return this.clickNoTarget(state, e);
-  if (CommonSelectors.isActiveFeature(e)) return this.clickActiveFeature(state, e);
+  if (isActiveFeature(e)) return this.clickActiveFeature(state, e);
   if (isInactiveFeature(e)) return this.clickInactive(state, e);
 };
 
@@ -233,5 +247,5 @@ DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function(state) {
   this.stopDragging(state);
 };
 
-module.exports = DirectSelect;
+export default DirectSelect;
 

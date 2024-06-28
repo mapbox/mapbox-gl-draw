@@ -1,4 +1,4 @@
-const Feature = require('./feature');
+import Feature from './feature.js';
 
 const Point = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
@@ -24,4 +24,4 @@ Point.prototype.getCoordinate = function() {
   return this.getCoordinates();
 };
 
-module.exports = Point;
+export default Point;

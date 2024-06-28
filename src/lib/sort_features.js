@@ -1,9 +1,10 @@
-const area = require('@mapbox/geojson-area');
-const Constants = require('../constants');
+import area from '@mapbox/geojson-area';
+import * as Constants from '../constants.js';
 
 const FEATURE_SORT_RANKS = {
   Point: 0,
   LineString: 1,
+  MultiLineString: 1,
   Polygon: 2
 };
 
@@ -19,7 +20,7 @@ function comparator(a, b) {
 
 // Sort in the order above, then sort polygons by area ascending.
 function sortFeatures(features) {
-  return features.map(feature => {
+  return features.map((feature) => {
     if (feature.geometry.type === Constants.geojsonTypes.POLYGON) {
       feature.area = area.geometry({
         type: Constants.geojsonTypes.FEATURE,
@@ -28,10 +29,10 @@ function sortFeatures(features) {
       });
     }
     return feature;
-  }).sort(comparator).map(feature => {
+  }).sort(comparator).map((feature) => {
     delete feature.area;
     return feature;
   });
 }
 
-module.exports = sortFeatures;
+export default sortFeatures;

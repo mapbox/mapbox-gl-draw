@@ -1,20 +1,20 @@
-const Constants = require('../constants');
-const featuresAt = require('../lib/features_at');
-const Point = require('../feature_types/point');
-const LineString = require('../feature_types/line_string');
-const Polygon = require('../feature_types/polygon');
-const MultiFeature = require('../feature_types/multi_feature');
+import * as Constants from '../constants.js';
+import featuresAt from '../lib/features_at.js';
+import Point from '../feature_types/point.js';
+import LineString from '../feature_types/line_string.js';
+import Polygon from '../feature_types/polygon.js';
+import MultiFeature from '../feature_types/multi_feature.js';
 
-const ModeInterface = module.exports = function(ctx) {
+export default function ModeInterface(ctx) {
   this.map = ctx.map;
   this.drawConfig = JSON.parse(JSON.stringify(ctx.options || {}));
   this._ctx = ctx;
-};
+}
 
 /**
  * Sets Draw's interal selected state
  * @name this.setSelected
- * @param {DrawFeature[]} - whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+ * @param {DrawFeature[]} - whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
  */
 ModeInterface.prototype.setSelected = function(features) {
   return this._ctx.store.setSelected(features);
@@ -23,7 +23,7 @@ ModeInterface.prototype.setSelected = function(features) {
 /**
  * Sets Draw's internal selected coordinate state
  * @name this.setSelectedCoordinates
- * @param {Object[]} coords - a array of {coord_path: 'string', featureId: 'string'}
+ * @param {Object[]} coords - a array of {coord_path: 'string', feature_id: 'string'}
  */
 ModeInterface.prototype.setSelectedCoordinates = function(coords) {
   this._ctx.store.setSelectedCoordinates(coords);
@@ -37,7 +37,7 @@ ModeInterface.prototype.setSelectedCoordinates = function(coords) {
 };
 
 /**
- * Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+ * Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
  * @name this.getSelected
  * @returns {DrawFeature[]}
  */
@@ -65,7 +65,7 @@ ModeInterface.prototype.isSelected = function(id) {
 };
 
 /**
- * Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) by its id
+ * Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) by its id
  * @name this.getFeature
  * @param {String} id - a feature id
  * @returns {DrawFeature}
@@ -102,7 +102,7 @@ ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
 };
 
 /**
- * Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) to draw.
+ * Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) to draw.
  * See `this.newFeature` for converting geojson into a DrawFeature
  * @name this.addFeature
  * @param {DrawFeature} feature - the feature to add
@@ -127,7 +127,7 @@ ModeInterface.prototype.clearSelectedCoordinates = function() {
 
 /**
  * Indicate if the different action are currently possible with your mode
- * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
+ * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
  * @name this.setActionableState
  * @param {Object} actions
  */
@@ -182,7 +182,7 @@ ModeInterface.prototype.featuresAt = function(event, bbox, bufferType = 'click')
 };
 
 /**
- * Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js) from geojson
+ * Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js) from geojson
  * @name this.newFeature
  * @param {GeoJSONFeature} geojson
  * @returns {DrawFeature}
@@ -196,7 +196,7 @@ ModeInterface.prototype.newFeature = function(geojson) {
 };
 
 /**
- * Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/master/src/feature_types/feature.js)
+ * Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature.js)
  * @name this.isInstanceOf
  * @param {String} type - `Point`, `LineString`, `Polygon`, `MultiFeature`
  * @param {Object} feature - the object that needs to be checked

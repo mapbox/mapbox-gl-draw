@@ -1,11 +1,10 @@
-import xtend from 'xtend';
-import getGeoJSON from './get_geojson';
 import hat from 'hat';
+import getGeoJSON from './get_geojson.js';
 
 const hatRack = hat.rack();
 
 export default function createFeature(featureType) {
-  const feature = xtend({
+  const feature = Object.assign({
     id: hatRack(),
     properties: {}
   }, getGeoJSON(featureType));

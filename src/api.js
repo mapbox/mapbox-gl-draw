@@ -1,22 +1,26 @@
-const isEqual = require('lodash.isequal');
-const normalize = require('@mapbox/geojson-normalize');
-const hat = require('hat');
-const featuresAt = require('./lib/features_at');
-const stringSetsAreEqual = require('./lib/string_sets_are_equal');
-const geojsonhint = require('@mapbox/geojsonhint');
-const Constants = require('./constants');
-const StringSet = require('./lib/string_set');
+import isEqual from 'fast-deep-equal';
+import normalize from '@mapbox/geojson-normalize';
+import hat from 'hat';
+import featuresAt from './lib/features_at.js';
+import stringSetsAreEqual from './lib/string_sets_are_equal.js';
+import * as Constants from './constants.js';
+import StringSet from './lib/string_set.js';
+
+import Polygon from './feature_types/polygon.js';
+import LineString from './feature_types/line_string.js';
+import Point from './feature_types/point.js';
+import MultiFeature from './feature_types/multi_feature.js';
 
 const featureTypes = {
-  Polygon: require('./feature_types/polygon'),
-  LineString: require('./feature_types/line_string'),
-  Point: require('./feature_types/point'),
-  MultiPolygon: require('./feature_types/multi_feature'),
-  MultiLineString: require('./feature_types/multi_feature'),
-  MultiPoint: require('./feature_types/multi_feature')
+  Polygon,
+  LineString,
+  Point,
+  MultiPolygon: MultiFeature,
+  MultiLineString: MultiFeature,
+  MultiPoint: MultiFeature
 };
 
-module.exports = function(ctx, api) {
+export default function(ctx, api) {
 
   api.modes = Constants.modes;
 
@@ -39,16 +43,14 @@ module.exports = function(ctx, api) {
   api.getSelectedPoints = function () {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
-      features: ctx.store.getSelectedCoordinates().map(coordinate => {
-        return {
-          type: Constants.geojsonTypes.FEATURE,
-          properties: {},
-          geometry: {
-            type: Constants.geojsonTypes.POINT,
-            coordinates: coordinate.coordinates
-          }
-        };
-      })
+      features: ctx.store.getSelectedCoordinates().map(coordinate => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      }))
     };
   };
 
@@ -71,13 +73,9 @@ module.exports = function(ctx, api) {
   };
 
   api.add = function (geojson) {
-    const errors = geojsonhint.hint(geojson, { precisionWarning: false }).filter(e => e.level !== 'message');
-    if (errors.length) {
-      throw new Error(errors[0].message);
-    }
     const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
-    const ids = featureCollection.features.map(feature => {
+    const ids = featureCollection.features.map((feature) => {
       feature.id = feature.id || hat();
 
       if (feature.geometry === null) {
@@ -95,7 +93,11 @@ module.exports = function(ctx, api) {
       } else {
         // If a feature of that id has already been created, and we are swapping it out ...
         const internalFeature = ctx.store.get(feature.id);
+        const originalProperties = internalFeature.properties;
         internalFeature.properties = feature.properties;
+        if (!isEqual(originalProperties, feature.properties)) {
+          ctx.store.featureChanged(internalFeature.id);
+        }
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);
         }
@@ -193,4 +195,4 @@ module.exports = function(ctx, api) {
   };
 
   return api;
-};
+}

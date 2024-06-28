@@ -1,5 +1,7 @@
-const xtend = require('xtend');
-const Constants = require('./constants');
+import * as Constants from './constants.js';
+
+import styles from './lib/theme.js';
+import modes from './modes/index.js';
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
@@ -9,8 +11,8 @@ const defaultOptions = {
   touchBuffer: 25,
   boxSelect: true,
   displayControlsDefault: true,
-  styles: require('./lib/theme'),
-  modes: require('./modes'),
+  styles,
+  modes,
   controls: {},
   userProperties: false
 };
@@ -34,32 +36,32 @@ const hideControls = {
 };
 
 function addSources(styles, sourceBucket) {
-  return styles.map(style => {
+  return styles.map((style) => {
     if (style.source) return style;
-    return xtend(style, {
+    return Object.assign({}, style, {
       id: `${style.id}.${sourceBucket}`,
       source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
     });
   });
 }
 
-module.exports = function(options = {}) {
-  let withDefaults = xtend(options);
+export default function(options = {}) {
+  let withDefaults = Object.assign({}, options);
 
   if (!options.controls) {
     withDefaults.controls = {};
   }
 
   if (options.displayControlsDefault === false) {
-    withDefaults.controls = xtend(hideControls, options.controls);
+    withDefaults.controls = Object.assign({}, hideControls, options.controls);
   } else {
-    withDefaults.controls = xtend(showControls, options.controls);
+    withDefaults.controls = Object.assign({}, showControls, options.controls);
   }
 
-  withDefaults = xtend(defaultOptions, withDefaults);
+  withDefaults = Object.assign({}, defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
   withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
 
   return withDefaults;
-};
+}

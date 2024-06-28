@@ -1,4 +1,5 @@
-const ModeInterface = module.exports = require('./mode_interface_accessors');
+import ModeInterface from './mode_interface_accessors.js';
+export default ModeInterface;
 
 /**
  * Triggered while a mode is being transitioned into.
@@ -112,21 +113,21 @@ ModeInterface.prototype.onTap = function() {};
 ModeInterface.prototype.onStop = function() {};
 
 /**
- * Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#trash-draw) is called.
+ * Triggered when [draw.trash()](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#trash-draw) is called.
  * @name MODE.onTrash
  * @param state {Object} - a mutible state object created by onSetup
  */
 ModeInterface.prototype.onTrash = function() {};
 
 /**
- * Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#combinefeatures-draw) is called.
+ * Triggered when [draw.combineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#combinefeatures-draw) is called.
  * @name MODE.onCombineFeature
  * @param state {Object} - a mutible state object created by onSetup
  */
 ModeInterface.prototype.onCombineFeature = function() {};
 
 /**
- * Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#uncombinefeatures-draw) is called.
+ * Triggered when [draw.uncombineFeatures()](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#uncombinefeatures-draw) is called.
  * @name MODE.onUncombineFeature
  * @param state {Object} - a mutible state object created by onSetup
  */
@@ -134,7 +135,7 @@ ModeInterface.prototype.onUncombineFeature = function() {};
 
 /**
  * Triggered per feature on render to convert raw features into set of features for display on the map
- * See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/master/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
+ * See [styling draw](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#styling-draw) for information about what geojson properties Draw uses as part of rendering.
  * @name MODE.toDisplayFeatures
  * @param state {Object} - a mutible state object created by onSetup
  * @param geojson {Object} - a geojson being evaulated. To render, pass to `display`.

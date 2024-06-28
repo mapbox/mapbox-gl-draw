@@ -1,54 +1,51 @@
 'use strict';
 
-var Evented = require('../../node_modules/mapbox-gl/js/util/evented');
-var util = require('../../node_modules/mapbox-gl/js/util/util');
-var formatNumber = require('../lib/format_number');
-var fpsRunner = require('../lib/fps');
-var DrawMouse = require('../lib/mouse_draw');
+import Evented from '../lib/evented';
+import formatNumber from '../lib/format_number';
+import fpsRunner from '../lib/fps';
+import DrawMouse from '../lib/mouse_draw';
 
-var START = {x: 189, y: 293}
+const START = {x: 189, y: 293};
 
-module.exports = function(options) {
-    var evented = util.extend({}, Evented);
+export default class Benchmark extends Evented {
+  constructor(options) {
+    super();
 
-    var out = options.createMap({
+    const out = options.createMap({
       width:1024,
       center: [-75.5597469696618, -2.6084634090944974],
       zoom: 5
     });
 
-    var dragMouse = DrawMouse(START, out.map);
+    // eslint-disable-next-line new-cap
+    const dragMouse = DrawMouse(START, out.map);
 
-    var progressDiv = document.getElementById('progress');
-    out.map.on('progress', function(e) {
-      progressDiv.style.width = e.done+"%";
+    const progressDiv = document.getElementById('progress');
+    out.map.on('progress', (e) => {
+      progressDiv.style.width = `${e.done}%`;
     });
 
-    out.map.on('load', function() {
-      out.map.on('draw.modechange', function(e) {
-        if(e.mode === 'simple_select') {
+    out.map.on('load', () => {
+      out.map.on('draw.modechange', (e) => {
+        if (e.mode === 'simple_select') {
           out.draw.changeMode('draw_point');
         }
       });
       out.draw.changeMode('draw_point');
 
-      setTimeout(function() {
-        var FPSControl = fpsRunner();
+      setTimeout(() => {
+        const FPSControl = fpsRunner();
         FPSControl.start();
-        dragMouse(function() {
-          var fps = FPSControl.stop();
+        dragMouse(() => {
+          const fps = FPSControl.stop();
           if (fps < 55) {
-            evented.fire('fail', {message: formatNumber(fps)+' fps - expected 55fps or better'});
-          }
-          else {
-            evented.fire('pass', {message: formatNumber(fps)+' fps'});
+            this.fire('fail', {message: `${formatNumber(fps)} fps - expected 55fps or better`});
+          } else {
+            this.fire('pass', {message: `${formatNumber(fps)} fps`});
           }
           out.draw.changeMode('simple_select');
         });
       }, 2000);
     });
-
-    return evented;
-};
-
-
+  }
+}
