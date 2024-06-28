@@ -1,4 +1,4 @@
-import bboxClip from '@turf/bbox-clip';
+import {bboxClip} from '@turf/bbox-clip';
 
 import Evented from '../../bench/lib/evented.js';
 import { interactions } from '../../src/constants.js';
