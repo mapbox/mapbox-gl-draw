@@ -1,4 +1,4 @@
-import * as Constants from "../constants";
+import * as Constants from '../constants.js';
 
 const {
   LAT_MIN,

@@ -1,6 +1,6 @@
 'use strict';
 
-import {Evented} from 'mapbox-gl/src/util/evented';
+import Evented from '../lib/evented';
 import formatNumber from '../lib/format_number';
 import land from '../fixtures/land.json';
 import fpsRunner from '../lib/fps';

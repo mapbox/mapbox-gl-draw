@@ -1,4 +1,4 @@
-import Feature from './feature';
+import Feature from './feature.js';
 
 const LineString = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);

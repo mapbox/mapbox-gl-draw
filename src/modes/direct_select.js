@@ -1,9 +1,9 @@
-import {noTarget, isOfMetaType, isActiveFeature, isInactiveFeature, isShiftDown} from '../lib/common_selectors';
-import createSupplementaryPoints from '../lib/create_supplementary_points';
-import constrainFeatureMovement from '../lib/constrain_feature_movement';
-import doubleClickZoom from '../lib/double_click_zoom';
-import * as Constants from '../constants';
-import moveFeatures from '../lib/move_features';
+import { noTarget, isOfMetaType, isActiveFeature, isInactiveFeature, isShiftDown } from '../lib/common_selectors.js';
+import createSupplementaryPoints from '../lib/create_supplementary_points.js';
+import constrainFeatureMovement from '../lib/constrain_feature_movement.js';
+import doubleClickZoom from '../lib/double_click_zoom.js';
+import * as Constants from '../constants.js';
+import moveFeatures from '../lib/move_features.js';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -183,10 +183,15 @@ DirectSelect.onMouseMove = function(state, e) {
   // On mousemove that is not a drag, stop vertex movement.
   const isFeature = isActiveFeature(e);
   const onVertex = isVertex(e);
+  const isMidPoint = isMidpoint(e);
   const noCoords = state.selectedCoordPaths.length === 0;
   if (isFeature && noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else if (onVertex && !noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else this.updateUIClasses({ mouse: Constants.cursors.NONE });
+
+  const isDraggableItem = onVertex || isFeature || isMidPoint;
+  if (isDraggableItem && state.dragMoving) this.fireUpdate();
+
   this.stopDragging(state);
 
   // Skip render
