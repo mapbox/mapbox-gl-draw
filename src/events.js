@@ -1,10 +1,10 @@
-import setupModeHandler from './lib/mode_handler';
-import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
-import featuresAt from './lib/features_at';
-import isClick from './lib/is_click';
-import isTap from './lib/is_tap';
-import * as Constants from './constants';
-import objectToMode from './modes/object_to_mode';
+import setupModeHandler from './lib/mode_handler.js';
+import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor.js';
+import featuresAt from './lib/features_at.js';
+import isClick from './lib/is_click.js';
+import isTap from './lib/is_tap.js';
+import * as Constants from './constants.js';
+import objectToMode from './modes/object_to_mode.js';
 
 export default function(ctx) {
 
@@ -125,7 +125,7 @@ export default function(ctx) {
   const isKeyModeValid = code => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
   events.keydown = function(event) {
-    const isMapElement = (event.srcElement || event.target).classList.contains('mapboxgl-canvas');
+    const isMapElement = (event.srcElement || event.target).classList.contains(Constants.classes.CANVAS);
     if (!isMapElement) return; // we only handle events on the map
 
     if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {

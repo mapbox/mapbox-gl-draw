@@ -1,10 +1,10 @@
-import Feature from './feature';
-import * as Constants from '../constants';
 import hat from 'hat';
+import Feature from './feature.js';
+import * as Constants from '../constants.js';
 
-import MultiPoint from './point';
-import MultiLineString from './line_string';
-import MultiPolygon from './polygon';
+import MultiPoint from './point.js';
+import MultiLineString from './line_string.js';
+import MultiPolygon from './polygon.js';
 
 const models = {
   MultiPoint,

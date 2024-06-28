@@ -5,16 +5,10 @@
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <meta charset=utf-8 />
   <title>Mapbox GL Draw | Mapbox</title>
-  <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
-  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css' rel='stylesheet'>
-  <link href='/dist/mapbox-gl-draw.css' rel='stylesheet' />
   <style>
     body { margin:0; padding:0; }
     html, body, #map { height: 100%; }
     .start-draw {
-      width: 315px;
       position: absolute;
       left :10px;
       bottom: 10px;
@@ -36,10 +30,10 @@
     }
   </style>
 </head>
+
 <body>
 <div id='map'></div>
-<div class='start-draw' >
-  <div id='start-static'>STATIC</div>
+<div class='start-draw'>
   <div id='start-point'>POINT</div>
   <div id='start-line'>LINE</div>
   <div id='start-polygon'>POLYGON</div>
@@ -50,12 +44,105 @@
   <button id='removeBtn'>remove draw</button>
   <button id='flipStyleBtn'>change style</button>
 </div>
-<script src='/debug/access_token_generated.js'></script>
-<script src='/dist/mapbox-gl-draw-unminified.js'></script>
-<script src='/debug/app.js'></script>
+
 <script type='text/javascript'>
 // Adds in the FPS graph to the top of the page.
 (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right: 500px;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>
+
+<script type='module'>
+  import mapboxgl from 'mapbox-gl';
+  import 'mapbox-gl/dist/mapbox-gl.css';
+
+  import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+  import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+
+  import MapboxDraw from '../index.js';
+  import '../dist/mapbox-gl-draw.css';
+
+  import {getAccessToken} from './access_token_generated.js';
+
+  mapboxgl.accessToken = getAccessToken();
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    zoom: 1,
+    center: [0, 0],
+  });
+
+  map.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl
+  }));
+
+  map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+  const modes = MapboxDraw.modes;
+  const Draw = window.Draw = new MapboxDraw({ modes });
+  let drawIsActive = true;
+  map.addControl(Draw, 'bottom-right');
+
+  map.on('load', () => {
+    // Add Draw to the map if it is inactive
+    const addButton = document.getElementById('addBtn');
+    addButton.onclick = function () {
+      if (drawIsActive) return;
+      drawIsActive = true;
+      map.addControl(Draw, 'bottom-right');
+    };
+
+    // Remove draw from the map if it is active
+    const removeButton = document.getElementById('removeBtn');
+    removeButton.onclick = function () {
+      if (!drawIsActive) return;
+      drawIsActive = false;
+      map.removeControl(Draw);
+    };
+
+    // Toggle the style between dark and streets
+    const flipStyleButton = document.getElementById('flipStyleBtn');
+    let currentStyle = 'streets-v9';
+    flipStyleButton.onclick = function () {
+      const style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
+      map.setStyle(`mapbox://styles/mapbox/${style}`);
+      currentStyle = style;
+    };
+
+    // toggle double click zoom
+    const doubleClickZoom = document.getElementById('doubleClickZoom');
+    let doubleClickZoomOn = true;
+    doubleClickZoom.onclick = function () {
+      if (doubleClickZoomOn) {
+        doubleClickZoomOn = false;
+        map.doubleClickZoom.disable();
+        doubleClickZoom.innerText = 'enable dblclick zoom';
+      } else {
+        map.doubleClickZoom.enable();
+        doubleClickZoomOn = true;
+        doubleClickZoom.innerText = 'disable dblclick zoom';
+      }
+    };
+
+    // Jump into draw point mode via a custom UI element
+    const startPoint = document.getElementById('start-point');
+    startPoint.onclick = function () {
+      Draw.changeMode('draw_point');
+    };
+
+    // Jump into draw line mode via a custom UI element
+    const startLine = document.getElementById('start-line');
+    startLine.onclick = function () {
+      Draw.changeMode('draw_line_string');
+    };
+
+    // Jump into draw polygon mode via a custom UI element
+    const startPolygon = document.getElementById('start-polygon');
+    startPolygon.onclick = function () {
+      Draw.changeMode('draw_polygon');
+    };
+  });
+
+</script>
+
 </body>
 </html>

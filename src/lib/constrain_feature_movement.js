@@ -1,5 +1,4 @@
-import extent from '@mapbox/geojson-extent';
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 const {
   LAT_MIN,
@@ -7,8 +6,25 @@ const {
   LAT_RENDERED_MIN,
   LAT_RENDERED_MAX,
   LNG_MIN,
-  LNG_MAX
+  LNG_MAX,
 } = Constants;
+function extent(feature) {
+  const depth = {
+    Point: 0,
+    LineString: 1,
+    Polygon: 2,
+    MultiPoint: 1,
+    MultiLineString: 2,
+    MultiPolygon: 3,
+  }[feature.geometry.type];
+
+  const coords = [feature.geometry.coordinates].flat(depth);
+  const lngs = coords.map(coord => coord[0]);
+  const lats = coords.map(coord => coord[1]);
+  const min = vals => Math.min.apply(null, vals);
+  const max = vals => Math.max.apply(null, vals);
+  return [min(lngs), min(lats), max(lngs), max(lats)];
+}
 
 // Ensure that we do not drag north-south far enough for
 // - any part of any feature to exceed the poles

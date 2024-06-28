@@ -1,59 +1,57 @@
-import test from 'tape';
-import * as commonSelectors from '../src/lib/common_selectors';
+import test from 'node:test';
+import assert from 'node:assert/strict';
 
-test('commonSelectors.isOfMetaType', (t) => {
+import * as commonSelectors from '../src/lib/common_selectors.js';
+
+test('commonSelectors.isOfMetaType', () => {
   const isFoo = commonSelectors.isOfMetaType('foo');
-  t.equal(typeof isFoo, 'function');
-  t.ok(isFoo({
+  assert.equal(typeof isFoo, 'function');
+  assert.ok(isFoo({
     featureTarget: {
       properties: {
         meta: 'foo'
       }
     }
   }));
-  t.notOk(isFoo({}));
-  t.notOk(isFoo({
+  assert.equal(isFoo({}), false);
+  assert.equal(isFoo({
     featureTarget: {
       properties: {
         meta: 'bar'
       }
     }
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isShiftMousedown', (t) => {
-  t.ok(commonSelectors.isShiftMousedown({
+test('commonSelectors.isShiftMousedown', () => {
+  assert.ok(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: true,
       button: 0
     }
   }));
 
-  t.notOk(commonSelectors.isShiftMousedown({
+  assert.equal(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: false,
       button: 0
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isShiftMousedown({
+  assert.equal(commonSelectors.isShiftMousedown({
     originalEvent: {
       shiftKey: true,
       button: 1
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isShiftMousedown({
+  assert.equal(commonSelectors.isShiftMousedown({
     nothing: false
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isActiveFeature', (t) => {
-  t.ok(commonSelectors.isActiveFeature({
+test('commonSelectors.isActiveFeature', () => {
+  assert.ok(commonSelectors.isActiveFeature({
     featureTarget: {
       properties: {
         active: 'true',
@@ -62,50 +60,48 @@ test('commonSelectors.isActiveFeature', (t) => {
     }
   }));
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     foo: 'bar'
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     featureTarget: {
       properties: {
         active: 'false',
         meta: 'feature'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     featureTarget: {
       properties: {
         active: 'true',
         meta: 'something'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     featureTarget: {
       properties: {
         active: true,
         meta: 'Feature'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     nothing: false
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isActiveFeature({
+  assert.equal(commonSelectors.isActiveFeature({
     featureTarget: {}
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isInactiveFeature', (t) => {
-  t.ok(commonSelectors.isInactiveFeature({
+test('commonSelectors.isInactiveFeature', () => {
+  assert.ok(commonSelectors.isInactiveFeature({
     featureTarget: {
       properties: {
         active: 'false',
@@ -114,70 +110,66 @@ test('commonSelectors.isInactiveFeature', (t) => {
     }
   }));
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     foo: 'bar'
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     featureTarget: {
       properties: {
         active: 'true',
         meta: 'feature'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     featureTarget: {
       properties: {
         active: 'false',
         meta: 'something'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     featureTarget: {
       properties: {
         active: false,
         meta: 'Feature'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     nothing: false
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isInactiveFeature({
+  assert.equal(commonSelectors.isInactiveFeature({
     featureTarget: {}
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.noTarget', (t) => {
-  t.ok(commonSelectors.noTarget({
+test('commonSelectors.noTarget', () => {
+  assert.ok(commonSelectors.noTarget({
     something: 1
   }));
 
-  t.ok(commonSelectors.noTarget({
+  assert.ok(commonSelectors.noTarget({
     FeatureTarget: 1
   }));
 
-  t.notOk(commonSelectors.noTarget({
+  assert.equal(commonSelectors.noTarget({
     featureTarget: {}
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.noTarget({
+  assert.equal(commonSelectors.noTarget({
     featureTarget: null
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isFeature', (t) => {
-  t.ok(commonSelectors.isFeature({
+test('commonSelectors.isFeature', () => {
+  assert.ok(commonSelectors.isFeature({
     featureTarget: {
       properties: {
         meta: 'feature'
@@ -185,87 +177,78 @@ test('commonSelectors.isFeature', (t) => {
     }
   }));
 
-  t.notOk(commonSelectors.isFeature({
+  assert.equal(commonSelectors.isFeature({
     feee: 2
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isFeature({
+  assert.equal(commonSelectors.isFeature({
     featureTarget: {
       properties: {
         meta: 'nonfeature'
       }
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isFeature({
+  assert.equal(commonSelectors.isFeature({
     nothing: false
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isFeature({
+  assert.equal(commonSelectors.isFeature({
     featureTarget: {}
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isShiftDown', (t) => {
-  t.ok(commonSelectors.isShiftDown({
+test('commonSelectors.isShiftDown', () => {
+  assert.ok(commonSelectors.isShiftDown({
     originalEvent: {
       shiftKey: true
     }
   }));
 
-  t.notOk(commonSelectors.isShiftDown({
+  assert.equal(commonSelectors.isShiftDown({
     originalEvent: {
       shiftKey: false
     }
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isShiftDown({
+  assert.equal(commonSelectors.isShiftDown({
     originalEvent: {}
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isShiftDown({
+  assert.equal(commonSelectors.isShiftDown({
     nothing: true
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isEscapeKey', (t) => {
-  t.ok(commonSelectors.isEscapeKey({
+test('commonSelectors.isEscapeKey', () => {
+  assert.ok(commonSelectors.isEscapeKey({
     keyCode: 27
   }));
 
-  t.notOk(commonSelectors.isEscapeKey({
+  assert.equal(commonSelectors.isEscapeKey({
     keyCode: 13
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isEscapeKey({
+  assert.equal(commonSelectors.isEscapeKey({
     originalEvent: {}
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.isEnterKey', (t) => {
-  t.ok(commonSelectors.isEnterKey({
+test('commonSelectors.isEnterKey', () => {
+  assert.ok(commonSelectors.isEnterKey({
     keyCode: 13
   }));
 
-  t.notOk(commonSelectors.isEnterKey({
+  assert.equal(commonSelectors.isEnterKey({
     keyCode: 27
-  }));
+  }), false);
 
-  t.notOk(commonSelectors.isEnterKey({
+  assert.equal(commonSelectors.isEnterKey({
     originalEvent: {}
-  }));
-
-  t.end();
+  }), false);
 });
 
-test('commonSelectors.true', (t) => {
-  t.ok(commonSelectors.isTrue());
-  t.ok(commonSelectors.isTrue(false));
-  t.end();
+test('commonSelectors.true', () => {
+  assert.ok(commonSelectors.isTrue());
+  assert.ok(commonSelectors.isTrue(false));
 });
