@@ -1,21 +1,22 @@
-import test from 'tape';
-import isEventAtCoordinates from '../src/lib/is_event_at_coordinates';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import isEventAtCoordinates from '../src/lib/is_event_at_coordinates.js';
 
-test('isEventAtCoordinates', (t) => {
-  t.ok(isEventAtCoordinates({
+test('isEventAtCoordinates', () => {
+  assert.ok(isEventAtCoordinates({
     lngLat: {
       lng: 3,
       lat: 29
     }
   }, [3, 29]));
-  t.notOk(isEventAtCoordinates({
+  assert.equal(isEventAtCoordinates({
     lngLat: {
       lng: -3,
       lat: 29
     }
-  }, [3, 29]));
-  t.notOk(isEventAtCoordinates({
+  }, [3, 29]), false);
+
+  assert.equal(isEventAtCoordinates({
     nothing: true
-  }, [3, 29]));
-  t.end();
+  }, [3, 29]), false);
 });

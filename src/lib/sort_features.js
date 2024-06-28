@@ -1,5 +1,5 @@
 import area from '@mapbox/geojson-area';
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 const FEATURE_SORT_RANKS = {
   Point: 0,

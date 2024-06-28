@@ -3,10 +3,10 @@
     "mourner",
     "plugin:import/recommended"
   ],
-  "parser": "@babel/eslint-parser",
+  "parser": "espree",
   "parserOptions": {
     "sourceType": "module",
-    "requireConfigFile": false
+    "ecmaVersion": 2020
   },
   "plugins": [
     "import"

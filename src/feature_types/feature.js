@@ -1,5 +1,5 @@
 import hat from 'hat';
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 const Feature = function(ctx, geojson) {
   this.ctx = ctx;

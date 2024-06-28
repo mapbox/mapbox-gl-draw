@@ -1,5 +1,5 @@
 import extent from '@mapbox/geojson-extent';
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 const {
   LAT_MIN,
