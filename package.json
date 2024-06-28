@@ -50,7 +50,7 @@
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-replace": "^5.0.2",
     "@rollup/plugin-terser": "^0.4.4",
-    "@turf/bbox-clip": "^6.5.0",
+    "@turf/bbox-clip": "^7.0.0",
     "@turf/centroid": "^6.5.0",
     "eslint": "8.57.0",
     "eslint-config-mourner": "3.0.0",
