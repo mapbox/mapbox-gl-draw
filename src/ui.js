@@ -1,5 +1,4 @@
-import xtend from 'xtend';
-import * as Constants from './constants';
+import * as Constants from './constants.js';
 
 const classTypes = ['mode', 'feature', 'mouse'];
 
@@ -27,7 +26,7 @@ export default function(ctx) {
   }
 
   function queueMapClasses(options) {
-    nextMapClasses = xtend(nextMapClasses, options);
+    nextMapClasses = Object.assign(nextMapClasses, options);
   }
 
   function updateMapClasses() {
@@ -53,7 +52,7 @@ export default function(ctx) {
       ctx.container.classList.add(...classesToAdd);
     }
 
-    currentMapClasses = xtend(currentMapClasses, nextMapClasses);
+    currentMapClasses = Object.assign(currentMapClasses, nextMapClasses);
   }
 
   function createControlButton(id, options = {}) {

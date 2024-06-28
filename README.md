@@ -1,6 +1,6 @@
 # @mapbox/mapbox-gl-draw
 
-[![Build Status](https://travis-ci.org/mapbox/mapbox-gl-draw.svg?branch=main)](https://travis-ci.org/mapbox/mapbox-gl-draw)
+![Build Status](https://github.com/mapbox/mapbox-gl-draw/actions/workflows/main.yml/badge.svg)
 
 Adds support for drawing and editing features on [mapbox-gl.js](https://www.mapbox.com/mapbox-gl-js/) maps. [See a live example here](https://www.mapbox.com/mapbox-gl-js/example/mapbox-gl-draw/)
 
@@ -94,8 +94,8 @@ Install dependencies, build the source files and crank up a server via:
 
 ```
 git clone git@github.com:mapbox/mapbox-gl-draw.git
-yarn install
-yarn start & open "http://localhost:9967/debug/?access_token=<token>"
+npm ci
+npm start & open "http://localhost:9967/debug/?access_token=<token>"
 ```
 
 ### Testing
@@ -120,8 +120,8 @@ To CDN:
 ```
 # make sure you are authenticated for AWS
 git checkout v{x.y.z}
-yarn install
-yarn run prepublish
+npm ci
+npm run prepublish
 aws s3 cp --recursive --acl public-read dist s3://mapbox-gl-js/plugins/mapbox-gl-draw/v{x.y.z}
 ```
 

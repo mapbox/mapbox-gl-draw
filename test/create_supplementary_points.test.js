@@ -1,8 +1,9 @@
-import test from 'tape';
-import createMap from './utils/create_map';
-import createSupplementaryPoints from '../src/lib/create_supplementary_points';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import createMap from './utils/create_map.js';
+import createSupplementaryPoints from '../src/lib/create_supplementary_points.js';
 
-test('createSupplementaryPoints with a point', (t) => {
+test('createSupplementaryPoints with a point', () => {
   const point = {
     type: 'Point',
     properties: {
@@ -16,7 +17,7 @@ test('createSupplementaryPoints with a point', (t) => {
 
   const result = createSupplementaryPoints(point);
 
-  t.deepEqual(result, [{
+  assert.deepEqual(result, [{
     geometry: {
       coordinates: [10, 15],
       type: 'Point'
@@ -30,10 +31,10 @@ test('createSupplementaryPoints with a point', (t) => {
     type: 'Feature'
   }]);
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with a line, no midpoints', (t) => {
+test('createSupplementaryPoints with a line, no midpoints', () => {
   const line = {
     type: 'Feature',
     properties: {
@@ -47,7 +48,7 @@ test('createSupplementaryPoints with a line, no midpoints', (t) => {
 
   const result = createSupplementaryPoints(line);
 
-  t.deepEqual(result, [{
+  assert.deepEqual(result, [{
     geometry: {
       coordinates: [0, 0],
       type: 'Point'
@@ -85,10 +86,10 @@ test('createSupplementaryPoints with a line, no midpoints', (t) => {
     type: 'Feature'
   }], 'adds vertices');
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with a polygon, no midpoints', (t) => {
+test('createSupplementaryPoints with a polygon, no midpoints', () => {
   const polygon = {
     type: 'Feature',
     properties: {
@@ -101,7 +102,7 @@ test('createSupplementaryPoints with a polygon, no midpoints', (t) => {
   };
   const result = createSupplementaryPoints(polygon);
 
-  t.deepEqual(result, [{
+  assert.deepEqual(result, [{
     geometry: {
       coordinates: [1, 1],
       type: 'Point'
@@ -151,10 +152,10 @@ test('createSupplementaryPoints with a polygon, no midpoints', (t) => {
     type: 'Feature'
   }], 'adds vertices');
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with line, midpoints, selected coordinate', (t) => {
+test('createSupplementaryPoints with line, midpoints, selected coordinate', () => {
   const line = {
     type: 'Feature',
     properties: {
@@ -173,7 +174,7 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', (t) 
     selectedPaths: '1'
   });
 
-  t.deepEqual(results, [{
+  assert.deepEqual(results, [{
     geometry: {
       coordinates: [0, 0],
       type: 'Point'
@@ -237,10 +238,10 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', (t) 
     type: 'Feature'
   }], 'adds vertices and midpoints');
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with polygon, midpoints, selection', (t) => {
+test('createSupplementaryPoints with polygon, midpoints, selection', () => {
   const polygon = {
     type: 'Feature',
     properties: {
@@ -260,7 +261,7 @@ test('createSupplementaryPoints with polygon, midpoints, selection', (t) => {
     selectedPaths: '0.1'
   });
 
-  t.deepEqual(results, [{
+  assert.deepEqual(results, [{
     geometry: {
       coordinates: [1, 1],
       type: 'Point'
@@ -362,10 +363,10 @@ test('createSupplementaryPoints with polygon, midpoints, selection', (t) => {
     type: 'Feature'
   }], 'adds vertices and midpoints');
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with MultiLineString, midpoints, selected coordinate', (t) => {
+test('createSupplementaryPoints with MultiLineString, midpoints, selected coordinate', () => {
   const line = {
     type: 'Feature',
     properties: {
@@ -387,7 +388,7 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     selectedPaths: '1.2'
   });
 
-  t.deepEqual(results, [{
+  assert.deepEqual(results, [{
     geometry: {
       coordinates: [0, 0],
       type: 'Point'
@@ -513,10 +514,10 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     type: 'Feature'
   }]);
 
-  t.end();
+
 });
 
-test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude north limit', (t) => {
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude north limit', () => {
   const line = {
     type: 'Feature',
     properties: {
@@ -533,7 +534,7 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     midpoints: true
   });
 
-  t.deepEqual(result, [{
+  assert.deepEqual(result, [{
     geometry: {
       coordinates: [0, 0],
       type: 'Point'
@@ -584,11 +585,11 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     type: 'Feature'
   }], 'adds vertices');
 
-  t.end();
+
 });
 
 
-test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude south limit', (t) => {
+test('createSupplementaryPoints with a line, not all midpoints rendered because of vertex exceeding projection latitude south limit', () => {
   const line = {
     type: 'Feature',
     properties: {
@@ -605,7 +606,7 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     midpoints: true
   });
 
-  t.deepEqual(result, [{
+  assert.deepEqual(result, [{
     geometry: {
       coordinates: [0, 0],
       type: 'Point'
@@ -656,5 +657,5 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     type: 'Feature'
   }], 'adds vertices');
 
-  t.end();
+
 });

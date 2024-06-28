@@ -1,7 +1,7 @@
-import sortFeatures from './sort_features';
-import mapEventToBoundingBox from './map_event_to_bounding_box';
-import * as Constants from '../constants';
-import StringSet from './string_set';
+import sortFeatures from './sort_features.js';
+import mapEventToBoundingBox from './map_event_to_bounding_box.js';
+import * as Constants from '../constants.js';
+import StringSet from './string_set.js';
 
 const META_TYPES = [
   Constants.meta.FEATURE,

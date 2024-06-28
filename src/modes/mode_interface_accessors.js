@@ -1,9 +1,9 @@
-import * as Constants from '../constants';
-import featuresAt from '../lib/features_at';
-import Point from '../feature_types/point';
-import LineString from '../feature_types/line_string';
-import Polygon from '../feature_types/polygon';
-import MultiFeature from '../feature_types/multi_feature';
+import * as Constants from '../constants.js';
+import featuresAt from '../lib/features_at.js';
+import Point from '../feature_types/point.js';
+import LineString from '../feature_types/line_string.js';
+import Polygon from '../feature_types/polygon.js';
+import MultiFeature from '../feature_types/multi_feature.js';
 
 export default function ModeInterface(ctx) {
   this.map = ctx.map;

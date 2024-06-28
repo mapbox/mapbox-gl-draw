@@ -1,5 +1,6 @@
-import test from 'tape';
-import isTap from '../src/lib/is_tap';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import isTap from '../src/lib/is_tap.js';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak
@@ -10,7 +11,7 @@ const testOptions = {
   interval: 250
 };
 
-test('isTap easy', (t) => {
+test('isTap easy', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -19,13 +20,12 @@ test('isTap easy', (t) => {
     point: { x: 1, y: 1},
     time: 1
   };
-  t.equal(isTap({}, b, testOptions), true, 'true when start is missing point and time');
-  t.equal(isTap({ time: 2000 }, b, testOptions), true, 'true when start has only time');
-  t.equal(isTap(a, b, testOptions), true, 'true when start and end match exactly');
-  t.end();
+  assert.equal(isTap({}, b, testOptions), true, 'true when start is missing point and time');
+  assert.equal(isTap({ time: 2000 }, b, testOptions), true, 'true when start has only time');
+  assert.equal(isTap(a, b, testOptions), true, 'true when start and end match exactly');
 });
 
-test('isTap when moving barely at all, same times', (t) => {
+test('isTap when moving barely at all, same times', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -34,11 +34,10 @@ test('isTap when moving barely at all, same times', (t) => {
     point: { x: 2, y: 1.5},
     time: 1
   };
-  t.equal(isTap(a, b, testOptions), true);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), true);
 });
 
-test('isTap when moving just under the distance limit, same times', (t) => {
+test('isTap when moving just under the distance limit, same times', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -48,11 +47,10 @@ test('isTap when moving just under the distance limit, same times', (t) => {
     time: 1
   };
   // Move distance ~24.89016
-  t.equal(isTap(a, b, testOptions), true);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), true);
 });
 
-test('isTap when moving just over the distance limit, same times', (t) => {
+test('isTap when moving just over the distance limit, same times', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -62,11 +60,10 @@ test('isTap when moving just over the distance limit, same times', (t) => {
     time: 1
   };
   // Move distance ~25.03158
-  t.equal(isTap(a, b, testOptions), false);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), false);
 });
 
-test('isTap when moving barely at all, just before the time limit', (t) => {
+test('isTap when moving barely at all, just before the time limit', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -75,11 +72,10 @@ test('isTap when moving barely at all, just before the time limit', (t) => {
     point: { x: 2, y: 1.5},
     time: 250
   };
-  t.equal(isTap(a, b, testOptions), true);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), true);
 });
 
-test('isTap when moving just under the limit, just after the time limit', (t) => {
+test('isTap when moving just under the limit, just after the time limit', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -89,11 +85,10 @@ test('isTap when moving just under the limit, just after the time limit', (t) =>
     time: 252
   };
   // Move distance ~24.89016
-  t.equal(isTap(a, b, testOptions), false);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), false);
 });
 
-test('isTap when moving just over the limit, same times', (t) => {
+test('isTap when moving just over the limit, same times', () => {
   const a = {
     point: { x: 1, y: 1 },
     time: 1
@@ -103,10 +98,5 @@ test('isTap when moving just over the limit, same times', (t) => {
     time: 1
   };
   // Move distance ~25.03158
-  t.equal(isTap(a, b, testOptions), false);
-  t.end();
+  assert.equal(isTap(a, b, testOptions), false);
 });
-
-
-
-

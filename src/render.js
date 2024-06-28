@@ -1,4 +1,4 @@
-import * as Constants from './constants';
+import * as Constants from './constants.js';
 
 export default function render() {
   // eslint-disable-next-line no-invalid-this

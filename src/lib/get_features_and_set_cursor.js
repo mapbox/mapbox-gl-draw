@@ -1,5 +1,5 @@
-import featuresAt from './features_at';
-import * as Constants from '../constants';
+import featuresAt from './features_at.js';
+import * as Constants from '../constants.js';
 
 export default function getFeatureAtAndSetCursors(event, ctx) {
   const features = featuresAt.click(event, null, ctx);
