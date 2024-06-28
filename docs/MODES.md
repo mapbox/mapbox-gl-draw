@@ -82,6 +82,10 @@ _please feel free to add your own modes to this list via a PR_
 -   [Scale/Rotate Mode](https://github.com/ReyhaneMasumi/mapbox-gl-draw-scale-rotate-mode): Scale and Rotate polygons and lines
 -   [Waypoint Mode](https://github.com/zakjan/mapbox-gl-draw-waypoint): Allow user to drag vertices only, prevent dragging features
 -   [Bezier Curve Mode](https://github.com/Jeff-Numix/mapbox-gl-draw-bezier-curve-mode): Draw and edit bezier curves
+-   [Snapping Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Add snapping ability while drawing features
+-   [Pinning Mode](https://github.com/mhsattarian/mapbox-gl-draw-pinning-mode): Pin shared coordinates together during edit
+-   [Passing Mode](https://github.com/mhsattarian/mapbox-gl-draw-passing-mode): Add ability to draw features but don't add them
+-   [Select Feature Mode](https://github.com/mhsattarian/mapbox-gl-draw-select-mode): Select features by click and highlight on hover
 -   [Paint Mode](https://github.com/piraveenankirupakaran/mapbox-gl-draw-paint-mode): Allows users to paint freestyle on the map
 
 
