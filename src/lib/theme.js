@@ -46,6 +46,11 @@ export default [
         ['==', ['get', 'active'], 'true'], orange,
         blue,
       ],
+      'line-dasharray': [
+        'case',
+        ['==', ['get', 'active'], 'true'], [0.2, 2],
+        [2, 0],
+      ],
       'line-width': 2,
     },
   },
