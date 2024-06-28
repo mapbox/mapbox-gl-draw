@@ -402,8 +402,7 @@ test('Draw.modes', () => {
   assert.equal(Draw.modes.DRAW_POINT, Constants.modes.DRAW_POINT, 'draw_point');
   assert.equal(Draw.modes.DRAW_LINE_STRING, Constants.modes.DRAW_LINE_STRING, 'draw_line_string');
   assert.equal(Draw.modes.DRAW_POLYGON, Constants.modes.DRAW_POLYGON, 'draw_polygon');
-  assert.equal(Draw.modes.STATIC, Constants.modes.STATIC, 'static');
-  assert.equal(getPublicMemberKeys(Draw.modes).length, 6, 'no unexpected modes');
+  assert.equal(getPublicMemberKeys(Draw.modes).length, 5, 'no unexpected modes');
 });
 
 test('Draw.combineFeatures -- polygon + polygon = multiploygon', () => {
