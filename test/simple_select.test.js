@@ -342,7 +342,7 @@ test('simple_select', async (t) => {
     cleanUp();
   });
 
-  await t.test('simple_select - tap dragging fires an update event', () => {
+  await t.test('simple_select - tap dragging fires an update event', async () => {
     const point = getGeoJSON('point');
     const pointId = Draw.add(point)[0];
     const translatePosition = (point, d) => [point[0] + d, point[1] + d];
@@ -355,7 +355,7 @@ test('simple_select', async (t) => {
     });
 
     await afterNextRender();
-    map.fire.reset();
+    map.fire.resetHistory();
     map.fire('touchstart', makeTouchEvent(...startPosition));
     map.fire('touchmove', makeTouchEvent(...translatePosition(startPosition, 15)));
     map.fire('touchmove', makeTouchEvent(...endPosition));
@@ -363,9 +363,9 @@ test('simple_select', async (t) => {
 
     const movedPoint = Draw.get(pointId);
     const args = getFireArgs().filter(arg => arg[0] === 'draw.update');
-    t.equal(args.length, 1, 'draw.update called once');
-    t.equal(movedPoint.geometry.coordinates[0], endPosition[0], 'point lng moved to touchend location');
-    t.equal(movedPoint.geometry.coordinates[1], endPosition[1], 'point lat moved to touchend location');
+    assert.equal(args.length, 1, 'draw.update called once');
+    assert.equal(movedPoint.geometry.coordinates[0], endPosition[0], 'point lng moved to touchend location');
+    assert.equal(movedPoint.geometry.coordinates[1], endPosition[1], 'point lat moved to touchend location');
   });
 
   await t.test('simple_select - click on a deselected feature with shift down while having another feature selected', async () => {
