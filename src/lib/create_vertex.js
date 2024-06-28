@@ -1,4 +1,4 @@
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 /**
  * Returns GeoJSON for a Point representing the
@@ -11,6 +11,7 @@ import * as Constants from '../constants';
  * @param {boolean} selected
  * @return {GeoJSON} Point
  */
+
 export default function(parentId, coordinates, path, selected) {
   return {
     type: Constants.geojsonTypes.FEATURE,

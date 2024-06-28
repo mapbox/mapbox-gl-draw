@@ -86,6 +86,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Pinning Mode](https://github.com/mhsattarian/mapbox-gl-draw-pinning-mode): Pin shared coordinates together during edit
 -   [Passing Mode](https://github.com/mhsattarian/mapbox-gl-draw-passing-mode): Add ability to draw features but don't add them
 -   [Select Feature Mode](https://github.com/mhsattarian/mapbox-gl-draw-select-mode): Select features by click and highlight on hover
+-   [Paint Mode](https://github.com/piraveenankirupakaran/mapbox-gl-draw-paint-mode): Allows users to paint freestyle on the map
 
 
 ## Life Cycle Functions

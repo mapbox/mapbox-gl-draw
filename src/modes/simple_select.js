@@ -1,10 +1,10 @@
-import * as CommonSelectors from '../lib/common_selectors';
-import mouseEventPoint from '../lib/mouse_event_point';
-import createSupplementaryPoints from '../lib/create_supplementary_points';
-import StringSet from '../lib/string_set';
-import doubleClickZoom from '../lib/double_click_zoom';
-import moveFeatures from '../lib/move_features';
-import * as Constants from '../constants';
+import * as CommonSelectors from '../lib/common_selectors.js';
+import mouseEventPoint from '../lib/mouse_event_point.js';
+import createSupplementaryPoints from '../lib/create_supplementary_points.js';
+import StringSet from '../lib/string_set.js';
+import doubleClickZoom from '../lib/double_click_zoom.js';
+import moveFeatures from '../lib/move_features.js';
+import * as Constants from '../constants.js';
 
 const SimpleSelect = {};
 
@@ -97,7 +97,10 @@ SimpleSelect.onStop = function() {
   doubleClickZoom.enable(this);
 };
 
-SimpleSelect.onMouseMove = function(state) {
+SimpleSelect.onMouseMove = function(state, e) {
+  const isFeature = CommonSelectors.isFeature(e);
+  if (isFeature && state.dragMoving) this.fireUpdate();
+
   // On mousemove that is not a drag, stop extended interactions.
   // This is useful if you drag off the canvas, release the button,
   // then move the mouse back over the canvas --- we don't allow the

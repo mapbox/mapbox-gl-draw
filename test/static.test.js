@@ -1,18 +1,20 @@
 /* eslint no-shadow:[0] */
-import test from 'tape';
-import MapboxDraw from '../index';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import {spy} from 'sinon';
-import setupAfterNextRender from './utils/after_next_render';
-import makeMouseEvent from './utils/make_mouse_event';
-import getGeoJSON from './utils/get_geojson';
-import createMap from './utils/create_map';
 
-test('static', (t) => {
+import MapboxDraw from '../index.js';
+import {setupAfterNextRender} from './utils/after_next_render.js';
+import makeMouseEvent from './utils/make_mouse_event.js';
+import getGeoJSON from './utils/get_geojson.js';
+import createMap from './utils/create_map.js';
 
+test('static', async (t) => {
   const map = createMap();
   const opts = {
     modes: {
-      static: require('@mapbox/mapbox-gl-draw-static-mode')
+      static: StaticMode
     },
     defaultMode: 'static'
   };
@@ -25,10 +27,9 @@ test('static', (t) => {
 
   const afterNextRender = setupAfterNextRender(map);
 
-  const cleanUp = function(cb) {
+  const cleanUp = function() {
     Draw.deleteAll();
     map.fire.resetHistory();
-    if (cb) cb();
   };
 
   const getFireArgs = function() {
@@ -39,11 +40,11 @@ test('static', (t) => {
     return args;
   };
 
-  t.test('static - init map for tests', (t) => {
+  t.test('static - init map for tests', () => {
     const done = function() {
       map.off('load', done);
-      t.end();
     };
+
     if (map.loaded()) {
       done();
     } else {
@@ -51,26 +52,24 @@ test('static', (t) => {
     }
   });
 
-
-  t.test('static - box select', (t) => {
+  await t.test('static - box select', async () => {
     Draw.add(getGeoJSON('negativePoint'));
     Draw.add(getGeoJSON('point'));
     map.fire.resetHistory();
 
-    afterNextRender(() => {
-      map.dragPan.disable.resetHistory();
-      map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
-      t.equal(map.dragPan.disable.callCount, 0, 'dragPan is still enabled');
-      map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
-      map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
+    await afterNextRender();
+    map.dragPan.disable.resetHistory();
+    map.fire('mousedown', makeMouseEvent(0, 0, { shiftKey: true }));
+    assert.equal(map.dragPan.disable.callCount, 0, 'dragPan is still enabled');
+    map.fire('mousemove', makeMouseEvent(15, 15, { shiftKey: true }));
+    map.fire('mouseup', makeMouseEvent(15, 15, { shiftKey: true }));
 
-      const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
-      t.equal(args.length, 0, 'should have zero selectionchange events');
-      cleanUp(t.end);
-    });
+    const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+    assert.equal(args.length, 0, 'should have zero selectionchange events');
+    cleanUp();
   });
 
-  t.test('static - try clicking many features', (t) => {
+  await t.test('static - try clicking many features', async () => {
     const features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
     Draw.add({
       type: 'FeatureCollection',
@@ -78,19 +77,16 @@ test('static', (t) => {
     });
     map.fire.resetHistory();
 
-    afterNextRender(() => {
-      map.fire('mousedown', makeMouseEvent(10, 10));
-      map.fire('mouseup', makeMouseEvent(10, 10));
-      map.fire('mousemove', makeMouseEvent(1.5, 1.5));
-      map.fire('mouseup', makeMouseEvent(1.5, 1.5));
-      map.fire('mousemove', makeMouseEvent(1, 1));
-      map.fire('mouseup', makeMouseEvent(1, 1));
+    await afterNextRender();
+    map.fire('mousedown', makeMouseEvent(10, 10));
+    map.fire('mouseup', makeMouseEvent(10, 10));
+    map.fire('mousemove', makeMouseEvent(1.5, 1.5));
+    map.fire('mouseup', makeMouseEvent(1.5, 1.5));
+    map.fire('mousemove', makeMouseEvent(1, 1));
+    map.fire('mouseup', makeMouseEvent(1, 1));
 
-      const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
-      t.equal(args.length, 0, 'should have zero selectionchange events');
-      cleanUp(t.end);
-    });
+    const args = getFireArgs().filter(arg => arg[0] === 'draw.selectionchange');
+    assert.equal(args.length, 0, 'should have zero selectionchange events');
+    cleanUp();
   });
-
-  t.end();
 });

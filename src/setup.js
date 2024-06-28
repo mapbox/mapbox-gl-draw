@@ -1,8 +1,7 @@
-import events from './events';
-import Store from './store';
-import ui from './ui';
-import * as Constants from './constants';
-import xtend from 'xtend';
+import events from './events.js';
+import Store from './store.js';
+import ui from './ui.js';
+import * as Constants from './constants.js';
 
 export default function(ctx) {
 
@@ -20,6 +19,7 @@ export default function(ctx) {
       ctx.ui.removeButtons();
       ctx.events.removeEventListeners();
       ctx.ui.clearMapClasses();
+      if (ctx.boxZoomInitial) ctx.map.boxZoom.enable();
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
@@ -37,22 +37,6 @@ export default function(ctx) {
       ctx.events.addEventListeners();
     },
     onAdd(map) {
-      if (process.env.NODE_ENV !== 'test') {
-        // Monkey patch to resolve breaking change to `fire` introduced by
-        // mapbox-gl-js. See mapbox/mapbox-gl-draw/issues/766.
-        const _fire = map.fire;
-        map.fire = function(type, event) {
-          // eslint-disable-next-line
-          let args = arguments;
-
-          if (_fire.length === 1 && arguments.length !== 1) {
-            args = [xtend({}, { type }, event)];
-          }
-
-          return _fire.apply(map, args);
-        };
-      }
-
       ctx.map = map;
       ctx.events = events(ctx);
       ctx.ui = ui(ctx);
@@ -63,6 +47,7 @@ export default function(ctx) {
       controlContainer = ctx.ui.addButtons();
 
       if (ctx.options.boxSelect) {
+        ctx.boxZoomInitial = map.boxZoom.isEnabled();
         map.boxZoom.disable();
         // Need to toggle dragPan on and off or else first
         // dragPan disable attempt in simple_select doesn't work

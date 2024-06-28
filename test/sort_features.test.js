@@ -1,7 +1,8 @@
-import test from 'tape';
-import sortFeatures from '../src/lib/sort_features';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import sortFeatures from '../src/lib/sort_features.js';
 
-test('sortFeatures', (t) => {
+test('sortFeatures', () => {
   const features = [
     {
       geometry: { type: 'LineString' },
@@ -39,7 +40,7 @@ test('sortFeatures', (t) => {
     }
   ];
 
-  t.deepEqual(sortFeatures(features), [
+  assert.deepEqual(sortFeatures(features), [
     {
       geometry: { type: 'Point' },
       properties: { id: 3 }
@@ -75,6 +76,4 @@ test('sortFeatures', (t) => {
       }
     }
   ]);
-
-  t.end();
 });

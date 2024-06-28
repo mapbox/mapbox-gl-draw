@@ -1,4 +1,4 @@
-import * as Constants from '../constants';
+import * as Constants from '../constants.js';
 
 export function isOfMetaType(type) {
   return function(e) {
