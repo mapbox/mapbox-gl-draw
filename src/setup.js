@@ -49,10 +49,14 @@ export default function(ctx) {
       if (ctx.options.boxSelect) {
         ctx.boxZoomInitial = map.boxZoom.isEnabled();
         map.boxZoom.disable();
+        const dragPanIsEnabled = map.dragPan.isEnabled();
         // Need to toggle dragPan on and off or else first
         // dragPan disable attempt in simple_select doesn't work
         map.dragPan.disable();
         map.dragPan.enable();
+        if (!dragPanIsEnabled) {
+          map.dragPan.disable();
+        }
       }
 
       if (map.loaded()) {
