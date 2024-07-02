@@ -27,6 +27,7 @@
   "browser": "dist/mapbox-gl-draw.js",
   "style": "dist/mapbox-gl-draw.css",
   "scripts": {
+    "dev": "vite -c vite.config.js",
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
@@ -40,7 +41,6 @@
     "prepublishOnly": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start-server": "vite --config vite.config.js",
     "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
     "start": "run-p build-token start-server"
   },
