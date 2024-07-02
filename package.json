@@ -35,14 +35,13 @@
     "pretest": "npm run lint",
     "test": "node --test --import ./test/mock-browser.js",
     "coverage": "node --test --import ./test/mock-browser.js --experimental-test-coverage",
-    "build-token": "node build/generate-access-token-script.js",
     "build": "rollup -c",
     "build-min": "rollup -c --environment MINIFY:true",
     "prepublishOnly": "run-s build build-min",
     "watch": "rollup -c --watch",
     "watch-bench": "rollup -c bench/rollup.config.js --watch",
-    "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
-    "start": "run-p build-token start-server"
+    "start-bench": "run-p watch watch-bench \"dev --base . .\"",
+    "start": "npm run dev"
   },
   "devDependencies": {
     "@mapbox/cloudfriend": "^8.1.0",
