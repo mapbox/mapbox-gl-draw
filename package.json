@@ -1,9 +1,6 @@
 {
   "name": "@mapbox/mapbox-gl-draw",
   "version": "1.4.3",
-  "engines": {
-    "node": "^18.0.0 || >=20.0.0"
-  },
   "description": "A drawing component for Mapbox GL JS",
   "author": "mapbox",
   "license": "ISC",
