@@ -9,4 +9,6 @@ dist/bench.js
 dist/bench.js.map
 coverage/
 .nyc_output/
-debug/access_token_generated.js
+
+# Vite
+*.local

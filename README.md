@@ -95,7 +95,7 @@ Install dependencies, build the source files and crank up a server via:
 ```
 git clone git@github.com:mapbox/mapbox-gl-draw.git
 npm ci
-npm start & open "http://localhost:9967/debug/?access_token=<token>"
+npm start & open "http://localhost:9967/debug/index.html?access_token=<token>"
 ```
 
 ### Testing
