@@ -213,6 +213,7 @@ export default function(ctx) {
       return currentMode.render(geojson, push);
     },
     fire(eventName, eventData) {
+      if (!ctx.map) return;
       ctx.map.fire(eventName, eventData);
     },
     addEventListeners() {

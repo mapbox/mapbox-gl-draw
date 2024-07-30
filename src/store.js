@@ -24,22 +24,28 @@ export default function Store(ctx) {
       renderRequest = requestAnimationFrame(() => {
         renderRequest = null;
         render.call(this);
+
+        // Fire a selection change event after rendering if the selection state changed
+        if (this._emitSelectionChange) {
+          this.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
+            features: this.getSelected().map(feature => feature.toGeoJSON()),
+            points: this.getSelectedCoordinates().map(coordinate => ({
+              type: Constants.geojsonTypes.FEATURE,
+              properties: {},
+              geometry: {
+                type: Constants.geojsonTypes.POINT,
+                coordinates: coordinate.coordinates
+              }
+            }))
+          });
+
+          this._emitSelectionChange = false;
+        }
+
+        // Fire `render` event
+        this.ctx.events.fire(Constants.events.RENDER, {});
       });
     }
-  };
-
-  this.emitSelectionChange = () => {
-    this.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
-      features: this.getSelected().map(feature => feature.toGeoJSON()),
-      points: this.getSelectedCoordinates().map(coordinate => ({
-        type: Constants.geojsonTypes.FEATURE,
-        properties: {},
-        geometry: {
-          type: Constants.geojsonTypes.POINT,
-          coordinates: coordinate.coordinates
-        }
-      }))
-    });
   };
 
   this.isDirty = false;
@@ -183,7 +189,7 @@ Store.prototype.select = function(featureIds, options = {}) {
     this._selectedFeatureIds.add(id);
     this._changedFeatureIds.add(id);
     if (!options.silent) {
-      this.emitSelectionChange();
+      this._emitSelectionChange = true;
     }
   });
   return this;
@@ -202,7 +208,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
     if (!options.silent) {
-      this.emitSelectionChange();
+      this._emitSelectionChange = true;
     }
   });
   refreshSelectedCoordinates(this, options);
@@ -247,7 +253,7 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
  */
 Store.prototype.setSelectedCoordinates = function(coordinates) {
   this._selectedCoordinates = coordinates;
-  this.emitSelectionChange();
+  this._emitSelectionChange = true;
   return this;
 };
 
@@ -258,7 +264,7 @@ Store.prototype.setSelectedCoordinates = function(coordinates) {
  */
 Store.prototype.clearSelectedCoordinates = function() {
   this._selectedCoordinates = [];
-  this.emitSelectionChange();
+  this._emitSelectionChange = true;
   return this;
 };
 

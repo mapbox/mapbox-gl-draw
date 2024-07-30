@@ -53,7 +53,6 @@ export default function render() {
   });
 
   cleanup();
-  store.ctx.events.fire(Constants.events.RENDER, {});
 
   function cleanup() {
     store.isDirty = false;

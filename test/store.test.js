@@ -38,7 +38,7 @@ test('Store constructor and public API', () => {
   assert.equal(store.isDirty, false, 'exposes store.isDirty');
   assert.equal(typeof store.render, 'function', 'exposes store.render');
 
-  assert.equal(getPublicMemberKeys(store).length, 5, 'no unexpected instance members');
+  assert.equal(getPublicMemberKeys(store).length, 4, 'no unexpected instance members');
 
   // prototype members
   assert.equal(typeof Store.prototype.setDirty, 'function', 'exposes store.setDirty');
