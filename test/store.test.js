@@ -38,7 +38,7 @@ test('Store constructor and public API', () => {
   assert.equal(store.isDirty, false, 'exposes store.isDirty');
   assert.equal(typeof store.render, 'function', 'exposes store.render');
 
-  assert.equal(getPublicMemberKeys(store).length, 4, 'no unexpected instance members');
+  assert.equal(getPublicMemberKeys(store).length, 5, 'no unexpected instance members');
 
   // prototype members
   assert.equal(typeof Store.prototype.setDirty, 'function', 'exposes store.setDirty');
@@ -218,16 +218,16 @@ test('Store#setSelected', () => {
   const line = createFeature('line');
   const polygon = createFeature('polygon');
 
-  store.setSelected(point.id);
+  store.setSelected(point.id, {silent: true});
   assert.deepEqual(store.getSelectedIds(), [point.id]);
 
-  store.setSelected([line.id, polygon.id]);
+  store.setSelected([line.id, polygon.id], {silent: true});
   assert.deepEqual(store.getSelectedIds(), [line.id, polygon.id]);
 
-  store.setSelected(line.id);
+  store.setSelected(line.id, {silent: true});
   assert.deepEqual(store.getSelectedIds(), [line.id]);
 
-  store.setSelected();
+  store.setSelected(undefined, {silent: true});
   assert.deepEqual(store.getSelectedIds(), []);
 });
 

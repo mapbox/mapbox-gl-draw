@@ -27,9 +27,23 @@ export default function Store(ctx) {
       });
     }
   };
+
+  this.emitSelectionChange = () => {
+    this.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
+      features: this.getSelected().map(feature => feature.toGeoJSON()),
+      points: this.getSelectedCoordinates().map(coordinate => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      }))
+    });
+  };
+
   this.isDirty = false;
 }
-
 
 /**
  * Delays all rendering until the returned function is invoked
@@ -169,7 +183,7 @@ Store.prototype.select = function(featureIds, options = {}) {
     this._selectedFeatureIds.add(id);
     this._changedFeatureIds.add(id);
     if (!options.silent) {
-      this._emitSelectionChange = true;
+      this.emitSelectionChange();
     }
   });
   return this;
@@ -188,7 +202,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
     if (!options.silent) {
-      this._emitSelectionChange = true;
+      this.emitSelectionChange();
     }
   });
   refreshSelectedCoordinates(this, options);
@@ -233,7 +247,7 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
  */
 Store.prototype.setSelectedCoordinates = function(coordinates) {
   this._selectedCoordinates = coordinates;
-  this._emitSelectionChange = true;
+  this.emitSelectionChange();
   return this;
 };
 
@@ -244,7 +258,7 @@ Store.prototype.setSelectedCoordinates = function(coordinates) {
  */
 Store.prototype.clearSelectedCoordinates = function() {
   this._selectedCoordinates = [];
-  this._emitSelectionChange = true;
+  this.emitSelectionChange();
   return this;
 };
 
@@ -261,7 +275,7 @@ Store.prototype.getSelectedIds = function() {
  * @return {Array<Object>} Selected features.
  */
 Store.prototype.getSelected = function() {
-  return this._selectedFeatureIds.values().map(id => this.get(id));
+  return this.getSelectedIds().map(id => this.get(id));
 };
 
 /**
@@ -301,7 +315,7 @@ Store.prototype.setFeatureProperty = function(featureId, property, value) {
 function refreshSelectedCoordinates(store, options) {
   const newSelectedCoordinates = store._selectedCoordinates.filter(point => store._selectedFeatureIds.has(point.feature_id));
   if (store._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
-    store._emitSelectionChange = true;
+    store.emitSelectionChange();
   }
   store._selectedCoordinates = newSelectedCoordinates;
 }

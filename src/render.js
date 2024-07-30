@@ -52,21 +52,6 @@ export default function render() {
     features: store.sources.hot
   });
 
-  if (store._emitSelectionChange) {
-    store.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
-      features: store.getSelected().map(feature => feature.toGeoJSON()),
-      points: store.getSelectedCoordinates().map(coordinate => ({
-        type: Constants.geojsonTypes.FEATURE,
-        properties: {},
-        geometry: {
-          type: Constants.geojsonTypes.POINT,
-          coordinates: coordinate.coordinates
-        }
-      }))
-    });
-    store._emitSelectionChange = false;
-  }
-
   cleanup();
   store.ctx.events.fire(Constants.events.RENDER, {});
 
