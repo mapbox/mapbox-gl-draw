@@ -118,7 +118,7 @@ DrawLineString.onStop = function(state) {
   //remove last added coordinate
   state.line.removeCoordinate(`${state.currentVertexPosition}`);
   if (state.line.isValid()) {
-    this.map.fire(Constants.events.CREATE, {
+    this.fire(Constants.events.CREATE, {
       features: [state.line.toGeoJSON()]
     });
   } else {

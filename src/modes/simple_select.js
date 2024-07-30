@@ -35,7 +35,7 @@ SimpleSelect.onSetup = function(opts) {
 };
 
 SimpleSelect.fireUpdate = function() {
-  this.map.fire(Constants.events.UPDATE, {
+  this.fire(Constants.events.UPDATE, {
     action: Constants.updateActions.MOVE,
     features: this.getSelected().map(f => f.toGeoJSON())
   });
@@ -347,7 +347,7 @@ SimpleSelect.onCombineFeatures = function() {
     this.deleteFeature(this.getSelectedIds(), { silent: true });
     this.setSelected([multiFeature.id]);
 
-    this.map.fire(Constants.events.COMBINE_FEATURES, {
+    this.fire(Constants.events.COMBINE_FEATURES, {
       createdFeatures: [multiFeature.toGeoJSON()],
       deletedFeatures: featuresCombined
     });
@@ -378,7 +378,7 @@ SimpleSelect.onUncombineFeatures = function() {
   }
 
   if (createdFeatures.length > 1) {
-    this.map.fire(Constants.events.UNCOMBINE_FEATURES, {
+    this.fire(Constants.events.UNCOMBINE_FEATURES, {
       createdFeatures,
       deletedFeatures: featuresUncombined
     });

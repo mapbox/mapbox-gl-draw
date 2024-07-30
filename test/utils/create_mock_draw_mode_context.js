@@ -21,6 +21,7 @@ export default function createMockDrawModeContext() {
       }
     },
     events: {
+      fire: spy(),
       changeMode: spy(),
       actionable: spy()
     },

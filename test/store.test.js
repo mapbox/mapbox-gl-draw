@@ -1,13 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {spy} from 'sinon';
+
 import Store from '../src/store.js';
 import createFeature from './utils/create_feature.js';
 import getPublicMemberKeys from './utils/get_public_member_keys.js';
 import createMap from './utils/create_map.js';
 
 function createStore() {
-  const map = createMap();
-  const ctx = { map };
+  const ctx = {
+    map: createMap(),
+    events: {
+      fire: spy()
+    }
+  };
+
   return new Store(ctx);
 }
 
@@ -211,16 +218,16 @@ test('Store#setSelected', () => {
   const line = createFeature('line');
   const polygon = createFeature('polygon');
 
-  store.setSelected(point.id);
+  store.setSelected(point.id, {silent: true});
   assert.deepEqual(store.getSelectedIds(), [point.id]);
 
-  store.setSelected([line.id, polygon.id]);
+  store.setSelected([line.id, polygon.id], {silent: true});
   assert.deepEqual(store.getSelectedIds(), [line.id, polygon.id]);
 
-  store.setSelected(line.id);
+  store.setSelected(line.id, {silent: true});
   assert.deepEqual(store.getSelectedIds(), [line.id]);
 
-  store.setSelected();
+  store.setSelected(undefined, {silent: true});
   assert.deepEqual(store.getSelectedIds(), []);
 });
 
