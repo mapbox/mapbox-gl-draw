@@ -212,10 +212,8 @@ export default function(ctx) {
     currentModeRender(geojson, push) {
       return currentMode.render(geojson, push);
     },
-    fire(name, event) {
-      if (events[name]) {
-        events[name](event);
-      }
+    fire(eventName, eventData) {
+      ctx.map.fire(eventName, eventData);
     },
     addEventListeners() {
       ctx.map.on('mousemove', events.mousemove);

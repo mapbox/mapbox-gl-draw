@@ -78,7 +78,7 @@ DrawPolygon.onStop = function(state) {
   //remove last added coordinate
   state.polygon.removeCoordinate(`0.${state.currentVertexPosition}`);
   if (state.polygon.isValid()) {
-    this.map.fire(Constants.events.CREATE, {
+    this.fire(Constants.events.CREATE, {
       features: [state.polygon.toGeoJSON()]
     });
   } else {

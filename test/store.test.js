@@ -1,13 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {spy} from 'sinon';
+
 import Store from '../src/store.js';
 import createFeature from './utils/create_feature.js';
 import getPublicMemberKeys from './utils/get_public_member_keys.js';
 import createMap from './utils/create_map.js';
 
 function createStore() {
-  const map = createMap();
-  const ctx = { map };
+  const ctx = {
+    map: createMap(),
+    events: {
+      fire: spy()
+    }
+  };
+
   return new Store(ctx);
 }
 

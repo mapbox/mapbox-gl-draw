@@ -13,7 +13,7 @@ const DirectSelect = {};
 // INTERNAL FUCNTIONS
 
 DirectSelect.fireUpdate = function() {
-  this.map.fire(Constants.events.UPDATE, {
+  this.fire(Constants.events.UPDATE, {
     action: Constants.updateActions.CHANGE_COORDINATES,
     features: this.getSelected().map(f => f.toGeoJSON())
   });

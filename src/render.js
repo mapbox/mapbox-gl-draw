@@ -53,7 +53,7 @@ export default function render() {
   });
 
   if (store._emitSelectionChange) {
-    store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
+    store.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
       features: store.getSelected().map(feature => feature.toGeoJSON()),
       points: store.getSelectedCoordinates().map(coordinate => ({
         type: Constants.geojsonTypes.FEATURE,
@@ -67,18 +67,8 @@ export default function render() {
     store._emitSelectionChange = false;
   }
 
-  if (store._deletedFeaturesToEmit.length) {
-    const geojsonToEmit = store._deletedFeaturesToEmit.map(feature => feature.toGeoJSON());
-
-    store._deletedFeaturesToEmit = [];
-
-    store.ctx.map.fire(Constants.events.DELETE, {
-      features: geojsonToEmit
-    });
-  }
-
   cleanup();
-  store.ctx.map.fire(Constants.events.RENDER, {});
+  store.ctx.events.fire(Constants.events.RENDER, {});
 
   function cleanup() {
     store.isDirty = false;

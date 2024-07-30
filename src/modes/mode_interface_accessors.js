@@ -152,6 +152,16 @@ ModeInterface.prototype.changeMode = function(mode, opts = {}, eventOpts = {}) {
 };
 
 /**
+ * Fire a map event
+ * @name this.fire
+ * @param {String} eventName - the event name.
+ * @param {Object} eventData - the event data object.
+ */
+ModeInterface.prototype.fire = function(eventName, eventData) {
+  return this._ctx.events.fire(eventName, eventData);
+};
+
+/**
  * Update the state of draw map classes
  * @name this.updateUIClasses
  * @param {Object} opts
