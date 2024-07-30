@@ -128,7 +128,7 @@ Store.prototype.add = function(feature, options = {}) {
   this._featureIds.add(feature.id);
 
   if (options.silent != null && options.silent === false) {
-    this.ctx.map.fire(Constants.events.CREATE, {
+    this.ctx.events.fire(Constants.events.CREATE, {
       features: [this._features[feature.id].toGeoJSON()]
     });
   }
@@ -322,9 +322,16 @@ Store.prototype.isSelected = function(featureId) {
  * @param {string} property property
  * @param {string} property value
 */
-Store.prototype.setFeatureProperty = function(featureId, property, value) {
+Store.prototype.setFeatureProperty = function(featureId, property, value, options) {
   this.get(featureId).setProperty(property, value);
   this.featureChanged(featureId);
+
+  if (options.silent != null && options.silent === false) {
+    this.ctx.events.fire(Constants.events.UPDATE, {
+      action: Constants.updateActions.CHANGE_PROPERTIES,
+      features: [this.get(featureId).toGeoJSON()]
+    });
+  }
 };
 
 function refreshSelectedCoordinates(store, options) {
