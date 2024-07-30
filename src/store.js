@@ -25,7 +25,7 @@ export default function Store(ctx) {
         renderRequest = null;
         render.call(this);
 
-        // Fire a selection change event after rendering if the selection state changed
+        // Fire deduplicated selection change event
         if (this._emitSelectionChange) {
           this.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
             features: this.getSelected().map(feature => feature.toGeoJSON()),
@@ -42,7 +42,7 @@ export default function Store(ctx) {
           this._emitSelectionChange = false;
         }
 
-        // Fire `render` event
+        // Fire render event
         this.ctx.events.fire(Constants.events.RENDER, {});
       });
     }
