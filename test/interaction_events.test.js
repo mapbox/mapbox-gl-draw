@@ -982,3 +982,73 @@ test('ensure user interactions fire right events', async (t) => {
     assert.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
   });
 });
+
+test('ensure API fire right events', async () => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({ container });
+  const fireSpy = spy(map, 'fire');
+  const afterNextRender = setupAfterNextRender(map);
+  const Draw = new MapboxDraw({ silent: false });
+
+  map.addControl(Draw);
+  await map.on('load');
+
+  document.body.removeChild(container);
+
+  function flushDrawEvents() {
+    const drawEvents = [];
+    for (let i = 0; i < fireSpy.callCount; i++) {
+      const eventName = fireSpy.getCall(i).args[0];
+      if (typeof eventName !== 'string' || eventName.indexOf('draw.') !== 0) continue;
+      // Ignore draw.render events for now
+      if (eventName === 'draw.render') continue;
+      // Ignore draw.actionable events for now
+      if (eventName === 'draw.actionable') continue;
+      drawEvents.push(eventName);
+    }
+    fireSpy.resetHistory();
+    return drawEvents;
+  }
+
+  Draw.add({
+    type: 'Feature',
+    id: 'point',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [10, 10]
+    }
+  });
+
+  Draw.deleteAll();
+
+  await afterNextRender();
+
+  Draw.add({
+    type: 'Feature',
+    id: 'line',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: [[10, 10], [20, 20]]
+    }
+  });
+
+  await afterNextRender();
+
+  Draw.changeMode('draw_point');
+  Draw.changeMode('draw_line_string');
+  Draw.changeMode('draw_polygon');
+  Draw.changeMode('simple_select');
+
+  await afterNextRender();
+
+  Draw.delete('line');
+
+  await afterNextRender();
+
+  assert.deepEqual(flushDrawEvents(), [
+    'draw.create', 'draw.delete', 'draw.create', 'draw.modechange', 'draw.modechange', 'draw.modechange', 'draw.modechange', 'draw.delete'
+  ], 'no unexpected draw events');
+});
