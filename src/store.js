@@ -117,13 +117,22 @@ Store.prototype.getAllIds = function() {
 /**
  * Adds a feature to the store.
  * @param {Object} feature
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  *
  * @return {Store} this
  */
-Store.prototype.add = function(feature) {
+Store.prototype.add = function(feature, options = {}) {
   this.featureChanged(feature.id);
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);
+
+  if (options.silent != null && options.silent === false) {
+    this.ctx.map.fire(Constants.events.CREATE, {
+      features: [this._features[feature.id].toGeoJSON()]
+    });
+  }
+
   return this;
 };
 

@@ -107,8 +107,8 @@ ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
  * @name this.addFeature
  * @param {DrawFeature} feature - the feature to add
  */
-ModeInterface.prototype.addFeature = function(feature) {
-  return this._ctx.store.add(feature);
+ModeInterface.prototype.addFeature = function(feature, opts = {}) {
+  return this._ctx.store.add(feature, opts);
 };
 
 /**
