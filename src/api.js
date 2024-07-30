@@ -192,7 +192,7 @@ export default function(ctx, api) {
   };
 
   api.setFeatureProperty = function(featureId, property, value) {
-    ctx.store.setFeatureProperty(featureId, property, value);
+    ctx.store.setFeatureProperty(featureId, property, value, { silent });
     return api;
   };
 

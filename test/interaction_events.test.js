@@ -1017,6 +1017,10 @@ test('ensure API fire right events', { only: true }, async (t) => {
     }
   };
 
+  t.afterEach(() => {
+    fireSpy.resetHistory();
+  });
+
   await t.test('Draw#add fires draw.create event', async () => {
     Draw.add(point);
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
@@ -1037,6 +1041,49 @@ test('ensure API fire right events', { only: true }, async (t) => {
     Draw.deleteAll();
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
     assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+  });
+
+  await t.test('Draw#set fires draw.create event', async () => {
+    const collection = {
+      type: 'FeatureCollection',
+      features: [point, line]
+    };
+
+    Draw.set(collection);
+
+    assert.strictEqual(fireSpy.callCount, 2, 'fires draw.create event for each feature');
+
+    assert.strictEqual(fireSpy.firstCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.firstCall.lastArg, {features: [point]});
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+  });
+
+  await t.test('Draw#set fires draw.delete event', async () => {
+    const collection = {
+      type: 'FeatureCollection',
+      features: [line]
+    };
+
+    Draw.set(collection);
+
+    assert.strictEqual(fireSpy.callCount, 1, 'fires draw.delete event for deleted feature');
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+  });
+
+  await t.test('Draw#setFeatureProperty fires draw.update event', () => {
+    Draw.add(point);
+
+    Draw.setFeatureProperty(point.id, 'price', 200);
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.update');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {
+      action: 'change_properties',
+      features: [{...point, properties: {price: 200}}]
+    });
   });
 
   await t.test('Draw#changeMode fires draw.modechange event', async () => {
