@@ -322,7 +322,7 @@ Store.prototype.isSelected = function(featureId) {
  * @param {string} property property
  * @param {string} property value
 */
-Store.prototype.setFeatureProperty = function(featureId, property, value, options) {
+Store.prototype.setFeatureProperty = function(featureId, property, value, options = {}) {
   this.get(featureId).setProperty(property, value);
   this.featureChanged(featureId);
 
@@ -334,7 +334,7 @@ Store.prototype.setFeatureProperty = function(featureId, property, value, option
   }
 };
 
-function refreshSelectedCoordinates(store, options) {
+function refreshSelectedCoordinates(store, options = {}) {
   const newSelectedCoordinates = store._selectedCoordinates.filter(point => store._selectedFeatureIds.has(point.feature_id));
   if (store._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
     store._emitSelectionChange = true;
