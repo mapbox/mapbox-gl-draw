@@ -9,6 +9,9 @@ import createMap from './utils/create_map.js';
 
 function createStore() {
   const ctx = {
+    options: {
+      silent: true
+    },
     map: createMap(),
     events: {
       fire: spy()

@@ -983,7 +983,7 @@ test('ensure user interactions fire right events', async (t) => {
   });
 });
 
-test('ensure API fire right events', { only: true }, async (t) => {
+test('ensure API fire right events', async (t) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({container});
