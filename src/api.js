@@ -98,7 +98,7 @@ export default function(ctx, api) {
         const originalProperties = internalFeature.properties;
         internalFeature.properties = feature.properties;
         if (!isEqual(originalProperties, feature.properties)) {
-          ctx.store.featureChanged(internalFeature.id);
+          ctx.store.featureChanged(internalFeature.id, { silent });
         }
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);

@@ -84,8 +84,14 @@ Store.prototype.setDirty = function() {
  * @param {string} featureId
  * @return {Store} this
  */
-Store.prototype.featureChanged = function(featureId) {
+Store.prototype.featureChanged = function(featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
+
+  const silent = options.silent != null ? options.silent : this.ctx.options.silent;
+  if (silent !== true && options.eventName && options.eventData) {
+    this.ctx.events.fire(options.eventName, options.eventData);
+  }
+
   return this;
 };
 
@@ -123,15 +129,14 @@ Store.prototype.getAllIds = function() {
  * @return {Store} this
  */
 Store.prototype.add = function(feature, options = {}) {
-  this.featureChanged(feature.id);
+  this.featureChanged(feature.id, {
+    silent: options.silent,
+    eventName: Constants.events.CREATE,
+    eventData: {features: [feature.toGeoJSON()]}
+  });
+
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);
-
-  if (options.silent != null && options.silent === false) {
-    this.ctx.events.fire(Constants.events.CREATE, {
-      features: [this._features[feature.id].toGeoJSON()]
-    });
-  }
 
   return this;
 };
@@ -321,17 +326,20 @@ Store.prototype.isSelected = function(featureId) {
  * @param {string} featureId
  * @param {string} property property
  * @param {string} property value
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
 */
 Store.prototype.setFeatureProperty = function(featureId, property, value, options = {}) {
   this.get(featureId).setProperty(property, value);
-  this.featureChanged(featureId);
 
-  if (options.silent != null && options.silent === false) {
-    this.ctx.events.fire(Constants.events.UPDATE, {
+  this.featureChanged(featureId, {
+    silent: options.silent,
+    eventName: Constants.events.UPDATE,
+    eventData: {
       action: Constants.updateActions.CHANGE_PROPERTIES,
       features: [this.get(featureId).toGeoJSON()]
-    });
-  }
+    }
+  });
 };
 
 function refreshSelectedCoordinates(store, options = {}) {

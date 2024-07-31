@@ -9,17 +9,17 @@ const Feature = function(ctx, geojson) {
   this.type = geojson.geometry.type;
 };
 
-Feature.prototype.changed = function() {
-  this.ctx.store.featureChanged(this.id);
+Feature.prototype.changed = function(options = {}) {
+  this.ctx.store.featureChanged(this.id, options);
 };
 
 Feature.prototype.incomingCoords = function(coords) {
   this.setCoordinates(coords);
 };
 
-Feature.prototype.setCoordinates = function(coords) {
+Feature.prototype.setCoordinates = function(coords, options = {}) {
   this.coordinates = coords;
-  this.changed();
+  this.changed(options);
 };
 
 Feature.prototype.getCoordinates = function() {
