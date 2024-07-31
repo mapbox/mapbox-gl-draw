@@ -46,6 +46,7 @@ test('Store constructor and public API', () => {
   // prototype members
   assert.equal(typeof Store.prototype.setDirty, 'function', 'exposes store.setDirty');
   assert.equal(typeof Store.prototype.createRenderBatch, 'function', 'exposes store.createRenderBatch');
+  assert.equal(typeof Store.prototype.featureCreated, 'function', 'exposes store.featureCreated');
   assert.equal(typeof Store.prototype.featureChanged, 'function', 'exposes store.featureChanged');
   assert.equal(typeof Store.prototype.getChangedIds, 'function', 'exposes store.getChangedIds');
   assert.equal(typeof Store.prototype.clearChangedIds, 'function', 'exposes store.clearChangedIds');
@@ -69,7 +70,7 @@ test('Store constructor and public API', () => {
   assert.equal(typeof Store.prototype.restoreMapConfig, 'function', 'exposes store.restoreMapConfig');
   assert.equal(typeof Store.prototype.getInitialConfigValue, 'function', 'exposes store.getInitialConfigValue');
 
-  assert.equal(getPublicMemberKeys(Store.prototype).length, 24, 'no untested prototype members');
+  assert.equal(getPublicMemberKeys(Store.prototype).length, 25, 'no untested prototype members');
 });
 
 test('Store#setDirty', () => {
