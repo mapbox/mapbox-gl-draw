@@ -1,4 +1,3 @@
-import hat from 'hat';
 import Feature from './feature.js';
 import * as Constants from '../constants.js';
 
@@ -33,7 +32,7 @@ MultiFeature.prototype = Object.create(Feature.prototype);
 MultiFeature.prototype._coordinatesToFeatures = function(coordinates) {
   const Model = this.model.bind(this);
   return coordinates.map(coords => new Model(this.ctx, {
-    id: hat(),
+    id: crypto.randomUUID(),
     type: Constants.geojsonTypes.FEATURE,
     properties: {},
     geometry: {

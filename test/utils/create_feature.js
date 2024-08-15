@@ -1,11 +1,8 @@
-import hat from 'hat';
 import getGeoJSON from './get_geojson.js';
-
-const hatRack = hat.rack();
 
 export default function createFeature(featureType) {
   const feature = Object.assign({
-    id: hatRack(),
+    id: crypto.randomUUID(),
     properties: {}
   }, getGeoJSON(featureType));
   feature.toGeoJSON = () => feature;

@@ -1,11 +1,10 @@
-import hat from 'hat';
 import * as Constants from '../constants.js';
 
 const Feature = function(ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
-  this.id = geojson.id || hat();
+  this.id = geojson.id || crypto.randomUUID();
   this.type = geojson.geometry.type;
 };
 
