@@ -179,8 +179,6 @@ Snapping.prototype.enableSnapping = function () {
     paint: {
       "circle-color": "transparent",
       "circle-radius": 5,
-      "circle-stroke-width": 3,
-      "circle-stroke-color": "orange",
     },
   });
 };
