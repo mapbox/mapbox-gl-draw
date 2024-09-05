@@ -68,7 +68,7 @@ module.exports = function render() {
     store.ctx.map.fire(Constants.events.SELECTION_CHANGE, {
       features: store
         .getSelected()
-        .filer((feature) => {
+        .filter((feature) => {
           feature != undefined;
         })
         .map((feature) => feature.toGeoJSON()),
