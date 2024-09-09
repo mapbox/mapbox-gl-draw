@@ -149,7 +149,7 @@ Snapping.prototype.addSnapBuffer = function (layerId) {
       "line-width": this.ctx.options.snapDistance * 2,
     };
   }
-  if (!map.getLayer(bufferLayerId)) {
+  if (!this.map.getLayer(bufferLayerId)) {
     this.map.addLayer(newLayer);
   }
   this.map.on("mousemove", bufferLayerId, this.mouseoverHandler);
