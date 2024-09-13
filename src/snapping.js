@@ -91,10 +91,11 @@ const Snapping = (module.exports = function (ctx) {
 
 Snapping.prototype.setSnapHoverState = function (f, state) {
   if (f.id !== undefined) {
-    const guidelineIds = JSON.parse(f.properties.guidelineIds) || [];
-    console.log("guidelineIds", guidelineIds);
+    console.log("f", JSON.stringify(f, null, 2));
+    // const guidelineIds = JSON.parse(f.properties.guidelineIds) || [];
+    // console.log("guidelineIds", guidelineIds);
     try {
-      for (const guidelineId of guidelineIds) {
+      for (const guidelineId of []) {
         this.map.setFeatureState(
           {
             id: guidelineId,
