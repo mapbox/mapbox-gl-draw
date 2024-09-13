@@ -91,6 +91,20 @@ const Snapping = (module.exports = function (ctx) {
 
 Snapping.prototype.setSnapHoverState = function (f, state) {
   if (f.id !== undefined) {
+    try {
+      const guidelineIds = f.properties.guidelineIds || [];
+      for (const guidelineId of guidelineIds) {
+        this.map.setFeatureState(
+          {
+            id: guidelineId,
+            source: f.source,
+            ...(f.sourceLayer && { sourceLayer: f.sourceLayer }),
+          },
+          { "snap-hover": state }
+        );
+      }
+    } catch (e) {}
+
     this.map.setFeatureState(
       {
         id: f.id,
