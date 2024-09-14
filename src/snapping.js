@@ -95,10 +95,21 @@ Snapping.prototype.setSnapHoverState = function (f, state) {
       {
         id: f.id,
         source: f.source,
-        ...(f.sourceLayer && { sourceLayer: f.sourceLayer }),
       },
       { "snap-hover": state }
     );
+    if (f.properties.type === "snappingPoint") {
+      const guidelineIds = JSON.parse(f.properties.guidelineIds) || [];
+      for (const guidelineId of guidelineIds) {
+        this.map.setFeatureState(
+          {
+            id: guidelineId,
+            source: f.source,
+          },
+          { "snap-hover": state }
+        );
+      }
+    }
   }
 };
 
