@@ -3,6 +3,7 @@ import * as Constants from "./constants.js";
 export default function render() {
   // eslint-disable-next-line no-invalid-this
   const store = this;
+  this._deletedFeaturesToEmit = [];
   const mapExists =
     store.ctx.map &&
     store.ctx.map.getSource(Constants.sources.HOT) !== undefined;
