@@ -2,7 +2,7 @@ import events from "./events.js";
 import Store from "./store.js";
 import ui from "./ui.js";
 import * as Constants from "./constants.js";
-import * as Snapping from "./snapping.js";
+import Snapping from "./snapping.js";
 
 export default function (ctx) {
   let controlContainer = null;
