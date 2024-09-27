@@ -1,17 +1,17 @@
-import events from './events.js';
-import Store from './store.js';
-import ui from './ui.js';
-import * as Constants from './constants.js';
+import events from "./events.js";
+import Store from "./store.js";
+import ui from "./ui.js";
+import * as Constants from "./constants.js";
+import * as Snapping from "./snapping.js";
 
-export default function(ctx) {
-
+export default function (ctx) {
   let controlContainer = null;
   let mapLoadedInterval = null;
 
   const setup = {
     onRemove() {
       // Stop connect attempt in the event that control is removed before map is loaded
-      ctx.map.off('load', setup.connect);
+      ctx.map.off("load", setup.connect);
       clearInterval(mapLoadedInterval);
 
       setup.removeLayers();
@@ -23,16 +23,19 @@ export default function(ctx) {
       ctx.map = null;
       ctx.container = null;
       ctx.store = null;
+      ctx.snapping.disableSnapping();
 
-      if (controlContainer && controlContainer.parentNode) controlContainer.parentNode.removeChild(controlContainer);
+      if (controlContainer && controlContainer.parentNode)
+        controlContainer.parentNode.removeChild(controlContainer);
       controlContainer = null;
 
       return this;
     },
     connect() {
-      ctx.map.off('load', setup.connect);
+      ctx.map.off("load", setup.connect);
       clearInterval(mapLoadedInterval);
       setup.addLayers();
+      new Snapping(ctx).enableSnapping();
       ctx.store.storeMapConfig();
       ctx.events.addEventListeners();
     },
@@ -42,7 +45,6 @@ export default function(ctx) {
       ctx.ui = ui(ctx);
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
-
 
       controlContainer = ctx.ui.addButtons();
 
@@ -62,8 +64,10 @@ export default function(ctx) {
       if (map.loaded()) {
         setup.connect();
       } else {
-        map.on('load', setup.connect);
-        mapLoadedInterval = setInterval(() => { if (map.loaded()) setup.connect(); }, 16);
+        map.on("load", setup.connect);
+        mapLoadedInterval = setInterval(() => {
+          if (map.loaded()) setup.connect();
+        }, 16);
       }
 
       ctx.events.start();
@@ -74,18 +78,18 @@ export default function(ctx) {
       ctx.map.addSource(Constants.sources.COLD, {
         data: {
           type: Constants.geojsonTypes.FEATURE_COLLECTION,
-          features: []
+          features: [],
         },
-        type: 'geojson'
+        type: "geojson",
       });
 
       // hot features style
       ctx.map.addSource(Constants.sources.HOT, {
         data: {
           type: Constants.geojsonTypes.FEATURE_COLLECTION,
-          features: []
+          features: [],
         },
-        type: 'geojson'
+        type: "geojson",
       });
 
       ctx.options.styles.forEach((style) => {
@@ -111,7 +115,7 @@ export default function(ctx) {
       if (ctx.map.getSource(Constants.sources.HOT)) {
         ctx.map.removeSource(Constants.sources.HOT);
       }
-    }
+    },
   };
 
   ctx.setup = setup;

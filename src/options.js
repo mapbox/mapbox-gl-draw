@@ -1,7 +1,7 @@
-import * as Constants from './constants.js';
+import * as Constants from "./constants.js";
 
-import styles from './lib/theme.js';
-import modes from './modes/index.js';
+import styles from "./lib/theme.js";
+import modes from "./modes/index.js";
 
 const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
@@ -14,7 +14,13 @@ const defaultOptions = {
   styles,
   modes,
   controls: {},
-  userProperties: false
+  userProperties: false,
+  snapLayers: [],
+  snapFeatureFilter: undefined,
+  snapDistance: 20,
+  snapping: {
+    layers: [],
+  },
 };
 
 const showControls = {
@@ -23,7 +29,7 @@ const showControls = {
   polygon: true,
   trash: true,
   combine_features: true,
-  uncombine_features: true
+  uncombine_features: true,
 };
 
 const hideControls = {
@@ -32,7 +38,7 @@ const hideControls = {
   polygon: false,
   trash: false,
   combine_features: false,
-  uncombine_features: false
+  uncombine_features: false,
 };
 
 function addSources(styles, sourceBucket) {
@@ -40,12 +46,13 @@ function addSources(styles, sourceBucket) {
     if (style.source) return style;
     return Object.assign({}, style, {
       id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
+      source:
+        sourceBucket === "hot" ? Constants.sources.HOT : Constants.sources.COLD,
     });
   });
 }
 
-export default function(options = {}) {
+export default function (options = {}) {
   let withDefaults = Object.assign({}, options);
 
   if (!options.controls) {
@@ -61,7 +68,9 @@ export default function(options = {}) {
   withDefaults = Object.assign({}, defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
-  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+  withDefaults.styles = addSources(withDefaults.styles, "cold").concat(
+    addSources(withDefaults.styles, "hot")
+  );
 
   return withDefaults;
 }
