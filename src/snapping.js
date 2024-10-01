@@ -42,13 +42,11 @@ export default class Snapping {
     this.bufferLayers
       .filter((l) => !newLayers.includes(l))
       .forEach((l) => {
-        console.log(`Remove snap buffer ${l.id}`);
         this.removeSnapBuffer(l);
       });
     newLayers
       .filter((l) => !this.bufferLayers.includes(l))
       .forEach((l) => {
-        console.log(`Add snap buffer ${l.id}`);
         this.addSnapBuffer(l);
       });
     this.bufferLayers = newLayers;
@@ -114,7 +112,6 @@ export default class Snapping {
   }
 
   addSnapBuffer(layerId) {
-    console.log("snap on ", layerId);
     const bufferLayerId = getBufferLayerId(layerId);
     const layerDef = this.map.getLayer(layerId);
     if (!layerDef) {
@@ -173,7 +170,6 @@ export default class Snapping {
   }
 
   enableSnapping() {
-    console.log("snap on");
     this.snappableLayers().forEach((l) => this.addSnapBuffer(l));
     this.map.addSource("_snap_vertex", {
       type: "geojson",
