@@ -139,11 +139,11 @@ test('Draw.set', () => {
     'Draw.add called with new collection');
   assert.equal(deleteSpy.callCount, 1,
     'Draw.delete called');
-  assert.deepEqual(deleteSpy.getCall(0).args, [[
+  assert.deepEqual(deleteSpy.getCall(0).args[0], [
     pointId,
     lineId,
     polygonId
-  ]], 'Draw.delete called with old features');
+  ], 'Draw.delete called with old features');
 
   // Then set to another that contains a feature
   // with an already-used id
