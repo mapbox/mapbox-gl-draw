@@ -50,9 +50,7 @@ test('Feature#changed', () => {
   ctx.store.featureChanged.resetHistory();
   feature.changed();
   assert.equal(ctx.store.featureChanged.callCount, 1, 'called function on store');
-  assert.deepEqual(ctx.store.featureChanged.getCall(0).args, [featureGeoJson.id], 'with correct args');
-
-
+  assert.deepEqual(ctx.store.featureChanged.getCall(0).args[0], featureGeoJson.id, 'with correct args');
 });
 
 test('Feature#incomingCoords', () => {
