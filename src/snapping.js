@@ -194,8 +194,9 @@ export default class Snapping {
 
   disableSnapping() {
     this.snappableLayers().forEach((l) => this.removeSnapBuffer(l));
-    this.map.removeLayer("_snap_vertex");
-    this.map.removeSource("_snap_vertex");
+    if (this.map.getLayer("_snap_vertex")) this.map.removeLayer("_snap_vertex");
+    if (this.map.getSource("_snap_vertex"))
+      this.map.removeSource("_snap_vertex");
   }
 
   snappableLayers() {
