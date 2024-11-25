@@ -163,10 +163,12 @@ export default class Snapping {
   }
 
   removeSnapBuffer(layerId) {
-    const bufferLayerId = getBufferLayerId(layerId);
-    this.map.off("mouseover", bufferLayerId, this.mouseoverHandler);
-    this.map.off("mouseout", bufferLayerId, this.mouseoutHandler);
-    this.map.removeLayer(bufferLayerId);
+    try {
+      const bufferLayerId = getBufferLayerId(layerId);
+      this.map.off("mouseover", bufferLayerId, this.mouseoverHandler);
+      this.map.off("mouseout", bufferLayerId, this.mouseoutHandler);
+      if (this.map.getLayer(bufferLayerId)) this.map.removeLayer(bufferLayerId);
+    } catch (e) {}
   }
 
   enableSnapping() {
@@ -192,8 +194,9 @@ export default class Snapping {
 
   disableSnapping() {
     this.snappableLayers().forEach((l) => this.removeSnapBuffer(l));
-    this.map.removeLayer("_snap_vertex");
-    this.map.removeSource("_snap_vertex");
+    if (this.map.getLayer("_snap_vertex")) this.map.removeLayer("_snap_vertex");
+    if (this.map.getSource("_snap_vertex"))
+      this.map.removeSource("_snap_vertex");
   }
 
   snappableLayers() {
