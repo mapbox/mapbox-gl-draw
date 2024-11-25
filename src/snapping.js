@@ -167,7 +167,7 @@ export default class Snapping {
       const bufferLayerId = getBufferLayerId(layerId);
       this.map.off("mouseover", bufferLayerId, this.mouseoverHandler);
       this.map.off("mouseout", bufferLayerId, this.mouseoutHandler);
-      this.map.removeLayer(bufferLayerId);
+      if (this.map.getLayer(bufferLayerId)) this.map.removeLayer(bufferLayerId);
     } catch (e) {}
   }
 
