@@ -163,10 +163,12 @@ export default class Snapping {
   }
 
   removeSnapBuffer(layerId) {
-    const bufferLayerId = getBufferLayerId(layerId);
-    this.map.off("mouseover", bufferLayerId, this.mouseoverHandler);
-    this.map.off("mouseout", bufferLayerId, this.mouseoutHandler);
-    this.map.removeLayer(bufferLayerId);
+    try {
+      const bufferLayerId = getBufferLayerId(layerId);
+      this.map.off("mouseover", bufferLayerId, this.mouseoverHandler);
+      this.map.off("mouseout", bufferLayerId, this.mouseoutHandler);
+      this.map.removeLayer(bufferLayerId);
+    } catch (e) {}
   }
 
   enableSnapping() {
