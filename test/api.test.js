@@ -33,6 +33,15 @@ afterEach(() => {
   deleteSpy = null;
 });
 
+test('Draw.add', async (t) => {
+  await t.test('should generate unique ID', () => {
+    const [id] = Draw.add(getGeoJSON('point'));
+
+    assert.equal(typeof id, 'string', 'valid string id returned on add');
+    assert.equal(id.length, 32, 'valid string id length');
+  });
+});
+
 test('Draw.getFeatureIdsAt', async () => {
   const feature = getGeoJSON('point');
   const [id] = Draw.add(feature);

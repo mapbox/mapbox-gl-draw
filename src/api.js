@@ -1,6 +1,6 @@
 import isEqual from 'fast-deep-equal';
 import normalize from '@mapbox/geojson-normalize';
-import hat from 'hat';
+import {generateID} from './lib/id.js';
 import featuresAt from './lib/features_at.js';
 import stringSetsAreEqual from './lib/string_sets_are_equal.js';
 import * as Constants from './constants.js';
@@ -78,7 +78,7 @@ export default function(ctx, api) {
     const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
     const ids = featureCollection.features.map((feature) => {
-      feature.id = feature.id || hat();
+      feature.id = feature.id || generateID();
 
       if (feature.geometry === null) {
         throw new Error('Invalid geometry: null');
