@@ -72,6 +72,7 @@ export default function(ctx) {
     addLayers() {
       // drawn features style
       ctx.map.addSource(Constants.sources.COLD, {
+        ...ctx.options.coldSourceOptions,
         data: {
           type: Constants.geojsonTypes.FEATURE_COLLECTION,
           features: []
@@ -81,6 +82,7 @@ export default function(ctx) {
 
       // hot features style
       ctx.map.addSource(Constants.sources.HOT, {
+        ...ctx.options.hotSourceOptions,
         data: {
           type: Constants.geojsonTypes.FEATURE_COLLECTION,
           features: []
