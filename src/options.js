@@ -15,7 +15,7 @@ const defaultOptions = {
   modes,
   controls: {},
   userProperties: false,
-  silent: true
+  suppressAPIEvents: true
 };
 
 const showControls = {

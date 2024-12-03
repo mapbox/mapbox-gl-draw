@@ -24,7 +24,7 @@ export default function(ctx, api) {
   api.modes = Constants.modes;
 
   // API doesn't emit events by default
-  const silent = ctx.options.silent !== undefined ? !!ctx.options.silent : true;
+  const silent = ctx.options.suppressAPIEvents !== undefined ? !!ctx.options.suppressAPIEvents : true;
 
   api.getFeatureIdsAt = function(point) {
     const features = featuresAt.click({ point }, null, ctx);

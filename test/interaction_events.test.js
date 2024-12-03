@@ -989,8 +989,8 @@ test('ensure API fire right events', async (t) => {
   const map = createMap({container});
   const fireSpy = spy(map, 'fire');
 
-  // Explicitly set silent to false to ensure events are fired
-  const Draw = new MapboxDraw({ silent: false });
+  // Explicitly set `suppressAPIEvents` to false to ensure events are fired
+  const Draw = new MapboxDraw({ suppressAPIEvents: false });
 
   map.addControl(Draw);
   await map.on('load');

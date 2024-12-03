@@ -87,7 +87,7 @@ Store.prototype.setDirty = function() {
 Store.prototype.featureCreated = function(featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
 
-  const silent = options.silent != null ? options.silent : this.ctx.options.silent;
+  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
   if (silent !== true) {
     const feature = this.get(featureId);
     this.ctx.events.fire(Constants.events.CREATE, {
@@ -106,7 +106,7 @@ Store.prototype.featureCreated = function(featureId, options = {}) {
 Store.prototype.featureChanged = function(featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
 
-  const silent = options.silent != null ? options.silent : this.ctx.options.silent;
+  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
   if (silent !== true) {
     this.ctx.events.fire(Constants.events.UPDATE, {
       action: options.action ? options.action : Constants.updateActions.CHANGE_COORDINATES,

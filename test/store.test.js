@@ -10,7 +10,7 @@ import createMap from './utils/create_map.js';
 function createStore() {
   const ctx = {
     options: {
-      silent: true
+      suppressAPIEvents: true
     },
     map: createMap(),
     events: {

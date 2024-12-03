@@ -33,7 +33,7 @@ test('Options test', async (t) => {
         combine_features: true,
         uncombine_features: true
       },
-      silent: true
+      suppressAPIEvents: true
     };
     assert.deepEqual(defaultOptions, Draw.options);
     assert.deepEqual(styleWithSourcesFixture, Draw.options.styles);
@@ -60,7 +60,7 @@ test('Options test', async (t) => {
         combine_features: true,
         uncombine_features: true
       },
-      silent: true
+      suppressAPIEvents: true
     };
 
     assert.deepEqual(defaultOptions, Draw.options);
@@ -87,7 +87,7 @@ test('Options test', async (t) => {
         combine_features: false,
         uncombine_features: false
       },
-      silent: true
+      suppressAPIEvents: true
     };
     assert.deepEqual(defaultOptions, Draw.options);
   });
@@ -113,7 +113,7 @@ test('Options test', async (t) => {
         combine_features: false,
         uncombine_features: false
       },
-      silent: true
+      suppressAPIEvents: true
     };
 
     assert.deepEqual(defaultOptions, Draw.options);
@@ -140,7 +140,7 @@ test('Options test', async (t) => {
         combine_features: true,
         uncombine_features: true
       },
-      silent: true
+      suppressAPIEvents: true
     };
 
     assert.deepEqual(defaultOptions, Draw.options);
@@ -167,7 +167,7 @@ test('Options test', async (t) => {
         combine_features: true,
         uncombine_features: true
       },
-      silent: true
+      suppressAPIEvents: true
     };
     assert.deepEqual(defaultOptions, Draw.options);
     assert.deepEqual(styleWithSourcesFixture, Draw.options.styles);

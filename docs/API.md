@@ -36,7 +36,7 @@ All of the following options are optional.
 - `modes`, Object: over ride the default modes with your own. `MapboxDraw.modes` can be used to see the default values. More information on custom modes [can be found here](https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/MODES.md).
 - `defaultMode`, String (default: `'simple_select'`): the mode (from `modes`) that user will first land in.
 - `userProperties`, boolean (default: `false`): properties of a feature will also be available for styling and prefixed with `user_`, e.g., `['==', 'user_custom_label', 'Example']`
-- `silent`, boolean (default: `true`): Whether or not to emit events when calling Draw API methods. If `false`, events will be emitted.
+- `suppressAPIEvents`, boolean (default: `true`): Whether or not to emit events when calling Draw API methods. If `false`, events will be emitted.
 
 ## Modes
 
