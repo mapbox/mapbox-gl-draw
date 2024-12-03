@@ -982,3 +982,125 @@ test('ensure user interactions fire right events', async (t) => {
     assert.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
   });
 });
+
+test('ensure API fire right events', async (t) => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const map = createMap({container});
+  const fireSpy = spy(map, 'fire');
+
+  // Explicitly set `suppressAPIEvents` to false to ensure events are fired
+  const Draw = new MapboxDraw({ suppressAPIEvents: false });
+
+  map.addControl(Draw);
+  await map.on('load');
+
+  document.body.removeChild(container);
+
+  const point = {
+    type: 'Feature',
+    id: 'point',
+    properties: {},
+    geometry: {
+      type: 'Point',
+      coordinates: [10, 10]
+    }
+  };
+
+  const line = {
+    type: 'Feature',
+    id: 'line',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: [[10, 10], [20, 20]]
+    }
+  };
+
+  t.afterEach(() => {
+    fireSpy.resetHistory();
+  });
+
+  await t.test('Draw#add fires draw.create event', async () => {
+    Draw.add(point);
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+
+    Draw.add(line);
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+  });
+
+  await t.test('Draw#delete fires draw.delete event', async () => {
+    Draw.delete(point.id);
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+  });
+
+  await t.test('Draw#deleteAll fires draw.delete event', async () => {
+    Draw.deleteAll();
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+  });
+
+  await t.test('Draw#set fires draw.create event', async () => {
+    const collection = {
+      type: 'FeatureCollection',
+      features: [point, line]
+    };
+
+    Draw.set(collection);
+
+    assert.strictEqual(fireSpy.callCount, 2, 'fires draw.create event for each feature');
+
+    assert.strictEqual(fireSpy.firstCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.firstCall.lastArg, {features: [point]});
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+  });
+
+  await t.test('Draw#set fires draw.delete event', async () => {
+    const collection = {
+      type: 'FeatureCollection',
+      features: [line]
+    };
+
+    Draw.set(collection);
+
+    assert.strictEqual(fireSpy.callCount, 1, 'fires draw.delete event for deleted feature');
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+  });
+
+  await t.test('Draw#setFeatureProperty fires draw.update event', () => {
+    Draw.add(point);
+
+    Draw.setFeatureProperty(point.id, 'price', 200);
+
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.update');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {
+      action: 'change_properties',
+      features: [{...point, properties: {price: 200}}]
+    });
+  });
+
+  await t.test('Draw#changeMode fires draw.modechange event', async () => {
+    Draw.changeMode('draw_point');
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_point' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+
+    Draw.changeMode('draw_line_string');
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_line_string' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+
+    Draw.changeMode('draw_polygon');
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_polygon' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+
+    Draw.changeMode('simple_select');
+    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'simple_select' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+  });
+});

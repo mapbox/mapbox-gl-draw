@@ -21,26 +21,28 @@ const featureTypes = {
 };
 
 export default function(ctx, api) {
-
   api.modes = Constants.modes;
+
+  // API doesn't emit events by default
+  const silent = ctx.options.suppressAPIEvents !== undefined ? !!ctx.options.suppressAPIEvents : true;
 
   api.getFeatureIdsAt = function(point) {
     const features = featuresAt.click({ point }, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 
-  api.getSelectedIds = function () {
+  api.getSelectedIds = function() {
     return ctx.store.getSelectedIds();
   };
 
-  api.getSelected = function () {
+  api.getSelected = function() {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getSelectedIds().map(id => ctx.store.get(id)).map(feature => feature.toGeoJSON())
     };
   };
 
-  api.getSelectedPoints = function () {
+  api.getSelectedPoints = function() {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getSelectedCoordinates().map(coordinate => ({
@@ -72,7 +74,7 @@ export default function(ctx, api) {
     return newIds;
   };
 
-  api.add = function (geojson) {
+  api.add = function(geojson) {
     const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
     const ids = featureCollection.features.map((feature) => {
@@ -89,14 +91,14 @@ export default function(ctx, api) {
           throw new Error(`Invalid geometry type: ${feature.geometry.type}.`);
         }
         const internalFeature = new Model(ctx, feature);
-        ctx.store.add(internalFeature);
+        ctx.store.add(internalFeature, { silent });
       } else {
         // If a feature of that id has already been created, and we are swapping it out ...
         const internalFeature = ctx.store.get(feature.id);
         const originalProperties = internalFeature.properties;
         internalFeature.properties = feature.properties;
         if (!isEqual(originalProperties, feature.properties)) {
-          ctx.store.featureChanged(internalFeature.id);
+          ctx.store.featureChanged(internalFeature.id, { silent });
         }
         if (!isEqual(internalFeature.getCoordinates(), feature.geometry.coordinates)) {
           internalFeature.incomingCoords(feature.geometry.coordinates);
@@ -110,7 +112,7 @@ export default function(ctx, api) {
   };
 
 
-  api.get = function (id) {
+  api.get = function(id) {
     const feature = ctx.store.get(id);
     if (feature) {
       return feature.toGeoJSON();
@@ -125,11 +127,11 @@ export default function(ctx, api) {
   };
 
   api.delete = function(featureIds) {
-    ctx.store.delete(featureIds, { silent: true });
+    ctx.store.delete(featureIds, { silent });
     // If we were in direct select mode and our selected feature no longer exists
     // (because it was deleted), we need to get out of that mode.
     if (api.getMode() === Constants.modes.DIRECT_SELECT && !ctx.store.getSelectedIds().length) {
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent });
     } else {
       ctx.store.render();
     }
@@ -138,11 +140,11 @@ export default function(ctx, api) {
   };
 
   api.deleteAll = function() {
-    ctx.store.delete(ctx.store.getAllIds(), { silent: true });
+    ctx.store.delete(ctx.store.getAllIds(), { silent });
     // If we were in direct select mode, now our selected feature no longer exists,
     // so escape that mode.
     if (api.getMode() === Constants.modes.DIRECT_SELECT) {
-      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent: true });
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, { silent });
     } else {
       ctx.store.render();
     }
@@ -156,7 +158,7 @@ export default function(ctx, api) {
       if (stringSetsAreEqual((modeOptions.featureIds || []), ctx.store.getSelectedIds())) return api;
       // And if we are changing the selection within simple_select mode, just change the selection,
       // instead of stopping and re-starting the mode
-      ctx.store.setSelected(modeOptions.featureIds, { silent: true });
+      ctx.store.setSelected(modeOptions.featureIds, { silent });
       ctx.store.render();
       return api;
     }
@@ -166,7 +168,7 @@ export default function(ctx, api) {
       return api;
     }
 
-    ctx.events.changeMode(mode, modeOptions, { silent: true });
+    ctx.events.changeMode(mode, modeOptions, { silent });
     return api;
   };
 
@@ -175,22 +177,22 @@ export default function(ctx, api) {
   };
 
   api.trash = function() {
-    ctx.events.trash({ silent: true });
+    ctx.events.trash({ silent });
     return api;
   };
 
   api.combineFeatures = function() {
-    ctx.events.combineFeatures({ silent: true });
+    ctx.events.combineFeatures({ silent });
     return api;
   };
 
   api.uncombineFeatures = function() {
-    ctx.events.uncombineFeatures({ silent: true });
+    ctx.events.uncombineFeatures({ silent });
     return api;
   };
 
   api.setFeatureProperty = function(featureId, property, value) {
-    ctx.store.setFeatureProperty(featureId, property, value);
+    ctx.store.setFeatureProperty(featureId, property, value, { silent });
     return api;
   };
 

@@ -84,8 +84,36 @@ Store.prototype.setDirty = function() {
  * @param {string} featureId
  * @return {Store} this
  */
-Store.prototype.featureChanged = function(featureId) {
+Store.prototype.featureCreated = function(featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
+
+  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
+  if (silent !== true) {
+    const feature = this.get(featureId);
+    this.ctx.events.fire(Constants.events.CREATE, {
+      features: [feature.toGeoJSON()]
+    });
+  }
+
+  return this;
+};
+
+/**
+ * Sets a feature's state to changed.
+ * @param {string} featureId
+ * @return {Store} this
+ */
+Store.prototype.featureChanged = function(featureId, options = {}) {
+  this._changedFeatureIds.add(featureId);
+
+  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
+  if (silent !== true) {
+    this.ctx.events.fire(Constants.events.UPDATE, {
+      action: options.action ? options.action : Constants.updateActions.CHANGE_COORDINATES,
+      features: [this.get(featureId).toGeoJSON()]
+    });
+  }
+
   return this;
 };
 
@@ -117,13 +145,15 @@ Store.prototype.getAllIds = function() {
 /**
  * Adds a feature to the store.
  * @param {Object} feature
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  *
  * @return {Store} this
  */
-Store.prototype.add = function(feature) {
-  this.featureChanged(feature.id);
+Store.prototype.add = function(feature, options = {}) {
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);
+  this.featureCreated(feature.id, {silent: options.silent});
   return this;
 };
 
@@ -312,13 +342,19 @@ Store.prototype.isSelected = function(featureId) {
  * @param {string} featureId
  * @param {string} property property
  * @param {string} property value
+ * @param {Object} [options]
+ * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
 */
-Store.prototype.setFeatureProperty = function(featureId, property, value) {
+Store.prototype.setFeatureProperty = function(featureId, property, value, options = {}) {
   this.get(featureId).setProperty(property, value);
-  this.featureChanged(featureId);
+
+  this.featureChanged(featureId, {
+    silent: options.silent,
+    action: Constants.updateActions.CHANGE_PROPERTIES
+  });
 };
 
-function refreshSelectedCoordinates(store, options) {
+function refreshSelectedCoordinates(store, options = {}) {
   const newSelectedCoordinates = store._selectedCoordinates.filter(point => store._selectedFeatureIds.has(point.feature_id));
   if (store._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
     store._emitSelectionChange = true;
