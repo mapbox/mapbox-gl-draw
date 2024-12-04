@@ -104,11 +104,22 @@ export default function(ctx) {
 
     if (!controls) return controlGroup;
 
+    if (controls[Constants.types.POINT]) {
+      buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
+        container: controlGroup,
+        className: Constants.classes.CONTROL_BUTTON_POINT,
+        title: `Marker tool ${ctx.options.keybindings ? '(1)' : ''}`,
+        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT),
+        onDeactivate: () => ctx.events.trash()
+      });
+    }
+
+
     if (controls[Constants.types.LINE]) {
       buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_LINE,
-        title: `LineString tool ${ctx.options.keybindings ? '(l)' : ''}`,
+        title: `LineString tool ${ctx.options.keybindings ? '(2)' : ''}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING),
         onDeactivate: () => ctx.events.trash()
       });
@@ -118,18 +129,8 @@ export default function(ctx) {
       buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
         container: controlGroup,
         className: Constants.classes.CONTROL_BUTTON_POLYGON,
-        title: `Polygon tool ${ctx.options.keybindings ? '(p)' : ''}`,
+        title: `Polygon tool ${ctx.options.keybindings ? '(3)' : ''}`,
         onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON),
-        onDeactivate: () => ctx.events.trash()
-      });
-    }
-
-    if (controls[Constants.types.POINT]) {
-      buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_POINT,
-        title: `Marker tool ${ctx.options.keybindings ? '(m)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT),
         onDeactivate: () => ctx.events.trash()
       });
     }
