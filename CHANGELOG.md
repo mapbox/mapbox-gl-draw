@@ -2,16 +2,16 @@
 
 ## 1.5.0
 
-* Library modernization (migration to ES modules, switch from Yarn to NPM etc.) by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1242
-* Add `suppressAPIEvents` option to `MapboxDraw` constructor to control event emitting caused by API method calls by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1264
-* Remove Static mode from constants by @oodavid in https://github.com/mapbox/mapbox-gl-draw/pull/1078
+* Library modernization by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1242:
+* Add `suppressAPIEvents` option to control event emission from API methods by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1264
+* Drop Static mode from constants by @oodavid in https://github.com/mapbox/mapbox-gl-draw/pull/1078
 * Keep dashed line for the active state in theme by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1243
 * Drop `map.fire` monkey patch by @stepankuzmin in https://github.com/mapbox/mapbox-gl-draw/pull/1243
 * Expose canvas class name by @neodescis in https://github.com/mapbox/mapbox-gl-draw/pull/1184
-* Fix of enabling previously disabled the "drag to pan" map interaction by @itoxiq in https://github.com/mapbox/mapbox-gl-draw/pull/1216
+* Fix re-enabling the "drag to pan" map interaction by @itoxiq in https://github.com/mapbox/mapbox-gl-draw/pull/1216
 * Fix availability of `properties.mode` in `vertex` and `midpoint` by @varna in https://github.com/mapbox/mapbox-gl-draw/pull/1221
-* Fix of trigger `featureChanged` on feature properties change by @petermoz in https://github.com/mapbox/mapbox-gl-draw/pull/1201
-* Fix exports entries in package.json by @varna in https://github.com/mapbox/mapbox-gl-draw/pull/1275
+* Fix `featureChanged` trigger on feature properties updates by @petermoz in https://github.com/mapbox/mapbox-gl-draw/pull/1201
+* Fix export entries in `package.json` by @varna in https://github.com/mapbox/mapbox-gl-draw/pull/1275
 * Remove `geojson-flatten` dependency by @stevage in https://github.com/mapbox/mapbox-gl-draw/pull/1066
 * Replace `hat` with `nanoid` for generating GeoJSON feature IDs by @underoot (h/t @varna for help) in https://github.com/mapbox/mapbox-gl-draw/pull/1318
 * Improve custom modes documentation by @mhsattarian in https://github.com/mapbox/mapbox-gl-draw/pull/1022
