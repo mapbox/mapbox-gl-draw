@@ -171,22 +171,22 @@ test('ui buttons with all options.controls, no attribution control', async (t) =
 
   assert.equal(buttons.length, 4, 'one button added');
 
-  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_line'), 'first button has line class');
+  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_point'), 'first button has point class');
   assert.ok(buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'first button has control class');
   assert.equal(buttons[0].parentNode, controlGroup, 'first button is in controlGroup');
-  const lineButton = buttons[0];
-
-  assert.ok(buttons[1].classList.contains('mapbox-gl-draw_polygon'), 'second button has polygon class');
+  assert.ok(buttons[1].classList.contains('mapbox-gl-draw_line'), 'second button has line class');
   assert.ok(buttons[1].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'second button has control class');
-  assert.equal(buttons[1].parentNode, controlGroup, 'second button is in controlGroup');
-  const polygonButton = buttons[1];
-  assert.ok(buttons[2].classList.contains('mapbox-gl-draw_point'), 'third button has point class');
+  assert.equal(buttons[2].parentNode, controlGroup, 'second button is in controlGroup');
+  assert.ok(buttons[2].classList.contains('mapbox-gl-draw_polygon'), 'third button has polygon class');
   assert.ok(buttons[2].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'third button has control class');
-  assert.equal(buttons[2].parentNode, controlGroup, 'third button is in controlGroup');
-  const pointButton = buttons[2];
+  assert.equal(buttons[1].parentNode, controlGroup, 'third button is in controlGroup');
   assert.ok(buttons[3].classList.contains('mapbox-gl-draw_trash'), 'fourth button has trash class');
   assert.ok(buttons[3].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'fourth button has control class');
   assert.equal(buttons[3].parentNode, controlGroup, 'fourth button is in controlGroup');
+
+  const pointButton = buttons[0];
+  const lineButton = buttons[1];
+  const polygonButton = buttons[2];
   const trashButton = buttons[3];
 
   t.test('click line button', () => {
