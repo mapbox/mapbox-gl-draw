@@ -28,7 +28,9 @@ DirectSelect.fireActionable = function(state) {
 };
 
 DirectSelect.startDragging = function(state, e) {
-  state.initialDragPanState = this.map.dragPan.isEnabled();
+  if (state.initialDragPanState == null) {
+    state.initialDragPanState = this.map.dragPan.isEnabled();
+  }
 
   this.map.dragPan.disable();
   state.canDragMove = true;
@@ -39,6 +41,8 @@ DirectSelect.stopDragging = function(state) {
   if (state.canDragMove && state.initialDragPanState === true) {
     this.map.dragPan.enable();
   }
+
+  state.initialDragPanState = null;
   state.dragMoving = false;
   state.canDragMove = false;
   state.dragMoveLocation = null;

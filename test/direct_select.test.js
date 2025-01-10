@@ -53,6 +53,30 @@ test('direct_select', async (t) => {
     }
   });
 
+  await t.test('direct_select - double click should not disable enabled dragPan', async () => {
+    const ids = Draw.add(getGeoJSON('polygon'));
+
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: ids[0]
+    });
+
+    await afterNextRender();
+
+    spy(map.dragPan, 'enable');
+
+    for (let i = 0; i < 2; i++) {
+      map.fire('mousedown', makeMouseEvent(35, 25));
+      await afterNextRender();
+    }
+
+    map.fire('mousemove', makeMouseEvent(0, 0));
+
+    assert.equal(map.dragPan.enable.callCount, 1, 'dragPan.enable called');
+
+    map.dragPan.enable.restore();
+  });
+
+
   await t.test('direct_select - should fire correct actionable when no vertices selected', async () => {
     const ids = Draw.add(getGeoJSON('polygon'));
     Draw.changeMode(Constants.modes.SIMPLE_SELECT, {
