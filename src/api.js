@@ -127,7 +127,7 @@ export default function(ctx, api) {
   };
 
   api.delete = function(featureIds) {
-    ctx.store.delete(featureIds, { silent });
+    ctx.store.delete(featureIds);
     // If we were in direct select mode and our selected feature no longer exists
     // (because it was deleted), we need to get out of that mode.
     if (api.getMode() === Constants.modes.DIRECT_SELECT && !ctx.store.getSelectedIds().length) {
@@ -140,7 +140,7 @@ export default function(ctx, api) {
   };
 
   api.deleteAll = function() {
-    ctx.store.delete(ctx.store.getAllIds(), { silent });
+    ctx.store.delete(ctx.store.getAllIds());
     // If we were in direct select mode, now our selected feature no longer exists,
     // so escape that mode.
     if (api.getMode() === Constants.modes.DIRECT_SELECT) {
