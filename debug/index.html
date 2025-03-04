@@ -42,10 +42,9 @@
   <button id='doubleClickZoom'>disable dblclick zoom</button>
   <button id='addBtn'>add draw</button>
   <button id='removeBtn'>remove draw</button>
-  <button id='flipStyleBtn'>change style</button>
 </div>
 
-<script type='text/javascript'>
+<script>
 // Adds in the FPS graph to the top of the page.
 (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();stats.domElement.style.cssText='position:fixed;right: 500px;top:0;z-index:10000';document.body.appendChild(stats.domElement);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})();
 </script>
@@ -57,10 +56,10 @@
   import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
   import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-  import MapboxDraw from '../index.js';
+  import MapboxDraw from '../index';
   import '../dist/mapbox-gl-draw.css';
 
-  import {getAccessToken} from './access_token_generated.js';
+  import {getAccessToken} from './access_token_generated';
 
   mapboxgl.accessToken = getAccessToken();
 
@@ -68,6 +67,7 @@
     container: 'map',
     zoom: 1,
     center: [0, 0],
+    hash: true
   });
 
   map.addControl(new MapboxGeocoder({
@@ -83,6 +83,8 @@
   map.addControl(Draw, 'bottom-right');
 
   map.on('load', () => {
+    map.setConfigProperty('basemap', 'theme', 'monochrome');
+
     // Add Draw to the map if it is inactive
     const addButton = document.getElementById('addBtn');
     addButton.onclick = function () {
@@ -97,15 +99,6 @@
       if (!drawIsActive) return;
       drawIsActive = false;
       map.removeControl(Draw);
-    };
-
-    // Toggle the style between dark and streets
-    const flipStyleButton = document.getElementById('flipStyleBtn');
-    let currentStyle = 'streets-v9';
-    flipStyleButton.onclick = function () {
-      const style = currentStyle === 'streets-v9' ? 'dark-v9' : 'streets-v9';
-      map.setStyle(`mapbox://styles/mapbox/${style}`);
-      currentStyle = style;
     };
 
     // toggle double click zoom

@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spy} from 'sinon';
-import Feature from '../src/feature_types/feature.js';
-import Point from '../src/feature_types/point.js';
-import MapboxDraw from '../index.js';
-import createFeature from './utils/create_feature.js';
-import getPublicMemberKeys from './utils/get_public_member_keys.js';
-import createMockCtx from './utils/create_mock_feature_context.js';
-import {drawGeometry} from './utils/draw_geometry.js';
-import createMap from './utils/create_map.js';
+import Feature from '../src/feature_types/feature';
+import Point from '../src/feature_types/point';
+import MapboxDraw from '../index';
+import createFeature from './utils/create_feature';
+import getPublicMemberKeys from './utils/get_public_member_keys';
+import createMockCtx from './utils/create_mock_feature_context';
+import {drawGeometry} from './utils/draw_geometry';
+import createMap from './utils/create_map';
 
 test('Point constructor and API', () => {
   const rawPoint = createFeature('point');

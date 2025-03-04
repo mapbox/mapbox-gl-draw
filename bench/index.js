@@ -118,8 +118,7 @@ function createMap(options) {
   mapboxgl.accessToken = getAccessToken();
 
   const map = new mapboxgl.Map(Object.assign({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v12'
+    container: 'map'
   }, options));
 
   const draw = new MapboxDraw(options);

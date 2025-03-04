@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import {spy} from 'sinon';
 
-import MapboxDraw from '../index.js';
-import {setupAfterNextRender} from './utils/after_next_render.js';
-import makeMouseEvent from './utils/make_mouse_event.js';
-import getGeoJSON from './utils/get_geojson.js';
-import createMap from './utils/create_map.js';
+import MapboxDraw from '../index';
+import {setupAfterNextRender} from './utils/after_next_render';
+import makeMouseEvent from './utils/make_mouse_event';
+import getGeoJSON from './utils/get_geojson';
+import createMap from './utils/create_map';
 
 test('static', async (t) => {
   const map = createMap();

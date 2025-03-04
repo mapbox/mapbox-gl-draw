@@ -1,4 +1,5 @@
-# Creating modes for Mapbox Draw
+Creating modes for Mapbox Draw
+---
 
 In Mapbox Draw, modes are used to group sets of user interactions into one behavior. Internally Draw has the `draw_polygon` mode, which controls a bunch of interactions for drawing a polygon. Draw also has the `simple_select` mode which controls interactions when zero, one or many features are selected including transitioning to `direct_select` mode when a user's interactions imply that they want to do detailed edits of a single feature.
 

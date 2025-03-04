@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {spy} from 'sinon';
 
 import * as Constants from '../src/constants.js';
-import MapboxDraw from '../index.js';
+import MapboxDraw from '../index';
 import createMap from './utils/create_map.js';
 import getGeoJSON from './utils/get_geojson.js';
 import {setupAfterNextRender} from './utils/after_next_render.js';
