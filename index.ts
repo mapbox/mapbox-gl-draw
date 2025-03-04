@@ -4,20 +4,9 @@ import setupAPI from './src/api';
 import modes from './src/modes/index';
 import * as Constants from './src/constants';
 import * as lib from './src/lib/index';
-import type { Controls, DrawLayer } from './src/types/types'
+import type { DrawOptions, Draw } from './src/types/types'
 
-interface Options {
-  keybindings: boolean;
-  touchEnabled: boolean;
-  boxSelect: boolean;
-  clickBuffer: number;
-  touchBuffer: number;
-  controls: Controls;
-  displayControlsDefault: boolean;
-  styles: Array<DrawLayer>
-}
-
-const setupDraw = (options: Options, api) => {
+const setupDraw = (options: DrawOptions, api: Draw) => {
   options = setupOptions(options);
 
   const ctx = {
