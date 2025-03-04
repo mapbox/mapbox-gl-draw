@@ -1,6 +1,6 @@
 import * as CommonSelectors from './common_selectors';
 import constrainFeatureMovement from './constrain_feature_movement';
-import createMidPoint from './create_midpoint';
+import { createMidPoint } from './create_midpoint';
 import createSupplementaryPoints from './create_supplementary_points';
 import { createVertex } from './create_vertex';
 import { doubleClickZoom } from './double_click_zoom';
@@ -15,7 +15,7 @@ import ModeHandler from './mode_handler';
 import moveFeatures from './move_features';
 import sortFeatures from './sort_features';
 import StringSet from './string_set';
-import stringSetsAreEqual from './string_sets_are_equal';
+import { stringSetsAreEqual } from './string_sets_are_equal';
 import theme from './theme';
 import toDenseArray from './to_dense_array';
 

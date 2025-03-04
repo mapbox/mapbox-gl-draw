@@ -47,16 +47,16 @@ function addSources(styles, sourceBucket) {
 }
 
 export default function (options = {}) {
-  let withDefaults = Object.assign({}, options);
+  let withDefaults = { ...options}
 
   if (!options.controls) {
     withDefaults.controls = {};
   }
 
   if (options.displayControlsDefault === false) {
-    withDefaults.controls = Object.assign({}, hideControls, options.controls);
+    withDefaults.controls = { ...hideControls, ...options.controls };
   } else {
-    withDefaults.controls = Object.assign({}, showControls, options.controls);
+    withDefaults.controls = { ...showControls, ...options.controls };
   }
 
   withDefaults = Object.assign({}, defaultOptions, withDefaults);

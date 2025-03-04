@@ -2,8 +2,9 @@ import toDenseArray from './lib/to_dense_array';
 import StringSet from './lib/string_set';
 import render from './render';
 import * as Constants from './constants';
+import type { DrawCTX } from './types/types';
 
-export default function Store(ctx) {
+export default function Store(ctx: DrawCTX) {
   this._features = {};
   this._featureIds = new StringSet();
   this._selectedFeatureIds = new StringSet();

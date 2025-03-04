@@ -43,7 +43,7 @@ export default function render() {
   newHotIds.forEach(id => renderFeature(id, 'hot'));
   newColdIds.forEach(id => renderFeature(id, 'cold'));
 
-  function renderFeature(id, source) {
+  function renderFeature(id: string, source: string) {
     const feature = store.get(id);
     const featureInternal = feature.internal(mode);
     store.ctx.events.currentModeRender(featureInternal, geojson => {

@@ -2,7 +2,7 @@ import isEqual from 'fast-deep-equal';
 import normalize from '@mapbox/geojson-normalize';
 import { generateID } from './lib/id';
 import * as featuresAt from './lib/features_at';
-import stringSetsAreEqual from './lib/string_sets_are_equal';
+import { stringSetsAreEqual } from './lib/string_sets_are_equal';
 import * as Constants from './constants';
 import StringSet from './lib/string_set';
 
@@ -10,6 +10,8 @@ import Polygon from './feature_types/polygon';
 import LineString from './feature_types/line_string';
 import Point from './feature_types/point';
 import MultiFeature from './feature_types/multi_feature';
+
+import type { DrawCTX, Draw } from './types/types';
 
 const featureTypes = {
   Polygon,
@@ -20,7 +22,7 @@ const featureTypes = {
   MultiPoint: MultiFeature
 };
 
-export default function (ctx, api) {
+export default function (ctx: DrawCTX, api: Draw) {
   api.modes = Constants.modes;
 
   // API doesn't emit events by default

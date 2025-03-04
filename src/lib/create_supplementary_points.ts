@@ -1,5 +1,5 @@
 import { createVertex } from './create_vertex';
-import createMidpoint from './create_midpoint';
+import { createMidpoint } from './create_midpoint';
 import * as Constants from '../constants';
 
 function createSupplementaryPoints(geojson, options = {}, basePath = null) {

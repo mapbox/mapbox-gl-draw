@@ -1,8 +1,9 @@
 import * as Constants from '../constants';
+import type { Feature, Point } from 'geojson';
 
-export default function (parent, startVertex, endVertex) {
-  const startCoord = startVertex.geometry.coordinates;
-  const endCoord = endVertex.geometry.coordinates;
+export const createMidpoint = (parent: string, startVertex: Feature, endVertex: Feature): Feature => {
+  const startCoord = (startVertex.geometry as Point).coordinates;
+  const endCoord = (endVertex.geometry as Point).coordinates;
 
   // If a coordinate exceeds the projection, we can't calculate a midpoint,
   // so run away
@@ -21,7 +22,7 @@ export default function (parent, startVertex, endVertex) {
   };
 
   return {
-    type: Constants.geojsonTypes.FEATURE,
+    type: Constants.geojsonTypes.FEATURE as 'Feature',
     properties: {
       meta: Constants.meta.MIDPOINT,
       parent,
@@ -30,7 +31,7 @@ export default function (parent, startVertex, endVertex) {
       coord_path: endVertex.properties.coord_path
     },
     geometry: {
-      type: Constants.geojsonTypes.POINT,
+      type: Constants.geojsonTypes.POINT as 'Point',
       coordinates: [mid.lng, mid.lat]
     }
   };

@@ -5,8 +5,9 @@ import isClick from './lib/is_click';
 import { isTap } from './lib/is_tap';
 import * as Constants from './constants';
 import objectToMode from './modes/object_to_mode';
+import type { DrawCTX } from './types/types';
 
-export default function (ctx) {
+export default function (ctx: DrawCTX) {
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
     return m;
