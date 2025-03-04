@@ -5,12 +5,28 @@ import doubleClickZoom from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';
 
+import type { DrawCTX, DrawCustomMode } from '../types/types';
+import type { MapMouseEvent } from 'mapbox-gl';
+
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
-const DirectSelect = {};
 
-// INTERNAL FUCNTIONS
+interface DirectSelectMode extends DrawCustomMode {
+  fireUpdate(): void;
+  clickInactive(): void;
+  fireActionable(state: DrawCTX): void;
+  clickNoTarget(state: DrawCTX, e: MapMouseEvent): void;
+  startDragging(state: DrawCTX, e: MapMouseEvent): void;
+}
+
+const DirectSelect: DirectSelectMode = {
+  clickInactive: function() {
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
+};
+
+// INTERNAL FUNCTIONS
 
 DirectSelect.fireUpdate = function() {
   this.fire(Constants.events.UPDATE, {
@@ -106,10 +122,6 @@ DirectSelect.clickNoTarget = function () {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-DirectSelect.clickInactive = function () {
-  this.changeMode(Constants.modes.SIMPLE_SELECT);
-};
-
 DirectSelect.clickActiveFeature = function (state) {
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
@@ -153,22 +165,6 @@ DirectSelect.onSetup = function(opts) {
 DirectSelect.onStop = function() {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
-};
-
-DirectSelect.toDisplayFeatures = function(state, geojson, push) {
-  if (state.featureId === geojson.properties.id) {
-    geojson.properties.active = Constants.activeStates.ACTIVE;
-    push(geojson);
-    createSupplementaryPoints(geojson, {
-      map: this.map,
-      midpoints: true,
-      selectedPaths: state.selectedCoordPaths
-    }).forEach(push);
-  } else {
-    geojson.properties.active = Constants.activeStates.INACTIVE;
-    push(geojson);
-  }
-  this.fireActionable(state);
 };
 
 DirectSelect.onTrash = function(state) {
@@ -254,6 +250,23 @@ DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function(state) {
   }
   this.stopDragging(state);
 };
+
+DirectSelect.toDisplayFeatures = function(state: DrawCTX, geojson, push) {
+  if (state.featureId === geojson.properties.id) {
+    geojson.properties.active = Constants.activeStates.ACTIVE;
+    push(geojson);
+    createSupplementaryPoints(geojson, {
+      map: this.map,
+      midpoints: true,
+      selectedPaths: state.selectedCoordPaths
+    }).forEach(push);
+  } else {
+    geojson.properties.active = Constants.activeStates.INACTIVE;
+    push(geojson);
+  }
+
+  this.fireActionable(state);
+}
 
 export default DirectSelect;
 

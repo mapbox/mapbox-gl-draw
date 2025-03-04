@@ -1,7 +1,7 @@
 import runSetup from './src/setup';
 import setupOptions from './src/options';
 import setupAPI from './src/api';
-import modes from './src/modes/index';
+import * as modes from './src/modes/index';
 import * as Constants from './src/constants';
 import * as lib from './src/lib/index';
 import type { DrawOptions, Draw } from './src/types/types'
@@ -26,7 +26,7 @@ const setupDraw = (options: DrawOptions, api: Draw) => {
   return api;
 };
 
-function MapboxDraw(options: Options) {
+function MapboxDraw(options: DrawOptions) {
   setupDraw(options, this);
 }
 

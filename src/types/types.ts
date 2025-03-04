@@ -139,6 +139,32 @@ export interface DrawCTX {
   doRender(id: string): void;
 }
 
+export interface DrawCustomMode<CustomModeState = unknown, CustomModeOptions = unknown> {
+  onSetup?(this: DrawCTX & this, options: CustomModeOptions): CustomModeState;
+  onDrag?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onClick?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onMouseMove?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onMouseDown?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onMouseUp?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onMouseOut?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+  onKeyUp?(this: DrawCTX & this, state: CustomModeState, e: KeyboardEvent): void;
+  onKeyDown?(this: DrawCTX & this, state: CustomModeState, e: KeyboardEvent): void;
+  onTouchStart?(this: DrawCTX & this, state: CustomModeState, e: MapTouchEvent): void;
+  onTouchMove?(this: DrawCTX & this, state: CustomModeState, e: MapTouchEvent): void;
+  onTouchEnd?(this: DrawCTX & this, state: CustomModeState, e: MapTouchEvent): void;
+  onTap?(this: DrawCTX & this, state: CustomModeState, e: MapTouchEvent): void;
+  onStop?(this: DrawCTX & this, state: CustomModeState): void;
+  onTrash?(this: DrawCTX & this, state: CustomModeState): void;
+  onCombineFeature?(this: DrawCTX & this, state: CustomModeState): void;
+  onUncombineFeature?(this: DrawCTX & this, state: CustomModeState): void;
+  toDisplayFeatures(
+    this: DrawCTX & this,
+    state: CustomModeState,
+    geojson: GeoJSON,
+    display: (geojson: GeoJSON) => void,
+  ): void;
+}
+
 export declare class Draw implements IControl {
   options: DrawOptions;
   types: typeof types;

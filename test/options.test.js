@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'url';
 
 import MapboxDraw from '../index';
-import modes from '../src/modes/index';
+import { modes } from '../src/modes/index';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const styleWithSourcesFixture = JSON.parse(fs.readFileSync(path.join(__dirname, './fixtures/style_with_sources.json')));

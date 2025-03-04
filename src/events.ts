@@ -1,5 +1,5 @@
 import setupModeHandler from './lib/mode_handler';
-import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
+import { getFeatureAtAndSetCursors } from './lib/get_features_at_and_set_cursor';
 import { featuresAt } from './lib/features_at';
 import isClick from './lib/is_click';
 import isTap from './lib/is_tap';
@@ -44,7 +44,7 @@ export default function(ctx) {
     if (button === 1) {
       return events.mousedrag(event);
     }
-    const target = getFeaturesAndSetCursor(event, ctx);
+    const target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
     currentMode.mousemove(event);
   };
@@ -54,13 +54,13 @@ export default function(ctx) {
       time: new Date().getTime(),
       point: event.point
     };
-    const target = getFeaturesAndSetCursor(event, ctx);
+    const target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
     currentMode.mousedown(event);
   };
 
   events.mouseup = function(event) {
-    const target = getFeaturesAndSetCursor(event, ctx);
+    const target = getFeatureAtAndSetCursors(event, ctx);
     event.featureTarget = target;
 
     if (isClick(mouseDownInfo, {

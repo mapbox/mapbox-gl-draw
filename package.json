@@ -23,7 +23,6 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./index.js",
     "./dist/mapbox-gl-draw-unminified.js": "./dist/mapbox-gl-draw-unminified.js",
     "./dist/mapbox-gl-draw.js": "./dist/mapbox-gl-draw.js",
     "./dist/mapbox-gl-draw.css": "./dist/mapbox-gl-draw.css"
@@ -33,8 +32,8 @@
   "style": "dist/mapbox-gl-draw.css",
   "scripts": {
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
-    "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.js --shallow",
-    "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.js --shallow",
+    "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.ts --shallow",
+    "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.ts --shallow",
     "lint": "eslint index.ts src test bench",
     "pretest": "npm run lint",
     "test": "node --test --import ./test/mock-browser.js",
@@ -49,6 +48,7 @@
     "start-server": "vite --config vite.config.js",
     "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
     "start": "run-p build-token start-server",
+    "format": "prettier --write '**/*.{js,ts,tsx,css}'",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -87,11 +87,11 @@
   },
   "files": [
     "src",
-    "index.js",
+    "index.ts",
     "dist/mapbox-gl-draw*"
   ],
   "lint-staged": {
-    "**/*.{js,ts}": [
+    "**/*.ts": [
       "eslint",
       "prettier --write"
     ]
