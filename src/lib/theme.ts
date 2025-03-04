@@ -1,5 +1,3 @@
-/* eslint comma-dangle: ["error", "always-multiline"] */
-
 const blue = '#3bb2d0';
 const orange = '#fbb03b';
 const white = '#fff';

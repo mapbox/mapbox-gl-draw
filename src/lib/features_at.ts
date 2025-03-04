@@ -14,21 +14,7 @@ const META_TYPES = [
   Constants.meta.VERTEX
 ];
 
-// Requires either event or bbox
-export default {
-  click: featuresAtClick,
-  touch: featuresAtTouch
-};
-
-function featuresAtClick(event: Event, bbox: BBox, ctx: DrawCTX) {
-  return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
-}
-
-function featuresAtTouch(event: Event, bbox: BBox, ctx: DrawCTX) {
-  return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
-}
-
-export const featuresAt = (
+const featuresAt = (
   event: Event,
   bbox: BBox,
   ctx: DrawCTX,
@@ -60,3 +46,15 @@ export const featuresAt = (
 
   return sortFeatures(uniqueFeatures);
 };
+
+function featuresAtClick(event: Event, bbox: BBox, ctx: DrawCTX) {
+  return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
+}
+
+function featuresAtTouch(event: Event, bbox: BBox, ctx: DrawCTX) {
+  return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
+}
+
+// Requires either event or bbox
+export const click = featuresAtClick;
+export const touch = featuresAtTouch;

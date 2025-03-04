@@ -1,8 +1,9 @@
-import { featuresAt } from './features_at';
+import * as featuresAt from './features_at';
 import * as Constants from '../constants';
 import type { DrawCTX } from '../types/types';
 
 export const getFeatureAtAndSetCursors = (event: Event, ctx: DrawCTX) => {
+  console.log('HELLO', featuresAt);
   const features = featuresAt.click(event, null, ctx);
   const classes = { mouse: Constants.cursors.NONE };
 

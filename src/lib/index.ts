@@ -5,7 +5,7 @@ import createSupplementaryPoints from './create_supplementary_points';
 import createVertex from './create_vertex';
 import doubleClickZoom from './double_click_zoom';
 import euclideanDistance from './euclidean_distance';
-import { featuresAt } from './features_at';
+import * as featuresAt from './features_at';
 import { getFeatureAtAndSetCursors } from './get_features_at_and_set_cursor';
 import isClick from './is_click';
 import isEventAtCoordinates from './is_event_at_coordinates';

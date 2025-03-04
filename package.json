@@ -34,7 +34,7 @@
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.ts --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.ts --shallow",
-    "lint": "eslint index.ts src test bench",
+    "lint": "eslint index.ts src bench test",
     "pretest": "npm run lint",
     "test": "node --test --import ./test/mock-browser.js",
     "coverage": "node --test --import ./test/mock-browser.js --experimental-test-coverage",
@@ -91,7 +91,7 @@
     "dist/mapbox-gl-draw*"
   ],
   "lint-staged": {
-    "**/*.ts": [
+    "**/*.{js,ts}": [
       "eslint",
       "prettier --write"
     ]
