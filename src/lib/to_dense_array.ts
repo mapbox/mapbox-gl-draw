@@ -1,10 +1,4 @@
-/**
- * Derive a dense array (no `undefined`s) from a single value or array.
- *
- * @param {any} x
- * @return {Array<any>}
- */
-function toDenseArray(x) {
+const toDenseArray = (x: unknown): Array<string | number> => {
   return [].concat(x).filter(y => y !== undefined);
 }
 

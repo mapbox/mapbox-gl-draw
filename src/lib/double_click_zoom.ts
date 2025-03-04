@@ -1,5 +1,7 @@
-export default {
-  enable(ctx) {
+import type { DrawCTX } from '../types/types';
+
+export const doubleClickZoom = {
+  enable: (ctx: DrawCTX) => {
     setTimeout(() => {
       // First check we've got a map and some context.
       if (
@@ -15,7 +17,7 @@ export default {
       ctx.map.doubleClickZoom.enable();
     }, 0);
   },
-  disable(ctx) {
+  disable: (ctx: DrawCTX) => {
     setTimeout(() => {
       if (!ctx.map || !ctx.map.doubleClickZoom) return;
       // Always disable here, as it's necessary in some cases.

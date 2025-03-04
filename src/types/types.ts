@@ -18,6 +18,13 @@ import type {
   MapTouchEvent as MapboxMapTouchEvent
 } from 'mapbox-gl';
 
+export type XY = { x: number, y: number };
+
+export interface Entry {
+  point: XY;
+  time: number;
+}
+
 export interface MapMouseEvent extends MapboxMapMouseEvent {
   featureTarget: DrawFeature;
 }
@@ -127,8 +134,15 @@ interface DrawActionableState {
   uncombineFeatures: boolean;
 }
 
+interface _DrawCTS extends DrawCTX {
+  store: {
+    getInitialConfigValue: (config: string) => boolean;
+  }
+}
+
 export interface DrawCTX {
   map: Map;
+  container: HTMLElement,
   drawConfig: DrawOptions;
   setSelected(features?: string | string[]): void;
   setSelectedCoordinates(
@@ -156,6 +170,17 @@ export interface DrawCTX {
   newFeature(geojson: GeoJSON): DrawFeature;
   isInstanceOf(type: string, feature: object): boolean;
   doRender(id: string): void;
+  ui: DrawUI;
+  _ctx: _DrawCTS;
+}
+
+export interface DrawUI {
+  queueMapClasses: (options: { mode: null, feature: null, mouse: null }) => void;
+  setActiveButton: (id: string) => void;
+  updateMapClasses: () => void;
+  clearMapClasses: () => void;
+  addButtons: () => void;
+  removeButtons: () => void;
 }
 
 export interface DrawCustomMode<

@@ -1,16 +1,17 @@
-import euclideanDistance from './euclidean_distance.js';
+import { euclideanDistance } from './euclidean_distance.js';
+import type { Entry } from '../types/types';
 
-export const TAP_TOLERANCE = 25;
-export const TAP_INTERVAL = 250;
+interface Options {
+  tolerance: number;
+  interval: number;
+}
 
-export default function isTap(start, end, options = {}) {
-  const tolerance =
-    options.tolerance != null ? options.tolerance : TAP_TOLERANCE;
-  const interval = options.interval != null ? options.interval : TAP_INTERVAL;
-
+export const isTap = (start: Entry, end: Entry, {
+  tolerance = 25,
+  interval = 250
+}: Options) => {
   start.point = start.point || end.point;
   start.time = start.time || end.time;
   const moveDistance = euclideanDistance(start.point, end.point);
-
   return moveDistance < tolerance && end.time - start.time < interval;
 }

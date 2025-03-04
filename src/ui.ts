@@ -1,8 +1,10 @@
 import * as Constants from './constants';
 
+import type { DrawCTX } from './types/types';
+
 const classTypes = ['mode', 'feature', 'mouse'];
 
-export default function (ctx) {
+export default function (ctx: DrawCTX) {
   const buttonElements = {};
   let activeButton = null;
 
@@ -53,7 +55,7 @@ export default function (ctx) {
     currentMapClasses = Object.assign(currentMapClasses, nextMapClasses);
   }
 
-  function createControlButton(id, options = {}) {
+  function createControlButton(id: string, options = {}) {
     const button = document.createElement('button');
     button.className = `${Constants.classes.CONTROL_BUTTON} ${options.className}`;
     button.setAttribute('title', options.title);

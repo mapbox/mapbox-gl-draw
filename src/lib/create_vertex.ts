@@ -1,20 +1,9 @@
 import * as Constants from '../constants';
+import type { Feature } from 'geojson';
 
-/**
- * Returns GeoJSON for a Point representing the
- * vertex of another feature.
- *
- * @param {string} parentId
- * @param {Array<number>} coordinates
- * @param {string} path - Dot-separated numbers indicating exactly
- *   where the point exists within its parent feature's coordinates.
- * @param {boolean} selected
- * @return {GeoJSON} Point
- */
-
-export default function (parentId, coordinates, path, selected) {
+export const createVertex = (parentId: string, coordinates: [number, number], path: string, selected: boolean): Feature => {
   return {
-    type: Constants.geojsonTypes.FEATURE,
+    type: Constants.geojsonTypes.FEATURE as 'Feature',
     properties: {
       meta: Constants.meta.VERTEX,
       parent: parentId,
@@ -24,7 +13,7 @@ export default function (parentId, coordinates, path, selected) {
         : Constants.activeStates.INACTIVE
     },
     geometry: {
-      type: Constants.geojsonTypes.POINT,
+      type: Constants.geojsonTypes.POINT as 'Point',
       coordinates
     }
   };

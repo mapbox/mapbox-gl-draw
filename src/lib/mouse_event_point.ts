@@ -1,14 +1,7 @@
 import Point from '@mapbox/point-geometry';
+import type { PointLike } from 'mapbox-gl';
 
-/**
- * Returns a Point representing a mouse event's position
- * relative to a containing element.
- *
- * @param {MouseEvent} mouseEvent
- * @param {Node} container
- * @returns {Point}
- */
-function mouseEventPoint(mouseEvent, container) {
+function mouseEventPoint(mouseEvent: MouseEvent, container: HTMLElement): PointLike {
   const rect = container.getBoundingClientRect();
   return new Point(
     mouseEvent.clientX - rect.left - (container.clientLeft || 0),

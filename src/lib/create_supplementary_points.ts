@@ -1,4 +1,4 @@
-import createVertex from './create_vertex';
+import { createVertex } from './create_vertex';
 import createMidpoint from './create_midpoint';
 import * as Constants from '../constants';
 
