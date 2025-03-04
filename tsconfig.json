@@ -3,8 +3,14 @@
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "Node",
+    "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "declaration": true
-  }
+    "noEmit": true
+  },
+  "include": [
+    "./src/**/*",
+    "./test/**/*",
+    "./bench/**/*"
+  ]
 }
