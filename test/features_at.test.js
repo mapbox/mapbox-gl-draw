@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import featuresAt from '../src/lib/features_at';
+import { featuresAt } from '../src/lib/features_at';
 import styles from '../src/lib/theme';
 import * as Constants from '../src/constants';
 import setupOptions from '../src/options';

@@ -1,5 +1,5 @@
 import * as Constants from '../constants';
-import featuresAt from '../lib/features_at';
+import { featuresAt } from '../lib/features_at';
 import Point from '../feature_types/point';
 import LineString from '../feature_types/line_string';
 import Polygon from '../feature_types/polygon';

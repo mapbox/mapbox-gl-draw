@@ -3,27 +3,16 @@ import mapEventToBoundingBox from './map_event_to_bounding_box';
 import * as Constants from '../constants';
 import StringSet from './string_set';
 
+import type { BBox } from 'geojson';
+import type { DrawCTX } from '../types/types';
+
 const META_TYPES = [
   Constants.meta.FEATURE,
   Constants.meta.MIDPOINT,
   Constants.meta.VERTEX
 ];
 
-// Requires either event or bbox
-export default {
-  click: featuresAtClick,
-  touch: featuresAtTouch
-};
-
-function featuresAtClick(event, bbox, ctx) {
-  return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
-}
-
-function featuresAtTouch(event, bbox, ctx) {
-  return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
-}
-
-function featuresAt(event, bbox, ctx, buffer) {
+export const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: number) => {
   if (ctx.map === null) return [];
 
   const box = (event) ? mapEventToBoundingBox(event, buffer) : bbox;

@@ -1,7 +1,7 @@
 import isEqual from 'fast-deep-equal';
 import normalize from '@mapbox/geojson-normalize';
-import {generateID} from './lib/id';
-import featuresAt from './lib/features_at';
+import { generateID } from './lib/id';
+import { featuresAt } from './lib/features_at';
 import stringSetsAreEqual from './lib/string_sets_are_equal';
 import * as Constants from './constants';
 import StringSet from './lib/string_set';

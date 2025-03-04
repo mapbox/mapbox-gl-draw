@@ -1,6 +1,6 @@
 import setupModeHandler from './lib/mode_handler';
 import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor';
-import featuresAt from './lib/features_at';
+import { featuresAt } from './lib/features_at';
 import isClick from './lib/is_click';
 import isTap from './lib/is_tap';
 import * as Constants from './constants';

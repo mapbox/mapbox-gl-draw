@@ -1,4 +1,4 @@
-import featuresAt from './features_at';
+import { featuresAt } from './features_at';
 import * as Constants from '../constants';
 
 export default function getFeatureAtAndSetCursors(event, ctx) {
