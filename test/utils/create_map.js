@@ -1,4 +1,4 @@
-import {bboxClip} from '@turf/bbox-clip';
+import { bboxClip } from '@turf/bbox-clip';
 
 import Evented from '../../bench/lib/evented';
 import { interactions } from '../../src/constants';
@@ -14,9 +14,9 @@ class MockMap extends Evented {
       addSource: (id, source) => {
         this.style._layers[id] = source;
       },
-      removeSource: (id) => {
+      removeSource: id => {
         delete this.style._layers[id];
-      },
+      }
     };
     this.options = {
       container: document.createElement('div'),
@@ -26,9 +26,15 @@ class MockMap extends Evented {
     for (const interaction of interactions) {
       this[interaction] = {
         enabled: true,
-        disable() { this.enabled = false; },
-        enable() { this.enabled = true; },
-        isEnabled() { return this.enabled; },
+        disable() {
+          this.enabled = false;
+        },
+        enable() {
+          this.enabled = true;
+        },
+        isEnabled() {
+          return this.enabled;
+        }
       };
     }
 
@@ -86,8 +92,8 @@ class MockMap extends Evented {
       for (const feature of source.data.features) {
         if (feature.geometry.type === 'Point') {
           const [x, y] = feature.geometry.coordinates;
-          if (x >= minX && x <= maxX && y >= minY && y <= maxY) features.push(feature);
-
+          if (x >= minX && x <= maxX && y >= minY && y <= maxY)
+            features.push(feature);
         } else if (feature.geometry.type === 'MultiPoint') {
           for (const [x, y] of feature.geometry.coordinates) {
             if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
@@ -95,7 +101,6 @@ class MockMap extends Evented {
               break;
             }
           }
-
         } else {
           const clipped = bboxClip(feature, bbox);
           if (clipped.geometry.coordinates.length) features.push(feature);

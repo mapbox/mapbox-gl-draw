@@ -1,7 +1,6 @@
 import mouseEvents from './mouse_events';
 
-export default function(ring, map) {
-
+export default function (ring, map) {
   const events = mouseEvents(map);
 
   let lastPoint = null;
@@ -24,7 +23,7 @@ export default function(ring, map) {
     events.push('mouseup', lastPoint);
   }
 
-  return function(cb) {
+  return function (cb) {
     events.run(cb);
   };
 }

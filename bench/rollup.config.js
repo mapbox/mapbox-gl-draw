@@ -15,8 +15,12 @@ export default {
   plugins: [
     json(),
     replace({
-      'process.env.MapboxAccessToken': JSON.stringify(process.env.MapboxAccessToken),
-      'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN),
+      'process.env.MapboxAccessToken': JSON.stringify(
+        process.env.MapboxAccessToken
+      ),
+      'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(
+        process.env.MAPBOX_ACCESS_TOKEN
+      ),
       preventAssignment: true
     }),
     resolve({
@@ -28,5 +32,5 @@ export default {
       // https://github.com/mapbox/mapbox-gl-js/pull/6956
       ignoreGlobal: true
     })
-  ],
+  ]
 };

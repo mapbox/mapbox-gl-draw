@@ -3,15 +3,17 @@ import fs from 'fs';
 import path from 'path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fileURLToPath} from 'url';
+import { fileURLToPath } from 'url';
 
 import MapboxDraw from '../index';
 import { modes } from '../src/modes/index';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const styleWithSourcesFixture = JSON.parse(fs.readFileSync(path.join(__dirname, './fixtures/style_with_sources.json')));
+const styleWithSourcesFixture = JSON.parse(
+  fs.readFileSync(path.join(__dirname, './fixtures/style_with_sources.json'))
+);
 
-test('Options test', async (t) => {
+test('Options test', async t => {
   t.test('no options', () => {
     const Draw = new MapboxDraw();
     const defaultOptions = {
@@ -67,7 +69,7 @@ test('Options test', async (t) => {
   });
 
   t.test('hide all controls', () => {
-    const Draw = new MapboxDraw({displayControlsDefault: false});
+    const Draw = new MapboxDraw({ displayControlsDefault: false });
     const defaultOptions = {
       defaultMode: 'simple_select',
       modes,
@@ -93,7 +95,10 @@ test('Options test', async (t) => {
   });
 
   await t.test('hide controls but show point', () => {
-    const Draw = new MapboxDraw({displayControlsDefault: false, controls: {point:true}});
+    const Draw = new MapboxDraw({
+      displayControlsDefault: false,
+      controls: { point: true }
+    });
     const defaultOptions = {
       defaultMode: 'simple_select',
       modes,
@@ -120,7 +125,7 @@ test('Options test', async (t) => {
   });
 
   t.test('hide only point control', () => {
-    const Draw = new MapboxDraw({ controls: {point:false}});
+    const Draw = new MapboxDraw({ controls: { point: false } });
     const defaultOptions = {
       defaultMode: 'simple_select',
       modes,
@@ -174,56 +179,61 @@ test('Options test', async (t) => {
   });
 
   await t.test('custom styles', () => {
-    const Draw = new MapboxDraw({styles: [{
-      'id': 'custom-polygon',
-      'type': 'fill',
-      'filter': ['all', ['==', '$type', 'Polygon']],
-      'paint': {
-        'fill-color': '#fff'
-      }
-    }, {
-      'id': 'custom-point',
-      'type': 'circle',
-      'filter': ['all', ['==', '$type', 'Point']],
-      'paint': {
-        'circle-color': '#fff'
-      }
-    }]});
+    const Draw = new MapboxDraw({
+      styles: [
+        {
+          id: 'custom-polygon',
+          type: 'fill',
+          filter: ['all', ['==', '$type', 'Polygon']],
+          paint: {
+            'fill-color': '#fff'
+          }
+        },
+        {
+          id: 'custom-point',
+          type: 'circle',
+          filter: ['all', ['==', '$type', 'Point']],
+          paint: {
+            'circle-color': '#fff'
+          }
+        }
+      ]
+    });
 
     const styles = [
       {
-        'id': 'custom-polygon.cold',
-        'source': 'mapbox-gl-draw-cold',
-        'type': 'fill',
-        'filter': ['all', ['==', '$type', 'Polygon']],
-        'paint': {
+        id: 'custom-polygon.cold',
+        source: 'mapbox-gl-draw-cold',
+        type: 'fill',
+        filter: ['all', ['==', '$type', 'Polygon']],
+        paint: {
           'fill-color': '#fff'
         }
       },
       {
-        'id': 'custom-point.cold',
-        'source': 'mapbox-gl-draw-cold',
-        'type': 'circle',
-        'filter': ['all', ['==', '$type', 'Point']],
-        'paint': {
+        id: 'custom-point.cold',
+        source: 'mapbox-gl-draw-cold',
+        type: 'circle',
+        filter: ['all', ['==', '$type', 'Point']],
+        paint: {
           'circle-color': '#fff'
         }
       },
       {
-        'id': 'custom-polygon.hot',
-        'source': 'mapbox-gl-draw-hot',
-        'type': 'fill',
-        'filter': ['all', ['==', '$type', 'Polygon']],
-        'paint': {
+        id: 'custom-polygon.hot',
+        source: 'mapbox-gl-draw-hot',
+        type: 'fill',
+        filter: ['all', ['==', '$type', 'Polygon']],
+        paint: {
           'fill-color': '#fff'
         }
       },
       {
-        'id': 'custom-point.hot',
-        'source': 'mapbox-gl-draw-hot',
-        'type': 'circle',
-        'filter': ['all', ['==', '$type', 'Point']],
-        'paint': {
+        id: 'custom-point.hot',
+        source: 'mapbox-gl-draw-hot',
+        type: 'circle',
+        filter: ['all', ['==', '$type', 'Point']],
+        paint: {
           'circle-color': '#fff'
         }
       }

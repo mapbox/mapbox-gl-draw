@@ -12,7 +12,15 @@ test('sortFeatures', () => {
       id: 'medium-polygon',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[15, 50], [15, 59], [35, 59], [35, 50], [15, 50]]]
+        coordinates: [
+          [
+            [15, 50],
+            [15, 59],
+            [35, 59],
+            [35, 50],
+            [15, 50]
+          ]
+        ]
       }
     },
     {
@@ -23,7 +31,15 @@ test('sortFeatures', () => {
       id: 'huge-polygon',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[58, 27], [58, 68], [101, 68], [101, 27], [58, 27]]]
+        coordinates: [
+          [
+            [58, 27],
+            [58, 68],
+            [101, 68],
+            [101, 27],
+            [58, 27]
+          ]
+        ]
       }
     },
     {
@@ -65,14 +81,30 @@ test('sortFeatures', () => {
       id: 'medium-polygon',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[15, 50], [15, 59], [35, 59], [35, 50], [15, 50]]]
+        coordinates: [
+          [
+            [15, 50],
+            [15, 59],
+            [35, 59],
+            [35, 50],
+            [15, 50]
+          ]
+        ]
       }
     },
     {
       id: 'huge-polygon',
       geometry: {
         type: 'Polygon',
-        coordinates: [[[58, 27], [58, 68], [101, 68], [101, 27], [58, 27]]]
+        coordinates: [
+          [
+            [58, 27],
+            [58, 68],
+            [101, 68],
+            [101, 27],
+            [58, 27]
+          ]
+        ]
       }
     }
   ]);

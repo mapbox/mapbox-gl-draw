@@ -1,4 +1,4 @@
-export default function(features, map) {
+export default function (features, map) {
   const sizes = [];
   let total = 0;
   for (const feature of features) {
@@ -18,7 +18,7 @@ export default function(features, map) {
   let pos = 0;
   let lastDone = -1;
 
-  map.on('progress', (e) => {
+  map.on('progress', e => {
     if (e.done < lastDone) {
       pos++;
     }
@@ -27,7 +27,7 @@ export default function(features, map) {
     for (let i = 0; i < pos; i++) {
       done += sizes[i];
     }
-    done += (sizes[pos] * e.done / 100);
+    done += (sizes[pos] * e.done) / 100;
     progressDiv.style.width = `${done}%`;
   });
 }

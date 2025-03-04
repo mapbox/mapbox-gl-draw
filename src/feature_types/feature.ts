@@ -1,7 +1,7 @@
-import {generateID} from '../lib/id';
+import { generateID } from '../lib/id';
 import * as Constants from '../constants';
 
-const Feature = function(ctx, geojson) {
+const Feature = function (ctx, geojson) {
   this.ctx = ctx;
   this.properties = geojson.properties || {};
   this.coordinates = geojson.geometry.coordinates;
@@ -9,40 +9,42 @@ const Feature = function(ctx, geojson) {
   this.type = geojson.geometry.type;
 };
 
-Feature.prototype.changed = function() {
+Feature.prototype.changed = function () {
   this.ctx.store.featureChanged(this.id);
 };
 
-Feature.prototype.incomingCoords = function(coords) {
+Feature.prototype.incomingCoords = function (coords) {
   this.setCoordinates(coords);
 };
 
-Feature.prototype.setCoordinates = function(coords) {
+Feature.prototype.setCoordinates = function (coords) {
   this.coordinates = coords;
   this.changed();
 };
 
-Feature.prototype.getCoordinates = function() {
+Feature.prototype.getCoordinates = function () {
   return JSON.parse(JSON.stringify(this.coordinates));
 };
 
-Feature.prototype.setProperty = function(property, value) {
+Feature.prototype.setProperty = function (property, value) {
   this.properties[property] = value;
 };
 
-Feature.prototype.toGeoJSON = function() {
-  return JSON.parse(JSON.stringify({
-    id: this.id,
-    type: Constants.geojsonTypes.FEATURE,
-    properties: this.properties,
-    geometry: {
-      coordinates: this.getCoordinates(),
-      type: this.type
-    }
-  }));
+Feature.prototype.toGeoJSON = function () {
+  return JSON.parse(
+    JSON.stringify({
+      id: this.id,
+      type: Constants.geojsonTypes.FEATURE,
+      properties: this.properties,
+      geometry: {
+        coordinates: this.getCoordinates(),
+        type: this.type
+      }
+    })
+  );
 };
 
-Feature.prototype.internal = function(mode) {
+Feature.prototype.internal = function (mode) {
   const properties = {
     id: this.id,
     meta: Constants.meta.FEATURE,

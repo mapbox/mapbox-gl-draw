@@ -1,15 +1,18 @@
 import mouseEvents from './mouse_events';
 import mousePath from './mouse_path';
 
-export default function(start, map) {
-
+export default function (start, map) {
   const path = mousePath(start);
   const events = mouseEvents(map);
 
-  events.push('mousedown', {
-    x: start.x,
-    y: start.y
-  }, true);
+  events.push(
+    'mousedown',
+    {
+      x: start.x,
+      y: start.y
+    },
+    true
+  );
 
   for (let i = 0; i < path.length; i++) {
     events.push('mousemove', path[i]);
@@ -23,7 +26,7 @@ export default function(start, map) {
     y: start.y
   });
 
-  return function(cb) {
+  return function (cb) {
     events.run(cb);
   };
 }

@@ -55,10 +55,10 @@ export default function Store(ctx) {
  * Delays all rendering until the returned function is invoked
  * @return {Function} renderBatch
  */
-Store.prototype.createRenderBatch = function() {
+Store.prototype.createRenderBatch = function () {
   const holdRender = this.render;
   let numRenders = 0;
-  this.render = function() {
+  this.render = function () {
     numRenders++;
   };
 
@@ -74,7 +74,7 @@ Store.prototype.createRenderBatch = function() {
  * Sets the store's state to dirty.
  * @return {Store} this
  */
-Store.prototype.setDirty = function() {
+Store.prototype.setDirty = function () {
   this.isDirty = true;
   return this;
 };
@@ -84,10 +84,13 @@ Store.prototype.setDirty = function() {
  * @param {string} featureId
  * @return {Store} this
  */
-Store.prototype.featureCreated = function(featureId, options = {}) {
+Store.prototype.featureCreated = function (featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
 
-  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
+  const silent =
+    options.silent != null
+      ? options.silent
+      : this.ctx.options.suppressAPIEvents;
   if (silent !== true) {
     const feature = this.get(featureId);
     this.ctx.events.fire(Constants.events.CREATE, {
@@ -103,13 +106,18 @@ Store.prototype.featureCreated = function(featureId, options = {}) {
  * @param {string} featureId
  * @return {Store} this
  */
-Store.prototype.featureChanged = function(featureId, options = {}) {
+Store.prototype.featureChanged = function (featureId, options = {}) {
   this._changedFeatureIds.add(featureId);
 
-  const silent = options.silent != null ? options.silent : this.ctx.options.suppressAPIEvents;
+  const silent =
+    options.silent != null
+      ? options.silent
+      : this.ctx.options.suppressAPIEvents;
   if (silent !== true) {
     this.ctx.events.fire(Constants.events.UPDATE, {
-      action: options.action ? options.action : Constants.updateActions.CHANGE_COORDINATES,
+      action: options.action
+        ? options.action
+        : Constants.updateActions.CHANGE_COORDINATES,
       features: [this.get(featureId).toGeoJSON()]
     });
   }
@@ -121,7 +129,7 @@ Store.prototype.featureChanged = function(featureId, options = {}) {
  * Gets the ids of all features currently in changed state.
  * @return {Store} this
  */
-Store.prototype.getChangedIds = function() {
+Store.prototype.getChangedIds = function () {
   return this._changedFeatureIds.values();
 };
 
@@ -129,7 +137,7 @@ Store.prototype.getChangedIds = function() {
  * Sets all features to unchanged state.
  * @return {Store} this
  */
-Store.prototype.clearChangedIds = function() {
+Store.prototype.clearChangedIds = function () {
   this._changedFeatureIds.clear();
   return this;
 };
@@ -138,7 +146,7 @@ Store.prototype.clearChangedIds = function() {
  * Gets the ids of all features in the store.
  * @return {Store} this
  */
-Store.prototype.getAllIds = function() {
+Store.prototype.getAllIds = function () {
   return this._featureIds.values();
 };
 
@@ -150,10 +158,10 @@ Store.prototype.getAllIds = function() {
  *
  * @return {Store} this
  */
-Store.prototype.add = function(feature, options = {}) {
+Store.prototype.add = function (feature, options = {}) {
   this._features[feature.id] = feature;
   this._featureIds.add(feature.id);
-  this.featureCreated(feature.id, {silent: options.silent});
+  this.featureCreated(feature.id, { silent: options.silent });
   return this;
 };
 
@@ -167,9 +175,9 @@ Store.prototype.add = function(feature, options = {}) {
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.delete = function(featureIds, options = {}) {
+Store.prototype.delete = function (featureIds, options = {}) {
   const deletedFeaturesToEmit = [];
-  toDenseArray(featureIds).forEach((id) => {
+  toDenseArray(featureIds).forEach(id => {
     if (!this._featureIds.has(id)) return;
     this._featureIds.delete(id);
     this._selectedFeatureIds.delete(id);
@@ -183,7 +191,9 @@ Store.prototype.delete = function(featureIds, options = {}) {
   });
 
   if (deletedFeaturesToEmit.length) {
-    this.ctx.events.fire(Constants.events.DELETE, {features: deletedFeaturesToEmit});
+    this.ctx.events.fire(Constants.events.DELETE, {
+      features: deletedFeaturesToEmit
+    });
   }
 
   refreshSelectedCoordinates(this, options);
@@ -194,7 +204,7 @@ Store.prototype.delete = function(featureIds, options = {}) {
  * Returns a feature in the store matching the specified value.
  * @return {Object | undefined} feature
  */
-Store.prototype.get = function(id) {
+Store.prototype.get = function (id) {
   return this._features[id];
 };
 
@@ -202,7 +212,7 @@ Store.prototype.get = function(id) {
  * Returns all features in the store.
  * @return {Array<Object>}
  */
-Store.prototype.getAll = function() {
+Store.prototype.getAll = function () {
   return Object.keys(this._features).map(id => this._features[id]);
 };
 
@@ -213,8 +223,8 @@ Store.prototype.getAll = function() {
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.select = function(featureIds, options = {}) {
-  toDenseArray(featureIds).forEach((id) => {
+Store.prototype.select = function (featureIds, options = {}) {
+  toDenseArray(featureIds).forEach(id => {
     if (this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.add(id);
     this._changedFeatureIds.add(id);
@@ -232,8 +242,8 @@ Store.prototype.select = function(featureIds, options = {}) {
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.deselect = function(featureIds, options = {}) {
-  toDenseArray(featureIds).forEach((id) => {
+Store.prototype.deselect = function (featureIds, options = {}) {
+  toDenseArray(featureIds).forEach(id => {
     if (!this._selectedFeatureIds.has(id)) return;
     this._selectedFeatureIds.delete(id);
     this._changedFeatureIds.add(id);
@@ -251,7 +261,7 @@ Store.prototype.deselect = function(featureIds, options = {}) {
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.clearSelected = function(options = {}) {
+Store.prototype.clearSelected = function (options = {}) {
   this.deselect(this._selectedFeatureIds.values(), { silent: options.silent });
   return this;
 };
@@ -264,14 +274,22 @@ Store.prototype.clearSelected = function(options = {}) {
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
  * @return {Store} this
  */
-Store.prototype.setSelected = function(featureIds, options = {}) {
+Store.prototype.setSelected = function (featureIds, options = {}) {
   featureIds = toDenseArray(featureIds);
 
   // Deselect any features not in the new selection
-  this.deselect(this._selectedFeatureIds.values().filter(id => featureIds.indexOf(id) === -1), { silent: options.silent });
+  this.deselect(
+    this._selectedFeatureIds
+      .values()
+      .filter(id => featureIds.indexOf(id) === -1),
+    { silent: options.silent }
+  );
 
   // Select any features in the new selection that were not already selected
-  this.select(featureIds.filter(id => !this._selectedFeatureIds.has(id)), { silent: options.silent });
+  this.select(
+    featureIds.filter(id => !this._selectedFeatureIds.has(id)),
+    { silent: options.silent }
+  );
 
   return this;
 };
@@ -281,7 +299,7 @@ Store.prototype.setSelected = function(featureIds, options = {}) {
  * @param {Array<Array<string>>} coordinates
  * @return {Store} this
  */
-Store.prototype.setSelectedCoordinates = function(coordinates) {
+Store.prototype.setSelectedCoordinates = function (coordinates) {
   this._selectedCoordinates = coordinates;
   this._emitSelectionChange = true;
   return this;
@@ -292,7 +310,7 @@ Store.prototype.setSelectedCoordinates = function(coordinates) {
  * @param {Object} [options]
  * @return {Store} this
  */
-Store.prototype.clearSelectedCoordinates = function() {
+Store.prototype.clearSelectedCoordinates = function () {
   this._selectedCoordinates = [];
   this._emitSelectionChange = true;
   return this;
@@ -302,7 +320,7 @@ Store.prototype.clearSelectedCoordinates = function() {
  * Returns the ids of features in the current selection.
  * @return {Array<string>} Selected feature ids.
  */
-Store.prototype.getSelectedIds = function() {
+Store.prototype.getSelectedIds = function () {
   return this._selectedFeatureIds.values();
 };
 
@@ -310,7 +328,7 @@ Store.prototype.getSelectedIds = function() {
  * Returns features in the current selection.
  * @return {Array<Object>} Selected features.
  */
-Store.prototype.getSelected = function() {
+Store.prototype.getSelected = function () {
   return this.getSelectedIds().map(id => this.get(id));
 };
 
@@ -318,8 +336,8 @@ Store.prototype.getSelected = function() {
  * Returns selected coordinates in the currently selected feature.
  * @return {Array<Object>} Selected coordinates.
  */
-Store.prototype.getSelectedCoordinates = function() {
-  const selected = this._selectedCoordinates.map((coordinate) => {
+Store.prototype.getSelectedCoordinates = function () {
+  const selected = this._selectedCoordinates.map(coordinate => {
     const feature = this.get(coordinate.feature_id);
     return {
       coordinates: feature.getCoordinate(coordinate.coord_path)
@@ -333,7 +351,7 @@ Store.prototype.getSelectedCoordinates = function() {
  * @param {string} featureId
  * @return {boolean} `true` if the feature is selected, `false` if not.
  */
-Store.prototype.isSelected = function(featureId) {
+Store.prototype.isSelected = function (featureId) {
   return this._selectedFeatureIds.has(featureId);
 };
 
@@ -344,8 +362,13 @@ Store.prototype.isSelected = function(featureId) {
  * @param {string} property value
  * @param {Object} [options]
  * @param {Object} [options.silent] - If `true`, this invocation will not fire an event.
-*/
-Store.prototype.setFeatureProperty = function(featureId, property, value, options = {}) {
+ */
+Store.prototype.setFeatureProperty = function (
+  featureId,
+  property,
+  value,
+  options = {}
+) {
   this.get(featureId).setProperty(property, value);
 
   this.featureChanged(featureId, {
@@ -355,8 +378,13 @@ Store.prototype.setFeatureProperty = function(featureId, property, value, option
 };
 
 function refreshSelectedCoordinates(store, options = {}) {
-  const newSelectedCoordinates = store._selectedCoordinates.filter(point => store._selectedFeatureIds.has(point.feature_id));
-  if (store._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
+  const newSelectedCoordinates = store._selectedCoordinates.filter(point =>
+    store._selectedFeatureIds.has(point.feature_id)
+  );
+  if (
+    store._selectedCoordinates.length !== newSelectedCoordinates.length &&
+    !options.silent
+  ) {
     store._emitSelectionChange = true;
   }
   store._selectedCoordinates = newSelectedCoordinates;
@@ -364,21 +392,22 @@ function refreshSelectedCoordinates(store, options = {}) {
 
 /**
  * Stores the initial config for a map, so that we can set it again after we're done.
-*/
-Store.prototype.storeMapConfig = function() {
-  Constants.interactions.forEach((interaction) => {
+ */
+Store.prototype.storeMapConfig = function () {
+  Constants.interactions.forEach(interaction => {
     const interactionSet = this.ctx.map[interaction];
     if (interactionSet) {
-      this._mapInitialConfig[interaction] = this.ctx.map[interaction].isEnabled();
+      this._mapInitialConfig[interaction] =
+        this.ctx.map[interaction].isEnabled();
     }
   });
 };
 
 /**
  * Restores the initial config for a map, ensuring all is well.
-*/
-Store.prototype.restoreMapConfig = function() {
-  Object.keys(this._mapInitialConfig).forEach((key) => {
+ */
+Store.prototype.restoreMapConfig = function () {
+  Object.keys(this._mapInitialConfig).forEach(key => {
     const value = this._mapInitialConfig[key];
     if (value) {
       this.ctx.map[key].enable();
@@ -393,8 +422,8 @@ Store.prototype.restoreMapConfig = function() {
  * @param {string} interaction
  * @return {boolean} `true` if the interaction is enabled, `false` if not.
  * Defaults to `true`. (Todo: include defaults.)
-*/
-Store.prototype.getInitialConfigValue = function(interaction) {
+ */
+Store.prototype.getInitialConfigValue = function (interaction) {
   if (this._mapInitialConfig[interaction] !== undefined) {
     return this._mapInitialConfig[interaction];
   } else {

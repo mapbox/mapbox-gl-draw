@@ -28,21 +28,30 @@ function featuresAtTouch(event: Event, bbox: BBox, ctx: DrawCTX) {
   return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
 }
 
-export const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: number) => {
+export const featuresAt = (
+  event: Event,
+  bbox: BBox,
+  ctx: DrawCTX,
+  buffer: number
+) => {
   if (ctx.map === null) return [];
 
-  const box = (event) ? mapEventToBoundingBox(event, buffer) : bbox;
+  const box = event ? mapEventToBoundingBox(event, buffer) : bbox;
 
   const queryParams = {};
 
-  if (ctx.options.styles) queryParams.layers = ctx.options.styles.map(s => s.id).filter(id => ctx.map.getLayer(id) != null);
+  if (ctx.options.styles)
+    queryParams.layers = ctx.options.styles
+      .map(s => s.id)
+      .filter(id => ctx.map.getLayer(id) != null);
 
-  const features = ctx.map.queryRenderedFeatures(box, queryParams)
+  const features = ctx.map
+    .queryRenderedFeatures(box, queryParams)
     .filter(feature => META_TYPES.indexOf(feature?.properties?.meta) !== -1);
 
   const featureIds = new StringSet();
   const uniqueFeatures = [];
-  features.forEach((feature) => {
+  features.forEach(feature => {
     const featureId = feature.properties?.id;
     if (featureIds.has(featureId)) return;
     featureIds.add(featureId);
@@ -50,4 +59,4 @@ export const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: numbe
   });
 
   return sortFeatures(uniqueFeatures);
-}
+};

@@ -1,5 +1,5 @@
 import click from './mouse_click.js';
-import {setupAfterNextRender} from './after_next_render.js';
+import { setupAfterNextRender } from './after_next_render.js';
 import makeMouseEvent from './make_mouse_event.js';
 
 /**

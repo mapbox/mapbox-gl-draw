@@ -1,15 +1,17 @@
 import * as Constants from '../constants';
 
-export default function(parent, startVertex, endVertex) {
+export default function (parent, startVertex, endVertex) {
   const startCoord = startVertex.geometry.coordinates;
   const endCoord = endVertex.geometry.coordinates;
 
   // If a coordinate exceeds the projection, we can't calculate a midpoint,
   // so run away
-  if (startCoord[1] > Constants.LAT_RENDERED_MAX ||
+  if (
+    startCoord[1] > Constants.LAT_RENDERED_MAX ||
     startCoord[1] < Constants.LAT_RENDERED_MIN ||
     endCoord[1] > Constants.LAT_RENDERED_MAX ||
-    endCoord[1] < Constants.LAT_RENDERED_MIN) {
+    endCoord[1] < Constants.LAT_RENDERED_MIN
+  ) {
     return null;
   }
 

@@ -30,6 +30,4 @@ test('createVertex', () => {
       coordinates: [99, 199]
     }
   });
-
-
 });

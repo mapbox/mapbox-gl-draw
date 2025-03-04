@@ -20,7 +20,7 @@ export default class SimpleSelectSmallBenchmark extends Evented {
     const dragMouse = DragMouse(START, out.map);
 
     const progressDiv = document.getElementById('progress');
-    out.map.on('progress', (e) => {
+    out.map.on('progress', e => {
       progressDiv.style.width = `${e.done}%`;
     });
 
@@ -33,9 +33,11 @@ export default class SimpleSelectSmallBenchmark extends Evented {
         dragMouse(() => {
           const fps = FPSControl.stop();
           if (fps < 55) {
-            this.fire('fail', {message: `${formatNumber(fps)} fps - expected 55fps or better`});
+            this.fire('fail', {
+              message: `${formatNumber(fps)} fps - expected 55fps or better`
+            });
           } else {
-            this.fire('pass', {message: `${formatNumber(fps)} fps`});
+            this.fire('pass', { message: `${formatNumber(fps)} fps` });
           }
         });
       }, 2000);

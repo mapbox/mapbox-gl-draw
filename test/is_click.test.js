@@ -18,13 +18,24 @@ test('isClick easy', () => {
     time: 1
   };
   const b = {
-    point: { x: 1, y: 1},
+    point: { x: 1, y: 1 },
     time: 1
   };
-  assert.equal(isClick({}, b, testOptions), true, 'true when start is missing point and time');
-  assert.equal(isClick({ time: 2000 }, b, testOptions), true, 'true when start has only time');
-  assert.equal(isClick(a, b, testOptions), true, 'true when start and end match exactly');
-
+  assert.equal(
+    isClick({}, b, testOptions),
+    true,
+    'true when start is missing point and time'
+  );
+  assert.equal(
+    isClick({ time: 2000 }, b, testOptions),
+    true,
+    'true when start has only time'
+  );
+  assert.equal(
+    isClick(a, b, testOptions),
+    true,
+    'true when start and end match exactly'
+  );
 });
 
 test('isClick when start/end have same time, very close coordinates', () => {
@@ -33,11 +44,10 @@ test('isClick when start/end have same time, very close coordinates', () => {
     time: 1
   };
   const b = {
-    point: { x: 2, y: 1.5},
+    point: { x: 2, y: 1.5 },
     time: 1
   };
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when start/end have same coordinates, distant times', () => {
@@ -46,11 +56,10 @@ test('isClick when start/end have same coordinates, distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 1, y: 1},
+    point: { x: 1, y: 1 },
     time: 6000
   };
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when start/end have very close coordinates, distant times', () => {
@@ -59,13 +68,11 @@ test('isClick when start/end have very close coordinates, distant times', () => 
     time: 1
   };
   const b = {
-    point: { x: 2, y: 1.15},
+    point: { x: 2, y: 1.15 },
     time: 6000
   };
   assert.equal(isClick(a, b, testOptions), true);
-
 });
-
 
 test('isClick when moving just under 4, same times', () => {
   const a = {
@@ -78,7 +85,6 @@ test('isClick when moving just under 4, same times', () => {
   };
   // Move distance ~3.959798
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just under 4, distant times', () => {
@@ -92,7 +98,6 @@ test('isClick when moving just under 4, distant times', () => {
   };
   // Move distance ~3.959798
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just above 4, same times', () => {
@@ -101,12 +106,11 @@ test('isClick when moving just above 4, same times', () => {
     time: 1
   };
   const b = {
-    point: { x: 3.9, y: 3.9},
+    point: { x: 3.9, y: 3.9 },
     time: 1
   };
   // Move distance ~4.101219
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just above 4, very close times', () => {
@@ -115,12 +119,11 @@ test('isClick when moving just above 4, very close times', () => {
     time: 1
   };
   const b = {
-    point: { x: 3.9, y: 3.9},
+    point: { x: 3.9, y: 3.9 },
     time: 499
   };
   // Move distance ~4.101219
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just above 4, distant times', () => {
@@ -129,12 +132,11 @@ test('isClick when moving just above 4, distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 3.9, y: 3.9},
+    point: { x: 3.9, y: 3.9 },
     time: 6000
   };
   // Move distance ~4.101219
   assert.equal(isClick(a, b, testOptions), false);
-
 });
 
 test('isClick when moving just above 4, barely too distant times', () => {
@@ -143,12 +145,11 @@ test('isClick when moving just above 4, barely too distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 3.9, y: 3.9},
+    point: { x: 3.9, y: 3.9 },
     time: 501
   };
   // Move distance ~4.101219
   assert.equal(isClick(a, b, testOptions), false);
-
 });
 
 test('isClick when moving just below 12, same times', () => {
@@ -157,12 +158,11 @@ test('isClick when moving just below 12, same times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.2, y: 9.2},
+    point: { x: 9.2, y: 9.2 },
     time: 1
   };
   // Move distance ~11.596551
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just below 12, very close times', () => {
@@ -171,12 +171,11 @@ test('isClick when moving just below 12, very close times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.2, y: 9.2},
+    point: { x: 9.2, y: 9.2 },
     time: 499
   };
   // Move distance ~11.596551
   assert.equal(isClick(a, b, testOptions), true);
-
 });
 
 test('isClick when moving just below 12, distant times', () => {
@@ -185,12 +184,11 @@ test('isClick when moving just below 12, distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.2, y: 9.2},
+    point: { x: 9.2, y: 9.2 },
     time: 6000
   };
   // Move distance ~11.596551
   assert.equal(isClick(a, b, testOptions), false);
-
 });
 
 test('isClick when moving just below 12, barely too distant times', () => {
@@ -199,12 +197,11 @@ test('isClick when moving just below 12, barely too distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.2, y: 9.2},
+    point: { x: 9.2, y: 9.2 },
     time: 501
   };
   // Move distance ~11.596551
   assert.equal(isClick(a, b, testOptions), false);
-
 });
 
 test('isClick when moving just above 12, same times', () => {
@@ -213,7 +210,7 @@ test('isClick when moving just above 12, same times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.5, y: 9.5},
+    point: { x: 9.5, y: 9.5 },
     time: 1
   };
   // Move distance ~12.020815
@@ -226,7 +223,7 @@ test('isClick when moving just above 12, distant times', () => {
     time: 1
   };
   const b = {
-    point: { x: 9.5, y: 9.5},
+    point: { x: 9.5, y: 9.5 },
     time: 6000
   };
   // Move distance ~12.020815

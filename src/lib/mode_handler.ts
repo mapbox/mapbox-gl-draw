@@ -1,6 +1,4 @@
-
-const ModeHandler = function(mode, DrawContext) {
-
+const ModeHandler = function (mode, DrawContext) {
   const handlers = {
     drag: [],
     click: [],

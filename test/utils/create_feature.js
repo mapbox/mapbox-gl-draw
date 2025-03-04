@@ -1,4 +1,4 @@
-import {generateID} from '../../src/lib/id.js';
+import { generateID } from '../../src/lib/id.js';
 import getGeoJSON from './get_geojson.js';
 
 const usedIds = new Set();
@@ -13,11 +13,16 @@ export function generateUniqueID() {
 }
 
 export default function createFeature(featureType) {
-  const feature = Object.assign({
-    id: generateUniqueID(),
-    properties: {}
-  }, getGeoJSON(featureType));
+  const feature = Object.assign(
+    {
+      id: generateUniqueID(),
+      properties: {}
+    },
+    getGeoJSON(featureType)
+  );
   feature.toGeoJSON = () => feature;
-  feature.setProperty = (property, name) => { feature.properties[property] = name; };
+  feature.setProperty = (property, name) => {
+    feature.properties[property] = name;
+  };
   return feature;
 }

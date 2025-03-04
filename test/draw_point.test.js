@@ -10,7 +10,7 @@ import drawPointModeObject from '../src/modes/draw_point.js';
 import Point from '../src/feature_types/point.js';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context.js';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context.js';
-import {escapeEvent, enterEvent} from './utils/key_events.js';
+import { escapeEvent, enterEvent } from './utils/key_events.js';
 import objectToMode from '../src/modes/object_to_mode.js';
 const drawPointMode = objectToMode(drawPointModeObject);
 
@@ -31,8 +31,11 @@ test('draw_point mode initialization', () => {
     }
   });
   // Strip ids for this comparison
-  assert.deepEqual(Object.assign({}, context.store.add.getCall(0).args[0], { id: null }),
-    Object.assign({}, emptypoint, { id: null }), 'with a new line');
+  assert.deepEqual(
+    Object.assign({}, context.store.add.getCall(0).args[0], { id: null }),
+    Object.assign({}, emptypoint, { id: null }),
+    'with a new line'
+  );
 });
 
 test('draw_point start', () => {
@@ -41,13 +44,31 @@ test('draw_point start', () => {
   const mode = drawPointMode(context);
   mode.start.call(lifecycleContext);
 
-  assert.equal(context.store.clearSelected.callCount, 1, 'store.clearSelected called');
-  assert.equal(context.ui.queueMapClasses.callCount, 1, 'ui.queueMapClasses called');
-  assert.deepEqual(context.ui.queueMapClasses.getCall(0).args, [{ mouse: 'add' }],
-    'ui.queueMapClasses received correct arguments');
-  assert.equal(context.ui.setActiveButton.callCount, 1, 'ui.setActiveButton called');
-  assert.deepEqual(context.ui.setActiveButton.getCall(0).args, ['point'],
-    'ui.setActiveButton received correct arguments');
+  assert.equal(
+    context.store.clearSelected.callCount,
+    1,
+    'store.clearSelected called'
+  );
+  assert.equal(
+    context.ui.queueMapClasses.callCount,
+    1,
+    'ui.queueMapClasses called'
+  );
+  assert.deepEqual(
+    context.ui.queueMapClasses.getCall(0).args,
+    [{ mouse: 'add' }],
+    'ui.queueMapClasses received correct arguments'
+  );
+  assert.equal(
+    context.ui.setActiveButton.callCount,
+    1,
+    'ui.setActiveButton called'
+  );
+  assert.deepEqual(
+    context.ui.setActiveButton.getCall(0).args,
+    ['point'],
+    'ui.setActiveButton received correct arguments'
+  );
 
   assert.equal(lifecycleContext.on.callCount, 12, 'this.on called');
 });
@@ -64,9 +85,16 @@ test('draw_point stop with point placed', () => {
   point.updateCoordinate(10, 20);
 
   mode.stop.call();
-  assert.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
-  assert.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
-    'ui.setActiveButton received correct arguments');
+  assert.equal(
+    context.ui.setActiveButton.callCount,
+    2,
+    'ui.setActiveButton called'
+  );
+  assert.deepEqual(
+    context.ui.setActiveButton.getCall(1).args,
+    [undefined],
+    'ui.setActiveButton received correct arguments'
+  );
   assert.equal(context.store.delete.callCount, 0, 'store.delete not called');
 });
 
@@ -81,15 +109,22 @@ test('draw_point stop with no point placed', () => {
 
   mode.stop.call();
 
-
-  assert.equal(context.ui.setActiveButton.callCount, 2, 'ui.setActiveButton called');
-  assert.deepEqual(context.ui.setActiveButton.getCall(1).args, [undefined],
-    'ui.setActiveButton received correct arguments');
+  assert.equal(
+    context.ui.setActiveButton.callCount,
+    2,
+    'ui.setActiveButton called'
+  );
+  assert.deepEqual(
+    context.ui.setActiveButton.getCall(1).args,
+    [undefined],
+    'ui.setActiveButton received correct arguments'
+  );
   assert.equal(context.store.delete.callCount, 1, 'store.delete called');
-  assert.deepEqual(context.store.delete.getCall(0).args, [
-    [point.id],
-    { silent: true }
-  ], 'store.delete received correct arguments');
+  assert.deepEqual(
+    context.store.delete.getCall(0).args,
+    [[point.id], { silent: true }],
+    'store.delete received correct arguments'
+  );
 });
 
 test('draw_point render the active point', () => {
@@ -114,7 +149,6 @@ test('draw_point render the active point', () => {
   };
   mode.render(geojson, x => memo.push(x));
   assert.equal(memo.length, 0, 'active point does not render');
-
 });
 
 test('draw_point render an inactive feature', () => {
@@ -131,26 +165,35 @@ test('draw_point render an inactive feature', () => {
     },
     geometry: {
       type: 'LineString',
-      coordinates: [[10, 10], [20, 20]]
+      coordinates: [
+        [10, 10],
+        [20, 20]
+      ]
     }
   };
   mode.render(geojson, x => memo.push(x));
   assert.equal(memo.length, 1, 'does render');
-  assert.deepEqual(memo[0], {
-    type: 'Feature',
-    properties: {
-      active: 'false',
-      meta: 'nothing'
+  assert.deepEqual(
+    memo[0],
+    {
+      type: 'Feature',
+      properties: {
+        active: 'false',
+        meta: 'nothing'
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [10, 10],
+          [20, 20]
+        ]
+      }
     },
-    geometry: {
-      type: 'LineString',
-      coordinates: [[10, 10], [20, 20]]
-    }
-  }, 'unaltered except active: false');
-
+    'unaltered except active: false'
+  );
 });
 
-test('draw_point mouse interaction', async (t) => {
+test('draw_point mouse interaction', async t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -174,7 +217,11 @@ test('draw_point mouse interaction', async (t) => {
     assert.deepEqual(point.geometry.coordinates, [10, 20], 'coordinate added');
 
     mouseClick(map, makeMouseEvent(30, 30));
-    assert.equal(features.length, 1, 'mode has changed, so another click does not create another point');
+    assert.equal(
+      features.length,
+      1,
+      'mode has changed, so another click does not create another point'
+    );
   });
 
   await t.test('exist before clicking by hitting Escape', () => {
@@ -185,7 +232,11 @@ test('draw_point mouse interaction', async (t) => {
 
     assert.equal(Draw.getAll().features.length, 0, 'no feature added');
     mouseClick(map, makeMouseEvent(30, 30));
-    assert.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
+    assert.equal(
+      Draw.getAll().features.length,
+      0,
+      'mode has changed, so a click does not create another point'
+    );
   });
 
   await t.test('exist before clicking by hitting Enter', () => {
@@ -196,7 +247,11 @@ test('draw_point mouse interaction', async (t) => {
 
     assert.equal(Draw.getAll().features.length, 0, 'no feature added');
     mouseClick(map, makeMouseEvent(30, 30));
-    assert.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
+    assert.equal(
+      Draw.getAll().features.length,
+      0,
+      'mode has changed, so a click does not create another point'
+    );
   });
 
   t.test('exist before clicking with Trash', () => {
@@ -207,14 +262,17 @@ test('draw_point mouse interaction', async (t) => {
 
     assert.equal(Draw.getAll().features.length, 0, 'no feature added');
     mouseClick(map, makeMouseEvent(30, 30));
-    assert.equal(Draw.getAll().features.length, 0, 'mode has changed, so a click does not create another point');
+    assert.equal(
+      Draw.getAll().features.length,
+      0,
+      'mode has changed, so a click does not create another point'
+    );
   });
 
   document.body.removeChild(container);
 });
 
-
-test('draw_point touch interaction', async (t) => {
+test('draw_point touch interaction', async t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -237,7 +295,11 @@ test('draw_point touch interaction', async (t) => {
     assert.deepEqual(point.geometry.coordinates, [10, 20], 'coordinate added');
 
     touchTap(map, makeTouchEvent(30, 30));
-    assert.equal(features.length, 1, 'mode has changed, so another click does not create another point');
+    assert.equal(
+      features.length,
+      1,
+      'mode has changed, so another click does not create another point'
+    );
   });
 
   document.body.removeChild(container);

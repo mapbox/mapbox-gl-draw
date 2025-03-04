@@ -16,7 +16,7 @@ export default function ModeInterface(ctx) {
  * @name this.setSelected
  * @param {DrawFeature[]} - whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature)
  */
-ModeInterface.prototype.setSelected = function(features) {
+ModeInterface.prototype.setSelected = function (features) {
   return this._ctx.store.setSelected(features);
 };
 
@@ -25,7 +25,7 @@ ModeInterface.prototype.setSelected = function(features) {
  * @name this.setSelectedCoordinates
  * @param {Object[]} coords - a array of {coord_path: 'string', feature_id: 'string'}
  */
-ModeInterface.prototype.setSelectedCoordinates = function(coords) {
+ModeInterface.prototype.setSelectedCoordinates = function (coords) {
   this._ctx.store.setSelectedCoordinates(coords);
   coords.reduce((m, c) => {
     if (m[c.feature_id] === undefined) {
@@ -41,7 +41,7 @@ ModeInterface.prototype.setSelectedCoordinates = function(coords) {
  * @name this.getSelected
  * @returns {DrawFeature[]}
  */
-ModeInterface.prototype.getSelected = function() {
+ModeInterface.prototype.getSelected = function () {
   return this._ctx.store.getSelected();
 };
 
@@ -50,7 +50,7 @@ ModeInterface.prototype.getSelected = function() {
  * @name this.getSelectedIds
  * @returns {String[]}
  */
-ModeInterface.prototype.getSelectedIds = function() {
+ModeInterface.prototype.getSelectedIds = function () {
   return this._ctx.store.getSelectedIds();
 };
 
@@ -60,7 +60,7 @@ ModeInterface.prototype.getSelectedIds = function() {
  * @param {String} id - a feature id
  * @returns {Boolean}
  */
-ModeInterface.prototype.isSelected = function(id) {
+ModeInterface.prototype.isSelected = function (id) {
   return this._ctx.store.isSelected(id);
 };
 
@@ -70,7 +70,7 @@ ModeInterface.prototype.isSelected = function(id) {
  * @param {String} id - a feature id
  * @returns {DrawFeature}
  */
-ModeInterface.prototype.getFeature = function(id) {
+ModeInterface.prototype.getFeature = function (id) {
   return this._ctx.store.get(id);
 };
 
@@ -79,7 +79,7 @@ ModeInterface.prototype.getFeature = function(id) {
  * @name this.select
  * @param {String} id
  */
-ModeInterface.prototype.select = function(id) {
+ModeInterface.prototype.select = function (id) {
   return this._ctx.store.select(id);
 };
 
@@ -88,7 +88,7 @@ ModeInterface.prototype.select = function(id) {
  * @name this.delete
  * @param {String} id
  */
-ModeInterface.prototype.deselect = function(id) {
+ModeInterface.prototype.deselect = function (id) {
   return this._ctx.store.deselect(id);
 };
 
@@ -97,7 +97,7 @@ ModeInterface.prototype.deselect = function(id) {
  * @name this.deleteFeature
  * @param {String} id - a feature id
  */
-ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
+ModeInterface.prototype.deleteFeature = function (id, opts = {}) {
   return this._ctx.store.delete(id, opts);
 };
 
@@ -107,21 +107,21 @@ ModeInterface.prototype.deleteFeature = function(id, opts = {}) {
  * @name this.addFeature
  * @param {DrawFeature} feature - the feature to add
  */
-ModeInterface.prototype.addFeature = function(feature, opts = {}) {
+ModeInterface.prototype.addFeature = function (feature, opts = {}) {
   return this._ctx.store.add(feature, opts);
 };
 
 /**
  * Clear all selected features
  */
-ModeInterface.prototype.clearSelectedFeatures = function() {
+ModeInterface.prototype.clearSelectedFeatures = function () {
   return this._ctx.store.clearSelected();
 };
 
 /**
  * Clear all selected coordinates
  */
-ModeInterface.prototype.clearSelectedCoordinates = function() {
+ModeInterface.prototype.clearSelectedCoordinates = function () {
   return this._ctx.store.clearSelectedCoordinates();
 };
 
@@ -131,7 +131,7 @@ ModeInterface.prototype.clearSelectedCoordinates = function() {
  * @name this.setActionableState
  * @param {Object} actions
  */
-ModeInterface.prototype.setActionableState = function(actions = {}) {
+ModeInterface.prototype.setActionableState = function (actions = {}) {
   const newSet = {
     trash: actions.trash || false,
     combineFeatures: actions.combineFeatures || false,
@@ -147,7 +147,11 @@ ModeInterface.prototype.setActionableState = function(actions = {}) {
  * @param {Object} opts - the options object to pass to the new mode
  * @param {Object} eventOpts - used to control what kind of events are emitted.
  */
-ModeInterface.prototype.changeMode = function(mode, opts = {}, eventOpts = {}) {
+ModeInterface.prototype.changeMode = function (
+  mode,
+  opts = {},
+  eventOpts = {}
+) {
   return this._ctx.events.changeMode(mode, opts, eventOpts);
 };
 
@@ -157,7 +161,7 @@ ModeInterface.prototype.changeMode = function(mode, opts = {}, eventOpts = {}) {
  * @param {String} eventName - the event name.
  * @param {Object} eventData - the event data object.
  */
-ModeInterface.prototype.fire = function(eventName, eventData) {
+ModeInterface.prototype.fire = function (eventName, eventData) {
   return this._ctx.events.fire(eventName, eventData);
 };
 
@@ -166,7 +170,7 @@ ModeInterface.prototype.fire = function(eventName, eventData) {
  * @name this.updateUIClasses
  * @param {Object} opts
  */
-ModeInterface.prototype.updateUIClasses = function(opts) {
+ModeInterface.prototype.updateUIClasses = function (opts) {
   return this._ctx.ui.queueMapClasses(opts);
 };
 
@@ -175,7 +179,7 @@ ModeInterface.prototype.updateUIClasses = function(opts) {
  * @name this.activateUIButton
  * @param {String?} name - name of the button to make active, leave as undefined to set buttons to be inactive
  */
-ModeInterface.prototype.activateUIButton = function(name) {
+ModeInterface.prototype.activateUIButton = function (name) {
   return this._ctx.ui.setActiveButton(name);
 };
 
@@ -186,8 +190,13 @@ ModeInterface.prototype.activateUIButton = function(name) {
  * @param {BBOX||NULL} bbox - the area to get features from
  * @param {String} bufferType - is this `click` or `tap` event, defaults to click
  */
-ModeInterface.prototype.featuresAt = function(event, bbox, bufferType = 'click') {
-  if (bufferType !== 'click' && bufferType !== 'touch') throw new Error('invalid buffer type');
+ModeInterface.prototype.featuresAt = function (
+  event,
+  bbox,
+  bufferType = 'click'
+) {
+  if (bufferType !== 'click' && bufferType !== 'touch')
+    throw new Error('invalid buffer type');
   return featuresAt[bufferType](event, bbox, this._ctx);
 };
 
@@ -197,11 +206,14 @@ ModeInterface.prototype.featuresAt = function(event, bbox, bufferType = 'click')
  * @param {GeoJSONFeature} geojson
  * @returns {DrawFeature}
  */
-ModeInterface.prototype.newFeature = function(geojson) {
+ModeInterface.prototype.newFeature = function (geojson) {
   const type = geojson.geometry.type;
-  if (type === Constants.geojsonTypes.POINT) return new Point(this._ctx, geojson);
-  if (type === Constants.geojsonTypes.LINE_STRING) return new LineString(this._ctx, geojson);
-  if (type === Constants.geojsonTypes.POLYGON) return new Polygon(this._ctx, geojson);
+  if (type === Constants.geojsonTypes.POINT)
+    return new Point(this._ctx, geojson);
+  if (type === Constants.geojsonTypes.LINE_STRING)
+    return new LineString(this._ctx, geojson);
+  if (type === Constants.geojsonTypes.POLYGON)
+    return new Polygon(this._ctx, geojson);
   return new MultiFeature(this._ctx, geojson);
 };
 
@@ -212,10 +224,12 @@ ModeInterface.prototype.newFeature = function(geojson) {
  * @param {Object} feature - the object that needs to be checked
  * @returns {Boolean}
  */
-ModeInterface.prototype.isInstanceOf = function(type, feature) {
+ModeInterface.prototype.isInstanceOf = function (type, feature) {
   if (type === Constants.geojsonTypes.POINT) return feature instanceof Point;
-  if (type === Constants.geojsonTypes.LINE_STRING) return feature instanceof LineString;
-  if (type === Constants.geojsonTypes.POLYGON) return feature instanceof Polygon;
+  if (type === Constants.geojsonTypes.LINE_STRING)
+    return feature instanceof LineString;
+  if (type === Constants.geojsonTypes.POLYGON)
+    return feature instanceof Polygon;
   if (type === 'MultiFeature') return feature instanceof MultiFeature;
   throw new Error(`Unknown feature class: ${type}`);
 };
@@ -225,7 +239,6 @@ ModeInterface.prototype.isInstanceOf = function(type, feature) {
  * @name this.doRender
  * @param {String} id - a feature id
  */
-ModeInterface.prototype.doRender = function(id) {
+ModeInterface.prototype.doRender = function (id) {
   return this._ctx.store.featureChanged(id);
 };
-

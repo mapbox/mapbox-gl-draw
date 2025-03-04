@@ -2,9 +2,7 @@ import * as Constants from './constants';
 
 const classTypes = ['mode', 'feature', 'mouse'];
 
-export default function(ctx) {
-
-
+export default function (ctx) {
   const buttonElements = {};
   let activeButton = null;
 
@@ -21,7 +19,7 @@ export default function(ctx) {
   };
 
   function clearMapClasses() {
-    queueMapClasses({mode:null, feature:null, mouse:null});
+    queueMapClasses({ mode: null, feature: null, mouse: null });
     updateMapClasses();
   }
 
@@ -35,7 +33,7 @@ export default function(ctx) {
     const classesToRemove = [];
     const classesToAdd = [];
 
-    classTypes.forEach((type) => {
+    classTypes.forEach(type => {
       if (nextMapClasses[type] === currentMapClasses[type]) return;
 
       classesToRemove.push(`${type}-${currentMapClasses[type]}`);
@@ -61,20 +59,24 @@ export default function(ctx) {
     button.setAttribute('title', options.title);
     options.container.appendChild(button);
 
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    button.addEventListener(
+      'click',
+      e => {
+        e.preventDefault();
+        e.stopPropagation();
 
-      const clickedButton = e.target;
-      if (clickedButton === activeButton) {
-        deactivateButtons();
-        options.onDeactivate();
-        return;
-      }
+        const clickedButton = e.target;
+        if (clickedButton === activeButton) {
+          deactivateButtons();
+          options.onDeactivate();
+          return;
+        }
 
-      setActiveButton(id);
-      options.onActivate();
-    }, true);
+        setActiveButton(id);
+        options.onActivate();
+      },
+      true
+    );
 
     return button;
   }
@@ -105,34 +107,43 @@ export default function(ctx) {
     if (!controls) return controlGroup;
 
     if (controls[Constants.types.POINT]) {
-      buttonElements[Constants.types.POINT] = createControlButton(Constants.types.POINT, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_POINT,
-        title: `Marker tool ${ctx.options.keybindings ? '(1)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT),
-        onDeactivate: () => ctx.events.trash()
-      });
+      buttonElements[Constants.types.POINT] = createControlButton(
+        Constants.types.POINT,
+        {
+          container: controlGroup,
+          className: Constants.classes.CONTROL_BUTTON_POINT,
+          title: `Marker tool ${ctx.options.keybindings ? '(1)' : ''}`,
+          onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POINT),
+          onDeactivate: () => ctx.events.trash()
+        }
+      );
     }
 
-
     if (controls[Constants.types.LINE]) {
-      buttonElements[Constants.types.LINE] = createControlButton(Constants.types.LINE, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_LINE,
-        title: `LineString tool ${ctx.options.keybindings ? '(2)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING),
-        onDeactivate: () => ctx.events.trash()
-      });
+      buttonElements[Constants.types.LINE] = createControlButton(
+        Constants.types.LINE,
+        {
+          container: controlGroup,
+          className: Constants.classes.CONTROL_BUTTON_LINE,
+          title: `LineString tool ${ctx.options.keybindings ? '(2)' : ''}`,
+          onActivate: () =>
+            ctx.events.changeMode(Constants.modes.DRAW_LINE_STRING),
+          onDeactivate: () => ctx.events.trash()
+        }
+      );
     }
 
     if (controls[Constants.types.POLYGON]) {
-      buttonElements[Constants.types.POLYGON] = createControlButton(Constants.types.POLYGON, {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_POLYGON,
-        title: `Polygon tool ${ctx.options.keybindings ? '(3)' : ''}`,
-        onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON),
-        onDeactivate: () => ctx.events.trash()
-      });
+      buttonElements[Constants.types.POLYGON] = createControlButton(
+        Constants.types.POLYGON,
+        {
+          container: controlGroup,
+          className: Constants.classes.CONTROL_BUTTON_POLYGON,
+          title: `Polygon tool ${ctx.options.keybindings ? '(3)' : ''}`,
+          onActivate: () => ctx.events.changeMode(Constants.modes.DRAW_POLYGON),
+          onDeactivate: () => ctx.events.trash()
+        }
+      );
     }
 
     if (controls.trash) {
@@ -158,21 +169,24 @@ export default function(ctx) {
     }
 
     if (controls.uncombine_features) {
-      buttonElements.uncombine_features = createControlButton('uncombineFeatures', {
-        container: controlGroup,
-        className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
-        title: 'Uncombine',
-        onActivate: () => {
-          ctx.events.uncombineFeatures();
+      buttonElements.uncombine_features = createControlButton(
+        'uncombineFeatures',
+        {
+          container: controlGroup,
+          className: Constants.classes.CONTROL_BUTTON_UNCOMBINE_FEATURES,
+          title: 'Uncombine',
+          onActivate: () => {
+            ctx.events.uncombineFeatures();
+          }
         }
-      });
+      );
     }
 
     return controlGroup;
   }
 
   function removeButtons() {
-    Object.keys(buttonElements).forEach((buttonId) => {
+    Object.keys(buttonElements).forEach(buttonId => {
       const button = buttonElements[buttonId];
       if (button.parentNode) {
         button.parentNode.removeChild(button);

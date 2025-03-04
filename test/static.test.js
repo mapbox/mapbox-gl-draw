@@ -2,15 +2,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
-import {spy} from 'sinon';
+import { spy } from 'sinon';
 
 import MapboxDraw from '../index';
-import {setupAfterNextRender} from './utils/after_next_render';
+import { setupAfterNextRender } from './utils/after_next_render';
 import makeMouseEvent from './utils/make_mouse_event';
 import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 
-test('static', async (t) => {
+test('static', async t => {
   const map = createMap();
   const opts = {
     modes: {
@@ -27,12 +27,12 @@ test('static', async (t) => {
 
   const afterNextRender = setupAfterNextRender(map);
 
-  const cleanUp = function() {
+  const cleanUp = function () {
     Draw.deleteAll();
     map.fire.resetHistory();
   };
 
-  const getFireArgs = function() {
+  const getFireArgs = function () {
     const args = [];
     for (let i = 0; i < map.fire.callCount; i++) {
       args.push(map.fire.getCall(i).args);
@@ -41,7 +41,7 @@ test('static', async (t) => {
   };
 
   t.test('static - init map for tests', () => {
-    const done = function() {
+    const done = function () {
       map.off('load', done);
     };
 
@@ -70,7 +70,11 @@ test('static', async (t) => {
   });
 
   await t.test('static - try clicking many features', async () => {
-    const features = [getGeoJSON('point'), getGeoJSON('line'), getGeoJSON('square')];
+    const features = [
+      getGeoJSON('point'),
+      getGeoJSON('line'),
+      getGeoJSON('square')
+    ];
     Draw.add({
       type: 'FeatureCollection',
       features

@@ -17,10 +17,10 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-export default function(modeObject) {
+export default function (modeObject) {
   const modeObjectKeys = Object.keys(modeObject);
 
-  return function(ctx, startOpts = {}) {
+  return function (ctx, startOpts = {}) {
     let state = {};
 
     const mode = modeObjectKeys.reduce((m, k) => {
@@ -41,7 +41,7 @@ export default function(modeObject) {
         // handlers that are not present in the mode
         // to reduce on render calls for functions that
         // have no logic
-        eventKeys.forEach((key) => {
+        eventKeys.forEach(key => {
           const modeHandler = eventMapper[key];
           let selector = () => false;
           if (modeObject[modeHandler]) {
@@ -49,7 +49,6 @@ export default function(modeObject) {
           }
           this.on(key, selector, wrapper(modeHandler));
         });
-
       },
       stop() {
         mode.onStop(state);

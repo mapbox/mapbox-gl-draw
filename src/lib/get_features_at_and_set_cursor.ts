@@ -7,8 +7,10 @@ export const getFeatureAtAndSetCursors = (event: Event, ctx: DrawCTX) => {
   const classes = { mouse: Constants.cursors.NONE };
 
   if (features[0]) {
-    classes.mouse = (features[0].properties.active === Constants.activeStates.ACTIVE) ?
-      Constants.cursors.MOVE : Constants.cursors.POINTER;
+    classes.mouse =
+      features[0].properties.active === Constants.activeStates.ACTIVE
+        ? Constants.cursors.MOVE
+        : Constants.cursors.POINTER;
     classes.feature = features[0].properties.meta;
   }
 
@@ -20,4 +22,4 @@ export const getFeatureAtAndSetCursors = (event: Event, ctx: DrawCTX) => {
   ctx.ui.updateMapClasses();
 
   return features[0];
-}
+};

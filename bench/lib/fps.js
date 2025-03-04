@@ -1,9 +1,9 @@
-export default function() {
+export default function () {
   let frameCount = 0;
   let start = null;
   let running = false;
 
-  const frameCounter = function() {
+  const frameCounter = function () {
     if (running) {
       frameCount++;
       requestAnimationFrame(frameCounter);

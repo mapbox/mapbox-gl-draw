@@ -1,7 +1,7 @@
 import mouseEvents from './mouse_events';
 import mousePath from './mouse_path';
 
-export default function(start, map) {
+export default function (start, map) {
   const path = mousePath(start);
 
   const events = mouseEvents(map);
@@ -24,7 +24,7 @@ export default function(start, map) {
 
   events.push('mouseup', path[path.length - 1]);
 
-  return function(cb) {
+  return function (cb) {
     events.run(cb);
   };
 }

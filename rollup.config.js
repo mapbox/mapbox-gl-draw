@@ -1,6 +1,8 @@
 const { MINIFY } = process.env;
 const minified = MINIFY === 'true';
-const outputFile = minified ? 'dist/mapbox-gl-draw.js' : 'dist/mapbox-gl-draw-unminified.js';
+const outputFile = minified
+  ? 'dist/mapbox-gl-draw.js'
+  : 'dist/mapbox-gl-draw-unminified.js';
 
 import typescript from '@rollup/plugin-typescript';
 

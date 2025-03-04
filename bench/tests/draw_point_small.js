@@ -5,7 +5,7 @@ import formatNumber from '../lib/format_number';
 import fpsRunner from '../lib/fps';
 import DrawMouse from '../lib/mouse_draw';
 
-const START = {x: 189, y: 293};
+const START = { x: 189, y: 293 };
 
 export default class Benchmark extends Evented {
   constructor(options) {
@@ -17,12 +17,12 @@ export default class Benchmark extends Evented {
     const dragMouse = DrawMouse(START, out.map);
 
     const progressDiv = document.getElementById('progress');
-    out.map.on('progress', (e) => {
+    out.map.on('progress', e => {
       progressDiv.style.width = `${e.done}%`;
     });
 
     out.map.on('load', () => {
-      out.map.on('draw.modechange', (e) => {
+      out.map.on('draw.modechange', e => {
         if (e.mode === 'simple_select') {
           out.draw.changeMode('draw_point');
         }
@@ -35,9 +35,11 @@ export default class Benchmark extends Evented {
         dragMouse(() => {
           const fps = FPSControl.stop();
           if (fps < 55) {
-            this.fire('fail', {message: `${formatNumber(fps)} fps - expected 55fps or better`});
+            this.fire('fail', {
+              message: `${formatNumber(fps)} fps - expected 55fps or better`
+            });
           } else {
-            this.fire('pass', {message: `${formatNumber(fps)} fps`});
+            this.fire('pass', { message: `${formatNumber(fps)} fps` });
           }
           out.draw.changeMode('simple_select');
         });
@@ -45,5 +47,3 @@ export default class Benchmark extends Evented {
     });
   }
 }
-
-

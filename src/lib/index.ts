@@ -39,5 +39,5 @@ export {
   stringSetsAreEqual,
   StringSet,
   theme,
-  toDenseArray,
+  toDenseArray
 };

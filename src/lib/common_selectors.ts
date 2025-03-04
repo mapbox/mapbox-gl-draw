@@ -1,7 +1,7 @@
 import * as Constants from '../constants';
 
 export function isOfMetaType(type) {
-  return function(e) {
+  return function (e) {
     const featureTarget = e.featureTarget;
     if (!featureTarget) return false;
     if (!featureTarget.properties) return false;
@@ -18,15 +18,19 @@ export function isShiftMousedown(e) {
 export function isActiveFeature(e) {
   if (!e.featureTarget) return false;
   if (!e.featureTarget.properties) return false;
-  return e.featureTarget.properties.active === Constants.activeStates.ACTIVE &&
-    e.featureTarget.properties.meta === Constants.meta.FEATURE;
+  return (
+    e.featureTarget.properties.active === Constants.activeStates.ACTIVE &&
+    e.featureTarget.properties.meta === Constants.meta.FEATURE
+  );
 }
 
 export function isInactiveFeature(e) {
   if (!e.featureTarget) return false;
   if (!e.featureTarget.properties) return false;
-  return e.featureTarget.properties.active === Constants.activeStates.INACTIVE &&
-    e.featureTarget.properties.meta === Constants.meta.FEATURE;
+  return (
+    e.featureTarget.properties.active === Constants.activeStates.INACTIVE &&
+    e.featureTarget.properties.meta === Constants.meta.FEATURE
+  );
 }
 
 export function noTarget(e) {

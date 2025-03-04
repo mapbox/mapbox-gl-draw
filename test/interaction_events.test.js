@@ -9,13 +9,9 @@ import createMap from './utils/create_map';
 import { setupAfterNextRender } from './utils/after_next_render.js';
 import makeMouseEvent from './utils/make_mouse_event.js';
 
-import {
-  backspaceEvent,
-  enterEvent,
-  escapeEvent
-} from './utils/key_events.js';
+import { backspaceEvent, enterEvent, escapeEvent } from './utils/key_events.js';
 
-test('ensure user interactions fire right events', async (t) => {
+test('ensure user interactions fire right events', async t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const map = createMap({ container });
@@ -40,7 +36,8 @@ test('ensure user interactions fire right events', async (t) => {
     const drawEvents = [];
     for (let i = 0; i < fireSpy.callCount; i++) {
       const eventName = fireSpy.getCall(i).args[0];
-      if (typeof eventName !== 'string' || eventName.indexOf('draw.') !== 0) continue;
+      if (typeof eventName !== 'string' || eventName.indexOf('draw.') !== 0)
+        continue;
       // Ignore draw.render events for now
       if (eventName === 'draw.render') continue;
       // Ignore draw.actionable events for now
@@ -86,10 +83,18 @@ test('ensure user interactions fire right events', async (t) => {
     }
   }
 
-  const pointButton = controlGroup.getElementsByClassName('mapbox-gl-draw_point')[0];
-  const lineButton = controlGroup.getElementsByClassName('mapbox-gl-draw_line')[0];
-  const trashButton = controlGroup.getElementsByClassName('mapbox-gl-draw_trash')[0];
-  const polygonButton = controlGroup.getElementsByClassName('mapbox-gl-draw_polygon')[0];
+  const pointButton = controlGroup.getElementsByClassName(
+    'mapbox-gl-draw_point'
+  )[0];
+  const lineButton = controlGroup.getElementsByClassName(
+    'mapbox-gl-draw_line'
+  )[0];
+  const trashButton = controlGroup.getElementsByClassName(
+    'mapbox-gl-draw_trash'
+  )[0];
+  const polygonButton = controlGroup.getElementsByClassName(
+    'mapbox-gl-draw_polygon'
+  )[0];
 
   // The sequence of these tests matters: each uses state established
   // in the prior tests. These variables keep track of bits of that state.
@@ -102,7 +107,11 @@ test('ensure user interactions fire right events', async (t) => {
     firedWith('draw.modechange', {
       mode: 'draw_point'
     });
-    assert.deepEqual(flushDrawEvents(), ['draw.modechange'], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange'],
+      'no unexpected draw events'
+    );
   });
 
   const pointA = {
@@ -135,11 +144,11 @@ test('ensure user interactions fire right events', async (t) => {
       points: []
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.create',
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.create', 'draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('deselect that point', async () => {
@@ -153,9 +162,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('re-select that point', async () => {
@@ -169,9 +180,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [pointA],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const pointB = {
@@ -186,7 +199,7 @@ test('ensure user interactions fire right events', async (t) => {
   await t.test('drag that point', async () => {
     // Now in `simple_select` mode ...
     map.fire('mousedown', makeMouseEvent(25, 25));
-    repeat(10, (i) => {
+    repeat(10, i => {
       map.fire('mousemove', makeMouseEvent(25 + i, 25 - i, { buttons: 1 }));
     });
     map.fire('mouseup', makeMouseEvent(35, 10));
@@ -195,9 +208,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'move',
       features: [pointB]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('delete that point with the Trash button', async () => {
@@ -207,9 +222,11 @@ test('ensure user interactions fire right events', async (t) => {
     firedWith('draw.delete', {
       features: [pointB]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.delete'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.delete'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('enter draw_line_string mode', () => {
@@ -218,9 +235,11 @@ test('ensure user interactions fire right events', async (t) => {
     firedWith('draw.modechange', {
       mode: 'draw_line_string'
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange'],
+      'no unexpected draw events'
+    );
   });
 
   const lineA = {
@@ -228,7 +247,11 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[10, 10], [30, 30], [50, 50]]
+      coordinates: [
+        [10, 10],
+        [30, 30],
+        [50, 50]
+      ]
     }
   };
 
@@ -238,11 +261,11 @@ test('ensure user interactions fire right events', async (t) => {
     map.fire('mousemove', makeMouseEvent(10, 10));
     map.fire('mousemove', makeMouseEvent(20, 20));
     click(map, makeMouseEvent(10, 10));
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(10 + i, 10 + i));
     });
     click(map, makeMouseEvent(30, 30));
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(30 + i, 30 + i));
     });
     click(map, makeMouseEvent(50, 50));
@@ -263,11 +286,11 @@ test('ensure user interactions fire right events', async (t) => {
       points: []
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.create',
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.create', 'draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('deselect that line', async () => {
@@ -278,9 +301,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('re-select that line', async () => {
@@ -292,9 +317,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [lineA],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const lineB = {
@@ -302,7 +329,11 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [40, 20], [60, 40]]
+      coordinates: [
+        [20, 0],
+        [40, 20],
+        [60, 40]
+      ]
     }
   };
 
@@ -311,7 +342,7 @@ test('ensure user interactions fire right events', async (t) => {
     // Mousedown anywhere on the line, not vertex
     map.fire('mousedown', makeMouseEvent(20, 20));
     // Drag it a little bit
-    repeat(10, (i) => {
+    repeat(10, i => {
       map.fire('mousemove', makeMouseEvent(20 + i, 20 - i, { buttons: 1 }));
     });
     // Release the mouse
@@ -324,9 +355,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [lineB]
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('select a vertex', async () => {
@@ -342,20 +375,23 @@ test('ensure user interactions fire right events', async (t) => {
 
     firedWith('draw.selectionchange', {
       features: [lineB],
-      points: [{
-        geometry: {
-          coordinates: [40, 20],
-          type: 'Point'
-        },
-        properties: {},
-        type: 'Feature'
-      }]
+      points: [
+        {
+          geometry: {
+            coordinates: [40, 20],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }
+      ]
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const lineC = {
@@ -363,7 +399,11 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [62, 42], [60, 40]]
+      coordinates: [
+        [20, 0],
+        [62, 42],
+        [60, 40]
+      ]
     }
   };
 
@@ -372,7 +412,7 @@ test('ensure user interactions fire right events', async (t) => {
     // Click the vertex again
     map.fire('mousedown', makeMouseEvent(40, 20));
     // Drag it a little bit
-    repeat(22, (i) => {
+    repeat(22, i => {
       map.fire('mousemove', makeMouseEvent(40 + i, 20 + i, { buttons: 1 }));
     });
     // Release the mouse
@@ -384,10 +424,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'change_coordinates',
       features: [lineC]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const lineD = {
@@ -395,7 +436,12 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [41, 21], [62, 42], [60, 40]]
+      coordinates: [
+        [20, 0],
+        [41, 21],
+        [62, 42],
+        [60, 40]
+      ]
     }
   };
 
@@ -408,9 +454,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'change_coordinates',
       features: [lineD]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update'],
+      'no unexpected draw events'
+    );
   });
 
   const lineE = {
@@ -418,7 +466,11 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [62, 42], [60, 40]]
+      coordinates: [
+        [20, 0],
+        [62, 42],
+        [60, 40]
+      ]
     }
   };
 
@@ -432,10 +484,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'change_coordinates',
       features: [lineE]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   // Leaving that line in place while moving on to
@@ -456,10 +509,11 @@ test('ensure user interactions fire right events', async (t) => {
       points: []
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const polygonA = {
@@ -467,22 +521,30 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, 0], [0, 30], [30, 30], [30, 0], [0, 0]]]
+      coordinates: [
+        [
+          [0, 0],
+          [0, 30],
+          [30, 30],
+          [30, 0],
+          [0, 0]
+        ]
+      ]
     }
   };
 
   await t.test('create a polygon', async () => {
     // Now in `draw_polygon` mode ...
     click(map, makeMouseEvent(0, 0));
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(0, 0 + i));
     });
     click(map, makeMouseEvent(0, 30));
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(0 + i, 30));
     });
     click(map, makeMouseEvent(30, 30));
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(30, 30 - i));
     });
     click(map, makeMouseEvent(30, 0));
@@ -503,11 +565,11 @@ test('ensure user interactions fire right events', async (t) => {
       points: []
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.create',
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.create', 'draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('deselect the polygon', async () => {
@@ -520,17 +582,22 @@ test('ensure user interactions fire right events', async (t) => {
       features: [],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('box-select the line and the polygon', async () => {
     // Now in `simple_select` mode ...
     // Mouse down with the shift key
     map.fire('mousedown', makeMouseEvent(200, 200, { shiftKey: true }));
-    repeat(20, (i) => {
-      map.fire('mousemove', makeMouseEvent(200 - (10 * i), 200 - (10 * i), { buttons: 1 }));
+    repeat(20, i => {
+      map.fire(
+        'mousemove',
+        makeMouseEvent(200 - 10 * i, 200 - 10 * i, { buttons: 1 })
+      );
     });
     map.fire('mouseup', makeMouseEvent(0, 0));
 
@@ -540,9 +607,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [lineE, polygonA],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const lineF = {
@@ -550,7 +619,11 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[40, -20], [82, 22], [80, 20]]
+      coordinates: [
+        [40, -20],
+        [82, 22],
+        [80, 20]
+      ]
     }
   };
 
@@ -559,7 +632,15 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[20, -20], [20, 10], [50, 10], [50, -20], [20, -20]]]
+      coordinates: [
+        [
+          [20, -20],
+          [20, 10],
+          [50, 10],
+          [50, -20],
+          [20, -20]
+        ]
+      ]
     }
   };
 
@@ -568,7 +649,7 @@ test('ensure user interactions fire right events', async (t) => {
     // Mousedown anywhere on either feature, not a vertex
     map.fire('mousedown', makeMouseEvent(0, 15));
     // Drag it a little bit
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(0 + i, 15 - i, { buttons: 1 }));
     });
     // Release the mouse
@@ -581,9 +662,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [lineF, polygonB]
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('deselect both', async () => {
@@ -596,9 +679,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('select the polygon', async () => {
@@ -611,9 +696,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [polygonB],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('select a vertex', async () => {
@@ -628,27 +715,34 @@ test('ensure user interactions fire right events', async (t) => {
 
     firedWith('draw.selectionchange', {
       features: [polygonB],
-      points: [{
-        geometry: {
-          coordinates: [20, -20],
-          type: 'Point'
-        },
-        properties: {},
-        type: 'Feature'
-      }]
+      points: [
+        {
+          geometry: {
+            coordinates: [20, -20],
+            type: 'Point'
+          },
+          properties: {},
+          type: 'Feature'
+        }
+      ]
     });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('add another vertex to the selection', async () => {
     // Now in `simple_select` mode ...
     click(map, makeMouseEvent(20, 10, { shiftKey: true }));
     await afterNextRender();
-    assert.deepEqual(flushDrawEvents(), ['draw.selectionchange'], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const polygonC = {
@@ -656,7 +750,15 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, -20], [0, 10], [50, 10], [50, -20], [0, -20]]]
+      coordinates: [
+        [
+          [0, -20],
+          [0, 10],
+          [50, 10],
+          [50, -20],
+          [0, -20]
+        ]
+      ]
     }
   };
 
@@ -665,7 +767,7 @@ test('ensure user interactions fire right events', async (t) => {
     // Click a vertex again
     map.fire('mousedown', makeMouseEvent(20, 10));
     // Drag it a little bit
-    repeat(20, (i) => {
+    repeat(20, i => {
       map.fire('mousemove', makeMouseEvent(20 - i, 10, { buttons: 1 }));
     });
     // Release the mouse
@@ -677,10 +779,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'change_coordinates',
       features: [polygonC]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update', 'draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   const polygonD = {
@@ -688,7 +791,16 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, -20], [0, 10], [25, 10], [50, 10], [50, -20], [0, -20]]]
+      coordinates: [
+        [
+          [0, -20],
+          [0, 10],
+          [25, 10],
+          [50, 10],
+          [50, -20],
+          [0, -20]
+        ]
+      ]
     }
   };
 
@@ -703,9 +815,11 @@ test('ensure user interactions fire right events', async (t) => {
       action: 'change_coordinates',
       features: [polygonD]
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.update'],
+      'no unexpected draw events'
+    );
   });
 
   const polygonE = {
@@ -713,27 +827,38 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'Polygon',
-      coordinates: [[[0, 10], [50, 10], [50, -20], [0, 10]]]
+      coordinates: [
+        [
+          [0, 10],
+          [50, 10],
+          [50, -20],
+          [0, 10]
+        ]
+      ]
     }
   };
 
-  await t.test('select then delete two vertices with Draw.trash()', async () => {
-    // Now in `direct_select` mode ...
-    click(map, makeMouseEvent(0, -20));
-    click(map, makeMouseEvent(25, 10, { shiftKey: true }));
-    Draw.trash();
+  await t.test(
+    'select then delete two vertices with Draw.trash()',
+    async () => {
+      // Now in `direct_select` mode ...
+      click(map, makeMouseEvent(0, -20));
+      click(map, makeMouseEvent(25, 10, { shiftKey: true }));
+      Draw.trash();
 
-    await afterNextRender();
+      await afterNextRender();
 
-    firedWith('draw.update', {
-      action: 'change_coordinates',
-      features: [polygonE]
-    });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.update',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
-  });
+      firedWith('draw.update', {
+        action: 'change_coordinates',
+        features: [polygonE]
+      });
+      assert.deepEqual(
+        flushDrawEvents(),
+        ['draw.update', 'draw.selectionchange'],
+        'no unexpected draw events'
+      );
+    }
+  );
 
   await t.test('select the polygon', async () => {
     // Deselect everything
@@ -752,9 +877,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [polygonE],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('add the line to the selection', async () => {
@@ -768,9 +895,11 @@ test('ensure user interactions fire right events', async (t) => {
       features: [polygonE, lineF],
       points: []
     });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.selectionchange'],
+      'no unexpected draw events'
+    );
   });
 
   // Below are tests to ensure that API usage to modify data does not
@@ -792,7 +921,10 @@ test('ensure user interactions fire right events', async (t) => {
       properties: {},
       geometry: {
         type: 'LineString',
-        coordinates: [[10, 10], [20, 20]]
+        coordinates: [
+          [10, 10],
+          [20, 20]
+        ]
       }
     });
     Draw.changeMode('draw_point');
@@ -805,29 +937,38 @@ test('ensure user interactions fire right events', async (t) => {
     assert.deepEqual(flushDrawEvents(), [], 'no unexpected draw events');
   });
 
-  await t.test('except when the API function does not directly correspond to the event', async () => {
-    const line = {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'LineString',
-        coordinates: [[10, 10], [20, 20], [30, 30]]
-      }
-    };
-    const lineId = Draw.add(line)[0];
-    Draw.changeMode('simple_select', {
-      featureIds: [lineId]
-    });
-    await afterNextRender();
-    Draw.trash();
-    await afterNextRender();
-    firedWith('draw.delete', {
-      features: [line]
-    });
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.delete'
-    ], 'no unexpected draw events');
-  });
+  await t.test(
+    'except when the API function does not directly correspond to the event',
+    async () => {
+      const line = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [10, 10],
+            [20, 20],
+            [30, 30]
+          ]
+        }
+      };
+      const lineId = Draw.add(line)[0];
+      Draw.changeMode('simple_select', {
+        featureIds: [lineId]
+      });
+      await afterNextRender();
+      Draw.trash();
+      await afterNextRender();
+      firedWith('draw.delete', {
+        features: [line]
+      });
+      assert.deepEqual(
+        flushDrawEvents(),
+        ['draw.delete'],
+        'no unexpected draw events'
+      );
+    }
+  );
 
   await t.test('start draw_point mode then exit with Enter', async () => {
     Draw.deleteAll();
@@ -840,9 +981,11 @@ test('ensure user interactions fire right events', async (t) => {
       mode: 'simple_select'
     });
     assert.equal(Draw.getAll().features.length, 0, 'no feature created');
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('start draw_point mode then exit with Escape', async () => {
@@ -856,104 +999,127 @@ test('ensure user interactions fire right events', async (t) => {
       mode: 'simple_select'
     });
     assert.equal(Draw.getAll().features.length, 0, 'no feature created');
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange'],
+      'no unexpected draw events'
+    );
   });
 
-  await t.test('start draw_line_string mode and drawing a line then finish with Enter', async () => {
-    Draw.deleteAll();
-    Draw.changeMode('draw_line_string');
-    click(map, makeMouseEvent(240, 240));
-    click(map, makeMouseEvent(260, 260));
-    container.dispatchEvent(enterEvent);
+  await t.test(
+    'start draw_line_string mode and drawing a line then finish with Enter',
+    async () => {
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      click(map, makeMouseEvent(240, 240));
+      click(map, makeMouseEvent(260, 260));
+      container.dispatchEvent(enterEvent);
 
-    await afterNextRender();
+      await afterNextRender();
 
-    const expectedLine = {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'LineString',
-        coordinates: [[240, 240], [260, 260]]
-      }
-    };
+      const expectedLine = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [240, 240],
+            [260, 260]
+          ]
+        }
+      };
 
-    firedWith('draw.create', {
-      features: [expectedLine]
-    });
+      firedWith('draw.create', {
+        features: [expectedLine]
+      });
 
-    firedWith('draw.selectionchange', {
-      features: [expectedLine],
-      points: []
-    });
+      firedWith('draw.selectionchange', {
+        features: [expectedLine],
+        points: []
+      });
 
-    firedWith('draw.modechange', {
-      mode: 'simple_select'
-    });
+      firedWith('draw.modechange', {
+        mode: 'simple_select'
+      });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.create',
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
-  });
+      assert.deepEqual(
+        flushDrawEvents(),
+        ['draw.create', 'draw.modechange', 'draw.selectionchange'],
+        'no unexpected draw events'
+      );
+    }
+  );
 
-  await t.test('start draw_line_string mode then exit with Escape', async () => {
-    Draw.deleteAll();
-    Draw.changeMode('draw_line_string');
-    click(map, makeMouseEvent(0, 0));
-    click(map, makeMouseEvent(20, 20));
-    container.dispatchEvent(escapeEvent);
+  await t.test(
+    'start draw_line_string mode then exit with Escape',
+    async () => {
+      Draw.deleteAll();
+      Draw.changeMode('draw_line_string');
+      click(map, makeMouseEvent(0, 0));
+      click(map, makeMouseEvent(20, 20));
+      container.dispatchEvent(escapeEvent);
 
-    await afterNextRender();
+      await afterNextRender();
 
-    firedWith('draw.modechange', {
-      mode: 'simple_select'
-    });
-    assert.equal(Draw.getAll().features.length, 0, 'no feature created');
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange'
-    ], 'no unexpected draw events');
-  });
+      firedWith('draw.modechange', {
+        mode: 'simple_select'
+      });
+      assert.equal(Draw.getAll().features.length, 0, 'no feature created');
+      assert.deepEqual(
+        flushDrawEvents(),
+        ['draw.modechange'],
+        'no unexpected draw events'
+      );
+    }
+  );
 
-  await t.test('start draw_polygon mode and drawing a polygon then finish with Enter', async () => {
-    Draw.deleteAll();
-    Draw.changeMode('draw_polygon');
-    click(map, makeMouseEvent(240, 240));
-    click(map, makeMouseEvent(260, 260));
-    click(map, makeMouseEvent(300, 200));
-    container.dispatchEvent(enterEvent);
+  await t.test(
+    'start draw_polygon mode and drawing a polygon then finish with Enter',
+    async () => {
+      Draw.deleteAll();
+      Draw.changeMode('draw_polygon');
+      click(map, makeMouseEvent(240, 240));
+      click(map, makeMouseEvent(260, 260));
+      click(map, makeMouseEvent(300, 200));
+      container.dispatchEvent(enterEvent);
 
-    await afterNextRender();
+      await afterNextRender();
 
-    const expectedPolygon = {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[[240, 240], [260, 260], [300, 200], [240, 240]]]
-      }
-    };
-    firedWith('draw.create', {
-      features: [expectedPolygon]
-    });
+      const expectedPolygon = {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [240, 240],
+              [260, 260],
+              [300, 200],
+              [240, 240]
+            ]
+          ]
+        }
+      };
+      firedWith('draw.create', {
+        features: [expectedPolygon]
+      });
 
-    firedWith('draw.selectionchange', {
-      features: [expectedPolygon],
-      points: []
-    });
+      firedWith('draw.selectionchange', {
+        features: [expectedPolygon],
+        points: []
+      });
 
-    firedWith('draw.modechange', {
-      mode: 'simple_select'
-    });
+      firedWith('draw.modechange', {
+        mode: 'simple_select'
+      });
 
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.create',
-      'draw.modechange',
-      'draw.selectionchange'
-    ], 'no unexpected draw events');
-  });
+      assert.deepEqual(
+        flushDrawEvents(),
+        ['draw.create', 'draw.modechange', 'draw.selectionchange'],
+        'no unexpected draw events'
+      );
+    }
+  );
 
   await t.test('start draw_polygon mode then exit with Escape', async () => {
     Draw.deleteAll();
@@ -968,9 +1134,11 @@ test('ensure user interactions fire right events', async (t) => {
       mode: 'simple_select'
     });
     assert.equal(Draw.getAll().features.length, 0, 'no feature created');
-    assert.deepEqual(flushDrawEvents(), [
-      'draw.modechange'
-    ], 'no unexpected draw events');
+    assert.deepEqual(
+      flushDrawEvents(),
+      ['draw.modechange'],
+      'no unexpected draw events'
+    );
   });
 
   await t.test('box selection includes no features', async () => {
@@ -983,10 +1151,10 @@ test('ensure user interactions fire right events', async (t) => {
   });
 });
 
-test('ensure API fire right events', async (t) => {
+test('ensure API fire right events', async t => {
   const container = document.createElement('div');
   document.body.appendChild(container);
-  const map = createMap({container});
+  const map = createMap({ container });
   const fireSpy = spy(map, 'fire');
 
   // Explicitly set `suppressAPIEvents` to false to ensure events are fired
@@ -1013,7 +1181,10 @@ test('ensure API fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[10, 10], [20, 20]]
+      coordinates: [
+        [10, 10],
+        [20, 20]
+      ]
     }
   };
 
@@ -1024,23 +1195,23 @@ test('ensure API fire right events', async (t) => {
   await t.test('Draw#add fires draw.create event', async () => {
     Draw.add(point);
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [point] });
 
     Draw.add(line);
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [line] });
   });
 
   await t.test('Draw#delete fires draw.delete event', async () => {
     Draw.delete(point.id);
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [point] });
   });
 
   await t.test('Draw#deleteAll fires draw.delete event', async () => {
     Draw.deleteAll();
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [line] });
   });
 
   await t.test('Draw#set fires draw.create event', async () => {
@@ -1051,13 +1222,17 @@ test('ensure API fire right events', async (t) => {
 
     Draw.set(collection);
 
-    assert.strictEqual(fireSpy.callCount, 2, 'fires draw.create event for each feature');
+    assert.strictEqual(
+      fireSpy.callCount,
+      2,
+      'fires draw.create event for each feature'
+    );
 
     assert.strictEqual(fireSpy.firstCall.firstArg, 'draw.create');
-    assert.deepStrictEqual(fireSpy.firstCall.lastArg, {features: [point]});
+    assert.deepStrictEqual(fireSpy.firstCall.lastArg, { features: [point] });
 
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [line]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [line] });
   });
 
   await t.test('Draw#set fires draw.delete event', async () => {
@@ -1068,10 +1243,14 @@ test('ensure API fire right events', async (t) => {
 
     Draw.set(collection);
 
-    assert.strictEqual(fireSpy.callCount, 1, 'fires draw.delete event for deleted feature');
+    assert.strictEqual(
+      fireSpy.callCount,
+      1,
+      'fires draw.delete event for deleted feature'
+    );
 
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.delete');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, {features: [point]});
+    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { features: [point] });
   });
 
   await t.test('Draw#setFeatureProperty fires draw.update event', () => {
@@ -1082,25 +1261,57 @@ test('ensure API fire right events', async (t) => {
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.update');
     assert.deepStrictEqual(fireSpy.lastCall.lastArg, {
       action: 'change_properties',
-      features: [{...point, properties: {price: 200}}]
+      features: [{ ...point, properties: { price: 200 } }]
     });
   });
 
   await t.test('Draw#changeMode fires draw.modechange event', async () => {
     Draw.changeMode('draw_point');
-    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_point' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+    assert.strictEqual(
+      fireSpy.lastCall.firstArg,
+      'draw.modechange',
+      'Draw.changeMode triggers draw.modechange event'
+    );
+    assert.deepStrictEqual(
+      fireSpy.lastCall.lastArg,
+      { mode: 'draw_point' },
+      'Draw.changeMode triggers draw.modechange event with correct data'
+    );
 
     Draw.changeMode('draw_line_string');
-    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_line_string' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+    assert.strictEqual(
+      fireSpy.lastCall.firstArg,
+      'draw.modechange',
+      'Draw.changeMode triggers draw.modechange event'
+    );
+    assert.deepStrictEqual(
+      fireSpy.lastCall.lastArg,
+      { mode: 'draw_line_string' },
+      'Draw.changeMode triggers draw.modechange event with correct data'
+    );
 
     Draw.changeMode('draw_polygon');
-    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'draw_polygon' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+    assert.strictEqual(
+      fireSpy.lastCall.firstArg,
+      'draw.modechange',
+      'Draw.changeMode triggers draw.modechange event'
+    );
+    assert.deepStrictEqual(
+      fireSpy.lastCall.lastArg,
+      { mode: 'draw_polygon' },
+      'Draw.changeMode triggers draw.modechange event with correct data'
+    );
 
     Draw.changeMode('simple_select');
-    assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.modechange', 'Draw.changeMode triggers draw.modechange event');
-    assert.deepStrictEqual(fireSpy.lastCall.lastArg, { mode: 'simple_select' }, 'Draw.changeMode triggers draw.modechange event with correct data');
+    assert.strictEqual(
+      fireSpy.lastCall.firstArg,
+      'draw.modechange',
+      'Draw.changeMode triggers draw.modechange event'
+    );
+    assert.deepStrictEqual(
+      fireSpy.lastCall.lastArg,
+      { mode: 'simple_select' },
+      'Draw.changeMode triggers draw.modechange event with correct data'
+    );
   });
 });

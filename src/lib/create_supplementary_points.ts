@@ -10,12 +10,17 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
 
   if (type === Constants.geojsonTypes.POINT) {
     // For points, just create a vertex
-    supplementaryPoints.push(createVertex(featureId, coordinates, basePath, isSelectedPath(basePath)));
+    supplementaryPoints.push(
+      createVertex(featureId, coordinates, basePath, isSelectedPath(basePath))
+    );
   } else if (type === Constants.geojsonTypes.POLYGON) {
     // Cycle through a Polygon's rings and
     // process each line
     coordinates.forEach((line, lineIndex) => {
-      processLine(line, (basePath !== null) ? `${basePath}.${lineIndex}` : String(lineIndex));
+      processLine(
+        line,
+        basePath !== null ? `${basePath}.${lineIndex}` : String(lineIndex)
+      );
     });
   } else if (type === Constants.geojsonTypes.LINE_STRING) {
     processLine(coordinates, basePath);
@@ -27,8 +32,16 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
     let firstPointString = '';
     let lastVertex = null;
     line.forEach((point, pointIndex) => {
-      const pointPath = (lineBasePath !== undefined && lineBasePath !== null) ? `${lineBasePath}.${pointIndex}` : String(pointIndex);
-      const vertex = createVertex(featureId, point, pointPath, isSelectedPath(pointPath));
+      const pointPath =
+        lineBasePath !== undefined && lineBasePath !== null
+          ? `${lineBasePath}.${pointIndex}`
+          : String(pointIndex);
+      const vertex = createVertex(
+        featureId,
+        point,
+        pointPath,
+        isSelectedPath(pointPath)
+      );
 
       // If we're creating midpoints, check if there was a
       // vertex before this one. If so, add a midpoint
@@ -73,7 +86,9 @@ function createSupplementaryPoints(geojson, options = {}, basePath = null) {
           coordinates: subCoordinates
         }
       };
-      supplementaryPoints = supplementaryPoints.concat(createSupplementaryPoints(subFeature, options, index));
+      supplementaryPoints = supplementaryPoints.concat(
+        createSupplementaryPoints(subFeature, options, index)
+      );
     });
   }
 

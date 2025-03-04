@@ -3,8 +3,7 @@ import Store from './store';
 import ui from './ui';
 import * as Constants from './constants';
 
-export default function(ctx) {
-
+export default function (ctx) {
   let controlContainer = null;
   let mapLoadedInterval = null;
 
@@ -24,7 +23,8 @@ export default function(ctx) {
       ctx.container = null;
       ctx.store = null;
 
-      if (controlContainer && controlContainer.parentNode) controlContainer.parentNode.removeChild(controlContainer);
+      if (controlContainer && controlContainer.parentNode)
+        controlContainer.parentNode.removeChild(controlContainer);
       controlContainer = null;
 
       return this;
@@ -42,7 +42,6 @@ export default function(ctx) {
       ctx.ui = ui(ctx);
       ctx.container = map.getContainer();
       ctx.store = new Store(ctx);
-
 
       controlContainer = ctx.ui.addButtons();
 
@@ -63,7 +62,9 @@ export default function(ctx) {
         setup.connect();
       } else {
         map.on('load', setup.connect);
-        mapLoadedInterval = setInterval(() => { if (map.loaded()) setup.connect(); }, 16);
+        mapLoadedInterval = setInterval(() => {
+          if (map.loaded()) setup.connect();
+        }, 16);
       }
 
       ctx.events.start();
@@ -88,7 +89,7 @@ export default function(ctx) {
         type: 'geojson'
       });
 
-      ctx.options.styles.forEach((style) => {
+      ctx.options.styles.forEach(style => {
         ctx.map.addLayer(style);
       });
 
@@ -98,7 +99,7 @@ export default function(ctx) {
     // Check for layers and sources before attempting to remove
     // If user adds draw control and removes it before the map is loaded, layers and sources will be missing
     removeLayers() {
-      ctx.options.styles.forEach((style) => {
+      ctx.options.styles.forEach(style => {
         if (ctx.map.getLayer(style.id)) {
           ctx.map.removeLayer(style.id);
         }

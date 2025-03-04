@@ -1,7 +1,7 @@
-export default function(map) {
+export default function (map) {
   const events = [];
 
-  events.push = function(event, point, dp) {
+  events.push = function (event, point, dp) {
     const payload = {
       dropPoint: dp === undefined ? false : dp,
       originalEvent: {
@@ -14,15 +14,15 @@ export default function(map) {
     events[events.length] = [event, payload];
   };
 
-  events.run = function(cb) {
+  events.run = function (cb) {
     const one = 100 / events.length;
-    const runner = function(i) {
+    const runner = function (i) {
       const event = events[i];
       if (event === undefined) {
         cb();
       } else {
         map.fire(event[0], event[1]);
-        map.fire('progress', {done:Math.ceil(one * i)});
+        map.fire('progress', { done: Math.ceil(one * i) });
         setTimeout(() => {
           runner(i + 1);
         }, 0);
