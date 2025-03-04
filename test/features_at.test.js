@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import featuresAt from '../src/lib/features_at.js';
-import styles from '../src/lib/theme.js';
-import * as Constants from '../src/constants.js';
-import setupOptions from '../src/options.js';
+import featuresAt from '../src/lib/features_at';
+import styles from '../src/lib/theme';
+import * as Constants from '../src/constants';
+import setupOptions from '../src/options';
 
 /**
  * Mock of the addLayers function in setup

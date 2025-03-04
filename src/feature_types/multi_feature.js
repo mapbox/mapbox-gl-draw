@@ -1,10 +1,10 @@
-import {generateID} from '../lib/id.js';
-import Feature from './feature.js';
-import * as Constants from '../constants.js';
+import {generateID} from '../lib/id';
+import Feature from './feature';
+import * as Constants from '../constants';
 
-import MultiPoint from './point.js';
-import MultiLineString from './line_string.js';
-import MultiPolygon from './polygon.js';
+import MultiPoint from './point';
+import MultiLineString from './line_string';
+import MultiPolygon from './polygon';
 
 const models = {
   MultiPoint,

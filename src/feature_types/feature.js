@@ -1,5 +1,5 @@
-import {generateID} from '../lib/id.js';
-import * as Constants from '../constants.js';
+import {generateID} from '../lib/id';
+import * as Constants from '../constants';
 
 const Feature = function(ctx, geojson) {
   this.ctx = ctx;

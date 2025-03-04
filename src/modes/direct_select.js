@@ -1,9 +1,9 @@
-import { noTarget, isOfMetaType, isActiveFeature, isInactiveFeature, isShiftDown } from '../lib/common_selectors.js';
-import createSupplementaryPoints from '../lib/create_supplementary_points.js';
-import constrainFeatureMovement from '../lib/constrain_feature_movement.js';
-import doubleClickZoom from '../lib/double_click_zoom.js';
-import * as Constants from '../constants.js';
-import moveFeatures from '../lib/move_features.js';
+import { noTarget, isOfMetaType, isActiveFeature, isInactiveFeature, isShiftDown } from '../lib/common_selectors';
+import createSupplementaryPoints from '../lib/create_supplementary_points';
+import constrainFeatureMovement from '../lib/constrain_feature_movement';
+import doubleClickZoom from '../lib/double_click_zoom';
+import * as Constants from '../constants';
+import moveFeatures from '../lib/move_features';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);

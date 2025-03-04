@@ -3,12 +3,12 @@ import {test, beforeEach, afterEach} from 'node:test';
 import assert from 'node:assert/strict';
 import {spy} from 'sinon';
 
-import * as Constants from '../src/constants.js';
+import * as Constants from '../src/constants';
 import MapboxDraw from '../index';
-import createMap from './utils/create_map.js';
-import getGeoJSON from './utils/get_geojson.js';
-import {setupAfterNextRender} from './utils/after_next_render.js';
-import getPublicMemberKeys from './utils/get_public_member_keys.js';
+import createMap from './utils/create_map';
+import getGeoJSON from './utils/get_geojson';
+import {setupAfterNextRender} from './utils/after_next_render';
+import getPublicMemberKeys from './utils/get_public_member_keys';
 
 let map;
 let afterNextRender;
