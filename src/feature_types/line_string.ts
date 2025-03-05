@@ -1,37 +1,42 @@
 import Feature from './feature.js';
-import type { FeatureCollection } from 'geojson';
-import type { DrawCTX } from '../types/types';
+import type { StrictFeature, DrawCTX } from '../types/types';
 
-const LineString = function (ctx: DrawCTX, geojson: FeatureCollection) {
-  Feature.call(this, ctx, geojson);
-};
+type Coordinate = [number, number];
 
-LineString.prototype = Object.create(Feature.prototype);
+class LineString extends Feature {
+  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+    super(ctx, geojson);
+  }
 
-LineString.prototype.isValid = function () {
-  return this.coordinates.length > 1;
-};
+  isValid(): boolean {
+    return this.coordinates.length > 1;
+  }
 
-LineString.prototype.addCoordinate = function (path: string, lng: number, lat: number) {
-  this.changed();
-  const id = parseInt(path, 10);
-  this.coordinates.splice(id, 0, [lng, lat]);
-};
+  addCoordinate(path: string, lng: number, lat: number): void {
+    this.changed();
+    const id = parseInt(path, 10);
+    this.coordinates.splice(id, 0, [lng, lat]);
+  }
 
-LineString.prototype.getCoordinate = function (path: string) {
-  const id = parseInt(path, 10);
-  return JSON.parse(JSON.stringify(this.coordinates[id]));
-};
+  getCoordinate(path: string): Coordinate | undefined {
+    const id = parseInt(path, 10);
+    return this.coordinates[id] ? [...this.coordinates[id] as Coordinate] : undefined;
+  }
 
-LineString.prototype.removeCoordinate = function (path: string) {
-  this.changed();
-  this.coordinates.splice(parseInt(path, 10), 1);
-};
+  removeCoordinate(path: string): void {
+    this.changed();
+    this.coordinates.splice(parseInt(path, 10), 1);
+  }
 
-LineString.prototype.updateCoordinate = function (path: string, lng: number, lat: number) {
-  const id = parseInt(path, 10);
-  this.coordinates[id] = [lng, lat];
-  this.changed();
-};
+  updateCoordinate(path: string, lng: number, lat: number): void {
+    const id = parseInt(path, 10);
+    if (this.coordinates[id]) {
+      this.coordinates[id] = [lng, lat];
+      this.changed();
+    }
+  }
+
+  changed(): void {}
+}
 
 export default LineString;

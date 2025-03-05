@@ -4,7 +4,7 @@ import * as featuresAt from './lib/features_at';
 import isClick from './lib/is_click';
 import { isTap } from './lib/is_tap';
 import * as Constants from './constants';
-import objectToMode from './modes/object_to_mode';
+import { objectToMode } from './modes/object_to_mode';
 import type { DrawCTX } from './types/types';
 
 export default function (ctx: DrawCTX) {

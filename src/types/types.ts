@@ -18,7 +18,21 @@ import type {
   MapTouchEvent as MapboxMapTouchEvent
 } from 'mapbox-gl';
 
+// Extend Feature to require geometry and properties
+export interface StrictFeature extends Omit<Feature, 'geometry' | 'properties'> {
+  geometry: Geometry & { coordinates: unknown };
+  properties: Record<string, unknown>;
+}
+
+// Extend FeatureCollection to use StrictFeature
+export interface StrictFeatureCollection extends Omit<FeatureCollection, 'features'> {
+  features: StrictFeature[];
+}
+
+// Example usage
 export type XY = { x: number, y: number };
+
+export type Coords = Array<[number, number]>;
 
 export interface Entry {
   point: XY;
@@ -258,16 +272,16 @@ export declare class Draw implements IControl {
   modes: Modes;
   getDefaultPosition: () => ControlPosition;
   constructor(options?: DrawOptions);
-  add(geojson: Feature | FeatureCollection | Geometry): string[];
+  add(geojson: Feature | StrictFeatureCollection | Geometry): string[];
   get(featureId: string): Feature | undefined;
   getFeatureIdsAt(point: { x: number; y: number }): string[];
   getSelectedIds(): string[];
-  getSelected(): FeatureCollection;
-  getSelectedPoints(): FeatureCollection;
-  getAll(): FeatureCollection;
+  getSelected(): StrictFeatureCollection;
+  getSelectedPoints(): StrictFeatureCollection;
+  getAll(): StrictFeatureCollection;
   delete(ids: string | string[]): this;
   deleteAll(): this;
-  set(featureCollection: FeatureCollection): string[];
+  set(featureCollection: StrictFeatureCollection): string[];
   trash(): this;
   combineFeatures(): this;
   uncombineFeatures(): this;

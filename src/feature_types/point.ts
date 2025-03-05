@@ -1,29 +1,35 @@
 import Feature from './feature.js';
+import type { DrawCTX, StrictFeature } from '../types/types';
 
-const Point = function (ctx, geojson) {
-  Feature.call(this, ctx, geojson);
-};
+type Coordinate = [number, number];
 
-Point.prototype = Object.create(Feature.prototype);
+class Point extends Feature {
+  coordinates: Coordinate;
 
-Point.prototype.isValid = function () {
-  return (
-    typeof this.coordinates[0] === 'number' &&
-    typeof this.coordinates[1] === 'number'
-  );
-};
-
-Point.prototype.updateCoordinate = function (pathOrLng, lngOrLat, lat) {
-  if (arguments.length === 3) {
-    this.coordinates = [lngOrLat, lat];
-  } else {
-    this.coordinates = [pathOrLng, lngOrLat];
+  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+    super(ctx, geojson);
+    this.coordinates = geojson.geometry.coordinates as Coordinate;
   }
-  this.changed();
-};
 
-Point.prototype.getCoordinate = function () {
-  return this.getCoordinates();
-};
+  isValid(): boolean {
+    return (
+      typeof this.coordinates[0] === 'number' &&
+      typeof this.coordinates[1] === 'number'
+    );
+  }
+
+  updateCoordinate(pathOrLng: number, lngOrLat: number, lat?: number): void {
+    if (lat !== undefined) {
+      this.coordinates = [lngOrLat, lat];
+    } else {
+      this.coordinates = [pathOrLng, lngOrLat];
+    }
+    this.changed();
+  }
+
+  getCoordinate(): Coordinate {
+    return this.getCoordinates() as Coordinate;
+  }
+}
 
 export default Point;

@@ -1,71 +1,75 @@
 import Feature from './feature.js';
+import type { DrawCTX, Coords, StrictFeature } from '../types/types';
 
-const Polygon = function (ctx, geojson) {
-  Feature.call(this, ctx, geojson);
-  this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
-};
+type Coordinate = [number, number];
 
-Polygon.prototype = Object.create(Feature.prototype);
+class Polygon extends Feature {
+  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+    super(ctx, geojson);
 
-Polygon.prototype.isValid = function () {
-  if (this.coordinates.length === 0) return false;
-  return this.coordinates.every(ring => ring.length > 2);
-};
+    // Ensure coordinates are properly typed and adjust them.
+    this.coordinates = this.coordinates.map((ring: Coords) => ring.slice(0, -1));
+  }
 
-// Expects valid geoJSON polygon geometry: first and last positions must be equivalent.
-Polygon.prototype.incomingCoords = function (coords) {
-  this.coordinates = coords.map(ring => ring.slice(0, -1));
-  this.changed();
-};
+  isValid(): boolean {
+    if (this.coordinates.length === 0) return false;
+    return this.coordinates.every((ring: Coords) => ring.length > 2);
+  }
 
-// Does NOT expect valid geoJSON polygon geometry: first and last positions should not be equivalent.
-Polygon.prototype.setCoordinates = function (coords) {
-  this.coordinates = coords;
-  this.changed();
-};
+  // Expects valid geoJSON polygon geometry: first and last positions must be equivalent.
+  incomingCoords(coords: Coords): void {
+    this.coordinates = coords.map(ring => ring.slice(0, -1));
+    this.changed();
+  }
 
-Polygon.prototype.addCoordinate = function (path, lng, lat) {
-  this.changed();
-  const ids = path.split('.').map(x => parseInt(x, 10));
+  // Does NOT expect valid geoJSON polygon geometry: first and last positions should not be equivalent.
+  setCoordinates(coords: Coords): void {
+    this.coordinates = coords;
+    this.changed();
+  }
 
-  const ring = this.coordinates[ids[0]];
+  addCoordinate(path: string, lng: number, lat: number): void {
+    this.changed();
+    const ids = path.split('.').map((x: string) => parseInt(x, 10));
+    const ring = this.coordinates[ids[0]];
+    ring.splice(ids[1], 0, [lng, lat]);
+  }
 
-  ring.splice(ids[1], 0, [lng, lat]);
-};
-
-Polygon.prototype.removeCoordinate = function (path) {
-  this.changed();
-  const ids = path.split('.').map(x => parseInt(x, 10));
-  const ring = this.coordinates[ids[0]];
-  if (ring) {
-    ring.splice(ids[1], 1);
-    if (ring.length < 3) {
-      this.coordinates.splice(ids[0], 1);
+  removeCoordinate(path: string): void {
+    this.changed();
+    const ids = path.split('.').map((x: string) => parseInt(x, 10));
+    const ring = this.coordinates[ids[0]];
+    if (ring) {
+      ring.splice(ids[1], 1);
+      if (ring.length < 3) {
+        this.coordinates.splice(ids[0], 1);
+      }
     }
   }
-};
 
-Polygon.prototype.getCoordinate = function (path) {
-  const ids = path.split('.').map(x => parseInt(x, 10));
-  const ring = this.coordinates[ids[0]];
-  return JSON.parse(JSON.stringify(ring[ids[1]]));
-};
-
-Polygon.prototype.getCoordinates = function () {
-  return this.coordinates.map(coords => coords.concat([coords[0]]));
-};
-
-Polygon.prototype.updateCoordinate = function (path, lng, lat) {
-  this.changed();
-  const parts = path.split('.');
-  const ringId = parseInt(parts[0], 10);
-  const coordId = parseInt(parts[1], 10);
-
-  if (this.coordinates[ringId] === undefined) {
-    this.coordinates[ringId] = [];
+  getCoordinate(path: string): Coords {
+    const ids = path.split('.').map((x: string) => parseInt(x, 10));
+    const ring = this.coordinates[ids[0]];
+    return JSON.parse(JSON.stringify(ring[ids[1]]));
   }
 
-  this.coordinates[ringId][coordId] = [lng, lat];
-};
+  getCoordinates(): Coords[] {
+    return this.coordinates.map((coords: Coords) => coords.concat([coords[0]]));
+  }
+
+  updateCoordinate(path: string, lng: number, lat: number): void {
+    this.changed();
+    const parts = path.split('.');
+    const ringId = parseInt(parts[0], 10);
+    const coordId = parseInt(parts[1], 10);
+
+    if (this.coordinates[ringId] === undefined) {
+      this.coordinates[ringId] = [];
+    }
+
+    this.coordinates[ringId][coordId] = [lng, lat];
+  }
+}
 
 export default Polygon;
+

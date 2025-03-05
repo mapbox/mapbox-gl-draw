@@ -1,4 +1,4 @@
-import toDenseArray from './lib/to_dense_array';
+import { toDenseArray } from './lib/to_dense_array';
 import StringSet from './lib/string_set';
 import render from './render';
 import * as Constants from './constants';

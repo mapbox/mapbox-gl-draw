@@ -1,7 +1,7 @@
 import * as Constants from '../constants';
 import type { Feature, Point } from 'geojson';
 
-export const createMidpoint = (parent: string, startVertex: Feature, endVertex: Feature): Feature => {
+export const createMidPoint = (parent: string, startVertex: Feature, endVertex: Feature): Feature => {
   const startCoord = (startVertex.geometry as Point).coordinates;
   const endCoord = (endVertex.geometry as Point).coordinates;
 

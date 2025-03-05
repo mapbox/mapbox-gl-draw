@@ -1,4 +1,6 @@
 import ModeInterface from './mode_interface.js';
+import type { DrawCTX } from '../types/types';
+import type { FeatureCollection } from 'geojson';
 
 const eventMapper = {
   drag: 'onDrag',
@@ -17,10 +19,10 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-export default function (modeObject) {
+export const objectToMode = (modeObject) => {
   const modeObjectKeys = Object.keys(modeObject);
 
-  return function (ctx, startOpts = {}) {
+  return function (ctx: DrawCTX, startOpts = {}) {
     let state = {};
 
     const mode = modeObjectKeys.reduce((m, k) => {
@@ -62,7 +64,7 @@ export default function (modeObject) {
       uncombineFeatures() {
         mode.onUncombineFeatures(state);
       },
-      render(geojson, push) {
+      render(geojson: FeatureCollection, push) {
         mode.toDisplayFeatures(state, geojson, push);
       }
     };

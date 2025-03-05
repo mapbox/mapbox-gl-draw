@@ -10,7 +10,7 @@ import drawLineStringModeObject from '../src/modes/draw_line_string.js';
 import LineString from '../src/feature_types/line_string.js';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context.js';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context.js';
-import objectToMode from '../src/modes/object_to_mode.js';
+import { objectToMode } from '../src/modes/object_to_mode.js';
 import { setupAfterNextRender } from './utils/after_next_render.js';
 
 const drawLineStringMode = objectToMode(drawLineStringModeObject);

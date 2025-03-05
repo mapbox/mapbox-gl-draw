@@ -7,17 +7,31 @@ interface Options {
   interval: number;
 }
 
-export default function isClick(start: Entry, end: Entry, {
-  fineTolerance = 4,
-  grossTolerance = 12,
-  interval = 500
-}: Options) {
-  start.point = start.point || end.point;
-  start.time = start.time || end.time;
-  const moveDistance = euclideanDistance(start.point, end.point);
+export default function isClick(
+  start: Entry, 
+  end: Entry, 
+  options: Partial<Options> = {}
+) {
+  const {
+    fineTolerance = 4,
+    grossTolerance = 12,
+    interval = 500
+  } = options;
+
+  const adjustedStart = {
+    point: start.point || end.point,
+    time: start.time || end.time
+  };
+
+  if (adjustedStart.time === undefined || end.time === undefined) {
+    return false;
+  }
+
+  const moveDistance = euclideanDistance(adjustedStart.point, end.point);
 
   return (
     moveDistance < fineTolerance ||
-    (moveDistance < grossTolerance && end.time - start.time < interval)
+    (moveDistance < grossTolerance && end.time - adjustedStart.time < interval)
   );
 }
+

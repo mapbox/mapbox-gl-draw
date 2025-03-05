@@ -11,7 +11,7 @@ import Polygon from '../src/feature_types/polygon.js';
 import createMockDrawModeContext from './utils/create_mock_draw_mode_context.js';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context.js';
 import { setupAfterNextRender } from './utils/after_next_render.js';
-import objectToMode from '../src/modes/object_to_mode.js';
+import { objectToMode } from '../src/modes/object_to_mode.js';
 const drawPolygonMode = objectToMode(drawPolygonModeObject);
 
 import {
