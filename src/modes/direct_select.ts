@@ -5,8 +5,8 @@ import {
   isInactiveFeature,
   isShiftDown
 } from '../lib/common_selectors';
-import createSupplementaryPoints from '../lib/create_supplementary_points';
-import constrainFeatureMovement from '../lib/constrain_feature_movement';
+import { createSupplementaryPoints } from '../lib/create_supplementary_points';
+import { constrainFeatureMovement } from '../lib/constrain_feature_movement';
 import { doubleClickZoom } from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';

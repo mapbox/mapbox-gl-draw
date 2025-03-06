@@ -1,4 +1,7 @@
 import * as Constants from '../constants';
+import type { StrictFeature } from '../types/types';
+
+type Delta = { lng: number; lat: number; }
 
 const {
   LAT_MIN,
@@ -8,7 +11,7 @@ const {
   LNG_MIN,
   LNG_MAX
 } = Constants;
-function extent(feature) {
+function extent(feature: StrictFeature) {
   const depth = {
     Point: 0,
     LineString: 1,
@@ -21,8 +24,8 @@ function extent(feature) {
   const coords = [feature.geometry.coordinates].flat(depth);
   const lngs = coords.map(coord => coord[0]);
   const lats = coords.map(coord => coord[1]);
-  const min = vals => Math.min.apply(null, vals);
-  const max = vals => Math.max.apply(null, vals);
+  const min = (vals: Array<number>) => Math.min.apply(null, vals);
+  const max = (vals: Array<number>) => Math.max.apply(null, vals);
   return [min(lngs), min(lats), max(lngs), max(lats)];
 }
 
@@ -30,7 +33,7 @@ function extent(feature) {
 // - any part of any feature to exceed the poles
 // - any feature to be completely lost in the space between the projection's
 //   edge and the poles, such that it couldn't be re-selected and moved back
-export default function (geojsonFeatures, delta) {
+export const constrainFeatureMovement = (geojsonFeatures: Array<StrictFeature>, delta: Delta) => {
   // "inner edge" = a feature's latitude closest to the equator
   let northInnerEdge = LAT_MIN;
   let southInnerEdge = LAT_MAX;

@@ -1,7 +1,7 @@
 import * as CommonSelectors from './common_selectors';
-import constrainFeatureMovement from './constrain_feature_movement';
+import { constrainFeatureMovement } from './constrain_feature_movement';
 import { createMidPoint } from './create_midpoint';
-import createSupplementaryPoints from './create_supplementary_points';
+import { createSupplementaryPoints } from './create_supplementary_points';
 import { createVertex } from './create_vertex';
 import { doubleClickZoom } from './double_click_zoom';
 import { euclideanDistance } from './euclidean_distance';

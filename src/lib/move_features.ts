@@ -1,4 +1,4 @@
-import constrainFeatureMovement from './constrain_feature_movement';
+import { constrainFeatureMovement } from './constrain_feature_movement';
 import * as Constants from '../constants';
 
 export default function (features, delta) {
