@@ -2,7 +2,7 @@ import { toDenseArray } from './lib/to_dense_array';
 import StringSet from './lib/string_set';
 import render from './render';
 import * as Constants from './constants';
-import type { DrawCTX, Feature, FeatureId, Coordinate, StoreOptions } from './types/types';
+import type { CTX, Feature, FeatureId, Coordinate, StoreOptions } from './types/types';
 
 type MapConfig = Record<string, boolean>;
 
@@ -19,12 +19,13 @@ export default class Store {
   private _changedFeatureIds = new StringSet();
   private _emitSelectionChange = false;
   private _mapInitialConfig: MapConfig = {};
-  private ctx: DrawCTX;
-  private isDirty = false;
-  private sources = { hot: [], cold: [] };
+  private ctx: CTX;
   private renderRequest: number | null = null;
 
-  constructor(ctx: DrawCTX) {
+  sources = { hot: [], cold: [] };
+  isDirty = false;
+
+  constructor(ctx: CTX) {
     this.ctx = ctx;
   }
 
@@ -187,7 +188,19 @@ export default class Store {
     return this;
   };
 
-  isSelected(featureId: string): this {
+  setSelectedCoordinates(coordinates) {
+    this._selectedCoordinates = coordinates;
+    this._emitSelectionChange = true;
+    return this;
+  };
+
+  clearSelectedCoordinates() {
+    this._selectedCoordinates = [];
+    this._emitSelectionChange = true;
+    return this;
+  };
+
+  isSelected(featureId: string): boolean {
     return this._selectedFeatureIds.has(featureId);
   };
 
@@ -215,6 +228,16 @@ export default class Store {
       }
     });
   }
+
+  getInitialConfigValue(interaction: string) {
+    if (this._mapInitialConfig[interaction] !== undefined) {
+      return this._mapInitialConfig[interaction];
+    } else {
+      // This needs to be set to whatever the default is for that interaction
+      // It seems to be true for all cases currently, so let's send back `true`.
+      return true;
+    }
+  };
 
   private refreshSelectedCoordinates(options: StoreOptions = {}): void {
     const newSelectedCoordinates = this._selectedCoordinates.filter(point => this._selectedFeatureIds.has(point.feature_id));

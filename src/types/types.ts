@@ -29,11 +29,18 @@ import type {
   FillLayerSpecification,
   IControl,
   LineLayerSpecification,
+  Layer,
   Map,
   MapEvent,
   MapMouseEvent as MapboxMapMouseEvent,
   MapTouchEvent as MapboxMapTouchEvent
 } from 'mapbox-gl';
+
+export interface DrawStyleLayer
+  extends Omit<Layer, 'id' | 'type'> {
+  id: string;
+  type: string;
+}
 
 // Extend Feature to require geometry and properties
 export interface StrictFeature
@@ -102,12 +109,14 @@ interface DrawFeatureBase<Coordinates> {
   toGeoJSON(): GeoJSON;
 }
 
+export interface DrawMapClasses {
+  mode?: Constants['modes'];
+  feature?: Constants['meta'];
+  mouse?: Constants['cursors'];
+}
+
 export interface DrawUI {
-  queueMapClasses: (options: {
-    mode: null;
-    feature: null;
-    mouse: null;
-  }) => void;
+  queueMapClasses: (options: DrawMapClasses) => void;
   setActiveButton: (id: string) => void;
   updateMapClasses: () => void;
   clearMapClasses: () => void;
@@ -278,6 +287,7 @@ interface DrawActionableEvent extends DrawEvent {
   type: 'draw.actionable';
 }
 
+// TODO This seems wrong. Remove now?
 export interface DrawCTX {
   map: Map;
   drawConfig: DrawOptions;
@@ -383,8 +393,14 @@ interface Modes {
   direct_select: DrawCustomMode;
 }
 
+export interface ModeCTX extends DrawCustomMode {
+  map: Map;
+  _ctx: CTX;
+}
+
 // Convert these to use imports from constants
 interface Constants {
+  readonly modes: (typeof modes)[keyof typeof modes];
   readonly classes: (typeof classes)[keyof typeof classes];
   readonly sources: (typeof sources)[keyof typeof sources];
   readonly cursors: (typeof cursors)[keyof typeof cursors];
@@ -582,7 +598,7 @@ export interface DrawOptions {
   clickBuffer?: number | undefined;
   touchBuffer?: number | undefined;
   controls?: DrawControls | undefined;
-  styles?: object[] | undefined;
+  styles?: Array<DrawStyleLayer> | undefined;
   modes?: { [modeKey: string]: DrawCustomMode } | undefined;
   defaultMode?: string | undefined;
   userProperties?: boolean | undefined;
@@ -593,7 +609,7 @@ interface DrawEvents {
   addEventListeners(): void;
   changeMode(mode: string, modeOptions: {}, eventOptions: {}): void;
   combineFeatures(): void;
-  currentModeName(): void;
+  currentModeName(): string;
   currentModeRender(geojson: StrictFeature, push: (geojson: StrictFeature) => void): void;
   fire(eventName: string, eventData: unknown): DrawMode;
   getMode(): DrawMode;
@@ -610,7 +626,12 @@ interface DrawStore {
   sources: {
     hot: [],
     cold: []
-  }
+  },
+  getInitialConfigValue(interaction: string): boolean;
+  featureChanged(id: string, options: {
+    silent?: boolean;
+    action?: string;
+  }): boolean;
 }
 
 interface DrawSetup {
@@ -637,9 +658,7 @@ export declare class Draw implements IControl {
   static modes: Modes;
   static constants: Constants;
   static lib: Lib;
-
   modes: DrawModes;
-
   getDefaultPosition: () => ControlPosition;
   constructor(options?: DrawOptions);
   add(geojson: Feature | StrictFeatureCollection | Geometry): string[];
@@ -652,9 +671,7 @@ export declare class Draw implements IControl {
   delete(ids: string | string[]): this;
   deleteAll(): this;
   set(featureCollection: StrictFeatureCollection): string[];
-
   trash(): DrawEvents['trash'];
-
   combineFeatures(): this;
   uncombineFeatures(): this;
   getMode(): (Modes & {}) | string;

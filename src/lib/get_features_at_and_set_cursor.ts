@@ -1,10 +1,13 @@
 import * as featuresAt from './features_at';
 import * as Constants from '../constants';
-import type { DrawCTX } from '../types/types';
+import type { CTX, DrawMapClasses } from '../types/types';
+import type { MapMouseEvent, MapTouchEvent } from 'mapbox-gl';
 
-export const getFeatureAtAndSetCursors = (event: Event, ctx: DrawCTX) => {
+type E = MapMouseEvent | MapTouchEvent;
+
+export const getFeatureAtAndSetCursors = (event: E, ctx: CTX) => {
   const features = featuresAt.click(event, null, ctx);
-  const classes = { mouse: Constants.cursors.NONE };
+  const classes: DrawMapClasses = { mouse: Constants.cursors.NONE };
 
   if (features[0]) {
     classes.mouse =

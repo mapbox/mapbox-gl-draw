@@ -4,9 +4,9 @@ import * as Constants from '../constants';
 import StringSet from './string_set';
 
 import type { BBox } from 'geojson';
-import type { DrawCTX, MapMouseEvent, MapTouchEvent } from '../types/types';
+import type { CTX, DrawStyleLayer, MapMouseEvent, MapTouchEvent } from '../types/types';
 
-type Event = MapMouseEvent | MapTouchEvent;
+type E = MapMouseEvent | MapTouchEvent;
 
 const META_TYPES = [
   Constants.meta.FEATURE,
@@ -14,12 +14,14 @@ const META_TYPES = [
   Constants.meta.VERTEX
 ];
 
-const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: number) => {
+const featuresAt = (event: E, bbox: BBox, ctx: CTX, buffer: number) => {
   if (ctx.map === null) return [];
 
   const box = event ? mapEventToBoundingBox(event, buffer) : bbox;
 
-  const queryParams = {};
+  const queryParams: {
+    layers?: Array<DrawStyleLayer>;
+  } = {};
 
   if (ctx.options.styles)
     queryParams.layers = ctx.options.styles
@@ -42,11 +44,11 @@ const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: number) => {
   return sortFeatures(uniqueFeatures);
 };
 
-function featuresAtClick(event: Event, bbox: BBox, ctx: DrawCTX) {
+function featuresAtClick(event: E, bbox: BBox, ctx: CTX) {
   return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
 }
 
-function featuresAtTouch(event: Event, bbox: BBox, ctx: DrawCTX) {
+function featuresAtTouch(event: E, bbox: BBox, ctx: CTX) {
   return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
 }
 
