@@ -1,12 +1,12 @@
 import Feature from './feature.js';
-import type { DrawCTX, StrictFeature } from '../types/types';
+import type { Draw, StrictFeature } from '../types/types';
 
 type Coordinate = [number, number];
 
 class Point extends Feature {
   coordinates: Coordinate;
 
-  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+  constructor(ctx: Draw, geojson: StrictFeature) {
     super(ctx, geojson);
     this.coordinates = geojson.geometry.coordinates as Coordinate;
   }

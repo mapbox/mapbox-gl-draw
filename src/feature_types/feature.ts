@@ -1,16 +1,16 @@
 import { generateID } from '../lib/id';
 import * as Constants from '../constants';
 import type { Geometry } from 'geojson';
-import type { StrictFeature, DrawCTX } from '../types/types';
+import type { StrictFeature, Draw } from '../types/types';
 
 class Feature {
-  protected ctx: DrawCTX;
+  protected ctx: Draw;
   properties: Record<string, any>;
   coordinates: any;
   id: string;
   type: Geometry['type'];
 
-  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+  constructor(ctx: Draw, geojson: StrictFeature) {
     this.ctx = ctx;
     this.properties = geojson.properties || {};
     this.coordinates = geojson.geometry.coordinates;

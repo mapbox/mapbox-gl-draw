@@ -1,10 +1,10 @@
 import Feature from './feature.js';
-import type { StrictFeature, DrawCTX } from '../types/types';
+import type { StrictFeature, Draw } from '../types/types';
 
 type Coordinate = [number, number];
 
 class LineString extends Feature {
-  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+  constructor(ctx: Draw, geojson: StrictFeature) {
     super(ctx, geojson);
   }
 

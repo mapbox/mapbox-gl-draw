@@ -1,10 +1,8 @@
 import Feature from './feature.js';
-import type { DrawCTX, Coords, StrictFeature } from '../types/types';
-
-type Coordinate = [number, number];
+import type { Draw, Coords, StrictFeature } from '../types/types';
 
 class Polygon extends Feature {
-  constructor(ctx: DrawCTX, geojson: StrictFeature) {
+  constructor(ctx: Draw, geojson: StrictFeature) {
     super(ctx, geojson);
 
     // Ensure coordinates are properly typed and adjust them.

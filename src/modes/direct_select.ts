@@ -11,13 +11,13 @@ import { doubleClickZoom } from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';
 
-import type { DrawCTX, DrawCustomMode } from '../types/types';
+import type { DrawCTX, DrawCTXCustomMode } from '../types/types';
 import type { MapMouseEvent } from 'mapbox-gl';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
-interface DirectSelectMode extends DrawCustomMode {
+interface DirectSelectMode extends DrawCTXCustomMode {
   fireUpdate(): void;
   clickInactive(): void;
   fireActionable(state: DrawCTX): void;
