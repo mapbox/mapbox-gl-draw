@@ -78,4 +78,3 @@ class Feature {
 }
 
 export default Feature;
-

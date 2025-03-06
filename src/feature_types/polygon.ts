@@ -6,7 +6,9 @@ class Polygon extends Feature {
     super(ctx, geojson);
 
     // Ensure coordinates are properly typed and adjust them.
-    this.coordinates = this.coordinates.map((ring: Coords) => ring.slice(0, -1));
+    this.coordinates = this.coordinates.map((ring: Coords) =>
+      ring.slice(0, -1)
+    );
   }
 
   isValid(): boolean {
@@ -70,4 +72,3 @@ class Polygon extends Feature {
 }
 
 export default Polygon;
-

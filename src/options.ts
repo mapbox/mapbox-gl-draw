@@ -47,7 +47,7 @@ function addSources(styles, sourceBucket) {
 }
 
 export default function (options = {}) {
-  let withDefaults = { ...options}
+  let withDefaults = { ...options };
 
   if (!options.controls) {
     withDefaults.controls = {};

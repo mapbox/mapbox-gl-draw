@@ -19,7 +19,7 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-export const objectToMode = (modeObject) => {
+export const objectToMode = modeObject => {
   const modeObjectKeys = Object.keys(modeObject);
 
   return function (ctx: DrawCTX, startOpts = {}) {
@@ -69,4 +69,4 @@ export const objectToMode = (modeObject) => {
       }
     };
   };
-}
+};

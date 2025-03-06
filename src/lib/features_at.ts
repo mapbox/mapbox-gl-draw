@@ -14,12 +14,7 @@ const META_TYPES = [
   Constants.meta.VERTEX
 ];
 
-const featuresAt = (
-  event: Event,
-  bbox: BBox,
-  ctx: DrawCTX,
-  buffer: number
-) => {
+const featuresAt = (event: Event, bbox: BBox, ctx: DrawCTX, buffer: number) => {
   if (ctx.map === null) return [];
 
   const box = event ? mapEventToBoundingBox(event, buffer) : bbox;

@@ -20,7 +20,9 @@ class LineString extends Feature {
 
   getCoordinate(path: string): Coordinate | undefined {
     const id = parseInt(path, 10);
-    return this.coordinates[id] ? [...this.coordinates[id] as Coordinate] : undefined;
+    return this.coordinates[id]
+      ? [...(this.coordinates[id] as Coordinate)]
+      : undefined;
   }
 
   removeCoordinate(path: string): void {

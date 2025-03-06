@@ -7,7 +7,7 @@ import { doubleClickZoom } from './double_click_zoom';
 import { euclideanDistance } from './euclidean_distance';
 import * as featuresAt from './features_at';
 import { getFeatureAtAndSetCursors } from './get_features_at_and_set_cursor';
-import isClick from './is_click';
+import { isClick } from './is_click';
 import { isEventAtCoordinates } from './is_event_at_coordinates';
 import { isTap } from './is_tap';
 import mapEventToBoundingBox from './map_event_to_bounding_box';

@@ -1,10 +1,10 @@
 import * as Constants from './constants';
 
-import type { DrawCTX } from './types/types';
+import type { CTX } from './types/types';
 
 const classTypes = ['mode', 'feature', 'mouse'];
 
-export default function (ctx: DrawCTX) {
+export default function (ctx: CTX) {
   const buttonElements = {};
   let activeButton = null;
 
@@ -89,7 +89,7 @@ export default function (ctx: DrawCTX) {
     activeButton = null;
   }
 
-  function setActiveButton(id) {
+  function setActiveButton(id: string) {
     deactivateButtons();
 
     const button = buttonElements[id];

@@ -16,7 +16,11 @@ type FeatureType = MultiPoint | MultiLineString | MultiPolygon;
 
 const takeAction = (
   features: FeatureType[],
-  action: 'getCoordinate' | 'updateCoordinate' | 'addCoordinate' | 'removeCoordinate',
+  action:
+    | 'getCoordinate'
+    | 'updateCoordinate'
+    | 'addCoordinate'
+    | 'removeCoordinate',
   path: string,
   lng?: number,
   lat?: number
@@ -35,7 +39,7 @@ class MultiFeature extends Feature {
     super(ctx, geojson);
 
     delete this.coordinates;
-    
+
     // Determine the model based on geojson type
     this.model = models[geojson.geometry.type];
     if (this.model === undefined) {
@@ -48,16 +52,17 @@ class MultiFeature extends Feature {
 
   private _coordinatesToFeatures(coordinates: any[]): FeatureType[] {
     const Model = this.model.bind(this);
-    return coordinates.map((coords) => 
-      new Model(this.ctx, {
-        id: generateID(),
-        type: Constants.geojsonTypes.FEATURE,
-        properties: {},
-        geometry: {
-          coordinates: coords,
-          type: this.type.replace('Multi', '')
-        }
-      })
+    return coordinates.map(
+      coords =>
+        new Model(this.ctx, {
+          id: generateID(),
+          type: Constants.geojsonTypes.FEATURE,
+          properties: {},
+          geometry: {
+            coordinates: coords,
+            type: this.type.replace('Multi', '')
+          }
+        })
     );
   }
 
@@ -77,7 +82,7 @@ class MultiFeature extends Feature {
   getCoordinates(): any[] {
     return JSON.parse(
       JSON.stringify(
-        this.features.map((f) => {
+        this.features.map(f => {
           if (f.type === Constants.geojsonTypes.POLYGON) {
             return f.getCoordinates();
           }

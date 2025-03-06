@@ -7,16 +7,12 @@ interface Options {
   interval: number;
 }
 
-export default function isClick(
-  start: Entry, 
-  end: Entry, 
+export const isClick = (
+  start: Entry,
+  end: Entry,
   options: Partial<Options> = {}
-) {
-  const {
-    fineTolerance = 4,
-    grossTolerance = 12,
-    interval = 500
-  } = options;
+) => {
+  const { fineTolerance = 4, grossTolerance = 12, interval = 500 } = options;
 
   const adjustedStart = {
     point: start.point || end.point,
@@ -34,4 +30,3 @@ export default function isClick(
     (moveDistance < grossTolerance && end.time - adjustedStart.time < interval)
   );
 }
-

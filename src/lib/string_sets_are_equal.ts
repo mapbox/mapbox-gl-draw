@@ -4,4 +4,4 @@ export const stringSetsAreEqual = (a: Array<string>, b: Array<string>) => {
     JSON.stringify(a.map(id => id).sort()) ===
     JSON.stringify(b.map(id => id).sort())
   );
-}
+};

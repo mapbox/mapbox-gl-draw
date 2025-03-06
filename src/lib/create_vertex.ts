@@ -1,7 +1,12 @@
 import * as Constants from '../constants';
 import type { Feature } from 'geojson';
 
-export const createVertex = (parentId: string, coordinates: [number, number], path: string, selected: boolean): Feature => {
+export const createVertex = (
+  parentId: string,
+  coordinates: [number, number],
+  path: string,
+  selected: boolean
+): Feature => {
   return {
     type: Constants.geojsonTypes.FEATURE as 'Feature',
     properties: {
@@ -17,4 +22,4 @@ export const createVertex = (parentId: string, coordinates: [number, number], pa
       coordinates
     }
   };
-}
+};

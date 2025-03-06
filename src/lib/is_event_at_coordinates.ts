@@ -7,4 +7,4 @@ export const isEventAtCoordinates = (
     Math.abs(event.lngLat.lng - coordinates[0]) < tolerance &&
     Math.abs(event.lngLat.lat - coordinates[1]) < tolerance
   );
-}
+};

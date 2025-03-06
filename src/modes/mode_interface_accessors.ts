@@ -1,244 +1,161 @@
 import * as Constants from '../constants';
-import *  as featuresAt from '../lib/features_at';
+import * as featuresAt from '../lib/features_at';
 import Point from '../feature_types/point';
 import LineString from '../feature_types/line_string';
 import Polygon from '../feature_types/polygon';
 import MultiFeature from '../feature_types/multi_feature';
+import type { DrawCTX } from '../types/types';
+import type { Feature as GeoJSONFeature } from 'geojson';
 
-export default function ModeInterface(ctx) {
-  this.map = ctx.map;
-  this.drawConfig = JSON.parse(JSON.stringify(ctx.options || {}));
-  this._ctx = ctx;
+type DrawFeature = Point | LineString | Polygon | MultiFeature;
+
+interface SelectedCoordinate {
+  coord_path: string;
+  feature_id: string;
 }
 
-/**
- * Sets Draw's interal selected state
- * @name this.setSelected
- * @param {DrawFeature[]} - whats selected as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature)
- */
-ModeInterface.prototype.setSelected = function (features) {
-  return this._ctx.store.setSelected(features);
-};
+interface DrawActions {
+  trash?: boolean;
+  combineFeatures?: boolean;
+  uncombineFeatures?: boolean;
+}
 
-/**
- * Sets Draw's internal selected coordinate state
- * @name this.setSelectedCoordinates
- * @param {Object[]} coords - a array of {coord_path: 'string', feature_id: 'string'}
- */
-ModeInterface.prototype.setSelectedCoordinates = function (coords) {
-  this._ctx.store.setSelectedCoordinates(coords);
-  coords.reduce((m, c) => {
-    if (m[c.feature_id] === undefined) {
-      m[c.feature_id] = true;
-      this._ctx.store.get(c.feature_id).changed();
+export default class ModeInterface {
+  private map: any;
+  private drawConfig: any;
+  private _ctx: DrawCTX;
+
+  constructor(ctx: DrawCTX) {
+    console.log('CTX', ctx);
+
+    this.map = ctx.map;
+    this.drawConfig = { ...ctx.options };
+    this._ctx = ctx;
+  }
+
+  setSelected(features: DrawFeature[]): void {
+    this._ctx.store.setSelected(features);
+  }
+
+  setSelectedCoordinates(coords: SelectedCoordinate[]): void {
+    this._ctx.store.setSelectedCoordinates(coords);
+    coords.reduce(
+      (m, c) => {
+        if (!m[c.feature_id]) {
+          m[c.feature_id] = true;
+          this._ctx.store.get(c.feature_id)?.changed();
+        }
+        return m;
+      },
+      {} as Record<string, boolean>
+    );
+  }
+
+  getSelected(): DrawFeature[] {
+    return this._ctx.store.getSelected();
+  }
+
+  getSelectedIds(): string[] {
+    return this._ctx.store.getSelectedIds();
+  }
+
+  isSelected(id: string): boolean {
+    return this._ctx.store.isSelected(id);
+  }
+
+  getFeature(id: string): DrawFeature | undefined {
+    return this._ctx.store.get(id);
+  }
+
+  select(id: string): void {
+    this._ctx.store.select(id);
+  }
+
+  deselect(id: string): void {
+    this._ctx.store.deselect(id);
+  }
+
+  deleteFeature(id: string, opts: Record<string, any> = {}): void {
+    this._ctx.store.delete(id, opts);
+  }
+
+  addFeature(feature: DrawFeature, opts: Record<string, any> = {}): void {
+    this._ctx.store.add(feature, opts);
+  }
+
+  clearSelectedFeatures(): void {
+    this._ctx.store.clearSelected();
+  }
+
+  clearSelectedCoordinates(): void {
+    this._ctx.store.clearSelectedCoordinates();
+  }
+
+  setActionableState({
+    trash,
+    combineFeatures,
+    uncombineFeatures
+  }: DrawActions): void {
+    this._ctx.events.actionable({
+      trash: trash || false,
+      combineFeatures: combineFeatures || false,
+      uncombineFeatures: uncombineFeatures || false
+    });
+  }
+
+  changeMode(
+    mode: string,
+    opts: Record<string, any> = {},
+    eventOpts: Record<string, any> = {}
+  ): void {
+    this._ctx.events.changeMode(mode, opts, eventOpts);
+  }
+
+  fire(eventName: string, eventData: any): void {
+    this._ctx.events.fire(eventName, eventData);
+  }
+
+  updateUIClasses(opts: Record<string, any>): void {
+    this._ctx.ui.queueMapClasses(opts);
+  }
+
+  activateUIButton(name?: string): void {
+    this._ctx.ui.setActiveButton(name);
+  }
+
+  featuresAt(
+    event: any,
+    bbox: any,
+    bufferType: 'click' | 'touch' = 'click'
+  ): any {
+    if (bufferType !== 'click' && bufferType !== 'touch') {
+      throw new Error('invalid buffer type');
     }
-    return m;
-  }, {});
-};
+    return featuresAt[bufferType](event, bbox, this._ctx);
+  }
 
-/**
- * Get all selected features as a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature)
- * @name this.getSelected
- * @returns {DrawFeature[]}
- */
-ModeInterface.prototype.getSelected = function () {
-  return this._ctx.store.getSelected();
-};
+  newFeature(geojson: GeoJSONFeature): DrawFeature {
+    const type = geojson.geometry.type;
+    if (type === Constants.geojsonTypes.POINT)
+      return new Point(this._ctx, geojson);
+    if (type === Constants.geojsonTypes.LINE_STRING)
+      return new LineString(this._ctx, geojson);
+    if (type === Constants.geojsonTypes.POLYGON)
+      return new Polygon(this._ctx, geojson);
+    return new MultiFeature(this._ctx, geojson);
+  }
 
-/**
- * Get the ids of all currently selected features
- * @name this.getSelectedIds
- * @returns {String[]}
- */
-ModeInterface.prototype.getSelectedIds = function () {
-  return this._ctx.store.getSelectedIds();
-};
+  isInstanceOf(type: string, feature: any): boolean {
+    if (type === Constants.geojsonTypes.POINT) return feature instanceof Point;
+    if (type === Constants.geojsonTypes.LINE_STRING)
+      return feature instanceof LineString;
+    if (type === Constants.geojsonTypes.POLYGON)
+      return feature instanceof Polygon;
+    if (type === 'MultiFeature') return feature instanceof MultiFeature;
+    throw new Error(`Unknown feature class: ${type}`);
+  }
 
-/**
- * Check if a feature is selected
- * @name this.isSelected
- * @param {String} id - a feature id
- * @returns {Boolean}
- */
-ModeInterface.prototype.isSelected = function (id) {
-  return this._ctx.store.isSelected(id);
-};
-
-/**
- * Get a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature) by its id
- * @name this.getFeature
- * @param {String} id - a feature id
- * @returns {DrawFeature}
- */
-ModeInterface.prototype.getFeature = function (id) {
-  return this._ctx.store.get(id);
-};
-
-/**
- * Add a feature to draw's internal selected state
- * @name this.select
- * @param {String} id
- */
-ModeInterface.prototype.select = function (id) {
-  return this._ctx.store.select(id);
-};
-
-/**
- * Remove a feature from draw's internal selected state
- * @name this.delete
- * @param {String} id
- */
-ModeInterface.prototype.deselect = function (id) {
-  return this._ctx.store.deselect(id);
-};
-
-/**
- * Delete a feature from draw
- * @name this.deleteFeature
- * @param {String} id - a feature id
- */
-ModeInterface.prototype.deleteFeature = function (id, opts = {}) {
-  return this._ctx.store.delete(id, opts);
-};
-
-/**
- * Add a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature) to draw.
- * See `this.newFeature` for converting geojson into a DrawFeature
- * @name this.addFeature
- * @param {DrawFeature} feature - the feature to add
- */
-ModeInterface.prototype.addFeature = function (feature, opts = {}) {
-  return this._ctx.store.add(feature, opts);
-};
-
-/**
- * Clear all selected features
- */
-ModeInterface.prototype.clearSelectedFeatures = function () {
-  return this._ctx.store.clearSelected();
-};
-
-/**
- * Clear all selected coordinates
- */
-ModeInterface.prototype.clearSelectedCoordinates = function () {
-  return this._ctx.store.clearSelectedCoordinates();
-};
-
-/**
- * Indicate if the different action are currently possible with your mode
- * See [draw.actionalbe](https://github.com/mapbox/mapbox-gl-draw/blob/main/API.md#drawactionable) for a list of possible actions. All undefined actions are set to **false** by default
- * @name this.setActionableState
- * @param {Object} actions
- */
-ModeInterface.prototype.setActionableState = function (actions = {}) {
-  const newSet = {
-    trash: actions.trash || false,
-    combineFeatures: actions.combineFeatures || false,
-    uncombineFeatures: actions.uncombineFeatures || false
-  };
-  return this._ctx.events.actionable(newSet);
-};
-
-/**
- * Trigger a mode change
- * @name this.changeMode
- * @param {String} mode - the mode to transition into
- * @param {Object} opts - the options object to pass to the new mode
- * @param {Object} eventOpts - used to control what kind of events are emitted.
- */
-ModeInterface.prototype.changeMode = function (
-  mode,
-  opts = {},
-  eventOpts = {}
-) {
-  return this._ctx.events.changeMode(mode, opts, eventOpts);
-};
-
-/**
- * Fire a map event
- * @name this.fire
- * @param {String} eventName - the event name.
- * @param {Object} eventData - the event data object.
- */
-ModeInterface.prototype.fire = function (eventName, eventData) {
-  return this._ctx.events.fire(eventName, eventData);
-};
-
-/**
- * Update the state of draw map classes
- * @name this.updateUIClasses
- * @param {Object} opts
- */
-ModeInterface.prototype.updateUIClasses = function (opts) {
-  return this._ctx.ui.queueMapClasses(opts);
-};
-
-/**
- * If a name is provided it makes that button active, else if makes all buttons inactive
- * @name this.activateUIButton
- * @param {String?} name - name of the button to make active, leave as undefined to set buttons to be inactive
- */
-ModeInterface.prototype.activateUIButton = function (name) {
-  return this._ctx.ui.setActiveButton(name);
-};
-
-/**
- * Get the features at the location of an event object or in a bbox
- * @name this.featuresAt
- * @param {Event||NULL} event - a mapbox-gl event object
- * @param {BBOX||NULL} bbox - the area to get features from
- * @param {String} bufferType - is this `click` or `tap` event, defaults to click
- */
-ModeInterface.prototype.featuresAt = function (
-  event,
-  bbox,
-  bufferType = 'click'
-) {
-  if (bufferType !== 'click' && bufferType !== 'touch')
-    throw new Error('invalid buffer type');
-  return featuresAt[bufferType](event, bbox, this._ctx);
-};
-
-/**
- * Create a new [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature) from geojson
- * @name this.newFeature
- * @param {GeoJSONFeature} geojson
- * @returns {DrawFeature}
- */
-ModeInterface.prototype.newFeature = function (geojson) {
-  const type = geojson.geometry.type;
-  if (type === Constants.geojsonTypes.POINT)
-    return new Point(this._ctx, geojson);
-  if (type === Constants.geojsonTypes.LINE_STRING)
-    return new LineString(this._ctx, geojson);
-  if (type === Constants.geojsonTypes.POLYGON)
-    return new Polygon(this._ctx, geojson);
-  return new MultiFeature(this._ctx, geojson);
-};
-
-/**
- * Check is an object is an instance of a [DrawFeature](https://github.com/mapbox/mapbox-gl-draw/blob/main/src/feature_types/feature)
- * @name this.isInstanceOf
- * @param {String} type - `Point`, `LineString`, `Polygon`, `MultiFeature`
- * @param {Object} feature - the object that needs to be checked
- * @returns {Boolean}
- */
-ModeInterface.prototype.isInstanceOf = function (type, feature) {
-  if (type === Constants.geojsonTypes.POINT) return feature instanceof Point;
-  if (type === Constants.geojsonTypes.LINE_STRING)
-    return feature instanceof LineString;
-  if (type === Constants.geojsonTypes.POLYGON)
-    return feature instanceof Polygon;
-  if (type === 'MultiFeature') return feature instanceof MultiFeature;
-  throw new Error(`Unknown feature class: ${type}`);
-};
-
-/**
- * Force draw to rerender the feature of the provided id
- * @name this.doRender
- * @param {String} id - a feature id
- */
-ModeInterface.prototype.doRender = function (id) {
-  return this._ctx.store.featureChanged(id);
-};
+  doRender(id: string): void {
+    this._ctx.store.featureChanged(id);
+  }
+}
