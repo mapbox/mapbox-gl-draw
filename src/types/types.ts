@@ -634,6 +634,7 @@ export interface DrawStoreOptions {
 interface DrawStore {
   ctx: CTX;
   isDirty: boolean;
+  setDirty(): this;
   render(): void;
   sources: {
     hot: [],

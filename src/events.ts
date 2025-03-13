@@ -155,10 +155,6 @@ export default function(ctx: CTX) {
       }
     },
 
-    zoomend: function() {
-      ctx.store.changeZoom();
-    },
-
     data: function(event) {
       if (event.dataType === 'style') {
         const { setup, map, options, store } = ctx;
