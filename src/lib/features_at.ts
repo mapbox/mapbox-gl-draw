@@ -20,7 +20,7 @@ const featuresAt = (event: E, bbox: BBox, ctx: CTX, buffer: number) => {
   const box = event ? mapEventToBoundingBox(event, buffer) : bbox;
 
   const queryParams: {
-    layers?: Array<DrawStyleLayer>;
+    layers?: Array<string>;
   } = {};
 
   if (ctx.options.styles)
