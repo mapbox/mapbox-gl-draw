@@ -5,167 +5,174 @@ import { isClick } from './lib/is_click';
 import { isTap } from './lib/is_tap';
 import * as Constants from './constants';
 import { objectToMode } from './modes/object_to_mode';
-import type { CTX } from './types/types';
+import type { CTX, Entry } from './types/types';
 
 export default function(ctx: CTX) {
-
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
     return m;
   }, {});
 
-  let mouseDownInfo = {};
-  let touchStartInfo = {};
-  const events = {};
+  let mouseDownInfo = {} as Entry;
+  let touchStartInfo = {} as Entry;
   let currentModeName = null;
   let currentMode = null;
-
-  events.drag = function(event, isDrag) {
-    if (isDrag({
-      point: event.point,
-      time: new Date().getTime()
-    })) {
-      ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
-      currentMode.drag(event);
-    } else {
-      event.originalEvent.stopPropagation();
-    }
-  };
-
-  events.mousedrag = function(event) {
-    events.drag(event, endInfo => !isClick(mouseDownInfo, endInfo));
-  };
-
-  events.touchdrag = function(event) {
-    events.drag(event, endInfo => !isTap(touchStartInfo, endInfo));
-  };
-
-  events.mousemove = function(event) {
-    const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
-    if (button === 1) {
-      return events.mousedrag(event);
-    }
-    const target = getFeatureAtAndSetCursors(event, ctx);
-    event.featureTarget = target;
-    currentMode.mousemove(event);
-  };
-
-  events.mousedown = function(event) {
-    mouseDownInfo = {
-      time: new Date().getTime(),
-      point: event.point
-    };
-    const target = getFeatureAtAndSetCursors(event, ctx);
-    event.featureTarget = target;
-    currentMode.mousedown(event);
-  };
-
-  events.mouseup = function(event) {
-    const target = getFeatureAtAndSetCursors(event, ctx);
-    event.featureTarget = target;
-
-    if (isClick(mouseDownInfo, {
-      point: event.point,
-      time: new Date().getTime()
-    })) {
-      currentMode.click(event);
-    } else {
-      currentMode.mouseup(event);
-    }
-  };
-
-  events.mouseout = function(event) {
-    currentMode.mouseout(event);
-  };
-
-  events.touchstart = function(event) {
-    if (!ctx.options.touchEnabled) {
-      return;
-    }
-
-    touchStartInfo = {
-      time: new Date().getTime(),
-      point: event.point
-    };
-    const target = featuresAt.touch(event, null, ctx)[0];
-    event.featureTarget = target;
-    currentMode.touchstart(event);
-  };
-
-  events.touchmove = function(event) {
-    if (!ctx.options.touchEnabled) {
-      return;
-    }
-
-    currentMode.touchmove(event);
-    return events.touchdrag(event);
-  };
-
-  events.touchend = function(event) {
-    // Prevent emulated mouse events because we will fully handle the touch here.
-    // This does not stop the touch events from propogating to mapbox though.
-    event.originalEvent.preventDefault();
-    if (!ctx.options.touchEnabled) {
-      return;
-    }
-
-    const target = featuresAt.touch(event, null, ctx)[0];
-    event.featureTarget = target;
-    if (isTap(touchStartInfo, {
-      time: new Date().getTime(),
-      point: event.point
-    })) {
-      currentMode.tap(event);
-    } else {
-      currentMode.touchend(event);
-    }
-  };
 
   // 8 - Backspace
   // 46 - Delete
   const isKeyModeValid = code => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
 
-  events.keydown = function(event) {
-    const isMapElement = (event.srcElement || event.target).classList.contains(Constants.classes.CANVAS);
-    if (!isMapElement) return; // we only handle events on the map
+  const events = {
+    drag: function(event, isDrag) {
+      if (isDrag) {
+        ctx.ui.queueMapClasses({ mouse: Constants.cursors.DRAG });
+        currentMode.drag(event);
+      } else {
+        event.originalEvent.stopPropagation();
+      }
+    },
 
-    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
-      event.preventDefault();
-      currentMode.trash();
-    } else if (isKeyModeValid(event.keyCode)) {
-      currentMode.keydown(event);
-    } else if (event.keyCode === 49 && ctx.options.controls.point) {
-      changeMode(Constants.modes.DRAW_POINT);
-    } else if (event.keyCode === 50 && ctx.options.controls.line_string) {
-      changeMode(Constants.modes.DRAW_LINE_STRING);
-    } else if (event.keyCode === 51 && ctx.options.controls.polygon) {
-      changeMode(Constants.modes.DRAW_POLYGON);
-    }
-  };
+    mousedrag: function(event) {
+      const info = {
+        point: event.point,
+        time: new Date().getTime()
+      };
 
-  events.keyup = function(event) {
-    if (isKeyModeValid(event.keyCode)) {
-      currentMode.keyup(event);
-    }
-  };
+      events.drag(event, !isClick(mouseDownInfo, info));
+    },
 
-  events.zoomend = function() {
-    ctx.store.changeZoom();
-  };
+    touchdrag: function(event) {
+      const info = {
+        point: event.point,
+        time: new Date().getTime()
+      };
 
-  events.data = function(event) {
-    if (event.dataType === 'style') {
-      const { setup, map, options, store } = ctx;
-      const hasLayers = options.styles.some(style => map.getLayer(style.id));
-      if (!hasLayers) {
-        setup.addLayers();
-        store.setDirty();
-        store.render();
+      events.drag(event, !isTap(touchStartInfo, info));
+    },
+
+    mousemove: function(event) {
+      const button = event.originalEvent.buttons !== undefined ? event.originalEvent.buttons : event.originalEvent.which;
+      if (button === 1) {
+        return events.mousedrag(event);
+      }
+      const target = getFeatureAtAndSetCursors(event, ctx);
+      event.featureTarget = target;
+      currentMode.mousemove(event);
+    },
+
+    mousedown: function(event) {
+      mouseDownInfo = {
+        time: new Date().getTime(),
+        point: event.point
+      };
+      const target = getFeatureAtAndSetCursors(event, ctx);
+      event.featureTarget = target;
+      currentMode.mousedown(event);
+    },
+
+    mouseup: function(event) {
+      const target = getFeatureAtAndSetCursors(event, ctx);
+      event.featureTarget = target;
+
+      if (isClick(mouseDownInfo, {
+        point: event.point,
+        time: new Date().getTime()
+      })) {
+        currentMode.click(event);
+      } else {
+        currentMode.mouseup(event);
+      }
+    },
+
+    mouseout: function(event) {
+      currentMode.mouseout(event);
+    },
+
+    touchstart: function(event) {
+      if (!ctx.options.touchEnabled) {
+        return;
+      }
+
+      touchStartInfo = {
+        time: new Date().getTime(),
+        point: event.point
+      };
+      const target = featuresAt.touch(event, null, ctx)[0];
+      event.featureTarget = target;
+      currentMode.touchstart(event);
+    },
+
+    touchmove: function(event) {
+      if (!ctx.options.touchEnabled) {
+        return;
+      }
+
+      currentMode.touchmove(event);
+      return events.touchdrag(event);
+    },
+
+    touchend: function(event) {
+      // Prevent emulated mouse events because we will fully handle the touch here.
+      // This does not stop the touch events from propogating to mapbox though.
+      event.originalEvent.preventDefault();
+      if (!ctx.options.touchEnabled) {
+        return;
+      }
+
+      const target = featuresAt.touch(event, null, ctx)[0];
+      event.featureTarget = target;
+      if (isTap(touchStartInfo, {
+        time: new Date().getTime(),
+        point: event.point
+      })) {
+        currentMode.tap(event);
+      } else {
+        currentMode.touchend(event);
+      }
+    },
+
+    keydown: function(event) {
+      const isMapElement = (event.srcElement || event.target).classList.contains(Constants.classes.CANVAS);
+      if (!isMapElement) return; // we only handle events on the map
+
+      if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
+        event.preventDefault();
+        currentMode.trash();
+      } else if (isKeyModeValid(event.keyCode)) {
+        currentMode.keydown(event);
+      } else if (event.keyCode === 49 && ctx.options.controls.point) {
+        changeMode(Constants.modes.DRAW_POINT);
+      } else if (event.keyCode === 50 && ctx.options.controls.line_string) {
+        changeMode(Constants.modes.DRAW_LINE_STRING);
+      } else if (event.keyCode === 51 && ctx.options.controls.polygon) {
+        changeMode(Constants.modes.DRAW_POLYGON);
+      }
+    },
+
+    keyup: function(event) {
+      if (isKeyModeValid(event.keyCode)) {
+        currentMode.keyup(event);
+      }
+    },
+
+    zoomend: function() {
+      ctx.store.changeZoom();
+    },
+
+    data: function(event) {
+      if (event.dataType === 'style') {
+        const { setup, map, options, store } = ctx;
+        const hasLayers = options.styles.some(style => map.getLayer(style.id));
+        if (!hasLayers) {
+          setup.addLayers();
+          store.setDirty();
+          store.render();
+        }
       }
     }
   };
 
-  function changeMode(modename, nextModeOptions, eventOptions = {}) {
+  function changeMode(modename, nextModeOptions = {}, eventOptions = {}) {
     currentMode.stop();
 
     const modebuilder = modes[modename];

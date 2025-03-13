@@ -2,9 +2,8 @@ import events from './events';
 import Store from './store';
 import ui from './ui';
 import * as Constants from './constants';
-import type { CTX } from './types/types';
 
-export default function (ctx: CTX) {
+export default function (ctx) {
   let controlContainer = null;
   let mapLoadedInterval = null;
 

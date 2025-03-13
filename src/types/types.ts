@@ -614,7 +614,7 @@ export interface DrawOptions {
 interface DrawEvents {
   actionable(action: DrawActionableState): void;
   addEventListeners(): void;
-  changeMode(mode: string, modeOptions: {}, eventOptions: {}): void;
+  changeMode(mode: string, modeOptions?: {}, eventOptions?: {}): void;
   combineFeatures(): void;
   currentModeName(): string;
   currentModeRender(geojson: StrictFeature, push: (geojson: StrictFeature) => void): void;
@@ -639,13 +639,14 @@ interface DrawStore {
     hot: [],
     cold: []
   },
+  restoreMapConfig(): Record<string, unknown>;
   getInitialConfigValue(interaction: string): boolean;
   featureChanged(id: string, options?: DrawStoreOptions): boolean;
   setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
     coords: Array<{ coord_path: string; feature_id: string }>
   ): void;
-
+  getSelectedCoordinates(): Coords[];
   getSelected(): DrawFeature[];
   getSelectedIds(): string[];
   isSelected(id: string): boolean;

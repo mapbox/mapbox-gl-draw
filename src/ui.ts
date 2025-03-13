@@ -1,11 +1,16 @@
 import * as Constants from './constants';
-
 import type { CTX } from './types/types';
 
 const classTypes = ['mode', 'feature', 'mouse'];
 
+interface ButtonElements {
+  trash?: HTMLButtonElement;
+  combine_features?: HTMLButtonElement;
+  uncombine_features?: HTMLButtonElement;
+}
+
 export default function (ctx: CTX) {
-  const buttonElements = {};
+  const buttonElements: ButtonElements = {};
   let activeButton = null;
 
   let currentMapClasses = {
@@ -55,7 +60,7 @@ export default function (ctx: CTX) {
     currentMapClasses = Object.assign(currentMapClasses, nextMapClasses);
   }
 
-  function createControlButton(id: string, options = {}) {
+  function createControlButton(id: string, options) {
     const button = document.createElement('button');
     button.className = `${Constants.classes.CONTROL_BUTTON} ${options.className}`;
     button.setAttribute('title', options.title);
