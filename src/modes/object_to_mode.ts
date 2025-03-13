@@ -1,6 +1,5 @@
 import ModeInterface from './mode_interface.js';
-import type { CTX, DrawCustomMode } from '../types/types';
-import type { FeatureCollection } from 'geojson';
+import type { CTX, DrawCustomMode, StrictFeature } from '../types/types';
 
 const eventMapper = {
   drag: 'onDrag',
@@ -64,7 +63,7 @@ export const objectToMode = (modeObject: DrawCustomMode) => {
       uncombineFeatures() {
         mode.onUncombineFeatures(state);
       },
-      render(geojson: FeatureCollection, push) {
+      render(geojson: StrictFeature, push) {
         mode.toDisplayFeatures(state, geojson, push);
       }
     };

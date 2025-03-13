@@ -223,7 +223,7 @@ interface DrawPolygon extends DrawFeatureBase<Position[][]> {
   removeCoordinate(path: string): void;
 }
 
-type DrawFeature =
+export type DrawFeature =
   | DrawPoint
   | DrawLineString
   | DrawPolygon
@@ -297,7 +297,7 @@ interface DrawActionableEvent extends DrawEvent {
 export interface DrawCustomModeThis {
   map: Map;
   drawConfig: DrawOptions;
-  setSelected(features?: string | string[]): void;
+  setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
     coords: Array<{ coord_path: string; feature_id: string }>
   ): void;
@@ -641,7 +641,7 @@ interface DrawStore {
   },
   getInitialConfigValue(interaction: string): boolean;
   featureChanged(id: string, options?: DrawStoreOptions): boolean;
-  setSelected(features?: string | string[]): void;
+  setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
     coords: Array<{ coord_path: string; feature_id: string }>
   ): void;
@@ -653,10 +653,10 @@ interface DrawStore {
   getFeature(id: string): DrawFeature;
   select(id: string): void;
   deselect(features: string | string[]): void;
-  delete(id: string): void;
-  deleteFeature(id: string, opts?: any): void;
-  add(featureId: string): void;
-  addFeature(feature: DrawFeature): void;
+  delete(id: string, opts: Record<string, any>): void;
+  deleteFeature(id: string, opts?: unknown): void;
+  add(feature: DrawFeature, opts: Record<string, unknown>): void;
+  addFeature(feature: DrawFeature, opts: Record<string, unknown>): void;
   clearSelected(): void;
   clearSelectedFeatures(): void;
   clearSelectedCoordinates(): void;

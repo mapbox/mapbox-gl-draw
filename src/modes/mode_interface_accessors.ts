@@ -4,10 +4,8 @@ import Point from '../feature_types/point';
 import LineString from '../feature_types/line_string';
 import Polygon from '../feature_types/polygon';
 import MultiFeature from '../feature_types/multi_feature';
-import type { CTX, DrawOptions, StrictFeature } from '../types/types';
+import type { CTX, DrawOptions, StrictFeature, DrawFeature } from '../types/types';
 import type { Map } from 'mapbox-gl';
-
-type DrawFeature = Point | LineString | Polygon | MultiFeature;
 
 interface SelectedCoordinate {
   coord_path: string;
@@ -132,7 +130,7 @@ export default class ModeInterface {
     return featuresAt[bufferType](event, bbox, this._ctx);
   }
 
-  newFeature(geojson: StrictFeature): DrawFeature {
+  newFeature(geojson: StrictFeature) {
     const type = geojson.geometry.type;
     if (type === Constants.geojsonTypes.POINT)
       return new Point(this._ctx, geojson);
