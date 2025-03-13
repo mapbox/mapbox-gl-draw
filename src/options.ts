@@ -2,7 +2,32 @@ import * as Constants from './constants';
 import * as modes from './modes/index';
 import styles from './lib/theme';
 
-const defaultOptions = {
+type Controls = {
+  point: boolean;
+  line_string: boolean;
+  polygon: boolean;
+  trash: boolean;
+  combine_features: boolean;
+  uncombine_features: boolean;
+  [key: string]: boolean;
+};
+
+type Options = {
+  defaultMode?: string;
+  keybindings?: boolean;
+  touchEnabled?: boolean;
+  clickBuffer?: number;
+  touchBuffer?: number;
+  boxSelect?: boolean;
+  displayControlsDefault?: boolean;
+  styles?: any[];
+  modes?: typeof modes;
+  controls?: Partial<Controls>;
+  userProperties?: boolean;
+  suppressAPIEvents?: boolean;
+};
+
+const defaultOptions: Options = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
   touchEnabled: true,
@@ -17,7 +42,7 @@ const defaultOptions = {
   suppressAPIEvents: true
 };
 
-const showControls = {
+const showControls: Controls = {
   point: true,
   line_string: true,
   polygon: true,
@@ -26,7 +51,7 @@ const showControls = {
   uncombine_features: true
 };
 
-const hideControls = {
+const hideControls: Controls = {
   point: false,
   line_string: false,
   polygon: false,
@@ -35,36 +60,34 @@ const hideControls = {
   uncombine_features: false
 };
 
-function addSources(styles, sourceBucket) {
+function addSources(styles: any[], sourceBucket: 'hot' | 'cold'): any[] {
   return styles.map(style => {
     if (style.source) return style;
-    return Object.assign({}, style, {
+    return {
+      ...style,
       id: `${style.id}.${sourceBucket}`,
-      source:
-        sourceBucket === 'hot' ? Constants.sources.HOT : Constants.sources.COLD
-    });
+      source: sourceBucket === 'hot' ? Constants.sources.HOT : Constants.sources.COLD
+    };
   });
 }
 
-export default function (options = {}) {
+export default function configureOptions(options: Options = {}): Options {
   let withDefaults = { ...options };
 
   if (!options.controls) {
     withDefaults.controls = {};
   }
 
-  if (options.displayControlsDefault === false) {
-    withDefaults.controls = { ...hideControls, ...options.controls };
-  } else {
-    withDefaults.controls = { ...showControls, ...options.controls };
-  }
+  withDefaults.controls = options.displayControlsDefault === false
+    ? { ...hideControls, ...options.controls }
+    : { ...showControls, ...options.controls };
 
-  withDefaults = Object.assign({}, defaultOptions, withDefaults);
+  withDefaults = { ...defaultOptions, ...withDefaults };
 
-  // Layers with a shared source should be adjacent for performance reasons
-  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(
-    addSources(withDefaults.styles, 'hot')
+  withDefaults.styles = addSources(withDefaults.styles || [], 'cold').concat(
+    addSources(withDefaults.styles || [], 'hot')
   );
 
   return withDefaults;
 }
+

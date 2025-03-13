@@ -1,5 +1,5 @@
 import ModeInterface from './mode_interface.js';
-import type { DrawCTX } from '../types/types';
+import type { CTX, DrawCustomMode } from '../types/types';
 import type { FeatureCollection } from 'geojson';
 
 const eventMapper = {
@@ -19,10 +19,10 @@ const eventMapper = {
 
 const eventKeys = Object.keys(eventMapper);
 
-export const objectToMode = modeObject => {
+export const objectToMode = (modeObject: DrawCustomMode) => {
   const modeObjectKeys = Object.keys(modeObject);
 
-  return function (ctx: DrawCTX, startOpts = {}) {
+  return function (ctx: CTX, startOpts = {}) {
     let state = {};
 
     const mode = modeObjectKeys.reduce((m, k) => {

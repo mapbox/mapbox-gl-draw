@@ -4,8 +4,8 @@ import Point from '../feature_types/point';
 import LineString from '../feature_types/line_string';
 import Polygon from '../feature_types/polygon';
 import MultiFeature from '../feature_types/multi_feature';
-import type { DrawCTX } from '../types/types';
-import type { Feature as GeoJSONFeature } from 'geojson';
+import type { CTX, DrawOptions, StrictFeature } from '../types/types';
+import type { Map } from 'mapbox-gl';
 
 type DrawFeature = Point | LineString | Polygon | MultiFeature;
 
@@ -21,13 +21,11 @@ interface DrawActions {
 }
 
 export default class ModeInterface {
-  private map: any;
-  private drawConfig: any;
-  private _ctx: DrawCTX;
+  map: Map;
+  drawConfig: DrawOptions;
+  private _ctx: CTX;
 
-  constructor(ctx: DrawCTX) {
-    console.log('CTX', ctx);
-
+  constructor(ctx: CTX) {
     this.map = ctx.map;
     this.drawConfig = { ...ctx.options };
     this._ctx = ctx;
@@ -134,7 +132,7 @@ export default class ModeInterface {
     return featuresAt[bufferType](event, bbox, this._ctx);
   }
 
-  newFeature(geojson: GeoJSONFeature): DrawFeature {
+  newFeature(geojson: StrictFeature): DrawFeature {
     const type = geojson.geometry.type;
     if (type === Constants.geojsonTypes.POINT)
       return new Point(this._ctx, geojson);

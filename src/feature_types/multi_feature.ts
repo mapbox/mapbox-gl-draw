@@ -13,6 +13,7 @@ const models = {
 };
 
 type FeatureType = MultiPoint | MultiLineString | MultiPolygon;
+type FeatureConstructor = new (...args: any[]) => FeatureType;
 
 const takeAction = (
   features: FeatureType[],
@@ -32,7 +33,7 @@ const takeAction = (
 };
 
 class MultiFeature extends Feature {
-  model: FeatureType;
+  model: FeatureConstructor;
   features: FeatureType[];
 
   constructor(ctx: any, geojson: any) {

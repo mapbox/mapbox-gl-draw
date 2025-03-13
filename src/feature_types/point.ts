@@ -1,14 +1,10 @@
 import Feature from './feature.js';
-import type { Draw, StrictFeature } from '../types/types';
-
-type Coordinate = [number, number];
+import type { CTX, StrictFeature } from '../types/types';
 
 class Point extends Feature {
-  coordinates: Coordinate;
-
-  constructor(ctx: Draw, geojson: StrictFeature) {
+  constructor(ctx: CTX, geojson: StrictFeature) {
     super(ctx, geojson);
-    this.coordinates = geojson.geometry.coordinates as Coordinate;
+    this.coordinates = geojson.geometry.coordinates;
   }
 
   isValid(): boolean {
@@ -27,8 +23,8 @@ class Point extends Feature {
     this.changed();
   }
 
-  getCoordinate(): Coordinate {
-    return this.getCoordinates() as Coordinate;
+  getCoordinate() {
+    return this.getCoordinates();
   }
 }
 

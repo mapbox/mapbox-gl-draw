@@ -11,7 +11,7 @@ import LineString from './feature_types/line_string';
 import Point from './feature_types/point';
 import MultiFeature from './feature_types/multi_feature';
 
-import type { DrawCTX, Draw } from './types/types';
+import type { CTX, Draw } from './types/types';
 
 const featureTypes = {
   Polygon,
@@ -22,7 +22,7 @@ const featureTypes = {
   MultiPoint: MultiFeature
 };
 
-export default function (ctx: DrawCTX, api: Draw) {
+export default function (ctx: CTX, api: Draw) {
   api.modes = Constants.modes;
 
   // API doesn't emit events by default

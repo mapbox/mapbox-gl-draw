@@ -1,7 +1,6 @@
 import * as featuresAt from './features_at';
 import * as Constants from '../constants';
-import type { CTX, DrawMapClasses } from '../types/types';
-import type { MapMouseEvent, MapTouchEvent } from 'mapbox-gl';
+import type { CTX, DrawMapClasses, MapMouseEvent, MapTouchEvent } from '../types/types';
 
 type E = MapMouseEvent | MapTouchEvent;
 

@@ -39,14 +39,14 @@ class Feature {
     this.properties[property] = value;
   }
 
-  toGeoJSON(): any {
+  toGeoJSON(): StrictFeature {
     return {
       id: this.id,
-      type: Constants.geojsonTypes.FEATURE,
+      type: Constants.geojsonTypes.FEATURE as 'Feature',
       properties: this.properties,
       geometry: {
         coordinates: this.getCoordinates(),
-        type: this.type
+        type: this.type as 'Point' | 'LineString' | 'Polygon'
       }
     };
   }

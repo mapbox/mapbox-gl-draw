@@ -1,4 +1,4 @@
-import {
+import type {
   BBox,
   Feature,
   FeatureCollection,
@@ -55,7 +55,6 @@ export interface StrictFeatureCollection
   features: StrictFeature[];
 }
 
-// Example usage
 export type XY = { x: number; y: number };
 
 export type Coords = Array<[number, number]>;
@@ -71,6 +70,14 @@ interface Modes {
   draw_point: DrawCustomMode;
   simple_select: DrawCustomMode;
   direct_select: DrawCustomMode;
+}
+
+export interface SelectedDrawModeFeature {
+  id: string;
+  type: string;
+  ctx: CTX;
+  properties: Record<string, unknown>
+  coordinates: Array<[number, number]>
 }
 
 interface DrawPoint extends DrawFeatureBase<Position> {
@@ -287,8 +294,7 @@ interface DrawActionableEvent extends DrawEvent {
   type: 'draw.actionable';
 }
 
-// TODO This seems wrong. Remove now?
-export interface DrawCTX {
+export interface DrawCustomModeThis {
   map: Map;
   drawConfig: DrawOptions;
   setSelected(features?: string | string[]): void;
@@ -319,66 +325,66 @@ export interface DrawCTX {
   doRender(id: string): void;
 }
 
-interface DrawCustomMode<CustomModeState = any, CustomModeOptions = any> {
-  onSetup?(this: DrawCTX & this, options: CustomModeOptions): CustomModeState;
-  onDrag?(this: DrawCTX & this, state: CustomModeState, e: MapMouseEvent): void;
+export interface DrawCustomMode<CustomModeState = any, CustomModeOptions = any> {
+  onSetup?(this: DrawCustomModeThis & this, options: CustomModeOptions): CustomModeState;
+  onDrag?(this: DrawCustomModeThis & this, state: CustomModeState, e: MapMouseEvent): void;
   onClick?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapMouseEvent
   ): void;
   onMouseMove?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapMouseEvent
   ): void;
   onMouseDown?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapMouseEvent
   ): void;
   onMouseUp?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapMouseEvent
   ): void;
   onMouseOut?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapMouseEvent
   ): void;
   onKeyUp?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: KeyboardEvent
   ): void;
   onKeyDown?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: KeyboardEvent
   ): void;
   onTouchStart?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapTouchEvent
   ): void;
   onTouchMove?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapTouchEvent
   ): void;
   onTouchEnd?(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     e: MapTouchEvent
   ): void;
-  onTap?(this: DrawCTX & this, state: CustomModeState, e: MapTouchEvent): void;
-  onStop?(this: DrawCTX & this, state: CustomModeState): void;
-  onTrash?(this: DrawCTX & this, state: CustomModeState): void;
-  onCombineFeature?(this: DrawCTX & this, state: CustomModeState): void;
-  onUncombineFeature?(this: DrawCTX & this, state: CustomModeState): void;
+  onTap?(this: DrawCustomModeThis & this, state: CustomModeState, e: MapTouchEvent): void;
+  onStop?(this: DrawCustomModeThis & this, state: CustomModeState): void;
+  onTrash?(this: DrawCustomModeThis & this, state: CustomModeState): void;
+  onCombineFeature?(this: DrawCustomModeThis & this, state: CustomModeState): void;
+  onUncombineFeature?(this: DrawCustomModeThis & this, state: CustomModeState): void;
   toDisplayFeatures(
-    this: DrawCTX & this,
+    this: DrawCustomModeThis & this,
     state: CustomModeState,
     geojson: GeoJSON,
     display: (geojson: GeoJSON) => void
@@ -469,16 +475,16 @@ export interface Lib {
   ): Feature<Point>;
 
   doubleClickZoom: {
-    enable: (ctx: DrawCTX) => void; // ?? ctx
-    disable: (ctx: DrawCTX) => void; // ?? ctx
+    enable: (ctx: DrawCustomModeThis) => void; // ?? ctx
+    disable: (ctx: DrawCustomModeThis) => void; // ?? ctx
   };
 
   featuresAt: {
-    click: (event: MapMouseEvent, bbox: BBox, ctx: DrawCTX) => Feature[]; // ?? ctx
-    touch: (event: MapTouchEvent, bbox: BBox, ctx: DrawCTX) => Feature[]; // ?? ctx
+    click: (event: MapMouseEvent, bbox: BBox, ctx: DrawCustomModeThis) => Feature[]; // ?? ctx
+    touch: (event: MapTouchEvent, bbox: BBox, ctx: DrawCustomModeThis) => Feature[]; // ?? ctx
   };
 
-  getFeatureAtAndSetCursors(event: MapMouseEvent, ctx: DrawCTX): Feature;
+  getFeatureAtAndSetCursors(event: MapMouseEvent, ctx: DrawCustomModeThis): Feature;
 
   euclideanDistance(
     a: { x: number; y: number },
@@ -602,6 +608,7 @@ export interface DrawOptions {
   modes?: { [modeKey: string]: DrawCustomMode } | undefined;
   defaultMode?: string | undefined;
   userProperties?: boolean | undefined;
+  suppressAPIEvents?: boolean | undefined;
 }
 
 interface DrawEvents {
@@ -619,6 +626,11 @@ interface DrawEvents {
   uncombineFeatures(): void; 
 }
 
+export interface DrawStoreOptions {
+  silent?: boolean;
+  action?: string;
+}
+
 interface DrawStore {
   ctx: CTX;
   isDirty: boolean;
@@ -628,10 +640,40 @@ interface DrawStore {
     cold: []
   },
   getInitialConfigValue(interaction: string): boolean;
-  featureChanged(id: string, options: {
-    silent?: boolean;
-    action?: string;
-  }): boolean;
+  featureChanged(id: string, options?: DrawStoreOptions): boolean;
+  setSelected(features?: string | string[]): void;
+  setSelectedCoordinates(
+    coords: Array<{ coord_path: string; feature_id: string }>
+  ): void;
+
+  getSelected(): DrawFeature[];
+  getSelectedIds(): string[];
+  isSelected(id: string): boolean;
+  get(id: string): DrawFeature;
+  getFeature(id: string): DrawFeature;
+  select(id: string): void;
+  deselect(features: string | string[]): void;
+  delete(id: string): void;
+  deleteFeature(id: string, opts?: any): void;
+  add(featureId: string): void;
+  addFeature(feature: DrawFeature): void;
+  clearSelected(): void;
+  clearSelectedFeatures(): void;
+  clearSelectedCoordinates(): void;
+  setActionableState(actionableState: DrawActionableState): void;
+  changeMode(mode: DrawMode, opts?: object, eventOpts?: object): void;
+  updateUIClasses(opts: object): void;
+  activateUIButton(name?: string): void;
+  featuresAt(
+    event: Event,
+    bbox: BBox,
+    bufferType: 'click' | 'tap'
+  ): DrawFeature[];
+  newFeature(geojson: GeoJSON): DrawFeature;
+  isInstanceOf(type: string, feature: object): boolean;
+  doRender(id: string): void;
+  getAllIds(): Array<string>
+  createRenderBatch(): () => void;
 }
 
 interface DrawSetup {
