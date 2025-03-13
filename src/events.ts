@@ -7,6 +7,10 @@ import * as Constants from './constants';
 import { objectToMode } from './modes/object_to_mode';
 import type { CTX, Entry } from './types/types';
 
+interface EventOptions {
+  silent?: boolean;
+}
+
 export default function(ctx: CTX) {
   const modes = Object.keys(ctx.options.modes).reduce((m, k) => {
     m[k] = objectToMode(ctx.options.modes[k]);
@@ -168,7 +172,7 @@ export default function(ctx: CTX) {
     }
   };
 
-  function changeMode(modename, nextModeOptions = {}, eventOptions = {}) {
+  function changeMode(modename, nextModeOptions = {}, eventOptions: EventOptions = {}) {
     currentMode.stop();
 
     const modebuilder = modes[modename];
