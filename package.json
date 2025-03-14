@@ -48,7 +48,6 @@
     "start-server": "vite --config vite.config.js",
     "start-bench": "run-p build-token watch watch-bench \"start-server --base . .\"",
     "start": "run-p build-token start-server",
-    "format": "prettier --write '**/*.{js,ts,css}'",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -14,8 +14,8 @@ export default class Benchmark extends Evented {
     const out = options.createMap();
 
     const drawing = [];
-    land.features.forEach(feature => {
-      feature.geometry.coordinates.forEach(ring => {
+    land.features.forEach((feature) => {
+      feature.geometry.coordinates.forEach((ring) => {
         // eslint-disable-next-line new-cap
         drawing.push(TraceMouse(ring, out.map));
       });
@@ -23,8 +23,8 @@ export default class Benchmark extends Evented {
 
     traceProgress(land.features, out.map);
 
-    const traceMouse = function (cb) {
-      const runner = function (count) {
+    const traceMouse = function(cb) {
+      const runner = function(count) {
         const draw = drawing[count];
         if (draw) {
           out.draw.changeMode('draw_polygon');
@@ -45,11 +45,9 @@ export default class Benchmark extends Evented {
         traceMouse(() => {
           const fps = FPSControl.stop();
           if (fps < 55) {
-            this.fire('fail', {
-              message: `${formatNumber(fps)} fps - expected 55fps or better`
-            });
+            this.fire('fail', {message: `${formatNumber(fps)} fps - expected 55fps or better`});
           } else {
-            this.fire('pass', { message: `${formatNumber(fps)} fps` });
+            this.fire('pass', {message: `${formatNumber(fps)} fps`});
           }
           out.draw.changeMode('simple_select');
         });

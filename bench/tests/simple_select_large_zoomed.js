@@ -16,7 +16,7 @@ export default class SimpleSelectLargeZoomedBenchmark extends Evented {
     super();
 
     const out = options.createMap({
-      width: 1024,
+      width:1024,
       center: [-75.5597469696618, -2.6084634090944974],
       zoom: 5
     });
@@ -25,7 +25,7 @@ export default class SimpleSelectLargeZoomedBenchmark extends Evented {
     const dragMouse = DragMouse(START, out.map);
 
     const progressDiv = document.getElementById('progress');
-    out.map.on('progress', e => {
+    out.map.on('progress', (e) => {
       progressDiv.style.width = `${e.done}%`;
     });
 
@@ -33,20 +33,20 @@ export default class SimpleSelectLargeZoomedBenchmark extends Evented {
       out.draw.add(SouthAmerica);
 
       setTimeout(() => {
-        this.fire('log', { message: 'normal - 29fps' });
+        this.fire('log', {message: 'normal - 29fps'});
         const FPSControl = fpsRunner();
         FPSControl.start();
         dragMouse(() => {
           const fps = FPSControl.stop();
           if (fps < 55) {
-            this.fire('fail', {
-              message: `${formatNumber(fps)} fps - expected 55fps or better`
-            });
+            this.fire('fail', {message: `${formatNumber(fps)} fps - expected 55fps or better`});
           } else {
-            this.fire('pass', { message: `${formatNumber(fps)} fps` });
+            this.fire('pass', {message: `${formatNumber(fps)} fps`});
           }
         });
       }, 2000);
     });
   }
 }
+
+

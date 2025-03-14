@@ -1,5 +1,4 @@
-Benchmarks
----
+# Benchmarks
 
 Benchmarks help us catch performance regressions and improve performance.
 

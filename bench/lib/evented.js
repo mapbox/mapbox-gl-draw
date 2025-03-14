@@ -1,3 +1,4 @@
+
 export default class Evented {
   on(type, listener) {
     if (!listener) {
