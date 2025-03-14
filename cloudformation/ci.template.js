@@ -7,13 +7,17 @@ module.exports = {
       Properties: {
         Policies: [
           {
-            PolicyName: 'list',
-            PolicyDocument: {
-              Statement: [
+            "PolicyName": "list",
+            "PolicyDocument": {
+              "Statement": [
                 {
-                  Action: ['s3:ListBucket'],
-                  Effect: 'Allow',
-                  Resource: ['arn:aws:s3:::mapbox-gl-js']
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3:::mapbox-gl-js"
+                  ]
                 }
               ]
             }
@@ -23,15 +27,15 @@ module.exports = {
             PolicyDocument: {
               Statement: [
                 {
-                  Action: [
-                    's3:GetObject',
-                    's3:GetObjectAcl',
-                    's3:PutObject',
-                    's3:PutObjectAcl'
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:GetObjectAcl",
+                    "s3:PutObject",
+                    "s3:PutObjectAcl"
                   ],
-                  Effect: 'Allow',
-                  Resource: [
-                    'arn:aws:s3:::mapbox-gl-js/plugins/mapbox-gl-draw/*'
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3:::mapbox-gl-js/plugins/mapbox-gl-draw/*"
                   ]
                 }
               ]

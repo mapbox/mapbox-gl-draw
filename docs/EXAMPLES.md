@@ -1,5 +1,4 @@
-Examples
----
+# Examples
 
 ## Styling
 
