@@ -223,6 +223,16 @@ interface DrawPolygon extends DrawFeatureBase<Position[][]> {
   removeCoordinate(path: string): void;
 }
 
+export interface ModeState {
+  featureId: string;
+  canDragMove: boolean;
+  dragMoveLocation: { lng: number; lat: number; } | undefined
+  dragMoving: boolean;
+  feature: DrawFeature;
+  initialDragPanState?: boolean;
+  selectedCoordPaths: [];
+}
+
 export type DrawFeature =
   | DrawPoint
   | DrawLineString

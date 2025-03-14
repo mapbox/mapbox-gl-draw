@@ -11,7 +11,7 @@ import { doubleClickZoom } from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';
 
-import type { CTX, DrawCustomMode, MapMouseEvent } from '../types/types';
+import type { ModeState, DrawCustomMode, MapMouseEvent } from '../types/types';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -19,12 +19,12 @@ const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 interface DirectSelectMode extends DrawCustomMode {
   fireUpdate(): void;
   clickInactive(): void;
-  fireActionable(state: CTX): void;
-  clickNoTarget(state: CTX, e: MapMouseEvent): void;
-  startDragging(state: CTX, e: MapMouseEvent): void;
-  stopDragging(state: CTX): void;
-  onVertex(state: CTX, e: MapMouseEvent): void;
-  onMidpoint(state: CTX, e: MapMouseEvent): void;
+  fireActionable(state: ModeState): void;
+  clickNoTarget(state: ModeState, e: MapMouseEvent): void;
+  startDragging(state: ModeState, e: MapMouseEvent): void;
+  stopDragging(state: ModeState): void;
+  onVertex(state: ModeState, e: MapMouseEvent): void;
+  onMidpoint(state: ModeState, e: MapMouseEvent): void;
 }
 
 const DirectSelect: DirectSelectMode = {
@@ -84,6 +84,9 @@ const DirectSelect: DirectSelectMode = {
   },
 
   onMidpoint: function (state, e) {
+
+    console.log('STATE LOOKS LIKE THIS', state);
+
     this.startDragging(state, e);
     const about = e.featureTarget.properties;
     state.feature.addCoordinate(about.coord_path, about.lng, about.lat);
@@ -272,7 +275,7 @@ const DirectSelect: DirectSelectMode = {
   onMouseUp: function (state) { return this._end(state); },
   onTouchEnd: function (state) { return this._end(state); },
 
-  toDisplayFeatures: function (state: CTX, geojson, push) {
+  toDisplayFeatures: function (state: ModeState, geojson, push) {
     if (state.featureId === geojson.properties.id) {
       geojson.properties.active = Constants.activeStates.ACTIVE;
       push(geojson);
