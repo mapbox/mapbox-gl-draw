@@ -64,6 +64,8 @@
     "@types/geojson": "^7946.0.16",
     "@typescript-eslint/parser": "^8.26.0",
     "eslint": "8.57.1",
+    "eslint-config-mourner": "^4.0.2",
+    "eslint-plugin-import": "^2.31.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
     "mapbox-gl": "^3.10.0",
@@ -90,7 +92,7 @@
     "dist/mapbox-gl-draw*"
   ],
   "lint-staged": {
-    "**/*.{js,ts}": [
+    "**/*.{ts}": [
       "eslint",
       "prettier --write"
     ]
