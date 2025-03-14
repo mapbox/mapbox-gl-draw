@@ -1,8 +1,4 @@
 {
-  "extends": [
-    "mourner",
-    "plugin:import/recommended"
-  ],
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "import"

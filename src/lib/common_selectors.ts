@@ -4,11 +4,11 @@ import { MapMouseEvent, MapTouchEvent } from '../types/types';
 type E = MapMouseEvent | MapTouchEvent;
 
 export function isOfMetaType(type: string) { return function (e: E) {
-    const featureTarget = e.featureTarget;
-    if (!featureTarget) return false;
-    if (!featureTarget.properties) return false;
-    return featureTarget.properties.meta === type;
-  };
+  const featureTarget = e.featureTarget;
+  if (!featureTarget) return false;
+  if (!featureTarget.properties) return false;
+  return featureTarget.properties.meta === type;
+};
 }
 
 export function isShiftMousedown(e: MapMouseEvent) {
