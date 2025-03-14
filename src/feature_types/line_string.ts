@@ -32,10 +32,8 @@ class LineString extends Feature {
 
   updateCoordinate(path: string, lng: number, lat: number): void {
     const id = parseInt(path, 10);
-    if (this.coordinates[id]) {
-      this.coordinates[id] = [lng, lat];
-      this.changed();
-    }
+    this.coordinates[id] = [lng, lat];
+    this.changed();
   }
 
   changed(): void {}
