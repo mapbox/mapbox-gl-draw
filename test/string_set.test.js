@@ -5,17 +5,41 @@ import StringSet from '../src/lib/string_set.js';
 test('StringSet constructor and API', () => {
   const set = new StringSet();
   assert.deepEqual(set.values(), [], 'empty by default');
-  assert.equal(Object.keys(set).filter(k => k[0] !== '_').length, 0, 'no unexpected properties');
+  assert.equal(
+    Object.keys(set).filter(k => k[0] !== '_').length,
+    0,
+    'no unexpected properties'
+  );
   // Methods
   assert.equal(typeof StringSet.prototype.add, 'function', 'exposes set.add');
-  assert.equal(typeof StringSet.prototype.delete, 'function', 'exposes set.delete');
+  assert.equal(
+    typeof StringSet.prototype.delete,
+    'function',
+    'exposes set.delete'
+  );
   assert.equal(typeof StringSet.prototype.has, 'function', 'exposes set.has');
-  assert.equal(typeof StringSet.prototype.values, 'function', 'exposes set.values');
-  assert.equal(typeof StringSet.prototype.clear, 'function', 'exposes set.clear');
-  assert.equal(Object.keys(StringSet.prototype).filter(k => k[0] !== '_').length, 5, 'no unexpected methods');
+  assert.equal(
+    typeof StringSet.prototype.values,
+    'function',
+    'exposes set.values'
+  );
+  assert.equal(
+    typeof StringSet.prototype.clear,
+    'function',
+    'exposes set.clear'
+  );
+  assert.equal(
+    Object.keys(StringSet.prototype).filter(k => k[0] !== '_').length,
+    5,
+    'no unexpected methods'
+  );
 
   const populatedSet = new StringSet(['a', 4, 'b']);
-  assert.deepEqual(populatedSet.values(), ['a', 4, 'b'], 'populated by constructor arg');
+  assert.deepEqual(
+    populatedSet.values(),
+    ['a', 4, 'b'],
+    'populated by constructor arg'
+  );
 });
 
 test('StringSet#add', () => {
@@ -60,7 +84,11 @@ test('StringSet#values', () => {
   const subject = ['a', 'b'];
   const set = new StringSet(subject);
   assert.deepEqual(set.values(), ['a', 'b']);
-  assert.notEqual(set.values(), subject, 'array is copied, so source array is not mutable');
+  assert.notEqual(
+    set.values(),
+    subject,
+    'array is copied, so source array is not mutable'
+  );
 });
 
 test('StringSet#clear', () => {

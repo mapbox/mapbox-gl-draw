@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spy} from 'sinon';
+import { spy } from 'sinon';
 
 import ui from '../src/ui.js';
 
@@ -36,14 +36,20 @@ function createMockContext({ position, controls } = {}) {
 }
 
 function getButtons(div) {
-  return Array.prototype.slice.call(div.getElementsByClassName('mapbox-gl-draw_ctrl-draw-btn'));
+  return Array.prototype.slice.call(
+    div.getElementsByClassName('mapbox-gl-draw_ctrl-draw-btn')
+  );
 }
 
-test('ui container classes', async (t) => {
+test('ui container classes', async t => {
   const { context, cleanup } = createMockContext();
   const testUi = ui(context);
 
-  assert.equal(context.container.className, '', 'confirm that class starts empty');
+  assert.equal(
+    context.container.className,
+    '',
+    'confirm that class starts empty'
+  );
 
   // Each sub-test relies on state from the prior sub-tests
 
@@ -54,9 +60,18 @@ test('ui container classes', async (t) => {
       mouse: 'move'
     });
     testUi.updateMapClasses();
-    assert.ok(context.container.classList.contains('mode-direct_select'), 'mode class set');
-    assert.ok(context.container.classList.contains('feature-vertex'), 'feature class set');
-    assert.ok(context.container.classList.contains('mouse-move'), 'mouse class set');
+    assert.ok(
+      context.container.classList.contains('mode-direct_select'),
+      'mode class set'
+    );
+    assert.ok(
+      context.container.classList.contains('feature-vertex'),
+      'feature class set'
+    );
+    assert.ok(
+      context.container.classList.contains('mouse-move'),
+      'mouse class set'
+    );
   });
 
   await t.test('update only feature class', () => {
@@ -64,9 +79,18 @@ test('ui container classes', async (t) => {
       feature: 'midpoint'
     });
     testUi.updateMapClasses();
-    assert.ok(context.container.classList.contains('mode-direct_select'), 'mode class remains');
-    assert.ok(context.container.classList.contains('feature-midpoint'), 'feature class updated');
-    assert.ok(context.container.classList.contains('mouse-move'), 'mouse class remains');
+    assert.ok(
+      context.container.classList.contains('mode-direct_select'),
+      'mode class remains'
+    );
+    assert.ok(
+      context.container.classList.contains('feature-midpoint'),
+      'feature class updated'
+    );
+    assert.ok(
+      context.container.classList.contains('mouse-move'),
+      'mouse class remains'
+    );
   });
 
   await t.test('update mode and mouse classes', () => {
@@ -75,9 +99,18 @@ test('ui container classes', async (t) => {
       mouse: 'bar'
     });
     testUi.updateMapClasses();
-    assert.ok(context.container.classList.contains('mode-foo'), 'mode class updated');
-    assert.ok(context.container.classList.contains('feature-midpoint'), 'feature class remains');
-    assert.ok(context.container.classList.contains('mouse-bar'), 'mouse class updated');
+    assert.ok(
+      context.container.classList.contains('mode-foo'),
+      'mode class updated'
+    );
+    assert.ok(
+      context.container.classList.contains('feature-midpoint'),
+      'feature class remains'
+    );
+    assert.ok(
+      context.container.classList.contains('mouse-bar'),
+      'mouse class updated'
+    );
   });
 
   await t.test('remove only feature class', () => {
@@ -85,9 +118,18 @@ test('ui container classes', async (t) => {
       feature: null
     });
     testUi.updateMapClasses();
-    assert.ok(context.container.classList.contains('mode-foo'), 'mode class remains');
-    assert.ok(context.container.className.indexOf('feature-') === -1, 'feature class removed');
-    assert.ok(context.container.classList.contains('mouse-bar'), 'mouse class remains');
+    assert.ok(
+      context.container.classList.contains('mode-foo'),
+      'mode class remains'
+    );
+    assert.ok(
+      context.container.className.indexOf('feature-') === -1,
+      'feature class removed'
+    );
+    assert.ok(
+      context.container.classList.contains('mouse-bar'),
+      'mouse class remains'
+    );
   });
 
   await t.test('remove all classes', () => {
@@ -97,9 +139,18 @@ test('ui container classes', async (t) => {
       mouse: null
     });
     testUi.updateMapClasses();
-    assert.ok(context.container.className.indexOf('mode-') === -1, 'mode class removed');
-    assert.ok(context.container.className.indexOf('feature-') === -1, 'feature class still gone');
-    assert.ok(context.container.className.indexOf('mouse-') === -1, 'mouse class removed');
+    assert.ok(
+      context.container.className.indexOf('mode-') === -1,
+      'mode class removed'
+    );
+    assert.ok(
+      context.container.className.indexOf('feature-') === -1,
+      'feature class still gone'
+    );
+    assert.ok(
+      context.container.className.indexOf('mouse-') === -1,
+      'mouse class removed'
+    );
   });
 
   cleanup();
@@ -128,8 +179,14 @@ test('ui buttons with one options.controls', () => {
   const div = testUi.addButtons();
   const buttons = getButtons(div);
   assert.equal(buttons.length, 1, 'one button added');
-  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_line'), 'has line class');
-  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'has control class');
+  assert.ok(
+    buttons[0].classList.contains('mapbox-gl-draw_line'),
+    'has line class'
+  );
+  assert.ok(
+    buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'),
+    'has control class'
+  );
 
   cleanup();
 });
@@ -144,8 +201,11 @@ test('ui buttons control group container inserted above attribution control, in 
   const controlContainer = getControlContainer();
   const testUi = ui(context);
 
-  assert.equal(controlContainer.getElementsByClassName('mapboxgl-ctrl-group').length, 0,
-    'confirm control group does not exist at first');
+  assert.equal(
+    controlContainer.getElementsByClassName('mapboxgl-ctrl-group').length,
+    0,
+    'confirm control group does not exist at first'
+  );
 
   const controlGroup = testUi.addButtons();
   assert.ok(controlGroup, 'control group exists');
@@ -153,7 +213,7 @@ test('ui buttons control group container inserted above attribution control, in 
   cleanup();
 });
 
-test('ui buttons with all options.controls, no attribution control', async (t) => {
+test('ui buttons with all options.controls, no attribution control', async t => {
   /* eslint-disable */
   const { context, cleanup } = createMockContext({
     controls: {
@@ -171,18 +231,58 @@ test('ui buttons with all options.controls, no attribution control', async (t) =
 
   assert.equal(buttons.length, 4, 'one button added');
 
-  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_point'), 'first button has point class');
-  assert.ok(buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'first button has control class');
-  assert.equal(buttons[0].parentNode, controlGroup, 'first button is in controlGroup');
-  assert.ok(buttons[1].classList.contains('mapbox-gl-draw_line'), 'second button has line class');
-  assert.ok(buttons[1].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'second button has control class');
-  assert.equal(buttons[2].parentNode, controlGroup, 'second button is in controlGroup');
-  assert.ok(buttons[2].classList.contains('mapbox-gl-draw_polygon'), 'third button has polygon class');
-  assert.ok(buttons[2].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'third button has control class');
-  assert.equal(buttons[1].parentNode, controlGroup, 'third button is in controlGroup');
-  assert.ok(buttons[3].classList.contains('mapbox-gl-draw_trash'), 'fourth button has trash class');
-  assert.ok(buttons[3].classList.contains('mapbox-gl-draw_ctrl-draw-btn'), 'fourth button has control class');
-  assert.equal(buttons[3].parentNode, controlGroup, 'fourth button is in controlGroup');
+  assert.ok(
+    buttons[0].classList.contains('mapbox-gl-draw_point'),
+    'first button has point class'
+  );
+  assert.ok(
+    buttons[0].classList.contains('mapbox-gl-draw_ctrl-draw-btn'),
+    'first button has control class'
+  );
+  assert.equal(
+    buttons[0].parentNode,
+    controlGroup,
+    'first button is in controlGroup'
+  );
+  assert.ok(
+    buttons[1].classList.contains('mapbox-gl-draw_line'),
+    'second button has line class'
+  );
+  assert.ok(
+    buttons[1].classList.contains('mapbox-gl-draw_ctrl-draw-btn'),
+    'second button has control class'
+  );
+  assert.equal(
+    buttons[2].parentNode,
+    controlGroup,
+    'second button is in controlGroup'
+  );
+  assert.ok(
+    buttons[2].classList.contains('mapbox-gl-draw_polygon'),
+    'third button has polygon class'
+  );
+  assert.ok(
+    buttons[2].classList.contains('mapbox-gl-draw_ctrl-draw-btn'),
+    'third button has control class'
+  );
+  assert.equal(
+    buttons[1].parentNode,
+    controlGroup,
+    'third button is in controlGroup'
+  );
+  assert.ok(
+    buttons[3].classList.contains('mapbox-gl-draw_trash'),
+    'fourth button has trash class'
+  );
+  assert.ok(
+    buttons[3].classList.contains('mapbox-gl-draw_ctrl-draw-btn'),
+    'fourth button has control class'
+  );
+  assert.equal(
+    buttons[3].parentNode,
+    controlGroup,
+    'fourth button is in controlGroup'
+  );
 
   const pointButton = buttons[0];
   const lineButton = buttons[1];
@@ -193,55 +293,152 @@ test('ui buttons with all options.controls, no attribution control', async (t) =
     lineButton.click();
 
     assert.ok(lineButton.classList.contains('active'), 'line button is active');
-    assert.equal(polygonButton.classList.contains('active'), false, 'polygon button is inactive');
-    assert.equal(pointButton.classList.contains('active'), false, 'point button is inactive');
-    assert.equal(trashButton.classList.contains('active'), false, 'trash button is inactive');
+    assert.equal(
+      polygonButton.classList.contains('active'),
+      false,
+      'polygon button is inactive'
+    );
+    assert.equal(
+      pointButton.classList.contains('active'),
+      false,
+      'point button is inactive'
+    );
+    assert.equal(
+      trashButton.classList.contains('active'),
+      false,
+      'trash button is inactive'
+    );
 
     assert.equal(context.events.changeMode.callCount, 1, 'changeMode called');
-    assert.deepEqual(context.events.changeMode.getCall(0).args, ['draw_line_string'], 'with correct arguments');
+    assert.deepEqual(
+      context.events.changeMode.getCall(0).args,
+      ['draw_line_string'],
+      'with correct arguments'
+    );
     context.events.changeMode.resetHistory();
   });
 
   await t.test('click polygon button', () => {
     polygonButton.click();
 
-    assert.equal(lineButton.classList.contains('active'), false, 'line button is inactive');
-    assert.ok(polygonButton.classList.contains('active'), 'polygon button is active');
-    assert.equal(pointButton.classList.contains('active'), false, 'point button is inactive');
-    assert.equal(trashButton.classList.contains('active'), false, 'trash button is inactive');
+    assert.equal(
+      lineButton.classList.contains('active'),
+      false,
+      'line button is inactive'
+    );
+    assert.ok(
+      polygonButton.classList.contains('active'),
+      'polygon button is active'
+    );
+    assert.equal(
+      pointButton.classList.contains('active'),
+      false,
+      'point button is inactive'
+    );
+    assert.equal(
+      trashButton.classList.contains('active'),
+      false,
+      'trash button is inactive'
+    );
 
     assert.equal(context.events.changeMode.callCount, 1, 'changeMode called');
-    assert.deepEqual(context.events.changeMode.getCall(0).args, ['draw_polygon'], 'with correct arguments');
+    assert.deepEqual(
+      context.events.changeMode.getCall(0).args,
+      ['draw_polygon'],
+      'with correct arguments'
+    );
     context.events.changeMode.resetHistory();
   });
 
-  await t.test('programmatically activate point button, then programmatically deactivate', () => {
-    testUi.setActiveButton('point');
+  await t.test(
+    'programmatically activate point button, then programmatically deactivate',
+    () => {
+      testUi.setActiveButton('point');
 
-    assert.equal(lineButton.classList.contains('active'), false, 'line button is inactive');
-    assert.equal(polygonButton.classList.contains('active'), false, 'polygon button is inactive');
-    assert.ok(pointButton.classList.contains('active'), 'point button is active');
-    assert.equal(trashButton.classList.contains('active'), false, 'trash button is inactive');
-    assert.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
+      assert.equal(
+        lineButton.classList.contains('active'),
+        false,
+        'line button is inactive'
+      );
+      assert.equal(
+        polygonButton.classList.contains('active'),
+        false,
+        'polygon button is inactive'
+      );
+      assert.ok(
+        pointButton.classList.contains('active'),
+        'point button is active'
+      );
+      assert.equal(
+        trashButton.classList.contains('active'),
+        false,
+        'trash button is inactive'
+      );
+      assert.equal(
+        context.events.changeMode.callCount,
+        0,
+        'changeMode not called'
+      );
 
-    testUi.setActiveButton();
+      testUi.setActiveButton();
 
-    assert.equal(lineButton.classList.contains('active'), false, 'line button is inactive');
-    assert.equal(polygonButton.classList.contains('active'), false, 'polygon button is inactive');
-    assert.equal(pointButton.classList.contains('active'), false, 'point button is inactive');
-    assert.equal(trashButton.classList.contains('active'), false, 'trash button is inactive');
-    assert.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
-  });
+      assert.equal(
+        lineButton.classList.contains('active'),
+        false,
+        'line button is inactive'
+      );
+      assert.equal(
+        polygonButton.classList.contains('active'),
+        false,
+        'polygon button is inactive'
+      );
+      assert.equal(
+        pointButton.classList.contains('active'),
+        false,
+        'point button is inactive'
+      );
+      assert.equal(
+        trashButton.classList.contains('active'),
+        false,
+        'trash button is inactive'
+      );
+      assert.equal(
+        context.events.changeMode.callCount,
+        0,
+        'changeMode not called'
+      );
+    }
+  );
 
   await t.test('click trash button', () => {
     trashButton.click();
 
-    assert.equal(lineButton.classList.contains('active'), false, 'line button is inactive');
-    assert.equal(polygonButton.classList.contains('active'), false, 'polygon button is inactive');
-    assert.equal(pointButton.classList.contains('active'), false, 'point button is inactive');
-    assert.equal(trashButton.classList.contains('active'), false, 'trash button is inactive');
+    assert.equal(
+      lineButton.classList.contains('active'),
+      false,
+      'line button is inactive'
+    );
+    assert.equal(
+      polygonButton.classList.contains('active'),
+      false,
+      'polygon button is inactive'
+    );
+    assert.equal(
+      pointButton.classList.contains('active'),
+      false,
+      'point button is inactive'
+    );
+    assert.equal(
+      trashButton.classList.contains('active'),
+      false,
+      'trash button is inactive'
+    );
 
-    assert.equal(context.events.changeMode.callCount, 0, 'changeMode not called');
+    assert.equal(
+      context.events.changeMode.callCount,
+      0,
+      'changeMode not called'
+    );
   });
 
   cleanup();

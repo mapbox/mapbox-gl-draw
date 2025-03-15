@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import isTap from '../src/lib/is_tap.js';
+import { isTap } from '../src/lib/is_tap.js';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak
@@ -17,12 +17,24 @@ test('isTap easy', () => {
     time: 1
   };
   const b = {
-    point: { x: 1, y: 1},
+    point: { x: 1, y: 1 },
     time: 1
   };
-  assert.equal(isTap({}, b, testOptions), true, 'true when start is missing point and time');
-  assert.equal(isTap({ time: 2000 }, b, testOptions), true, 'true when start has only time');
-  assert.equal(isTap(a, b, testOptions), true, 'true when start and end match exactly');
+  assert.equal(
+    isTap({}, b, testOptions),
+    true,
+    'true when start is missing point and time'
+  );
+  assert.equal(
+    isTap({ time: 2000 }, b, testOptions),
+    true,
+    'true when start has only time'
+  );
+  assert.equal(
+    isTap(a, b, testOptions),
+    true,
+    'true when start and end match exactly'
+  );
 });
 
 test('isTap when moving barely at all, same times', () => {
@@ -31,7 +43,7 @@ test('isTap when moving barely at all, same times', () => {
     time: 1
   };
   const b = {
-    point: { x: 2, y: 1.5},
+    point: { x: 2, y: 1.5 },
     time: 1
   };
   assert.equal(isTap(a, b, testOptions), true);
@@ -69,7 +81,7 @@ test('isTap when moving barely at all, just before the time limit', () => {
     time: 1
   };
   const b = {
-    point: { x: 2, y: 1.5},
+    point: { x: 2, y: 1.5 },
     time: 250
   };
   assert.equal(isTap(a, b, testOptions), true);
