@@ -59,6 +59,8 @@ export type XY = { x: number; y: number };
 
 export type Coords = Array<[number, number]>;
 
+export type DrawCoords = Array<{ coord_path: string; feature_id: string }>
+
 export interface Entry {
   point: XY;
   time: number;
@@ -159,9 +161,9 @@ interface DrawControls {
 }
 
 interface DrawActionableState {
-  trash: boolean;
-  combineFeatures: boolean;
-  uncombineFeatures: boolean;
+  trash?: boolean;
+  combineFeatures?: boolean;
+  uncombineFeatures?: boolean;
 }
 
 interface DrawFeatureBase<Coordinates> {
@@ -223,14 +225,14 @@ interface DrawPolygon extends DrawFeatureBase<Position[][]> {
   removeCoordinate(path: string): void;
 }
 
-export interface ModeState {
+export interface DirectSelectState {
   featureId: string;
   canDragMove: boolean;
   dragMoveLocation: { lng: number; lat: number; } | undefined
   dragMoving: boolean;
-  feature: DrawFeature;
+  feature: DrawPolygon;
   initialDragPanState?: boolean;
-  selectedCoordPaths: [];
+  selectedCoordPaths: number[];
 }
 
 export type DrawFeature =
@@ -309,7 +311,7 @@ export interface DrawCustomModeThis {
   drawConfig: DrawOptions;
   setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
-    coords: Array<{ coord_path: string; feature_id: string }>
+    coords: DrawCoords
   ): void;
   getSelected(): DrawFeature[];
   getSelectedIds(): string[];
@@ -396,8 +398,8 @@ export interface DrawCustomMode<CustomModeState = any, CustomModeOptions = any> 
   toDisplayFeatures(
     this: DrawCustomModeThis & this,
     state: CustomModeState,
-    geojson: GeoJSON,
-    display: (geojson: GeoJSON) => void
+    geojson: StrictFeature,
+    display: (geojson: StrictFeature) => void
   ): void;
 }
 
@@ -655,7 +657,7 @@ interface DrawStore {
   featureChanged(id: string, options?: DrawStoreOptions): boolean;
   setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
-    coords: Array<{ coord_path: string; feature_id: string }>
+    coords: DrawCoords
   ): void;
   getSelectedCoordinates(): Coords[];
   getSelected(): DrawFeature[];
@@ -665,7 +667,7 @@ interface DrawStore {
   getFeature(id: string): DrawFeature;
   select(id: string): void;
   deselect(features: string | string[]): void;
-  delete(id: string, opts: Record<string, any>): void;
+  delete(id: string | string[], opts: Record<string, any>): void;
   deleteFeature(id: string, opts?: unknown): void;
   add(feature: DrawFeature, opts: Record<string, unknown>): void;
   addFeature(feature: DrawFeature, opts: Record<string, unknown>): void;

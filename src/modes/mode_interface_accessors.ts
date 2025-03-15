@@ -71,7 +71,7 @@ export default class ModeInterface {
     this._ctx.store.deselect(id);
   }
 
-  deleteFeature(id: string, opts: Record<string, any> = {}): void {
+  deleteFeature(id: string | string[], opts: Record<string, any> = {}): void {
     this._ctx.store.delete(id, opts);
   }
 

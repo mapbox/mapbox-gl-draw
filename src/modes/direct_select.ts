@@ -11,20 +11,30 @@ import { doubleClickZoom } from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';
 
-import type { ModeState, DrawCustomMode, MapMouseEvent } from '../types/types';
+import type { DirectSelectState, DrawCustomMode, MapMouseEvent, MapTouchEvent, DrawCoords } from '../types/types';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
+type Event = MapMouseEvent | MapTouchEvent;
+
 interface DirectSelectMode extends DrawCustomMode {
   fireUpdate(): void;
   clickInactive(): void;
-  fireActionable(state: ModeState): void;
-  clickNoTarget(state: ModeState, e: MapMouseEvent): void;
-  startDragging(state: ModeState, e: MapMouseEvent): void;
-  stopDragging(state: ModeState): void;
-  onVertex(state: ModeState, e: MapMouseEvent): void;
-  onMidpoint(state: ModeState, e: MapMouseEvent): void;
+  fireActionable(state: DirectSelectState): void;
+  clickNoTarget(state: DirectSelectState, e: Event): void;
+  startDragging(state: DirectSelectState, e: Event): void;
+  stopDragging(state: DirectSelectState): void;
+  onVertex(state: DirectSelectState, e: Event): void;
+  onMidpoint(state: DirectSelectState, e: Event): void;
+  onFeature(state: DirectSelectState, e: Event): void;
+  dragFeature(state: DirectSelectState, e: Event, delta: { lng: number, lat: number }): void;
+  dragVertex(state: DirectSelectState, e: Event, delta: { lng: number, lat: number }): void;
+  clickActiveFeature(state: DirectSelectState): void;
+  pathsToCoordinates(featureId: string, paths: []): DrawCoords;
+  _start(state: DirectSelectState, e: Event): void;
+  _select(state: DirectSelectState, e: Event): void;
+  _end(state: DirectSelectState): void;
 }
 
 const DirectSelect: DirectSelectMode = {
@@ -68,12 +78,13 @@ const DirectSelect: DirectSelectMode = {
 
   onVertex: function (state, e) {
     this.startDragging(state, e);
-    const about = e.featureTarget.properties;
-    const selectedIndex = state.selectedCoordPaths.indexOf(about.coord_path);
-    if (!isShiftDown(e) && selectedIndex === -1) {
-      state.selectedCoordPaths = [about.coord_path];
-    } else if (isShiftDown(e) && selectedIndex === -1) {
-      state.selectedCoordPaths.push(about.coord_path);
+    const { coord_path } = e.featureTarget.properties;
+
+    const selectedIndex = state.selectedCoordPaths.indexOf(coord_path);
+    if (!isShiftDown(e as MapMouseEvent) && selectedIndex === -1) {
+      state.selectedCoordPaths = [coord_path];
+    } else if (isShiftDown(e as MapMouseEvent) && selectedIndex === -1) {
+      state.selectedCoordPaths.push(coord_path);
     }
 
     const selectedCoordinates = this.pathsToCoordinates(
@@ -84,9 +95,6 @@ const DirectSelect: DirectSelectMode = {
   },
 
   onMidpoint: function (state, e) {
-
-    console.log('STATE LOOKS LIKE THIS', state);
-
     this.startDragging(state, e);
     const about = e.featureTarget.properties;
     state.feature.addCoordinate(about.coord_path, about.lng, about.lat);
@@ -237,7 +245,7 @@ const DirectSelect: DirectSelectMode = {
     if (isMidpoint(e)) return this.onMidpoint(state, e);
   },
 
-  TouchStart: function (state, e) { return this._start(state, e); },
+  onTouchStart: function (state, e) { return this._start(state, e); },
   onMouseDown: function (state, e) { return this._start(state, e); },
 
   onDrag: function (state, e) {
@@ -275,7 +283,7 @@ const DirectSelect: DirectSelectMode = {
   onMouseUp: function (state) { return this._end(state); },
   onTouchEnd: function (state) { return this._end(state); },
 
-  toDisplayFeatures: function (state: ModeState, geojson, push) {
+  toDisplayFeatures: function (state, geojson, push) {
     if (state.featureId === geojson.properties.id) {
       geojson.properties.active = Constants.activeStates.ACTIVE;
       push(geojson);
