@@ -232,7 +232,7 @@ export interface DirectSelectState {
   dragMoving: boolean;
   feature: DrawPolygon;
   initialDragPanState?: boolean;
-  selectedCoordPaths: number[];
+  selectedCoordPaths: string[];
 }
 
 export type DrawFeature =
@@ -308,6 +308,7 @@ interface DrawActionableEvent extends DrawEvent {
 
 export interface DrawCustomModeThis {
   map: Map;
+  _ctx: CTX;
   drawConfig: DrawOptions;
   setSelected(features?: DrawFeature[]): void;
   setSelectedCoordinates(
@@ -409,11 +410,6 @@ interface Modes {
   draw_point: DrawCustomMode;
   simple_select: DrawCustomMode;
   direct_select: DrawCustomMode;
-}
-
-export interface ModeCTX extends DrawCustomMode {
-  map: Map;
-  _ctx: CTX;
 }
 
 // Convert these to use imports from constants

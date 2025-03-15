@@ -11,14 +11,14 @@ import { doubleClickZoom } from '../lib/double_click_zoom';
 import * as Constants from '../constants';
 import moveFeatures from '../lib/move_features';
 
-import type { DirectSelectState, ModeCTX, MapMouseEvent, MapTouchEvent, DrawCoords, StrictFeature } from '../types/types';
+import type { DirectSelectState, DrawCustomMode, MapMouseEvent, MapTouchEvent, DrawCoords, StrictFeature } from '../types/types';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
 
 type Event = MapMouseEvent | MapTouchEvent;
 
-interface DirectSelectMode extends ModeCTX {
+interface DirectSelectMode extends DrawCustomMode {
   fireUpdate(): void;
   clickInactive(): void;
   fireActionable(state: DirectSelectState): void;
@@ -31,7 +31,7 @@ interface DirectSelectMode extends ModeCTX {
   dragFeature(state: DirectSelectState, e: Event, delta: { lng: number, lat: number }): void;
   dragVertex(state: DirectSelectState, e: Event, delta: { lng: number, lat: number }): void;
   clickActiveFeature(state: DirectSelectState): void;
-  pathsToCoordinates(featureId: string, paths: number[]): DrawCoords;
+  pathsToCoordinates(featureId: string, paths: string[]): DrawCoords;
   _start(state: DirectSelectState, e: Event): void;
   _select(state: DirectSelectState, e: Event): void;
   _end(state: DirectSelectState): void;
@@ -181,8 +181,6 @@ const DirectSelect: DirectSelectMode = {
       this.pathsToCoordinates(featureId, state.selectedCoordPaths)
     );
     this.setSelected(featureId);
-
-    console.log('does this have map?', this);
     doubleClickZoom.disable(this);
 
     this.setActionableState({
