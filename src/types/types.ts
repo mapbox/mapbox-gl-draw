@@ -1,14 +1,3 @@
-import type {
-  BBox,
-  Feature,
-  FeatureCollection,
-  GeoJSON,
-  GeoJsonTypes,
-  Geometry,
-  Point,
-  Position
-} from 'geojson';
-
 import {
   classes,
   sources,
@@ -22,6 +11,17 @@ import {
   activeStates,
   interactions
 } from '../constants';
+
+import type {
+  BBox,
+  Feature,
+  FeatureCollection,
+  GeoJSON,
+  GeoJsonTypes,
+  Geometry,
+  Point,
+  Position
+} from 'geojson';
 
 import type {
   CircleLayerSpecification,
@@ -112,8 +112,8 @@ interface DrawFeatureBase<Coordinates> {
   incomingCoords: this['setCoordinates'];
   setCoordinates(coords: Coordinates): void;
   getCoordinates(): Coordinates;
-  getCoordinate(path: string): Position;
-  updateCoordinate(path: string, lng: number, lat: number): void;
+  getCoordinate(path: number): Position;
+  updateCoordinate(path: number, lng: number, lat: number): void;
   setProperty(property: string, value: any): void;
   toGeoJSON(): GeoJSON;
 }
