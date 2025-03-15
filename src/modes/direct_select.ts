@@ -206,7 +206,7 @@ const DirectSelect: DirectSelectMode = {
     this.clearSelectedCoordinates();
     this.fireActionable(state);
     if (state.feature.isValid() === false) {
-      this.deleteFeature([state.featureId]);
+      this.deleteFeature(state.featureId);
       this.changeMode(Constants.modes.SIMPLE_SELECT, {});
     }
   },
