@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createVertex } from '../src/lib/create_vertex.js';
+import { createVertex } from '../src/lib/create_vertex';
 
 test('createVertex', () => {
   assert.deepEqual(createVertex('foo', [1, 2], '3.4.5', true), {

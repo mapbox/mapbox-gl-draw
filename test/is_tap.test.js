@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isTap } from '../src/lib/is_tap.js';
+import { isTap } from '../src/lib/is_tap';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak
-// the actual constants in `is_tap.js` without having to
+// the actual constants in `is_tap` without having to
 // rewrite tests.
 const testOptions = {
   tolerance: 25,

@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spy } from 'sinon';
 
-import Store from '../src/store.js';
-import createFeature from './utils/create_feature.js';
-import getPublicMemberKeys from './utils/get_public_member_keys.js';
-import createMap from './utils/create_map.js';
+import Store from '../src/store';
+import createFeature from './utils/create_feature';
+import getPublicMemberKeys from './utils/get_public_member_keys';
+import createMap from './utils/create_map';
 
 function createStore() {
   const ctx = {

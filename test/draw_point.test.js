@@ -4,14 +4,14 @@ import MapboxDraw from '../index';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
-import makeMouseEvent from './utils/make_mouse_event.js';
-import makeTouchEvent from './utils/make_touch_event.js';
-import drawPointModeObject from '../src/modes/draw_point.js';
-import Point from '../src/feature_types/point.js';
-import createMockDrawModeContext from './utils/create_mock_draw_mode_context.js';
-import createMockLifecycleContext from './utils/create_mock_lifecycle_context.js';
-import { escapeEvent, enterEvent } from './utils/key_events.js';
-import { objectToMode } from '../src/modes/object_to_mode.js';
+import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
+import drawPointModeObject from '../src/modes/draw_point';
+import Point from '../src/feature_types/point';
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import { escapeEvent, enterEvent } from './utils/key_events';
+import { objectToMode } from '../src/modes/object_to_mode';
 const drawPointMode = objectToMode(drawPointModeObject);
 
 test('draw_point mode initialization', () => {

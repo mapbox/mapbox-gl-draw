@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import createMap from './utils/create_map.js';
-import { createSupplementaryPoints } from '../src/lib/create_supplementary_points.js';
+import createMap from './utils/create_map';
+import { createSupplementaryPoints } from '../src/lib/create_supplementary_points';
 
 test('createSupplementaryPoints with a point', () => {
   const point = {

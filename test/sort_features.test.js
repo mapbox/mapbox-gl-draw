@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import sortFeatures from '../src/lib/sort_features.js';
+import sortFeatures from '../src/lib/sort_features';
 
 test('sortFeatures', () => {
   const features = [

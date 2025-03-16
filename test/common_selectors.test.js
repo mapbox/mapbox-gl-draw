@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import * as commonSelectors from '../src/lib/common_selectors.js';
+import * as commonSelectors from '../src/lib/common_selectors';
 
 test('commonSelectors.isOfMetaType', () => {
   const isFoo = commonSelectors.isOfMetaType('foo');

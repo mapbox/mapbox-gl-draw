@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import StringSet from '../src/lib/string_set.js';
+import StringSet from '../src/lib/string_set';
 
 test('StringSet constructor and API', () => {
   const set = new StringSet();

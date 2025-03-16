@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import getGeoJSON from './utils/get_geojson.js';
-import createMockFeatureContext from './utils/create_mock_feature_context.js';
-import Point from '../src/feature_types/point.js';
-import LineString from '../src/feature_types/line_string.js';
-import Polygon from '../src/feature_types/polygon.js';
-import moveFeatures from '../src/lib/move_features.js';
+import getGeoJSON from './utils/get_geojson';
+import createMockFeatureContext from './utils/create_mock_feature_context';
+import Point from '../src/feature_types/point';
+import LineString from '../src/feature_types/line_string';
+import Polygon from '../src/feature_types/polygon';
+import moveFeatures from '../src/lib/move_features';
 
 const mockFeatureContext = createMockFeatureContext();
 

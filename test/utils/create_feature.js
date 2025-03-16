@@ -1,5 +1,5 @@
-import { generateID } from '../../src/lib/id.js';
-import getGeoJSON from './get_geojson.js';
+import { generateID } from '../../src/lib/id';
+import getGeoJSON from './get_geojson';
 
 const usedIds = new Set();
 

@@ -6,10 +6,10 @@ import { spy } from 'sinon';
 import MapboxDraw from '../index';
 import click from './utils/mouse_click';
 import createMap from './utils/create_map';
-import { setupAfterNextRender } from './utils/after_next_render.js';
-import makeMouseEvent from './utils/make_mouse_event.js';
+import { setupAfterNextRender } from './utils/after_next_render';
+import makeMouseEvent from './utils/make_mouse_event';
 
-import { backspaceEvent, enterEvent, escapeEvent } from './utils/key_events.js';
+import { backspaceEvent, enterEvent, escapeEvent } from './utils/key_events';
 
 test('ensure user interactions fire right events', async t => {
   const container = document.createElement('div');

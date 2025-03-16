@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isEventAtCoordinates } from '../src/lib/is_event_at_coordinates.js';
+import { isEventAtCoordinates } from '../src/lib/is_event_at_coordinates';
 
 test('isEventAtCoordinates', () => {
   assert.ok(

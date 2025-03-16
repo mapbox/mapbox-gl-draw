@@ -4,14 +4,14 @@ import MapboxDraw from '../index';
 import mouseClick from './utils/mouse_click';
 import touchTap from './utils/touch_tap';
 import createMap from './utils/create_map';
-import makeMouseEvent from './utils/make_mouse_event.js';
-import makeTouchEvent from './utils/make_touch_event.js';
-import drawLineStringModeObject from '../src/modes/draw_line_string.js';
-import LineString from '../src/feature_types/line_string.js';
-import createMockDrawModeContext from './utils/create_mock_draw_mode_context.js';
-import createMockLifecycleContext from './utils/create_mock_lifecycle_context.js';
-import { objectToMode } from '../src/modes/object_to_mode.js';
-import { setupAfterNextRender } from './utils/after_next_render.js';
+import makeMouseEvent from './utils/make_mouse_event';
+import makeTouchEvent from './utils/make_touch_event';
+import drawLineStringModeObject from '../src/modes/draw_line_string';
+import LineString from '../src/feature_types/line_string';
+import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
+import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
+import { objectToMode } from '../src/modes/object_to_mode';
+import { setupAfterNextRender } from './utils/after_next_render';
 
 const drawLineStringMode = objectToMode(drawLineStringModeObject);
 
@@ -21,7 +21,7 @@ import {
   startLineStringEvent,
   startPolygonEvent,
   escapeEvent
-} from './utils/key_events.js';
+} from './utils/key_events';
 
 test('draw_line_string mode initialization', () => {
   const context = createMockDrawModeContext();

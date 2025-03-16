@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isClick } from '../src/lib/is_click.js';
+import { isClick } from '../src/lib/is_click';
 
 // By adding these values as options and stating them in the test,
 // we can know the calculation works from the tests, but tweak
-// the actual constants in `is_click.js` without having to
+// the actual constants in `is_click` without having to
 // rewrite tests.
 const testOptions = {
   fineTolerance: 4,

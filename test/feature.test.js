@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { spy } from 'sinon';
-import Feature from '../src/feature_types/feature.js';
-import createFeature from './utils/create_feature.js';
-import getPublicMemberKeys from './utils/get_public_member_keys.js';
-import createMockCtx from './utils/create_mock_feature_context.js';
+import Feature from '../src/feature_types/feature';
+import createFeature from './utils/create_feature';
+import getPublicMemberKeys from './utils/get_public_member_keys';
+import createMockCtx from './utils/create_mock_feature_context';
 
 test('Feature contrusctor and API', () => {
   const featureGeoJson = createFeature('line');
