@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import Point from '@mapbox/point-geometry';
-import mouseEventPoint from '../src/lib/mouse_event_point';
+import { mouseEventPoint } from '../src/lib/mouse_event_point';
 
 test('mouseEventPoint', () => {
   const mockContainer = {

@@ -1,9 +1,9 @@
 import * as CommonSelectors from '../lib/common_selectors';
-import mouseEventPoint from '../lib/mouse_event_point';
+import { mouseEventPoint } from '../lib/mouse_event_point';
 import { createSupplementaryPoints } from '../lib/create_supplementary_points';
 import StringSet from '../lib/string_set';
 import { doubleClickZoom } from '../lib/double_click_zoom';
-import moveFeatures from '../lib/move_features';
+import { moveFeatures } from '../lib/move_features';
 import * as Constants from '../constants';
 
 const SimpleSelect = {

@@ -1,5 +1,5 @@
-import sortFeatures from './sort_features';
-import mapEventToBoundingBox from './map_event_to_bounding_box';
+import { sortFeatures } from './sort_features';
+import { mapEventToBoundingBox } from './map_event_to_bounding_box';
 import * as Constants from '../constants';
 import StringSet from './string_set';
 

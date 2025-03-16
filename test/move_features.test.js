@@ -5,7 +5,7 @@ import createMockFeatureContext from './utils/create_mock_feature_context';
 import Point from '../src/feature_types/point';
 import LineString from '../src/feature_types/line_string';
 import Polygon from '../src/feature_types/polygon';
-import moveFeatures from '../src/lib/move_features';
+import { moveFeatures } from '../src/lib/move_features';
 
 const mockFeatureContext = createMockFeatureContext();
 

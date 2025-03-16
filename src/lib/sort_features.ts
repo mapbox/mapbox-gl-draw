@@ -16,7 +16,7 @@ interface DrawFeature extends Feature {
   area?: number;
 }
 
-function comparator(a: DrawFeature, b: DrawFeature) {
+const comparator = (a: DrawFeature, b: DrawFeature) => {
   const score =
     FEATURE_SORT_RANKS[a.geometry.type] - FEATURE_SORT_RANKS[b.geometry.type];
 
@@ -33,7 +33,7 @@ function comparator(a: DrawFeature, b: DrawFeature) {
 }
 
 // Sort in the order above, then sort polygons by area ascending.
-function sortFeatures(features: Array<DrawFeature>) {
+export const sortFeatures = (features: Array<DrawFeature>) => {
   return features
     .map(feature => {
       if (feature.geometry.type === Constants.geojsonTypes.POLYGON) {
@@ -51,5 +51,3 @@ function sortFeatures(features: Array<DrawFeature>) {
       return feature;
     });
 }
-
-export default sortFeatures;
