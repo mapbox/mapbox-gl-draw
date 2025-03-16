@@ -107,7 +107,7 @@ export default class Store {
   }
 
   delete(featureIds: string | string[], options: DrawStoreOptions = {}): this {
-    const deletedFeatures: DrawFeature[] = [];
+    const deletedFeatures = [];
     toDenseArray(featureIds).forEach(id => {
       if (!this._featureIds.has(id)) return;
       this._featureIds.delete(id);
@@ -162,7 +162,7 @@ export default class Store {
     return this;
   }
 
-  deselect(featureIds: string[], options: DrawStoreOptions = {}): this {
+  deselect(featureIds: (string | number)[], options: DrawStoreOptions = {}): this {
     toDenseArray(featureIds).forEach(id => {
       if (!this._selectedFeatureIds.has(id)) return;
       this._selectedFeatureIds.delete(id);
@@ -174,10 +174,10 @@ export default class Store {
   }
 
   setSelected(featureIds: string[], options: DrawStoreOptions = {}): this {
-    featureIds = toDenseArray(featureIds);
+    featureIds = toDenseArray(featureIds) as string[];
 
     // Deselect any features not in the new selection
-    this.deselect(this._selectedFeatureIds.values().filter(id => featureIds.indexOf(id) === -1), { silent: options.silent });
+    this.deselect(this._selectedFeatureIds.values().filter(id => featureIds.indexOf(id as string) === -1), { silent: options.silent });
 
     // Select any features in the new selection that were not already selected
     this.select(featureIds.filter(id => !this._selectedFeatureIds.has(id)), { silent: options.silent });
