@@ -1,5 +1,5 @@
 import runSetup from './src/setup';
-import setupOptions from './src/options';
+import { configureOptions } from './src/options';
 import setupAPI from './src/api';
 import * as modes from './src/modes/index';
 import * as Constants from './src/constants';
@@ -7,7 +7,7 @@ import * as lib from './src/lib/index';
 import type { DrawOptions, Draw } from './src/types/types';
 
 const setupDraw = (options: DrawOptions, api: Draw) => {
-  options = setupOptions(options);
+  options = configureOptions(options);
 
   const ctx = {
     options

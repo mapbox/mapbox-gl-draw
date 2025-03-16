@@ -1,6 +1,7 @@
 import * as Constants from './constants';
 import * as modes from './modes/index';
 import styles from './lib/theme';
+import { DrawOptions } from './types/types';
 
 type Controls = {
   point: boolean;
@@ -12,22 +13,7 @@ type Controls = {
   [key: string]: boolean;
 };
 
-type Options = {
-  defaultMode?: string;
-  keybindings?: boolean;
-  touchEnabled?: boolean;
-  clickBuffer?: number;
-  touchBuffer?: number;
-  boxSelect?: boolean;
-  displayControlsDefault?: boolean;
-  styles?: any[];
-  modes?: typeof modes;
-  controls?: Partial<Controls>;
-  userProperties?: boolean;
-  suppressAPIEvents?: boolean;
-};
-
-const defaultOptions: Options = {
+const defaultOptions = {
   defaultMode: Constants.modes.SIMPLE_SELECT,
   keybindings: true,
   touchEnabled: true,
@@ -71,7 +57,7 @@ function addSources(styles: any[], sourceBucket: 'hot' | 'cold'): any[] {
   });
 }
 
-export default function configureOptions(options: Options = {}): Options {
+export const configureOptions = (options: DrawOptions = {}): DrawOptions => {
   let withDefaults = { ...options };
 
   if (!options.controls) {
@@ -82,7 +68,7 @@ export default function configureOptions(options: Options = {}): Options {
     ? { ...hideControls, ...options.controls }
     : { ...showControls, ...options.controls };
 
-  withDefaults = { ...defaultOptions, ...withDefaults };
+  withDefaults = { ...defaultOptions, ...withDefaults } as DrawOptions;
 
   withDefaults.styles = addSources(withDefaults.styles || [], 'cold').concat(
     addSources(withDefaults.styles || [], 'hot')
