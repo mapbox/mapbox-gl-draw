@@ -11,7 +11,7 @@ import LineString from './feature_types/line_string';
 import Point from './feature_types/point';
 import MultiFeature from './feature_types/multi_feature';
 
-import type { CTX, Draw } from './types/types';
+import type { CTX, Draw, StrictFeature, MapMouseEvent } from './types/types';
 
 const featureTypes = {
   Polygon,
@@ -32,7 +32,8 @@ export default function (ctx: CTX, api: Draw) {
       : true;
 
   api.getFeatureIdsAt = (point) => {
-    const features = featuresAt.click({ point }, null, ctx);
+    const event = { point } as MapMouseEvent;
+    const features = featuresAt.click(event, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 
@@ -42,17 +43,17 @@ export default function (ctx: CTX, api: Draw) {
 
   api.getSelected = () => {
     return {
-      type: Constants.geojsonTypes.FEATURE_COLLECTION,
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
       features: ctx.store
         .getSelectedIds()
         .map(id => ctx.store.get(id))
-        .map(feature => feature.toGeoJSON())
+        .map(feature => feature.toGeoJSON()) as StrictFeature[]
     };
   };
 
   api.getSelectedPoints = () => {
     return {
-      type: Constants.geojsonTypes.FEATURE_COLLECTION,
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
       features: ctx.store.getSelectedCoordinates().map(coordinate => ({
         type: Constants.geojsonTypes.FEATURE,
         properties: {},
@@ -60,7 +61,7 @@ export default function (ctx: CTX, api: Draw) {
           type: Constants.geojsonTypes.POINT,
           coordinates: coordinate.coordinates
         }
-      }))
+      })) as StrictFeature[]
     };
   };
 
@@ -113,7 +114,7 @@ export default function (ctx: CTX, api: Draw) {
         const originalProperties = internalFeature.properties;
         internalFeature.properties = feature.properties;
         if (!isEqual(originalProperties, feature.properties)) {
-          ctx.store.featureChanged(internalFeature.id, { silent });
+          ctx.store.featureChanged(internalFeature.id as string, { silent });
         }
         if (
           !isEqual(
@@ -134,14 +135,14 @@ export default function (ctx: CTX, api: Draw) {
   api.get = (id) => {
     const feature = ctx.store.get(id);
     if (feature) {
-      return feature.toGeoJSON();
+      return feature.toGeoJSON() as StrictFeature;
     }
   };
 
   api.getAll = () => {
     return {
-      type: Constants.geojsonTypes.FEATURE_COLLECTION,
-      features: ctx.store.getAll().map(feature => feature.toGeoJSON())
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
+      features: ctx.store.getAll().map(feature => feature.toGeoJSON()) as StrictFeature[]
     };
   };
 

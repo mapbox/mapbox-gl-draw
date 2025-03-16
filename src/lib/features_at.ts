@@ -4,7 +4,7 @@ import * as Constants from '../constants';
 import StringSet from './string_set';
 
 import type { BBox } from 'geojson';
-import type { CTX, DrawStyleLayer, MapMouseEvent, MapTouchEvent } from '../types/types';
+import type { CTX, MapMouseEvent, MapTouchEvent } from '../types/types';
 
 type E = MapMouseEvent | MapTouchEvent;
 

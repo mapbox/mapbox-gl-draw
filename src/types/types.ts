@@ -102,7 +102,6 @@ interface DrawPolygon extends DrawFeatureBase<Position[][]> {
 }
 
 interface DrawFeatureBase<Coordinates> {
-  readonly properties: Readonly<Feature['properties']>;
   readonly coordinates: Coordinates;
   readonly id: NonNullable<Feature['id']>;
   readonly type: GeoJsonTypes;
@@ -115,6 +114,7 @@ interface DrawFeatureBase<Coordinates> {
   getCoordinate(path: number): Position;
   updateCoordinate(path: number, lng: number, lat: number): void;
   setProperty(property: string, value: any): void;
+  properties: Readonly<Feature['properties']>;
   toGeoJSON(): GeoJSON;
 }
 
@@ -167,7 +167,6 @@ interface DrawActionableState {
 }
 
 interface DrawFeatureBase<Coordinates> {
-  readonly properties: Readonly<Feature['properties']>;
   readonly coordinates: Coordinates;
   readonly id: NonNullable<Feature['id']>;
   readonly type: GeoJsonTypes;
@@ -180,6 +179,7 @@ interface DrawFeatureBase<Coordinates> {
   getCoordinate(path: string): Position;
   updateCoordinate(path: string, lng: number, lat: number): void;
   setProperty(property: string, value: any): void;
+  properties: Readonly<Feature['properties']>;
   toGeoJSON(): GeoJSON;
 }
 
@@ -712,11 +712,11 @@ export declare class Draw implements IControl {
   static modes: Modes;
   static constants: Constants;
   static lib: Lib;
-  modes: DrawModes;
+  modes: typeof modes;
   getDefaultPosition: () => ControlPosition;
   constructor(options?: DrawOptions);
   add(geojson: Feature | StrictFeatureCollection | Geometry): string[];
-  get(featureId: string): Feature | undefined;
+  get(featureId: string): StrictFeature | undefined;
   getFeatureIdsAt(point: { x: number; y: number }): string[];
   getSelectedIds(): string[];
   getSelected(): StrictFeatureCollection;
