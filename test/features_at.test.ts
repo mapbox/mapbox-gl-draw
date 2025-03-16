@@ -1,3 +1,4 @@
+import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as featuresAt from '../src/lib/features_at';

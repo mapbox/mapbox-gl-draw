@@ -5,7 +5,9 @@
     "moduleResolution": "Node",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "noEmit": true
+    "allowJs": true,
+    "noEmit": true,
+    "types": ["node"]
   },
   "include": [
     "./src/**/*",

@@ -1,4 +1,5 @@
 /* eslint no-shadow:[0] */
+import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import createSyntheticEvent from 'synthetic-dom-events';

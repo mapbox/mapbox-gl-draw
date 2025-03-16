@@ -74,14 +74,6 @@ interface Modes {
   direct_select: DrawCustomMode;
 }
 
-export interface SelectedDrawModeFeature {
-  id: string;
-  type: string;
-  ctx: CTX;
-  properties: Record<string, unknown>
-  coordinates: Array<[number, number]>
-}
-
 interface DrawPoint extends DrawFeatureBase<Position> {
   readonly type: 'Point';
   getCoordinate(): Position;

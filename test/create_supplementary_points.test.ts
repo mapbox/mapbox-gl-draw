@@ -1,3 +1,4 @@
+import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import createMap from './utils/create_map';

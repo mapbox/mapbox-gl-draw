@@ -1,4 +1,5 @@
 /* eslint no-shadow:[0] */
+import './mock-browser';
 import fs from 'fs';
 import path from 'path';
 import test from 'node:test';

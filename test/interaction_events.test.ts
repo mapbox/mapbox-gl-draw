@@ -1,5 +1,6 @@
 // These tests ensure that user interactions fire the right events
 
+import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spy } from 'sinon';

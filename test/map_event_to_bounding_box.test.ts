@@ -1,3 +1,4 @@
+import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mapEventToBoundingBox } from '../src/lib/map_event_to_bounding_box';
