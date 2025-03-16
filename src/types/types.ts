@@ -183,7 +183,7 @@ interface DrawFeatureBase<Coordinates> {
   toGeoJSON(): GeoJSON;
 }
 
-interface DrawMultiFeature<
+export interface DrawMultiFeature<
   Type extends 'MultiPoint' | 'MultiLineString' | 'MultiPolygon'
 > extends Omit<
     DrawFeatureBase<

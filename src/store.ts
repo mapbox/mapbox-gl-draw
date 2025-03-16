@@ -2,18 +2,16 @@ import { toDenseArray } from './lib/to_dense_array';
 import StringSet from './lib/string_set';
 import render from './render';
 import * as Constants from './constants';
-import type { CTX, StrictFeature, Coords, DrawStoreOptions } from './types/types';
-
-type MapConfig = Record<string, boolean>;
+import type { CTX, DrawFeature, DrawCoords, DrawStoreOptions } from './types/types';
 
 export default class Store {
-  private _features: Record<string, StrictFeature> = {};
+  private _features: Record<string, DrawFeature> = {};
   private _featureIds = new StringSet();
   private _selectedFeatureIds = new StringSet();
-  private _selectedCoordinates: Coords[] = [];
+  private _selectedCoordinates: DrawCoords = [];
   private _changedFeatureIds = new StringSet();
   private _emitSelectionChange = false;
-  private _mapInitialConfig: MapConfig = {};
+  private _mapInitialConfig: Record<string, boolean> = {};
   private ctx: CTX;
   private renderRequest: number | null = null;
 
@@ -32,7 +30,9 @@ export default class Store {
 
         if (this._emitSelectionChange) {
           this.ctx.events.fire(Constants.events.SELECTION_CHANGE, {
-            features: this.getSelected().map(feature => feature.toGeoJSON()),
+            features: this.getSelected().map(feature => {
+              return feature.toGeoJSON()
+            }),
             points: this.getSelectedCoordinates().map(coordinate => ({
               type: Constants.geojsonTypes.FEATURE,
               properties: {},
@@ -66,7 +66,7 @@ export default class Store {
     return this;
   }
 
-  featureCreated(featureId: string, options: DrawStoreOptions = {}): this {
+  featureCreated(featureId, options: DrawStoreOptions = {}): this {
     this._changedFeatureIds.add(featureId);
     if (!options.silent) {
       const feature = this.get(featureId);
@@ -86,7 +86,7 @@ export default class Store {
     return this;
   }
 
-  getChangedIds(): string[] {
+  getChangedIds() {
     return this._changedFeatureIds.values();
   }
 
@@ -95,11 +95,11 @@ export default class Store {
     return this;
   }
 
-  getAllIds(): string[] {
+  getAllIds() {
     return this._featureIds.values();
   }
 
-  add(feature: StrictFeature, options: DrawStoreOptions = {}): this {
+  add(feature: DrawFeature, options: DrawStoreOptions = {}): this {
     this._features[feature.id] = feature;
     this._featureIds.add(feature.id);
     this.featureCreated(feature.id, { silent: options.silent });
@@ -107,7 +107,7 @@ export default class Store {
   }
 
   delete(featureIds: string | string[], options: DrawStoreOptions = {}): this {
-    const deletedFeatures: StrictFeature[] = [];
+    const deletedFeatures: DrawFeature[] = [];
     toDenseArray(featureIds).forEach(id => {
       if (!this._featureIds.has(id)) return;
       this._featureIds.delete(id);
@@ -127,27 +127,29 @@ export default class Store {
     return this;
   }
 
-  get(id: string): StrictFeature {
+  get(id: string) {
     return this._features[id];
   }
 
-  getAll(): StrictFeature[] {
+  getAll() {
     return Object.values(this._features);
   }
 
-  getSelectedIds(): string[] {
+  getSelectedIds() {
     return this._selectedFeatureIds.values();
   }
 
-  getSelected(): StrictFeature[] {
-    return this.getSelectedIds().map(id => this.get(id));
+  getSelected() {
+    return this.getSelectedIds().map(id => this.get(id as string));
   }
 
-  getSelectedCoordinates(): Coords[] {
-    return this._selectedCoordinates.map(coordinate => {
+  getSelectedCoordinates() {
+    const coordinates = this._selectedCoordinates.map(coordinate => {
       const feature = this.get(coordinate.feature_id);
       return { coordinates: feature.getCoordinate(coordinate.coord_path) };
     });
+
+    return coordinates;
   }
 
   select(featureIds: string[], options: DrawStoreOptions = {}): this {
