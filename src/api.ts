@@ -31,16 +31,16 @@ export default function (ctx: CTX, api: Draw) {
       ? !!ctx.options.suppressAPIEvents
       : true;
 
-  api.getFeatureIdsAt = function (point) {
+  api.getFeatureIdsAt = (point) => {
     const features = featuresAt.click({ point }, null, ctx);
     return features.map(feature => feature.properties.id);
   };
 
-  api.getSelectedIds = function () {
+  api.getSelectedIds = () => {
     return ctx.store.getSelectedIds();
   };
 
-  api.getSelected = function () {
+  api.getSelected = () => {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store
@@ -50,7 +50,7 @@ export default function (ctx: CTX, api: Draw) {
     };
   };
 
-  api.getSelectedPoints = function () {
+  api.getSelectedPoints = () => {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getSelectedCoordinates().map(coordinate => ({
@@ -64,7 +64,7 @@ export default function (ctx: CTX, api: Draw) {
     };
   };
 
-  api.set = function (featureCollection) {
+  api.set = (featureCollection) => {
     if (
       featureCollection.type === undefined ||
       featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION ||
@@ -86,7 +86,7 @@ export default function (ctx: CTX, api: Draw) {
     return newIds;
   };
 
-  api.add = function (geojson) {
+  api.add = (geojson) => {
     const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
 
     const ids = featureCollection.features.map(feature => {
@@ -131,21 +131,21 @@ export default function (ctx: CTX, api: Draw) {
     return ids;
   };
 
-  api.get = function (id) {
+  api.get = (id) => {
     const feature = ctx.store.get(id);
     if (feature) {
       return feature.toGeoJSON();
     }
   };
 
-  api.getAll = function () {
+  api.getAll = () => {
     return {
       type: Constants.geojsonTypes.FEATURE_COLLECTION,
       features: ctx.store.getAll().map(feature => feature.toGeoJSON())
     };
   };
 
-  api.delete = function (featureIds) {
+  api.delete = (featureIds) => {
     ctx.store.delete(featureIds, { silent });
     // If we were in direct select mode and our selected feature no longer exists
     // (because it was deleted), we need to get out of that mode.
@@ -163,7 +163,7 @@ export default function (ctx: CTX, api: Draw) {
     return api;
   };
 
-  api.deleteAll = function () {
+  api.deleteAll = () => {
     ctx.store.delete(ctx.store.getAllIds(), { silent });
     // If we were in direct select mode, now our selected feature no longer exists,
     // so escape that mode.
@@ -178,7 +178,7 @@ export default function (ctx: CTX, api: Draw) {
     return api;
   };
 
-  api.changeMode = function (mode, modeOptions = {}) {
+  api.changeMode = (mode, modeOptions: { featureIds?: string[], featureId?: string } = {}) => {
     // Avoid changing modes just to re-select what's already selected
     if (
       mode === Constants.modes.SIMPLE_SELECT &&
@@ -210,26 +210,26 @@ export default function (ctx: CTX, api: Draw) {
     return api;
   };
 
-  api.getMode = function () {
-    return ctx.events.getMode();
+  api.getMode = () => {
+    return ctx.events.getMode() as string;
   };
 
-  api.trash = function () {
+  api.trash = () => {
     ctx.events.trash({ silent });
     return api;
   };
 
-  api.combineFeatures = function () {
-    ctx.events.combineFeatures({ silent });
+  api.combineFeatures = () => {
+    ctx.events.combineFeatures();
     return api;
   };
 
-  api.uncombineFeatures = function () {
-    ctx.events.uncombineFeatures({ silent });
+  api.uncombineFeatures = () => {
+    ctx.events.uncombineFeatures();
     return api;
   };
 
-  api.setFeatureProperty = function (featureId, property, value) {
+  api.setFeatureProperty = (featureId, property, value) => {
     ctx.store.setFeatureProperty(featureId, property, value, { silent });
     return api;
   };

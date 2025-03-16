@@ -263,7 +263,7 @@ interface DrawCreateEvent extends DrawEvent {
 }
 
 interface DrawDeleteEvent extends DrawEvent {
-  // Array of GeoJSON objects representing the features that were deleted
+  // Array of GeoJSON objects representing the features that were delete, featureId?: stringd
   features: Feature[];
   type: 'draw.delete';
 }
@@ -651,7 +651,7 @@ interface DrawStore {
   restoreMapConfig(): Record<string, unknown>;
   getInitialConfigValue(interaction: string): boolean;
   featureChanged(id: string, options?: DrawStoreOptions): boolean;
-  setSelected(features?: DrawFeature[]): void;
+  setSelected(features?: string[], options?: { silent: boolean }): void;
   setSelectedCoordinates(
     coords: DrawCoords
   ): void;
@@ -679,11 +679,13 @@ interface DrawStore {
     bbox: BBox,
     bufferType: 'click' | 'tap'
   ): DrawFeature[];
-  newFeature(geojson: GeoJSON): DrawFeature;
+  newFeature(geojson: StrictFeatureCollection): DrawFeature;
   isInstanceOf(type: string, feature: object): boolean;
   doRender(id: string): void;
   getAllIds(): Array<string>
+  getAll(): DrawFeature[];
   createRenderBatch(): () => void;
+  setFeatureProperty(featureId: string, property: string, value: any, options?: { silent: boolean }): this;
 }
 
 interface DrawSetup {
@@ -723,7 +725,7 @@ export declare class Draw implements IControl {
   delete(ids: string | string[]): this;
   deleteAll(): this;
   set(featureCollection: StrictFeatureCollection): string[];
-  trash(): DrawEvents['trash'];
+  trash(): this;
   combineFeatures(): this;
   uncombineFeatures(): this;
   getMode(): (Modes & {}) | string;

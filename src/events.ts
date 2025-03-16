@@ -258,7 +258,7 @@ export default function(ctx: CTX) {
         ctx.container.removeEventListener('keyup', events.keyup);
       }
     },
-    trash(options) {
+    trash(options?: { silent: boolean }) {
       currentMode.trash(options);
     },
     combineFeatures() {

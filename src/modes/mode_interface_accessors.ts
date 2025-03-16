@@ -29,7 +29,7 @@ export default class ModeInterface {
     this._ctx = ctx;
   }
 
-  setSelected(features: DrawFeature[]): void {
+  setSelected(features: string[]): void {
     this._ctx.store.setSelected(features);
   }
 

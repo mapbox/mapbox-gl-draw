@@ -236,6 +236,15 @@ export default class Store {
     }
   };
 
+  setFeatureProperty(featureId, property, value, options: DrawStoreOptions = {}) {
+    this.get(featureId).setProperty(property, value);
+
+    this.featureChanged(featureId, {
+      silent: options.silent,
+      action: Constants.updateActions.CHANGE_PROPERTIES
+    });
+  };
+
   private refreshSelectedCoordinates(options: DrawStoreOptions = {}): void {
     const newSelectedCoordinates = this._selectedCoordinates.filter(point => this._selectedFeatureIds.has(point.feature_id));
     if (this._selectedCoordinates.length !== newSelectedCoordinates.length && !options.silent) {
