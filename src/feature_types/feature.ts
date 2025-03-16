@@ -22,7 +22,7 @@ class Feature {
     this.ctx.store.featureChanged(this.id);
   }
 
-  incomingCoords(coords: any): void {
+  incomingCoords(coords: number[][]): void {
     this.setCoordinates(coords);
   }
 

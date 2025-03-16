@@ -108,7 +108,7 @@ interface DrawFeatureBase<Coordinates> {
 
   changed(): void;
   isValid(): boolean;
-  incomingCoords: this['setCoordinates'];
+  incomingCoords(coords: number[][]): void;
   setCoordinates(coords: Coordinates): void;
   getCoordinates(): Coordinates;
   getCoordinate(path: number): Position;
@@ -173,7 +173,6 @@ interface DrawFeatureBase<Coordinates> {
 
   changed(): void;
   isValid(): boolean;
-  incomingCoords: this['setCoordinates'];
   setCoordinates(coords: Coordinates): void;
   getCoordinates(): Coordinates;
   getCoordinate(path: string): Position;
@@ -655,7 +654,7 @@ interface DrawStore {
   setSelectedCoordinates(
     coords: DrawCoords
   ): void;
-  getSelectedCoordinates(): Coords[];
+  getSelectedCoordinates(): { coordinates: Coords[] }[]
   getSelected(): DrawFeature[];
   getSelectedIds(): string[];
   isSelected(id: string): boolean;
