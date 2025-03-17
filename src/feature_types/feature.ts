@@ -5,7 +5,7 @@ import type { StrictFeature, CTX } from '../types/types';
 
 class Feature {
   ctx: CTX;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   coordinates: any;
   id: string;
   type: Geometry['type'];
@@ -22,20 +22,20 @@ class Feature {
     this.ctx.store.featureChanged(this.id);
   }
 
-  incomingCoords(coords: number[][]): void {
+  incomingCoords(coords: number[][] | number[]): void {
     this.setCoordinates(coords);
   }
 
-  setCoordinates(coords: any): void {
+  setCoordinates(coords: unknown): void {
     this.coordinates = coords;
     this.changed();
   }
 
-  getCoordinates(): any {
+  getCoordinates() {
     return JSON.parse(JSON.stringify(this.coordinates));
   }
 
-  setProperty(property: string, value: any): void {
+  setProperty(property: string, value: unknown): void {
     this.properties[property] = value;
   }
 
@@ -51,8 +51,8 @@ class Feature {
     };
   }
 
-  internal(mode: string): any {
-    const properties: Record<string, any> = {
+  internal(mode: string) {
+    const properties: Record<string, unknown> = {
       id: this.id,
       meta: Constants.meta.FEATURE,
       'meta:type': this.type,

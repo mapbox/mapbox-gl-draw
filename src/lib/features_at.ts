@@ -3,7 +3,6 @@ import { mapEventToBoundingBox } from './map_event_to_bounding_box';
 import * as Constants from '../constants';
 import StringSet from './string_set';
 
-import type { BBox } from 'geojson';
 import type { CTX, MapMouseEvent, MapTouchEvent } from '../types/types';
 
 type E = MapMouseEvent | MapTouchEvent;
@@ -14,7 +13,7 @@ const META_TYPES = [
   Constants.meta.VERTEX
 ];
 
-const featuresAt = (event: E, bbox: BBox, ctx: CTX, buffer: number) => {
+const featuresAt = (event: E, bbox, ctx: CTX, buffer: number) => {
   if (ctx.map === null) return [];
 
   const box = event ? mapEventToBoundingBox(event, buffer) : bbox;
@@ -44,11 +43,11 @@ const featuresAt = (event: E, bbox: BBox, ctx: CTX, buffer: number) => {
   return sortFeatures(uniqueFeatures);
 };
 
-function featuresAtClick(event: E, bbox: BBox, ctx: CTX) {
+function featuresAtClick(event: E, bbox, ctx: CTX) {
   return featuresAt(event, bbox, ctx, ctx.options.clickBuffer);
 }
 
-function featuresAtTouch(event: E, bbox: BBox, ctx: CTX) {
+function featuresAtTouch(event: E, bbox, ctx: CTX) {
   return featuresAt(event, bbox, ctx, ctx.options.touchBuffer);
 }
 

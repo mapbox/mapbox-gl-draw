@@ -1,3 +1,4 @@
+import { spy } from 'sinon';
 import runSetup from './src/setup';
 import { configureOptions } from './src/options';
 import setupAPI from './src/api';
@@ -11,7 +12,7 @@ const setupDraw = (options: DrawOptions, api: Draw) => {
 
   const ctx = {
     options
-  };
+  } as spy;
 
   api = setupAPI(ctx, api);
   ctx.api = api;

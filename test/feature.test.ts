@@ -1,8 +1,7 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-
-import { spy } from 'sinon';
 import Feature from '../src/feature_types/feature';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';

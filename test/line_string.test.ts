@@ -194,20 +194,20 @@ test('LineString integration', async () => {
 
   await map.on('load');
 
-  drawGeometry(map, Draw, 'LineString', lineStringCoordinates, () => {
-    const feats = Draw.getAll().features;
-    assert.equal(1, feats.length, 'only one');
-    assert.equal('LineString', feats[0].geometry.type, 'of the right type');
-    assert.equal(
-      lineStringCoordinates[0].length,
-      feats[0].geometry.coordinates[0].length,
-      'right number of points'
-    );
-    assert.deepEqual(
-      [...lineStringCoordinates, [20, 40]],
-      feats[0].geometry.coordinates,
-      'in the right spot'
-    );
-    Draw.onRemove();
-  });
+  await drawGeometry(map, Draw, 'LineString', lineStringCoordinates);
+
+  const feats = Draw.getAll().features;
+  assert.equal(1, feats.length, 'only one');
+  assert.equal('LineString', feats[0].geometry.type, 'of the right type');
+  assert.equal(
+    lineStringCoordinates[0].length,
+    feats[0].geometry.coordinates[0].length,
+    'right number of points'
+  );
+  assert.deepEqual(
+    [...lineStringCoordinates, [20, 40]],
+    feats[0].geometry.coordinates,
+    'in the right spot'
+  );
+  Draw.onRemove();
 });

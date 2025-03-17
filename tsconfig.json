@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "Node",
+    "target": "esnext",
+    "module": "NodeNext",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "noEmit": true,
     "types": ["node"]
   },
-  "include": [
-    "./src/**/*",
-    "./test/**/*"
-  ]
+  "include": ["src", "test"]
 }
+

@@ -1,4 +1,5 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as featuresAt from '../src/lib/features_at';
@@ -117,10 +118,8 @@ function createMockContext() {
           const layer = _layers[layerId];
           if (!layer) {
             // this layer is not in the style.layers array
-            throw new ErrorEvent(
-              new Error(
-                `The layer '${layerId}' does not exist in the map's style and cannot be queried for features.`
-              )
+            throw new Error(
+              `The layer '${layerId}' does not exist in the map's style and cannot be queried for features.`
             );
           }
           includedSources[layer.source] = true;
@@ -166,7 +165,7 @@ function createMockContext() {
     }
   };
 
-  context.options = configureOptions(context.options);
+  context.options = configureOptions(context.options as spy) as spy;
 
   addLayers(context);
 
@@ -174,7 +173,7 @@ function createMockContext() {
 }
 
 test('featuresAt with click bounding box', () => {
-  const mockContext = createMockContext();
+  const mockContext = createMockContext() as spy;
   const result = featuresAt.click(
     null,
     [
@@ -219,7 +218,7 @@ test('featuresAt with click bounding box', () => {
 });
 
 test('featuresAt with touch bounding box', () => {
-  const mockContext = createMockContext();
+  const mockContext = createMockContext() as spy;
   const result = featuresAt.touch(
     null,
     [
@@ -264,7 +263,7 @@ test('featuresAt with touch bounding box', () => {
 });
 
 test('featuresAt should not include missing style layers', () => {
-  const mockContext = createMockContext();
+  const mockContext = createMockContext() as spy;
 
   // mock of map's setStyle, which will remove all mapbox-gl-draw styles until the data event is fired, in which mapbox-gl-draw adds back in the styles.
   mockContext.map.setStyle({});

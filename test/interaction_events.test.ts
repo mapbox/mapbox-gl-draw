@@ -1189,10 +1189,6 @@ test('ensure API fire right events', async t => {
     }
   };
 
-  t.afterEach(() => {
-    fireSpy.resetHistory();
-  });
-
   await t.test('Draw#add fires draw.create event', async () => {
     Draw.add(point);
     assert.strictEqual(fireSpy.lastCall.firstArg, 'draw.create');

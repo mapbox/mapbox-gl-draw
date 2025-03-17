@@ -972,7 +972,7 @@ test('simple_select', async t => {
       'should not get any selected features'
     );
     assert.equal(
-      context.store._emitSelectionChange,
+      (context.store as spy)._emitSelectionChange,
       undefined,
       'should not emit selection change'
     );
@@ -995,7 +995,7 @@ test('simple_select', async t => {
       'should not get any selected features'
     );
     assert.equal(
-      context.store._emitSelectionChange,
+      (context.store as spy)._emitSelectionChange,
       undefined,
       'should not emit selection change'
     );

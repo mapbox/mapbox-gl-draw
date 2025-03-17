@@ -2,6 +2,7 @@ import { bboxClip } from '@turf/bbox-clip';
 import Evented from '../../bench/lib/evented';
 import { interactions } from '../../src/constants';
 import type { StrictFeature } from '../../src/types/types';
+import type { Polygon } from 'geojson';
 
 type Source = {
   data: { features: StrictFeature[] };
@@ -155,7 +156,7 @@ class MockMap extends Evented {
             }
           }
         } else {
-          const clipped = bboxClip(feature, bbox);
+          const clipped = bboxClip(feature as unknown as Polygon, bbox);
           if (clipped.geometry.coordinates.length) features.push(feature);
         }
       }
