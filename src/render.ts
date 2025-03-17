@@ -34,9 +34,9 @@ export default function render() {
   store.sources.cold = store.isDirty
     ? []
     : store.sources.cold.filter(geojson => {
-        const id = geojson.properties.id || geojson.properties.parent;
-        return newHotIds.indexOf(id) === -1;
-      });
+      const id = geojson.properties.id || geojson.properties.parent;
+      return newHotIds.indexOf(id) === -1;
+    });
 
   const coldChanged =
     lastColdCount !== store.sources.cold.length || newColdIds.length > 0;

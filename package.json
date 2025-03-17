@@ -34,7 +34,7 @@
     "docs": "run-s docs-modes-life-cycle docs-modes-get-and-set",
     "docs-modes-get-and-set": "documentation readme --readme-file ./docs/MODES.md -s \"Setters and Getters\" src/modes/mode_interface_accessors.ts --shallow",
     "docs-modes-life-cycle": "documentation readme --readme-file ./docs/MODES.md -s \"Life Cycle Functions\" src/modes/mode_interface.ts --shallow",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint --cache **/*.ts",
     "pretest": "npm run lint",
     "test": "tsx test/*.test.ts",
     "coverage": "tsx test/*.test.ts --experimental-test-coverage",
