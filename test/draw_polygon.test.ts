@@ -24,6 +24,8 @@ import {
   escapeEvent
 } from './utils/key_events';
 
+import type { StrictFeature } from '../src/types/types';
+
 test('draw_polygon mode initialization', () => {
   const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
@@ -85,7 +87,7 @@ test('draw_polygon start', async () => {
 });
 
 test('draw_polygon stop with valid polygon', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -94,7 +96,7 @@ test('draw_polygon stop with valid polygon', () => {
   const testPolygon = context.store.get(context.store.getAllIds()[0]);
   testPolygon.isValid = () => true;
 
-  mode.stop.call();
+  (mode.stop as spy).call();
   assert.equal(
     context.ui.setActiveButton.callCount,
     2,
@@ -109,7 +111,7 @@ test('draw_polygon stop with valid polygon', () => {
 });
 
 test('draw_polygon stop with invalid polygon', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -118,7 +120,7 @@ test('draw_polygon stop with invalid polygon', () => {
   const testPolygon = context.store.get(context.store.getAllIds()[0]);
   testPolygon.isValid = () => false;
 
-  mode.stop.call();
+  (mode.stop as spy).call();
   assert.equal(
     context.ui.setActiveButton.callCount,
     2,
@@ -138,7 +140,7 @@ test('draw_polygon stop with invalid polygon', () => {
 });
 
 test('draw_polygon render active polygon with no coordinates', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -155,12 +157,12 @@ test('draw_polygon render active polygon with no coordinates', () => {
       coordinates: []
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 0, 'does not render');
 });
 
 test('draw_polygon render active polygon with 1 coordinate (and closer)', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -182,12 +184,12 @@ test('draw_polygon render active polygon with 1 coordinate (and closer)', () => 
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 0, 'does not render');
 });
 
 test('draw_polygon render active polygon with 2 coordinates (and closer)', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -210,7 +212,7 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', () =>
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 2, 'does render');
   assert.deepEqual(
     memo[1],
@@ -234,7 +236,7 @@ test('draw_polygon render active polygon with 2 coordinates (and closer)', () =>
 });
 
 test('draw_polygon render active polygon with 3 coordinates (and closer)', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -259,7 +261,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', () =>
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 3, 'does render');
   assert.deepEqual(
     memo[0],
@@ -322,7 +324,7 @@ test('draw_polygon render active polygon with 3 coordinates (and closer)', () =>
 });
 
 test('draw_polygon render inactive feature', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -341,7 +343,7 @@ test('draw_polygon render inactive feature', () => {
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 1, 'does render');
   assert.deepEqual(
     memo[0],

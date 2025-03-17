@@ -25,6 +25,8 @@ import {
   escapeEvent
 } from './utils/key_events';
 
+import type { StrictFeature } from '../src/types/types';
+
 test('draw_line_string mode initialization', () => {
   const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode((context));
@@ -160,7 +162,7 @@ test('draw_line_string render active line with 0 coordinates', () => {
       coordinates: []
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 0, 'does not render');
 });
 
@@ -183,7 +185,7 @@ test('draw_line_string render active line with 1 coordinate', () => {
       coordinates: [[0, 0]]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 0, 'does not render');
 });
 
@@ -209,7 +211,7 @@ test('draw_line_string render active line with 2 coordinates', () => {
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 2, 'does render');
   assert.deepEqual(
     memo[1],
@@ -249,7 +251,7 @@ test('draw_line_string render inactive feature', () => {
       coordinates: [0, 0]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 1, 'does render');
   assert.deepEqual(
     memo[0],
@@ -749,15 +751,15 @@ test('draw_line_string continue LineString', () => {
       coordinates: coordinates.slice(0)
     }
   };
-  const line = new LineString(context, geojson);
+  const line = new LineString(context, geojson as StrictFeature);
   context.store.add(line);
   assert.throws(
-    () => drawLineStringMode(context, { featureId: 2 }).start(lifecycleContext),
+    () => drawLineStringMode(context, { featureId: 2 }).start.call(lifecycleContext),
     /featureId/,
     'wrong feature id'
   );
   assert.throws(
-    () => drawLineStringMode(context, { featureId: 1 }).start(lifecycleContext),
+    () => drawLineStringMode(context, { featureId: 1 }).start.call(lifecycleContext),
     /from.*property/,
     'no "from" prop'
   );

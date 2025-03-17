@@ -1,4 +1,5 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import MapboxDraw from '../index';
@@ -13,10 +14,12 @@ import createMockDrawModeContext from './utils/create_mock_draw_mode_context';
 import createMockLifecycleContext from './utils/create_mock_lifecycle_context';
 import { escapeEvent, enterEvent } from './utils/key_events';
 import { objectToMode } from '../src/modes/object_to_mode';
-const drawPointMode = objectToMode(drawPointModeObject);
+import type { StrictFeature } from '../src/types/types';
+
+const drawPointMode = objectToMode(drawPointModeObject as spy);
 
 test('draw_point mode initialization', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
   mode.start.call(lifecycleContext);
@@ -40,7 +43,7 @@ test('draw_point mode initialization', () => {
 });
 
 test('draw_point start', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPointMode(context);
   mode.start.call(lifecycleContext);
@@ -75,7 +78,7 @@ test('draw_point start', () => {
 });
 
 test('draw_point stop with point placed', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -85,7 +88,7 @@ test('draw_point stop with point placed', () => {
   const point = context.store.get(id);
   point.updateCoordinate(10, 20);
 
-  mode.stop.call();
+  (mode.stop as spy).call();
   assert.equal(
     context.ui.setActiveButton.callCount,
     2,
@@ -100,7 +103,7 @@ test('draw_point stop with point placed', () => {
 });
 
 test('draw_point stop with no point placed', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -108,7 +111,7 @@ test('draw_point stop with no point placed', () => {
   const id = context.store.getAllIds()[0];
   const point = context.store.get(id);
 
-  mode.stop.call();
+  (mode.stop as spy).call();
 
   assert.equal(
     context.ui.setActiveButton.callCount,
@@ -129,7 +132,7 @@ test('draw_point stop with no point placed', () => {
 });
 
 test('draw_point render the active point', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -148,12 +151,12 @@ test('draw_point render the active point', () => {
       coordinates: [10, 10]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 0, 'active point does not render');
 });
 
 test('draw_point render an inactive feature', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPointMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -172,7 +175,7 @@ test('draw_point render an inactive feature', () => {
       ]
     }
   };
-  mode.render(geojson, x => memo.push(x));
+  mode.render(geojson as StrictFeature, x => memo.push(x));
   assert.equal(memo.length, 1, 'does render');
   assert.deepEqual(
     memo[0],
