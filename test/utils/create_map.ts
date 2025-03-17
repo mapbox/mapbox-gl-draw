@@ -137,7 +137,7 @@ class MockMap extends Evented {
 
   addLayer() {}
 
-  queryRenderedStrictFeatures([p0, p1]: [{ x: number; y: number } | Coordinates, { x: number; y: number } | Coordinates]): StrictFeature[] {
+  queryRenderedFeatures([p0, p1]: [{ x: number; y: number } | Coordinates, { x: number; y: number } | Coordinates]): StrictFeature[] {
     if (!Array.isArray(p0)) p0 = [p0.x, p0.y];
     if (!Array.isArray(p1)) p1 = [p1.x, p1.y];
     const minX = Math.min(p0[0], p1[0]);
