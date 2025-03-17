@@ -393,9 +393,10 @@ test('Draw.changeMode and Draw.getMode with no pre-existing feature', () => {
     'Polygon',
     'and it is a polygon'
   );
+
   assert.deepEqual(
     Draw.getAll().features[0].geometry.coordinates,
-    [[null]],
+    [[undefined]],
     'and it is empty'
   );
 
