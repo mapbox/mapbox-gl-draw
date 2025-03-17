@@ -6,12 +6,15 @@ interface Options {
   interval?: number;
 }
 
+export const TAP_TOLERANCE = 25;
+export const TAP_INTERVAL = 250;
+
 export const isTap = (
   start: Entry,
   end: Entry,
   options: Options = {}
 ): boolean => {
-  const { tolerance = 25, interval = 250 } = options;
+  const { tolerance = TAP_TOLERANCE, interval = TAP_INTERVAL } = options;
 
   start.point = start.point || end.point;
   start.time = start.time || end.time;

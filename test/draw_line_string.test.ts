@@ -1,4 +1,5 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import MapboxDraw from '../index';
@@ -25,8 +26,8 @@ import {
 } from './utils/key_events';
 
 test('draw_line_string mode initialization', () => {
-  const context = createMockDrawModeContext();
-  const mode = drawLineStringMode(context);
+  const context = createMockDrawModeContext() as spy;
+  const mode = drawLineStringMode((context));
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
 
@@ -49,7 +50,7 @@ test('draw_line_string mode initialization', () => {
 });
 
 test('draw_line_string start', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -86,7 +87,7 @@ test('draw_line_string start', () => {
 });
 
 test('draw_line_string stop with valid line', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -95,7 +96,7 @@ test('draw_line_string stop with valid line', () => {
   const line = context.store.get(context.store.getAllIds()[0]);
   line.isValid = () => true;
 
-  mode.stop.call();
+  (mode.stop as spy).call();
   assert.equal(
     context.ui.setActiveButton.callCount,
     2,
@@ -110,7 +111,7 @@ test('draw_line_string stop with valid line', () => {
 });
 
 test('draw_line_string stop with invalid line', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -119,7 +120,7 @@ test('draw_line_string stop with invalid line', () => {
   const line = context.store.get(context.store.getAllIds()[0]);
   line.isValid = () => false;
 
-  mode.stop.call();
+  (mode.stop as spy).call();
   assert.equal(
     context.ui.setActiveButton.callCount,
     2,
@@ -141,7 +142,7 @@ test('draw_line_string stop with invalid line', () => {
 });
 
 test('draw_line_string render active line with 0 coordinates', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -164,7 +165,7 @@ test('draw_line_string render active line with 0 coordinates', () => {
 });
 
 test('draw_line_string render active line with 1 coordinate', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -187,7 +188,7 @@ test('draw_line_string render active line with 1 coordinate', () => {
 });
 
 test('draw_line_string render active line with 2 coordinates', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -232,7 +233,7 @@ test('draw_line_string render active line with 2 coordinates', () => {
 });
 
 test('draw_line_string render inactive feature', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as unknown as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -729,7 +730,7 @@ test('draw_line_string touch interaction', async t => {
 });
 
 test('draw_line_string continue LineString', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as unknown as spy;
   const mode = drawLineStringMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);

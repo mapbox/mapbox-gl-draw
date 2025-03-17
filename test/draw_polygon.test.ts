@@ -1,4 +1,5 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import MapboxDraw from '../index';
@@ -24,7 +25,7 @@ import {
 } from './utils/key_events';
 
 test('draw_polygon mode initialization', () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const mode = drawPolygonMode(context);
   const lifecycleContext = createMockLifecycleContext();
   mode.start.call(lifecycleContext);
@@ -48,7 +49,7 @@ test('draw_polygon mode initialization', () => {
 });
 
 test('draw_polygon start', async () => {
-  const context = createMockDrawModeContext();
+  const context = createMockDrawModeContext() as spy;
   const lifecycleContext = createMockLifecycleContext();
   const mode = drawPolygonMode(context);
 

@@ -1,13 +1,12 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spy } from 'sinon';
 
 import Store from '../src/store';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMap from './utils/create_map';
-import type { CTX } from '../src/types/types';
 
 function createStore() {
   const ctx = {
@@ -18,7 +17,7 @@ function createStore() {
     events: {
       fire: spy()
     }
-  } as unknown as CTX;
+  } as spy;
 
   return new Store(ctx);
 }
@@ -30,7 +29,7 @@ test('Store has correct properties', () => {
 
 test('Store constructor and public API', () => {
   const map = createMap();
-  const ctx = { map } as unknown as CTX;
+  const ctx = { map } as spy;
   const store = new Store(ctx);
 
   // instance members
@@ -395,7 +394,7 @@ test('Store#storeAndRestoreMapConfig', () => {
     'Disables doubleClickZoom on the map'
   );
   const ctx = { map };
-  const store = new Store(ctx);
+  const store = new Store(ctx as spy);
   store.storeMapConfig();
   // Check we can get the initial state of it
   assert.equal(

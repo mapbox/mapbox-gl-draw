@@ -94,15 +94,15 @@ test('Feature#changed', () => {
   const featureGeoJson = createFeature('point');
   const feature = new Feature(ctx, featureGeoJson);
 
-  ctx.store.featureChanged.resetHistory();
+  (ctx.store.featureChanged as spy).resetHistory();
   feature.changed();
   assert.equal(
-    ctx.store.featureChanged.callCount,
+    (ctx.store.featureChanged as spy).callCount,
     1,
     'called function on store'
   );
   assert.deepEqual(
-    ctx.store.featureChanged.getCall(0).args[0],
+    (ctx.store.featureChanged as spy).getCall(0).args[0],
     featureGeoJson.id,
     'with correct args'
   );

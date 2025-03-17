@@ -12,7 +12,7 @@ import getGeoJSON from './utils/get_geojson';
 import createMap from './utils/create_map';
 
 test('static', async t => {
-  const map = createMap();
+  const map = createMap() as spy;
   const opts = {
     modes: {
       static: StaticMode

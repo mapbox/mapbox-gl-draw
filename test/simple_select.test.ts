@@ -19,7 +19,7 @@ test('simple_select', async t => {
   const context = createMockDrawModeContext();
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
-  const map = createMap({ container: mapContainer });
+  const map = createMap({ container: mapContainer }) as spy;
 
   const Draw = new MapboxDraw();
   map.addControl(Draw);
@@ -144,6 +144,7 @@ test('simple_select', async t => {
       type: 'FeatureCollection',
       features
     });
+
     map.fire.resetHistory();
 
     await afterNextRender();

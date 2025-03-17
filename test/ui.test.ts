@@ -1,11 +1,18 @@
 import './mock-browser';
+import { spy } from 'sinon';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spy } from 'sinon';
 
 import ui from '../src/ui';
 
-function createMockContext({ position, controls } = {}) {
+type Options = {
+  position?: string;
+  controls?: unknown;
+};
+
+function createMockContext(options: Options = {}) {
+  const { position, controls } = options;
+
   const container = document.createElement('div');
   document.body.appendChild(container);
 
@@ -44,7 +51,7 @@ function getButtons(div) {
 
 test('ui container classes', async t => {
   const { context, cleanup } = createMockContext();
-  const testUi = ui(context);
+  const testUi = ui(context as spy);
 
   assert.equal(
     context.container.className,
@@ -159,7 +166,7 @@ test('ui container classes', async t => {
 
 test('ui buttons with no options.controls', () => {
   const { context, cleanup } = createMockContext();
-  const testUi = ui(context);
+  const testUi = ui(context as spy);
 
   const div = testUi.addButtons();
   assert.deepEqual(getButtons(div), [], 'still no buttons');
@@ -175,7 +182,7 @@ test('ui buttons with one options.controls', () => {
     }
   });
   /* eslint-enable */
-  const testUi = ui(context);
+  const testUi = ui(context as spy);
 
   const div = testUi.addButtons();
   const buttons = getButtons(div);
@@ -200,7 +207,7 @@ test('ui buttons control group container inserted above attribution control, in 
   });
 
   const controlContainer = getControlContainer();
-  const testUi = ui(context);
+  const testUi = ui(context as spy);
 
   assert.equal(
     controlContainer.getElementsByClassName('mapboxgl-ctrl-group').length,
@@ -225,7 +232,7 @@ test('ui buttons with all options.controls, no attribution control', async t => 
     }
   });
   /* eslint-enable */
-  const testUi = ui(context);
+  const testUi = ui(context as spy);
 
   const controlGroup = testUi.addButtons();
   const buttons = getButtons(controlGroup);
@@ -381,7 +388,7 @@ test('ui buttons with all options.controls, no attribution control', async t => 
         'changeMode not called'
       );
 
-      testUi.setActiveButton();
+      testUi.setActiveButton('');
 
       assert.equal(
         lineButton.classList.contains('active'),

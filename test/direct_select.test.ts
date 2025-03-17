@@ -19,7 +19,7 @@ import * as Constants from '../src/constants';
 test('direct_select', async t => {
   const mapContainer = document.createElement('div');
   document.body.appendChild(mapContainer);
-  const map = createMap({ container: mapContainer });
+  const map = createMap({ container: mapContainer }) as spy;
 
   const Draw = new MapboxDraw();
   map.addControl(Draw);

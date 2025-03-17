@@ -1,5 +1,4 @@
 import { spy } from 'sinon';
-import type { CTX, DrawStore } from '../../src/types/types';
 
 /**
  * Returns an mock ctx object with just those properties a Feature
@@ -9,13 +8,13 @@ import type { CTX, DrawStore } from '../../src/types/types';
  */
 export default function createMockFeatureContext(
   opts = { userProperties: false }
-): CTX {
+): spy {
   return {
     options: {
       userProperties: opts.userProperties
     },
     store: {
       featureChanged: spy()
-    } as unknown as DrawStore
-  } as unknown as CTX;
+    }
+  } as spy;
 }
