@@ -116,7 +116,7 @@ export interface DrawMapClasses {
   mouse?: Constants['cursors'];
 }
 
-export interface DrawUI {
+interface DrawUI {
   queueMapClasses: (options: DrawMapClasses) => void;
   setActiveButton: (id: string) => void;
   updateMapClasses: () => void;
@@ -174,7 +174,7 @@ interface DrawFeatureBase<Coordinates> {
   toGeoJSON(): GeoJSON;
 }
 
-export interface DrawMultiFeature<
+interface DrawMultiFeature<
   Type extends 'MultiPoint' | 'MultiLineString' | 'MultiPolygon'
 > extends Omit<
     DrawFeatureBase<
@@ -297,7 +297,7 @@ interface DrawActionableEvent extends DrawEvent {
   type: 'draw.actionable';
 }
 
-export interface DrawCustomModeThis {
+interface DrawCustomModeThis {
   map: Map;
   _ctx: CTX;
   drawConfig: DrawOptions;
@@ -432,7 +432,7 @@ interface StringSet {
   clear(): StringSet;
 }
 
-export interface Lib {
+interface Lib {
   CommonSelectors: {
     isOfMetaType: (
       type: Constants['meta'][keyof Constants['meta']]
