@@ -2,10 +2,6 @@ import click from './mouse_click';
 import { setupAfterNextRender } from './after_next_render';
 import makeMouseEvent from './make_mouse_event';
 
-/**
- * Draws a feature on a map.
- */
-
 const mapFeaturesToModes = {
   Polygon: 'draw_polygon',
   Point: 'draw_point',
@@ -23,6 +19,6 @@ export async function drawGeometry(map, draw, type, coordinates) {
 
   for (const point of drawCoordinates) {
     click(map, makeMouseEvent(point[0], point[1], false));
-    await afterNextRender();
+    await afterNextRender(map);
   }
 }

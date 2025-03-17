@@ -2,6 +2,7 @@ import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { sortFeatures } from '../src/lib/sort_features';
+import {StrictFeature} from '../src/types/types';
 
 test('sortFeatures', () => {
   const features = [
@@ -57,7 +58,7 @@ test('sortFeatures', () => {
     }
   ];
 
-  assert.deepEqual(sortFeatures(features), [
+  assert.deepEqual(sortFeatures(features as unknown as StrictFeature[]), [
     {
       geometry: { type: 'Point' },
       properties: { id: 3 }

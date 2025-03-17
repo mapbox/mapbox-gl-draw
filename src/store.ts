@@ -12,11 +12,11 @@ export default class Store {
   private _changedFeatureIds = new StringSet();
   private _emitSelectionChange = false;
   private _mapInitialConfig: Record<string, boolean> = {};
-  private ctx: CTX;
-  private renderRequest: number | null = null;
 
   sources = { hot: [], cold: [] };
   isDirty = false;
+  ctx: CTX;
+  renderRequest: number | null = null;
 
   constructor(ctx: CTX) {
     this.ctx = ctx;

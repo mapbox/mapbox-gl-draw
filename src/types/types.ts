@@ -704,6 +704,8 @@ export declare class Draw implements IControl {
   static constants: Constants;
   static lib: Lib;
   modes: typeof modes;
+  types: typeof types;
+  options: DrawOptions;
   getDefaultPosition: () => ControlPosition;
   constructor(options?: DrawOptions);
   add(geojson: Feature | StrictFeatureCollection | Geometry): string[];

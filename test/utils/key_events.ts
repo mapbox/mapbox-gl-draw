@@ -1,9 +1,10 @@
 import createSyntheticEvent from 'synthetic-dom-events';
 import * as Constants from '../../src/constants';
 
-const classList = [Constants.classes.CANVAS];
-classList.contains = function (cls) {
-  return classList.indexOf(cls) >= 0;
+const classList = [Constants.classes.CANVAS] as any;
+
+classList.contains = function (cls: string) {
+  return this.includes(cls);
 };
 
 export const enterEvent = createSyntheticEvent('keyup', {

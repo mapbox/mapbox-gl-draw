@@ -7,6 +7,7 @@ import Store from '../src/store';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMap from './utils/create_map';
+import type { CTX } from '../src/types/types';
 
 function createStore() {
   const ctx = {
@@ -17,7 +18,7 @@ function createStore() {
     events: {
       fire: spy()
     }
-  };
+  } as unknown as CTX;
 
   return new Store(ctx);
 }
@@ -29,7 +30,7 @@ test('Store has correct properties', () => {
 
 test('Store constructor and public API', () => {
   const map = createMap();
-  const ctx = { map };
+  const ctx = { map } as unknown as CTX;
   const store = new Store(ctx);
 
   // instance members
@@ -225,7 +226,7 @@ test('Store#featureChanged, Store#getChangedIds, Store#clearChangedIds', () => {
 
 test('Store#add, Store#get, Store#getAll', () => {
   const store = createStore();
-  assert.equal(store.get(1), undefined);
+  assert.equal(store.get(1 as unknown as string), undefined);
   assert.deepEqual(store.getAll(), []);
   const point = createFeature('point');
   const line = createFeature('line');

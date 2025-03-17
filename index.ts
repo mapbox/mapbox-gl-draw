@@ -26,7 +26,7 @@ const setupDraw = (options: DrawOptions, api: Draw) => {
   return api;
 };
 
-function MapboxDraw(options: DrawOptions) {
+function MapboxDraw(options?: DrawOptions) {
   setupDraw(options, this);
 }
 

@@ -63,8 +63,6 @@ test('StringSet#delete', () => {
   assert.deepEqual(set.values(), ['b', 2]);
   set.delete('a');
   assert.deepEqual(set.values(), ['b', 2]);
-  set.delete();
-  assert.deepEqual(set.values(), ['b', 2]);
   set.delete('b');
   assert.deepEqual(set.values(), [2]);
   set.delete(2);

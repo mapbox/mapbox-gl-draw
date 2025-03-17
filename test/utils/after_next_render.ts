@@ -1,6 +1,8 @@
+import type { Map } from "mapbox-gl";
+
 const TIMEOUT = 1000;
 
-export function setupAfterNextRender(map) {
+export const setupAfterNextRender = (map: Map) => {
   let render = 0;
   map.on('draw.render', () => {
     render++;
@@ -21,7 +23,7 @@ export function setupAfterNextRender(map) {
 
         if (lastRender < render) {
           clearInterval(id);
-          resolve();
+          resolve(true);
         }
       });
     });
