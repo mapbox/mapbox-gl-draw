@@ -17,13 +17,13 @@ class Polygon extends Feature {
   }
 
   // Expects valid geoJSON polygon geometry: first and last positions must be equivalent.
-  incomingCoords(coords: Coords): void {
+  incomingCoords(coords): void {
     this.coordinates = coords.map(ring => ring.slice(0, -1));
     this.changed();
   }
 
   // Does NOT expect valid geoJSON polygon geometry: first and last positions should not be equivalent.
-  setCoordinates(coords: Coords): void {
+  setCoordinates(coords: Coords[]): void {
     this.coordinates = coords;
     this.changed();
   }

@@ -9,6 +9,7 @@ type Source = {
 };
 
 type Layer = Record<string, Source>;
+type Coordinates = [number, number];
 
 type MapOptions = {
   container?: HTMLElement;
@@ -154,7 +155,7 @@ class MockMap extends Evented {
             }
           }
         } else {
-          const clipped = bboxClip(feature as unknown as StrictFeature, bbox);
+          const clipped = bboxClip(feature, bbox);
           if (clipped.geometry.coordinates.length) features.push(feature);
         }
       }

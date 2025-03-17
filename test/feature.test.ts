@@ -7,6 +7,7 @@ import Feature from '../src/feature_types/feature';
 import createFeature from './utils/create_feature';
 import getPublicMemberKeys from './utils/get_public_member_keys';
 import createMockCtx from './utils/create_mock_feature_context';
+import type { StrictFeature } from '../src/types/types';
 
 test('Feature contrusctor and API', () => {
   const featureGeoJson = createFeature('line');
@@ -77,7 +78,8 @@ test('Feature contrusctor and API', () => {
       type: 'Point',
       coordinates: [0, 0]
     }
-  };
+  } as StrictFeature;
+
   const featureWithDefaultsOnly = new Feature(ctx, simpleFeatureGeoJson);
   assert.deepEqual(
     featureWithDefaultsOnly.properties,

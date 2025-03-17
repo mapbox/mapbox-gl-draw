@@ -12,26 +12,26 @@ class LineString extends Feature {
     return this.coordinates.length > 1;
   }
 
-  addCoordinate(path: string, lng: number, lat: number): void {
+  addCoordinate(path: string | number, lng: number, lat: number): void {
     this.changed();
-    const id = parseInt(path, 10);
+    const id = parseInt(path as string, 10);
     this.coordinates.splice(id, 0, [lng, lat]);
   }
 
-  getCoordinate(path: string): Coordinate | undefined {
-    const id = parseInt(path, 10);
+  getCoordinate(path: string | number): Coordinate | undefined {
+    const id = parseInt(path as string, 10);
     return this.coordinates[id]
       ? [...(this.coordinates[id] as Coordinate)]
       : undefined;
   }
 
-  removeCoordinate(path: string): void {
+  removeCoordinate(path: string | number): void {
     this.changed();
-    this.coordinates.splice(parseInt(path, 10), 1);
+    this.coordinates.splice(parseInt(path as string, 10), 1);
   }
 
-  updateCoordinate(path: string, lng: number, lat: number): void {
-    const id = parseInt(path, 10);
+  updateCoordinate(path: string | number, lng: number, lat: number): void {
+    const id = parseInt(path as string, 10);
     this.coordinates[id] = [lng, lat];
     this.changed();
   }

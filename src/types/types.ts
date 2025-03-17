@@ -100,7 +100,7 @@ interface DrawFeatureBase<Coordinates> {
 
   changed(): void;
   isValid(): boolean;
-  incomingCoords(coords: number[][]): void;
+  incomingCoords(coords: Coords[]): void;
   setCoordinates(coords: Coordinates): void;
   getCoordinates(): Coordinates;
   getCoordinate(path: number): Position;
