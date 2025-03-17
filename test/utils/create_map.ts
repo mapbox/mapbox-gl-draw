@@ -62,8 +62,13 @@ class MockMap extends Evented {
     };
 
     // Explicitly define each interaction
+    this.scrollZoom = this.createInteraction();
+    this.boxZoom = this.createInteraction();
+    this.dragRotate = this.createInteraction();
     this.dragPan = this.createInteraction();
+    this.keyboard = this.createInteraction();
     this.doubleClickZoom = this.createInteraction();
+    this.touchZoomRotate = this.createInteraction();
 
     // Dynamically add any other interactions
     for (const interaction of interactions) {
@@ -78,7 +83,7 @@ class MockMap extends Evented {
   }
 
   // Helper function to create interaction objects
-  private createInteraction(): Interaction {
+  createInteraction(): Interaction {
     return {
       enabled: true,
       disable() {

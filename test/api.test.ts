@@ -1,10 +1,8 @@
 /* eslint no-shadow:[0] */
 import './mock-browser';
-import { test } from 'node:test';
-import beforeEach from 'node:test';
-import afterEach from 'node:test';
-import assert from 'node:assert/strict';
+import { test, beforeEach, afterEach } from 'node:test';
 import { spy } from 'sinon';
+import assert from 'node:assert/strict';
 
 import * as Constants from '../src/constants';
 import MapboxDraw from '../index';
