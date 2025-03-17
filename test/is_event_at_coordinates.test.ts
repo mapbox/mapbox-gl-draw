@@ -32,7 +32,7 @@ test('isEventAtCoordinates', () => {
     isEventAtCoordinates(
       {
         nothing: true
-      },
+      } as unknown as { lngLat: { lng: number, lat: number } } ,
       [3, 29]
     ),
     false

@@ -2,7 +2,7 @@ import './mock-browser';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import getGeoJSON from './utils/get_geojson';
-import constrainFeatureMovement from '../src/lib/constrain_feature_movement';
+import { constrainFeatureMovement } from '../src/lib/constrain_feature_movement';
 
 test('constrainFeatureMovement point, no constraint', () => {
   const point = getGeoJSON('point');

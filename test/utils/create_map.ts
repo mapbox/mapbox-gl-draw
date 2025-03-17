@@ -14,6 +14,14 @@ type MapOptions = {
   container?: HTMLElement;
 } & Record<string, any>;
 
+// Define the structure of an interaction
+type Interaction = {
+  enabled: boolean;
+  disable(): void;
+  enable(): void;
+  isEnabled(): boolean;
+};
+
 class MockMap extends Evented {
   sources: Record<string, Source> = {};
   style: {
@@ -24,6 +32,15 @@ class MockMap extends Evented {
   };
   options: MapOptions;
 
+  // Explicitly declare interactions for TypeScript
+  scrollZoom!: Interaction;
+  boxZoom!: Interaction;
+  dragRotate!: Interaction;
+  dragPan!: Interaction;
+  keyboard!: Interaction;
+  doubleClickZoom!: Interaction;
+  touchZoomRotate!: Interaction;
+  
   constructor(options: MapOptions = {}) {
     super();
 
@@ -42,24 +59,36 @@ class MockMap extends Evented {
       ...options
     };
 
+    // Explicitly define each interaction
+    this.dragPan = this.createInteraction();
+    this.doubleClickZoom = this.createInteraction();
+
+    // Dynamically add any other interactions
     for (const interaction of interactions) {
-      this[interaction] = {
-        enabled: true,
-        disable() {
-          this.enabled = false;
-        },
-        enable() {
-          this.enabled = true;
-        },
-        isEnabled() {
-          return this.enabled;
-        }
-      };
+      if (!(interaction in this)) {
+        (this as any)[interaction] = this.createInteraction();
+      }
     }
 
     setTimeout(() => {
       this.fire('load');
     }, 0);
+  }
+
+  // Helper function to create interaction objects
+  private createInteraction(): Interaction {
+    return {
+      enabled: true,
+      disable() {
+        this.enabled = false;
+      },
+      enable() {
+        this.enabled = true;
+      },
+      isEnabled() {
+        return this.enabled;
+      }
+    };
   }
 
   addControl(control: { onAdd: (map: MockMap) => void }) {
@@ -137,4 +166,3 @@ class MockMap extends Evented {
 export default function createMap(mapOptions?: MapOptions): MockMap {
   return new MockMap(mapOptions);
 }
-

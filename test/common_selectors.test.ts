@@ -83,7 +83,7 @@ test('commonSelectors.isActiveFeature', () => {
   assert.equal(
     commonSelectors.isActiveFeature({
       foo: 'bar'
-    }),
+    } as unknown as MapMouseEvent),
     false
   );
 

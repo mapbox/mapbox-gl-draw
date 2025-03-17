@@ -14,12 +14,12 @@ test('mouseEventPoint', () => {
         top: 20
       };
     }
-  };
+  } as HTMLElement;
 
   const mockEvent = {
     clientX: 15,
     clientY: 33
-  };
+  } as MouseEvent;
 
   const result = mouseEventPoint(mockEvent, mockContainer);
   assert.equal(result instanceof Point, true);
