@@ -33,13 +33,13 @@ class MockMap extends Evented {
   options: MapOptions;
 
   // Explicitly declare interactions for TypeScript
-  scrollZoom!: Interaction;
-  boxZoom!: Interaction;
-  dragRotate!: Interaction;
-  dragPan!: Interaction;
-  keyboard!: Interaction;
-  doubleClickZoom!: Interaction;
-  touchZoomRotate!: Interaction;
+  scrollZoom: Interaction;
+  boxZoom: Interaction;
+  dragRotate: Interaction;
+  dragPan: Interaction;
+  keyboard: Interaction;
+  doubleClickZoom: Interaction;
+  touchZoomRotate: Interaction;
   
   constructor(options: MapOptions = {}) {
     super();

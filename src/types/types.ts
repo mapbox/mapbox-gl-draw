@@ -62,8 +62,8 @@ export type Coords = Array<[number, number]>;
 export type DrawCoords = Array<{ coord_path: string; feature_id: string }>
 
 export interface Entry {
-  point: XY;
-  time: number;
+  point?: XY;
+  time?: number;
 }
 
 interface Modes {
@@ -630,7 +630,7 @@ export interface DrawStoreOptions {
   action?: string;
 }
 
-interface DrawStore {
+export interface DrawStore {
   ctx: CTX;
   isDirty: boolean;
   setDirty(): this;

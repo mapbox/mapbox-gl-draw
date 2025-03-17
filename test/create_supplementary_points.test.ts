@@ -3,6 +3,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import createMap from './utils/create_map';
 import { createSupplementaryPoints } from '../src/lib/create_supplementary_points';
+import type { StrictFeature } from '../src/types/types';
+import {Map} from 'mapbox-gl';
 
 test('createSupplementaryPoints with a point', () => {
   const point = {
@@ -14,7 +16,7 @@ test('createSupplementaryPoints with a point', () => {
       type: 'Point',
       coordinates: [10, 15]
     }
-  };
+  } as unknown as StrictFeature;
 
   const result = createSupplementaryPoints(point);
 
@@ -49,7 +51,7 @@ test('createSupplementaryPoints with a line, no midpoints', () => {
         [8, 8]
       ]
     }
-  };
+  } as unknown as StrictFeature;
 
   const result = createSupplementaryPoints(line);
 
@@ -118,7 +120,8 @@ test('createSupplementaryPoints with a polygon, no midpoints', () => {
         ]
       ]
     }
-  };
+  } as unknown as StrictFeature;
+
   const result = createSupplementaryPoints(polygon);
 
   assert.deepEqual(
@@ -195,8 +198,9 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', () =
         [8, 8]
       ]
     }
-  };
-  const map = createMap();
+  } as unknown as StrictFeature;
+
+  const map = createMap() as unknown as Map;
 
   const results = createSupplementaryPoints(line, {
     map,
@@ -297,9 +301,9 @@ test('createSupplementaryPoints with polygon, midpoints, selection', () => {
         ]
       ]
     }
-  };
+  } as unknown as StrictFeature;
 
-  const map = createMap();
+  const map = createMap() as unknown as Map;
 
   const results = createSupplementaryPoints(polygon, {
     map,
@@ -444,8 +448,9 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
         ]
       ]
     }
-  };
-  const map = createMap();
+  } as unknown as StrictFeature;
+
+  const map = createMap() as unknown as Map;
 
   const results = createSupplementaryPoints(line, {
     map,
@@ -605,10 +610,12 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
         [7, 87]
       ]
     }
-  };
+  } as unknown as StrictFeature;
+
+  const map = createMap() as unknown as Map;
 
   const result = createSupplementaryPoints(line, {
-    map: createMap(),
+    map,
     midpoints: true
   });
 
@@ -687,10 +694,12 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
         [7, -87]
       ]
     }
-  };
+  } as unknown as StrictFeature;
+
+  const map = createMap() as unknown as Map;
 
   const result = createSupplementaryPoints(line, {
-    map: createMap(),
+    map,
     midpoints: true
   });
 
