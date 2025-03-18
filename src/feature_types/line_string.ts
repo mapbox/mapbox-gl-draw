@@ -35,8 +35,6 @@ class LineString extends Feature {
     this.coordinates[id] = [lng, lat];
     this.changed();
   }
-
-  changed(): void {}
 }
 
 export default LineString;
