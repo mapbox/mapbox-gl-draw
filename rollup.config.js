@@ -1,34 +1,27 @@
-const {MINIFY} = process.env;
-const minified = MINIFY === 'true';
-const outputFile = minified ? 'dist/mapbox-gl-draw.js' : 'dist/mapbox-gl-draw-unminified.js';
-
-import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
 
+const { MINIFY } = process.env;
+const minified = MINIFY === 'true';
+const outputFile = minified
+  ? 'dist/mapbox-gl-draw.js'
+  : 'dist/mapbox-gl-draw-unminified.js';
+
 export default {
-  input: ['index.js'],
+  input: 'index.ts',
   output: {
     name: 'MapboxDraw',
     file: outputFile,
-    format: 'umd',
+    format: 'esm',
     sourcemap: true,
     indent: false
   },
   treeshake: true,
   plugins: [
+    typescript(),
     minified ? terser({
       ecma: 2020,
       module: true,
     }) : false,
-    resolve({
-      browser: true,
-      preferBuiltins: true
-    }),
-    commonjs({
-      // global keyword handling causes Webpack compatibility issues, so we disabled it:
-      // https://github.com/mapbox/mapbox-gl-js/pull/6956
-      ignoreGlobal: true
-    })
-  ],
+  ]
 };
