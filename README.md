@@ -45,14 +45,6 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css' type='text/css' />
 ```
 
-### Typescript
-
-Typescript definition files are available as part of the [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/mapbox__mapbox-gl-draw) package.
-
-```
-npm install @types/mapbox__mapbox-gl-draw
-```
-
 ### Example usage
 
 ```js
