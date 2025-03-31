@@ -8,5 +8,4 @@ dist/mapbox-gl-draw-unminified.js.map
 dist/bench.js
 dist/bench.js.map
 coverage/
-.nyc_output/
 debug/access_token_generated.js
