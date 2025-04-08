@@ -1,0 +1,239 @@
+import isEqual from 'fast-deep-equal';
+import normalize from '@mapbox/geojson-normalize';
+import { generateID } from './lib/id';
+import * as featuresAt from './lib/features_at';
+import { stringSetsAreEqual } from './lib/string_sets_are_equal';
+import * as Constants from './constants';
+import StringSet from './lib/string_set';
+
+import Polygon from './feature_types/polygon';
+import LineString from './feature_types/line_string';
+import Point from './feature_types/point';
+import MultiFeature from './feature_types/multi_feature';
+
+import type { CTX, Draw, StrictFeature, MapMouseEvent } from './types/types';
+
+const featureTypes = {
+  Polygon,
+  LineString,
+  Point,
+  MultiPolygon: MultiFeature,
+  MultiLineString: MultiFeature,
+  MultiPoint: MultiFeature
+};
+
+export default function (ctx: CTX, api: Draw) {
+  api.modes = Constants.modes;
+
+  // API doesn't emit events by default
+  const silent =
+    ctx.options.suppressAPIEvents !== undefined
+      ? !!ctx.options.suppressAPIEvents
+      : true;
+
+  api.getFeatureIdsAt = (point) => {
+    const event = { point } as MapMouseEvent;
+    const features = featuresAt.click(event, null, ctx);
+    return features.map(feature => feature.properties.id);
+  };
+
+  api.getSelectedIds = () => {
+    return ctx.store.getSelectedIds();
+  };
+
+  api.getSelected = () => {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
+      features: ctx.store
+        .getSelectedIds()
+        .map(id => ctx.store.get(id))
+        .map(feature => feature.toGeoJSON()) as StrictFeature[]
+    };
+  };
+
+  api.getSelectedPoints = () => {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
+      features: ctx.store.getSelectedCoordinates().map(coordinate => ({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: {},
+        geometry: {
+          type: Constants.geojsonTypes.POINT,
+          coordinates: coordinate.coordinates
+        }
+      })) as StrictFeature[]
+    };
+  };
+
+  api.set = (featureCollection) => {
+    if (
+      featureCollection.type === undefined ||
+      featureCollection.type !== Constants.geojsonTypes.FEATURE_COLLECTION ||
+      !Array.isArray(featureCollection.features)
+    ) {
+      throw new Error('Invalid FeatureCollection');
+    }
+    const renderBatch = ctx.store.createRenderBatch();
+    let toDelete = ctx.store.getAllIds().slice();
+    const newIds = api.add(featureCollection);
+    const newIdsLookup = new StringSet(newIds);
+
+    toDelete = toDelete.filter(id => !newIdsLookup.has(id));
+    if (toDelete.length) {
+      api.delete(toDelete);
+    }
+
+    renderBatch();
+    return newIds;
+  };
+
+  api.add = (geojson) => {
+    const featureCollection = JSON.parse(JSON.stringify(normalize(geojson)));
+
+    const ids = featureCollection.features.map(feature => {
+      feature.id = feature.id || generateID();
+
+      if (feature.geometry === null) {
+        throw new Error('Invalid geometry: null');
+      }
+
+      if (
+        ctx.store.get(feature.id) === undefined ||
+        ctx.store.get(feature.id).type !== feature.geometry.type
+      ) {
+        // If the feature has not yet been created ...
+        const Model = featureTypes[feature.geometry.type];
+        if (Model === undefined) {
+          throw new Error(`Invalid geometry type: ${feature.geometry.type}.`);
+        }
+        const internalFeature = new Model(ctx, feature);
+        ctx.store.add(internalFeature, { silent });
+      } else {
+        // If a feature of that id has already been created, and we are swapping it out ...
+        const internalFeature = ctx.store.get(feature.id);
+        const originalProperties = internalFeature.properties;
+        internalFeature.properties = feature.properties;
+        if (!isEqual(originalProperties, feature.properties)) {
+          ctx.store.featureChanged(internalFeature.id as string, { silent });
+        }
+        if (
+          !isEqual(
+            internalFeature.getCoordinates(),
+            feature.geometry.coordinates
+          )
+        ) {
+          internalFeature.incomingCoords(feature.geometry.coordinates);
+        }
+      }
+      return feature.id;
+    });
+
+    ctx.store.render();
+    return ids;
+  };
+
+  api.get = (id) => {
+    const feature = ctx.store.get(id);
+    if (feature) {
+      return feature.toGeoJSON() as StrictFeature;
+    }
+  };
+
+  api.getAll = () => {
+    return {
+      type: Constants.geojsonTypes.FEATURE_COLLECTION as 'FeatureCollection',
+      features: ctx.store.getAll().map(feature => feature.toGeoJSON()) as StrictFeature[]
+    };
+  };
+
+  api.delete = (featureIds) => {
+    ctx.store.delete(featureIds, { silent });
+    // If we were in direct select mode and our selected feature no longer exists
+    // (because it was deleted), we need to get out of that mode.
+    if (
+      api.getMode() === Constants.modes.DIRECT_SELECT &&
+      !ctx.store.getSelectedIds().length
+    ) {
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, {
+        silent
+      });
+    } else {
+      ctx.store.render();
+    }
+
+    return api;
+  };
+
+  api.deleteAll = () => {
+    ctx.store.delete(ctx.store.getAllIds(), { silent });
+    // If we were in direct select mode, now our selected feature no longer exists,
+    // so escape that mode.
+    if (api.getMode() === Constants.modes.DIRECT_SELECT) {
+      ctx.events.changeMode(Constants.modes.SIMPLE_SELECT, undefined, {
+        silent
+      });
+    } else {
+      ctx.store.render();
+    }
+
+    return api;
+  };
+
+  api.changeMode = (mode, modeOptions: { featureIds?: string[], featureId?: string } = {}) => {
+    // Avoid changing modes just to re-select what's already selected
+    if (
+      mode === Constants.modes.SIMPLE_SELECT &&
+      api.getMode() === Constants.modes.SIMPLE_SELECT
+    ) {
+      if (
+        stringSetsAreEqual(
+          modeOptions.featureIds || [],
+          ctx.store.getSelectedIds()
+        )
+      )
+        return api;
+      // And if we are changing the selection within simple_select mode, just change the selection,
+      // instead of stopping and re-starting the mode
+      ctx.store.setSelected(modeOptions.featureIds, { silent });
+      ctx.store.render();
+      return api;
+    }
+
+    if (
+      mode === Constants.modes.DIRECT_SELECT &&
+      api.getMode() === Constants.modes.DIRECT_SELECT &&
+      modeOptions.featureId === ctx.store.getSelectedIds()[0]
+    ) {
+      return api;
+    }
+
+    ctx.events.changeMode(mode, modeOptions, { silent });
+    return api;
+  };
+
+  api.getMode = () => {
+    return ctx.events.getMode() as string;
+  };
+
+  api.trash = () => {
+    ctx.events.trash({ silent });
+    return api;
+  };
+
+  api.combineFeatures = () => {
+    ctx.events.combineFeatures();
+    return api;
+  };
+
+  api.uncombineFeatures = () => {
+    ctx.events.uncombineFeatures();
+    return api;
+  };
+
+  api.setFeatureProperty = (featureId, property, value) => {
+    ctx.store.setFeatureProperty(featureId, property, value, { silent });
+    return api;
+  };
+
+  return api;
+}
