@@ -1,0 +1,80 @@
+import { generateID } from '../lib/id';
+import * as Constants from '../constants';
+import type { Geometry } from 'geojson';
+import type { StrictFeature, CTX } from '../types/types';
+
+class Feature {
+  ctx: CTX;
+  properties: Record<string, unknown>;
+  coordinates: any;
+  id: string;
+  type: Geometry['type'];
+
+  constructor(ctx: CTX, geojson: StrictFeature) {
+    this.ctx = ctx;
+    this.properties = geojson.properties || {};
+    this.coordinates = geojson.geometry.coordinates;
+    this.id = (geojson as any).id || generateID();
+    this.type = geojson.geometry.type;
+  }
+
+  changed(): void {
+    this.ctx.store.featureChanged(this.id);
+  }
+
+  incomingCoords(coords: number[][] | number[]): void {
+    this.setCoordinates(coords);
+  }
+
+  setCoordinates(coords: unknown): void {
+    this.coordinates = coords;
+    this.changed();
+  }
+
+  getCoordinates() {
+    return JSON.parse(JSON.stringify(this.coordinates));
+  }
+
+  setProperty(property: string, value: unknown): void {
+    this.properties[property] = value;
+  }
+
+  toGeoJSON(): StrictFeature {
+    return {
+      id: this.id,
+      type: Constants.geojsonTypes.FEATURE as 'Feature',
+      properties: this.properties,
+      geometry: {
+        coordinates: this.getCoordinates(),
+        type: this.type as 'Point' | 'LineString' | 'Polygon'
+      }
+    };
+  }
+
+  internal(mode: string) {
+    const properties: Record<string, unknown> = {
+      id: this.id,
+      meta: Constants.meta.FEATURE,
+      'meta:type': this.type,
+      active: Constants.activeStates.INACTIVE,
+      mode
+    };
+
+    if (this.ctx.options.userProperties) {
+      for (const name in this.properties) {
+        properties[`user_${name}`] = this.properties[name];
+      }
+    }
+
+    return {
+      type: Constants.geojsonTypes.FEATURE,
+      properties,
+      geometry: {
+        coordinates: this.getCoordinates(),
+        type: this.type
+      }
+    };
+  }
+}
+
+export default Feature;
