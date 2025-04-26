@@ -52,11 +52,31 @@ export function isShiftDown(e) {
 }
 
 export function isEscapeKey(e) {
-  return e.keyCode === 27;
+  return e.key === 'Escape' || e.keyCode === 27;
 }
 
 export function isEnterKey(e) {
-  return e.keyCode === 13;
+  return e.key === 'Enter' || e.keyCode === 13;
+}
+
+export function isBackspaceKey(e) {
+  return e.key === 'Backspace' || e.keyCode === 8;
+}
+
+export function isDeleteKey(e) {
+  return e.key === 'Delete' || e.keyCode === 46;
+}
+
+export function isDigit1Key(e) {
+  return e.key === '1' || e.keyCode === 49;
+}
+
+export function isDigit2Key(e) {
+  return e.key === '2' || e.keyCode === 50;
+}
+
+export function isDigit3Key(e) {
+  return e.key === '3' || e.keyCode === 51;
 }
 
 export function isTrue() {
