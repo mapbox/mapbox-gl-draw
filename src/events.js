@@ -1,7 +1,7 @@
 import * as Constants from './constants.js';
+import * as CommonSelectors from './lib/common_selectors.js';
 import featuresAt from './lib/features_at.js';
 import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor.js';
-import { CommonSelectors } from './lib/common_selectors.js';
 import isClick from './lib/is_click.js';
 import isTap from './lib/is_tap.js';
 import setupModeHandler from './lib/mode_handler.js';
@@ -124,10 +124,7 @@ export default function(ctx) {
   const isKeyModeValid = (event) => {
     const isBackspaceKey = CommonSelectors.isBackspaceKey(event);
     const isDeleteKey = CommonSelectors.isDeleteKey(event);
-
-    const key = event.key || String.fromCharCode(event.keyCode);
-    const isDigitKey = key >= '0' && key <= '9';
-
+    const isDigitKey = CommonSelectors.isDigitKey(event);
     return !(isBackspaceKey || isDeleteKey || isDigitKey);
   };
 

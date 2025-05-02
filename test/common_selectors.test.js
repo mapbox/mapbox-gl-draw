@@ -300,6 +300,26 @@ test('commonSelectors.isDigit3Key', () => {
   assert.equal(commonSelectors.isDigit3Key({ key: '1' }), false);
 });
 
+test('commonSelectors.isDigitKey', () => {
+  const keyCode0 = 48;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode0 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '0' }));
+
+  const keyCode2 = 50;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode2 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '2' }));
+
+  const keyCode9 = 57;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode9 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '9' }));
+
+  assert.equal(commonSelectors.isDigitKey({ keyCode: 47 }), false);
+  assert.equal(commonSelectors.isDigitKey({ key: '/' }), false);
+
+  assert.equal(commonSelectors.isDigitKey({ keyCode: 58 }), false);
+  assert.equal(commonSelectors.isDigitKey({ key: ':' }), false);
+});
+
 test('commonSelectors.true', () => {
   assert.ok(commonSelectors.isTrue());
   assert.ok(commonSelectors.isTrue(false));

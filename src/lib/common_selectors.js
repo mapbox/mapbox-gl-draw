@@ -79,6 +79,12 @@ export function isDigit3Key(e) {
   return e.key === '3' || e.keyCode === 51;
 }
 
+export function isDigitKey(e) {
+  const key = e.key || String.fromCharCode(e.keyCode);
+  const isDigitKey = key >= '0' && key <= '9';
+  return isDigitKey;
+}
+
 export function isTrue() {
   return true;
 }
