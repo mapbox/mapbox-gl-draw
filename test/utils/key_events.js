@@ -8,30 +8,30 @@ classList.contains = function(cls) {
 
 export const enterEvent = createSyntheticEvent('keyup', {
   srcElement: { classList },
-  keyCode: 13
+  key: 'Enter'
 });
 
 export const startPointEvent = createSyntheticEvent('keydown', {
   srcElement: { classList },
-  keyCode: 49
+  key: '1'
 });
 
 export const startLineStringEvent = createSyntheticEvent('keydown', {
   srcElement: { classList },
-  keyCode: 50
+  key: '2'
 });
 
 export const startPolygonEvent = createSyntheticEvent('keydown', {
   srcElement: { classList },
-  keyCode: 51
+  key: '3'
 });
 
 export const escapeEvent = createSyntheticEvent('keyup', {
   srcElement: { classList },
-  keyCode: 27
+  key: 'Escape'
 });
 
 export const backspaceEvent = createSyntheticEvent('keydown', {
   srcElement: { classList },
-  keyCode: 8
+  key: 'Backspace'
 });

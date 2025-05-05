@@ -232,6 +232,10 @@ test('commonSelectors.isEscapeKey', () => {
   assert.equal(commonSelectors.isEscapeKey({
     originalEvent: {}
   }), false);
+
+  assert.equal(commonSelectors.isEscapeKey({
+    key: 'Escape'
+  }), true);
 });
 
 test('commonSelectors.isEnterKey', () => {
@@ -246,6 +250,74 @@ test('commonSelectors.isEnterKey', () => {
   assert.equal(commonSelectors.isEnterKey({
     originalEvent: {}
   }), false);
+
+  assert.equal(commonSelectors.isEnterKey({
+    key: 'Enter'
+  }), true);
+
+  assert.equal(commonSelectors.isEnterKey({
+    key: 'Escape'
+  }), false);
+});
+
+test('commonSelectors.isBackspaceKey', () => {
+  assert.ok(commonSelectors.isBackspaceKey({ keyCode: 8 }));
+  assert.ok(commonSelectors.isBackspaceKey({ key: 'Backspace' }));
+
+  assert.equal(commonSelectors.isBackspaceKey({ keyCode: 27 }), false);
+  assert.equal(commonSelectors.isBackspaceKey({ key: 'Escape' }), false);
+});
+
+test('commonSelectors.isDeleteKey', () => {
+  assert.ok(commonSelectors.isDeleteKey({ keyCode: 46 }));
+  assert.ok(commonSelectors.isDeleteKey({ key: 'Delete' }));
+
+  assert.equal(commonSelectors.isDeleteKey({ keyCode: 27 }), false);
+  assert.equal(commonSelectors.isDeleteKey({ key: 'Escape' }), false);
+});
+
+test('commonSelectors.isDigit1Key', () => {
+  assert.ok(commonSelectors.isDigit1Key({ keyCode: 49 }));
+  assert.ok(commonSelectors.isDigit1Key({ key: '1' }));
+
+  assert.equal(commonSelectors.isDigit1Key({ keyCode: 50 }), false);
+  assert.equal(commonSelectors.isDigit1Key({ key: '2' }), false);
+});
+
+test('commonSelectors.isDigit2Key', () => {
+  assert.ok(commonSelectors.isDigit2Key({ keyCode: 50 }));
+  assert.ok(commonSelectors.isDigit2Key({ key: '2' }));
+
+  assert.equal(commonSelectors.isDigit2Key({ keyCode: 51 }), false);
+  assert.equal(commonSelectors.isDigit2Key({ key: '3' }), false);
+});
+
+test('commonSelectors.isDigit3Key', () => {
+  assert.ok(commonSelectors.isDigit3Key({ keyCode: 51 }));
+  assert.ok(commonSelectors.isDigit3Key({ key: '3' }));
+
+  assert.equal(commonSelectors.isDigit3Key({ keyCode: 49 }), false);
+  assert.equal(commonSelectors.isDigit3Key({ key: '1' }), false);
+});
+
+test('commonSelectors.isDigitKey', () => {
+  const keyCode0 = 48;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode0 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '0' }));
+
+  const keyCode2 = 50;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode2 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '2' }));
+
+  const keyCode9 = 57;
+  assert.ok(commonSelectors.isDigitKey({ keyCode: keyCode9 }));
+  assert.ok(commonSelectors.isDigitKey({ key: '9' }));
+
+  assert.equal(commonSelectors.isDigitKey({ keyCode: 47 }), false);
+  assert.equal(commonSelectors.isDigitKey({ key: '/' }), false);
+
+  assert.equal(commonSelectors.isDigitKey({ keyCode: 58 }), false);
+  assert.equal(commonSelectors.isDigitKey({ key: ':' }), false);
 });
 
 test('commonSelectors.true', () => {

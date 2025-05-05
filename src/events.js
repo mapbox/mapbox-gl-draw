@@ -1,9 +1,10 @@
-import setupModeHandler from './lib/mode_handler.js';
-import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor.js';
+import * as Constants from './constants.js';
+import * as CommonSelectors from './lib/common_selectors.js';
 import featuresAt from './lib/features_at.js';
+import getFeaturesAndSetCursor from './lib/get_features_and_set_cursor.js';
 import isClick from './lib/is_click.js';
 import isTap from './lib/is_tap.js';
-import * as Constants from './constants.js';
+import setupModeHandler from './lib/mode_handler.js';
 import objectToMode from './modes/object_to_mode.js';
 
 export default function(ctx) {
@@ -120,30 +121,33 @@ export default function(ctx) {
     }
   };
 
-  // 8 - Backspace
-  // 46 - Delete
-  const isKeyModeValid = code => !(code === 8 || code === 46 || (code >= 48 && code <= 57));
+  const isKeyModeValid = (event) => {
+    const isBackspaceKey = CommonSelectors.isBackspaceKey(event);
+    const isDeleteKey = CommonSelectors.isDeleteKey(event);
+    const isDigitKey = CommonSelectors.isDigitKey(event);
+    return !(isBackspaceKey || isDeleteKey || isDigitKey);
+  };
 
   events.keydown = function(event) {
     const isMapElement = (event.srcElement || event.target).classList.contains(Constants.classes.CANVAS);
     if (!isMapElement) return; // we only handle events on the map
 
-    if ((event.keyCode === 8 || event.keyCode === 46) && ctx.options.controls.trash) {
+    if ((CommonSelectors.isBackspaceKey(event) || CommonSelectors.isDeleteKey(event)) && ctx.options.controls.trash) {
       event.preventDefault();
       currentMode.trash();
-    } else if (isKeyModeValid(event.keyCode)) {
+    } else if (isKeyModeValid(event)) {
       currentMode.keydown(event);
-    } else if (event.keyCode === 49 && ctx.options.controls.point) {
+    } else if (CommonSelectors.isDigit1Key(event) && ctx.options.controls.point) {
       changeMode(Constants.modes.DRAW_POINT);
-    } else if (event.keyCode === 50 && ctx.options.controls.line_string) {
+    } else if (CommonSelectors.isDigit2Key(event) && ctx.options.controls.line_string) {
       changeMode(Constants.modes.DRAW_LINE_STRING);
-    } else if (event.keyCode === 51 && ctx.options.controls.polygon) {
+    } else if (CommonSelectors.isDigit3Key(event) && ctx.options.controls.polygon) {
       changeMode(Constants.modes.DRAW_POLYGON);
     }
   };
 
   events.keyup = function(event) {
-    if (isKeyModeValid(event.keyCode)) {
+    if (isKeyModeValid(event)) {
       currentMode.keyup(event);
     }
   };
