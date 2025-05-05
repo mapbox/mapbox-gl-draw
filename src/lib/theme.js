@@ -48,8 +48,9 @@ export default [
       ],
       'line-dasharray': [
         'case',
-        ['==', ['get', 'active'], 'true'], [0.2, 2],
-        [2, 0],
+        ['==', ['get', 'active'], 'true'],
+        ['literal', [0.2, 2]],
+        ['literal', [2, 0]],
       ],
       'line-width': 2,
     },
