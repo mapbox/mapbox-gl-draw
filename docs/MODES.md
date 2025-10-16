@@ -63,7 +63,7 @@ For more info on how to handle map interactions see [Life Cycle Functions](#life
 
 ## Available Custom Modes
 
-_please feel free to add your own modes to this list via a PR_
+_Please feel free to add your own modes to this list via a PR_
 
 -   [Static Mode](https://github.com/mapbox/mapbox-gl-draw-static-mode): Turn off interactions
 -   [Cut/Split Line Mode](https://github.com/BrunoSalerno/mapbox-gl-draw-cut-line-mode): Cut/split lineStrings functionality
@@ -88,6 +88,7 @@ _please feel free to add your own modes to this list via a PR_
 -   [Select Feature Mode](https://github.com/mhsattarian/mapbox-gl-draw-select-mode): Select features by click and highlight on hover
 -   [Paint Mode](https://github.com/piraveenankirupakaran/mapbox-gl-draw-paint-mode): Allows users to paint freestyle on the map
 
+_Please note that the custom modes/software listed above are not created or endorsed by Mapbox, and we make no guarantees, warranties or assume any liabilities or obligations arising from them, including whether they are useful, secure or available.  Please use your own judgment when deciding whether and how to use them. Any use of these projects is solely at your own risk._
 
 ## Life Cycle Functions
 
