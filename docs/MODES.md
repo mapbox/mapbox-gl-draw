@@ -83,6 +83,7 @@ _Please feel free to add your own modes to this list via a PR_
 -   [Waypoint Mode](https://github.com/zakjan/mapbox-gl-draw-waypoint): Allow user to drag vertices only, prevent dragging features
 -   [Bezier Curve Mode](https://github.com/Jeff-Numix/mapbox-gl-draw-bezier-curve-mode): Draw and edit bezier curves
 -   [Snapping Mode](https://github.com/mhsattarian/mapbox-gl-draw-snap-mode): Add snapping ability while drawing features
+-   [Snapping Polygon Mode](https://github.com/expomap/mapbox-gl-draw-snapping-polygon-mode): Add snapping ability while drawing polygons
 -   [Pinning Mode](https://github.com/mhsattarian/mapbox-gl-draw-pinning-mode): Pin shared coordinates together during edit
 -   [Passing Mode](https://github.com/mhsattarian/mapbox-gl-draw-passing-mode): Add ability to draw features but don't add them
 -   [Select Feature Mode](https://github.com/mhsattarian/mapbox-gl-draw-select-mode): Select features by click and highlight on hover
