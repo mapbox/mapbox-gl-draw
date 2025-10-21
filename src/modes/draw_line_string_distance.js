@@ -78,6 +78,9 @@ DrawLineStringDistance.createDistanceInput = function(state) {
     color: #666;
     font-size: 12px;
     white-space: nowrap;
+    width: 120px;
+    text-align: center;
+    display: inline-block;
   `;
 
   // Create input

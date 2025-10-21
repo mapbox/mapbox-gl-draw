@@ -78,6 +78,9 @@ DrawPolygonDistance.createDistanceInput = function(state) {
     color: #666;
     font-size: 12px;
     white-space: nowrap;
+    width: 120px;
+    text-align: center;
+    display: inline-block;
   `;
 
   // Create input
@@ -407,14 +410,22 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
         previewVertex = [lngLat.lng, lngLat.lat];
       }
     } else {
-      // No snapping available
+      // No snapping available - just follow cursor
       previewVertex = [lngLat.lng, lngLat.lat];
     }
     this.removeGuideCircle(state);
   }
 
   // Update polygon preview
-  state.polygon.updateCoordinate(`0.${state.vertices.length}`, previewVertex[0], previewVertex[1]);
+  if (previewVertex) {
+    state.polygon.updateCoordinate(`0.${state.vertices.length}`, previewVertex[0], previewVertex[1]);
+
+    // For preview with only 1 vertex, add the first vertex again to close the ring
+    // so the preview line is visible (polygons need at least 3 vertices to render)
+    if (state.vertices.length === 1) {
+      state.polygon.updateCoordinate(`0.${state.vertices.length + 1}`, state.vertices[0][0], state.vertices[0][1]);
+    }
+  }
 };
 
 
