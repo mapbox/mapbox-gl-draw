@@ -209,9 +209,35 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
     newVertex = destinationPoint.geometry.coordinates;
   } else {
-    // Free placement: snap to features directly
+    // Free placement: check for feature snap first
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-    newVertex = [snappedCoord.lng, snappedCoord.lat];
+
+    // Check if actually snapped to a feature
+    const didSnap = snappedCoord.lng !== e.lngLat.lng || snappedCoord.lat !== e.lngLat.lat;
+
+    if (didSnap) {
+      // Feature snap takes priority
+      newVertex = [snappedCoord.lng, snappedCoord.lat];
+    } else if (state.snapEnabled && state.vertices.length >= 2) {
+      // No feature snap - check for bearing-based orthogonal snap
+      const from = turf.point(lastVertex);
+      const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
+      const mouseBearing = turf.bearing(from, to);
+      const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
+      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+
+      if (orthogonalBearing !== null) {
+        // Snap to orthogonal bearing at mouse distance
+        const destinationPoint = turf.destination(from, mouseDistance, orthogonalBearing, { units: 'kilometers' });
+        newVertex = destinationPoint.geometry.coordinates;
+      } else {
+        // Use mouse position
+        newVertex = [e.lngLat.lng, e.lngLat.lat];
+      }
+    } else {
+      // No snapping available
+      newVertex = [e.lngLat.lng, e.lngLat.lat];
+    }
   }
 
   // Check for polygon closing
@@ -283,9 +309,35 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
 
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
   } else {
-    // Free placement: snap to features directly
+    // Free placement: check for feature snap first
     const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
-    previewVertex = [snappedCoord.lng, snappedCoord.lat];
+
+    // Check if actually snapped to a feature
+    const didSnap = snappedCoord.lng !== lngLat.lng || snappedCoord.lat !== lngLat.lat;
+
+    if (didSnap) {
+      // Feature snap takes priority
+      previewVertex = [snappedCoord.lng, snappedCoord.lat];
+    } else if (state.snapEnabled && state.vertices.length >= 2) {
+      // No feature snap - check for bearing-based orthogonal snap
+      const from = turf.point(lastVertex);
+      const to = turf.point([lngLat.lng, lngLat.lat]);
+      const mouseBearing = turf.bearing(from, to);
+      const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
+      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+
+      if (orthogonalBearing !== null) {
+        // Snap to orthogonal bearing at mouse distance
+        const destinationPoint = turf.destination(from, mouseDistance, orthogonalBearing, { units: 'kilometers' });
+        previewVertex = destinationPoint.geometry.coordinates;
+      } else {
+        // Use mouse position
+        previewVertex = [lngLat.lng, lngLat.lat];
+      }
+    } else {
+      // No snapping available
+      previewVertex = [lngLat.lng, lngLat.lat];
+    }
     this.removeGuideCircle(state);
   }
 
@@ -334,7 +386,8 @@ DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
       paint: {
         'line-color': '#000000',
         'line-width': 1,
-        'line-opacity': 0.8
+        'line-opacity': 0.2,
+        'line-dasharray': [2, 2]
       }
     });
   } else {
