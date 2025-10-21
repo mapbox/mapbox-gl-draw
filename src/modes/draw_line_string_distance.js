@@ -128,6 +128,38 @@ DrawLineStringDistance.onClick = function(state, e) {
   this.clickOnMap(state, e);
 };
 
+DrawLineStringDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
+  if (!state.snapEnabled || state.vertices.length < 2) {
+    return null;
+  }
+
+  // Calculate the bearing of the last segment
+  const lastVertex = state.vertices[state.vertices.length - 1];
+  const secondLastVertex = state.vertices[state.vertices.length - 2];
+  const from = turf.point(secondLastVertex);
+  const to = turf.point(lastVertex);
+  const lastSegmentBearing = turf.bearing(from, to);
+
+  // Check orthogonal directions: 0°, 90°, 180°, 270° from last segment
+  const orthogonalAngles = [0, 90, 180, 270];
+
+  for (const angle of orthogonalAngles) {
+    const orthogonalBearing = lastSegmentBearing + angle;
+    const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+    const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+
+    // Calculate the smallest angle difference
+    let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
+    if (diff > 180) diff = 360 - diff;
+
+    if (diff <= tolerance) {
+      return orthogonalBearing;
+    }
+  }
+
+  return null;
+};
+
 DrawLineStringDistance.clickOnMap = function(state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
@@ -147,23 +179,32 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
   const lastVertex = state.vertices[state.vertices.length - 1];
 
   if (state.currentDistance !== null && state.currentDistance > 0) {
-    // Distance mode: snap to features for direction, but use exact distance
+    // Distance mode: check for feature snap first
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
 
-    // Check if we snapped to a 90° snap point first
-    const snapPoint = this.findClosestSnapPoint(state, e.lngLat, this.map);
+    // Check if actually snapped to a feature
+    const didSnap = snappedCoord.lng !== e.lngLat.lng || snappedCoord.lat !== e.lngLat.lat;
 
-    if (snapPoint) {
-      // Use 90° snap point
-      newVertex = snapPoint;
-    } else {
-      // Use snapped coordinate for direction
+    let bearingToUse;
+    if (didSnap) {
+      // Feature snap takes priority - use snapped coordinate for direction
       const from = turf.point(lastVertex);
       const to = turf.point([snappedCoord.lng, snappedCoord.lat]);
-      const bearingValue = turf.bearing(from, to);
-      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingValue, { units: 'kilometers' });
-      newVertex = destinationPoint.geometry.coordinates;
+      bearingToUse = turf.bearing(from, to);
+    } else {
+      // No feature snap - check for bearing-based orthogonal snap
+      const from = turf.point(lastVertex);
+      const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
+      const mouseBearing = turf.bearing(from, to);
+      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+
+      bearingToUse = orthogonalBearing !== null ? orthogonalBearing : mouseBearing;
     }
+
+    // Place vertex at exact distance in calculated direction
+    const from = turf.point(lastVertex);
+    const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+    newVertex = destinationPoint.geometry.coordinates;
   } else {
     // Free placement: snap to features directly
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
@@ -172,9 +213,6 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
 
   state.vertices.push(newVertex);
   state.line.updateCoordinate(state.vertices.length - 1, newVertex[0], newVertex[1]);
-
-  // Clear snap points
-  state.snapPoints = [];
 
   // Clear distance input for next segment
   if (state.distanceInput) {
@@ -202,23 +240,32 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
   const lastVertex = state.vertices[state.vertices.length - 1];
 
   if (state.currentDistance !== null && state.currentDistance > 0) {
-    // Distance mode: snap to features for direction, but use exact distance
+    // Distance mode: check for feature snap first
     const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
 
-    // Check if we snapped to a 90° snap point first
-    const snapPoint = this.findClosestSnapPoint(state, lngLat, this.map);
+    // Check if actually snapped to a feature
+    const didSnap = snappedCoord.lng !== lngLat.lng || snappedCoord.lat !== lngLat.lat;
 
-    if (snapPoint) {
-      // Use 90° snap point
-      previewVertex = snapPoint;
-    } else {
-      // Use snapped coordinate for direction
+    let bearingToUse;
+    if (didSnap) {
+      // Feature snap takes priority - use snapped coordinate for direction
       const from = turf.point(lastVertex);
       const to = turf.point([snappedCoord.lng, snappedCoord.lat]);
-      const bearingValue = turf.bearing(from, to);
-      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingValue, { units: 'kilometers' });
-      previewVertex = destinationPoint.geometry.coordinates;
+      bearingToUse = turf.bearing(from, to);
+    } else {
+      // No feature snap - check for bearing-based orthogonal snap
+      const from = turf.point(lastVertex);
+      const to = turf.point([lngLat.lng, lngLat.lat]);
+      const mouseBearing = turf.bearing(from, to);
+      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+
+      bearingToUse = orthogonalBearing !== null ? orthogonalBearing : mouseBearing;
     }
+
+    // Place preview vertex at exact distance in calculated direction
+    const from = turf.point(lastVertex);
+    const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+    previewVertex = destinationPoint.geometry.coordinates;
 
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
   } else {
@@ -230,51 +277,6 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
 
   // Update line preview
   state.line.updateCoordinate(state.vertices.length, previewVertex[0], previewVertex[1]);
-};
-
-DrawLineStringDistance.calculateSnapPoints = function(state, center, radius) {
-  if (state.vertices.length < 2) {
-    state.snapPoints = [];
-    return;
-  }
-
-  const lastVertex = state.vertices[state.vertices.length - 1];
-  const secondLastVertex = state.vertices[state.vertices.length - 2];
-
-  const from = turf.point(secondLastVertex);
-  const to = turf.point(lastVertex);
-  const lastSegmentBearing = turf.bearing(from, to);
-
-  const snapAngles = [0, 90, 180, 270];
-  state.snapPoints = snapAngles.map((angle) => {
-    const snapBearing = lastSegmentBearing + angle;
-    const snapPoint = turf.destination(turf.point(center), radius / 1000, snapBearing, { units: 'kilometers' });
-    return snapPoint.geometry.coordinates;
-  });
-};
-
-DrawLineStringDistance.findClosestSnapPoint = function(state, mouseLngLat, map) {
-  if (!state.snapEnabled || state.snapPoints.length === 0) {
-    return null;
-  }
-
-  const mousePoint = map.project(mouseLngLat);
-  let closestSnapPoint = null;
-  let closestDistance = Infinity;
-
-  state.snapPoints.forEach((snapCoord) => {
-    const snapLngLat = { lng: snapCoord[0], lat: snapCoord[1] };
-    const snapPoint = map.project(snapLngLat);
-
-    const distance = Math.sqrt(Math.pow(mousePoint.x - snapPoint.x, 2) + Math.pow(mousePoint.y - snapPoint.y, 2));
-
-    if (distance < state.snapTolerance && distance < closestDistance) {
-      closestDistance = distance;
-      closestSnapPoint = snapCoord;
-    }
-  });
-
-  return closestSnapPoint;
 };
 
 DrawLineStringDistance.updateGuideCircle = function(state, center, radius) {
@@ -297,10 +299,6 @@ DrawLineStringDistance.updateGuideCircle = function(state, center, radius) {
   };
 
   state.guideCircle = circleFeature;
-
-  if (state.snapEnabled) {
-    this.calculateSnapPoints(state, center, radius);
-  }
 
   const map = this.map;
   if (!map) return;
@@ -461,24 +459,6 @@ DrawLineStringDistance.toDisplayFeatures = function(state, geojson, display) {
         geometry: {
           type: 'Point',
           coordinates: vertex
-        }
-      });
-    });
-  }
-
-  // Display snap points
-  if (state.snapEnabled && state.snapPoints.length > 0) {
-    state.snapPoints.forEach((snapCoord) => {
-      display({
-        type: 'Feature',
-        properties: {
-          meta: 'snap-point',
-          parent: state.line.id,
-          active: Constants.activeStates.INACTIVE
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: snapCoord
         }
       });
     });
