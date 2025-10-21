@@ -150,4 +150,21 @@ export default [
       'circle-color': orange,
     },
   },
+  // Snap point
+  //   Visible when using distance modes
+  //   Shows 90-degree snap points on the guide circle
+  {
+    'id': 'gl-draw-snap-point',
+    'type': 'circle',
+    'filter': [
+      'all',
+      ['==', 'meta', 'snap-point'],
+    ],
+    'paint': {
+      'circle-radius': 4,
+      'circle-color': '#000000',
+      'circle-stroke-color': white,
+      'circle-stroke-width': 2,
+    },
+  },
 ];
