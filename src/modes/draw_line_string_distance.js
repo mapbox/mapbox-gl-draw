@@ -47,30 +47,86 @@ DrawLineStringDistance.onSetup = function(opts) {
 };
 
 DrawLineStringDistance.createDistanceInput = function(state) {
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'distance (m)';
-  input.className = 'distance-mode-input';
-  input.style.cssText = `
+  // Create container
+  const container = document.createElement('div');
+  container.className = 'distance-mode-container';
+  container.style.cssText = `
     position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 10000;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(200, 200, 200, 0.8);
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 4px 8px;
-    font-size: 12px;
-    width: 100px;
-    display: none;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
     pointer-events: auto;
     transition: opacity 0.2s ease-in-out;
   `;
+
+  // Create label/state display
+  const label = document.createElement('span');
+  label.className = 'distance-mode-label';
+  label.textContent = 'Press D for distance';
+  label.style.cssText = `
+    color: #666;
+    font-size: 12px;
+    white-space: nowrap;
+  `;
+
+  // Create input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'distance (m)';
+  input.className = 'distance-mode-input';
+  input.style.cssText = `
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    width: 120px;
+    display: none;
+    outline: none;
+  `;
+
+  // Create clear button
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '×';
+  clearBtn.className = 'distance-mode-clear';
+  clearBtn.style.cssText = `
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    display: none;
+  `;
+
+  const updateDisplay = () => {
+    if (state.currentDistance !== null && state.currentDistance > 0) {
+      label.style.display = 'none';
+      input.style.display = 'block';
+      clearBtn.style.display = 'block';
+    } else {
+      label.style.display = 'block';
+      input.style.display = 'none';
+      clearBtn.style.display = 'none';
+    }
+  };
 
   input.addEventListener('input', (e) => {
     const value = e.target.value;
     if (value === '' || !isNaN(parseFloat(value))) {
       state.currentDistance = value === '' ? null : parseFloat(value);
+      updateDisplay();
       if (state.currentPosition) {
         this.onMouseMove(state, {
           point: state.lastPoint || { x: 0, y: 0 },
@@ -87,42 +143,65 @@ DrawLineStringDistance.createDistanceInput = function(state) {
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (state.currentDistance !== null && state.currentDistance > 0) {
-        e.target.blur();
-      } else if (state.currentPosition) {
-        this.clickOnMap(state, { lngLat: state.currentPosition });
-      }
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      state.snapEnabled = !state.snapEnabled;
-      if (!state.snapEnabled) {
-        state.inputEnabled = false;
-        e.target.style.display = 'none';
-        state.currentDistance = null;
-        state.snapPoints = [];
-        this.removeGuideCircle(state);
+      if (state.vertices.length >= 2) {
+        this.finishDrawing(state);
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      this.onKeyUp(state, { keyCode: 27 });
+      state.currentDistance = null;
+      input.value = '';
+      input.blur();
+      updateDisplay();
     } else if (e.key === 'Backspace' && e.target.value === '') {
       e.preventDefault();
       this.onKeyUp(state, { keyCode: 8 });
     }
   });
 
-  document.body.appendChild(input);
+  clearBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    state.currentDistance = null;
+    input.value = '';
+    input.blur();
+    updateDisplay();
+  });
+
+  // Add keyboard shortcut for 'D' key to toggle
+  const keyHandler = (e) => {
+    if (e.key === 'd' || e.key === 'D') {
+      if (state.vertices.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Toggle: if distance is active, clear it; otherwise activate it
+        if (state.currentDistance !== null || document.activeElement === input) {
+          state.currentDistance = null;
+          input.value = '';
+          input.blur();
+          updateDisplay();
+        } else {
+          input.style.display = 'block';
+          label.style.display = 'none';
+          input.focus();
+        }
+      }
+    }
+  };
+  document.addEventListener('keydown', keyHandler);
+
+  container.appendChild(label);
+  container.appendChild(input);
+  container.appendChild(clearBtn);
+  document.body.appendChild(container);
+
   state.distanceInput = input;
+  state.distanceContainer = container;
+  state.distanceKeyHandler = keyHandler;
+
+  updateDisplay();
 };
 
-DrawLineStringDistance.updateInputPosition = function(state, pointOnScreen) {
-  if (state.distanceInput && state.vertices.length > 0 && state.inputEnabled) {
-    const offset = { x: 50, y: -30 };
-    state.distanceInput.style.left = pointOnScreen.x + offset.x + 'px';
-    state.distanceInput.style.top = pointOnScreen.y + offset.y + 'px';
-    state.distanceInput.style.display = 'block';
-  }
-};
 
 DrawLineStringDistance.onClick = function(state, e) {
   if (e.originalEvent && e.originalEvent.target === state.distanceInput) {
@@ -169,11 +248,6 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
     state.vertices.push([snappedCoord.lng, snappedCoord.lat]);
     state.line.updateCoordinate(0, snappedCoord.lng, snappedCoord.lat);
-
-    if (state.distanceInput) {
-      state.distanceInput.style.display = 'block';
-      setTimeout(() => state.distanceInput.focus(), 10);
-    }
     return;
   }
 
@@ -257,8 +331,6 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
 
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
-
-  this.updateInputPosition(state, pointOnScreen);
 
   if (state.vertices.length === 0) {
     return;
@@ -447,9 +519,6 @@ DrawLineStringDistance.onKeyUp = function(state, e) {
       state.line.removeCoordinate(state.vertices.length);
     } else if (state.vertices.length === 1) {
       state.vertices.pop();
-      if (state.distanceInput) {
-        state.distanceInput.style.display = 'none';
-      }
       state.line.setCoordinates([]);
     }
   }
@@ -478,10 +547,17 @@ DrawLineStringDistance.onStop = function(state) {
   this.activateUIButton();
   this.removeGuideCircle(state);
 
-  if (state.distanceInput) {
-    state.distanceInput.remove();
-    state.distanceInput = null;
+  if (state.distanceContainer) {
+    state.distanceContainer.remove();
+    state.distanceContainer = null;
   }
+
+  if (state.distanceKeyHandler) {
+    document.removeEventListener('keydown', state.distanceKeyHandler);
+    state.distanceKeyHandler = null;
+  }
+
+  state.distanceInput = null;
 
   if (this.getFeature(state.line.id) === undefined) return;
 
