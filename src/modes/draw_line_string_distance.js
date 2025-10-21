@@ -52,16 +52,19 @@ DrawLineStringDistance.createDistanceInput = function(state) {
   input.placeholder = 'distance (m)';
   input.className = 'distance-mode-input';
   input.style.cssText = `
-    position: absolute;
-    z-index: 999;
+    position: fixed;
+    z-index: 10000;
     background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     padding: 4px 8px;
     font-size: 12px;
     width: 100px;
     display: none;
+    pointer-events: auto;
+    transition: opacity 0.2s ease-in-out;
   `;
 
   input.addEventListener('input', (e) => {
