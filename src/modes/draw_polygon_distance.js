@@ -38,7 +38,9 @@ DrawPolygonDistance.onSetup = function(opts) {
     inputEnabled: true,
     snapEnabled: true,
     snapPoints: [],
-    snapTolerance: 20
+    snapTolerance: 20,
+    snappedLineBearing: null,
+    snappedLineSegment: null
   };
 
   this.createDistanceInput(state);
@@ -206,45 +208,122 @@ DrawPolygonDistance.createDistanceInput = function(state) {
 };
 
 
-DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
-  if (!state.snapEnabled || state.vertices.length < 2) {
+DrawPolygonDistance.getSnappedLineBearing = function(snappedCoord) {
+  // Get the snapping system to find which line was snapped to
+  const snapping = this._ctx.snapping;
+  if (!snapping || !snapping.snappedGeometry) {
     return null;
   }
 
-  // Calculate the bearing of the last segment
-  const lastVertex = state.vertices[state.vertices.length - 1];
-  const secondLastVertex = state.vertices[state.vertices.length - 2];
-  const from = turf.point(secondLastVertex);
-  const to = turf.point(lastVertex);
-  const lastSegmentBearing = turf.bearing(from, to);
+  const geom = snapping.snappedGeometry;
 
-  // Check orthogonal directions: 0°, 90°, 180°, 270° from last segment
-  const orthogonalAngles = [0, 90, 180, 270];
+  // Only process LineString or MultiLineString
+  if (geom.type !== 'LineString' && geom.type !== 'MultiLineString') {
+    return null;
+  }
 
-  for (const angle of orthogonalAngles) {
-    const orthogonalBearing = lastSegmentBearing + angle;
-    const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
-    const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+  const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
+  const line = geom.type === 'LineString' ? geom : turf.lineString(geom.coordinates.flat());
 
-    // Calculate the smallest angle difference
-    let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
-    if (diff > 180) diff = 360 - diff;
+  // Find the nearest segment
+  let nearestSegment = null;
+  let minDistance = Infinity;
 
-    if (diff <= tolerance) {
-      return orthogonalBearing;
+  const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    const segmentStart = coords[i];
+    const segmentEnd = coords[i + 1];
+    const segment = turf.lineString([segmentStart, segmentEnd]);
+    const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
+    const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestSegment = { start: segmentStart, end: segmentEnd };
     }
+  }
+
+  if (nearestSegment) {
+    const bearing = turf.bearing(
+      turf.point(nearestSegment.start),
+      turf.point(nearestSegment.end)
+    );
+    return { bearing, segment: nearestSegment };
   }
 
   return null;
 };
 
+DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
+  if (!state.snapEnabled) {
+    return null;
+  }
 
-DrawPolygonDistance.updateRightAngleIndicator = function(state, cornerVertex, prevBearing, nextBearing) {
+  const orthogonalAngles = [0, 90, 180, 270];
+  let bestMatch = null;
+  let bestDiff = Infinity;
+
+  // Check previous segment bearing (if we have 2+ vertices)
+  if (state.vertices.length >= 2) {
+    const lastVertex = state.vertices[state.vertices.length - 1];
+    const secondLastVertex = state.vertices[state.vertices.length - 2];
+    const from = turf.point(secondLastVertex);
+    const to = turf.point(lastVertex);
+    const lastSegmentBearing = turf.bearing(from, to);
+
+    for (const angle of orthogonalAngles) {
+      const orthogonalBearing = lastSegmentBearing + angle;
+      const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+      const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        bestMatch = {
+          bearing: orthogonalBearing,
+          referenceBearing: lastSegmentBearing,
+          referenceType: 'previous',
+          referenceSegment: { start: secondLastVertex, end: lastVertex }
+        };
+      }
+    }
+  }
+
+  // Check snapped line bearing (if we have a snapped line)
+  if (state.snappedLineBearing !== null && state.vertices.length >= 1) {
+    for (const angle of orthogonalAngles) {
+      const orthogonalBearing = state.snappedLineBearing + angle;
+      const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+      const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        bestMatch = {
+          bearing: orthogonalBearing,
+          referenceBearing: state.snappedLineBearing,
+          referenceType: 'snapped',
+          referenceSegment: state.snappedLineSegment
+        };
+      }
+    }
+  }
+
+  return bestMatch;
+};
+
+
+DrawPolygonDistance.updateRightAngleIndicator = function(state, cornerVertex, referenceBearing, nextBearing, referenceSegment) {
   // Create L-shaped indicator that forms a square with the two line segments
   const cornerPoint = turf.point(cornerVertex);
 
-  // Point 1: 2m back along previous segment (opposite direction)
-  const point1 = turf.destination(cornerPoint, 2 / 1000, prevBearing + 180, { units: 'kilometers' });
+  // Point 1: 2m back along reference segment (opposite direction)
+  const point1 = turf.destination(cornerPoint, 2 / 1000, referenceBearing + 180, { units: 'kilometers' });
 
   // Point 2: The diagonal corner of the square - from point1, go 2m perpendicular (along next segment direction)
   const point2 = turf.destination(turf.point(point1.geometry.coordinates), 2 / 1000, nextBearing, { units: 'kilometers' });
@@ -296,6 +375,13 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
     state.vertices.push([snappedCoord.lng, snappedCoord.lat]);
     state.polygon.updateCoordinate('0.0', snappedCoord.lng, snappedCoord.lat);
+
+    // Store snapped line info if snapped to a line
+    const snappedLineInfo = this.getSnappedLineBearing(snappedCoord);
+    if (snappedLineInfo) {
+      state.snappedLineBearing = snappedLineInfo.bearing;
+      state.snappedLineSegment = snappedLineInfo.segment;
+    }
     return;
   }
 
@@ -321,9 +407,9 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
       const from = turf.point(lastVertex);
       const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
       const mouseBearing = turf.bearing(from, to);
-      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-      bearingToUse = orthogonalBearing !== null ? orthogonalBearing : mouseBearing;
+      bearingToUse = orthogonalMatch !== null ? orthogonalMatch.bearing : mouseBearing;
     }
 
     // Place vertex at exact distance in calculated direction
@@ -340,17 +426,17 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     if (didSnap) {
       // Feature snap takes priority
       newVertex = [snappedCoord.lng, snappedCoord.lat];
-    } else if (state.snapEnabled && state.vertices.length >= 2) {
+    } else if (state.snapEnabled) {
       // No feature snap - check for bearing-based orthogonal snap
       const from = turf.point(lastVertex);
       const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
       const mouseBearing = turf.bearing(from, to);
       const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
-      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-      if (orthogonalBearing !== null) {
+      if (orthogonalMatch !== null) {
         // Snap to orthogonal bearing at mouse distance
-        const destinationPoint = turf.destination(from, mouseDistance, orthogonalBearing, { units: 'kilometers' });
+        const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
         newVertex = destinationPoint.geometry.coordinates;
       } else {
         // Use mouse position
@@ -375,6 +461,17 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
 
   state.vertices.push(newVertex);
   state.polygon.updateCoordinate(`0.${state.vertices.length - 1}`, newVertex[0], newVertex[1]);
+
+  // Store snapped line info if snapped to a line
+  const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
+  const snappedLineInfo = this.getSnappedLineBearing(snappedCoord);
+  if (snappedLineInfo) {
+    state.snappedLineBearing = snappedLineInfo.bearing;
+    state.snappedLineSegment = snappedLineInfo.segment;
+  } else {
+    state.snappedLineBearing = null;
+    state.snappedLineSegment = null;
+  }
 
   // Clear distance input for next segment
   if (state.distanceInput) {
@@ -408,6 +505,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
 
     let bearingToUse;
     let isOrthogonalSnap = false;
+    let orthogonalSnapInfo = null;
     if (didSnap) {
       // Feature snap takes priority - use snapped coordinate for direction
       const from = turf.point(lastVertex);
@@ -418,11 +516,12 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
       const from = turf.point(lastVertex);
       const to = turf.point([lngLat.lng, lngLat.lat]);
       const mouseBearing = turf.bearing(from, to);
-      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-      if (orthogonalBearing !== null) {
-        bearingToUse = orthogonalBearing;
+      if (orthogonalMatch !== null) {
+        bearingToUse = orthogonalMatch.bearing;
         isOrthogonalSnap = true;
+        orthogonalSnapInfo = orthogonalMatch;
       } else {
         bearingToUse = mouseBearing;
       }
@@ -436,12 +535,8 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
 
     // Show right-angle indicator if orthogonal snap is active
-    if (isOrthogonalSnap && state.vertices.length >= 2) {
-      const secondLastVertex = state.vertices[state.vertices.length - 2];
-      const prevFrom = turf.point(secondLastVertex);
-      const prevTo = turf.point(lastVertex);
-      const prevBearing = turf.bearing(prevFrom, prevTo);
-      this.updateRightAngleIndicator(state, lastVertex, prevBearing, bearingToUse);
+    if (isOrthogonalSnap && orthogonalSnapInfo) {
+      this.updateRightAngleIndicator(state, lastVertex, orthogonalSnapInfo.referenceBearing, bearingToUse, orthogonalSnapInfo.referenceSegment);
     } else {
       this.removeRightAngleIndicator(state);
     }
@@ -455,25 +550,22 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     if (didSnap) {
       // Feature snap takes priority
       previewVertex = [snappedCoord.lng, snappedCoord.lat];
-    } else if (state.snapEnabled && state.vertices.length >= 2) {
+      this.removeRightAngleIndicator(state);
+    } else if (state.snapEnabled) {
       // No feature snap - check for bearing-based orthogonal snap
       const from = turf.point(lastVertex);
       const to = turf.point([lngLat.lng, lngLat.lat]);
       const mouseBearing = turf.bearing(from, to);
       const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
-      const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
+      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-      if (orthogonalBearing !== null) {
+      if (orthogonalMatch !== null) {
         // Snap to orthogonal bearing at mouse distance
-        const destinationPoint = turf.destination(from, mouseDistance, orthogonalBearing, { units: 'kilometers' });
+        const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
         previewVertex = destinationPoint.geometry.coordinates;
 
         // Show right-angle indicator
-        const secondLastVertex = state.vertices[state.vertices.length - 2];
-        const prevFrom = turf.point(secondLastVertex);
-        const prevTo = turf.point(lastVertex);
-        const prevBearing = turf.bearing(prevFrom, prevTo);
-        this.updateRightAngleIndicator(state, lastVertex, prevBearing, orthogonalBearing);
+        this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, orthogonalMatch.bearing, orthogonalMatch.referenceSegment);
       } else {
         // Use mouse position
         previewVertex = [lngLat.lng, lngLat.lat];
