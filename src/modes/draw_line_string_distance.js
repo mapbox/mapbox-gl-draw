@@ -576,13 +576,6 @@ DrawLineStringDistance.onKeyUp = function(state, e) {
 
   // Enter key
   if (e.keyCode === 13 || CommonSelectors.isEnterKey(e)) {
-    if (state.vertices.length === 0) return;
-
-    if (state.currentPosition) {
-      this.clickOnMap(state, { lngLat: state.currentPosition });
-      return;
-    }
-
     if (state.vertices.length >= 2) {
       this.finishDrawing(state);
     }
@@ -622,6 +615,10 @@ DrawLineStringDistance.finishDrawing = function(state) {
   }
 
   state.line.setCoordinates(state.vertices);
+
+  // Clean up indicators before finishing
+  this.removeGuideCircle(state);
+  this.removeRightAngleIndicator(state);
 
   this.fire(Constants.events.CREATE, {
     features: [state.line.toGeoJSON()]

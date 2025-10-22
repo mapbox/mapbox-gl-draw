@@ -578,13 +578,6 @@ DrawPolygonDistance.onKeyUp = function(state, e) {
 
   // Enter key
   if (e.keyCode === 13 || CommonSelectors.isEnterKey(e)) {
-    if (state.vertices.length === 0) return;
-
-    if (state.currentPosition) {
-      this.clickOnMap(state, { lngLat: state.currentPosition });
-      return;
-    }
-
     if (state.vertices.length >= 3) {
       this.finishDrawing(state);
     }
@@ -626,6 +619,10 @@ DrawPolygonDistance.finishDrawing = function(state) {
   // Close the polygon
   const closedCoords = [...state.vertices, state.vertices[0]];
   state.polygon.setCoordinates([closedCoords]);
+
+  // Clean up indicators before finishing
+  this.removeGuideCircle(state);
+  this.removeRightAngleIndicator(state);
 
   this.fire(Constants.events.CREATE, {
     features: [state.polygon.toGeoJSON()]
