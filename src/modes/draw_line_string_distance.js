@@ -351,6 +351,7 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
     const didSnap = snappedCoord.lng !== lngLat.lng || snappedCoord.lat !== lngLat.lat;
 
     let bearingToUse;
+    let isOrthogonalSnap = false;
     if (didSnap) {
       // Feature snap takes priority - use snapped coordinate for direction
       const from = turf.point(lastVertex);
@@ -363,7 +364,12 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
       const mouseBearing = turf.bearing(from, to);
       const orthogonalBearing = this.getOrthogonalBearing(state, mouseBearing);
 
-      bearingToUse = orthogonalBearing !== null ? orthogonalBearing : mouseBearing;
+      if (orthogonalBearing !== null) {
+        bearingToUse = orthogonalBearing;
+        isOrthogonalSnap = true;
+      } else {
+        bearingToUse = mouseBearing;
+      }
     }
 
     // Place preview vertex at exact distance in calculated direction
@@ -372,6 +378,17 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
     previewVertex = destinationPoint.geometry.coordinates;
 
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
+
+    // Show right-angle indicator if orthogonal snap is active
+    if (isOrthogonalSnap && state.vertices.length >= 2) {
+      const secondLastVertex = state.vertices[state.vertices.length - 2];
+      const prevFrom = turf.point(secondLastVertex);
+      const prevTo = turf.point(lastVertex);
+      const prevBearing = turf.bearing(prevFrom, prevTo);
+      this.updateRightAngleIndicator(state, lastVertex, prevBearing, bearingToUse);
+    } else {
+      this.removeRightAngleIndicator(state);
+    }
   } else {
     // Free placement: check for feature snap first
     const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
@@ -394,13 +411,22 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
         // Snap to orthogonal bearing at mouse distance
         const destinationPoint = turf.destination(from, mouseDistance, orthogonalBearing, { units: 'kilometers' });
         previewVertex = destinationPoint.geometry.coordinates;
+
+        // Show right-angle indicator
+        const secondLastVertex = state.vertices[state.vertices.length - 2];
+        const prevFrom = turf.point(secondLastVertex);
+        const prevTo = turf.point(lastVertex);
+        const prevBearing = turf.bearing(prevFrom, prevTo);
+        this.updateRightAngleIndicator(state, lastVertex, prevBearing, orthogonalBearing);
       } else {
         // Use mouse position
         previewVertex = [lngLat.lng, lngLat.lat];
+        this.removeRightAngleIndicator(state);
       }
     } else {
       // No snapping available
       previewVertex = [lngLat.lng, lngLat.lat];
+      this.removeRightAngleIndicator(state);
     }
     this.removeGuideCircle(state);
   }
@@ -466,6 +492,67 @@ DrawLineStringDistance.removeGuideCircle = function(state) {
     map.removeSource('distance-guide-circle');
   }
   state.guideCircle = null;
+};
+
+DrawLineStringDistance.updateRightAngleIndicator = function(state, cornerVertex, prevBearing, nextBearing) {
+  // Create L-shaped indicator that forms a square with the two line segments
+  const cornerPoint = turf.point(cornerVertex);
+
+  // Point 1: 2m back along previous segment (opposite direction)
+  const point1 = turf.destination(cornerPoint, 2 / 1000, prevBearing + 180, { units: 'kilometers' });
+
+  // Point 2: The diagonal corner of the square - from point1, go 2m perpendicular (along next segment direction)
+  const point2 = turf.destination(turf.point(point1.geometry.coordinates), 2 / 1000, nextBearing, { units: 'kilometers' });
+
+  // Point 3: 2m forward along next segment
+  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing, { units: 'kilometers' });
+
+  const indicatorFeature = {
+    type: 'Feature',
+    properties: { isRightAngleIndicator: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [point1.geometry.coordinates, point2.geometry.coordinates, point3.geometry.coordinates]
+    }
+  };
+
+  state.rightAngleIndicator = indicatorFeature;
+
+  const map = this.map;
+  if (!map) return;
+
+  if (!map.getSource('right-angle-indicator')) {
+    map.addSource('right-angle-indicator', {
+      type: 'geojson',
+      data: indicatorFeature
+    });
+
+    map.addLayer({
+      id: 'right-angle-indicator',
+      type: 'line',
+      source: 'right-angle-indicator',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 1.0
+      }
+    });
+  } else {
+    map.getSource('right-angle-indicator').setData(indicatorFeature);
+  }
+};
+
+DrawLineStringDistance.removeRightAngleIndicator = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('right-angle-indicator')) {
+    map.removeLayer('right-angle-indicator');
+  }
+  if (map.getSource && map.getSource('right-angle-indicator')) {
+    map.removeSource('right-angle-indicator');
+  }
+  state.rightAngleIndicator = null;
 };
 
 DrawLineStringDistance.onKeyUp = function(state, e) {
