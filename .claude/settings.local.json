@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(yarn link)",
-      "Bash(yarn build)"
+      "Bash(yarn build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run build-min:*)"
     ],
     "deny": [],
     "ask": []

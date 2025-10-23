@@ -208,6 +208,122 @@ DrawPolygonDistance.createDistanceInput = function(state) {
 };
 
 
+DrawPolygonDistance.getSnapInfo = function(lngLat) {
+  const snapping = this._ctx.snapping;
+  if (!snapping || !snapping.snappedGeometry) {
+    return null;
+  }
+
+  const geom = snapping.snappedGeometry;
+  const snapCoord = this._ctx.snapping.snapCoord(lngLat);
+
+  // Check if actually snapped
+  const didSnap = snapCoord.lng !== lngLat.lng || snapCoord.lat !== lngLat.lat;
+  if (!didSnap) {
+    return null;
+  }
+
+  // Point snap
+  if (geom.type === 'Point') {
+    return {
+      type: 'point',
+      coord: [snapCoord.lng, snapCoord.lat],
+      snappedFeature: snapping.snappedFeature
+    };
+  }
+
+  // Line snap (LineString or MultiLineString)
+  if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+    const snapPoint = turf.point([snapCoord.lng, snapCoord.lat]);
+    const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
+
+    // Find the nearest segment
+    let nearestSegment = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < coords.length - 1; i++) {
+      const segmentStart = coords[i];
+      const segmentEnd = coords[i + 1];
+      const segment = turf.lineString([segmentStart, segmentEnd]);
+      const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
+      const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestSegment = { start: segmentStart, end: segmentEnd };
+      }
+    }
+
+    if (nearestSegment) {
+      const bearing = turf.bearing(
+        turf.point(nearestSegment.start),
+        turf.point(nearestSegment.end)
+      );
+      return {
+        type: 'line',
+        coord: [snapCoord.lng, snapCoord.lat],
+        bearing: bearing,
+        segment: nearestSegment,
+        snappedFeature: snapping.snappedFeature
+      };
+    }
+  }
+
+  return null;
+};
+
+DrawPolygonDistance.calculateLineIntersection = function(startPoint, bearing, lineSegment) {
+  // Calculate where the bearing line from startPoint intersects with lineSegment (extended to infinity)
+  // Returns null if lines are parallel or intersection distance is unreasonable
+
+  const p1 = turf.point(startPoint);
+  const lineStart = turf.point(lineSegment.start);
+  const lineEnd = turf.point(lineSegment.end);
+
+  const lineBearing = turf.bearing(lineStart, lineEnd);
+
+  // Check if lines are nearly parallel (within 5 degrees)
+  let angleDiff = Math.abs(bearing - lineBearing);
+  if (angleDiff > 180) angleDiff = 360 - angleDiff;
+  if (angleDiff < 5 || angleDiff > 175) {
+    return null; // Lines are too parallel
+  }
+
+  // Create a long line along the bearing (extended in BOTH directions - forward and backward)
+  const bearingLine = turf.lineString([
+    turf.destination(p1, 1000, bearing + 180, { units: 'kilometers' }).geometry.coordinates, // 1000km backward
+    turf.destination(p1, 1000, bearing, { units: 'kilometers' }).geometry.coordinates // 1000km forward
+  ]);
+
+  // Create a long line along the snap line bearing (extended in both directions)
+  const extendedSnapLine = turf.lineString([
+    turf.destination(lineStart, 1000, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+    turf.destination(lineStart, 1000, lineBearing, { units: 'kilometers' }).geometry.coordinates
+  ]);
+
+  try {
+    const intersection = turf.lineIntersect(bearingLine, extendedSnapLine);
+
+    if (intersection.features.length > 0) {
+      const intersectionPoint = intersection.features[0].geometry.coordinates;
+      const distance = turf.distance(p1, turf.point(intersectionPoint), { units: 'meters' });
+
+      // Only return if distance is reasonable (less than 10km)
+      if (distance < 10000) {
+        return {
+          coord: intersectionPoint,
+          distance: distance
+        };
+      }
+    }
+  } catch (e) {
+    // Intersection calculation failed
+    return null;
+  }
+
+  return null;
+};
+
 DrawPolygonDistance.getSnappedLineBearing = function(snappedCoord) {
   // Get the snapping system to find which line was snapped to
   const snapping = this._ctx.snapping;
@@ -385,67 +501,62 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     return;
   }
 
-  // Subsequent vertices
+  // Subsequent vertices - apply new priority system
   let newVertex;
   const lastVertex = state.vertices[state.vertices.length - 1];
+  const from = turf.point(lastVertex);
+  const hasUserDistance = state.currentDistance !== null && state.currentDistance > 0;
 
-  if (state.currentDistance !== null && state.currentDistance > 0) {
-    // Distance mode: check for feature snap first
-    const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
+  // Get snap info (point or line)
+  const snapInfo = this.getSnapInfo(e.lngLat);
 
-    // Check if actually snapped to a feature
-    const didSnap = snappedCoord.lng !== e.lngLat.lng || snappedCoord.lat !== e.lngLat.lat;
+  // Calculate mouse bearing for orthogonal snap check
+  const mouseBearing = turf.bearing(from, turf.point([e.lngLat.lng, e.lngLat.lat]));
+  const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-    let bearingToUse;
-    if (didSnap) {
-      // Feature snap takes priority - use snapped coordinate for direction
-      const from = turf.point(lastVertex);
-      const to = turf.point([snappedCoord.lng, snappedCoord.lat]);
-      bearingToUse = turf.bearing(from, to);
-    } else {
-      // No feature snap - check for bearing-based orthogonal snap
-      const from = turf.point(lastVertex);
-      const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
-      const mouseBearing = turf.bearing(from, to);
-      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+  // Determine direction (bearing) priority
+  let bearingToUse = mouseBearing;
+  let usePointDirection = false;
 
-      bearingToUse = orthogonalMatch !== null ? orthogonalMatch.bearing : mouseBearing;
-    }
+  if (snapInfo && snapInfo.type === 'point') {
+    // Priority 1: Point snap direction (highest priority for direction)
+    bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
+    usePointDirection = true;
+  } else if (orthogonalMatch !== null) {
+    // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
+    bearingToUse = orthogonalMatch.bearing;
+  } else if (snapInfo && snapInfo.type === 'line') {
+    // Priority 3: Line snap bearing (lowest priority for direction)
+    bearingToUse = snapInfo.bearing;
+  }
 
-    // Place vertex at exact distance in calculated direction
-    const from = turf.point(lastVertex);
+  // Determine length priority
+  if (hasUserDistance) {
+    // Priority 1 for length: User-entered distance (always wins)
     const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
     newVertex = destinationPoint.geometry.coordinates;
-  } else {
-    // Free placement: check for feature snap first
-    const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-
-    // Check if actually snapped to a feature
-    const didSnap = snappedCoord.lng !== e.lngLat.lng || snappedCoord.lat !== e.lngLat.lat;
-
-    if (didSnap) {
-      // Feature snap takes priority
-      newVertex = [snappedCoord.lng, snappedCoord.lat];
-    } else if (state.snapEnabled) {
-      // No feature snap - check for bearing-based orthogonal snap
-      const from = turf.point(lastVertex);
-      const to = turf.point([e.lngLat.lng, e.lngLat.lat]);
-      const mouseBearing = turf.bearing(from, to);
-      const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
-      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
-
-      if (orthogonalMatch !== null) {
-        // Snap to orthogonal bearing at mouse distance
-        const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
-        newVertex = destinationPoint.geometry.coordinates;
-      } else {
-        // Use mouse position
-        newVertex = [e.lngLat.lng, e.lngLat.lat];
-      }
+  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
+    // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
+    const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    if (intersection) {
+      newVertex = intersection.coord;
     } else {
-      // No snapping available
-      newVertex = [e.lngLat.lng, e.lngLat.lat];
+      // Fallback to mouse distance if intersection fails
+      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+      newVertex = destinationPoint.geometry.coordinates;
     }
+  } else if (usePointDirection && snapInfo) {
+    // Point snap: use distance to point
+    newVertex = snapInfo.coord;
+  } else if (snapInfo && snapInfo.type === 'line') {
+    // Line snap: use snapped position
+    newVertex = snapInfo.coord;
+  } else {
+    // No snap: use mouse distance with bearing
+    const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
+    const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+    newVertex = destinationPoint.geometry.coordinates;
   }
 
   // Check for polygon closing
@@ -492,91 +603,76 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     return;
   }
 
-  // Calculate preview position
+  // Calculate preview position using new priority system
   let previewVertex;
   const lastVertex = state.vertices[state.vertices.length - 1];
+  const from = turf.point(lastVertex);
+  const hasUserDistance = state.currentDistance !== null && state.currentDistance > 0;
 
-  if (state.currentDistance !== null && state.currentDistance > 0) {
-    // Distance mode: check for feature snap first
-    const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
+  // Get snap info (point or line)
+  const snapInfo = this.getSnapInfo(lngLat);
 
-    // Check if actually snapped to a feature
-    const didSnap = snappedCoord.lng !== lngLat.lng || snappedCoord.lat !== lngLat.lat;
+  // Calculate mouse bearing for orthogonal snap check
+  const mouseBearing = turf.bearing(from, turf.point([lngLat.lng, lngLat.lat]));
+  const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
-    let bearingToUse;
-    let isOrthogonalSnap = false;
-    let orthogonalSnapInfo = null;
-    if (didSnap) {
-      // Feature snap takes priority - use snapped coordinate for direction
-      const from = turf.point(lastVertex);
-      const to = turf.point([snappedCoord.lng, snappedCoord.lat]);
-      bearingToUse = turf.bearing(from, to);
-    } else {
-      // No feature snap - check for bearing-based orthogonal snap
-      const from = turf.point(lastVertex);
-      const to = turf.point([lngLat.lng, lngLat.lat]);
-      const mouseBearing = turf.bearing(from, to);
-      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+  // Determine direction (bearing) priority
+  let bearingToUse = mouseBearing;
+  let usePointDirection = false;
+  let isOrthogonalSnap = false;
 
-      if (orthogonalMatch !== null) {
-        bearingToUse = orthogonalMatch.bearing;
-        isOrthogonalSnap = true;
-        orthogonalSnapInfo = orthogonalMatch;
-      } else {
-        bearingToUse = mouseBearing;
-      }
-    }
+  if (snapInfo && snapInfo.type === 'point') {
+    // Priority 1: Point snap direction (highest priority for direction)
+    bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
+    usePointDirection = true;
+  } else if (orthogonalMatch !== null) {
+    // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
+    bearingToUse = orthogonalMatch.bearing;
+    isOrthogonalSnap = true;
+  } else if (snapInfo && snapInfo.type === 'line') {
+    // Priority 3: Line snap bearing (lowest priority for direction)
+    bearingToUse = snapInfo.bearing;
+  }
 
-    // Place preview vertex at exact distance in calculated direction
-    const from = turf.point(lastVertex);
+  // Determine length priority
+  if (hasUserDistance) {
+    // Priority 1 for length: User-entered distance (always wins)
     const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
     previewVertex = destinationPoint.geometry.coordinates;
-
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
-
-    // Show right-angle indicator if orthogonal snap is active
-    if (isOrthogonalSnap && orthogonalSnapInfo) {
-      this.updateRightAngleIndicator(state, lastVertex, orthogonalSnapInfo.referenceBearing, bearingToUse, orthogonalSnapInfo.referenceSegment);
+  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
+    // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
+    const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    if (intersection) {
+      previewVertex = intersection.coord;
     } else {
-      this.removeRightAngleIndicator(state);
-    }
-  } else {
-    // Free placement: check for feature snap first
-    const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
-
-    // Check if actually snapped to a feature
-    const didSnap = snappedCoord.lng !== lngLat.lng || snappedCoord.lat !== lngLat.lat;
-
-    if (didSnap) {
-      // Feature snap takes priority
-      previewVertex = [snappedCoord.lng, snappedCoord.lat];
-      this.removeRightAngleIndicator(state);
-    } else if (state.snapEnabled) {
-      // No feature snap - check for bearing-based orthogonal snap
-      const from = turf.point(lastVertex);
-      const to = turf.point([lngLat.lng, lngLat.lat]);
-      const mouseBearing = turf.bearing(from, to);
-      const mouseDistance = turf.distance(from, to, { units: 'kilometers' });
-      const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
-
-      if (orthogonalMatch !== null) {
-        // Snap to orthogonal bearing at mouse distance
-        const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
-        previewVertex = destinationPoint.geometry.coordinates;
-
-        // Show right-angle indicator
-        this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, orthogonalMatch.bearing, orthogonalMatch.referenceSegment);
-      } else {
-        // Use mouse position
-        previewVertex = [lngLat.lng, lngLat.lat];
-        this.removeRightAngleIndicator(state);
-      }
-    } else {
-      // No snapping available
-      previewVertex = [lngLat.lng, lngLat.lat];
-      this.removeRightAngleIndicator(state);
+      // Fallback to mouse distance if intersection fails
+      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+      previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
+  } else if (usePointDirection && snapInfo) {
+    // Point snap: use distance to point
+    previewVertex = snapInfo.coord;
+    this.removeGuideCircle(state);
+  } else if (snapInfo && snapInfo.type === 'line') {
+    // Line snap: use snapped position
+    previewVertex = snapInfo.coord;
+    this.removeGuideCircle(state);
+  } else {
+    // No snap: use mouse distance with bearing
+    const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
+    const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+    previewVertex = destinationPoint.geometry.coordinates;
+    this.removeGuideCircle(state);
+  }
+
+  // Show right-angle indicator if orthogonal snap is active (but not for point snap)
+  if (isOrthogonalSnap && !usePointDirection && orthogonalMatch) {
+    this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, bearingToUse, orthogonalMatch.referenceSegment);
+  } else {
+    this.removeRightAngleIndicator(state);
   }
 
   // Update polygon preview - add closing line
