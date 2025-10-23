@@ -515,6 +515,64 @@ DrawPolygonDistance.removeRightAngleIndicator = function(state) {
   if (map.getLayer && map.getLayer('right-angle-indicator')) map.removeLayer('right-angle-indicator');
   if (map.getSource && map.getSource('right-angle-indicator')) map.removeSource('right-angle-indicator');
 };
+
+DrawPolygonDistance.updateClosingRightAngleIndicator = function(state, cornerVertex, referenceBearing, nextBearing, referenceSegment) {
+  // Create L-shaped indicator for closing perpendicular (always inside)
+  const cornerPoint = turf.point(cornerVertex);
+
+  // For closing perpendicular: indicator on inside (forward along reference, back along next)
+  const point1 = turf.destination(cornerPoint, 2 / 1000, referenceBearing, { units: 'kilometers' });
+  const point2 = turf.destination(turf.point(point1.geometry.coordinates), 2 / 1000, nextBearing + 180, { units: 'kilometers' });
+  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing + 180, { units: 'kilometers' });
+
+  const indicatorFeature = {
+    type: 'Feature',
+    properties: { isClosingRightAngleIndicator: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [point1.geometry.coordinates, point2.geometry.coordinates, point3.geometry.coordinates]
+    }
+  };
+
+  state.closingRightAngleIndicator = indicatorFeature;
+
+  const map = this.map;
+  if (!map) return;
+
+  if (!map.getSource('right-angle-indicator-closing')) {
+    map.addSource('right-angle-indicator-closing', {
+      type: 'geojson',
+      data: indicatorFeature
+    });
+
+    map.addLayer({
+      id: 'right-angle-indicator-closing',
+      type: 'line',
+      source: 'right-angle-indicator-closing',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 1.0
+      }
+    });
+  } else {
+    map.getSource('right-angle-indicator-closing').setData(indicatorFeature);
+  }
+};
+
+DrawPolygonDistance.removeClosingRightAngleIndicator = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('right-angle-indicator-closing')) {
+    map.removeLayer('right-angle-indicator-closing');
+  }
+  if (map.getSource && map.getSource('right-angle-indicator-closing')) {
+    map.removeSource('right-angle-indicator-closing');
+  }
+  state.closingRightAngleIndicator = null;
+};
+
 DrawPolygonDistance.onClick = function(state, e) {
   if (e.originalEvent && e.originalEvent.target === state.distanceInput) {
     return;
@@ -651,23 +709,65 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
 
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(from, turf.point([lngLat.lng, lngLat.lat]));
+
+  // Check for closing perpendicular snap (perpendicular to first segment)
+  let closingPerpendicularSnap = null;
+  if (state.vertices.length >= 2) {
+    const firstVertex = state.vertices[0];
+    const secondVertex = state.vertices[1];
+    const firstSegmentBearing = turf.bearing(turf.point(firstVertex), turf.point(secondVertex));
+    const bearingToFirst = turf.bearing(turf.point([lngLat.lng, lngLat.lat]), turf.point(firstVertex));
+
+    // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
+    for (const angle of [90, 270]) {
+      const targetBearing = firstSegmentBearing + angle;
+      const normalizedTarget = ((targetBearing % 360) + 360) % 360;
+      const normalizedToFirst = ((bearingToFirst % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedTarget - normalizedToFirst);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= 5) {
+        closingPerpendicularSnap = {
+          firstVertex: firstVertex,
+          perpendicularBearing: targetBearing,
+          firstSegmentBearing: firstSegmentBearing
+        };
+        break;
+      }
+    }
+  }
+
   const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+
+  // Check if BOTH regular orthogonal AND closing perpendicular are active
+  const bothSnapsActive = orthogonalMatch !== null && closingPerpendicularSnap !== null && !(snapInfo && snapInfo.type === 'point');
 
   // Determine direction (bearing) priority
   let bearingToUse = mouseBearing;
   let usePointDirection = false;
   let isOrthogonalSnap = false;
+  let isClosingPerpendicularSnap = false;
 
   if (snapInfo && snapInfo.type === 'point') {
     // Priority 1: Point snap direction (highest priority for direction)
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
+  } else if (bothSnapsActive) {
+    // Special case: Both orthogonal and closing perpendicular are active
+    // We'll handle this in the length priority section
+    isOrthogonalSnap = true;
+    isClosingPerpendicularSnap = true;
   } else if (orthogonalMatch !== null) {
     // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
+  } else if (closingPerpendicularSnap !== null) {
+    // Priority 3: Closing perpendicular snap
+    // (This will be handled in the length priority section)
+    isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === 'line') {
-    // Priority 3: Line snap bearing (lowest priority for direction)
+    // Priority 4: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
   }
 
@@ -677,6 +777,61 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
     previewVertex = destinationPoint.geometry.coordinates;
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
+  } else if (bothSnapsActive) {
+    // Special case: Both orthogonal and closing perpendicular are active
+    // Find intersection where both constraints are satisfied
+    const perpLine = {
+      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+    };
+
+    const intersection = this.calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    if (intersection) {
+      previewVertex = intersection.coord;
+      // Show both indicators (regular at last vertex, closing at first vertex)
+      this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, orthogonalMatch.bearing, orthogonalMatch.referenceSegment);
+      const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
+      const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
+      this.updateClosingRightAngleIndicator(
+        state,
+        closingPerpendicularSnap.firstVertex,
+        closingPerpendicularSnap.firstSegmentBearing,
+        closingBearing,
+        firstSegment
+      );
+    } else {
+      // Fallback to mouse distance
+      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
+      previewVertex = destinationPoint.geometry.coordinates;
+    }
+    this.removeGuideCircle(state);
+  } else if (closingPerpendicularSnap !== null && !usePointDirection && !isOrthogonalSnap) {
+    // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
+    const perpLine = {
+      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+    };
+
+    const intersection = this.calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    if (intersection) {
+      previewVertex = intersection.coord;
+      const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
+      const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
+      this.updateClosingRightAngleIndicator(
+        state,
+        closingPerpendicularSnap.firstVertex,
+        closingPerpendicularSnap.firstSegmentBearing,
+        closingBearing,
+        firstSegment
+      );
+    } else {
+      // Fallback to mouse position
+      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, mouseBearing, { units: 'kilometers' });
+      previewVertex = destinationPoint.geometry.coordinates;
+    }
+    this.removeGuideCircle(state);
   } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
     const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
@@ -705,11 +860,16 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     this.removeGuideCircle(state);
   }
 
-  // Show right-angle indicator if orthogonal snap is active (but not for point snap)
-  if (isOrthogonalSnap && !usePointDirection && orthogonalMatch) {
+  // Show right-angle indicator if orthogonal snap is active (but not for point snap or dual snap)
+  if (isOrthogonalSnap && !usePointDirection && !bothSnapsActive && !isClosingPerpendicularSnap && orthogonalMatch) {
     this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, bearingToUse, orthogonalMatch.referenceSegment);
   } else {
     this.removeRightAngleIndicator(state);
+  }
+
+  // Clean up closing indicator if not in use
+  if (!isClosingPerpendicularSnap && !bothSnapsActive) {
+    this.removeClosingRightAngleIndicator(state);
   }
 
   // Update polygon preview - add closing line
@@ -863,6 +1023,7 @@ DrawPolygonDistance.onStop = function(state) {
   this.activateUIButton();
   this.removeGuideCircle(state);
   this.removeRightAngleIndicator(state);
+  this.removeClosingRightAngleIndicator(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
