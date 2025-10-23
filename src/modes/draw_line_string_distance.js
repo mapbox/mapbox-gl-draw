@@ -479,21 +479,63 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
 
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(from, turf.point([e.lngLat.lng, e.lngLat.lat]));
+
+  // Check for closing perpendicular snap (perpendicular to first segment)
+  let closingPerpendicularSnap = null;
+  if (state.vertices.length >= 3) {
+    const firstVertex = state.vertices[0];
+    const secondVertex = state.vertices[1];
+    const firstSegmentBearing = turf.bearing(turf.point(firstVertex), turf.point(secondVertex));
+    const bearingToFirst = turf.bearing(turf.point([e.lngLat.lng, e.lngLat.lat]), turf.point(firstVertex));
+
+    // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
+    for (const angle of [90, 270]) {
+      const targetBearing = firstSegmentBearing + angle;
+      const normalizedTarget = ((targetBearing % 360) + 360) % 360;
+      const normalizedToFirst = ((bearingToFirst % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedTarget - normalizedToFirst);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= 5) {
+        closingPerpendicularSnap = {
+          firstVertex: firstVertex,
+          perpendicularBearing: targetBearing,
+          firstSegmentBearing: firstSegmentBearing
+        };
+        break;
+      }
+    }
+  }
+
   const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+
+  // Check if BOTH regular orthogonal AND closing perpendicular are active
+  const bothSnapsActive = orthogonalMatch !== null && closingPerpendicularSnap !== null && !(snapInfo && snapInfo.type === 'point');
 
   // Determine direction (bearing) priority
   let bearingToUse = mouseBearing;
   let usePointDirection = false;
+  let isOrthogonalSnap = false;
+  let isClosingPerpendicularSnap = false;
 
   if (snapInfo && snapInfo.type === 'point') {
     // Priority 1: Point snap direction (highest priority for direction)
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
+  } else if (bothSnapsActive) {
+    // Special case: Both orthogonal and closing perpendicular are active
+    isOrthogonalSnap = true;
+    isClosingPerpendicularSnap = true;
   } else if (orthogonalMatch !== null) {
     // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
     bearingToUse = orthogonalMatch.bearing;
+    isOrthogonalSnap = true;
+  } else if (closingPerpendicularSnap !== null) {
+    // Priority 3: Closing perpendicular snap
+    isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === 'line') {
-    // Priority 3: Line snap bearing (lowest priority for direction)
+    // Priority 4: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
   }
 
@@ -502,6 +544,39 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
     // Priority 1 for length: User-entered distance (always wins)
     const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
     newVertex = destinationPoint.geometry.coordinates;
+  } else if (bothSnapsActive) {
+    // Special case: Both orthogonal and closing perpendicular are active
+    // Find intersection where both constraints are satisfied
+    const perpLine = {
+      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+    };
+
+    const intersection = this.calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    if (intersection) {
+      newVertex = intersection.coord;
+    } else {
+      // Fallback to mouse distance
+      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
+      newVertex = destinationPoint.geometry.coordinates;
+    }
+  } else if (closingPerpendicularSnap !== null && !usePointDirection && !isOrthogonalSnap) {
+    // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
+    const perpLine = {
+      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+    };
+
+    const intersection = this.calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    if (intersection) {
+      newVertex = intersection.coord;
+    } else {
+      // Fallback to mouse position
+      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
+      const destinationPoint = turf.destination(from, mouseDistance, mouseBearing, { units: 'kilometers' });
+      newVertex = destinationPoint.geometry.coordinates;
+    }
   } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
     const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
