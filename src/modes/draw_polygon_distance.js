@@ -290,15 +290,16 @@ DrawPolygonDistance.calculateLineIntersection = function(startPoint, bearing, li
   }
 
   // Create a long line along the bearing (extended in BOTH directions - forward and backward)
+  // Using 100m (0.1km) extension which is sufficient for small geometries
   const bearingLine = turf.lineString([
-    turf.destination(p1, 1000, bearing + 180, { units: 'kilometers' }).geometry.coordinates, // 1000km backward
-    turf.destination(p1, 1000, bearing, { units: 'kilometers' }).geometry.coordinates // 1000km forward
+    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates, // 100m backward
+    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates // 100m forward
   ]);
 
   // Create a long line along the snap line bearing (extended in both directions)
   const extendedSnapLine = turf.lineString([
-    turf.destination(lineStart, 1000, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-    turf.destination(lineStart, 1000, lineBearing, { units: 'kilometers' }).geometry.coordinates
+    turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+    turf.destination(lineStart, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates
   ]);
 
   try {
@@ -403,6 +404,34 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
           referenceBearing: lastSegmentBearing,
           referenceType: 'previous',
           referenceSegment: { start: secondLastVertex, end: lastVertex }
+        };
+      }
+    }
+  }
+
+  // Check FIRST segment bearing (if we have 3+ vertices) - helps close rectangles!
+  if (state.vertices.length >= 3) {
+    const firstVertex = state.vertices[0];
+    const secondVertex = state.vertices[1];
+    const from = turf.point(firstVertex);
+    const to = turf.point(secondVertex);
+    const firstSegmentBearing = turf.bearing(from, to);
+
+    for (const angle of orthogonalAngles) {
+      const orthogonalBearing = firstSegmentBearing + angle;
+      const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+      const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        bestMatch = {
+          bearing: orthogonalBearing,
+          referenceBearing: firstSegmentBearing,
+          referenceType: 'first',
+          referenceSegment: { start: firstVertex, end: secondVertex }
         };
       }
     }
