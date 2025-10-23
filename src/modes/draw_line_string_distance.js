@@ -144,7 +144,10 @@ DrawLineStringDistance.createDistanceInput = function(state) {
   });
 
   input.addEventListener('keydown', (e) => {
-    e.stopPropagation();
+    // Only stop propagation for keys we're handling
+    if (e.key === 'Enter' || e.key === 'Escape' || (e.key === 'Backspace' && e.target.value === '')) {
+      e.stopPropagation();
+    }
 
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -172,8 +175,12 @@ DrawLineStringDistance.createDistanceInput = function(state) {
     updateDisplay();
   });
 
-  // Add keyboard shortcut for 'D' key to toggle
+  // Store reference to mode context for use in keyHandler
+  const self = this;
+
+  // Add keyboard shortcuts
   const keyHandler = (e) => {
+    // 'D' key to toggle distance input
     if (e.key === 'd' || e.key === 'D') {
       if (state.vertices.length > 0) {
         e.preventDefault();
@@ -191,6 +198,12 @@ DrawLineStringDistance.createDistanceInput = function(state) {
           input.focus();
         }
       }
+    }
+    // Backspace to remove last vertex (bypasses need for trash controls)
+    else if (e.key === 'Backspace' && document.activeElement !== input) {
+      e.preventDefault();
+      e.stopPropagation();
+      self.onTrash(state);
     }
   };
   document.addEventListener('keydown', keyHandler);
@@ -1010,8 +1023,33 @@ DrawLineStringDistance.onStop = function(state) {
 };
 
 DrawLineStringDistance.onTrash = function(state) {
-  this.deleteFeature([state.line.id], { silent: true });
-  this.changeMode(Constants.modes.SIMPLE_SELECT);
+  // Remove the last drawn vertex instead of deleting the entire feature
+  if (state.vertices.length > 1) {
+    state.vertices.pop();
+    state.line.removeCoordinate(state.vertices.length);
+
+    // Also remove the preview coordinate
+    if (state.line.coordinates.length > state.vertices.length) {
+      state.line.removeCoordinate(state.vertices.length);
+    }
+
+    // If we have the last mouse position, regenerate the preview
+    if (state.currentPosition) {
+      this.onMouseMove(state, {
+        point: state.lastPoint || { x: 0, y: 0 },
+        lngLat: state.currentPosition
+      });
+    }
+
+    // Force an immediate render through the store
+    if (this._ctx && this._ctx.store && this._ctx.store.render) {
+      this._ctx.store.render();
+    }
+  } else {
+    // If only one or zero vertices, delete the feature and exit
+    this.deleteFeature([state.line.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
 };
 
 DrawLineStringDistance.toDisplayFeatures = function(state, geojson, display) {

@@ -172,8 +172,12 @@ DrawPolygonDistance.createDistanceInput = function(state) {
     updateDisplay();
   });
 
-  // Add keyboard shortcut for 'D' key to toggle
+  // Store reference to mode context for use in keyHandler
+  const self = this;
+
+  // Add keyboard shortcuts
   const keyHandler = (e) => {
+    // 'D' key to toggle distance input
     if (e.key === 'd' || e.key === 'D') {
       if (state.vertices.length > 0) {
         e.preventDefault();
@@ -191,6 +195,12 @@ DrawPolygonDistance.createDistanceInput = function(state) {
           input.focus();
         }
       }
+    }
+    // Backspace to remove last vertex (bypasses need for trash controls)
+    else if (e.key === 'Backspace' && document.activeElement !== input) {
+      e.preventDefault();
+      e.stopPropagation();
+      self.onTrash(state);
     }
   };
   document.addEventListener('keydown', keyHandler);
@@ -874,8 +884,33 @@ DrawPolygonDistance.onStop = function(state) {
 };
 
 DrawPolygonDistance.onTrash = function(state) {
-  this.deleteFeature([state.polygon.id], { silent: true });
-  this.changeMode(Constants.modes.SIMPLE_SELECT);
+  // Remove the last drawn vertex instead of deleting the entire feature
+  if (state.vertices.length > 1) {
+    state.vertices.pop();
+    state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+
+    // Also remove the preview coordinate
+    if (state.polygon.coordinates[0].length > state.vertices.length) {
+      state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+    }
+
+    // If we have the last mouse position, regenerate the preview
+    if (state.currentPosition) {
+      this.onMouseMove(state, {
+        point: state.lastPoint || { x: 0, y: 0 },
+        lngLat: state.currentPosition
+      });
+    }
+
+    // Force an immediate render through the store
+    if (this._ctx && this._ctx.store && this._ctx.store.render) {
+      this._ctx.store.render();
+    }
+  } else {
+    // If only one or zero vertices, delete the feature and exit
+    this.deleteFeature([state.polygon.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  }
 };
 
 DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
