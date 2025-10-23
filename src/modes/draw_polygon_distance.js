@@ -279,24 +279,23 @@ DrawPolygonDistance.calculateLineIntersection = function(startPoint, bearing, li
   const p1 = turf.point(startPoint);
   const lineStart = turf.point(lineSegment.start);
   const lineEnd = turf.point(lineSegment.end);
-
   const lineBearing = turf.bearing(lineStart, lineEnd);
 
   // Check if lines are nearly parallel (within 5 degrees)
   let angleDiff = Math.abs(bearing - lineBearing);
-  if (angleDiff > 180) angleDiff = 360 - angleDiff;
+  if (angleDiff > 180) angleDiff = Math.abs(360 - angleDiff);
   if (angleDiff < 5 || angleDiff > 175) {
     return null; // Lines are too parallel
   }
 
-  // Create a long line along the bearing (extended in BOTH directions - forward and backward)
+  // Create a long line along the bearing (extended bidirectionally)
   // Using 100m (0.1km) extension which is sufficient for small geometries
   const bearingLine = turf.lineString([
-    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates, // 100m backward
-    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates // 100m forward
+    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates,
+    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates
   ]);
 
-  // Create a long line along the snap line bearing (extended in both directions)
+  // Create extended line along the snap line bearing
   const extendedSnapLine = turf.lineString([
     turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
     turf.destination(lineStart, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates
@@ -318,7 +317,6 @@ DrawPolygonDistance.calculateLineIntersection = function(startPoint, bearing, li
       }
     }
   } catch (e) {
-    // Intersection calculation failed
     return null;
   }
 

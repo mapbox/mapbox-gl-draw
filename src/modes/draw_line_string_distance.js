@@ -333,33 +333,23 @@ DrawLineStringDistance.calculateLineIntersection = function(startPoint, bearing,
   const p1 = turf.point(startPoint);
   const lineStart = turf.point(lineSegment.start);
   const lineEnd = turf.point(lineSegment.end);
-
   const lineBearing = turf.bearing(lineStart, lineEnd);
-
-  console.log('calculateLineIntersection:', {
-    bearing: bearing,
-    lineBearing: lineBearing,
-    startPoint: startPoint,
-    lineSegment: lineSegment
-  });
 
   // Check if lines are nearly parallel (within 5 degrees)
   let angleDiff = Math.abs(bearing - lineBearing);
   if (angleDiff > 180) angleDiff = Math.abs(360 - angleDiff);
-  console.log('angleDiff:', angleDiff);
   if (angleDiff < 5 || angleDiff > 175) {
-    console.log('Lines are too parallel, rejecting');
     return null; // Lines are too parallel
   }
 
-  // Create a long line along the bearing (extended in BOTH directions - forward and backward)
+  // Create a long line along the bearing (extended bidirectionally)
   // Using 100m (0.1km) extension which is sufficient for small geometries
   const bearingLine = turf.lineString([
-    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates, // 100m backward
-    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates // 100m forward
+    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates,
+    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates
   ]);
 
-  // Create a long line along the snap line bearing (extended in both directions)
+  // Create extended line along the snap line bearing
   const extendedSnapLine = turf.lineString([
     turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
     turf.destination(lineStart, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates
@@ -368,32 +358,22 @@ DrawLineStringDistance.calculateLineIntersection = function(startPoint, bearing,
   try {
     const intersection = turf.lineIntersect(bearingLine, extendedSnapLine);
 
-    console.log('Turf intersection result:', intersection.features.length);
-
     if (intersection.features.length > 0) {
       const intersectionPoint = intersection.features[0].geometry.coordinates;
       const distance = turf.distance(p1, turf.point(intersectionPoint), { units: 'meters' });
 
-      console.log('Intersection distance:', distance, 'meters');
-
       // Only return if distance is reasonable (less than 10km)
       if (distance < 10000) {
-        console.log('Intersection found and accepted');
         return {
           coord: intersectionPoint,
           distance: distance
         };
-      } else {
-        console.log('Intersection too far, rejecting');
       }
     }
   } catch (e) {
-    // Intersection calculation failed
-    console.log('Turf intersection threw error:', e);
     return null;
   }
 
-  console.log('No intersection found');
   return null;
 };
 
@@ -578,17 +558,16 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(from, turf.point([lngLat.lng, lngLat.lat]));
 
-  // SPECIAL CHECK: Closing segment perpendicular to first segment (for rectangles)
+  // Check for closing perpendicular snap: helps draw rectangles by making the closing
+  // segment (from current position to first vertex) perpendicular to the first segment
   let closingPerpendicularSnap = null;
   if (state.vertices.length >= 3) {
     const firstVertex = state.vertices[0];
     const secondVertex = state.vertices[1];
     const firstSegmentBearing = turf.bearing(turf.point(firstVertex), turf.point(secondVertex));
-
-    // Check bearing from current position to first vertex
     const bearingToFirst = turf.bearing(turf.point([lngLat.lng, lngLat.lat]), turf.point(firstVertex));
 
-    // Check if it's close to perpendicular to first segment
+    // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
     for (const angle of [90, 270]) {
       const targetBearing = firstSegmentBearing + angle;
       const normalizedTarget = ((targetBearing % 360) + 360) % 360;
@@ -597,7 +576,7 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
       let diff = Math.abs(normalizedTarget - normalizedToFirst);
       if (diff > 180) diff = 360 - diff;
 
-      if (diff <= 5) { // 5 degree tolerance
+      if (diff <= 5) {
         closingPerpendicularSnap = {
           firstVertex: firstVertex,
           perpendicularBearing: targetBearing,
@@ -612,14 +591,6 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive = orthogonalMatch !== null && closingPerpendicularSnap !== null && !(snapInfo && snapInfo.type === 'point');
-
-  if (orthogonalMatch !== null || closingPerpendicularSnap !== null) {
-    console.log('Snap status:', {
-      orthogonalMatch: orthogonalMatch !== null,
-      closingPerpendicularSnap: closingPerpendicularSnap !== null,
-      bothSnapsActive: bothSnapsActive
-    });
-  }
 
   // Determine direction (bearing) priority
   let bearingToUse = mouseBearing;
@@ -657,23 +628,15 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
   } else if (bothSnapsActive) {
     // Special case: Both orthogonal and closing perpendicular are active
-    console.log('Entering bothSnapsActive block');
-    // Find intersection of the two constraint lines
-    const orthogonalLine = {
-      start: turf.destination(turf.point(lastVertex), 0.1, orthogonalMatch.bearing + 180, { units: 'kilometers' }).geometry.coordinates,
-      end: turf.destination(turf.point(lastVertex), 0.1, orthogonalMatch.bearing, { units: 'kilometers' }).geometry.coordinates
-    };
-
+    // Find intersection where both constraints are satisfied
     const perpLine = {
       start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
     };
 
     const intersection = this.calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
-    console.log('Intersection result:', intersection ? 'found' : 'not found');
     if (intersection) {
       previewVertex = intersection.coord;
-      console.log('Showing both indicators');
       // Show both indicators (regular at last vertex, closing at first vertex)
       this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, orthogonalMatch.bearing, orthogonalMatch.referenceSegment);
       const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
@@ -693,8 +656,7 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
     }
     this.removeGuideCircle(state);
   } else if (closingPerpendicularSnap !== null && !usePointDirection && !isOrthogonalSnap) {
-    // Priority: Closing segment perpendicular to first segment (lower than regular orthogonal snap)
-    // Calculate where to place point so closing segment is perpendicular to first segment
+    // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
     const perpLine = {
       start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
@@ -705,7 +667,6 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
       previewVertex = intersection.coord;
       isClosingPerpendicularSnap = true;
       // Show right-angle indicator at first vertex
-      // The closing segment is drawn FROM preview TO first vertex, so calculate bearing in that direction
       const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
       const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
       this.updateClosingRightAngleIndicator(
@@ -750,20 +711,16 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
     this.removeGuideCircle(state);
   }
 
-  // Show right-angle indicator if orthogonal snap is active (but not for point snap)
-  // Note: bothSnapsActive already handles showing both indicators
+  // Show right-angle indicators based on snap state
+  // Note: bothSnapsActive case already handles showing both indicators above
   if (isOrthogonalSnap && !usePointDirection && orthogonalMatch && !bothSnapsActive) {
-    console.log('Showing regular indicator (single mode)');
     this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, bearingToUse, orthogonalMatch.referenceSegment);
   } else if (!isClosingPerpendicularSnap && !bothSnapsActive) {
-    console.log('Removing regular indicator');
-    // Remove regular indicator if not in orthogonal or dual snap mode
     this.removeRightAngleIndicator(state);
   }
 
   // Handle closing indicator separately
   if (!isClosingPerpendicularSnap && !bothSnapsActive) {
-    console.log('Removing closing indicator');
     this.removeClosingRightAngleIndicator(state);
   }
 
