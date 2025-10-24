@@ -339,6 +339,64 @@ DrawLineStringDistance.getSnappedLineBearing = function(snappedCoord) {
   return null;
 };
 
+DrawLineStringDistance.calculateCircleLineIntersection = function(centerPoint, radiusMeters, lineSegment, mousePosition) {
+  // Calculate where a circle (centered at centerPoint with radius in meters) intersects with a line segment
+  // Returns the intersection point closest to mousePosition, or null if no intersection exists
+
+  const center = turf.point(centerPoint);
+  const lineStart = turf.point(lineSegment.start);
+  const lineEnd = turf.point(lineSegment.end);
+
+  // Extend the line segment in both directions to ensure we catch all intersections
+  const lineBearing = turf.bearing(lineStart, lineEnd);
+  const extendedLineStart = turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates;
+  const extendedLineEnd = turf.destination(lineEnd, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates;
+
+  // Create a circle polygon approximation
+  const circle = turf.circle(centerPoint, radiusMeters / 1000, { steps: 64, units: 'kilometers' });
+  const extendedLine = turf.lineString([extendedLineStart, extendedLineEnd]);
+
+  try {
+    // Find intersection points between circle and line
+    const intersections = turf.lineIntersect(circle, extendedLine);
+
+    if (intersections.features.length === 0) {
+      return null;
+    }
+
+    // If only one intersection, return it
+    if (intersections.features.length === 1) {
+      const coord = intersections.features[0].geometry.coordinates;
+      const distance = turf.distance(center, turf.point(coord), { units: 'meters' });
+      return { coord, distance };
+    }
+
+    // Multiple intersections: choose the one closest to mouse position
+    const mousePoint = turf.point(mousePosition);
+    let closestIntersection = null;
+    let minDistanceToMouse = Infinity;
+
+    for (const intersection of intersections.features) {
+      const coord = intersection.geometry.coordinates;
+      const distanceToMouse = turf.distance(mousePoint, turf.point(coord), { units: 'meters' });
+
+      if (distanceToMouse < minDistanceToMouse) {
+        minDistanceToMouse = distanceToMouse;
+        closestIntersection = coord;
+      }
+    }
+
+    if (closestIntersection) {
+      const distance = turf.distance(center, turf.point(closestIntersection), { units: 'meters' });
+      return { coord: closestIntersection, distance };
+    }
+  } catch (e) {
+    return null;
+  }
+
+  return null;
+};
+
 DrawLineStringDistance.calculateLineIntersection = function(startPoint, bearing, lineSegment) {
   // Calculate where the bearing line from startPoint intersects with lineSegment (extended to infinity)
   // Returns null if lines are parallel or intersection distance is unreasonable
@@ -541,9 +599,27 @@ DrawLineStringDistance.clickOnMap = function(state, e) {
 
   // Determine length priority
   if (hasUserDistance) {
-    // Priority 1 for length: User-entered distance (always wins)
-    const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
-    newVertex = destinationPoint.geometry.coordinates;
+    // Priority 1 for length: User-entered distance
+    // If we have a line snap, use circle-line intersection to find the correct point
+    if (snapInfo && snapInfo.type === 'line') {
+      const circleLineIntersection = this.calculateCircleLineIntersection(
+        lastVertex,
+        state.currentDistance,
+        snapInfo.segment,
+        [e.lngLat.lng, e.lngLat.lat]
+      );
+      if (circleLineIntersection) {
+        newVertex = circleLineIntersection.coord;
+      } else {
+        // Fallback: if no intersection found, use bearing to create point at exact distance
+        const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+        newVertex = destinationPoint.geometry.coordinates;
+      }
+    } else {
+      // No line snap: use bearing to create point at exact distance
+      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+      newVertex = destinationPoint.geometry.coordinates;
+    }
   } else if (bothSnapsActive) {
     // Special case: Both orthogonal and closing perpendicular are active
     // Find intersection where both constraints are satisfied
@@ -710,9 +786,27 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
 
   // Determine length priority
   if (hasUserDistance) {
-    // Priority 1 for length: User-entered distance (always wins)
-    const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
-    previewVertex = destinationPoint.geometry.coordinates;
+    // Priority 1 for length: User-entered distance
+    // If we have a line snap, use circle-line intersection to find the correct point
+    if (snapInfo && snapInfo.type === 'line') {
+      const circleLineIntersection = this.calculateCircleLineIntersection(
+        lastVertex,
+        state.currentDistance,
+        snapInfo.segment,
+        [lngLat.lng, lngLat.lat]
+      );
+      if (circleLineIntersection) {
+        previewVertex = circleLineIntersection.coord;
+      } else {
+        // Fallback: if no intersection found, use bearing to create point at exact distance
+        const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+        previewVertex = destinationPoint.geometry.coordinates;
+      }
+    } else {
+      // No line snap: use bearing to create point at exact distance
+      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+      previewVertex = destinationPoint.geometry.coordinates;
+    }
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
   } else if (bothSnapsActive) {
     // Special case: Both orthogonal and closing perpendicular are active
