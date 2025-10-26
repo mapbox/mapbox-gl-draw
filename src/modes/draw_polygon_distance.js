@@ -40,7 +40,8 @@ DrawPolygonDistance.onSetup = function(opts) {
     snapPoints: [],
     snapTolerance: 20,
     snappedLineBearing: null,
-    snappedLineSegment: null
+    snappedLineSegment: null,
+    labelDebounceTimer: null
   };
 
   this.createDistanceInput(state);
@@ -1041,6 +1042,12 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     this.removeClosingRightAngleIndicator(state);
   }
 
+  // Calculate actual distance to preview vertex (accounts for all snapping)
+  const actualDistance = turf.distance(from, turf.point(previewVertex), { units: 'meters' });
+
+  // Update distance label
+  this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
+
   // Update polygon preview - add closing line
   const allCoords = [...state.vertices, previewVertex];
 
@@ -1050,6 +1057,110 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   }
 
   state.polygon.setCoordinates([allCoords]);
+};
+
+DrawPolygonDistance.updateDistanceLabel = function(state, startVertex, endVertex, distance) {
+  const map = this.map;
+  if (!map) return;
+
+  // Clear existing debounce timer
+  if (state.labelDebounceTimer) {
+    clearTimeout(state.labelDebounceTimer);
+  }
+
+  // Hide label immediately
+  if (map.getLayer && map.getLayer('distance-label-text')) {
+    map.setPaintProperty('distance-label-text', 'text-opacity', 0);
+  }
+
+  // Format distance to 1 decimal place
+  const distanceText = `${distance.toFixed(1)}m`;
+
+  // Calculate midpoint of the segment
+  const start = turf.point(startVertex);
+  const end = turf.point(endVertex);
+  const midpoint = turf.midpoint(start, end);
+
+  // Calculate bearing for rotation
+  const bearing = turf.bearing(start, end);
+
+  // Offset the label position above the line (perpendicular to bearing)
+  // Use 3m offset above the line (increased from 1.5m to ensure it's clearly above)
+  const offsetDistance = 3 / 1000; // Convert to km for turf
+  const perpendicularBearing = bearing - 90; // 90 degrees perpendicular to the LEFT (above when rotated)
+  const offsetMidpoint = turf.destination(midpoint, offsetDistance, perpendicularBearing, { units: 'kilometers' });
+
+  // Create a feature for the text label at the offset midpoint
+  // Rotate text 90 degrees counter-clockwise from the line bearing
+  const labelFeature = {
+    type: 'Feature',
+    properties: {
+      distanceLabel: true,
+      distance: distanceText,
+      rotation: bearing - 90 // Rotate 90 degrees counter-clockwise
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: offsetMidpoint.geometry.coordinates
+    }
+  };
+
+  // Wrap in FeatureCollection to ensure proper rendering
+  const labelFeatureCollection = {
+    type: 'FeatureCollection',
+    features: [labelFeature]
+  };
+
+  // Update or create the text label layer
+  if (!map.getSource('distance-label-text')) {
+    map.addSource('distance-label-text', {
+      type: 'geojson',
+      data: labelFeatureCollection
+    });
+
+    map.addLayer({
+      id: 'distance-label-text',
+      type: 'symbol',
+      source: 'distance-label-text',
+      layout: {
+        'text-field': ['get', 'distance'],
+        'text-size': 10,
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-offset': [0, 0],
+        'text-anchor': 'center',
+        'text-rotate': ['get', 'rotation'],
+        'text-rotation-alignment': 'map',
+        'text-pitch-alignment': 'map',
+        'text-allow-overlap': false,
+        'text-ignore-placement': false
+      },
+      paint: {
+        'text-color': '#000000',
+        'text-opacity': 0
+      }
+    });
+  } else {
+    map.getSource('distance-label-text').setData(labelFeatureCollection);
+  }
+
+  // Set debounce timer to show label after 300ms of no movement
+  state.labelDebounceTimer = setTimeout(() => {
+    if (map.getLayer && map.getLayer('distance-label-text')) {
+      map.setPaintProperty('distance-label-text', 'text-opacity', 1);
+    }
+  }, 300);
+};
+
+DrawPolygonDistance.removeDistanceLabel = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('distance-label-text')) {
+    map.removeLayer('distance-label-text');
+  }
+  if (map.getSource && map.getSource('distance-label-text')) {
+    map.removeSource('distance-label-text');
+  }
 };
 
 DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
@@ -1193,6 +1304,7 @@ DrawPolygonDistance.onStop = function(state) {
   this.removeGuideCircle(state);
   this.removeRightAngleIndicator(state);
   this.removeClosingRightAngleIndicator(state);
+  this.removeDistanceLabel(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
