@@ -901,14 +901,9 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   // Update distance label
   this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
 
-  // Update polygon preview - add closing line
+  // Update polygon preview - always close the polygon ring
   const allCoords = [...state.vertices, previewVertex];
-
-  // Add preview line back to first vertex if we have enough vertices
-  if (state.vertices.length >= 2) {
-    allCoords.push(state.vertices[0]);
-  }
-
+  allCoords.push(state.vertices[0]);
   state.polygon.setCoordinates([allCoords]);
 };
 
@@ -1225,11 +1220,20 @@ DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
 
   if (!isActivePolygon) return display(geojson);
 
+  if (geojson.geometry.coordinates.length === 0) return;
+
+  const coordinateCount = geojson.geometry.coordinates[0].length;
+  if (coordinateCount < 3) {
+    return;
+  }
+
+  geojson.properties.meta = Constants.meta.FEATURE;
+
   // Display vertices
   if (state.vertices.length > 0) {
     state.vertices.forEach((vertex, index) => {
       display({
-        type: 'Feature',
+        type: Constants.geojsonTypes.FEATURE,
         properties: {
           meta: Constants.meta.VERTEX,
           parent: state.polygon.id,
@@ -1237,11 +1241,30 @@ DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
           active: index === state.vertices.length - 1 ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE
         },
         geometry: {
-          type: 'Point',
+          type: Constants.geojsonTypes.POINT,
           coordinates: vertex
         }
       });
     });
+  }
+
+  // Display as LineString for first 1-2 vertices for reliable rendering at all zoom levels
+  if (coordinateCount <= 4) {
+    const lineCoordinates = [
+      [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]],
+      [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
+    ];
+    display({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: geojson.properties,
+      geometry: {
+        coordinates: lineCoordinates,
+        type: Constants.geojsonTypes.LINE_STRING
+      }
+    });
+    if (coordinateCount === 3) {
+      return;
+    }
   }
 
   display(geojson);
