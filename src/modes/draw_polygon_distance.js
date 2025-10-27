@@ -439,6 +439,79 @@ DrawPolygonDistance.getSnappedLineBearing = function(snappedCoord) {
   return null;
 };
 
+DrawPolygonDistance.getUnderlyingLineBearing = function(e, snappedCoord) {
+  // When clicking on a point that sits on a line, detect the underlying line's bearing
+  const snapping = this._ctx.snapping;
+  if (!snapping || !snapping.snappedGeometry || snapping.snappedGeometry.type !== 'Point') {
+    return null;
+  }
+
+  // Query all features at click point across all snap buffer layers
+  const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+  const allFeaturesAtPoint = this.map.queryRenderedFeatures(e.point, {
+    layers: bufferLayers
+  });
+
+  // Look for a line or polygon feature
+  const underlyingFeature = allFeaturesAtPoint.find((feature) => {
+    if (feature.id === snapping.snappedFeature.id && feature.layer.id === snapping.snappedFeature.layer.id) {
+      return false;
+    }
+    const geomType = feature.geometry.type;
+    return geomType === 'LineString' ||
+           geomType === 'MultiLineString' ||
+           geomType === 'Polygon' ||
+           geomType === 'MultiPolygon';
+  });
+
+  if (!underlyingFeature) {
+    return null;
+  }
+
+  let underlyingGeom = underlyingFeature.geometry;
+  if (underlyingGeom.type === 'Polygon' || underlyingGeom.type === 'MultiPolygon') {
+    underlyingGeom = turf.polygonToLine(underlyingGeom).geometry;
+  }
+
+  if (underlyingGeom.type !== 'LineString' && underlyingGeom.type !== 'MultiLineString') {
+    return null;
+  }
+
+  const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
+  const coords = underlyingGeom.type === 'LineString' ? underlyingGeom.coordinates : underlyingGeom.coordinates.flat();
+
+  // Find the nearest segment
+  let nearestSegment = null;
+  let minDistance = Infinity;
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    const segmentStart = coords[i];
+    const segmentEnd = coords[i + 1];
+    const segment = turf.lineString([segmentStart, segmentEnd]);
+    const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
+    const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestSegment = { start: segmentStart, end: segmentEnd };
+    }
+  }
+
+  if (!nearestSegment) {
+    return null;
+  }
+
+  const bearing = turf.bearing(
+    turf.point(nearestSegment.start),
+    turf.point(nearestSegment.end)
+  );
+
+  return {
+    bearing: bearing,
+    segment: nearestSegment
+  };
+};
+
 DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
   if (!state.snapEnabled) {
     return null;
@@ -505,6 +578,7 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
   }
 
   // Check snapped line bearing (if we have a snapped line)
+  // This includes underlying lines from points, which are stored in state when clicking
   if (state.snappedLineBearing !== null && state.vertices.length >= 1) {
     for (const angle of orthogonalAngles) {
       const orthogonalBearing = state.snappedLineBearing + angle;
@@ -651,6 +725,13 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     if (snappedLineInfo) {
       state.snappedLineBearing = snappedLineInfo.bearing;
       state.snappedLineSegment = snappedLineInfo.segment;
+    }
+
+    // If snapping to a point, check for underlying line at click location
+    const underlyingLineInfo = this.getUnderlyingLineBearing(e, snappedCoord);
+    if (underlyingLineInfo) {
+      state.snappedLineBearing = underlyingLineInfo.bearing;
+      state.snappedLineSegment = underlyingLineInfo.segment;
     }
     return;
   }
