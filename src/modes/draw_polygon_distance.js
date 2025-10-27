@@ -2,6 +2,13 @@ import * as turf from '@turf/turf';
 import * as CommonSelectors from '../lib/common_selectors.js';
 import doubleClickZoom from '../lib/double_click_zoom.js';
 import * as Constants from '../constants.js';
+import {
+  findNearestSegment,
+  getUnderlyingLineBearing,
+  getSnappedLineBearing,
+  calculateCircleLineIntersection,
+  calculateLineIntersection
+} from '../lib/distance_mode_helpers.js';
 
 const DrawPolygonDistance = {};
 
@@ -248,33 +255,17 @@ DrawPolygonDistance.getSnapInfo = function(lngLat) {
     const snapPoint = turf.point([snapCoord.lng, snapCoord.lat]);
     const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
 
-    // Find the nearest segment
-    let nearestSegment = null;
-    let minDistance = Infinity;
-
-    for (let i = 0; i < coords.length - 1; i++) {
-      const segmentStart = coords[i];
-      const segmentEnd = coords[i + 1];
-      const segment = turf.lineString([segmentStart, segmentEnd]);
-      const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
-      const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestSegment = { start: segmentStart, end: segmentEnd };
-      }
-    }
-
-    if (nearestSegment) {
+    const result = findNearestSegment(coords, snapPoint);
+    if (result) {
       const bearing = turf.bearing(
-        turf.point(nearestSegment.start),
-        turf.point(nearestSegment.end)
+        turf.point(result.segment.start),
+        turf.point(result.segment.end)
       );
       return {
         type: 'line',
         coord: [snapCoord.lng, snapCoord.lat],
         bearing: bearing,
-        segment: nearestSegment,
+        segment: result.segment,
         snappedFeature: snapping.snappedFeature
       };
     }
@@ -283,238 +274,16 @@ DrawPolygonDistance.getSnapInfo = function(lngLat) {
   return null;
 };
 
-DrawPolygonDistance.calculateCircleLineIntersection = function(centerPoint, radiusMeters, lineSegment, mousePosition) {
-  // Calculate where a circle (centered at centerPoint with radius in meters) intersects with a line segment
-  // Returns the intersection point closest to mousePosition, or null if no intersection exists
-
-  const center = turf.point(centerPoint);
-  const lineStart = turf.point(lineSegment.start);
-  const lineEnd = turf.point(lineSegment.end);
-
-  // Extend the line segment in both directions to ensure we catch all intersections
-  const lineBearing = turf.bearing(lineStart, lineEnd);
-  const extendedLineStart = turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates;
-  const extendedLineEnd = turf.destination(lineEnd, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates;
-
-  // Create a circle polygon approximation
-  const circle = turf.circle(centerPoint, radiusMeters / 1000, { steps: 64, units: 'kilometers' });
-  const extendedLine = turf.lineString([extendedLineStart, extendedLineEnd]);
-
-  try {
-    // Find intersection points between circle and line
-    const intersections = turf.lineIntersect(circle, extendedLine);
-
-    if (intersections.features.length === 0) {
-      return null;
-    }
-
-    // If only one intersection, return it
-    if (intersections.features.length === 1) {
-      const coord = intersections.features[0].geometry.coordinates;
-      const distance = turf.distance(center, turf.point(coord), { units: 'meters' });
-      return { coord, distance };
-    }
-
-    // Multiple intersections: choose the one closest to mouse position
-    const mousePoint = turf.point(mousePosition);
-    let closestIntersection = null;
-    let minDistanceToMouse = Infinity;
-
-    for (const intersection of intersections.features) {
-      const coord = intersection.geometry.coordinates;
-      const distanceToMouse = turf.distance(mousePoint, turf.point(coord), { units: 'meters' });
-
-      if (distanceToMouse < minDistanceToMouse) {
-        minDistanceToMouse = distanceToMouse;
-        closestIntersection = coord;
-      }
-    }
-
-    if (closestIntersection) {
-      const distance = turf.distance(center, turf.point(closestIntersection), { units: 'meters' });
-      return { coord: closestIntersection, distance };
-    }
-  } catch (e) {
-    return null;
-  }
-
-  return null;
-};
-
-DrawPolygonDistance.calculateLineIntersection = function(startPoint, bearing, lineSegment) {
-  // Calculate where the bearing line from startPoint intersects with lineSegment (extended to infinity)
-  // Returns null if lines are parallel or intersection distance is unreasonable
-
-  const p1 = turf.point(startPoint);
-  const lineStart = turf.point(lineSegment.start);
-  const lineEnd = turf.point(lineSegment.end);
-  const lineBearing = turf.bearing(lineStart, lineEnd);
-
-  // Check if lines are nearly parallel (within 5 degrees)
-  let angleDiff = Math.abs(bearing - lineBearing);
-  if (angleDiff > 180) angleDiff = Math.abs(360 - angleDiff);
-  if (angleDiff < 5 || angleDiff > 175) {
-    return null; // Lines are too parallel
-  }
-
-  // Create a long line along the bearing (extended bidirectionally)
-  // Using 100m (0.1km) extension which is sufficient for small geometries
-  const bearingLine = turf.lineString([
-    turf.destination(p1, 0.1, bearing + 180, { units: 'kilometers' }).geometry.coordinates,
-    turf.destination(p1, 0.1, bearing, { units: 'kilometers' }).geometry.coordinates
-  ]);
-
-  // Create extended line along the snap line bearing
-  const extendedSnapLine = turf.lineString([
-    turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-    turf.destination(lineStart, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates
-  ]);
-
-  try {
-    const intersection = turf.lineIntersect(bearingLine, extendedSnapLine);
-
-    if (intersection.features.length > 0) {
-      const intersectionPoint = intersection.features[0].geometry.coordinates;
-      const distance = turf.distance(p1, turf.point(intersectionPoint), { units: 'meters' });
-
-      // Only return if distance is reasonable (less than 10km)
-      if (distance < 10000) {
-        return {
-          coord: intersectionPoint,
-          distance: distance
-        };
-      }
-    }
-  } catch (e) {
-    return null;
-  }
-
-  return null;
-};
-
-DrawPolygonDistance.getSnappedLineBearing = function(snappedCoord) {
-  // Get the snapping system to find which line was snapped to
-  const snapping = this._ctx.snapping;
-  if (!snapping || !snapping.snappedGeometry) {
-    return null;
-  }
-
-  const geom = snapping.snappedGeometry;
-
-  // Only process LineString or MultiLineString
-  if (geom.type !== 'LineString' && geom.type !== 'MultiLineString') {
-    return null;
-  }
-
-  const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
-  const line = geom.type === 'LineString' ? geom : turf.lineString(geom.coordinates.flat());
-
-  // Find the nearest segment
-  let nearestSegment = null;
-  let minDistance = Infinity;
-
-  const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
-
-  for (let i = 0; i < coords.length - 1; i++) {
-    const segmentStart = coords[i];
-    const segmentEnd = coords[i + 1];
-    const segment = turf.lineString([segmentStart, segmentEnd]);
-    const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
-    const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestSegment = { start: segmentStart, end: segmentEnd };
-    }
-  }
-
-  if (nearestSegment) {
-    const bearing = turf.bearing(
-      turf.point(nearestSegment.start),
-      turf.point(nearestSegment.end)
-    );
-    return { bearing, segment: nearestSegment };
-  }
-
-  return null;
-};
-
-DrawPolygonDistance.getUnderlyingLineBearing = function(e, snappedCoord) {
-  // When clicking on a point that sits on a line, detect the underlying line's bearing
-  const snapping = this._ctx.snapping;
-  if (!snapping || !snapping.snappedGeometry || snapping.snappedGeometry.type !== 'Point') {
-    return null;
-  }
-
-  // Query all features at click point across all snap buffer layers
-  const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
-  const allFeaturesAtPoint = this.map.queryRenderedFeatures(e.point, {
-    layers: bufferLayers
-  });
-
-  // Look for a line or polygon feature
-  const underlyingFeature = allFeaturesAtPoint.find((feature) => {
-    if (feature.id === snapping.snappedFeature.id && feature.layer.id === snapping.snappedFeature.layer.id) {
-      return false;
-    }
-    const geomType = feature.geometry.type;
-    return geomType === 'LineString' ||
-           geomType === 'MultiLineString' ||
-           geomType === 'Polygon' ||
-           geomType === 'MultiPolygon';
-  });
-
-  if (!underlyingFeature) {
-    return null;
-  }
-
-  let underlyingGeom = underlyingFeature.geometry;
-  if (underlyingGeom.type === 'Polygon' || underlyingGeom.type === 'MultiPolygon') {
-    underlyingGeom = turf.polygonToLine(underlyingGeom).geometry;
-  }
-
-  if (underlyingGeom.type !== 'LineString' && underlyingGeom.type !== 'MultiLineString') {
-    return null;
-  }
-
-  const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
-  const coords = underlyingGeom.type === 'LineString' ? underlyingGeom.coordinates : underlyingGeom.coordinates.flat();
-
-  // Find the nearest segment
-  let nearestSegment = null;
-  let minDistance = Infinity;
-
-  for (let i = 0; i < coords.length - 1; i++) {
-    const segmentStart = coords[i];
-    const segmentEnd = coords[i + 1];
-    const segment = turf.lineString([segmentStart, segmentEnd]);
-    const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
-    const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestSegment = { start: segmentStart, end: segmentEnd };
-    }
-  }
-
-  if (!nearestSegment) {
-    return null;
-  }
-
-  const bearing = turf.bearing(
-    turf.point(nearestSegment.start),
-    turf.point(nearestSegment.end)
-  );
-
-  return {
-    bearing: bearing,
-    segment: nearestSegment
-  };
-};
-
 DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
   if (!state.snapEnabled) {
     return null;
+  }
+
+  // Cache key based on state that affects orthogonal bearings
+  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${Math.floor(currentBearing / tolerance) * tolerance}`;
+
+  if (state.orthogonalBearingCache && state.orthogonalBearingCache.key === cacheKey) {
+    return state.orthogonalBearingCache.result;
   }
 
   const orthogonalAngles = [0, 90, 180, 270];
@@ -599,6 +368,9 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
       }
     }
   }
+
+  // Cache the result
+  state.orthogonalBearingCache = { key: cacheKey, result: bestMatch };
 
   return bestMatch;
 };
@@ -721,14 +493,14 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     state.polygon.updateCoordinate('0.0', snappedCoord.lng, snappedCoord.lat);
 
     // Store snapped line info if snapped to a line
-    const snappedLineInfo = this.getSnappedLineBearing(snappedCoord);
+    const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
     if (snappedLineInfo) {
       state.snappedLineBearing = snappedLineInfo.bearing;
       state.snappedLineSegment = snappedLineInfo.segment;
     }
 
     // If snapping to a point, check for underlying line at click location
-    const underlyingLineInfo = this.getUnderlyingLineBearing(e, snappedCoord);
+    const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, snappedCoord);
     if (underlyingLineInfo) {
       state.snappedLineBearing = underlyingLineInfo.bearing;
       state.snappedLineSegment = underlyingLineInfo.segment;
@@ -812,7 +584,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     // Priority 1 for length: User-entered distance
     // If we have a line snap, use circle-line intersection to find the correct point
     if (snapInfo && snapInfo.type === 'line') {
-      const circleLineIntersection = this.calculateCircleLineIntersection(
+      const circleLineIntersection = calculateCircleLineIntersection(
         lastVertex,
         state.currentDistance,
         snapInfo.segment,
@@ -838,7 +610,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
     };
 
-    const intersection = this.calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    const intersection = calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
     if (intersection) {
       newVertex = intersection.coord;
     } else {
@@ -854,7 +626,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
     };
 
-    const intersection = this.calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    const intersection = calculateLineIntersection(lastVertex, mouseBearing, perpLine);
     if (intersection) {
       newVertex = intersection.coord;
     } else {
@@ -865,7 +637,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     }
   } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    const intersection = calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
     if (intersection) {
       newVertex = intersection.coord;
     } else {
@@ -903,7 +675,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
 
   // Store snapped line info if snapped to a line
   const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-  const snappedLineInfo = this.getSnappedLineBearing(snappedCoord);
+  const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
   if (snappedLineInfo) {
     state.snappedLineBearing = snappedLineInfo.bearing;
     state.snappedLineSegment = snappedLineInfo.segment;
@@ -1009,7 +781,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     // Priority 1 for length: User-entered distance
     // If we have a line snap, use circle-line intersection to find the correct point
     if (snapInfo && snapInfo.type === 'line') {
-      const circleLineIntersection = this.calculateCircleLineIntersection(
+      const circleLineIntersection = calculateCircleLineIntersection(
         lastVertex,
         state.currentDistance,
         snapInfo.segment,
@@ -1036,7 +808,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
     };
 
-    const intersection = this.calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    const intersection = calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
     if (intersection) {
       previewVertex = intersection.coord;
       // Show both indicators (regular at last vertex, closing at first vertex)
@@ -1064,7 +836,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
       end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
     };
 
-    const intersection = this.calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    const intersection = calculateLineIntersection(lastVertex, mouseBearing, perpLine);
     if (intersection) {
       previewVertex = intersection.coord;
       const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
@@ -1085,7 +857,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     this.removeGuideCircle(state);
   } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = this.calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    const intersection = calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
     if (intersection) {
       previewVertex = intersection.coord;
     } else {
@@ -1245,6 +1017,15 @@ DrawPolygonDistance.removeDistanceLabel = function(state) {
 };
 
 DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
+  // Check if we can reuse the existing circle (optimization)
+  if (state.guideCircle &&
+      state.guideCircleRadius === radius &&
+      state.guideCircleCenter &&
+      state.guideCircleCenter[0] === center[0] &&
+      state.guideCircleCenter[1] === center[1]) {
+    return; // No need to regenerate
+  }
+
   const steps = 64;
   const circleCoords = [];
 
@@ -1264,6 +1045,8 @@ DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
   };
 
   state.guideCircle = circleFeature;
+  state.guideCircleRadius = radius;
+  state.guideCircleCenter = center;
 
   const map = this.map;
   if (!map) return;
