@@ -560,7 +560,22 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
 
+  // Check for line snapping even before first vertex is placed
   if (state.vertices.length === 0) {
+    const snapInfo = this.getSnapInfo(lngLat);
+    if (snapInfo && snapInfo.type === 'line') {
+      this.updateLineSegmentSplitLabels(state, snapInfo.segment, [lngLat.lng, lngLat.lat]);
+    } else if (snapInfo && snapInfo.type === 'point') {
+      // Check for underlying line at the point snap location
+      const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, { lng: snapInfo.coord[0], lat: snapInfo.coord[1] });
+      if (underlyingLineInfo && underlyingLineInfo.segment) {
+        this.updateLineSegmentSplitLabels(state, underlyingLineInfo.segment, snapInfo.coord);
+      } else {
+        this.removeLineSegmentSplitLabels(state);
+      }
+    } else {
+      this.removeLineSegmentSplitLabels(state);
+    }
     return;
   }
 
@@ -766,6 +781,24 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
   // Update distance label
   this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
 
+  // Update line segment split labels if snapping to a line
+  if (snapInfo && snapInfo.type === 'line') {
+    this.updateLineSegmentSplitLabels(state, snapInfo.segment, [lngLat.lng, lngLat.lat]);
+  } else if (snapInfo && snapInfo.type === 'point') {
+    // Check for underlying line at the point snap location
+    const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, { lng: snapInfo.coord[0], lat: snapInfo.coord[1] });
+    if (underlyingLineInfo && underlyingLineInfo.segment) {
+      this.updateLineSegmentSplitLabels(state, underlyingLineInfo.segment, snapInfo.coord);
+    } else {
+      this.removeLineSegmentSplitLabels(state);
+    }
+  } else {
+    this.removeLineSegmentSplitLabels(state);
+  }
+
+  // Update preview point indicator
+  this.updatePreviewPoint(state, previewVertex);
+
   // Update line preview
   state.line.updateCoordinate(state.vertices.length, previewVertex[0], previewVertex[1]);
 };
@@ -773,16 +806,6 @@ DrawLineStringDistance.onMouseMove = function(state, e) {
 DrawLineStringDistance.updateDistanceLabel = function(state, startVertex, endVertex, distance) {
   const map = this.map;
   if (!map) return;
-
-  // Clear existing debounce timer
-  if (state.labelDebounceTimer) {
-    clearTimeout(state.labelDebounceTimer);
-  }
-
-  // Hide label immediately
-  if (map.getLayer && map.getLayer('distance-label-text')) {
-    map.setPaintProperty('distance-label-text', 'text-opacity', 0);
-  }
 
   // Format distance to 1 decimal place
   const distanceText = `${distance.toFixed(1)}m`;
@@ -795,6 +818,15 @@ DrawLineStringDistance.updateDistanceLabel = function(state, startVertex, endVer
   // Calculate bearing for rotation
   const bearing = turf.bearing(start, end);
 
+  // Calculate text rotation (perpendicular to line)
+  let rotation = bearing - 90;
+  // Normalize to 0-360
+  rotation = ((rotation % 360) + 360) % 360;
+  // If upside down (between 90° and 270°), flip it 180°
+  if (rotation > 90 && rotation < 270) {
+    rotation = (rotation + 180) % 360;
+  }
+
   // Offset the label position above the line (perpendicular to bearing)
   // Use 3m offset above the line (increased from 1.5m to ensure it's clearly above)
   const offsetDistance = 3 / 1000; // Convert to km for turf
@@ -802,13 +834,12 @@ DrawLineStringDistance.updateDistanceLabel = function(state, startVertex, endVer
   const offsetMidpoint = turf.destination(midpoint, offsetDistance, perpendicularBearing, { units: 'kilometers' });
 
   // Create a feature for the text label at the offset midpoint
-  // Rotate text 90 degrees counter-clockwise from the line bearing
   const labelFeature = {
     type: 'Feature',
     properties: {
       distanceLabel: true,
       distance: distanceText,
-      rotation: bearing - 90 // Rotate 90 degrees counter-clockwise
+      rotation: rotation
     },
     geometry: {
       type: 'Point',
@@ -842,24 +873,17 @@ DrawLineStringDistance.updateDistanceLabel = function(state, startVertex, endVer
         'text-rotate': ['get', 'rotation'],
         'text-rotation-alignment': 'map',
         'text-pitch-alignment': 'map',
-        'text-allow-overlap': false,
-        'text-ignore-placement': false
+        'text-allow-overlap': true,
+        'text-ignore-placement': true
       },
       paint: {
         'text-color': '#000000',
-        'text-opacity': 0
+        'text-opacity': 1
       }
     });
   } else {
     map.getSource('distance-label-text').setData(labelFeatureCollection);
   }
-
-  // Set debounce timer to show label after 300ms of no movement
-  state.labelDebounceTimer = setTimeout(() => {
-    if (map.getLayer && map.getLayer('distance-label-text')) {
-      map.setPaintProperty('distance-label-text', 'text-opacity', 1);
-    }
-  }, 300);
 };
 
 DrawLineStringDistance.removeDistanceLabel = function(state) {
@@ -871,6 +895,176 @@ DrawLineStringDistance.removeDistanceLabel = function(state) {
   }
   if (map.getSource && map.getSource('distance-label-text')) {
     map.removeSource('distance-label-text');
+  }
+};
+
+DrawLineStringDistance.updateLineSegmentSplitLabels = function(state, segment, snapPoint) {
+  const map = this.map;
+  if (!map) return;
+
+  const snappedCoord = this._ctx.snapping.snapCoord({ lng: snapPoint[0], lat: snapPoint[1] });
+  const snapCoord = [snappedCoord.lng, snappedCoord.lat];
+
+  // Calculate distances for the two sub-segments
+  const distance1 = turf.distance(turf.point(segment.start), turf.point(snapCoord), { units: 'meters' });
+  const distance2 = turf.distance(turf.point(snapCoord), turf.point(segment.end), { units: 'meters' });
+
+  const labelFeatures = [];
+
+  // First sub-segment label (start to snap point)
+  if (distance1 > 0.1) { // Only show if distance is meaningful
+    const distanceText1 = `${distance1.toFixed(1)}m`;
+    const midpoint1 = turf.midpoint(turf.point(segment.start), turf.point(snapCoord));
+    const bearing1 = turf.bearing(turf.point(segment.start), turf.point(snapCoord));
+
+    // Calculate rotation and flip if upside down
+    let rotation1 = bearing1 - 90;
+    rotation1 = ((rotation1 % 360) + 360) % 360;
+    if (rotation1 > 90 && rotation1 < 270) {
+      rotation1 = (rotation1 + 180) % 360;
+    }
+
+    const offsetDistance = 3 / 1000;
+    const perpendicularBearing1 = bearing1 - 90;
+    const offsetMidpoint1 = turf.destination(midpoint1, offsetDistance, perpendicularBearing1, { units: 'kilometers' });
+
+    labelFeatures.push({
+      type: 'Feature',
+      properties: {
+        distanceLabel: true,
+        distance: distanceText1,
+        rotation: rotation1
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: offsetMidpoint1.geometry.coordinates
+      }
+    });
+  }
+
+  // Second sub-segment label (snap point to end)
+  if (distance2 > 0.1) { // Only show if distance is meaningful
+    const distanceText2 = `${distance2.toFixed(1)}m`;
+    const midpoint2 = turf.midpoint(turf.point(snapCoord), turf.point(segment.end));
+    const bearing2 = turf.bearing(turf.point(snapCoord), turf.point(segment.end));
+
+    // Calculate rotation and flip if upside down
+    let rotation2 = bearing2 - 90;
+    rotation2 = ((rotation2 % 360) + 360) % 360;
+    if (rotation2 > 90 && rotation2 < 270) {
+      rotation2 = (rotation2 + 180) % 360;
+    }
+
+    const offsetDistance = 3 / 1000;
+    const perpendicularBearing2 = bearing2 - 90;
+    const offsetMidpoint2 = turf.destination(midpoint2, offsetDistance, perpendicularBearing2, { units: 'kilometers' });
+
+    labelFeatures.push({
+      type: 'Feature',
+      properties: {
+        distanceLabel: true,
+        distance: distanceText2,
+        rotation: rotation2
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: offsetMidpoint2.geometry.coordinates
+      }
+    });
+  }
+
+  const labelFeatureCollection = {
+    type: 'FeatureCollection',
+    features: labelFeatures
+  };
+
+  if (!map.getSource('line-segment-split-labels')) {
+    map.addSource('line-segment-split-labels', {
+      type: 'geojson',
+      data: labelFeatureCollection
+    });
+
+    map.addLayer({
+      id: 'line-segment-split-labels',
+      type: 'symbol',
+      source: 'line-segment-split-labels',
+      layout: {
+        'text-field': ['get', 'distance'],
+        'text-size': 10,
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-offset': [0, 0],
+        'text-anchor': 'center',
+        'text-rotate': ['get', 'rotation'],
+        'text-rotation-alignment': 'map',
+        'text-pitch-alignment': 'map',
+        'text-allow-overlap': true,
+        'text-ignore-placement': true
+      },
+      paint: {
+        'text-color': '#666666',
+        'text-opacity': 0.8
+      }
+    });
+  } else {
+    map.getSource('line-segment-split-labels').setData(labelFeatureCollection);
+  }
+};
+
+DrawLineStringDistance.removeLineSegmentSplitLabels = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('line-segment-split-labels')) {
+    map.removeLayer('line-segment-split-labels');
+  }
+  if (map.getSource && map.getSource('line-segment-split-labels')) {
+    map.removeSource('line-segment-split-labels');
+  }
+};
+
+DrawLineStringDistance.updatePreviewPoint = function(state, coordinates) {
+  const map = this.map;
+  if (!map) return;
+
+  const previewPointFeature = {
+    type: 'Feature',
+    properties: { isPreviewPoint: true },
+    geometry: {
+      type: 'Point',
+      coordinates: coordinates
+    }
+  };
+
+  if (!map.getSource('preview-point-indicator')) {
+    map.addSource('preview-point-indicator', {
+      type: 'geojson',
+      data: previewPointFeature
+    });
+
+    map.addLayer({
+      id: 'preview-point-indicator',
+      type: 'circle',
+      source: 'preview-point-indicator',
+      paint: {
+        'circle-radius': 2,
+        'circle-color': '#000000',
+        'circle-opacity': 1
+      }
+    });
+  } else {
+    map.getSource('preview-point-indicator').setData(previewPointFeature);
+  }
+};
+
+DrawLineStringDistance.removePreviewPoint = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('preview-point-indicator')) {
+    map.removeLayer('preview-point-indicator');
+  }
+  if (map.getSource && map.getSource('preview-point-indicator')) {
+    map.removeSource('preview-point-indicator');
   }
 };
 
@@ -1132,6 +1326,8 @@ DrawLineStringDistance.finishDrawing = function(state) {
   this.removeGuideCircle(state);
   this.removeRightAngleIndicator(state);
   this.removeClosingRightAngleIndicator(state);
+  this.removeLineSegmentSplitLabels(state);
+  this.removePreviewPoint(state);
 
   this.fire(Constants.events.CREATE, {
     features: [state.line.toGeoJSON()]
@@ -1147,6 +1343,8 @@ DrawLineStringDistance.onStop = function(state) {
   this.activateUIButton();
   this.removeGuideCircle(state);
   this.removeDistanceLabel(state);
+  this.removeLineSegmentSplitLabels(state);
+  this.removePreviewPoint(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
