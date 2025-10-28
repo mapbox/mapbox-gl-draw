@@ -1,18 +1,18 @@
-import * as turf from '@turf/turf';
-import * as CommonSelectors from '../lib/common_selectors.js';
-import doubleClickZoom from '../lib/double_click_zoom.js';
-import * as Constants from '../constants.js';
+import * as turf from "@turf/turf";
+import * as CommonSelectors from "../lib/common_selectors.js";
+import doubleClickZoom from "../lib/double_click_zoom.js";
+import * as Constants from "../constants.js";
 import {
   findNearestSegment,
   getUnderlyingLineBearing,
   getSnappedLineBearing,
   calculateCircleLineIntersection,
-  calculateLineIntersection
-} from '../lib/distance_mode_helpers.js';
+  calculateLineIntersection,
+} from "../lib/distance_mode_helpers.js";
 
 const DrawPolygonDistance = {};
 
-DrawPolygonDistance.onSetup = function(opts) {
+DrawPolygonDistance.onSetup = function (opts) {
   opts = opts || {};
 
   const polygon = this.newFeature({
@@ -20,8 +20,8 @@ DrawPolygonDistance.onSetup = function(opts) {
     properties: {},
     geometry: {
       type: Constants.geojsonTypes.POLYGON,
-      coordinates: [[]]
-    }
+      coordinates: [[]],
+    },
   });
 
   this.addFeature(polygon);
@@ -30,7 +30,7 @@ DrawPolygonDistance.onSetup = function(opts) {
   this.updateUIClasses({ mouse: Constants.cursors.ADD });
   this.activateUIButton(Constants.types.POLYGON);
   this.setActionableState({
-    trash: true
+    trash: true,
   });
 
   const state = {
@@ -38,6 +38,8 @@ DrawPolygonDistance.onSetup = function(opts) {
     currentVertexPosition: 0,
     currentDistance: null,
     distanceInput: null,
+    currentAngle: null,
+    angleInput: null,
     vertices: [],
     guideCircle: null,
     currentPosition: null,
@@ -48,18 +50,19 @@ DrawPolygonDistance.onSetup = function(opts) {
     snapTolerance: 20,
     snappedLineBearing: null,
     snappedLineSegment: null,
-    labelDebounceTimer: null
+    labelDebounceTimer: null,
   };
 
   this.createDistanceInput(state);
+  this.createAngleInput(state);
 
   return state;
 };
 
-DrawPolygonDistance.createDistanceInput = function(state) {
+DrawPolygonDistance.createDistanceInput = function (state) {
   // Create container
-  const container = document.createElement('div');
-  container.className = 'distance-mode-container';
+  const container = document.createElement("div");
+  container.className = "distance-mode-container";
   container.style.cssText = `
     position: fixed;
     bottom: 100px;
@@ -71,111 +74,123 @@ DrawPolygonDistance.createDistanceInput = function(state) {
     border: 1px solid rgba(200, 200, 200, 0.8);
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 8px 12px;
+    padding: 6px 10px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 11px;
     pointer-events: auto;
     transition: opacity 0.2s ease-in-out;
   `;
 
   // Create label/state display
-  const label = document.createElement('span');
-  label.className = 'distance-mode-label';
-  label.textContent = 'Press D for distance';
+  const label = document.createElement("span");
+  label.className = "distance-mode-label";
+  label.textContent = "D for distance";
   label.style.cssText = `
     color: #666;
-    font-size: 12px;
+    font-size: 9px;
     white-space: nowrap;
-    width: 120px;
+    width: 80px;
     text-align: center;
     display: inline-block;
   `;
 
   // Create input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'distance (m)';
-  input.className = 'distance-mode-input';
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "distance (m)";
+  input.className = "distance-mode-input";
   input.style.cssText = `
     border: 1px solid rgba(200, 200, 200, 0.8);
     border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 12px;
-    width: 120px;
+    padding: 3px 6px;
+    font-size: 9px;
+    width: 80px;
     display: none;
     outline: none;
+    background: transparent;
+    transition: background-color 0.2s;
   `;
 
   // Create clear button
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = '×';
-  clearBtn.className = 'distance-mode-clear';
+  const clearBtn = document.createElement("button");
+  clearBtn.textContent = "×";
+  clearBtn.className = "distance-mode-clear";
   clearBtn.style.cssText = `
     border: none;
     background: none;
     color: #666;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
-    padding: 0 4px;
+    padding: 0 3px;
     line-height: 1;
     display: none;
   `;
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
-      label.style.display = 'none';
-      input.style.display = 'block';
-      clearBtn.style.display = 'block';
+      label.style.display = "none";
+      input.style.display = "block";
+      clearBtn.style.display = "block";
     } else {
-      label.style.display = 'block';
-      input.style.display = 'none';
-      clearBtn.style.display = 'none';
+      label.style.display = "block";
+      input.style.display = "none";
+      clearBtn.style.display = "none";
     }
   };
 
-  input.addEventListener('input', (e) => {
+  // Add focus/blur handlers for the grey tint
+  input.addEventListener("focus", () => {
+    input.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+  });
+
+  input.addEventListener("blur", () => {
+    input.style.backgroundColor = "transparent";
+  });
+
+  input.addEventListener("input", (e) => {
     const value = e.target.value;
-    if (value === '' || !isNaN(parseFloat(value))) {
-      state.currentDistance = value === '' ? null : parseFloat(value);
+    if (value === "" || !isNaN(parseFloat(value))) {
+      state.currentDistance = value === "" ? null : parseFloat(value);
       updateDisplay();
       if (state.currentPosition) {
         this.onMouseMove(state, {
           point: state.lastPoint || { x: 0, y: 0 },
-          lngLat: state.currentPosition
+          lngLat: state.currentPosition,
         });
       }
     } else {
-      e.target.value = state.currentDistance !== null ? state.currentDistance.toString() : '';
+      e.target.value =
+        state.currentDistance !== null ? state.currentDistance.toString() : "";
     }
   });
 
-  input.addEventListener('keydown', (e) => {
+  input.addEventListener("keydown", (e) => {
     e.stopPropagation();
 
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       if (state.vertices.length >= 3) {
         this.finishDrawing(state);
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       e.preventDefault();
       state.currentDistance = null;
-      input.value = '';
+      input.value = "";
       input.blur();
       updateDisplay();
-    } else if (e.key === 'Backspace' && e.target.value === '') {
+    } else if (e.key === "Backspace" && e.target.value === "") {
       e.preventDefault();
       this.onKeyUp(state, { keyCode: 8 });
     }
   });
 
-  clearBtn.addEventListener('click', (e) => {
+  clearBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     state.currentDistance = null;
-    input.value = '';
+    input.value = "";
     input.blur();
     updateDisplay();
   });
@@ -186,32 +201,35 @@ DrawPolygonDistance.createDistanceInput = function(state) {
   // Add keyboard shortcuts
   const keyHandler = (e) => {
     // 'D' key to toggle distance input
-    if (e.key === 'd' || e.key === 'D') {
+    if (e.key === "d" || e.key === "D") {
       if (state.vertices.length > 0) {
         e.preventDefault();
         e.stopPropagation();
 
         // Toggle: if distance is active, clear it; otherwise activate it
-        if (state.currentDistance !== null || document.activeElement === input) {
+        if (
+          state.currentDistance !== null ||
+          document.activeElement === input
+        ) {
           state.currentDistance = null;
-          input.value = '';
+          input.value = "";
           input.blur();
           updateDisplay();
         } else {
-          input.style.display = 'block';
-          label.style.display = 'none';
+          input.style.display = "block";
+          label.style.display = "none";
           input.focus();
         }
       }
     }
     // Backspace to remove last vertex (bypasses need for trash controls)
-    else if (e.key === 'Backspace' && document.activeElement !== input) {
+    else if (e.key === "Backspace" && document.activeElement !== input) {
       e.preventDefault();
       e.stopPropagation();
       self.onTrash(state);
     }
   };
-  document.addEventListener('keydown', keyHandler);
+  document.addEventListener("keydown", keyHandler);
 
   container.appendChild(label);
   container.appendChild(input);
@@ -225,8 +243,172 @@ DrawPolygonDistance.createDistanceInput = function(state) {
   updateDisplay();
 };
 
+DrawPolygonDistance.createAngleInput = function (state) {
+  // We'll add the angle input to the same container as distance
+  // So we just need to add elements to the existing distance container
+  const distanceContainer = state.distanceContainer;
 
-DrawPolygonDistance.getSnapInfo = function(lngLat) {
+  // Create separator
+  const separator = document.createElement("span");
+  separator.style.cssText = `
+    color: #ccc;
+    font-size: 11px;
+    padding: 0 3px;
+  `;
+  separator.textContent = "|";
+
+  // Create label/state display
+  const label = document.createElement("span");
+  label.className = "angle-mode-label";
+  label.textContent = "A for angle";
+  label.style.cssText = `
+    color: #666;
+    font-size: 9px;
+    white-space: nowrap;
+    width: 80px;
+    text-align: center;
+    display: inline-block;
+  `;
+
+  // Create input
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "angle (°)";
+  input.className = "angle-mode-input";
+  input.style.cssText = `
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 9px;
+    width: 80px;
+    display: none;
+    outline: none;
+    background: transparent;
+    transition: background-color 0.2s;
+  `;
+
+  // Create clear button
+  const clearBtn = document.createElement("button");
+  clearBtn.textContent = "×";
+  clearBtn.className = "angle-mode-clear";
+  clearBtn.style.cssText = `
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+    display: none;
+  `;
+
+  const updateDisplay = () => {
+    if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
+      label.style.display = "none";
+      input.style.display = "block";
+      clearBtn.style.display = "block";
+    } else {
+      label.style.display = "block";
+      input.style.display = "none";
+      clearBtn.style.display = "none";
+    }
+  };
+
+  // Add focus/blur handlers for the grey tint
+  input.addEventListener("focus", () => {
+    input.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
+  });
+
+  input.addEventListener("blur", () => {
+    input.style.backgroundColor = "transparent";
+  });
+
+  input.addEventListener("input", (e) => {
+    const value = e.target.value;
+    if (value === "" || !isNaN(parseFloat(value))) {
+      state.currentAngle = value === "" ? null : parseFloat(value);
+      updateDisplay();
+      if (state.currentPosition) {
+        this.onMouseMove(state, {
+          point: state.lastPoint || { x: 0, y: 0 },
+          lngLat: state.currentPosition,
+        });
+      }
+    } else {
+      e.target.value =
+        state.currentAngle !== null ? state.currentAngle.toString() : "";
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (state.vertices.length >= 3) {
+        this.finishDrawing(state);
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      state.currentAngle = null;
+      input.value = "";
+      input.blur();
+      updateDisplay();
+    } else if (e.key === "Backspace" && e.target.value === "") {
+      e.preventDefault();
+      this.onKeyUp(state, { keyCode: 8 });
+    }
+  });
+
+  clearBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    state.currentAngle = null;
+    input.value = "";
+    input.blur();
+    updateDisplay();
+  });
+
+  // Store reference to mode context for use in keyHandler
+  const self = this;
+
+  // Add keyboard shortcuts
+  const keyHandler = (e) => {
+    // 'A' key to toggle angle input
+    if (e.key === "a" || e.key === "A") {
+      if (state.vertices.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Toggle: if angle is active, clear it; otherwise activate it
+        if (state.currentAngle !== null || document.activeElement === input) {
+          state.currentAngle = null;
+          input.value = "";
+          input.blur();
+          updateDisplay();
+        } else {
+          input.style.display = "block";
+          label.style.display = "none";
+          input.focus();
+        }
+      }
+    }
+  };
+  document.addEventListener("keydown", keyHandler);
+
+  distanceContainer.appendChild(separator);
+  distanceContainer.appendChild(label);
+  distanceContainer.appendChild(input);
+  distanceContainer.appendChild(clearBtn);
+
+  state.angleInput = input;
+  state.angleKeyHandler = keyHandler;
+  state.angleSeparator = separator;
+
+  updateDisplay();
+};
+
+DrawPolygonDistance.getSnapInfo = function (lngLat) {
   const snapping = this._ctx.snapping;
   if (!snapping || !snapping.snappedGeometry) {
     return null;
@@ -242,18 +424,19 @@ DrawPolygonDistance.getSnapInfo = function(lngLat) {
   }
 
   // Point snap
-  if (geom.type === 'Point') {
+  if (geom.type === "Point") {
     return {
-      type: 'point',
+      type: "point",
       coord: [snapCoord.lng, snapCoord.lat],
-      snappedFeature: snapping.snappedFeature
+      snappedFeature: snapping.snappedFeature,
     };
   }
 
   // Line snap (LineString or MultiLineString)
-  if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+  if (geom.type === "LineString" || geom.type === "MultiLineString") {
     const snapPoint = turf.point([snapCoord.lng, snapCoord.lat]);
-    const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
+    const coords =
+      geom.type === "LineString" ? geom.coordinates : geom.coordinates.flat();
 
     const result = findNearestSegment(coords, snapPoint);
     if (result) {
@@ -262,11 +445,11 @@ DrawPolygonDistance.getSnapInfo = function(lngLat) {
         turf.point(result.segment.end)
       );
       return {
-        type: 'line',
+        type: "line",
         coord: [snapCoord.lng, snapCoord.lat],
         bearing: bearing,
         segment: result.segment,
-        snappedFeature: snapping.snappedFeature
+        snappedFeature: snapping.snappedFeature,
       };
     }
   }
@@ -274,15 +457,24 @@ DrawPolygonDistance.getSnapInfo = function(lngLat) {
   return null;
 };
 
-DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, tolerance = 5) {
+DrawPolygonDistance.getOrthogonalBearing = function (
+  state,
+  currentBearing,
+  tolerance = 5
+) {
   if (!state.snapEnabled) {
     return null;
   }
 
   // Cache key based on state that affects orthogonal bearings
-  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${Math.floor(currentBearing / tolerance) * tolerance}`;
+  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${
+    Math.floor(currentBearing / tolerance) * tolerance
+  }`;
 
-  if (state.orthogonalBearingCache && state.orthogonalBearingCache.key === cacheKey) {
+  if (
+    state.orthogonalBearingCache &&
+    state.orthogonalBearingCache.key === cacheKey
+  ) {
     return state.orthogonalBearingCache.result;
   }
 
@@ -311,8 +503,8 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
         bestMatch = {
           bearing: orthogonalBearing,
           referenceBearing: lastSegmentBearing,
-          referenceType: 'previous',
-          referenceSegment: { start: secondLastVertex, end: lastVertex }
+          referenceType: "previous",
+          referenceSegment: { start: secondLastVertex, end: lastVertex },
         };
       }
     }
@@ -339,8 +531,8 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
         bestMatch = {
           bearing: orthogonalBearing,
           referenceBearing: firstSegmentBearing,
-          referenceType: 'first',
-          referenceSegment: { start: firstVertex, end: secondVertex }
+          referenceType: "first",
+          referenceSegment: { start: firstVertex, end: secondVertex },
         };
       }
     }
@@ -362,8 +554,8 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
         bestMatch = {
           bearing: orthogonalBearing,
           referenceBearing: state.snappedLineBearing,
-          referenceType: 'snapped',
-          referenceSegment: state.snappedLineSegment
+          referenceType: "snapped",
+          referenceSegment: state.snappedLineSegment,
         };
       }
     }
@@ -375,68 +567,113 @@ DrawPolygonDistance.getOrthogonalBearing = function(state, currentBearing, toler
   return bestMatch;
 };
 
-
-DrawPolygonDistance.updateRightAngleIndicator = function(state, cornerVertex, referenceBearing, nextBearing, referenceSegment) {
+DrawPolygonDistance.updateRightAngleIndicator = function (
+  state,
+  cornerVertex,
+  referenceBearing,
+  nextBearing,
+  referenceSegment
+) {
   // Create L-shaped indicator that forms a square with the two line segments
   const cornerPoint = turf.point(cornerVertex);
 
   // Point 1: 2m back along reference segment (opposite direction)
-  const point1 = turf.destination(cornerPoint, 2 / 1000, referenceBearing + 180, { units: 'kilometers' });
+  const point1 = turf.destination(
+    cornerPoint,
+    2 / 1000,
+    referenceBearing + 180,
+    { units: "kilometers" }
+  );
 
   // Point 2: The diagonal corner of the square - from point1, go 2m perpendicular (along next segment direction)
-  const point2 = turf.destination(turf.point(point1.geometry.coordinates), 2 / 1000, nextBearing, { units: 'kilometers' });
+  const point2 = turf.destination(
+    turf.point(point1.geometry.coordinates),
+    2 / 1000,
+    nextBearing,
+    { units: "kilometers" }
+  );
 
   // Point 3: 2m forward along next segment
-  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing, { units: 'kilometers' });
+  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing, {
+    units: "kilometers",
+  });
 
   const indicatorFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isRightAngleIndicator: true },
     geometry: {
-      type: 'LineString',
-      coordinates: [point1.geometry.coordinates, point2.geometry.coordinates, point3.geometry.coordinates]
-    }
+      type: "LineString",
+      coordinates: [
+        point1.geometry.coordinates,
+        point2.geometry.coordinates,
+        point3.geometry.coordinates,
+      ],
+    },
   };
 
   const map = this.map;
   if (!map) return;
 
-  if (!map.getSource('right-angle-indicator')) {
-    map.addSource('right-angle-indicator', { type: 'geojson', data: indicatorFeature });
+  if (!map.getSource("right-angle-indicator")) {
+    map.addSource("right-angle-indicator", {
+      type: "geojson",
+      data: indicatorFeature,
+    });
     map.addLayer({
-      id: 'right-angle-indicator',
-      type: 'line',
-      source: 'right-angle-indicator',
-      paint: { 'line-color': '#000000', 'line-width': 1, 'line-opacity': 1.0 }
+      id: "right-angle-indicator",
+      type: "line",
+      source: "right-angle-indicator",
+      paint: { "line-color": "#000000", "line-width": 1, "line-opacity": 1.0 },
     });
   } else {
-    map.getSource('right-angle-indicator').setData(indicatorFeature);
+    map.getSource("right-angle-indicator").setData(indicatorFeature);
   }
 };
 
-DrawPolygonDistance.removeRightAngleIndicator = function(state) {
+DrawPolygonDistance.removeRightAngleIndicator = function (state) {
   const map = this.map;
   if (!map) return;
-  if (map.getLayer && map.getLayer('right-angle-indicator')) map.removeLayer('right-angle-indicator');
-  if (map.getSource && map.getSource('right-angle-indicator')) map.removeSource('right-angle-indicator');
+  if (map.getLayer && map.getLayer("right-angle-indicator"))
+    map.removeLayer("right-angle-indicator");
+  if (map.getSource && map.getSource("right-angle-indicator"))
+    map.removeSource("right-angle-indicator");
 };
 
-DrawPolygonDistance.updateClosingRightAngleIndicator = function(state, cornerVertex, referenceBearing, nextBearing, referenceSegment) {
+DrawPolygonDistance.updateClosingRightAngleIndicator = function (
+  state,
+  cornerVertex,
+  referenceBearing,
+  nextBearing,
+  referenceSegment
+) {
   // Create L-shaped indicator for closing perpendicular (always inside)
   const cornerPoint = turf.point(cornerVertex);
 
   // For closing perpendicular: indicator on inside (forward along reference, back along next)
-  const point1 = turf.destination(cornerPoint, 2 / 1000, referenceBearing, { units: 'kilometers' });
-  const point2 = turf.destination(turf.point(point1.geometry.coordinates), 2 / 1000, nextBearing + 180, { units: 'kilometers' });
-  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing + 180, { units: 'kilometers' });
+  const point1 = turf.destination(cornerPoint, 2 / 1000, referenceBearing, {
+    units: "kilometers",
+  });
+  const point2 = turf.destination(
+    turf.point(point1.geometry.coordinates),
+    2 / 1000,
+    nextBearing + 180,
+    { units: "kilometers" }
+  );
+  const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing + 180, {
+    units: "kilometers",
+  });
 
   const indicatorFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isClosingRightAngleIndicator: true },
     geometry: {
-      type: 'LineString',
-      coordinates: [point1.geometry.coordinates, point2.geometry.coordinates, point3.geometry.coordinates]
-    }
+      type: "LineString",
+      coordinates: [
+        point1.geometry.coordinates,
+        point2.geometry.coordinates,
+        point3.geometry.coordinates,
+      ],
+    },
   };
 
   state.closingRightAngleIndicator = indicatorFeature;
@@ -444,53 +681,57 @@ DrawPolygonDistance.updateClosingRightAngleIndicator = function(state, cornerVer
   const map = this.map;
   if (!map) return;
 
-  if (!map.getSource('right-angle-indicator-closing')) {
-    map.addSource('right-angle-indicator-closing', {
-      type: 'geojson',
-      data: indicatorFeature
+  if (!map.getSource("right-angle-indicator-closing")) {
+    map.addSource("right-angle-indicator-closing", {
+      type: "geojson",
+      data: indicatorFeature,
     });
 
     map.addLayer({
-      id: 'right-angle-indicator-closing',
-      type: 'line',
-      source: 'right-angle-indicator-closing',
+      id: "right-angle-indicator-closing",
+      type: "line",
+      source: "right-angle-indicator-closing",
       paint: {
-        'line-color': '#000000',
-        'line-width': 1,
-        'line-opacity': 1.0
-      }
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-opacity": 1.0,
+      },
     });
   } else {
-    map.getSource('right-angle-indicator-closing').setData(indicatorFeature);
+    map.getSource("right-angle-indicator-closing").setData(indicatorFeature);
   }
 };
 
-DrawPolygonDistance.removeClosingRightAngleIndicator = function(state) {
+DrawPolygonDistance.removeClosingRightAngleIndicator = function (state) {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('right-angle-indicator-closing')) {
-    map.removeLayer('right-angle-indicator-closing');
+  if (map.getLayer && map.getLayer("right-angle-indicator-closing")) {
+    map.removeLayer("right-angle-indicator-closing");
   }
-  if (map.getSource && map.getSource('right-angle-indicator-closing')) {
-    map.removeSource('right-angle-indicator-closing');
+  if (map.getSource && map.getSource("right-angle-indicator-closing")) {
+    map.removeSource("right-angle-indicator-closing");
   }
   state.closingRightAngleIndicator = null;
 };
 
-DrawPolygonDistance.onClick = function(state, e) {
-  if (e.originalEvent && e.originalEvent.target === state.distanceInput) {
+DrawPolygonDistance.onClick = function (state, e) {
+  if (
+    e.originalEvent &&
+    (e.originalEvent.target === state.distanceInput ||
+      e.originalEvent.target === state.angleInput)
+  ) {
     return;
   }
   this.clickOnMap(state, e);
 };
 
-DrawPolygonDistance.clickOnMap = function(state, e) {
+DrawPolygonDistance.clickOnMap = function (state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
     const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
     state.vertices.push([snappedCoord.lng, snappedCoord.lat]);
-    state.polygon.updateCoordinate('0.0', snappedCoord.lng, snappedCoord.lat);
+    state.polygon.updateCoordinate("0.0", snappedCoord.lng, snappedCoord.lat);
 
     // Store snapped line info if snapped to a line
     const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
@@ -500,7 +741,12 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     }
 
     // If snapping to a point, check for underlying line at click location
-    const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, snappedCoord);
+    const underlyingLineInfo = getUnderlyingLineBearing(
+      this._ctx,
+      this.map,
+      e,
+      snappedCoord
+    );
     if (underlyingLineInfo) {
       state.snappedLineBearing = underlyingLineInfo.bearing;
       state.snappedLineSegment = underlyingLineInfo.segment;
@@ -512,21 +758,31 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
   let newVertex;
   const lastVertex = state.vertices[state.vertices.length - 1];
   const from = turf.point(lastVertex);
-  const hasUserDistance = state.currentDistance !== null && state.currentDistance > 0;
+  const hasUserDistance =
+    state.currentDistance !== null && state.currentDistance > 0;
 
   // Get snap info (point or line)
   const snapInfo = this.getSnapInfo(e.lngLat);
 
   // Calculate mouse bearing for orthogonal snap check
-  const mouseBearing = turf.bearing(from, turf.point([e.lngLat.lng, e.lngLat.lat]));
+  const mouseBearing = turf.bearing(
+    from,
+    turf.point([e.lngLat.lng, e.lngLat.lat])
+  );
 
   // Check for closing perpendicular snap (perpendicular to first segment)
   let closingPerpendicularSnap = null;
   if (state.vertices.length >= 2) {
     const firstVertex = state.vertices[0];
     const secondVertex = state.vertices[1];
-    const firstSegmentBearing = turf.bearing(turf.point(firstVertex), turf.point(secondVertex));
-    const bearingToFirst = turf.bearing(turf.point([e.lngLat.lng, e.lngLat.lat]), turf.point(firstVertex));
+    const firstSegmentBearing = turf.bearing(
+      turf.point(firstVertex),
+      turf.point(secondVertex)
+    );
+    const bearingToFirst = turf.bearing(
+      turf.point([e.lngLat.lng, e.lngLat.lat]),
+      turf.point(firstVertex)
+    );
 
     // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
     for (const angle of [90, 270]) {
@@ -541,7 +797,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
         closingPerpendicularSnap = {
           firstVertex: firstVertex,
           perpendicularBearing: targetBearing,
-          firstSegmentBearing: firstSegmentBearing
+          firstSegmentBearing: firstSegmentBearing,
         };
         break;
       }
@@ -551,16 +807,33 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
   const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
-  const bothSnapsActive = orthogonalMatch !== null && closingPerpendicularSnap !== null && !(snapInfo && snapInfo.type === 'point');
+  const bothSnapsActive =
+    orthogonalMatch !== null &&
+    closingPerpendicularSnap !== null &&
+    !(snapInfo && snapInfo.type === "point");
+
+  // Determine reference bearing for angle input
+  let referenceBearing = 0; // Default to true north
+  if (state.vertices.length >= 2) {
+    const secondLastVertex = state.vertices[state.vertices.length - 2];
+    referenceBearing = turf.bearing(turf.point(secondLastVertex), from);
+  } else if (state.snappedLineBearing !== null) {
+    referenceBearing = state.snappedLineBearing;
+  }
 
   // Determine direction (bearing) priority
   let bearingToUse = mouseBearing;
   let usePointDirection = false;
   let isOrthogonalSnap = false;
   let isClosingPerpendicularSnap = false;
+  const hasUserAngle =
+    state.currentAngle !== null && !isNaN(state.currentAngle);
 
-  if (snapInfo && snapInfo.type === 'point') {
-    // Priority 1: Point snap direction (highest priority for direction)
+  if (hasUserAngle) {
+    // Priority 0: User-entered angle (highest priority for direction)
+    bearingToUse = referenceBearing + state.currentAngle;
+  } else if (snapInfo && snapInfo.type === "point") {
+    // Priority 1: Point snap direction
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
   } else if (bothSnapsActive) {
@@ -574,7 +847,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
   } else if (closingPerpendicularSnap !== null) {
     // Priority 3: Closing perpendicular snap
     isClosingPerpendicularSnap = true;
-  } else if (snapInfo && snapInfo.type === 'line') {
+  } else if (snapInfo && snapInfo.type === "line") {
     // Priority 4: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
   }
@@ -583,7 +856,7 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
   if (hasUserDistance) {
     // Priority 1 for length: User-entered distance
     // If we have a line snap, use circle-line intersection to find the correct point
-    if (snapInfo && snapInfo.type === 'line') {
+    if (snapInfo && snapInfo.type === "line") {
       const circleLineIntersection = calculateCircleLineIntersection(
         lastVertex,
         state.currentDistance,
@@ -594,75 +867,159 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
         newVertex = circleLineIntersection.coord;
       } else {
         // Fallback: if no intersection found, use bearing to create point at exact distance
-        const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+        const destinationPoint = turf.destination(
+          from,
+          state.currentDistance / 1000,
+          bearingToUse,
+          { units: "kilometers" }
+        );
         newVertex = destinationPoint.geometry.coordinates;
       }
     } else {
       // No line snap: use bearing to create point at exact distance
-      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+      const destinationPoint = turf.destination(
+        from,
+        state.currentDistance / 1000,
+        bearingToUse,
+        { units: "kilometers" }
+      );
       newVertex = destinationPoint.geometry.coordinates;
     }
   } else if (bothSnapsActive) {
     // Special case: Both orthogonal and closing perpendicular are active
     // Find intersection where both constraints are satisfied
     const perpLine = {
-      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
     };
 
-    const intersection = calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      orthogonalMatch.bearing,
+      perpLine
+    );
     if (intersection) {
       newVertex = intersection.coord;
     } else {
       // Fallback to mouse distance
-      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        orthogonalMatch.bearing,
+        { units: "kilometers" }
+      );
       newVertex = destinationPoint.geometry.coordinates;
     }
-  } else if (closingPerpendicularSnap !== null && !usePointDirection && !isOrthogonalSnap) {
+  } else if (
+    closingPerpendicularSnap !== null &&
+    !usePointDirection &&
+    !isOrthogonalSnap
+  ) {
     // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
     const perpLine = {
-      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
     };
 
-    const intersection = calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      mouseBearing,
+      perpLine
+    );
     if (intersection) {
       newVertex = intersection.coord;
     } else {
       // Fallback to mouse position
-      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, mouseBearing, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        mouseBearing,
+        { units: "kilometers" }
+      );
       newVertex = destinationPoint.geometry.coordinates;
     }
-  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
+  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === "line") {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      bearingToUse,
+      snapInfo.segment
+    );
     if (intersection) {
       newVertex = intersection.coord;
     } else {
       // Fallback to mouse distance if intersection fails
-      const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        bearingToUse,
+        { units: "kilometers" }
+      );
       newVertex = destinationPoint.geometry.coordinates;
     }
   } else if (usePointDirection && snapInfo) {
     // Point snap: use distance to point
     newVertex = snapInfo.coord;
-  } else if (snapInfo && snapInfo.type === 'line') {
+  } else if (snapInfo && snapInfo.type === "line") {
     // Line snap: use snapped position
     newVertex = snapInfo.coord;
   } else {
     // No snap: use mouse distance with bearing
-    const mouseDistance = turf.distance(from, turf.point([e.lngLat.lng, e.lngLat.lat]), { units: 'kilometers' });
-    const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+    const mouseDistance = turf.distance(
+      from,
+      turf.point([e.lngLat.lng, e.lngLat.lat]),
+      { units: "kilometers" }
+    );
+    const destinationPoint = turf.destination(
+      from,
+      mouseDistance,
+      bearingToUse,
+      { units: "kilometers" }
+    );
     newVertex = destinationPoint.geometry.coordinates;
   }
 
   // Check for polygon closing
   if (state.vertices.length >= 3) {
     const firstVertex = state.vertices[0];
-    const dist = turf.distance(turf.point(firstVertex), turf.point(newVertex), { units: 'meters' });
+    const dist = turf.distance(turf.point(firstVertex), turf.point(newVertex), {
+      units: "meters",
+    });
 
     if (dist < 10) {
       this.finishDrawing(state);
@@ -671,7 +1028,11 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
   }
 
   state.vertices.push(newVertex);
-  state.polygon.updateCoordinate(`0.${state.vertices.length - 1}`, newVertex[0], newVertex[1]);
+  state.polygon.updateCoordinate(
+    `0.${state.vertices.length - 1}`,
+    newVertex[0],
+    newVertex[1]
+  );
 
   // Store snapped line info if snapped to a line
   const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
@@ -684,15 +1045,19 @@ DrawPolygonDistance.clickOnMap = function(state, e) {
     state.snappedLineSegment = null;
   }
 
-  // Clear distance input for next segment
+  // Clear distance and angle inputs for next segment
   if (state.distanceInput) {
-    state.distanceInput.value = '';
+    state.distanceInput.value = "";
     state.currentDistance = null;
     state.distanceInput.focus();
   }
+  if (state.angleInput) {
+    state.angleInput.value = "";
+    state.currentAngle = null;
+  }
 };
 
-DrawPolygonDistance.onMouseMove = function(state, e) {
+DrawPolygonDistance.onMouseMove = function (state, e) {
   const pointOnScreen = e.point;
   const lngLat = e.lngLat;
 
@@ -702,13 +1067,25 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   // Check for line snapping even before first vertex is placed
   if (state.vertices.length === 0) {
     const snapInfo = this.getSnapInfo(lngLat);
-    if (snapInfo && snapInfo.type === 'line') {
-      this.updateLineSegmentSplitLabels(state, snapInfo.segment, [lngLat.lng, lngLat.lat]);
-    } else if (snapInfo && snapInfo.type === 'point') {
+    if (snapInfo && snapInfo.type === "line") {
+      this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
+        lngLat.lng,
+        lngLat.lat,
+      ]);
+    } else if (snapInfo && snapInfo.type === "point") {
       // Check for underlying line at the point snap location
-      const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, { lng: snapInfo.coord[0], lat: snapInfo.coord[1] });
+      const underlyingLineInfo = getUnderlyingLineBearing(
+        this._ctx,
+        this.map,
+        e,
+        { lng: snapInfo.coord[0], lat: snapInfo.coord[1] }
+      );
       if (underlyingLineInfo && underlyingLineInfo.segment) {
-        this.updateLineSegmentSplitLabels(state, underlyingLineInfo.segment, snapInfo.coord);
+        this.updateLineSegmentSplitLabels(
+          state,
+          underlyingLineInfo.segment,
+          snapInfo.coord
+        );
       } else {
         this.removeLineSegmentSplitLabels(state);
       }
@@ -722,7 +1099,8 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   let previewVertex;
   const lastVertex = state.vertices[state.vertices.length - 1];
   const from = turf.point(lastVertex);
-  const hasUserDistance = state.currentDistance !== null && state.currentDistance > 0;
+  const hasUserDistance =
+    state.currentDistance !== null && state.currentDistance > 0;
 
   // Get snap info (point or line)
   const snapInfo = this.getSnapInfo(lngLat);
@@ -735,8 +1113,14 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   if (state.vertices.length >= 2) {
     const firstVertex = state.vertices[0];
     const secondVertex = state.vertices[1];
-    const firstSegmentBearing = turf.bearing(turf.point(firstVertex), turf.point(secondVertex));
-    const bearingToFirst = turf.bearing(turf.point([lngLat.lng, lngLat.lat]), turf.point(firstVertex));
+    const firstSegmentBearing = turf.bearing(
+      turf.point(firstVertex),
+      turf.point(secondVertex)
+    );
+    const bearingToFirst = turf.bearing(
+      turf.point([lngLat.lng, lngLat.lat]),
+      turf.point(firstVertex)
+    );
 
     // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
     for (const angle of [90, 270]) {
@@ -751,7 +1135,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
         closingPerpendicularSnap = {
           firstVertex: firstVertex,
           perpendicularBearing: targetBearing,
-          firstSegmentBearing: firstSegmentBearing
+          firstSegmentBearing: firstSegmentBearing,
         };
         break;
       }
@@ -761,16 +1145,33 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
-  const bothSnapsActive = orthogonalMatch !== null && closingPerpendicularSnap !== null && !(snapInfo && snapInfo.type === 'point');
+  const bothSnapsActive =
+    orthogonalMatch !== null &&
+    closingPerpendicularSnap !== null &&
+    !(snapInfo && snapInfo.type === "point");
+
+  // Determine reference bearing for angle input
+  let referenceBearing = 0; // Default to true north
+  if (state.vertices.length >= 2) {
+    const secondLastVertex = state.vertices[state.vertices.length - 2];
+    referenceBearing = turf.bearing(turf.point(secondLastVertex), from);
+  } else if (state.snappedLineBearing !== null) {
+    referenceBearing = state.snappedLineBearing;
+  }
 
   // Determine direction (bearing) priority
   let bearingToUse = mouseBearing;
   let usePointDirection = false;
   let isOrthogonalSnap = false;
   let isClosingPerpendicularSnap = false;
+  const hasUserAngle =
+    state.currentAngle !== null && !isNaN(state.currentAngle);
 
-  if (snapInfo && snapInfo.type === 'point') {
-    // Priority 1: Point snap direction (highest priority for direction)
+  if (hasUserAngle) {
+    // Priority 0: User-entered angle (highest priority for direction)
+    bearingToUse = referenceBearing + state.currentAngle;
+  } else if (snapInfo && snapInfo.type === "point") {
+    // Priority 1: Point snap direction
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
   } else if (bothSnapsActive) {
@@ -786,7 +1187,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     // Priority 3: Closing perpendicular snap
     // (This will be handled in the length priority section)
     isClosingPerpendicularSnap = true;
-  } else if (snapInfo && snapInfo.type === 'line') {
+  } else if (snapInfo && snapInfo.type === "line") {
     // Priority 4: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
   }
@@ -795,7 +1196,7 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   if (hasUserDistance) {
     // Priority 1 for length: User-entered distance
     // If we have a line snap, use circle-line intersection to find the correct point
-    if (snapInfo && snapInfo.type === 'line') {
+    if (snapInfo && snapInfo.type === "line") {
       const circleLineIntersection = calculateCircleLineIntersection(
         lastVertex,
         state.currentDistance,
@@ -806,12 +1207,22 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
         previewVertex = circleLineIntersection.coord;
       } else {
         // Fallback: if no intersection found, use bearing to create point at exact distance
-        const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+        const destinationPoint = turf.destination(
+          from,
+          state.currentDistance / 1000,
+          bearingToUse,
+          { units: "kilometers" }
+        );
         previewVertex = destinationPoint.geometry.coordinates;
       }
     } else {
       // No line snap: use bearing to create point at exact distance
-      const destinationPoint = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
+      const destinationPoint = turf.destination(
+        from,
+        state.currentDistance / 1000,
+        bearingToUse,
+        { units: "kilometers" }
+      );
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.updateGuideCircle(state, lastVertex, state.currentDistance);
@@ -819,16 +1230,39 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     // Special case: Both orthogonal and closing perpendicular are active
     // Find intersection where both constraints are satisfied
     const perpLine = {
-      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
     };
 
-    const intersection = calculateLineIntersection(lastVertex, orthogonalMatch.bearing, perpLine);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      orthogonalMatch.bearing,
+      perpLine
+    );
     if (intersection) {
       previewVertex = intersection.coord;
       // Show both indicators (regular at last vertex, closing at first vertex)
-      this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, orthogonalMatch.bearing, orthogonalMatch.referenceSegment);
-      const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
+      this.updateRightAngleIndicator(
+        state,
+        lastVertex,
+        orthogonalMatch.referenceBearing,
+        orthogonalMatch.bearing,
+        orthogonalMatch.referenceSegment
+      );
+      const closingBearing = turf.bearing(
+        turf.point(previewVertex),
+        turf.point(closingPerpendicularSnap.firstVertex)
+      );
       const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
       this.updateClosingRightAngleIndicator(
         state,
@@ -839,22 +1273,52 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
       );
     } else {
       // Fallback to mouse distance
-      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, orthogonalMatch.bearing, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        orthogonalMatch.bearing,
+        { units: "kilometers" }
+      );
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
-  } else if (closingPerpendicularSnap !== null && !usePointDirection && !isOrthogonalSnap) {
+  } else if (
+    closingPerpendicularSnap !== null &&
+    !usePointDirection &&
+    !isOrthogonalSnap
+  ) {
     // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
     const perpLine = {
-      start: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing + 180, { units: 'kilometers' }).geometry.coordinates,
-      end: turf.destination(turf.point(closingPerpendicularSnap.firstVertex), 0.1, closingPerpendicularSnap.perpendicularBearing, { units: 'kilometers' }).geometry.coordinates
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
     };
 
-    const intersection = calculateLineIntersection(lastVertex, mouseBearing, perpLine);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      mouseBearing,
+      perpLine
+    );
     if (intersection) {
       previewVertex = intersection.coord;
-      const closingBearing = turf.bearing(turf.point(previewVertex), turf.point(closingPerpendicularSnap.firstVertex));
+      const closingBearing = turf.bearing(
+        turf.point(previewVertex),
+        turf.point(closingPerpendicularSnap.firstVertex)
+      );
       const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
       this.updateClosingRightAngleIndicator(
         state,
@@ -865,20 +1329,42 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
       );
     } else {
       // Fallback to mouse position
-      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, mouseBearing, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        mouseBearing,
+        { units: "kilometers" }
+      );
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
-  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === 'line') {
+  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === "line") {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = calculateLineIntersection(lastVertex, bearingToUse, snapInfo.segment);
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      bearingToUse,
+      snapInfo.segment
+    );
     if (intersection) {
       previewVertex = intersection.coord;
     } else {
       // Fallback to mouse distance if intersection fails
-      const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
-      const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        bearingToUse,
+        { units: "kilometers" }
+      );
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
@@ -886,21 +1372,42 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
     // Point snap: use distance to point
     previewVertex = snapInfo.coord;
     this.removeGuideCircle(state);
-  } else if (snapInfo && snapInfo.type === 'line') {
+  } else if (snapInfo && snapInfo.type === "line") {
     // Line snap: use snapped position
     previewVertex = snapInfo.coord;
     this.removeGuideCircle(state);
   } else {
     // No snap: use mouse distance with bearing
-    const mouseDistance = turf.distance(from, turf.point([lngLat.lng, lngLat.lat]), { units: 'kilometers' });
-    const destinationPoint = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
+    const mouseDistance = turf.distance(
+      from,
+      turf.point([lngLat.lng, lngLat.lat]),
+      { units: "kilometers" }
+    );
+    const destinationPoint = turf.destination(
+      from,
+      mouseDistance,
+      bearingToUse,
+      { units: "kilometers" }
+    );
     previewVertex = destinationPoint.geometry.coordinates;
     this.removeGuideCircle(state);
   }
 
   // Show right-angle indicator if orthogonal snap is active (but not for point snap or dual snap)
-  if (isOrthogonalSnap && !usePointDirection && !bothSnapsActive && !isClosingPerpendicularSnap && orthogonalMatch) {
-    this.updateRightAngleIndicator(state, lastVertex, orthogonalMatch.referenceBearing, bearingToUse, orthogonalMatch.referenceSegment);
+  if (
+    isOrthogonalSnap &&
+    !usePointDirection &&
+    !bothSnapsActive &&
+    !isClosingPerpendicularSnap &&
+    orthogonalMatch
+  ) {
+    this.updateRightAngleIndicator(
+      state,
+      lastVertex,
+      orthogonalMatch.referenceBearing,
+      bearingToUse,
+      orthogonalMatch.referenceSegment
+    );
   } else {
     this.removeRightAngleIndicator(state);
   }
@@ -911,19 +1418,33 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   }
 
   // Calculate actual distance to preview vertex (accounts for all snapping)
-  const actualDistance = turf.distance(from, turf.point(previewVertex), { units: 'meters' });
+  const actualDistance = turf.distance(from, turf.point(previewVertex), {
+    units: "meters",
+  });
 
   // Update distance label
   this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
 
   // Update line segment split labels if snapping to a line
-  if (snapInfo && snapInfo.type === 'line') {
-    this.updateLineSegmentSplitLabels(state, snapInfo.segment, [lngLat.lng, lngLat.lat]);
-  } else if (snapInfo && snapInfo.type === 'point') {
+  if (snapInfo && snapInfo.type === "line") {
+    this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
+      lngLat.lng,
+      lngLat.lat,
+    ]);
+  } else if (snapInfo && snapInfo.type === "point") {
     // Check for underlying line at the point snap location
-    const underlyingLineInfo = getUnderlyingLineBearing(this._ctx, this.map, e, { lng: snapInfo.coord[0], lat: snapInfo.coord[1] });
+    const underlyingLineInfo = getUnderlyingLineBearing(
+      this._ctx,
+      this.map,
+      e,
+      { lng: snapInfo.coord[0], lat: snapInfo.coord[1] }
+    );
     if (underlyingLineInfo && underlyingLineInfo.segment) {
-      this.updateLineSegmentSplitLabels(state, underlyingLineInfo.segment, snapInfo.coord);
+      this.updateLineSegmentSplitLabels(
+        state,
+        underlyingLineInfo.segment,
+        snapInfo.coord
+      );
     } else {
       this.removeLineSegmentSplitLabels(state);
     }
@@ -940,7 +1461,12 @@ DrawPolygonDistance.onMouseMove = function(state, e) {
   state.polygon.setCoordinates([allCoords]);
 };
 
-DrawPolygonDistance.updateDistanceLabel = function(state, startVertex, endVertex, distance) {
+DrawPolygonDistance.updateDistanceLabel = function (
+  state,
+  startVertex,
+  endVertex,
+  distance
+) {
   const map = this.map;
   if (!map) return;
 
@@ -968,91 +1494,118 @@ DrawPolygonDistance.updateDistanceLabel = function(state, startVertex, endVertex
   // Use 3m offset above the line (increased from 1.5m to ensure it's clearly above)
   const offsetDistance = 3 / 1000; // Convert to km for turf
   const perpendicularBearing = bearing - 90; // 90 degrees perpendicular to the LEFT (above when rotated)
-  const offsetMidpoint = turf.destination(midpoint, offsetDistance, perpendicularBearing, { units: 'kilometers' });
+  const offsetMidpoint = turf.destination(
+    midpoint,
+    offsetDistance,
+    perpendicularBearing,
+    { units: "kilometers" }
+  );
 
   // Create a feature for the text label at the offset midpoint
   const labelFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: {
       distanceLabel: true,
       distance: distanceText,
-      rotation: rotation
+      rotation: rotation,
     },
     geometry: {
-      type: 'Point',
-      coordinates: offsetMidpoint.geometry.coordinates
-    }
+      type: "Point",
+      coordinates: offsetMidpoint.geometry.coordinates,
+    },
   };
 
   // Wrap in FeatureCollection to ensure proper rendering
   const labelFeatureCollection = {
-    type: 'FeatureCollection',
-    features: [labelFeature]
+    type: "FeatureCollection",
+    features: [labelFeature],
   };
 
   // Update or create the text label layer
-  if (!map.getSource('distance-label-text')) {
-    map.addSource('distance-label-text', {
-      type: 'geojson',
-      data: labelFeatureCollection
+  if (!map.getSource("distance-label-text")) {
+    map.addSource("distance-label-text", {
+      type: "geojson",
+      data: labelFeatureCollection,
     });
 
     map.addLayer({
-      id: 'distance-label-text',
-      type: 'symbol',
-      source: 'distance-label-text',
+      id: "distance-label-text",
+      type: "symbol",
+      source: "distance-label-text",
       layout: {
-        'text-field': ['get', 'distance'],
-        'text-size': 10,
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-offset': [0, 0],
-        'text-anchor': 'center',
-        'text-rotate': ['get', 'rotation'],
-        'text-rotation-alignment': 'map',
-        'text-pitch-alignment': 'map',
-        'text-allow-overlap': true,
-        'text-ignore-placement': true
+        "text-field": ["get", "distance"],
+        "text-size": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0],
+        "text-anchor": "center",
+        "text-rotate": ["get", "rotation"],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
       },
       paint: {
-        'text-color': '#000000',
-        'text-opacity': 1
-      }
+        "text-color": "#000000",
+        "text-opacity": 1,
+      },
     });
   } else {
-    map.getSource('distance-label-text').setData(labelFeatureCollection);
+    map.getSource("distance-label-text").setData(labelFeatureCollection);
   }
 };
 
-DrawPolygonDistance.removeDistanceLabel = function(state) {
+DrawPolygonDistance.removeDistanceLabel = function (state) {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('distance-label-text')) {
-    map.removeLayer('distance-label-text');
+  if (map.getLayer && map.getLayer("distance-label-text")) {
+    map.removeLayer("distance-label-text");
   }
-  if (map.getSource && map.getSource('distance-label-text')) {
-    map.removeSource('distance-label-text');
+  if (map.getSource && map.getSource("distance-label-text")) {
+    map.removeSource("distance-label-text");
   }
 };
 
-DrawPolygonDistance.updateLineSegmentSplitLabels = function(state, segment, snapPoint) {
+DrawPolygonDistance.updateLineSegmentSplitLabels = function (
+  state,
+  segment,
+  snapPoint
+) {
   const map = this.map;
   if (!map) return;
 
-  const snappedCoord = this._ctx.snapping.snapCoord({ lng: snapPoint[0], lat: snapPoint[1] });
+  const snappedCoord = this._ctx.snapping.snapCoord({
+    lng: snapPoint[0],
+    lat: snapPoint[1],
+  });
   const snapCoord = [snappedCoord.lng, snappedCoord.lat];
 
   // Calculate distances for the two sub-segments
-  const distance1 = turf.distance(turf.point(segment.start), turf.point(snapCoord), { units: 'meters' });
-  const distance2 = turf.distance(turf.point(snapCoord), turf.point(segment.end), { units: 'meters' });
+  const distance1 = turf.distance(
+    turf.point(segment.start),
+    turf.point(snapCoord),
+    { units: "meters" }
+  );
+  const distance2 = turf.distance(
+    turf.point(snapCoord),
+    turf.point(segment.end),
+    { units: "meters" }
+  );
 
   const labelFeatures = [];
 
   // First sub-segment label (start to snap point)
-  if (distance1 > 0.1) { // Only show if distance is meaningful
+  if (distance1 > 0.1) {
+    // Only show if distance is meaningful
     const distanceText1 = `${distance1.toFixed(1)}m`;
-    const midpoint1 = turf.midpoint(turf.point(segment.start), turf.point(snapCoord));
-    const bearing1 = turf.bearing(turf.point(segment.start), turf.point(snapCoord));
+    const midpoint1 = turf.midpoint(
+      turf.point(segment.start),
+      turf.point(snapCoord)
+    );
+    const bearing1 = turf.bearing(
+      turf.point(segment.start),
+      turf.point(snapCoord)
+    );
 
     // Calculate rotation and flip if upside down
     let rotation1 = bearing1 - 90;
@@ -1063,27 +1616,39 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function(state, segment, snap
 
     const offsetDistance = 3 / 1000;
     const perpendicularBearing1 = bearing1 - 90;
-    const offsetMidpoint1 = turf.destination(midpoint1, offsetDistance, perpendicularBearing1, { units: 'kilometers' });
+    const offsetMidpoint1 = turf.destination(
+      midpoint1,
+      offsetDistance,
+      perpendicularBearing1,
+      { units: "kilometers" }
+    );
 
     labelFeatures.push({
-      type: 'Feature',
+      type: "Feature",
       properties: {
         distanceLabel: true,
         distance: distanceText1,
-        rotation: rotation1
+        rotation: rotation1,
       },
       geometry: {
-        type: 'Point',
-        coordinates: offsetMidpoint1.geometry.coordinates
-      }
+        type: "Point",
+        coordinates: offsetMidpoint1.geometry.coordinates,
+      },
     });
   }
 
   // Second sub-segment label (snap point to end)
-  if (distance2 > 0.1) { // Only show if distance is meaningful
+  if (distance2 > 0.1) {
+    // Only show if distance is meaningful
     const distanceText2 = `${distance2.toFixed(1)}m`;
-    const midpoint2 = turf.midpoint(turf.point(snapCoord), turf.point(segment.end));
-    const bearing2 = turf.bearing(turf.point(snapCoord), turf.point(segment.end));
+    const midpoint2 = turf.midpoint(
+      turf.point(snapCoord),
+      turf.point(segment.end)
+    );
+    const bearing2 = turf.bearing(
+      turf.point(snapCoord),
+      turf.point(segment.end)
+    );
 
     // Calculate rotation and flip if upside down
     let rotation2 = bearing2 - 90;
@@ -1094,124 +1659,131 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function(state, segment, snap
 
     const offsetDistance = 3 / 1000;
     const perpendicularBearing2 = bearing2 - 90;
-    const offsetMidpoint2 = turf.destination(midpoint2, offsetDistance, perpendicularBearing2, { units: 'kilometers' });
+    const offsetMidpoint2 = turf.destination(
+      midpoint2,
+      offsetDistance,
+      perpendicularBearing2,
+      { units: "kilometers" }
+    );
 
     labelFeatures.push({
-      type: 'Feature',
+      type: "Feature",
       properties: {
         distanceLabel: true,
         distance: distanceText2,
-        rotation: rotation2
+        rotation: rotation2,
       },
       geometry: {
-        type: 'Point',
-        coordinates: offsetMidpoint2.geometry.coordinates
-      }
+        type: "Point",
+        coordinates: offsetMidpoint2.geometry.coordinates,
+      },
     });
   }
 
   const labelFeatureCollection = {
-    type: 'FeatureCollection',
-    features: labelFeatures
+    type: "FeatureCollection",
+    features: labelFeatures,
   };
 
-  if (!map.getSource('line-segment-split-labels')) {
-    map.addSource('line-segment-split-labels', {
-      type: 'geojson',
-      data: labelFeatureCollection
+  if (!map.getSource("line-segment-split-labels")) {
+    map.addSource("line-segment-split-labels", {
+      type: "geojson",
+      data: labelFeatureCollection,
     });
 
     map.addLayer({
-      id: 'line-segment-split-labels',
-      type: 'symbol',
-      source: 'line-segment-split-labels',
+      id: "line-segment-split-labels",
+      type: "symbol",
+      source: "line-segment-split-labels",
       layout: {
-        'text-field': ['get', 'distance'],
-        'text-size': 10,
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-offset': [0, 0],
-        'text-anchor': 'center',
-        'text-rotate': ['get', 'rotation'],
-        'text-rotation-alignment': 'map',
-        'text-pitch-alignment': 'map',
-        'text-allow-overlap': true,
-        'text-ignore-placement': true
+        "text-field": ["get", "distance"],
+        "text-size": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0],
+        "text-anchor": "center",
+        "text-rotate": ["get", "rotation"],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
       },
       paint: {
-        'text-color': '#666666',
-        'text-opacity': 0.8
-      }
+        "text-color": "#666666",
+        "text-opacity": 0.8,
+      },
     });
   } else {
-    map.getSource('line-segment-split-labels').setData(labelFeatureCollection);
+    map.getSource("line-segment-split-labels").setData(labelFeatureCollection);
   }
 };
 
-DrawPolygonDistance.removeLineSegmentSplitLabels = function(state) {
+DrawPolygonDistance.removeLineSegmentSplitLabels = function (state) {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('line-segment-split-labels')) {
-    map.removeLayer('line-segment-split-labels');
+  if (map.getLayer && map.getLayer("line-segment-split-labels")) {
+    map.removeLayer("line-segment-split-labels");
   }
-  if (map.getSource && map.getSource('line-segment-split-labels')) {
-    map.removeSource('line-segment-split-labels');
+  if (map.getSource && map.getSource("line-segment-split-labels")) {
+    map.removeSource("line-segment-split-labels");
   }
 };
 
-DrawPolygonDistance.updatePreviewPoint = function(state, coordinates) {
+DrawPolygonDistance.updatePreviewPoint = function (state, coordinates) {
   const map = this.map;
   if (!map) return;
 
   const previewPointFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isPreviewPoint: true },
     geometry: {
-      type: 'Point',
-      coordinates: coordinates
-    }
+      type: "Point",
+      coordinates: coordinates,
+    },
   };
 
-  if (!map.getSource('preview-point-indicator')) {
-    map.addSource('preview-point-indicator', {
-      type: 'geojson',
-      data: previewPointFeature
+  if (!map.getSource("preview-point-indicator")) {
+    map.addSource("preview-point-indicator", {
+      type: "geojson",
+      data: previewPointFeature,
     });
 
     map.addLayer({
-      id: 'preview-point-indicator',
-      type: 'circle',
-      source: 'preview-point-indicator',
+      id: "preview-point-indicator",
+      type: "circle",
+      source: "preview-point-indicator",
       paint: {
-        'circle-radius': 2,
-        'circle-color': '#000000',
-        'circle-opacity': 1
-      }
+        "circle-radius": 2,
+        "circle-color": "#000000",
+        "circle-opacity": 1,
+      },
     });
   } else {
-    map.getSource('preview-point-indicator').setData(previewPointFeature);
+    map.getSource("preview-point-indicator").setData(previewPointFeature);
   }
 };
 
-DrawPolygonDistance.removePreviewPoint = function(state) {
+DrawPolygonDistance.removePreviewPoint = function (state) {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('preview-point-indicator')) {
-    map.removeLayer('preview-point-indicator');
+  if (map.getLayer && map.getLayer("preview-point-indicator")) {
+    map.removeLayer("preview-point-indicator");
   }
-  if (map.getSource && map.getSource('preview-point-indicator')) {
-    map.removeSource('preview-point-indicator');
+  if (map.getSource && map.getSource("preview-point-indicator")) {
+    map.removeSource("preview-point-indicator");
   }
 };
 
-DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
+DrawPolygonDistance.updateGuideCircle = function (state, center, radius) {
   // Check if we can reuse the existing circle (optimization)
-  if (state.guideCircle &&
-      state.guideCircleRadius === radius &&
-      state.guideCircleCenter &&
-      state.guideCircleCenter[0] === center[0] &&
-      state.guideCircleCenter[1] === center[1]) {
+  if (
+    state.guideCircle &&
+    state.guideCircleRadius === radius &&
+    state.guideCircleCenter &&
+    state.guideCircleCenter[0] === center[0] &&
+    state.guideCircleCenter[1] === center[1]
+  ) {
     return; // No need to regenerate
   }
 
@@ -1220,17 +1792,19 @@ DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
 
   for (let i = 0; i <= steps; i++) {
     const angle = (i / steps) * 360;
-    const pt = turf.destination(turf.point(center), radius / 1000, angle, { units: 'kilometers' });
+    const pt = turf.destination(turf.point(center), radius / 1000, angle, {
+      units: "kilometers",
+    });
     circleCoords.push(pt.geometry.coordinates);
   }
 
   const circleFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isGuideCircle: true },
     geometry: {
-      type: 'LineString',
-      coordinates: circleCoords
-    }
+      type: "LineString",
+      coordinates: circleCoords,
+    },
   };
 
   state.guideCircle = circleFeature;
@@ -1240,42 +1814,42 @@ DrawPolygonDistance.updateGuideCircle = function(state, center, radius) {
   const map = this.map;
   if (!map) return;
 
-  if (!map.getSource('distance-guide-circle')) {
-    map.addSource('distance-guide-circle', {
-      type: 'geojson',
-      data: circleFeature
+  if (!map.getSource("distance-guide-circle")) {
+    map.addSource("distance-guide-circle", {
+      type: "geojson",
+      data: circleFeature,
     });
 
     map.addLayer({
-      id: 'distance-guide-circle',
-      type: 'line',
-      source: 'distance-guide-circle',
+      id: "distance-guide-circle",
+      type: "line",
+      source: "distance-guide-circle",
       paint: {
-        'line-color': '#000000',
-        'line-width': 1,
-        'line-opacity': 0.2,
-        'line-dasharray': [2, 2]
-      }
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-opacity": 0.2,
+        "line-dasharray": [2, 2],
+      },
     });
   } else {
-    map.getSource('distance-guide-circle').setData(circleFeature);
+    map.getSource("distance-guide-circle").setData(circleFeature);
   }
 };
 
-DrawPolygonDistance.removeGuideCircle = function(state) {
+DrawPolygonDistance.removeGuideCircle = function (state) {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('distance-guide-circle')) {
-    map.removeLayer('distance-guide-circle');
+  if (map.getLayer && map.getLayer("distance-guide-circle")) {
+    map.removeLayer("distance-guide-circle");
   }
-  if (map.getSource && map.getSource('distance-guide-circle')) {
-    map.removeSource('distance-guide-circle');
+  if (map.getSource && map.getSource("distance-guide-circle")) {
+    map.removeSource("distance-guide-circle");
   }
   state.guideCircle = null;
 };
 
-DrawPolygonDistance.onKeyUp = function(state, e) {
+DrawPolygonDistance.onKeyUp = function (state, e) {
   // Tab key
   if (e.keyCode === 9) {
     if (state.vertices.length === 0) return;
@@ -1285,8 +1859,8 @@ DrawPolygonDistance.onKeyUp = function(state, e) {
       state.inputEnabled = true;
       state.currentDistance = null;
       if (state.distanceInput) {
-        state.distanceInput.value = '';
-        state.distanceInput.style.display = 'block';
+        state.distanceInput.value = "";
+        state.distanceInput.style.display = "block";
         setTimeout(() => state.distanceInput.focus(), 10);
       }
       this.removeGuideCircle(state);
@@ -1313,7 +1887,7 @@ DrawPolygonDistance.onKeyUp = function(state, e) {
 
   // Backspace
   if (e.keyCode === 8) {
-    if (state.distanceInput && state.distanceInput.value !== '') {
+    if (state.distanceInput && state.distanceInput.value !== "") {
       return;
     }
 
@@ -1327,7 +1901,7 @@ DrawPolygonDistance.onKeyUp = function(state, e) {
   }
 };
 
-DrawPolygonDistance.finishDrawing = function(state) {
+DrawPolygonDistance.finishDrawing = function (state) {
   if (state.vertices.length < 3) {
     this.deleteFeature([state.polygon.id], { silent: true });
     this.changeMode(Constants.modes.SIMPLE_SELECT);
@@ -1345,15 +1919,15 @@ DrawPolygonDistance.finishDrawing = function(state) {
   this.removePreviewPoint(state);
 
   this.fire(Constants.events.CREATE, {
-    features: [state.polygon.toGeoJSON()]
+    features: [state.polygon.toGeoJSON()],
   });
 
   this.changeMode(Constants.modes.SIMPLE_SELECT, {
-    featureIds: [state.polygon.id]
+    featureIds: [state.polygon.id],
   });
 };
 
-DrawPolygonDistance.onStop = function(state) {
+DrawPolygonDistance.onStop = function (state) {
   doubleClickZoom.enable(this);
   this.activateUIButton();
   this.removeGuideCircle(state);
@@ -1369,11 +1943,17 @@ DrawPolygonDistance.onStop = function(state) {
   }
 
   if (state.distanceKeyHandler) {
-    document.removeEventListener('keydown', state.distanceKeyHandler);
+    document.removeEventListener("keydown", state.distanceKeyHandler);
     state.distanceKeyHandler = null;
   }
 
+  if (state.angleKeyHandler) {
+    document.removeEventListener("keydown", state.angleKeyHandler);
+    state.angleKeyHandler = null;
+  }
+
   state.distanceInput = null;
+  state.angleInput = null;
 
   if (this.getFeature(state.polygon.id) === undefined) return;
 
@@ -1382,7 +1962,7 @@ DrawPolygonDistance.onStop = function(state) {
   }
 };
 
-DrawPolygonDistance.onTrash = function(state) {
+DrawPolygonDistance.onTrash = function (state) {
   // Remove the last drawn vertex instead of deleting the entire feature
   if (state.vertices.length > 1) {
     state.vertices.pop();
@@ -1397,7 +1977,7 @@ DrawPolygonDistance.onTrash = function(state) {
     if (state.currentPosition) {
       this.onMouseMove(state, {
         point: state.lastPoint || { x: 0, y: 0 },
-        lngLat: state.currentPosition
+        lngLat: state.currentPosition,
       });
     }
 
@@ -1412,9 +1992,11 @@ DrawPolygonDistance.onTrash = function(state) {
   }
 };
 
-DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
+DrawPolygonDistance.toDisplayFeatures = function (state, geojson, display) {
   const isActivePolygon = geojson.properties.id === state.polygon.id;
-  geojson.properties.active = isActivePolygon ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE;
+  geojson.properties.active = isActivePolygon
+    ? Constants.activeStates.ACTIVE
+    : Constants.activeStates.INACTIVE;
 
   if (!isActivePolygon) return display(geojson);
 
@@ -1436,12 +2018,15 @@ DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
           meta: Constants.meta.VERTEX,
           parent: state.polygon.id,
           coord_path: `0.${index}`,
-          active: index === state.vertices.length - 1 ? Constants.activeStates.ACTIVE : Constants.activeStates.INACTIVE
+          active:
+            index === state.vertices.length - 1
+              ? Constants.activeStates.ACTIVE
+              : Constants.activeStates.INACTIVE,
         },
         geometry: {
           type: Constants.geojsonTypes.POINT,
-          coordinates: vertex
-        }
+          coordinates: vertex,
+        },
       });
     });
   }
@@ -1449,16 +2034,22 @@ DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
   // Display as LineString for first 1-2 vertices for reliable rendering at all zoom levels
   if (coordinateCount <= 4) {
     const lineCoordinates = [
-      [geojson.geometry.coordinates[0][0][0], geojson.geometry.coordinates[0][0][1]],
-      [geojson.geometry.coordinates[0][1][0], geojson.geometry.coordinates[0][1][1]]
+      [
+        geojson.geometry.coordinates[0][0][0],
+        geojson.geometry.coordinates[0][0][1],
+      ],
+      [
+        geojson.geometry.coordinates[0][1][0],
+        geojson.geometry.coordinates[0][1][1],
+      ],
     ];
     display({
       type: Constants.geojsonTypes.FEATURE,
       properties: geojson.properties,
       geometry: {
         coordinates: lineCoordinates,
-        type: Constants.geojsonTypes.LINE_STRING
-      }
+        type: Constants.geojsonTypes.LINE_STRING,
+      },
     });
     if (coordinateCount === 3) {
       return;
@@ -1471,4 +2062,3 @@ DrawPolygonDistance.toDisplayFeatures = function(state, geojson, display) {
 DrawPolygonDistance.onTap = DrawPolygonDistance.onClick;
 
 export default DrawPolygonDistance;
-
