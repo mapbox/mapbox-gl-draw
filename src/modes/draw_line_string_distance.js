@@ -51,6 +51,12 @@ DrawLineStringDistance.onSetup = function (opts) {
     snappedLineBearing: null,
     snappedLineSegment: null,
     labelDebounceTimer: null,
+    // Extended guideline hover state
+    hoverDebounceTimer: null,
+    hoveredIntersectionPoint: null,
+    extendedGuidelines: null,
+    lastHoverPosition: null,
+    isHoveringExtendedGuidelines: false,
   };
 
   this.createDistanceInput(state);
@@ -564,6 +570,276 @@ DrawLineStringDistance.getOrthogonalBearing = function (
   return bestMatch;
 };
 
+DrawLineStringDistance.detectHoveredIntersectionPoint = function (state, e) {
+  const map = this.map;
+  if (!map || !this._ctx.snapping) return null;
+
+  // Query features at the hover point from snap buffer layers
+  const bufferLayers = this._ctx.snapping.bufferLayers.map(
+    (layerId) => "_snap_buffer_" + layerId
+  );
+  const featuresAtPoint = map.queryRenderedFeatures(e.point, {
+    layers: bufferLayers,
+  });
+
+  // Look for a snappingPoint feature with guidelineIds
+  const intersectionPoint = featuresAtPoint.find((feature) => {
+    return (
+      feature.properties &&
+      feature.properties.type === "snappingPoint" &&
+      feature.properties.guidelineIds
+    );
+  });
+
+  if (!intersectionPoint) return null;
+
+  return {
+    coord: intersectionPoint.geometry.coordinates,
+    guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
+    feature: intersectionPoint,
+  };
+};
+
+DrawLineStringDistance.extendGuidelines = function (state, intersectionInfo) {
+  const map = this.map;
+  if (!map) return [];
+
+  const extendedLines = [];
+  const { coord, guidelineIds } = intersectionInfo;
+
+  // For each guideline ID, query the feature and extend it
+  for (const guidelineId of guidelineIds) {
+    // Query the guideline feature from the source
+    const sourceId = intersectionInfo.feature.source;
+    const source = map.getSource(sourceId);
+    if (!source) continue;
+
+    // Get all features from the source (for GeoJSON sources)
+    // We need to find the feature with the matching ID
+    const allFeatures = map.querySourceFeatures(sourceId, {
+      sourceLayer: intersectionInfo.feature.sourceLayer,
+    });
+
+    const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
+    if (!guidelineFeature) continue;
+
+    let geometry = guidelineFeature.geometry;
+
+    // Handle different geometry types
+    if (geometry.type === "LineString") {
+      const coords = geometry.coordinates;
+      if (coords.length < 2) continue;
+
+      // Calculate bearing from first to last point
+      const bearing = turf.bearing(
+        turf.point(coords[0]),
+        turf.point(coords[coords.length - 1])
+      );
+
+      // Extend 200m in each direction
+      const extendedStart = turf.destination(
+        turf.point(coords[0]),
+        200 / 1000,
+        bearing + 180,
+        { units: "kilometers" }
+      );
+      const extendedEnd = turf.destination(
+        turf.point(coords[coords.length - 1]),
+        200 / 1000,
+        bearing,
+        { units: "kilometers" }
+      );
+
+      extendedLines.push({
+        type: "Feature",
+        properties: { isExtendedGuideline: true },
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            extendedStart.geometry.coordinates,
+            ...coords,
+            extendedEnd.geometry.coordinates,
+          ],
+        },
+      });
+    } else if (geometry.type === "MultiLineString") {
+      // Handle each line segment in the MultiLineString
+      for (const lineCoords of geometry.coordinates) {
+        if (lineCoords.length < 2) continue;
+
+        const bearing = turf.bearing(
+          turf.point(lineCoords[0]),
+          turf.point(lineCoords[lineCoords.length - 1])
+        );
+
+        const extendedStart = turf.destination(
+          turf.point(lineCoords[0]),
+          200 / 1000,
+          bearing + 180,
+          { units: "kilometers" }
+        );
+        const extendedEnd = turf.destination(
+          turf.point(lineCoords[lineCoords.length - 1]),
+          200 / 1000,
+          bearing,
+          { units: "kilometers" }
+        );
+
+        extendedLines.push({
+          type: "Feature",
+          properties: { isExtendedGuideline: true },
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              extendedStart.geometry.coordinates,
+              ...lineCoords,
+              extendedEnd.geometry.coordinates,
+            ],
+          },
+        });
+      }
+    }
+  }
+
+  return extendedLines;
+};
+
+DrawLineStringDistance.renderExtendedGuidelines = function (state, extendedLines) {
+  const map = this.map;
+  if (!map) return;
+
+  const featureCollection = {
+    type: "FeatureCollection",
+    features: extendedLines,
+  };
+
+  // Create or update the visual layer for extended guidelines
+  if (!map.getSource("extended-guidelines")) {
+    map.addSource("extended-guidelines", {
+      type: "geojson",
+      data: featureCollection,
+    });
+
+    map.addLayer({
+      id: "extended-guidelines",
+      type: "line",
+      source: "extended-guidelines",
+      paint: {
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-opacity": 0.3,
+        "line-dasharray": [4, 4],
+      },
+    });
+  } else {
+    map.getSource("extended-guidelines").setData(featureCollection);
+  }
+
+  // Create or update the snap buffer layer for extended guidelines
+  const bufferLayerId = "_snap_buffer_extended-guidelines";
+  const snapDistance = this._ctx.options.snapDistance || 15;
+
+  if (!map.getLayer(bufferLayerId)) {
+    map.addLayer({
+      id: bufferLayerId,
+      type: "line",
+      source: "extended-guidelines",
+      paint: {
+        "line-color": "hsla(0,100%,50%,0.001)",
+        "line-width": snapDistance * 2,
+      },
+    });
+
+    // Add mouseover handler to enable snapping
+    const mouseoverHandler = (e) => {
+      if (e.features && e.features.length > 0) {
+        const feature = e.features[0];
+        this._ctx.snapping.snappedGeometry = feature.geometry;
+        this._ctx.snapping.snappedFeature = feature;
+        // Mark that we're hovering over extended guidelines
+        state.isHoveringExtendedGuidelines = true;
+      }
+    };
+
+    const mouseoutHandler = () => {
+      // Mark that we're no longer hovering over extended guidelines
+      state.isHoveringExtendedGuidelines = false;
+
+      // Only clear if we're still showing extended guidelines
+      // The snapping system will handle switching to other features
+      if (
+        this._ctx.snapping.snappedGeometry &&
+        this._ctx.snapping.snappedFeature &&
+        this._ctx.snapping.snappedFeature.properties &&
+        this._ctx.snapping.snappedFeature.properties.isExtendedGuideline
+      ) {
+        this._ctx.snapping.snappedGeometry = undefined;
+        this._ctx.snapping.snappedFeature = undefined;
+      }
+    };
+
+    // Store handlers for cleanup
+    state.extendedGuidelineMouseoverHandler = mouseoverHandler;
+    state.extendedGuidelineMouseoutHandler = mouseoutHandler;
+
+    map.on("mousemove", bufferLayerId, mouseoverHandler);
+    map.on("mouseout", bufferLayerId, mouseoutHandler);
+  }
+};
+
+DrawLineStringDistance.removeExtendedGuidelines = function (state) {
+  const map = this.map;
+  if (!map) return;
+
+  const bufferLayerId = "_snap_buffer_extended-guidelines";
+
+  // Remove event handlers
+  if (state.extendedGuidelineMouseoverHandler) {
+    map.off("mousemove", bufferLayerId, state.extendedGuidelineMouseoverHandler);
+    state.extendedGuidelineMouseoverHandler = null;
+  }
+  if (state.extendedGuidelineMouseoutHandler) {
+    map.off("mouseout", bufferLayerId, state.extendedGuidelineMouseoutHandler);
+    state.extendedGuidelineMouseoutHandler = null;
+  }
+
+  // Clear snap-hover state from the intersection point and its guidelines
+  if (state.hoveredIntersectionPoint && this._ctx.snapping) {
+    const feature = state.hoveredIntersectionPoint.feature;
+    if (feature && feature.id !== undefined) {
+      // Clear the intersection point itself
+      this._ctx.snapping.setSnapHoverState(feature, false);
+    }
+  }
+
+  // Remove buffer layer
+  if (map.getLayer && map.getLayer(bufferLayerId)) {
+    map.removeLayer(bufferLayerId);
+  }
+
+  // Remove visual layer
+  if (map.getLayer && map.getLayer("extended-guidelines")) {
+    map.removeLayer("extended-guidelines");
+  }
+  if (map.getSource && map.getSource("extended-guidelines")) {
+    map.removeSource("extended-guidelines");
+  }
+
+  // Clear snapping if it's pointing to extended guidelines
+  if (
+    this._ctx.snapping.snappedFeature &&
+    this._ctx.snapping.snappedFeature.properties &&
+    this._ctx.snapping.snappedFeature.properties.isExtendedGuideline
+  ) {
+    this._ctx.snapping.snappedGeometry = undefined;
+    this._ctx.snapping.snappedFeature = undefined;
+  }
+
+  state.extendedGuidelines = null;
+  state.hoveredIntersectionPoint = null;
+  state.lastHoverPosition = null;
+};
+
 DrawLineStringDistance.clickOnMap = function (state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
@@ -642,10 +918,14 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     }
   }
 
-  const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+  // Disable orthogonal/perpendicular snaps when extended guidelines are active
+  const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
+
+  const orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
+    !extendedGuidelinesActive &&
     orthogonalMatch !== null &&
     closingPerpendicularSnap !== null &&
     !(snapInfo && snapInfo.type === "point");
@@ -678,12 +958,14 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     // Special case: Both orthogonal and closing perpendicular are active
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
-  } else if (orthogonalMatch !== null) {
+  } else if (orthogonalMatch !== null && !extendedGuidelinesActive) {
     // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
+    // Skip if extended guidelines are active
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
-  } else if (closingPerpendicularSnap !== null) {
+  } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
     // Priority 3: Closing perpendicular snap
+    // Skip if extended guidelines are active
     isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === "line") {
     // Priority 4: Line snap bearing (lowest priority for direction)
@@ -889,10 +1171,68 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
 
+  // Handle extended guideline hover logic
+  const intersectionPointInfo = this.detectHoveredIntersectionPoint(state, e);
+
+  if (intersectionPointInfo) {
+    // Hovering over an intersection point
+    const currentCoord = intersectionPointInfo.coord;
+
+    // Check if this is a different point than what we're already hovering
+    const isDifferentPoint =
+      !state.hoveredIntersectionPoint ||
+      state.hoveredIntersectionPoint.coord[0] !== currentCoord[0] ||
+      state.hoveredIntersectionPoint.coord[1] !== currentCoord[1];
+
+    if (isDifferentPoint) {
+      // Clear existing debounce timer and extended guidelines
+      if (state.hoverDebounceTimer) {
+        clearTimeout(state.hoverDebounceTimer);
+        state.hoverDebounceTimer = null;
+      }
+      this.removeExtendedGuidelines(state);
+
+      // Store new hover point
+      state.hoveredIntersectionPoint = intersectionPointInfo;
+      state.lastHoverPosition = [lngLat.lng, lngLat.lat];
+
+      // Start new debounce timer (500ms)
+      state.hoverDebounceTimer = setTimeout(() => {
+        // Extend and render guidelines
+        const extendedLines = this.extendGuidelines(state, intersectionPointInfo);
+        state.extendedGuidelines = extendedLines;
+        this.renderExtendedGuidelines(state, extendedLines);
+      }, 500);
+    }
+    // If same point and extended guidelines exist, keep them visible (do nothing)
+  } else {
+    // Not hovering over an intersection point
+    // Only remove extended guidelines if we're also not hovering over the extended lines themselves
+    if (!state.isHoveringExtendedGuidelines) {
+      if (state.hoverDebounceTimer || state.extendedGuidelines) {
+        // Clear debounce timer and remove extended guidelines
+        if (state.hoverDebounceTimer) {
+          clearTimeout(state.hoverDebounceTimer);
+          state.hoverDebounceTimer = null;
+        }
+        this.removeExtendedGuidelines(state);
+      }
+    }
+  }
+
   // Check for line snapping even before first vertex is placed
   if (state.vertices.length === 0) {
     const snapInfo = this.getSnapInfo(lngLat);
-    if (snapInfo && snapInfo.type === "line") {
+
+    // Check if snapping to extended guideline
+    const isSnappingToExtendedGuideline =
+      snapInfo &&
+      snapInfo.type === "line" &&
+      snapInfo.snappedFeature &&
+      snapInfo.snappedFeature.properties &&
+      snapInfo.snappedFeature.properties.isExtendedGuideline;
+
+    if (snapInfo && snapInfo.type === "line" && !isSnappingToExtendedGuideline) {
       this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
         lngLat.lng,
         lngLat.lat,
@@ -917,6 +1257,17 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     } else {
       this.removeLineSegmentSplitLabels(state);
     }
+
+    // Show preview point at snap location (or mouse position if not snapping)
+    let previewCoord;
+    if (snapInfo) {
+      previewCoord = snapInfo.coord;
+    } else {
+      const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
+      previewCoord = [snappedCoord.lng, snappedCoord.lat];
+    }
+    this.updatePreviewPoint(state, previewCoord);
+
     return;
   }
 
@@ -968,10 +1319,14 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     }
   }
 
-  const orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing);
+  // Disable orthogonal/perpendicular snaps when extended guidelines are active
+  const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
+
+  const orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
+    !extendedGuidelinesActive &&
     orthogonalMatch !== null &&
     closingPerpendicularSnap !== null &&
     !(snapInfo && snapInfo.type === "point");
@@ -1005,12 +1360,14 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     // We'll handle this in the length priority section
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
-  } else if (orthogonalMatch !== null) {
+  } else if (orthogonalMatch !== null && !extendedGuidelinesActive) {
     // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
+    // Skip if extended guidelines are active
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
-  } else if (closingPerpendicularSnap !== null) {
+  } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
     // Priority 3: Closing perpendicular snap
+    // Skip if extended guidelines are active
     // (This will be handled in the length priority section)
     isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === "line") {
@@ -1253,8 +1610,16 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   // Update distance label
   this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
 
-  // Update line segment split labels if snapping to a line
-  if (snapInfo && snapInfo.type === "line") {
+  // Check if we're snapping to an extended guideline
+  const isSnappingToExtendedGuideline =
+    snapInfo &&
+    snapInfo.type === "line" &&
+    snapInfo.snappedFeature &&
+    snapInfo.snappedFeature.properties &&
+    snapInfo.snappedFeature.properties.isExtendedGuideline;
+
+  // Update line segment split labels if snapping to a line (but not extended guidelines)
+  if (snapInfo && snapInfo.type === "line" && !isSnappingToExtendedGuideline) {
     this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
       lngLat.lng,
       lngLat.lat,
@@ -1931,6 +2296,13 @@ DrawLineStringDistance.onStop = function (state) {
   this.removeDistanceLabel(state);
   this.removeLineSegmentSplitLabels(state);
   this.removePreviewPoint(state);
+
+  // Clean up extended guidelines
+  if (state.hoverDebounceTimer) {
+    clearTimeout(state.hoverDebounceTimer);
+    state.hoverDebounceTimer = null;
+  }
+  this.removeExtendedGuidelines(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
