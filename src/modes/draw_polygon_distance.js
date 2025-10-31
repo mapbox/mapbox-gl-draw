@@ -2518,7 +2518,15 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
 
   // Backspace
   if (e.keyCode === 8) {
+    // Don't delete vertex if user is typing in distance or angle input
     if (state.distanceInput && state.distanceInput.value !== "") {
+      return;
+    }
+    if (state.angleInput && state.angleInput.value !== "") {
+      return;
+    }
+    // Also check if either input is focused (even if empty)
+    if (document.activeElement === state.distanceInput || document.activeElement === state.angleInput) {
       return;
     }
 
