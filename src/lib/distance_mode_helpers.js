@@ -227,3 +227,167 @@ export function calculateLineIntersection(startPoint, bearing, lineSegment) {
 
   return null;
 }
+
+/**
+ * When extended guidelines are active and we're snapping to a line,
+ * check if the cursor is close to an intersection between the extended guidelines and the snapped line.
+ * If yes, return a point snap at that intersection to prioritize it.
+ * Returns null if no close intersection found.
+ */
+export function findExtendedGuidelineIntersection(extendedGuidelines, snapInfo, cursorPosition, snapTolerance) {
+  if (!extendedGuidelines || extendedGuidelines.length === 0) {
+    return null;
+  }
+
+  if (!snapInfo || snapInfo.type !== 'line') {
+    return null;
+  }
+
+  const cursorPoint = turf.point([cursorPosition.lng, cursorPosition.lat]);
+  const lineSegment = snapInfo.segment;
+  const lineStart = turf.point(lineSegment.start);
+  const lineEnd = turf.point(lineSegment.end);
+  const lineBearing = turf.bearing(lineStart, lineEnd);
+
+  // Create extended line from the snap line
+  const extendedSnapLine = turf.lineString([
+    turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' }).geometry.coordinates,
+    turf.destination(lineStart, 0.1, lineBearing, { units: 'kilometers' }).geometry.coordinates
+  ]);
+
+  let closestIntersection = null;
+  let minDistance = Infinity;
+
+  // Check each extended guideline for intersections
+  for (const guideline of extendedGuidelines) {
+    try {
+      const guidelineLineString = turf.lineString(guideline.geometry.coordinates);
+      const intersections = turf.lineIntersect(guidelineLineString, extendedSnapLine);
+
+      for (const intersection of intersections.features) {
+        const intersectionCoord = intersection.geometry.coordinates;
+        const intersectionPoint = turf.point(intersectionCoord);
+
+        // Check distance from cursor to intersection
+        const distanceToCursor = turf.distance(cursorPoint, intersectionPoint, { units: 'meters' });
+
+        if (distanceToCursor < minDistance) {
+          minDistance = distanceToCursor;
+          closestIntersection = intersectionCoord;
+        }
+      }
+    } catch (e) {
+      // Ignore errors and continue
+      continue;
+    }
+  }
+
+  // If we found an intersection within snap tolerance, return it as a point snap
+  if (closestIntersection && minDistance <= snapTolerance) {
+    return {
+      type: 'point',
+      coord: closestIntersection,
+      snappedFeature: snapInfo.snappedFeature
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Check if clicking near an extended guideline intersection point.
+ * This handles the logic for detecting when the cursor is near an intersection
+ * between an extended guideline and another line feature.
+ * Returns the intersection coordinate if found, or null otherwise.
+ */
+export function checkExtendedGuidelineIntersectionClick(ctx, map, state, e, getSnapInfoFn) {
+  if (!state.extendedGuidelines || state.extendedGuidelines.length === 0) {
+    return null;
+  }
+
+  const snapping = ctx.snapping;
+  if (!snapping || !snapping.snappedFeature) {
+    return null;
+  }
+
+  const isExtendedGuideline =
+    snapping.snappedFeature.properties &&
+    snapping.snappedFeature.properties.isExtendedGuideline;
+
+  if (isExtendedGuideline) {
+    // Snapping to extended guideline - check for intersections with other lines
+    const snapInfo = getSnapInfoFn(e.lngLat);
+
+    // Query all features at cursor point to find other lines
+    const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+    const allFeaturesAtPoint = map.queryRenderedFeatures(e.point, {
+      layers: bufferLayers
+    });
+
+    // Look for a non-extended-guideline line feature
+    const otherLineFeature = allFeaturesAtPoint.find((feature) => {
+      if (feature.properties && feature.properties.isExtendedGuideline) {
+        return false;
+      }
+      const geomType = feature.geometry.type;
+      return geomType === 'LineString' ||
+             geomType === 'MultiLineString' ||
+             geomType === 'Polygon' ||
+             geomType === 'MultiPolygon';
+    });
+
+    if (otherLineFeature && snapInfo) {
+      // Get the geometry of the other line
+      let otherGeom = otherLineFeature.geometry;
+      if (otherGeom.type === 'Polygon' || otherGeom.type === 'MultiPolygon') {
+        otherGeom = turf.polygonToLine(otherGeom).geometry;
+      }
+
+      if (otherGeom.type === 'LineString' || otherGeom.type === 'MultiLineString') {
+        const snapPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
+        const coords = otherGeom.type === 'LineString' ? otherGeom.coordinates : otherGeom.coordinates.flat();
+
+        const result = findNearestSegment(coords, snapPoint);
+        if (result) {
+          const otherLineSnapInfo = {
+            type: 'line',
+            coord: snapInfo.coord,
+            bearing: turf.bearing(
+              turf.point(result.segment.start),
+              turf.point(result.segment.end)
+            ),
+            segment: result.segment,
+            snappedFeature: otherLineFeature
+          };
+
+          const intersectionSnap = findExtendedGuidelineIntersection(
+            state.extendedGuidelines,
+            otherLineSnapInfo,
+            e.lngLat,
+            state.snapTolerance
+          );
+
+          if (intersectionSnap) {
+            return intersectionSnap.coord;
+          }
+        }
+      }
+    }
+  } else {
+    // Snapping to something else - check if it's a line that intersects with extended guideline
+    const tempSnapInfo = getSnapInfoFn(e.lngLat);
+    if (tempSnapInfo && tempSnapInfo.type === 'line') {
+      const intersectionSnap = findExtendedGuidelineIntersection(
+        state.extendedGuidelines,
+        tempSnapInfo,
+        e.lngLat,
+        state.snapTolerance
+      );
+      if (intersectionSnap) {
+        return intersectionSnap.coord;
+      }
+    }
+  }
+
+  return null;
+}

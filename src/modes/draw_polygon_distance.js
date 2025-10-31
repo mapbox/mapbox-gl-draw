@@ -8,6 +8,8 @@ import {
   getSnappedLineBearing,
   calculateCircleLineIntersection,
   calculateLineIntersection,
+  findExtendedGuidelineIntersection,
+  checkExtendedGuidelineIntersectionClick,
 } from "../lib/distance_mode_helpers.js";
 
 const DrawPolygonDistance = {};
@@ -1005,11 +1007,25 @@ DrawPolygonDistance.removeExtendedGuidelines = function (state) {
 DrawPolygonDistance.clickOnMap = function (state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
-    const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-    state.vertices.push([snappedCoord.lng, snappedCoord.lat]);
-    state.polygon.updateCoordinate("0.0", snappedCoord.lng, snappedCoord.lat);
+    // Check for extended guideline intersection snapping
+    const intersectionCoord = checkExtendedGuidelineIntersectionClick(
+      this._ctx,
+      this.map,
+      state,
+      e,
+      this.getSnapInfo.bind(this)
+    );
+
+    const vertexCoord = intersectionCoord || (() => {
+      const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
+      return [snappedCoord.lng, snappedCoord.lat];
+    })();
+
+    state.vertices.push(vertexCoord);
+    state.polygon.updateCoordinate("0.0", vertexCoord[0], vertexCoord[1]);
 
     // Store snapped line info if snapped to a line
+    const snappedCoord = { lng: vertexCoord[0], lat: vertexCoord[1] };
     const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
     if (snappedLineInfo) {
       state.snappedLineBearing = snappedLineInfo.bearing;
@@ -1038,7 +1054,94 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     state.currentDistance !== null && state.currentDistance > 0;
 
   // Get snap info (point or line)
-  const snapInfo = this.getSnapInfo(e.lngLat);
+  let snapInfo = null;
+
+  // If extended guidelines are active, use exclusive snapping
+  if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+    // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+    const snapping = this._ctx.snapping;
+    if (snapping && snapping.snappedFeature) {
+      const isExtendedGuideline =
+        snapping.snappedFeature.properties &&
+        snapping.snappedFeature.properties.isExtendedGuideline;
+
+      if (isExtendedGuideline) {
+        // Snapping to extended guideline
+        snapInfo = this.getSnapInfo(e.lngLat);
+
+        // Check if there are any nearby lines that intersect with the extended guideline
+        const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+        const allFeaturesAtPoint = this.map.queryRenderedFeatures(e.point, {
+          layers: bufferLayers
+        });
+
+        // Look for a non-extended-guideline line feature
+        const otherLineFeature = allFeaturesAtPoint.find((feature) => {
+          if (feature.properties && feature.properties.isExtendedGuideline) {
+            return false;
+          }
+          const geomType = feature.geometry.type;
+          return geomType === 'LineString' ||
+                 geomType === 'MultiLineString' ||
+                 geomType === 'Polygon' ||
+                 geomType === 'MultiPolygon';
+        });
+
+        if (otherLineFeature && snapInfo) {
+          let otherGeom = otherLineFeature.geometry;
+          if (otherGeom.type === 'Polygon' || otherGeom.type === 'MultiPolygon') {
+            otherGeom = turf.polygonToLine(otherGeom).geometry;
+          }
+
+          if (otherGeom.type === 'LineString' || otherGeom.type === 'MultiLineString') {
+            const snapPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
+            const coords = otherGeom.type === 'LineString' ? otherGeom.coordinates : otherGeom.coordinates.flat();
+
+            const result = findNearestSegment(coords, snapPoint);
+            if (result) {
+              const otherLineSnapInfo = {
+                type: 'line',
+                coord: snapInfo.coord,
+                bearing: turf.bearing(
+                  turf.point(result.segment.start),
+                  turf.point(result.segment.end)
+                ),
+                segment: result.segment,
+                snappedFeature: otherLineFeature
+              };
+
+              const intersectionSnap = findExtendedGuidelineIntersection(
+                state.extendedGuidelines,
+                otherLineSnapInfo,
+                e.lngLat,
+                state.snapTolerance
+              );
+              if (intersectionSnap) {
+                snapInfo = intersectionSnap;
+              }
+            }
+          }
+        }
+      } else {
+        // Snapping to something else - check if it's a line that intersects with extended guideline
+        const tempSnapInfo = this.getSnapInfo(e.lngLat);
+        if (tempSnapInfo && tempSnapInfo.type === 'line') {
+          const intersectionSnap = findExtendedGuidelineIntersection(
+            state.extendedGuidelines,
+            tempSnapInfo,
+            e.lngLat,
+            state.snapTolerance
+          );
+          if (intersectionSnap) {
+            snapInfo = intersectionSnap;
+          }
+        }
+      }
+    }
+  } else {
+    // No extended guidelines - use regular snapping
+    snapInfo = this.getSnapInfo(e.lngLat);
+  }
 
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(
@@ -1137,8 +1240,11 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   // Determine length priority
   if (hasUserDistance) {
     // Priority 1 for length: User-entered distance
-    // If we have a line snap, use circle-line intersection to find the correct point
-    if (snapInfo && snapInfo.type === "line") {
+    // If we have a point snap (including intersection points), use it directly
+    if (snapInfo && snapInfo.type === "point") {
+      newVertex = snapInfo.coord;
+    } else if (snapInfo && snapInfo.type === "line") {
+      // If we have a line snap, use circle-line intersection to find the correct point
       const circleLineIntersection = calculateCircleLineIntersection(
         lastVertex,
         state.currentDistance,
@@ -1158,7 +1264,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         newVertex = destinationPoint.geometry.coordinates;
       }
     } else {
-      // No line snap: use bearing to create point at exact distance
+      // No snap: use bearing to create point at exact distance
       const destinationPoint = turf.destination(
         from,
         state.currentDistance / 1000,
@@ -1397,7 +1503,43 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
 
   // Check for line snapping even before first vertex is placed
   if (state.vertices.length === 0) {
-    const snapInfo = this.getSnapInfo(lngLat);
+    let snapInfo = null;
+
+    // If extended guidelines are active, use exclusive snapping
+    if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+      // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+
+      // Check what the snapping system is currently snapping to
+      const snapping = this._ctx.snapping;
+      if (snapping && snapping.snappedFeature) {
+        const isExtendedGuideline =
+          snapping.snappedFeature.properties &&
+          snapping.snappedFeature.properties.isExtendedGuideline;
+
+        if (isExtendedGuideline) {
+          // Snapping to extended guideline - allow it
+          snapInfo = this.getSnapInfo(lngLat);
+        } else {
+          // Snapping to something else - check if it's a line that intersects with extended guideline
+          const tempSnapInfo = this.getSnapInfo(lngLat);
+          if (tempSnapInfo && tempSnapInfo.type === 'line') {
+            // It's a line - check for intersection with extended guideline
+            const intersectionSnap = findExtendedGuidelineIntersection(
+              state.extendedGuidelines,
+              tempSnapInfo,
+              lngLat,
+              state.snapTolerance
+            );
+            if (intersectionSnap) {
+              snapInfo = intersectionSnap;
+            }
+          }
+        }
+      }
+    } else {
+      // No extended guidelines - use regular snapping
+      snapInfo = this.getSnapInfo(lngLat);
+    }
 
     // Check if snapping to extended guideline
     const isSnappingToExtendedGuideline =
@@ -1408,9 +1550,10 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       snapInfo.snappedFeature.properties.isExtendedGuideline;
 
     if (snapInfo && snapInfo.type === "line" && !isSnappingToExtendedGuideline) {
+      const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
       this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
-        lngLat.lng,
-        lngLat.lat,
+        snappedCoord.lng,
+        snappedCoord.lat,
       ]);
     } else if (snapInfo && snapInfo.type === "point") {
       // Check for underlying line at the point snap location
@@ -1454,7 +1597,46 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     state.currentDistance !== null && state.currentDistance > 0;
 
   // Get snap info (point or line)
-  const snapInfo = this.getSnapInfo(lngLat);
+  let snapInfo = null;
+
+  // If extended guidelines are active, use exclusive snapping
+  if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+    // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+
+    // Check what the snapping system is currently snapping to
+    const snapping = this._ctx.snapping;
+    if (snapping && snapping.snappedFeature) {
+      const isExtendedGuideline =
+        snapping.snappedFeature.properties &&
+        snapping.snappedFeature.properties.isExtendedGuideline;
+
+      if (isExtendedGuideline) {
+        // Snapping to extended guideline - allow it
+        snapInfo = this.getSnapInfo(lngLat);
+      } else {
+        // Snapping to something else - check if it's a line that intersects with extended guideline
+        const tempSnapInfo = this.getSnapInfo(lngLat);
+        if (tempSnapInfo && tempSnapInfo.type === 'line') {
+          // It's a line - check for intersection with extended guideline
+          const intersectionSnap = findExtendedGuidelineIntersection(
+            state.extendedGuidelines,
+            tempSnapInfo,
+            lngLat,
+            state.snapTolerance
+          );
+          if (intersectionSnap) {
+            snapInfo = intersectionSnap;
+          }
+          // else: line but no intersection near cursor - snapInfo stays null
+        }
+        // else: not a line (it's a point) - snapInfo stays null
+      }
+    }
+    // else: not snapping to anything - snapInfo stays null
+  } else {
+    // No extended guidelines - use regular snapping
+    snapInfo = this.getSnapInfo(lngLat);
+  }
 
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(from, turf.point([lngLat.lng, lngLat.lat]));
@@ -1792,10 +1974,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
 
   // Update line segment split labels if snapping to a line (but not extended guidelines)
   if (snapInfo && snapInfo.type === "line" && !isSnappingToExtendedGuideline) {
-    this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
-      lngLat.lng,
-      lngLat.lat,
-    ]);
+    this.updateLineSegmentSplitLabels(state, snapInfo.segment, previewVertex);
   } else if (snapInfo && snapInfo.type === "point") {
     // Check for underlying line at the point snap location
     const underlyingLineInfo = getUnderlyingLineBearing(
