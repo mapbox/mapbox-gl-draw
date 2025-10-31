@@ -1004,6 +1004,78 @@ DrawPolygonDistance.removeExtendedGuidelines = function (state) {
   state.lastHoverPosition = null;
 };
 
+DrawPolygonDistance.showAngleReferenceLine = function (state, startPoint, referenceBearing) {
+  const map = this.map;
+  if (!map) return;
+
+  // Create a line extending from startPoint along the reference bearing
+  const lineLength = 0.5; // 500 meters in kilometers
+  const refPoint1 = turf.destination(
+    turf.point(startPoint),
+    lineLength,
+    referenceBearing,
+    { units: 'kilometers' }
+  );
+  const refPoint2 = turf.destination(
+    turf.point(startPoint),
+    lineLength,
+    referenceBearing + 180,
+    { units: 'kilometers' }
+  );
+
+  const referenceLine = {
+    type: 'Feature',
+    properties: { isAngleReference: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+        refPoint2.geometry.coordinates,
+        startPoint,
+        refPoint1.geometry.coordinates
+      ]
+    }
+  };
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [referenceLine]
+  };
+
+  // Create or update the visual layer for angle reference line
+  if (!map.getSource('angle-reference-line')) {
+    map.addSource('angle-reference-line', {
+      type: 'geojson',
+      data: featureCollection
+    });
+
+    map.addLayer({
+      id: 'angle-reference-line',
+      type: 'line',
+      source: 'angle-reference-line',
+      paint: {
+        'line-color': '#0066ff',
+        'line-width': 1.5,
+        'line-opacity': 0.5,
+        'line-dasharray': [2, 2]
+      }
+    });
+  } else {
+    map.getSource('angle-reference-line').setData(featureCollection);
+  }
+};
+
+DrawPolygonDistance.removeAngleReferenceLine = function () {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('angle-reference-line')) {
+    map.removeLayer('angle-reference-line');
+  }
+  if (map.getSource && map.getSource('angle-reference-line')) {
+    map.removeSource('angle-reference-line');
+  }
+};
+
 DrawPolygonDistance.clickOnMap = function (state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
@@ -1211,6 +1283,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   let isClosingPerpendicularSnap = false;
   const hasUserAngle =
     state.currentAngle !== null && !isNaN(state.currentAngle);
+
+  // Show/hide angle reference line based on whether angle input is active
+  if (hasUserAngle) {
+    this.showAngleReferenceLine(state, lastVertex, referenceBearing);
+  } else {
+    this.removeAngleReferenceLine();
+  }
 
   if (hasUserAngle) {
     // Priority 0: User-entered angle (highest priority for direction)
@@ -1576,15 +1655,12 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       this.removeLineSegmentSplitLabels(state);
     }
 
-    // Show preview point at snap location (or mouse position if not snapping)
-    let previewCoord;
+    // Only show preview point when actually snapping to something
     if (snapInfo) {
-      previewCoord = snapInfo.coord;
+      this.updatePreviewPoint(state, snapInfo.coord);
     } else {
-      const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
-      previewCoord = [snappedCoord.lng, snappedCoord.lat];
+      this.removePreviewPoint(state);
     }
-    this.updatePreviewPoint(state, previewCoord);
 
     return;
   }
@@ -1703,6 +1779,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   let isClosingPerpendicularSnap = false;
   const hasUserAngle =
     state.currentAngle !== null && !isNaN(state.currentAngle);
+
+  // Show/hide angle reference line based on whether angle input is active
+  if (hasUserAngle) {
+    this.showAngleReferenceLine(state, lastVertex, referenceBearing);
+  } else {
+    this.removeAngleReferenceLine();
+  }
 
   if (hasUserAngle) {
     // Priority 0: User-entered angle (highest priority for direction)
@@ -1996,8 +2079,12 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removeLineSegmentSplitLabels(state);
   }
 
-  // Update preview point indicator
-  this.updatePreviewPoint(state, previewVertex);
+  // Only show preview point when actually snapping to something
+  if (snapInfo) {
+    this.updatePreviewPoint(state, previewVertex);
+  } else {
+    this.removePreviewPoint(state);
+  }
 
   // Update polygon preview - always close the polygon ring
   const allCoords = [...state.vertices, previewVertex];
@@ -2487,6 +2574,7 @@ DrawPolygonDistance.onStop = function (state) {
     state.hoverDebounceTimer = null;
   }
   this.removeExtendedGuidelines(state);
+  this.removeAngleReferenceLine();
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
