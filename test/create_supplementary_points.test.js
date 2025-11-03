@@ -188,12 +188,12 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', () =
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2, 2],
+      coordinates: [2, 2.00121958],
       type: 'Point'
     },
     properties: {
       coord_path: '1',
-      lat: 2,
+      lat: 2.00121958,
       lng: 2,
       meta: 'midpoint',
       parent: 'foo'
@@ -213,12 +213,12 @@ test('createSupplementaryPoints with line, midpoints, selected coordinate', () =
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [6, 6],
+      coordinates: [6, 6.00367071],
       type: 'Point'
     },
     properties: {
       coord_path: '2',
-      lat: 6,
+      lat: 6.00367071,
       lng: 6,
       meta: 'midpoint',
       parent: 'foo'
@@ -275,12 +275,12 @@ test('createSupplementaryPoints with polygon, midpoints, selection', () => {
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [1.5, 1.5],
+      coordinates: [1.5, 1.50005713],
       type: 'Point'
     },
     properties: {
       coord_path: '0.1',
-      lat: 1.5,
+      lat: 1.50005713,
       lng: 1.5,
       meta: 'midpoint',
       parent: 'foo'
@@ -300,12 +300,12 @@ test('createSupplementaryPoints with polygon, midpoints, selection', () => {
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2.5, 2.5],
+      coordinates: [2.5, 2.50009526],
       type: 'Point'
     },
     properties: {
       coord_path: '0.2',
-      lat: 2.5,
+      lat: 2.50009526,
       lng: 2.5,
       meta: 'midpoint',
       parent: 'foo'
@@ -325,12 +325,12 @@ test('createSupplementaryPoints with polygon, midpoints, selection', () => {
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [3.5, 3.5],
+      coordinates: [3.5, 3.50013344],
       type: 'Point'
     },
     properties: {
       coord_path: '0.3',
-      lat: 3.5,
+      lat: 3.50013344,
       lng: 3.5,
       meta: 'midpoint',
       parent: 'foo'
@@ -350,12 +350,12 @@ test('createSupplementaryPoints with polygon, midpoints, selection', () => {
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2.5, 2.5],
+      coordinates: [2.5, 2.50085753],
       type: 'Point'
     },
     properties: {
       coord_path: '0.4',
-      lat: 2.5,
+      lat: 2.50085753,
       lng: 2.5,
       meta: 'midpoint',
       parent: 'foo'
@@ -402,12 +402,12 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2, 2],
+      coordinates: [2, 2.00121958],
       type: 'Point'
     },
     properties: {
       coord_path: '0.1',
-      lat: 2,
+      lat: 2.00121958,
       lng: 2,
       meta: 'midpoint',
       parent: 'foo'
@@ -427,12 +427,12 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [6, 6],
+      coordinates: [6, 6.00367071],
       type: 'Point'
     },
     properties: {
       coord_path: '0.2',
-      lat: 6,
+      lat: 6.00367071,
       lng: 6,
       meta: 'midpoint',
       parent: 'foo'
@@ -464,12 +464,12 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [22, 22],
+      coordinates: [22, 22.01411104],
       type: 'Point'
     },
     properties: {
       coord_path: '1.1',
-      lat: 22,
+      lat: 22.01411104,
       lng: 22,
       meta: 'midpoint',
       parent: 'foo'
@@ -489,12 +489,12 @@ test('createSupplementaryPoints with MultiLineString, midpoints, selected coordi
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [26, 26],
+      coordinates: [26, 26.01703496],
       type: 'Point'
     },
     properties: {
       coord_path: '1.2',
-      lat: 26,
+      lat: 26.01703496,
       lng: 26,
       meta: 'midpoint',
       parent: 'foo'
@@ -548,12 +548,12 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2, 2],
+      coordinates: [2, 2.00121958],
       type: 'Point'
     },
     properties: {
       coord_path: '1',
-      lat: 2,
+      lat: 2.00121958,
       lng: 2,
       meta: 'midpoint',
       parent: 'foo'
@@ -620,12 +620,12 @@ test('createSupplementaryPoints with a line, not all midpoints rendered because 
     type: 'Feature'
   }, {
     geometry: {
-      coordinates: [2, 2],
+      coordinates: [2, 2.00121958],
       type: 'Point'
     },
     properties: {
       coord_path: '1',
-      lat: 2,
+      lat: 2.00121958,
       lng: 2,
       meta: 'midpoint',
       parent: 'foo'

@@ -395,14 +395,14 @@ test('ensure user interactions fire right events', async (t) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: [[20, 0], [41, 21], [62, 42], [60, 40]]
+      coordinates: [[20, 0], [41, 22.57323626], [62, 42], [60, 40]]
     }
   };
 
   await t.test('add another vertex', async () => {
     // Now in `direct_select` mode ...
     // Click a midpoint of lineC
-    click(map, makeMouseEvent(41, 21));
+    click(map, makeMouseEvent(41, 23));
     await afterNextRender();
     firedWith('draw.update', {
       action: 'change_coordinates',
