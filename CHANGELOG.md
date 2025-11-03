@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.5.1
+
 * Fix midpoint rendering precision by @romain-tracktik in https://github.com/mapbox/mapbox-gl-draw/pull/1433
 * Fix keybindings ordering and tooltips by @underoot in https://github.com/mapbox/mapbox-gl-draw/pull/1320
 * Fix drag-pan being disabled after multiple consecutive clicks on non-Point features in DirectSelect mode by @underoot in https://github.com/mapbox/mapbox-gl-draw/pull/1341
