@@ -1357,8 +1357,71 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
   }
 
-  // Smart conflict resolution: if both orthogonal and parallel match, choose the closest one
-  if (orthogonalMatch && parallelLineMatch) {
+  // Check if BOTH regular orthogonal AND closing perpendicular are active
+  const bothSnapsActive =
+    !extendedGuidelinesActive &&
+    orthogonalMatch !== null &&
+    closingPerpendicularSnap !== null &&
+    !(snapInfo && snapInfo.type === "point");
+
+  // Smart conflict resolution with geo-based priority for bothSnapsActive
+  if (bothSnapsActive && parallelLineMatch) {
+    // Calculate the bothSnapsActive intersection point
+    const perpLine = {
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+    };
+
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      orthogonalMatch.bearing,
+      perpLine
+    );
+
+    if (intersection) {
+      // Calculate distance from mouse to intersection point
+      const distanceToIntersection = turf.distance(
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        turf.point(intersection.coord),
+        { units: 'meters' }
+      );
+
+      // If very close to intersection (<5m), prioritize bothSnapsActive
+      if (distanceToIntersection < 5) {
+        parallelLineMatch = null;
+      } else {
+        // Far from intersection, allow bearing comparison
+        const orthogonalDiff = (() => {
+          const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+          const normMouse = ((mouseBearing % 360) + 360) % 360;
+          let diff = Math.abs(normOrtho - normMouse);
+          if (diff > 180) diff = 360 - diff;
+          return diff;
+        })();
+
+        const parallelDiff = parallelLineMatch.diff;
+
+        // If parallel is closer to mouse bearing, disable orthogonal snaps
+        if (parallelDiff < orthogonalDiff) {
+          orthogonalMatch = null;
+          // This will also disable bothSnapsActive since orthogonalMatch becomes null
+        } else {
+          parallelLineMatch = null;
+        }
+      }
+    }
+  } else if (orthogonalMatch && parallelLineMatch) {
+    // No bothSnapsActive - simple bearing comparison
     const orthogonalDiff = (() => {
       const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
       const normMouse = ((mouseBearing % 360) + 360) % 360;
@@ -1375,13 +1438,6 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       parallelLineMatch = null;
     }
   }
-
-  // Check if BOTH regular orthogonal AND closing perpendicular are active
-  const bothSnapsActive =
-    !extendedGuidelinesActive &&
-    orthogonalMatch !== null &&
-    closingPerpendicularSnap !== null &&
-    !(snapInfo && snapInfo.type === "point");
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
@@ -1885,9 +1941,71 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
   }
 
-  // Smart conflict resolution: if both orthogonal and parallel match, choose the closest one
-  if (orthogonalMatch && parallelLineMatch) {
-    // Calculate difference between mouse bearing and each snap bearing
+  // Check if BOTH regular orthogonal AND closing perpendicular are active
+  const bothSnapsActive =
+    !extendedGuidelinesActive &&
+    orthogonalMatch !== null &&
+    closingPerpendicularSnap !== null &&
+    !(snapInfo && snapInfo.type === "point");
+
+  // Smart conflict resolution with geo-based priority for bothSnapsActive
+  if (bothSnapsActive && parallelLineMatch) {
+    // Calculate the bothSnapsActive intersection point
+    const perpLine = {
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+    };
+
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      orthogonalMatch.bearing,
+      perpLine
+    );
+
+    if (intersection) {
+      // Calculate distance from mouse to intersection point
+      const distanceToIntersection = turf.distance(
+        turf.point([lngLat.lng, lngLat.lat]),
+        turf.point(intersection.coord),
+        { units: 'meters' }
+      );
+
+      // If very close to intersection (<5m), prioritize bothSnapsActive
+      if (distanceToIntersection < 5) {
+        parallelLineMatch = null;
+      } else {
+        // Far from intersection, allow bearing comparison
+        const orthogonalDiff = (() => {
+          const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+          const normMouse = ((mouseBearing % 360) + 360) % 360;
+          let diff = Math.abs(normOrtho - normMouse);
+          if (diff > 180) diff = 360 - diff;
+          return diff;
+        })();
+
+        const parallelDiff = parallelLineMatch.diff;
+
+        // If parallel is closer to mouse bearing, disable orthogonal snaps
+        if (parallelDiff < orthogonalDiff) {
+          orthogonalMatch = null;
+          // This will also disable bothSnapsActive since orthogonalMatch becomes null
+        } else {
+          parallelLineMatch = null;
+        }
+      }
+    }
+  } else if (orthogonalMatch && parallelLineMatch) {
+    // No bothSnapsActive - simple bearing comparison
     const orthogonalDiff = (() => {
       const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
       const normMouse = ((mouseBearing % 360) + 360) % 360;
@@ -1896,23 +2014,14 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       return diff;
     })();
 
-    const parallelDiff = parallelLineMatch.diff; // Already calculated in getParallelBearing
+    const parallelDiff = parallelLineMatch.diff;
 
-    // If parallel is closer to mouse bearing, disable orthogonal for this frame
     if (parallelDiff < orthogonalDiff) {
       orthogonalMatch = null;
     } else {
-      // Orthogonal is closer, disable parallel
       parallelLineMatch = null;
     }
   }
-
-  // Check if BOTH regular orthogonal AND closing perpendicular are active
-  const bothSnapsActive =
-    !extendedGuidelinesActive &&
-    orthogonalMatch !== null &&
-    closingPerpendicularSnap !== null &&
-    !(snapInfo && snapInfo.type === "point");
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
