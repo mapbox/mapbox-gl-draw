@@ -10,6 +10,8 @@ import {
   calculateLineIntersection,
   findExtendedGuidelineIntersection,
   checkExtendedGuidelineIntersectionClick,
+  findNearbyParallelLines,
+  getParallelBearing,
 } from "../lib/distance_mode_helpers.js";
 
 const DrawPolygonDistance = {};
@@ -59,6 +61,8 @@ DrawPolygonDistance.onSetup = function (opts) {
     extendedGuidelines: null,
     lastHoverPosition: null,
     isHoveringExtendedGuidelines: false,
+    // Parallel line snapping state
+    parallelLineSnap: null,
   };
 
   this.createDistanceInput(state);
@@ -723,6 +727,92 @@ DrawPolygonDistance.removeClosingRightAngleIndicator = function (state) {
   state.closingRightAngleIndicator = null;
 };
 
+DrawPolygonDistance.updateParallelLineIndicators = function (
+  state,
+  lastVertex,
+  previewVertex,
+  matchedLine
+) {
+  const map = this.map;
+  if (!map) return;
+
+  // Get the snap line segment
+  const coords = [matchedLine.segment.start, matchedLine.segment.end];
+
+  // Calculate bearing of the snap line
+  const bearing = turf.bearing(
+    turf.point(coords[0]),
+    turf.point(coords[coords.length - 1])
+  );
+
+  // Extend the line 200m in both directions (same as extended guidelines)
+  const extendedStart = turf.destination(
+    turf.point(coords[0]),
+    0.2,
+    bearing + 180,
+    { units: 'kilometers' }
+  );
+  const extendedEnd = turf.destination(
+    turf.point(coords[coords.length - 1]),
+    0.2,
+    bearing,
+    { units: 'kilometers' }
+  );
+
+  // Create extended line feature
+  const extendedLineFeature = {
+    type: 'Feature',
+    properties: { isParallelExtendedLine: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+        extendedStart.geometry.coordinates,
+        extendedEnd.geometry.coordinates
+      ]
+    }
+  };
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [extendedLineFeature]
+  };
+
+  // Render extended line
+  if (!map.getSource('parallel-line-indicators')) {
+    map.addSource('parallel-line-indicators', {
+      type: 'geojson',
+      data: featureCollection
+    });
+
+    map.addLayer({
+      id: 'parallel-line-indicators',
+      type: 'line',
+      source: 'parallel-line-indicators',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 0.3,
+        'line-dasharray': [4, 4]
+      }
+    });
+  } else {
+    map.getSource('parallel-line-indicators').setData(featureCollection);
+  }
+};
+
+DrawPolygonDistance.removeParallelLineIndicators = function (state) {
+  const map = this.map;
+  if (!map) return;
+
+  // Remove extended line
+  if (map.getLayer && map.getLayer('parallel-line-indicators')) {
+    map.removeLayer('parallel-line-indicators');
+  }
+  if (map.getSource && map.getSource('parallel-line-indicators')) {
+    map.removeSource('parallel-line-indicators');
+  }
+};
+
 DrawPolygonDistance.onClick = function (state, e) {
   if (
     e.originalEvent &&
@@ -1258,7 +1348,33 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  const orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+
+  // Detect parallel lines nearby (orthogonal intersection method, ±5° tolerance)
+  let parallelLineMatch = null;
+  if (!extendedGuidelinesActive && state.vertices.length >= 1) {
+    const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, e.lngLat);
+    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
+  }
+
+  // Smart conflict resolution: if both orthogonal and parallel match, choose the closest one
+  if (orthogonalMatch && parallelLineMatch) {
+    const orthogonalDiff = (() => {
+      const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+      const normMouse = ((mouseBearing % 360) + 360) % 360;
+      let diff = Math.abs(normOrtho - normMouse);
+      if (diff > 180) diff = 360 - diff;
+      return diff;
+    })();
+
+    const parallelDiff = parallelLineMatch.diff;
+
+    if (parallelDiff < orthogonalDiff) {
+      orthogonalMatch = null;
+    } else {
+      parallelLineMatch = null;
+    }
+  }
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
@@ -1281,6 +1397,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   let usePointDirection = false;
   let isOrthogonalSnap = false;
   let isClosingPerpendicularSnap = false;
+  let isParallelLineSnap = false;
   const hasUserAngle =
     state.currentAngle !== null && !isNaN(state.currentAngle);
 
@@ -1307,12 +1424,17 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     // Skip if extended guidelines are active
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
+  } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
+    // Priority 3: Parallel line snap (snap to bearing of nearby lines)
+    // Skip if extended guidelines are active
+    bearingToUse = parallelLineMatch.bearing;
+    isParallelLineSnap = true;
   } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
-    // Priority 3: Closing perpendicular snap
+    // Priority 4: Closing perpendicular snap
     // Skip if extended guidelines are active
     isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === "line") {
-    // Priority 4: Line snap bearing (lowest priority for direction)
+    // Priority 5: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
   }
 
@@ -1754,7 +1876,36 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  const orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+
+  // Detect parallel lines nearby (orthogonal intersection method, ±5° tolerance)
+  let parallelLineMatch = null;
+  if (!extendedGuidelinesActive && state.vertices.length >= 1) {
+    const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, lngLat);
+    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
+  }
+
+  // Smart conflict resolution: if both orthogonal and parallel match, choose the closest one
+  if (orthogonalMatch && parallelLineMatch) {
+    // Calculate difference between mouse bearing and each snap bearing
+    const orthogonalDiff = (() => {
+      const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+      const normMouse = ((mouseBearing % 360) + 360) % 360;
+      let diff = Math.abs(normOrtho - normMouse);
+      if (diff > 180) diff = 360 - diff;
+      return diff;
+    })();
+
+    const parallelDiff = parallelLineMatch.diff; // Already calculated in getParallelBearing
+
+    // If parallel is closer to mouse bearing, disable orthogonal for this frame
+    if (parallelDiff < orthogonalDiff) {
+      orthogonalMatch = null;
+    } else {
+      // Orthogonal is closer, disable parallel
+      parallelLineMatch = null;
+    }
+  }
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
@@ -1777,6 +1928,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   let usePointDirection = false;
   let isOrthogonalSnap = false;
   let isClosingPerpendicularSnap = false;
+  let isParallelLineSnap = false;
   const hasUserAngle =
     state.currentAngle !== null && !isNaN(state.currentAngle);
 
@@ -1804,14 +1956,25 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     // Skip if extended guidelines are active
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
+  } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
+    // Priority 3: Parallel line snap (snap to bearing of nearby lines)
+    // Skip if extended guidelines are active
+    bearingToUse = parallelLineMatch.bearing;
+    isParallelLineSnap = true;
+    state.parallelLineSnap = parallelLineMatch;
   } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
-    // Priority 3: Closing perpendicular snap
+    // Priority 4: Closing perpendicular snap
     // Skip if extended guidelines are active
     // (This will be handled in the length priority section)
     isClosingPerpendicularSnap = true;
   } else if (snapInfo && snapInfo.type === "line") {
-    // Priority 4: Line snap bearing (lowest priority for direction)
+    // Priority 5: Line snap bearing (lowest priority for direction)
     bearingToUse = snapInfo.bearing;
+  }
+
+  // Clear parallel line snap if not active
+  if (!isParallelLineSnap) {
+    state.parallelLineSnap = null;
   }
 
   // Determine length priority
@@ -2039,6 +2202,18 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removeClosingRightAngleIndicator(state);
   }
 
+  // Show parallel line indicators
+  if (isParallelLineSnap && state.parallelLineSnap) {
+    this.updateParallelLineIndicators(
+      state,
+      lastVertex,
+      previewVertex,
+      state.parallelLineSnap.matchedLine
+    );
+  } else {
+    this.removeParallelLineIndicators(state);
+  }
+
   // Calculate actual distance to preview vertex (accounts for all snapping)
   const actualDistance = turf.distance(from, turf.point(previewVertex), {
     units: "meters",
@@ -2079,8 +2254,8 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removeLineSegmentSplitLabels(state);
   }
 
-  // Only show preview point when actually snapping to something
-  if (snapInfo) {
+  // Show preview point when snapping to something OR when orthogonal/parallel snap is active
+  if (snapInfo || isOrthogonalSnap || isParallelLineSnap) {
     this.updatePreviewPoint(state, previewVertex);
   } else {
     this.removePreviewPoint(state);
@@ -2583,6 +2758,7 @@ DrawPolygonDistance.onStop = function (state) {
   }
   this.removeExtendedGuidelines(state);
   this.removeAngleReferenceLine();
+  this.removeParallelLineIndicators(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();

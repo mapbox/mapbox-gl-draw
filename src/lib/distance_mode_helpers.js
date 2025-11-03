@@ -295,6 +295,177 @@ export function findExtendedGuidelineIntersection(extendedGuidelines, snapInfo, 
 }
 
 /**
+ * Find the closest snap lines that intersect the orthogonal line from the midpoint
+ * of the line being drawn. Returns the closest line on each side (max 2 lines).
+ */
+export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
+  const snapping = ctx.snapping;
+  if (!snapping || !snapping.bufferLayers || snapping.bufferLayers.length === 0) {
+    return [];
+  }
+
+  // Calculate midpoint of the line being drawn
+  const midpoint = turf.midpoint(
+    turf.point(lastVertex),
+    turf.point([currentPosition.lng, currentPosition.lat])
+  );
+
+  // Calculate bearing of the line being drawn
+  const lineBearing = turf.bearing(
+    turf.point(lastVertex),
+    turf.point([currentPosition.lng, currentPosition.lat])
+  );
+
+  // Create orthogonal line (perpendicular to the line being drawn)
+  // Extend it 1km in both directions from the midpoint
+  const orthogonalBearing = lineBearing + 90;
+  const orthogonalStart = turf.destination(
+    midpoint,
+    1,
+    orthogonalBearing + 180,
+    { units: 'kilometers' }
+  );
+  const orthogonalEnd = turf.destination(
+    midpoint,
+    1,
+    orthogonalBearing,
+    { units: 'kilometers' }
+  );
+
+  const orthogonalLine = turf.lineString([
+    orthogonalStart.geometry.coordinates,
+    orthogonalEnd.geometry.coordinates
+  ]);
+
+  // Query all snap features (use large buffer box to get everything nearby)
+  const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+  const allFeatures = map.queryRenderedFeatures({
+    layers: bufferLayers
+  });
+
+  const intersectingLines = [];
+
+  for (const feature of allFeatures) {
+    let geom = feature.geometry;
+
+    // Skip points
+    if (geom.type === 'Point') {
+      continue;
+    }
+
+    // Convert polygons to lines
+    if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+      geom = turf.polygonToLine(geom).geometry;
+    }
+
+    // Only process LineString
+    if (geom.type === 'LineString') {
+      const coords = geom.coordinates;
+      if (coords.length >= 2) {
+        const snapLine = turf.lineString(coords);
+
+        // Check if this line intersects our orthogonal line
+        try {
+          const intersections = turf.lineIntersect(snapLine, orthogonalLine);
+
+          if (intersections.features.length > 0) {
+            // Calculate bearing of the snap line
+            const bearing = turf.bearing(
+              turf.point(coords[0]),
+              turf.point(coords[coords.length - 1])
+            );
+
+            // Calculate distance from midpoint to intersection
+            const intersectionPoint = intersections.features[0].geometry.coordinates;
+            const distanceFromMidpoint = turf.distance(
+              midpoint,
+              turf.point(intersectionPoint),
+              { units: 'meters' }
+            );
+
+            // Determine which side of the midpoint the intersection is on
+            const intersectionBearing = turf.bearing(
+              midpoint,
+              turf.point(intersectionPoint)
+            );
+
+            // Normalize bearings
+            const normOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+            const normIntersection = ((intersectionBearing % 360) + 360) % 360;
+
+            // Determine side: if intersection bearing is close to orthogonal bearing, it's "right side"
+            // otherwise it's "left side"
+            let diff = Math.abs(normOrthogonal - normIntersection);
+            if (diff > 180) diff = 360 - diff;
+            const side = diff < 90 ? 'right' : 'left';
+
+            intersectingLines.push({
+              feature: feature,
+              bearing: bearing,
+              segment: { start: coords[0], end: coords[coords.length - 1] },
+              geometry: geom,
+              distanceFromMidpoint: distanceFromMidpoint,
+              side: side
+            });
+          }
+        } catch (e) {
+          // Ignore intersection errors
+          continue;
+        }
+      }
+    }
+  }
+
+  // Find the single closest line (regardless of side)
+  if (intersectingLines.length === 0) {
+    return [];
+  }
+
+  intersectingLines.sort((a, b) => a.distanceFromMidpoint - b.distanceFromMidpoint);
+
+  return [intersectingLines[0]];
+}
+
+/**
+ * Find the best matching parallel line bearing within tolerance
+ * Returns null if no match, or {bearing, matchedLine} if found
+ */
+export function getParallelBearing(nearbyLines, mouseBearing, tolerance = 3) {
+  if (!nearbyLines || nearbyLines.length === 0) {
+    return null;
+  }
+
+  let bestMatch = null;
+  let bestDiff = Infinity;
+
+  const normalizedMouse = ((mouseBearing % 360) + 360) % 360;
+
+  for (const line of nearbyLines) {
+    const lineBearing = line.bearing;
+    const normalizedLine = ((lineBearing % 360) + 360) % 360;
+
+    // Check both directions of the line (bearing and bearing + 180)
+    for (const testBearing of [normalizedLine, (normalizedLine + 180) % 360]) {
+      let diff = Math.abs(testBearing - normalizedMouse);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        // Use the actual bearing that matched (either lineBearing or lineBearing + 180)
+        const matchedBearing = testBearing === normalizedLine ? lineBearing : lineBearing + 180;
+        bestMatch = {
+          bearing: matchedBearing,
+          matchedLine: line,
+          diff: diff
+        };
+      }
+    }
+  }
+
+  return bestMatch;
+}
+
+/**
  * Check if clicking near an extended guideline intersection point.
  * This handles the logic for detecting when the cursor is near an intersection
  * between an extended guideline and another line feature.
