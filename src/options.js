@@ -37,6 +37,25 @@ const defaultOptions = {
 
   /** @type {number} Extension distance in kilometers for extended guidelines (when hovering intersection points) */
   extendedGuidelineDistance: 0.2,
+
+  // Angle/Distance Input UI Configuration
+  /** @type {boolean} Enable/disable the angle and distance input UI in distance drawing modes (default: true) */
+  useAngleDistanceInput: true,
+
+  /**
+   * Position of the angle/distance input container in normalized coordinates [x, y]
+   * where [0, 0] is top-left corner and [1, 1] is bottom-right corner.
+   * The coordinates represent the center point of the input container.
+   * @type {[number, number]}
+   * @default [0.5, 0.9] (bottom-center, matching current behavior)
+   * @example
+   * [0.5, 0.9]   - bottom-center (default)
+   * [0, 0]       - top-left corner
+   * [1, 1]       - bottom-right corner
+   * [0.5, 0.5]   - center of map
+   * [0.2, 0.8]   - lower-left area
+   */
+  angleDistanceInputPosition: [0.5, 0.93],
 };
 
 const showControls = {

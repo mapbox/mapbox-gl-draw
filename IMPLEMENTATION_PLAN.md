@@ -2,7 +2,7 @@
 
 **Date Created**: 2025-11-04
 **Last Updated**: 2025-11-04
-**Status**: In Progress (4/5 completed)
+**Status**: ✓ COMPLETED (5/5 completed)
 **Total Tasks**: 5
 
 ## Critical Requirements
@@ -25,7 +25,7 @@
 
 ### Additional Tasks
 
-- [ ] **TASK-5**: Add configuration options for angle/distance input visibility and position
+- [x] **TASK-5**: Add configuration options for angle/distance input visibility and position ✓ COMPLETED
 
 ---
 
@@ -730,6 +730,27 @@ If time permits, consider:
 - [ ] Add offset option to fine-tune position: `angleDistanceInputOffset: [10, -20]` (pixels from normalized position)
 - [ ] Add animation when position changes dynamically
 - [ ] Remember last position in localStorage for user convenience
+
+### Status: ✓ COMPLETED
+
+**Implementation Summary:**
+
+Added two new configuration options in `src/options.js:42-58`:
+1. `useAngleDistanceInput: true` - Enable/disable the angle/distance input UI
+2. `angleDistanceInputPosition: [0.5, 0.93]` - Position in normalized coordinates
+
+**Files Modified:**
+1. `src/options.js` - Added configuration options with JSDoc documentation
+2. `src/modes/draw_line_string_distance.js:77-115, 285-295` - Added visibility check and position calculation in both `createDistanceInput()` and `createAngleInput()`
+3. `src/modes/draw_polygon_distance.js:77-115, 278-288` - Added visibility check and position calculation in both `createDistanceInput()` and `createAngleInput()`
+
+**Features Implemented:**
+- ✓ Users can disable input UI completely via `useAngleDistanceInput: false`
+- ✓ Users can position the input container anywhere using normalized [x, y] coordinates (0-1 range)
+- ✓ Position represents center point of container
+- ✓ Backward compatibility maintained with default values
+- ✓ Works in both line string and polygon distance modes
+- ✓ User tested and confirmed working
 
 ---
 

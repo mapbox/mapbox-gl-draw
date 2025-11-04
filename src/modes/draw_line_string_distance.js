@@ -74,14 +74,31 @@ DrawLineStringDistance.onSetup = function (opts) {
 };
 
 DrawLineStringDistance.createDistanceInput = function (state) {
+  // Check if angle/distance input UI is enabled
+  if (!this._ctx.options.useAngleDistanceInput) {
+    return;
+  }
+
   // Create container
   const container = document.createElement("div");
   container.className = "distance-mode-container";
+
+  // Calculate position from normalized coordinates
+  const mapContainer = this._ctx.map.getContainer();
+  const mapWidth = mapContainer.offsetWidth;
+  const mapHeight = mapContainer.offsetHeight;
+  const [normX, normY] = this._ctx.options.angleDistanceInputPosition;
+
+  // Convert normalized position to pixel coordinates
+  // Using top/left with translate(-50%, -50%) to center on the point
+  const pixelX = mapWidth * normX;
+  const pixelY = mapHeight * normY;
+
   container.style.cssText = `
     position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: ${pixelY}px;
+    left: ${pixelX}px;
+    transform: translate(-50%, -50%);
     z-index: 10000;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
@@ -265,9 +282,17 @@ DrawLineStringDistance.createDistanceInput = function (state) {
 };
 
 DrawLineStringDistance.createAngleInput = function (state) {
+  // Check if angle/distance input UI is enabled
+  if (!this._ctx.options.useAngleDistanceInput) {
+    return;
+  }
+
   // We'll add the angle input to the same container as distance
   // So we just need to add elements to the existing distance container
   const distanceContainer = state.distanceContainer;
+  if (!distanceContainer) {
+    return;
+  }
 
   // Create separator
   const separator = document.createElement("span");
