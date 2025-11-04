@@ -2,7 +2,7 @@
 
 **Date Created**: 2025-11-04
 **Last Updated**: 2025-11-04
-**Status**: In Progress (3/5 completed)
+**Status**: In Progress (4/5 completed)
 **Total Tasks**: 5
 
 ## Critical Requirements
@@ -21,10 +21,10 @@
 - [x] **TASK-1**: Add configurability options for snap tolerances and thresholds ✓ COMPLETED
 - [x] **TASK-2**: Extract conflict resolution logic to shared helper function ✓ COMPLETED
 - [x] **TASK-3**: Add performance optimization with spatial bounds for feature queries ✓ COMPLETED
+- [x] **TASK-4**: Fix geometric precision issue with double orthogonal snap chaining ✓ COMPLETED
 
 ### Additional Tasks
 
-- [ ] **TASK-4**: Fix geometric precision issue with double orthogonal snap chaining
 - [ ] **TASK-5**: Add configuration options for angle/distance input visibility and position
 
 ---
@@ -495,6 +495,34 @@ During implementation, need to answer:
 - User experience impact is minor (few meters offset) but affects precision workflows
 - Fix may have benefits for overall bearing calculation precision
 - Consider if similar precision issues exist in other snap types
+
+### Solution Implemented ✓ COMPLETED
+
+**Root Cause Identified:**
+1. **Cache quantization error**: The cache key used `Math.floor(currentBearing / tolerance) * tolerance` which quantized bearings to 5° increments (e.g., 92.5° and 94.9° both became 90°), introducing 0-5° errors
+2. **Floating-point precision**: Small errors in `turf.bearing()` and `turf.destination()` calculations accumulate when chaining orthogonal snaps through multiple intersection points
+3. **No recovery mechanism**: When orthogonal snaps brought cursor very close to existing vertices, there was no logic to snap exactly to them
+
+**Fixes Applied:**
+
+1. **Fixed cache quantization** (`draw_line_string_distance.js:509` and `draw_polygon_distance.js:485`):
+   - Changed cache key from `Math.floor(currentBearing / tolerance) * tolerance` to `Math.round(currentBearing)`
+   - Uses 1° precision instead of 5° quantization, reducing error from 0-5° to 0-0.5°
+
+2. **Added snap-to-vertex helper** (`distance_mode_helpers.js:499`):
+   - New function `snapToNearbyVertex(calculatedCoord, existingVertices, snapThreshold = 0.5)`
+   - When orthogonal/parallel/bearing snaps calculate a vertex position, checks if it's within 0.5m of any existing vertex
+   - If yes, snaps exactly to that vertex, recovering from accumulated precision errors
+
+3. **Integrated snap-to-vertex logic** in both modes:
+   - `draw_line_string_distance.js:1359`: Added check before pushing vertex to state
+   - `draw_polygon_distance.js:1621`: Added check before pushing vertex to state
+   - Only applies when `isOrthogonalSnap`, `isParallelLineSnap`, or `isClosingPerpendicularSnap` are active
+
+**Status**: COMPLETED - Both fixes work together to maintain geometric precision:
+- Cache fix prevents bearing quantization errors from accumulating
+- Snap-to-vertex logic recovers from any remaining floating-point precision errors
+- Testing required by user to verify fix eliminates the geometric drift in real-world scenarios
 
 ---
 

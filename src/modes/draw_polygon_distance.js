@@ -13,6 +13,7 @@ import {
   findNearbyParallelLines,
   getParallelBearing,
   resolveSnapConflicts,
+  snapToNearbyVertex,
 } from "../lib/distance_mode_helpers.js";
 
 const DrawPolygonDistance = {};
@@ -480,8 +481,9 @@ DrawPolygonDistance.getOrthogonalBearing = function (
   }
 
   // Cache key based on state that affects orthogonal bearings
+  // Use 1-degree precision instead of tolerance-based quantization to avoid geometric drift
   const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${
-    Math.floor(currentBearing / tolerance) * tolerance
+    Math.round(currentBearing)
   }`;
 
   if (
@@ -1611,6 +1613,15 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     if (dist < 10) {
       this.finishDrawing(state);
       return;
+    }
+  }
+
+  // Check if orthogonal/parallel/bearing snap brought us very close to an existing vertex
+  // If yes, snap exactly to that vertex to maintain geometric precision (fixes chaining errors)
+  if (isOrthogonalSnap || isParallelLineSnap || isClosingPerpendicularSnap) {
+    const nearbyVertex = snapToNearbyVertex(newVertex, state.vertices, 0.5);
+    if (nearbyVertex) {
+      newVertex = nearbyVertex;
     }
   }
 

@@ -488,6 +488,34 @@ export function getParallelBearing(nearbyLines, mouseBearing, tolerance) {
 }
 
 /**
+ * Check if a calculated position (from bearing/distance snap) is very close to any existing vertex
+ * If yes, snap exactly to that vertex to maintain geometric precision
+ *
+ * @param {Array} calculatedCoord - The calculated coordinate [lng, lat]
+ * @param {Array<Array>} existingVertices - Array of existing vertex coordinates
+ * @param {number} snapThreshold - Distance threshold in meters (default: 0.5m)
+ * @returns {Array|null} The nearby vertex coordinate if found, or null
+ */
+export function snapToNearbyVertex(calculatedCoord, existingVertices, snapThreshold = 0.5) {
+  if (!calculatedCoord || !existingVertices || existingVertices.length === 0) {
+    return null;
+  }
+
+  const calculatedPoint = turf.point(calculatedCoord);
+
+  for (const vertex of existingVertices) {
+    const vertexPoint = turf.point(vertex);
+    const distance = turf.distance(calculatedPoint, vertexPoint, { units: 'meters' });
+
+    if (distance <= snapThreshold) {
+      return vertex;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Resolves conflicts between orthogonal, parallel, and bothSnapsActive snapping
  * Returns which snap should win based on proximity and bearing comparison
  *
