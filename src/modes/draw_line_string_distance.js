@@ -642,16 +642,17 @@ DrawLineStringDistance.extendGuidelines = function (state, intersectionInfo) {
         turf.point(coords[coords.length - 1])
       );
 
-      // Extend 200m in each direction
+      // Extend by configured distance in each direction
+      const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
       const extendedStart = turf.destination(
         turf.point(coords[0]),
-        200 / 1000,
+        extensionDistance,
         bearing + 180,
         { units: "kilometers" }
       );
       const extendedEnd = turf.destination(
         turf.point(coords[coords.length - 1]),
-        200 / 1000,
+        extensionDistance,
         bearing,
         { units: "kilometers" }
       );
@@ -1100,13 +1101,13 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
 
-  // Detect parallel lines nearby (orthogonal intersection method, ±5° tolerance)
+  // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
     const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, e.lngLat);
-    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
+    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
   }
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
@@ -1148,8 +1149,8 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
         { units: 'meters' }
       );
 
-      // If very close to intersection (<5m), prioritize bothSnapsActive
-      if (distanceToIntersection < 5) {
+      // If very close to intersection (within configured threshold), prioritize bothSnapsActive
+      if (distanceToIntersection < this._ctx.options.parallelSnapProximityThreshold) {
         parallelLineMatch = null;
       } else {
         // Far from intersection, allow bearing comparison
@@ -1669,13 +1670,13 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing);
+  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
 
-  // Detect parallel lines nearby (orthogonal intersection method, ±5° tolerance)
+  // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
     const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, lngLat);
-    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, 5);
+    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
   }
 
   // Check if BOTH regular orthogonal AND closing perpendicular are active
@@ -1717,8 +1718,8 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
         { units: 'meters' }
       );
 
-      // If very close to intersection (<5m), prioritize bothSnapsActive
-      if (distanceToIntersection < 5) {
+      // If very close to intersection (within configured threshold), prioritize bothSnapsActive
+      if (distanceToIntersection < this._ctx.options.parallelSnapProximityThreshold) {
         parallelLineMatch = null;
       } else {
         // Far from intersection, allow bearing comparison

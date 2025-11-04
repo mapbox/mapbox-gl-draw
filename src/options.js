@@ -21,6 +21,22 @@ const defaultOptions = {
   snapping: {
     layers: [],
   },
+
+  // Distance mode snapping configuration options
+  /** @type {number} Tolerance in degrees for orthogonal snapping (perpendicular/parallel angles) */
+  orthogonalSnapTolerance: 5,
+
+  /** @type {number} Tolerance in degrees for parallel line snapping */
+  parallelSnapTolerance: 3,
+
+  /** @type {number} Distance threshold in meters for bothSnapsActive conflict resolution priority */
+  parallelSnapProximityThreshold: 5,
+
+  /** @type {number} Search distance in kilometers for finding parallel lines (orthogonal line extension) */
+  parallelSnapSearchDistance: 1,
+
+  /** @type {number} Extension distance in kilometers for extended guidelines (when hovering intersection points) */
+  extendedGuidelineDistance: 0.2,
 };
 
 const showControls = {

@@ -297,6 +297,10 @@ export function findExtendedGuidelineIntersection(extendedGuidelines, snapInfo, 
 /**
  * Find the closest snap lines that intersect the orthogonal line from the midpoint
  * of the line being drawn. Returns the closest line on each side (max 2 lines).
+ * @param {Object} ctx - The context object with options
+ * @param {Object} map - The Mapbox map instance
+ * @param {Array} lastVertex - The last vertex coordinate [lng, lat]
+ * @param {Object} currentPosition - Current mouse position {lng, lat}
  */
 export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
   const snapping = ctx.snapping;
@@ -317,17 +321,18 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
   );
 
   // Create orthogonal line (perpendicular to the line being drawn)
-  // Extend it 1km in both directions from the midpoint
+  // Extend it using the configured search distance in both directions from the midpoint
+  const searchDistance = ctx.options.parallelSnapSearchDistance || 1;
   const orthogonalBearing = lineBearing + 90;
   const orthogonalStart = turf.destination(
     midpoint,
-    1,
+    searchDistance,
     orthogonalBearing + 180,
     { units: 'kilometers' }
   );
   const orthogonalEnd = turf.destination(
     midpoint,
-    1,
+    searchDistance,
     orthogonalBearing,
     { units: 'kilometers' }
   );
@@ -429,8 +434,11 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
 /**
  * Find the best matching parallel line bearing within tolerance
  * Returns null if no match, or {bearing, matchedLine} if found
+ * @param {Array} nearbyLines - Array of nearby parallel line candidates
+ * @param {number} mouseBearing - Current mouse bearing in degrees
+ * @param {number} tolerance - Tolerance in degrees for matching (from ctx.options.parallelSnapTolerance)
  */
-export function getParallelBearing(nearbyLines, mouseBearing, tolerance = 3) {
+export function getParallelBearing(nearbyLines, mouseBearing, tolerance) {
   if (!nearbyLines || nearbyLines.length === 0) {
     return null;
   }
