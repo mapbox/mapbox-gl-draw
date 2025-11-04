@@ -474,6 +474,103 @@ export function getParallelBearing(nearbyLines, mouseBearing, tolerance) {
 }
 
 /**
+ * Resolves conflicts between orthogonal, parallel, and bothSnapsActive snapping
+ * Returns which snap should win based on proximity and bearing comparison
+ *
+ * @param {Object} options
+ * @param {Object|null} options.orthogonalMatch - Orthogonal snap match object with bearing
+ * @param {Object|null} options.parallelLineMatch - Parallel line snap match object with diff property
+ * @param {boolean} options.bothSnapsActive - Whether double orthogonal snap is active
+ * @param {Array} options.lastVertex - Last vertex coordinate [lng, lat]
+ * @param {Object} options.lngLat - Current mouse position {lng, lat}
+ * @param {Object|null} options.closingPerpendicularSnap - Closing perpendicular snap object (for bothSnapsActive calculation)
+ * @param {number} options.proximityThreshold - Distance threshold in meters for bothSnapsActive priority
+ * @param {number} options.mouseBearing - Current mouse bearing in degrees
+ *
+ * @returns {Object} { orthogonalMatch, parallelLineMatch } - One will be null based on conflict resolution
+ */
+export function resolveSnapConflicts(options) {
+  let { orthogonalMatch, parallelLineMatch, bothSnapsActive, lastVertex, lngLat, closingPerpendicularSnap, proximityThreshold, mouseBearing } = options;
+
+  // Smart conflict resolution with geo-based priority for bothSnapsActive
+  if (bothSnapsActive && parallelLineMatch) {
+    // Calculate the bothSnapsActive intersection point
+    const perpLine = {
+      start: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing + 180,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+      end: turf.destination(
+        turf.point(closingPerpendicularSnap.firstVertex),
+        0.1,
+        closingPerpendicularSnap.perpendicularBearing,
+        { units: "kilometers" }
+      ).geometry.coordinates,
+    };
+
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      orthogonalMatch.bearing,
+      perpLine
+    );
+
+    if (intersection) {
+      // Calculate distance from mouse to intersection point
+      const distanceToIntersection = turf.distance(
+        turf.point([lngLat.lng, lngLat.lat]),
+        turf.point(intersection.coord),
+        { units: 'meters' }
+      );
+
+      // If very close to intersection (within configured threshold), prioritize bothSnapsActive
+      if (distanceToIntersection < proximityThreshold) {
+        parallelLineMatch = null;
+      } else {
+        // Far from intersection, allow bearing comparison
+        const orthogonalDiff = (() => {
+          const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+          const normMouse = ((mouseBearing % 360) + 360) % 360;
+          let diff = Math.abs(normOrtho - normMouse);
+          if (diff > 180) diff = 360 - diff;
+          return diff;
+        })();
+
+        const parallelDiff = parallelLineMatch.diff;
+
+        // If parallel is closer to mouse bearing, disable orthogonal snaps
+        if (parallelDiff < orthogonalDiff) {
+          orthogonalMatch = null;
+          // This will also disable bothSnapsActive since orthogonalMatch becomes null
+        } else {
+          parallelLineMatch = null;
+        }
+      }
+    }
+  } else if (orthogonalMatch && parallelLineMatch) {
+    // No bothSnapsActive - simple bearing comparison
+    const orthogonalDiff = (() => {
+      const normOrtho = ((orthogonalMatch.bearing % 360) + 360) % 360;
+      const normMouse = ((mouseBearing % 360) + 360) % 360;
+      let diff = Math.abs(normOrtho - normMouse);
+      if (diff > 180) diff = 360 - diff;
+      return diff;
+    })();
+
+    const parallelDiff = parallelLineMatch.diff;
+
+    if (parallelDiff < orthogonalDiff) {
+      orthogonalMatch = null;
+    } else {
+      parallelLineMatch = null;
+    }
+  }
+
+  return { orthogonalMatch, parallelLineMatch };
+}
+
+/**
  * Check if clicking near an extended guideline intersection point.
  * This handles the logic for detecting when the cursor is near an intersection
  * between an extended guideline and another line feature.
