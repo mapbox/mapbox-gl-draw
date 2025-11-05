@@ -91,6 +91,22 @@ export function showMovementVector(map, fromLngLat, toLngLat, options = {}) {
     turf.point([toLngLat.lng, toLngLat.lat])
   );
 
+  // Calculate bearing of the line
+  const bearing = turf.bearing(
+    turf.point([fromLngLat.lng, fromLngLat.lat]),
+    turf.point([toLngLat.lng, toLngLat.lat])
+  );
+
+  // Offset the label 3 meters perpendicular to the line (to the left side)
+  const offsetDistance = 3 / 1000; // 3 meters in kilometers
+  const perpendicularBearing = bearing - 90; // 90 degrees left
+  const offsetMidpoint = turf.destination(
+    midpoint,
+    offsetDistance,
+    perpendicularBearing,
+    { units: 'kilometers' }
+  );
+
   // Create label feature
   const labelFeature = {
     type: 'Feature',
@@ -100,7 +116,7 @@ export function showMovementVector(map, fromLngLat, toLngLat, options = {}) {
     },
     geometry: {
       type: 'Point',
-      coordinates: midpoint.geometry.coordinates
+      coordinates: offsetMidpoint.geometry.coordinates
     }
   };
 
