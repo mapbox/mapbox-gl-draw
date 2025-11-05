@@ -342,23 +342,10 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
     orthogonalEnd.geometry.coordinates
   ]);
 
-  // Calculate bounding box for spatial query optimization
-  // Use searchDistance to create a box around the midpoint
-  const northPoint = turf.destination(midpoint, searchDistance, 0, { units: 'kilometers' });
-  const southPoint = turf.destination(midpoint, searchDistance, 180, { units: 'kilometers' });
-  const eastPoint = turf.destination(midpoint, searchDistance, 90, { units: 'kilometers' });
-  const westPoint = turf.destination(midpoint, searchDistance, 270, { units: 'kilometers' });
-
-  // Convert geographic bounds to pixel coordinates for query
-  const nwPixel = map.project([westPoint.geometry.coordinates[0], northPoint.geometry.coordinates[1]]);
-  const sePixel = map.project([eastPoint.geometry.coordinates[0], southPoint.geometry.coordinates[1]]);
-
-  // Create bounding box [[x1, y1], [x2, y2]] for queryRenderedFeatures
-  const bbox = [[nwPixel.x, nwPixel.y], [sePixel.x, sePixel.y]];
-
-  // Query snap features within the bounding box (performance optimization)
+  // Query all snap features (without bbox restriction)
+  // Note: bbox optimization was causing issues - query returns features but none intersect
   const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
-  const allFeatures = map.queryRenderedFeatures(bbox, {
+  const allFeatures = map.queryRenderedFeatures({
     layers: bufferLayers
   });
 
