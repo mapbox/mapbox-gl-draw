@@ -5,6 +5,7 @@ import StringSet from '../lib/string_set.js';
 import doubleClickZoom from '../lib/double_click_zoom.js';
 import moveFeatures from '../lib/move_features.js';
 import * as Constants from '../constants.js';
+import { showMovementVector, removeMovementVector } from '../lib/movement_vector.js';
 
 const SimpleSelect = {};
 
@@ -12,6 +13,7 @@ SimpleSelect.onSetup = function(opts) {
   // turn the opts into state.
   const state = {
     dragMoveLocation: null,
+    dragMoveStartLocation: null, // Original grab position for movement vector
     boxSelectStartLocation: null,
     boxSelectElement: undefined,
     boxSelecting: false,
@@ -90,6 +92,10 @@ SimpleSelect.stopExtendedInteractions = function(state) {
     this.map.dragPan.enable();
   }
 
+  // Remove movement vector visualization
+  removeMovementVector(this.map);
+  state.dragMoveStartLocation = null;
+
   state.boxSelecting = false;
   state.canBoxSelect = false;
   state.dragMoving = false;
@@ -98,6 +104,8 @@ SimpleSelect.stopExtendedInteractions = function(state) {
 
 SimpleSelect.onStop = function() {
   doubleClickZoom.enable(this);
+  // Clean up movement vector on mode exit
+  removeMovementVector(this.map);
 };
 
 SimpleSelect.onMouseMove = function(state, e) {
@@ -164,6 +172,7 @@ SimpleSelect.startOnActiveFeature = function(state, e) {
   // Set up the state for drag moving
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
+  state.dragMoveStartLocation = e.lngLat; // Store original position for movement vector
 };
 
 SimpleSelect.clickOnFeature = function(state, e) {
@@ -274,6 +283,11 @@ SimpleSelect.dragMove = function(state, e) {
     moveFeatures(this.getSelected(), delta);
   }
   state.dragMoveLocation = lngLat;
+
+  // Show movement vector from original grab position to current position
+  if (state.dragMoveStartLocation) {
+    showMovementVector(this.map, state.dragMoveStartLocation, lngLat);
+  }
 };
 
 SimpleSelect.onTouchEnd = SimpleSelect.onMouseUp = function(state, e) {

@@ -4,6 +4,7 @@ import constrainFeatureMovement from '../lib/constrain_feature_movement.js';
 import doubleClickZoom from '../lib/double_click_zoom.js';
 import * as Constants from '../constants.js';
 import moveFeatures from '../lib/move_features.js';
+import { showMovementVector, removeMovementVector } from '../lib/movement_vector.js';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -33,12 +34,18 @@ DirectSelect.startDragging = function(state, e) {
   this.map.dragPan.disable();
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
+  state.dragMoveStartLocation = e.lngLat; // Store original position for movement vector
 };
 
 DirectSelect.stopDragging = function(state) {
   if (state.canDragMove && state.initialDragPanState === true) {
     this.map.dragPan.enable();
   }
+
+  // Remove movement vector visualization
+  removeMovementVector(this.map);
+  state.dragMoveStartLocation = null;
+
   state.dragMoving = false;
   state.canDragMove = false;
   state.dragMoveLocation = null;
@@ -130,6 +137,7 @@ DirectSelect.onSetup = function(opts) {
     featureId,
     feature,
     dragMoveLocation: opts.startPos || null,
+    dragMoveStartLocation: null, // Original grab position for movement vector
     dragMoving: false,
     canDragMove: false,
     selectedCoordPaths: opts.coordPath ? [opts.coordPath] : [],
@@ -149,6 +157,8 @@ DirectSelect.onSetup = function(opts) {
 DirectSelect.onStop = function() {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
+  // Clean up movement vector on mode exit
+  removeMovementVector(this.map);
 };
 
 DirectSelect.toDisplayFeatures = function(state, geojson, push) {
@@ -238,6 +248,11 @@ DirectSelect.onDrag = function(state, e) {
     else this.dragFeature(state, e, delta);
   }
   state.dragMoveLocation = lngLat;
+
+  // Show movement vector from original grab position to current position
+  if (state.dragMoveStartLocation) {
+    showMovementVector(this.map, state.dragMoveStartLocation, lngLat);
+  }
 };
 
 DirectSelect.onClick = function(state, e) {
