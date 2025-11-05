@@ -6,6 +6,7 @@ import doubleClickZoom from '../lib/double_click_zoom.js';
 import moveFeatures from '../lib/move_features.js';
 import * as Constants from '../constants.js';
 import { showMovementVector, removeMovementVector } from '../lib/movement_vector.js';
+import { findClickedEdge, determineRailDirection, constrainToRail, showRailIndicator, removeRailIndicator } from '../lib/rail_constraint.js';
 
 const SimpleSelect = {};
 
@@ -21,7 +22,12 @@ SimpleSelect.onSetup = function(opts) {
     dragMoving: false,
     canDragMove: false,
     initialDragPanState: this.map.dragPan.isEnabled(),
-    initiallySelectedFeatureIds: opts.featureIds || []
+    initiallySelectedFeatureIds: opts.featureIds || [],
+    // Rail constraint state
+    railConstraintActive: false,
+    railEdge: null, // Edge that was grabbed
+    railDirection: null, // Determined rail direction
+    railBearing: null // Bearing to constrain movement to
   };
 
   this.setSelected(state.initiallySelectedFeatureIds.filter(id => this.getFeature(id) !== undefined));
@@ -92,9 +98,16 @@ SimpleSelect.stopExtendedInteractions = function(state) {
     this.map.dragPan.enable();
   }
 
-  // Remove movement vector visualization
+  // Remove visualizations
   removeMovementVector(this.map);
+  removeRailIndicator(this.map);
   state.dragMoveStartLocation = null;
+
+  // Clear rail constraint state
+  state.railConstraintActive = false;
+  state.railEdge = null;
+  state.railDirection = null;
+  state.railBearing = null;
 
   state.boxSelecting = false;
   state.canBoxSelect = false;
@@ -104,8 +117,9 @@ SimpleSelect.stopExtendedInteractions = function(state) {
 
 SimpleSelect.onStop = function() {
   doubleClickZoom.enable(this);
-  // Clean up movement vector on mode exit
+  // Clean up visualizations on mode exit
   removeMovementVector(this.map);
+  removeRailIndicator(this.map);
 };
 
 SimpleSelect.onMouseMove = function(state, e) {
@@ -173,6 +187,15 @@ SimpleSelect.startOnActiveFeature = function(state, e) {
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
   state.dragMoveStartLocation = e.lngLat; // Store original position for movement vector
+
+  // Detect which edge was grabbed (for rail constraint)
+  const selectedFeatures = this.getSelected();
+  if (selectedFeatures.length === 1) {
+    const clickedEdge = findClickedEdge(selectedFeatures[0], e.lngLat);
+    if (clickedEdge) {
+      state.railEdge = clickedEdge;
+    }
+  }
 };
 
 SimpleSelect.clickOnFeature = function(state, e) {
@@ -270,6 +293,40 @@ SimpleSelect.dragMove = function(state, e) {
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
   let lngLat = e.lngLat;
+
+  // Handle rail constraint for feature movement when edge was grabbed
+  if (state.railEdge && state.dragMoveStartLocation) {
+    // Continuously determine rail direction based on current mouse position
+    const railDir = determineRailDirection(
+      state.dragMoveStartLocation,
+      lngLat,
+      state.railEdge.bearing,
+      15 // Angular tolerance in degrees
+    );
+
+    if (railDir) {
+      // Within tolerance - snap to rail
+      state.railConstraintActive = true;
+      state.railDirection = railDir.name;
+      state.railBearing = railDir.bearing;
+
+      // Show L-shaped indicator at grab point
+      showRailIndicator(
+        this.map,
+        state.dragMoveStartLocation,
+        state.railEdge.bearing,
+        state.railBearing
+      );
+
+      // Constrain movement to current rail direction
+      lngLat = constrainToRail(state.dragMoveStartLocation, lngLat, state.railBearing);
+    } else {
+      // Outside tolerance - allow free movement
+      state.railConstraintActive = false;
+      removeRailIndicator(this.map);
+    }
+  }
+
   // TODO more efficient
   if (this.getSelected().length === 1 && this.getSelected()[0].type === 'Point') {
     lngLat = this._ctx.snapping.snapCoord(e.lngLat);

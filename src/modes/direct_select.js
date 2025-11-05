@@ -5,6 +5,7 @@ import doubleClickZoom from '../lib/double_click_zoom.js';
 import * as Constants from '../constants.js';
 import moveFeatures from '../lib/move_features.js';
 import { showMovementVector, removeMovementVector } from '../lib/movement_vector.js';
+import { findClickedEdge, determineRailDirection, constrainToRail, showRailLine, removeRailLine, showRailIndicator, removeRailIndicator } from '../lib/rail_constraint.js';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
@@ -35,6 +36,12 @@ DirectSelect.startDragging = function(state, e) {
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
   state.dragMoveStartLocation = e.lngLat; // Store original position for movement vector
+
+  // Detect which edge was grabbed (for rail constraint)
+  const clickedEdge = findClickedEdge(state.feature, e.lngLat);
+  if (clickedEdge) {
+    state.railEdge = clickedEdge;
+  }
 };
 
 DirectSelect.stopDragging = function(state) {
@@ -42,9 +49,16 @@ DirectSelect.stopDragging = function(state) {
     this.map.dragPan.enable();
   }
 
-  // Remove movement vector visualization
+  // Remove visualizations
   removeMovementVector(this.map);
+  removeRailIndicator(this.map);
   state.dragMoveStartLocation = null;
+
+  // Clear rail constraint state
+  state.railConstraintActive = false;
+  state.railEdge = null;
+  state.railDirection = null;
+  state.railBearing = null;
 
   state.dragMoving = false;
   state.canDragMove = false;
@@ -141,6 +155,11 @@ DirectSelect.onSetup = function(opts) {
     dragMoving: false,
     canDragMove: false,
     selectedCoordPaths: opts.coordPath ? [opts.coordPath] : [],
+    // Rail constraint state
+    railConstraintActive: false,
+    railEdge: null, // Edge that was grabbed
+    railDirection: null, // Determined rail direction
+    railBearing: null // Bearing to constrain movement to
   };
 
   this.setSelected(featureId);
@@ -157,8 +176,9 @@ DirectSelect.onSetup = function(opts) {
 DirectSelect.onStop = function() {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
-  // Clean up movement vector on mode exit
+  // Clean up visualizations on mode exit
   removeMovementVector(this.map);
+  removeRailIndicator(this.map);
 };
 
 DirectSelect.toDisplayFeatures = function(state, geojson, push) {
@@ -232,8 +252,44 @@ DirectSelect.onDrag = function(state, e) {
   e.originalEvent.stopPropagation();
   let lngLat = e.lngLat;
 
+  // Handle rail constraint when edge was grabbed
+  if (state.railEdge && state.dragMoveStartLocation) {
+    // Continuously determine rail direction based on current mouse position
+    const railDir = determineRailDirection(
+      state.dragMoveStartLocation,
+      lngLat,
+      state.railEdge.bearing,
+      15 // Angular tolerance in degrees
+    );
+
+    if (railDir) {
+      // Within tolerance - snap to rail
+      state.railConstraintActive = true;
+      state.railDirection = railDir.name;
+      state.railBearing = railDir.bearing;
+
+      // Show L-shaped indicator at grab point
+      showRailIndicator(
+        this.map,
+        state.dragMoveStartLocation,
+        state.railEdge.bearing,
+        state.railBearing
+      );
+
+      // Constrain movement to current rail direction
+      lngLat = constrainToRail(state.dragMoveStartLocation, lngLat, state.railBearing);
+    } else {
+      // Outside tolerance - allow free movement
+      state.railConstraintActive = false;
+      removeRailIndicator(this.map);
+    }
+  }
+
   if (state.selectedCoordPaths.length === 1) {
-    lngLat = this._ctx.snapping.snapCoord(e.lngLat);
+    // Apply snapping after rail constraint
+    if (!state.railConstraintActive) {
+      lngLat = this._ctx.snapping.snapCoord(lngLat);
+    }
     // following the dragVertex() path below seems to cause a lag where our point
     // ends up one step behind the snapped location
     state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
