@@ -2634,27 +2634,126 @@ DrawLineStringDistance.updateParallelLineIndicators = function (
     }
   };
 
-  const featureCollection = {
-    type: 'FeatureCollection',
-    features: [extendedLineFeature]
+  // Calculate the orthogonal connector line from lastVertex to closest point on extended line
+  const lastVertexPoint = turf.point(lastVertex);
+  const extendedLine = turf.lineString([
+    extendedStart.geometry.coordinates,
+    extendedEnd.geometry.coordinates
+  ]);
+  const closestPoint = turf.nearestPointOnLine(extendedLine, lastVertexPoint);
+  const connectorDistance = turf.distance(lastVertexPoint, closestPoint, { units: 'meters' });
+
+  // Create orthogonal connector line feature
+  const connectorLineFeature = {
+    type: 'Feature',
+    properties: { isOrthogonalConnector: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+        lastVertex,
+        closestPoint.geometry.coordinates
+      ]
+    }
   };
 
-  // Render extended line
+  // Calculate midpoint for distance label
+  const connectorMidpoint = turf.midpoint(lastVertexPoint, closestPoint);
+
+  // Calculate bearing of the connector line for label rotation
+  const connectorBearing = turf.bearing(lastVertexPoint, closestPoint);
+
+  // Calculate label rotation (same logic as movement_vector.js)
+  let labelRotation = connectorBearing - 90;
+  labelRotation = ((labelRotation % 360) + 360) % 360;
+  // Flip if upside down
+  if (labelRotation > 90 && labelRotation < 270) {
+    labelRotation = (labelRotation + 180) % 360;
+  }
+
+  // Offset the label 3 meters perpendicular to the connector line
+  const offsetDistance = 3 / 1000; // 3 meters in kilometers
+  const perpendicularBearing = connectorBearing - 90; // 90 degrees left
+  const offsetMidpoint = turf.destination(
+    connectorMidpoint,
+    offsetDistance,
+    perpendicularBearing,
+    { units: 'kilometers' }
+  );
+
+  // Create label feature with formatted distance
+  const labelFeature = {
+    type: 'Feature',
+    properties: {
+      distance: `${connectorDistance.toFixed(1)}m`,
+      rotation: labelRotation
+    },
+    geometry: {
+      type: 'Point',
+      coordinates: offsetMidpoint.geometry.coordinates
+    }
+  };
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [extendedLineFeature, connectorLineFeature, labelFeature]
+  };
+
+  // Render extended line, connector line, and label
   if (!map.getSource('parallel-line-indicators')) {
     map.addSource('parallel-line-indicators', {
       type: 'geojson',
       data: featureCollection
     });
 
+    // Add parallel extended line layer
     map.addLayer({
       id: 'parallel-line-indicators',
       type: 'line',
       source: 'parallel-line-indicators',
+      filter: ['==', ['get', 'isParallelExtendedLine'], true],
       paint: {
         'line-color': '#000000',
         'line-width': 1,
         'line-opacity': 0.3,
         'line-dasharray': [4, 4]
+      }
+    });
+
+    // Add orthogonal connector line layer
+    map.addLayer({
+      id: 'parallel-line-indicators-connector',
+      type: 'line',
+      source: 'parallel-line-indicators',
+      filter: ['==', ['get', 'isOrthogonalConnector'], true],
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 0.3,
+        'line-dasharray': [4, 4]
+      }
+    });
+
+    // Add label layer
+    map.addLayer({
+      id: 'parallel-line-indicators-label',
+      type: 'symbol',
+      source: 'parallel-line-indicators',
+      filter: ['==', ['geometry-type'], 'Point'],
+      layout: {
+        'text-field': ['get', 'distance'],
+        'text-size': 10,
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-offset': [0, 0],
+        'text-anchor': 'center',
+        'text-rotate': ['get', 'rotation'],
+        'text-rotation-alignment': 'map',
+        'text-pitch-alignment': 'map',
+        'text-allow-overlap': true,
+        'text-ignore-placement': true
+      },
+      paint: {
+        'text-color': '#000000',
+        'text-opacity': 1
       }
     });
   } else {
@@ -2666,10 +2765,18 @@ DrawLineStringDistance.removeParallelLineIndicators = function (state) {
   const map = this.map;
   if (!map) return;
 
-  // Remove extended line
+  // Remove all layers
+  if (map.getLayer && map.getLayer('parallel-line-indicators-label')) {
+    map.removeLayer('parallel-line-indicators-label');
+  }
+  if (map.getLayer && map.getLayer('parallel-line-indicators-connector')) {
+    map.removeLayer('parallel-line-indicators-connector');
+  }
   if (map.getLayer && map.getLayer('parallel-line-indicators')) {
     map.removeLayer('parallel-line-indicators');
   }
+
+  // Remove source
   if (map.getSource && map.getSource('parallel-line-indicators')) {
     map.removeSource('parallel-line-indicators');
   }
