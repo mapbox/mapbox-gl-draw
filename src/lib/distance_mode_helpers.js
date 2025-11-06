@@ -600,6 +600,77 @@ export function resolveSnapConflicts(options) {
 }
 
 /**
+ * Calculate the perpendicular point on a line from a given vertex
+ * Returns the point on the line where a perpendicular from the vertex intersects
+ * Also returns the distance from cursor to this perpendicular point
+ *
+ * @param {Array} fromVertex - The vertex to draw perpendicular from [lng, lat]
+ * @param {Object} lineSegment - Line segment {start, end}
+ * @param {Object} cursorPosition - Current cursor position {lng, lat}
+ * @returns {Object|null} {coord: [lng, lat], distanceFromCursor: meters} or null if no intersection
+ */
+export function calculatePerpendicularToLine(fromVertex, lineSegment, cursorPosition) {
+  const vertexPoint = turf.point(fromVertex);
+  const lineStart = turf.point(lineSegment.start);
+  const lineEnd = turf.point(lineSegment.end);
+
+  // Calculate the bearing of the line
+  const lineBearing = turf.bearing(lineStart, lineEnd);
+
+  // Calculate perpendicular bearings (both directions)
+  const perpBearing1 = lineBearing + 90;
+  const perpBearing2 = lineBearing - 90;
+
+  // Create extended line segment (extend in both directions)
+  const extendedLineStart = turf.destination(lineStart, 0.1, lineBearing + 180, { units: 'kilometers' });
+  const extendedLineEnd = turf.destination(lineEnd, 0.1, lineBearing, { units: 'kilometers' });
+  const extendedLine = turf.lineString([
+    extendedLineStart.geometry.coordinates,
+    extendedLineEnd.geometry.coordinates
+  ]);
+
+  // Try both perpendicular directions
+  let bestIntersection = null;
+  let minDistance = Infinity;
+
+  for (const perpBearing of [perpBearing1, perpBearing2]) {
+    // Create perpendicular line from vertex (extended in both directions)
+    const perpStart = turf.destination(vertexPoint, 0.1, perpBearing + 180, { units: 'kilometers' });
+    const perpEnd = turf.destination(vertexPoint, 0.1, perpBearing, { units: 'kilometers' });
+    const perpLine = turf.lineString([
+      perpStart.geometry.coordinates,
+      perpEnd.geometry.coordinates
+    ]);
+
+    try {
+      // Find intersection
+      const intersections = turf.lineIntersect(perpLine, extendedLine);
+
+      if (intersections.features.length > 0) {
+        const intersectionCoord = intersections.features[0].geometry.coordinates;
+        const intersectionPoint = turf.point(intersectionCoord);
+
+        // Calculate distance from intersection to cursor
+        const cursorPoint = turf.point([cursorPosition.lng, cursorPosition.lat]);
+        const distanceFromCursor = turf.distance(intersectionPoint, cursorPoint, { units: 'meters' });
+
+        if (distanceFromCursor < minDistance) {
+          minDistance = distanceFromCursor;
+          bestIntersection = {
+            coord: intersectionCoord,
+            distanceFromCursor: distanceFromCursor
+          };
+        }
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+
+  return bestIntersection;
+}
+
+/**
  * Check if clicking near an extended guideline intersection point.
  * This handles the logic for detecting when the cursor is near an intersection
  * between an extended guideline and another line feature.

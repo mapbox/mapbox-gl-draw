@@ -14,6 +14,7 @@ import {
   getParallelBearing,
   resolveSnapConflicts,
   snapToNearbyVertex,
+  calculatePerpendicularToLine,
 } from "../lib/distance_mode_helpers.js";
 
 const DrawLineStringDistance = {};
@@ -1138,6 +1139,20 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
   }
 
+  // Check for perpendicular-to-line snap (when snapping to a line)
+  let perpendicularToLineSnap = null;
+  if (!extendedGuidelinesActive && state.vertices.length >= 1 && snapInfo && snapInfo.type === "line") {
+    const perpPoint = calculatePerpendicularToLine(lastVertex, snapInfo.segment, e.lngLat);
+    if (perpPoint) {
+      perpendicularToLineSnap = {
+        coord: perpPoint.coord,
+        distanceFromCursor: perpPoint.distanceFromCursor,
+        lineSegment: snapInfo.segment,
+        lineBearing: snapInfo.bearing
+      };
+    }
+  }
+
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
     !extendedGuidelinesActive &&
@@ -1158,6 +1173,61 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   });
   orthogonalMatch = resolved.orthogonalMatch;
   parallelLineMatch = resolved.parallelLineMatch;
+
+  // Check if perpendicular-to-line snap should override regular line snap
+  // This happens when cursor is close to the perpendicular point (within snap tolerance)
+  const snapTolerance = this._ctx.options.snapDistance || 20; // pixels
+  const metersPerPixel = 156543.03392 * Math.cos(e.lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+  const snapToleranceMeters = snapTolerance * metersPerPixel;
+
+  let isPerpendicularToLineSnap = false;
+  if (perpendicularToLineSnap && perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters) {
+    // Within snap tolerance - check if perpendicular snap should win based on proximity
+    // Compare with orthogonal and parallel snaps
+    let shouldUsePerpendicular = true;
+
+    if (orthogonalMatch !== null) {
+      // Calculate distance to orthogonal snap point
+      const orthogonalPoint = turf.destination(from, 0.1, orthogonalMatch.bearing, { units: 'kilometers' });
+      const orthogonalDist = turf.distance(
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        orthogonalPoint,
+        { units: 'meters' }
+      );
+      if (orthogonalDist < perpendicularToLineSnap.distanceFromCursor) {
+        shouldUsePerpendicular = false;
+      }
+    }
+
+    if (shouldUsePerpendicular && parallelLineMatch !== null) {
+      // Calculate distance to parallel snap point
+      const parallelPoint = turf.destination(from, 0.1, parallelLineMatch.bearing, { units: 'kilometers' });
+      const parallelDist = turf.distance(
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        parallelPoint,
+        { units: 'meters' }
+      );
+      if (parallelDist < perpendicularToLineSnap.distanceFromCursor) {
+        shouldUsePerpendicular = false;
+      }
+    }
+
+    if (shouldUsePerpendicular) {
+      // Override snapInfo to use perpendicular point as a point snap
+      snapInfo = {
+        type: "point",
+        coord: perpendicularToLineSnap.coord,
+        snappedFeature: snapInfo.snappedFeature
+      };
+      isPerpendicularToLineSnap = true;
+      // Clear orthogonal and parallel snaps since perpendicular won
+      orthogonalMatch = null;
+      parallelLineMatch = null;
+    }
+  }
+
+  // Store perpendicular-to-line snap state for indicator
+  state.perpendicularToLineSnap = isPerpendicularToLineSnap ? perpendicularToLineSnap : null;
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
@@ -1655,6 +1725,20 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
   }
 
+  // Check for perpendicular-to-line snap (when snapping to a line)
+  let perpendicularToLineSnap = null;
+  if (!extendedGuidelinesActive && state.vertices.length >= 1 && snapInfo && snapInfo.type === "line") {
+    const perpPoint = calculatePerpendicularToLine(lastVertex, snapInfo.segment, lngLat);
+    if (perpPoint) {
+      perpendicularToLineSnap = {
+        coord: perpPoint.coord,
+        distanceFromCursor: perpPoint.distanceFromCursor,
+        lineSegment: snapInfo.segment,
+        lineBearing: snapInfo.bearing
+      };
+    }
+  }
+
   // Check if BOTH regular orthogonal AND closing perpendicular are active
   const bothSnapsActive =
     !extendedGuidelinesActive &&
@@ -1675,6 +1759,61 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   });
   orthogonalMatch = resolved.orthogonalMatch;
   parallelLineMatch = resolved.parallelLineMatch;
+
+  // Check if perpendicular-to-line snap should override regular line snap
+  // This happens when cursor is close to the perpendicular point (within snap tolerance)
+  const snapTolerance = this._ctx.options.snapDistance || 20; // pixels
+  const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+  const snapToleranceMeters = snapTolerance * metersPerPixel;
+
+  let isPerpendicularToLineSnap = false;
+  if (perpendicularToLineSnap && perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters) {
+    // Within snap tolerance - check if perpendicular snap should win based on proximity
+    // Compare with orthogonal and parallel snaps
+    let shouldUsePerpendicular = true;
+
+    if (orthogonalMatch !== null) {
+      // Calculate distance to orthogonal snap point
+      const orthogonalPoint = turf.destination(from, 0.1, orthogonalMatch.bearing, { units: 'kilometers' });
+      const orthogonalDist = turf.distance(
+        turf.point([lngLat.lng, lngLat.lat]),
+        orthogonalPoint,
+        { units: 'meters' }
+      );
+      if (orthogonalDist < perpendicularToLineSnap.distanceFromCursor) {
+        shouldUsePerpendicular = false;
+      }
+    }
+
+    if (shouldUsePerpendicular && parallelLineMatch !== null) {
+      // Calculate distance to parallel snap point
+      const parallelPoint = turf.destination(from, 0.1, parallelLineMatch.bearing, { units: 'kilometers' });
+      const parallelDist = turf.distance(
+        turf.point([lngLat.lng, lngLat.lat]),
+        parallelPoint,
+        { units: 'meters' }
+      );
+      if (parallelDist < perpendicularToLineSnap.distanceFromCursor) {
+        shouldUsePerpendicular = false;
+      }
+    }
+
+    if (shouldUsePerpendicular) {
+      // Override snapInfo to use perpendicular point as a point snap
+      snapInfo = {
+        type: "point",
+        coord: perpendicularToLineSnap.coord,
+        snappedFeature: snapInfo.snappedFeature
+      };
+      isPerpendicularToLineSnap = true;
+      // Clear orthogonal and parallel snaps since perpendicular won
+      orthogonalMatch = null;
+      parallelLineMatch = null;
+    }
+  }
+
+  // Store perpendicular-to-line snap state for indicator
+  state.perpendicularToLineSnap = isPerpendicularToLineSnap ? perpendicularToLineSnap : null;
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
@@ -1944,7 +2083,47 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
 
   // Show right-angle indicators based on snap state
   // Note: bothSnapsActive case already handles showing both indicators above
-  if (
+  if (isPerpendicularToLineSnap && state.perpendicularToLineSnap) {
+    // Show right angle indicator at the perpendicular point
+    const perpSnap = state.perpendicularToLineSnap;
+    const snapPoint = turf.point(perpSnap.coord);
+
+    // Calculate bearing from last vertex to perpendicular point
+    const bearingToPerp = turf.bearing(turf.point(lastVertex), snapPoint);
+
+    // The indicator should always be on the side of the snapping line where the last vertex is
+    // Use cross product to determine which side: (snapPoint - lineStart) × (lastVertex - lineStart)
+    const lineStart = turf.point(perpSnap.lineSegment.start);
+    const lineEnd = turf.point(perpSnap.lineSegment.end);
+    const lastVertPoint = turf.point(lastVertex);
+
+    // Vectors from line start
+    const toSnap = [
+      perpSnap.coord[0] - lineStart.geometry.coordinates[0],
+      perpSnap.coord[1] - lineStart.geometry.coordinates[1]
+    ];
+    const toLastVert = [
+      lastVertPoint.geometry.coordinates[0] - lineStart.geometry.coordinates[0],
+      lastVertPoint.geometry.coordinates[1] - lineStart.geometry.coordinates[1]
+    ];
+
+    // Cross product: toSnap × toLastVert
+    const crossProduct = toSnap[0] * toLastVert[1] - toSnap[1] * toLastVert[0];
+
+    // If cross product is positive, lastVertex is on the left side of the vector from lineStart to snapPoint
+    // If negative, lastVertex is on the right side
+    // We want flipInside = false when lastVertex is on the left, true when on the right
+    const flipInside = crossProduct < 0;
+
+    this.updateRightAngleIndicator(
+      state,
+      perpSnap.coord,
+      perpSnap.lineBearing,
+      bearingToPerp,
+      perpSnap.lineSegment,
+      flipInside
+    );
+  } else if (
     isOrthogonalSnap &&
     !usePointDirection &&
     orthogonalMatch &&
