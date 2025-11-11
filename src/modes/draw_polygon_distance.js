@@ -482,7 +482,7 @@ DrawPolygonDistance.getSnapInfo = function (lngLat) {
     if (result) {
       const bearing = turf.bearing(
         turf.point(result.segment.start),
-        turf.point(result.segment.end)
+        turf.point(result.segment.end),
       );
       return {
         type: "line",
@@ -500,7 +500,7 @@ DrawPolygonDistance.getSnapInfo = function (lngLat) {
 DrawPolygonDistance.getOrthogonalBearing = function (
   state,
   currentBearing,
-  tolerance = 5
+  tolerance = 5,
 ) {
   if (!state.snapEnabled) {
     return null;
@@ -508,9 +508,9 @@ DrawPolygonDistance.getOrthogonalBearing = function (
 
   // Cache key based on state that affects orthogonal bearings
   // Use 1-degree precision instead of tolerance-based quantization to avoid geometric drift
-  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${
-    Math.round(currentBearing)
-  }`;
+  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${Math.round(
+    currentBearing,
+  )}`;
 
   if (
     state.orthogonalBearingCache &&
@@ -613,7 +613,7 @@ DrawPolygonDistance.updateRightAngleIndicator = function (
   cornerVertex,
   referenceBearing,
   nextBearing,
-  referenceSegment
+  referenceSegment,
 ) {
   // Create L-shaped indicator that forms a square with the two line segments
   const cornerPoint = turf.point(cornerVertex);
@@ -623,7 +623,7 @@ DrawPolygonDistance.updateRightAngleIndicator = function (
     cornerPoint,
     2 / 1000,
     referenceBearing + 180,
-    { units: "kilometers" }
+    { units: "kilometers" },
   );
 
   // Point 2: The diagonal corner of the square - from point1, go 2m perpendicular (along next segment direction)
@@ -631,7 +631,7 @@ DrawPolygonDistance.updateRightAngleIndicator = function (
     turf.point(point1.geometry.coordinates),
     2 / 1000,
     nextBearing,
-    { units: "kilometers" }
+    { units: "kilometers" },
   );
 
   // Point 3: 2m forward along next segment
@@ -685,7 +685,7 @@ DrawPolygonDistance.updateClosingRightAngleIndicator = function (
   cornerVertex,
   referenceBearing,
   nextBearing,
-  referenceSegment
+  referenceSegment,
 ) {
   // Create L-shaped indicator for closing perpendicular (always inside)
   const cornerPoint = turf.point(cornerVertex);
@@ -698,7 +698,7 @@ DrawPolygonDistance.updateClosingRightAngleIndicator = function (
     turf.point(point1.geometry.coordinates),
     2 / 1000,
     nextBearing + 180,
-    { units: "kilometers" }
+    { units: "kilometers" },
   );
   const point3 = turf.destination(cornerPoint, 2 / 1000, nextBearing + 180, {
     units: "kilometers",
@@ -760,7 +760,7 @@ DrawPolygonDistance.updateParallelLineIndicators = function (
   state,
   lastVertex,
   previewVertex,
-  matchedLine
+  matchedLine,
 ) {
   const map = this.map;
   if (!map) return;
@@ -771,7 +771,7 @@ DrawPolygonDistance.updateParallelLineIndicators = function (
   // Calculate bearing of the snap line
   const bearing = turf.bearing(
     turf.point(coords[0]),
-    turf.point(coords[coords.length - 1])
+    turf.point(coords[coords.length - 1]),
   );
 
   // Extend the line 200m in both directions (same as extended guidelines)
@@ -779,48 +779,47 @@ DrawPolygonDistance.updateParallelLineIndicators = function (
     turf.point(coords[0]),
     0.2,
     bearing + 180,
-    { units: 'kilometers' }
+    { units: "kilometers" },
   );
   const extendedEnd = turf.destination(
     turf.point(coords[coords.length - 1]),
     0.2,
     bearing,
-    { units: 'kilometers' }
+    { units: "kilometers" },
   );
 
   // Create extended line feature
   const extendedLineFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isParallelExtendedLine: true },
     geometry: {
-      type: 'LineString',
+      type: "LineString",
       coordinates: [
         extendedStart.geometry.coordinates,
-        extendedEnd.geometry.coordinates
-      ]
-    }
+        extendedEnd.geometry.coordinates,
+      ],
+    },
   };
 
   // Calculate the orthogonal connector line from lastVertex to closest point on extended line
   const lastVertexPoint = turf.point(lastVertex);
   const extendedLine = turf.lineString([
     extendedStart.geometry.coordinates,
-    extendedEnd.geometry.coordinates
+    extendedEnd.geometry.coordinates,
   ]);
   const closestPoint = turf.nearestPointOnLine(extendedLine, lastVertexPoint);
-  const connectorDistance = turf.distance(lastVertexPoint, closestPoint, { units: 'meters' });
+  const connectorDistance = turf.distance(lastVertexPoint, closestPoint, {
+    units: "meters",
+  });
 
   // Create orthogonal connector line feature
   const connectorLineFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isOrthogonalConnector: true },
     geometry: {
-      type: 'LineString',
-      coordinates: [
-        lastVertex,
-        closestPoint.geometry.coordinates
-      ]
-    }
+      type: "LineString",
+      coordinates: [lastVertex, closestPoint.geometry.coordinates],
+    },
   };
 
   // Calculate midpoint for distance label
@@ -844,87 +843,87 @@ DrawPolygonDistance.updateParallelLineIndicators = function (
     connectorMidpoint,
     offsetDistance,
     perpendicularBearing,
-    { units: 'kilometers' }
+    { units: "kilometers" },
   );
 
   // Create label feature with formatted distance
   const labelFeature = {
-    type: 'Feature',
+    type: "Feature",
     properties: {
       distance: `${connectorDistance.toFixed(1)}m`,
-      rotation: labelRotation
+      rotation: labelRotation,
     },
     geometry: {
-      type: 'Point',
-      coordinates: offsetMidpoint.geometry.coordinates
-    }
+      type: "Point",
+      coordinates: offsetMidpoint.geometry.coordinates,
+    },
   };
 
   const featureCollection = {
-    type: 'FeatureCollection',
-    features: [extendedLineFeature, connectorLineFeature, labelFeature]
+    type: "FeatureCollection",
+    features: [extendedLineFeature, connectorLineFeature, labelFeature],
   };
 
   // Render extended line, connector line, and label
-  if (!map.getSource('parallel-line-indicators')) {
-    map.addSource('parallel-line-indicators', {
-      type: 'geojson',
-      data: featureCollection
+  if (!map.getSource("parallel-line-indicators")) {
+    map.addSource("parallel-line-indicators", {
+      type: "geojson",
+      data: featureCollection,
     });
 
     // Add parallel extended line layer
     map.addLayer({
-      id: 'parallel-line-indicators',
-      type: 'line',
-      source: 'parallel-line-indicators',
-      filter: ['==', ['get', 'isParallelExtendedLine'], true],
+      id: "parallel-line-indicators",
+      type: "line",
+      source: "parallel-line-indicators",
+      filter: ["==", ["get", "isParallelExtendedLine"], true],
       paint: {
-        'line-color': '#000000',
-        'line-width': 1,
-        'line-opacity': 0.3,
-        'line-dasharray': [4, 4]
-      }
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-opacity": 0.3,
+        "line-dasharray": [4, 4],
+      },
     });
 
     // Add orthogonal connector line layer
     map.addLayer({
-      id: 'parallel-line-indicators-connector',
-      type: 'line',
-      source: 'parallel-line-indicators',
-      filter: ['==', ['get', 'isOrthogonalConnector'], true],
+      id: "parallel-line-indicators-connector",
+      type: "line",
+      source: "parallel-line-indicators",
+      filter: ["==", ["get", "isOrthogonalConnector"], true],
       paint: {
-        'line-color': '#000000',
-        'line-width': 1,
-        'line-opacity': 0.3,
-        'line-dasharray': [4, 4]
-      }
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-opacity": 0.3,
+        "line-dasharray": [4, 4],
+      },
     });
 
     // Add label layer
     map.addLayer({
-      id: 'parallel-line-indicators-label',
-      type: 'symbol',
-      source: 'parallel-line-indicators',
-      filter: ['==', ['geometry-type'], 'Point'],
+      id: "parallel-line-indicators-label",
+      type: "symbol",
+      source: "parallel-line-indicators",
+      filter: ["==", ["geometry-type"], "Point"],
       layout: {
-        'text-field': ['get', 'distance'],
-        'text-size': 10,
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-offset': [0, 0],
-        'text-anchor': 'center',
-        'text-rotate': ['get', 'rotation'],
-        'text-rotation-alignment': 'map',
-        'text-pitch-alignment': 'map',
-        'text-allow-overlap': true,
-        'text-ignore-placement': true
+        "text-field": ["get", "distance"],
+        "text-size": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0],
+        "text-anchor": "center",
+        "text-rotate": ["get", "rotation"],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
       },
       paint: {
-        'text-color': '#000000',
-        'text-opacity': 1
-      }
+        "text-color": "#000000",
+        "text-opacity": 1,
+      },
     });
   } else {
-    map.getSource('parallel-line-indicators').setData(featureCollection);
+    map.getSource("parallel-line-indicators").setData(featureCollection);
   }
 };
 
@@ -933,19 +932,19 @@ DrawPolygonDistance.removeParallelLineIndicators = function (state) {
   if (!map) return;
 
   // Remove all layers
-  if (map.getLayer && map.getLayer('parallel-line-indicators-label')) {
-    map.removeLayer('parallel-line-indicators-label');
+  if (map.getLayer && map.getLayer("parallel-line-indicators-label")) {
+    map.removeLayer("parallel-line-indicators-label");
   }
-  if (map.getLayer && map.getLayer('parallel-line-indicators-connector')) {
-    map.removeLayer('parallel-line-indicators-connector');
+  if (map.getLayer && map.getLayer("parallel-line-indicators-connector")) {
+    map.removeLayer("parallel-line-indicators-connector");
   }
-  if (map.getLayer && map.getLayer('parallel-line-indicators')) {
-    map.removeLayer('parallel-line-indicators');
+  if (map.getLayer && map.getLayer("parallel-line-indicators")) {
+    map.removeLayer("parallel-line-indicators");
   }
 
   // Remove source
-  if (map.getSource && map.getSource('parallel-line-indicators')) {
-    map.removeSource('parallel-line-indicators');
+  if (map.getSource && map.getSource("parallel-line-indicators")) {
+    map.removeSource("parallel-line-indicators");
   }
 };
 
@@ -966,28 +965,66 @@ DrawPolygonDistance.detectHoveredIntersectionPoint = function (state, e) {
 
   // Query features at the hover point from snap buffer layers
   const bufferLayers = this._ctx.snapping.bufferLayers.map(
-    (layerId) => "_snap_buffer_" + layerId
+    (layerId) => "_snap_buffer_" + layerId,
   );
   const featuresAtPoint = map.queryRenderedFeatures(e.point, {
     layers: bufferLayers,
   });
 
-  // Look for a snappingPoint feature with guidelineIds
-  const intersectionPoint = featuresAtPoint.find((feature) => {
+  // DEBUG: Log all features at the hover point
+  if (featuresAtPoint.length > 0) {
+    console.log('===== FEATURES AT HOVER POINT =====');
+    featuresAtPoint.forEach((f, idx) => {
+      console.log(`Feature ${idx}:`, {
+        geometry: f.geometry?.type,
+        properties: f.properties,
+        layer: f.layer?.id,
+        source: f.source
+      });
+    });
+    console.log('===================================');
+  }
+
+  // Look for a midpoint feature FIRST (point with isMidpoint === true)
+  // Midpoints also have type: 'snappingPoint', so check for them before intersections
+  const midpoint = featuresAtPoint.find((feature) => {
     return (
       feature.properties &&
       feature.properties.type === "snappingPoint" &&
+      feature.properties.isMidpoint === true &&
       feature.properties.guidelineIds
     );
   });
 
-  if (!intersectionPoint) return null;
+  if (midpoint) {
+    return {
+      coord: midpoint.geometry.coordinates,
+      feature: midpoint,
+      guidelineIds: JSON.parse(midpoint.properties.guidelineIds),
+      type: "midpoint",
+    };
+  }
 
-  return {
-    coord: intersectionPoint.geometry.coordinates,
-    guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
-    feature: intersectionPoint,
-  };
+  // Look for an intersection point (snappingPoint with multiple guidelines, NOT a midpoint)
+  const intersectionPoint = featuresAtPoint.find((feature) => {
+    return (
+      feature.properties &&
+      feature.properties.type === "snappingPoint" &&
+      feature.properties.guidelineIds &&
+      feature.properties.isMidpoint !== true
+    );
+  });
+
+  if (intersectionPoint) {
+    return {
+      coord: intersectionPoint.geometry.coordinates,
+      guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
+      feature: intersectionPoint,
+      type: "intersection",
+    };
+  }
+
+  return null;
 };
 
 DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
@@ -995,6 +1032,123 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
   if (!map) return [];
 
   const extendedLines = [];
+
+  // Handle midpoint type - create perpendicular guideline
+  if (intersectionInfo.type === "midpoint") {
+    const { coord, guidelineIds } = intersectionInfo;
+
+    // Get the parent line from the guideline ID
+    const guidelineId = guidelineIds[0]; // Midpoints have only one parent guideline
+    const sourceId = intersectionInfo.feature.source;
+    const source = map.getSource(sourceId);
+    if (!source) return [];
+
+    // Get all features from the source
+    const allFeatures = map.querySourceFeatures(sourceId, {
+      sourceLayer: intersectionInfo.feature.sourceLayer,
+    });
+
+    const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
+    if (!guidelineFeature) return [];
+
+    const geometry = guidelineFeature.geometry;
+    let lineBearing;
+
+    // Calculate the bearing of the line segment containing the midpoint
+    if (geometry.type === "LineString") {
+      const coords = geometry.coordinates;
+      if (coords.length < 2) return [];
+
+      // Find the segment that contains this midpoint
+      let segmentBearing;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const start = coords[i];
+        const end = coords[i + 1];
+        const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+        // Check if this is close to our midpoint
+        const dist = turf.distance(turf.point(mid), turf.point(coord), {
+          units: "meters",
+        });
+        if (dist < 1) {
+          // Within 1 meter
+          segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+          break;
+        }
+      }
+
+      if (segmentBearing === undefined) {
+        // Fallback: use bearing from first to last point
+        segmentBearing = turf.bearing(
+          turf.point(coords[0]),
+          turf.point(coords[coords.length - 1]),
+        );
+      }
+
+      lineBearing = segmentBearing;
+    } else if (geometry.type === "MultiLineString") {
+      // Handle MultiLineString - find which line contains the midpoint
+      let segmentBearing;
+      for (const lineCoords of geometry.coordinates) {
+        if (lineCoords.length < 2) continue;
+
+        for (let i = 0; i < lineCoords.length - 1; i++) {
+          const start = lineCoords[i];
+          const end = lineCoords[i + 1];
+          const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+          const dist = turf.distance(turf.point(mid), turf.point(coord), {
+            units: "meters",
+          });
+          if (dist < 1) {
+            segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+            break;
+          }
+        }
+        if (segmentBearing !== undefined) break;
+      }
+
+      if (segmentBearing === undefined) return [];
+      lineBearing = segmentBearing;
+    } else {
+      return []; // Don't handle other geometry types
+    }
+
+    // Create perpendicular line (90 degrees to the original line)
+    const perpendicularBearing = lineBearing + 90;
+    const extensionDistance =
+      this._ctx.options.extendedGuidelineDistance || 0.2;
+
+    const extendedStart = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing + 180,
+      { units: "kilometers" },
+    );
+    const extendedEnd = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing,
+      { units: "kilometers" },
+    );
+
+    extendedLines.push({
+      type: "Feature",
+      properties: { isExtendedGuideline: true, isMidpointGuideline: true },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          extendedStart.geometry.coordinates,
+          coord,
+          extendedEnd.geometry.coordinates,
+        ],
+      },
+    });
+
+    return extendedLines;
+  }
+
+  // Handle intersection type - extend the original guidelines
   const { coord, guidelineIds } = intersectionInfo;
 
   // For each guideline ID, query the feature and extend it
@@ -1023,22 +1177,23 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
       // Calculate bearing from first to last point
       const bearing = turf.bearing(
         turf.point(coords[0]),
-        turf.point(coords[coords.length - 1])
+        turf.point(coords[coords.length - 1]),
       );
 
       // Extend by configured distance in each direction
-      const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+      const extensionDistance =
+        this._ctx.options.extendedGuidelineDistance || 0.2;
       const extendedStart = turf.destination(
         turf.point(coords[0]),
         extensionDistance,
         bearing + 180,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const extendedEnd = turf.destination(
         turf.point(coords[coords.length - 1]),
         extensionDistance,
         bearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
 
       extendedLines.push({
@@ -1060,21 +1215,22 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
 
         const bearing = turf.bearing(
           turf.point(lineCoords[0]),
-          turf.point(lineCoords[lineCoords.length - 1])
+          turf.point(lineCoords[lineCoords.length - 1]),
         );
 
-        const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+        const extensionDistance =
+          this._ctx.options.extendedGuidelineDistance || 0.2;
         const extendedStart = turf.destination(
           turf.point(lineCoords[0]),
           extensionDistance,
           bearing + 180,
-          { units: "kilometers" }
+          { units: "kilometers" },
         );
         const extendedEnd = turf.destination(
           turf.point(lineCoords[lineCoords.length - 1]),
           extensionDistance,
           bearing,
-          { units: "kilometers" }
+          { units: "kilometers" },
         );
 
         extendedLines.push({
@@ -1187,7 +1343,11 @@ DrawPolygonDistance.removeExtendedGuidelines = function (state) {
 
   // Remove event handlers
   if (state.extendedGuidelineMouseoverHandler) {
-    map.off("mousemove", bufferLayerId, state.extendedGuidelineMouseoverHandler);
+    map.off(
+      "mousemove",
+      bufferLayerId,
+      state.extendedGuidelineMouseoverHandler,
+    );
     state.extendedGuidelineMouseoverHandler = null;
   }
   if (state.extendedGuidelineMouseoutHandler) {
@@ -1232,7 +1392,11 @@ DrawPolygonDistance.removeExtendedGuidelines = function (state) {
   state.lastHoverPosition = null;
 };
 
-DrawPolygonDistance.showAngleReferenceLine = function (state, startPoint, referenceBearing) {
+DrawPolygonDistance.showAngleReferenceLine = function (
+  state,
+  startPoint,
+  referenceBearing,
+) {
   const map = this.map;
   if (!map) return;
 
@@ -1242,53 +1406,53 @@ DrawPolygonDistance.showAngleReferenceLine = function (state, startPoint, refere
     turf.point(startPoint),
     lineLength,
     referenceBearing,
-    { units: 'kilometers' }
+    { units: "kilometers" },
   );
   const refPoint2 = turf.destination(
     turf.point(startPoint),
     lineLength,
     referenceBearing + 180,
-    { units: 'kilometers' }
+    { units: "kilometers" },
   );
 
   const referenceLine = {
-    type: 'Feature',
+    type: "Feature",
     properties: { isAngleReference: true },
     geometry: {
-      type: 'LineString',
+      type: "LineString",
       coordinates: [
         refPoint2.geometry.coordinates,
         startPoint,
-        refPoint1.geometry.coordinates
-      ]
-    }
+        refPoint1.geometry.coordinates,
+      ],
+    },
   };
 
   const featureCollection = {
-    type: 'FeatureCollection',
-    features: [referenceLine]
+    type: "FeatureCollection",
+    features: [referenceLine],
   };
 
   // Create or update the visual layer for angle reference line
-  if (!map.getSource('angle-reference-line')) {
-    map.addSource('angle-reference-line', {
-      type: 'geojson',
-      data: featureCollection
+  if (!map.getSource("angle-reference-line")) {
+    map.addSource("angle-reference-line", {
+      type: "geojson",
+      data: featureCollection,
     });
 
     map.addLayer({
-      id: 'angle-reference-line',
-      type: 'line',
-      source: 'angle-reference-line',
+      id: "angle-reference-line",
+      type: "line",
+      source: "angle-reference-line",
       paint: {
-        'line-color': '#0066ff',
-        'line-width': 1.5,
-        'line-opacity': 0.5,
-        'line-dasharray': [2, 2]
-      }
+        "line-color": "#0066ff",
+        "line-width": 1.5,
+        "line-opacity": 0.5,
+        "line-dasharray": [2, 2],
+      },
     });
   } else {
-    map.getSource('angle-reference-line').setData(featureCollection);
+    map.getSource("angle-reference-line").setData(featureCollection);
   }
 };
 
@@ -1296,11 +1460,11 @@ DrawPolygonDistance.removeAngleReferenceLine = function () {
   const map = this.map;
   if (!map) return;
 
-  if (map.getLayer && map.getLayer('angle-reference-line')) {
-    map.removeLayer('angle-reference-line');
+  if (map.getLayer && map.getLayer("angle-reference-line")) {
+    map.removeLayer("angle-reference-line");
   }
-  if (map.getSource && map.getSource('angle-reference-line')) {
-    map.removeSource('angle-reference-line');
+  if (map.getSource && map.getSource("angle-reference-line")) {
+    map.removeSource("angle-reference-line");
   }
 };
 
@@ -1318,13 +1482,15 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         this.map,
         state,
         e,
-        this.getSnapInfo.bind(this)
+        this.getSnapInfo.bind(this),
       );
 
-      vertexCoord = intersectionCoord || (() => {
-        const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-        return [snappedCoord.lng, snappedCoord.lat];
-      })();
+      vertexCoord =
+        intersectionCoord ||
+        (() => {
+          const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
+          return [snappedCoord.lng, snappedCoord.lat];
+        })();
     }
 
     state.vertices.push(vertexCoord);
@@ -1343,7 +1509,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       this._ctx,
       this.map,
       e,
-      snappedCoord
+      snappedCoord,
     );
     if (underlyingLineInfo) {
       state.snappedLineBearing = underlyingLineInfo.bearing;
@@ -1360,9 +1526,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     // Check for polygon closing
     if (state.vertices.length >= 3) {
       const firstVertex = state.vertices[0];
-      const dist = turf.distance(turf.point(firstVertex), turf.point(newVertex), {
-        units: "meters",
-      });
+      const dist = turf.distance(
+        turf.point(firstVertex),
+        turf.point(newVertex),
+        {
+          units: "meters",
+        },
+      );
 
       if (dist < 10) {
         this.finishDrawing(state);
@@ -1374,7 +1544,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     state.polygon.updateCoordinate(
       `0.${state.vertices.length - 1}`,
       newVertex[0],
-      newVertex[1]
+      newVertex[1],
     );
 
     // Store snapped line info if snapped to a line
@@ -1426,9 +1596,11 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         snapInfo = this.getSnapInfo(e.lngLat);
 
         // Check if there are any nearby lines that intersect with the extended guideline
-        const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+        const bufferLayers = snapping.bufferLayers.map(
+          (layerId) => "_snap_buffer_" + layerId,
+        );
         const allFeaturesAtPoint = this.map.queryRenderedFeatures(e.point, {
-          layers: bufferLayers
+          layers: bufferLayers,
         });
 
         // Look for a non-extended-guideline line feature
@@ -1437,40 +1609,51 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
             return false;
           }
           const geomType = feature.geometry.type;
-          return geomType === 'LineString' ||
-                 geomType === 'MultiLineString' ||
-                 geomType === 'Polygon' ||
-                 geomType === 'MultiPolygon';
+          return (
+            geomType === "LineString" ||
+            geomType === "MultiLineString" ||
+            geomType === "Polygon" ||
+            geomType === "MultiPolygon"
+          );
         });
 
         if (otherLineFeature && snapInfo) {
           let otherGeom = otherLineFeature.geometry;
-          if (otherGeom.type === 'Polygon' || otherGeom.type === 'MultiPolygon') {
+          if (
+            otherGeom.type === "Polygon" ||
+            otherGeom.type === "MultiPolygon"
+          ) {
             otherGeom = turf.polygonToLine(otherGeom).geometry;
           }
 
-          if (otherGeom.type === 'LineString' || otherGeom.type === 'MultiLineString') {
+          if (
+            otherGeom.type === "LineString" ||
+            otherGeom.type === "MultiLineString"
+          ) {
             const snapPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
-            const coords = otherGeom.type === 'LineString' ? otherGeom.coordinates : otherGeom.coordinates.flat();
+            const coords =
+              otherGeom.type === "LineString"
+                ? otherGeom.coordinates
+                : otherGeom.coordinates.flat();
 
             const result = findNearestSegment(coords, snapPoint);
             if (result) {
               const otherLineSnapInfo = {
-                type: 'line',
+                type: "line",
                 coord: snapInfo.coord,
                 bearing: turf.bearing(
                   turf.point(result.segment.start),
-                  turf.point(result.segment.end)
+                  turf.point(result.segment.end),
                 ),
                 segment: result.segment,
-                snappedFeature: otherLineFeature
+                snappedFeature: otherLineFeature,
               };
 
               const intersectionSnap = findExtendedGuidelineIntersection(
                 state.extendedGuidelines,
                 otherLineSnapInfo,
                 e.lngLat,
-                state.snapTolerance
+                state.snapTolerance,
               );
               if (intersectionSnap) {
                 snapInfo = intersectionSnap;
@@ -1481,12 +1664,12 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       } else {
         // Snapping to something else - check if it's a line that intersects with extended guideline
         const tempSnapInfo = this.getSnapInfo(e.lngLat);
-        if (tempSnapInfo && tempSnapInfo.type === 'line') {
+        if (tempSnapInfo && tempSnapInfo.type === "line") {
           const intersectionSnap = findExtendedGuidelineIntersection(
             state.extendedGuidelines,
             tempSnapInfo,
             e.lngLat,
-            state.snapTolerance
+            state.snapTolerance,
           );
           if (intersectionSnap) {
             snapInfo = intersectionSnap;
@@ -1502,7 +1685,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   // Calculate mouse bearing for orthogonal snap check
   const mouseBearing = turf.bearing(
     from,
-    turf.point([e.lngLat.lng, e.lngLat.lat])
+    turf.point([e.lngLat.lng, e.lngLat.lat]),
   );
 
   // Check for closing perpendicular snap (perpendicular to first segment)
@@ -1512,11 +1695,11 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     const secondVertex = state.vertices[1];
     const firstSegmentBearing = turf.bearing(
       turf.point(firstVertex),
-      turf.point(secondVertex)
+      turf.point(secondVertex),
     );
     const bearingToFirst = turf.bearing(
       turf.point([e.lngLat.lng, e.lngLat.lat]),
-      turf.point(firstVertex)
+      turf.point(firstVertex),
     );
 
     // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
@@ -1540,27 +1723,52 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   }
 
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
-  const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
+  const extendedGuidelinesActive =
+    state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  let orthogonalMatch = extendedGuidelinesActive
+    ? null
+    : this.getOrthogonalBearing(
+        state,
+        mouseBearing,
+        this._ctx.options.orthogonalSnapTolerance,
+      );
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
-    const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, e.lngLat);
-    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
+    const nearbyLines = findNearbyParallelLines(
+      this._ctx,
+      this.map,
+      lastVertex,
+      e.lngLat,
+    );
+    parallelLineMatch = getParallelBearing(
+      nearbyLines,
+      mouseBearing,
+      this._ctx.options.parallelSnapTolerance,
+    );
   }
 
   // Check for perpendicular-to-line snap (when snapping to a line)
   let perpendicularToLineSnap = null;
-  if (!extendedGuidelinesActive && state.vertices.length >= 1 && snapInfo && snapInfo.type === "line") {
-    const perpPoint = calculatePerpendicularToLine(lastVertex, snapInfo.segment, e.lngLat);
+  if (
+    !extendedGuidelinesActive &&
+    state.vertices.length >= 1 &&
+    snapInfo &&
+    snapInfo.type === "line"
+  ) {
+    const perpPoint = calculatePerpendicularToLine(
+      lastVertex,
+      snapInfo.segment,
+      e.lngLat,
+    );
     if (perpPoint) {
       perpendicularToLineSnap = {
         coord: perpPoint.coord,
         distanceFromCursor: perpPoint.distanceFromCursor,
         lineSegment: snapInfo.segment,
-        lineBearing: snapInfo.bearing
+        lineBearing: snapInfo.bearing,
       };
     }
   }
@@ -1581,7 +1789,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     lngLat: e.lngLat,
     closingPerpendicularSnap,
     proximityThreshold: this._ctx.options.parallelSnapProximityThreshold,
-    mouseBearing
+    mouseBearing,
   });
   orthogonalMatch = resolved.orthogonalMatch;
   parallelLineMatch = resolved.parallelLineMatch;
@@ -1589,22 +1797,32 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   // Check if perpendicular-to-line snap should override regular line snap
   // This happens when cursor is close to the perpendicular point (within snap tolerance)
   const snapTolerance = this._ctx.options.snapDistance || 20; // pixels
-  const metersPerPixel = 156543.03392 * Math.cos(e.lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+  const metersPerPixel =
+    (156543.03392 * Math.cos((e.lngLat.lat * Math.PI) / 180)) /
+    Math.pow(2, this.map.getZoom());
   const snapToleranceMeters = snapTolerance * metersPerPixel;
 
   let isPerpendicularToLineSnap = false;
-  if (perpendicularToLineSnap && perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters) {
+  if (
+    perpendicularToLineSnap &&
+    perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters
+  ) {
     // Within snap tolerance - check if perpendicular snap should win based on proximity
     // Compare with orthogonal and parallel snaps
     let shouldUsePerpendicular = true;
 
     if (orthogonalMatch !== null) {
       // Calculate distance to orthogonal snap point
-      const orthogonalPoint = turf.destination(from, 0.1, orthogonalMatch.bearing, { units: 'kilometers' });
+      const orthogonalPoint = turf.destination(
+        from,
+        0.1,
+        orthogonalMatch.bearing,
+        { units: "kilometers" },
+      );
       const orthogonalDist = turf.distance(
         turf.point([e.lngLat.lng, e.lngLat.lat]),
         orthogonalPoint,
-        { units: 'meters' }
+        { units: "meters" },
       );
       if (orthogonalDist < perpendicularToLineSnap.distanceFromCursor) {
         shouldUsePerpendicular = false;
@@ -1613,11 +1831,16 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
 
     if (shouldUsePerpendicular && parallelLineMatch !== null) {
       // Calculate distance to parallel snap point
-      const parallelPoint = turf.destination(from, 0.1, parallelLineMatch.bearing, { units: 'kilometers' });
+      const parallelPoint = turf.destination(
+        from,
+        0.1,
+        parallelLineMatch.bearing,
+        { units: "kilometers" },
+      );
       const parallelDist = turf.distance(
         turf.point([e.lngLat.lng, e.lngLat.lat]),
         parallelPoint,
-        { units: 'meters' }
+        { units: "meters" },
       );
       if (parallelDist < perpendicularToLineSnap.distanceFromCursor) {
         shouldUsePerpendicular = false;
@@ -1629,7 +1852,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       snapInfo = {
         type: "point",
         coord: perpendicularToLineSnap.coord,
-        snappedFeature: snapInfo.snappedFeature
+        snappedFeature: snapInfo.snappedFeature,
       };
       isPerpendicularToLineSnap = true;
       // Clear orthogonal and parallel snaps since perpendicular won
@@ -1639,7 +1862,9 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   }
 
   // Store perpendicular-to-line snap state for indicator
-  state.perpendicularToLineSnap = isPerpendicularToLineSnap ? perpendicularToLineSnap : null;
+  state.perpendicularToLineSnap = isPerpendicularToLineSnap
+    ? perpendicularToLineSnap
+    : null;
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
@@ -1708,7 +1933,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         lastVertex,
         state.currentDistance,
         snapInfo.segment,
-        [e.lngLat.lng, e.lngLat.lat]
+        [e.lngLat.lng, e.lngLat.lat],
       );
       if (circleLineIntersection) {
         newVertex = circleLineIntersection.coord;
@@ -1718,7 +1943,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
           from,
           state.currentDistance / 1000,
           bearingToUse,
-          { units: "kilometers" }
+          { units: "kilometers" },
         );
         newVertex = destinationPoint.geometry.coordinates;
       }
@@ -1728,7 +1953,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         from,
         state.currentDistance / 1000,
         bearingToUse,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       newVertex = destinationPoint.geometry.coordinates;
     }
@@ -1740,20 +1965,20 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing + 180,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
       end: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
     };
 
     const intersection = calculateLineIntersection(
       lastVertex,
       orthogonalMatch.bearing,
-      perpLine
+      perpLine,
     );
     if (intersection) {
       newVertex = intersection.coord;
@@ -1762,13 +1987,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       const mouseDistance = turf.distance(
         from,
         turf.point([e.lngLat.lng, e.lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         orthogonalMatch.bearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       newVertex = destinationPoint.geometry.coordinates;
     }
@@ -1783,20 +2008,20 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing + 180,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
       end: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
     };
 
     const intersection = calculateLineIntersection(
       lastVertex,
       mouseBearing,
-      perpLine
+      perpLine,
     );
     if (intersection) {
       newVertex = intersection.coord;
@@ -1805,13 +2030,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       const mouseDistance = turf.distance(
         from,
         turf.point([e.lngLat.lng, e.lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         mouseBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       newVertex = destinationPoint.geometry.coordinates;
     }
@@ -1820,7 +2045,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     const intersection = calculateLineIntersection(
       lastVertex,
       bearingToUse,
-      snapInfo.segment
+      snapInfo.segment,
     );
     if (intersection) {
       newVertex = intersection.coord;
@@ -1829,13 +2054,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       const mouseDistance = turf.distance(
         from,
         turf.point([e.lngLat.lng, e.lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         bearingToUse,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       newVertex = destinationPoint.geometry.coordinates;
     }
@@ -1850,13 +2075,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     const mouseDistance = turf.distance(
       from,
       turf.point([e.lngLat.lng, e.lngLat.lat]),
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
     const destinationPoint = turf.destination(
       from,
       mouseDistance,
       bearingToUse,
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
     newVertex = destinationPoint.geometry.coordinates;
   }
@@ -1887,7 +2112,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   state.polygon.updateCoordinate(
     `0.${state.vertices.length - 1}`,
     newVertex[0],
-    newVertex[1]
+    newVertex[1],
   );
 
   // Store snapped line info if snapped to a line
@@ -1948,7 +2173,10 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       // Start new debounce timer (500ms)
       state.hoverDebounceTimer = setTimeout(() => {
         // Extend and render guidelines
-        const extendedLines = this.extendGuidelines(state, intersectionPointInfo);
+        const extendedLines = this.extendGuidelines(
+          state,
+          intersectionPointInfo,
+        );
         state.extendedGuidelines = extendedLines;
         this.renderExtendedGuidelines(state, extendedLines);
       }, 500);
@@ -1990,13 +2218,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         } else {
           // Snapping to something else - check if it's a line that intersects with extended guideline
           const tempSnapInfo = this.getSnapInfo(lngLat);
-          if (tempSnapInfo && tempSnapInfo.type === 'line') {
+          if (tempSnapInfo && tempSnapInfo.type === "line") {
             // It's a line - check for intersection with extended guideline
             const intersectionSnap = findExtendedGuidelineIntersection(
               state.extendedGuidelines,
               tempSnapInfo,
               lngLat,
-              state.snapTolerance
+              state.snapTolerance,
             );
             if (intersectionSnap) {
               snapInfo = intersectionSnap;
@@ -2017,7 +2245,11 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       snapInfo.snappedFeature.properties &&
       snapInfo.snappedFeature.properties.isExtendedGuideline;
 
-    if (snapInfo && snapInfo.type === "line" && !isSnappingToExtendedGuideline) {
+    if (
+      snapInfo &&
+      snapInfo.type === "line" &&
+      !isSnappingToExtendedGuideline
+    ) {
       const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
       this.updateLineSegmentSplitLabels(state, snapInfo.segment, [
         snappedCoord.lng,
@@ -2029,13 +2261,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         this._ctx,
         this.map,
         e,
-        { lng: snapInfo.coord[0], lat: snapInfo.coord[1] }
+        { lng: snapInfo.coord[0], lat: snapInfo.coord[1] },
       );
       if (underlyingLineInfo && underlyingLineInfo.segment) {
         this.updateLineSegmentSplitLabels(
           state,
           underlyingLineInfo.segment,
-          snapInfo.coord
+          snapInfo.coord,
         );
       } else {
         this.removeLineSegmentSplitLabels(state);
@@ -2084,13 +2316,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       } else {
         // Snapping to something else - check if it's a line that intersects with extended guideline
         const tempSnapInfo = this.getSnapInfo(lngLat);
-        if (tempSnapInfo && tempSnapInfo.type === 'line') {
+        if (tempSnapInfo && tempSnapInfo.type === "line") {
           // It's a line - check for intersection with extended guideline
           const intersectionSnap = findExtendedGuidelineIntersection(
             state.extendedGuidelines,
             tempSnapInfo,
             lngLat,
-            state.snapTolerance
+            state.snapTolerance,
           );
           if (intersectionSnap) {
             snapInfo = intersectionSnap;
@@ -2116,11 +2348,11 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     const secondVertex = state.vertices[1];
     const firstSegmentBearing = turf.bearing(
       turf.point(firstVertex),
-      turf.point(secondVertex)
+      turf.point(secondVertex),
     );
     const bearingToFirst = turf.bearing(
       turf.point([lngLat.lng, lngLat.lat]),
-      turf.point(firstVertex)
+      turf.point(firstVertex),
     );
 
     // Check if bearing to first vertex is perpendicular to first segment (90° or 270°)
@@ -2144,27 +2376,52 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   }
 
   // Disable orthogonal/perpendicular snaps when extended guidelines are active
-  const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
+  const extendedGuidelinesActive =
+    state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  let orthogonalMatch = extendedGuidelinesActive
+    ? null
+    : this.getOrthogonalBearing(
+        state,
+        mouseBearing,
+        this._ctx.options.orthogonalSnapTolerance,
+      );
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
-    const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, lngLat);
-    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
+    const nearbyLines = findNearbyParallelLines(
+      this._ctx,
+      this.map,
+      lastVertex,
+      lngLat,
+    );
+    parallelLineMatch = getParallelBearing(
+      nearbyLines,
+      mouseBearing,
+      this._ctx.options.parallelSnapTolerance,
+    );
   }
 
   // Check for perpendicular-to-line snap (when snapping to a line)
   let perpendicularToLineSnap = null;
-  if (!extendedGuidelinesActive && state.vertices.length >= 1 && snapInfo && snapInfo.type === "line") {
-    const perpPoint = calculatePerpendicularToLine(lastVertex, snapInfo.segment, lngLat);
+  if (
+    !extendedGuidelinesActive &&
+    state.vertices.length >= 1 &&
+    snapInfo &&
+    snapInfo.type === "line"
+  ) {
+    const perpPoint = calculatePerpendicularToLine(
+      lastVertex,
+      snapInfo.segment,
+      lngLat,
+    );
     if (perpPoint) {
       perpendicularToLineSnap = {
         coord: perpPoint.coord,
         distanceFromCursor: perpPoint.distanceFromCursor,
         lineSegment: snapInfo.segment,
-        lineBearing: snapInfo.bearing
+        lineBearing: snapInfo.bearing,
       };
     }
   }
@@ -2185,7 +2442,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     lngLat,
     closingPerpendicularSnap,
     proximityThreshold: this._ctx.options.parallelSnapProximityThreshold,
-    mouseBearing
+    mouseBearing,
   });
   orthogonalMatch = resolved.orthogonalMatch;
   parallelLineMatch = resolved.parallelLineMatch;
@@ -2193,22 +2450,32 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   // Check if perpendicular-to-line snap should override regular line snap
   // This happens when cursor is close to the perpendicular point (within snap tolerance)
   const snapTolerance = this._ctx.options.snapDistance || 20; // pixels
-  const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+  const metersPerPixel =
+    (156543.03392 * Math.cos((lngLat.lat * Math.PI) / 180)) /
+    Math.pow(2, this.map.getZoom());
   const snapToleranceMeters = snapTolerance * metersPerPixel;
 
   let isPerpendicularToLineSnap = false;
-  if (perpendicularToLineSnap && perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters) {
+  if (
+    perpendicularToLineSnap &&
+    perpendicularToLineSnap.distanceFromCursor <= snapToleranceMeters
+  ) {
     // Within snap tolerance - check if perpendicular snap should win based on proximity
     // Compare with orthogonal and parallel snaps
     let shouldUsePerpendicular = true;
 
     if (orthogonalMatch !== null) {
       // Calculate distance to orthogonal snap point
-      const orthogonalPoint = turf.destination(from, 0.1, orthogonalMatch.bearing, { units: 'kilometers' });
+      const orthogonalPoint = turf.destination(
+        from,
+        0.1,
+        orthogonalMatch.bearing,
+        { units: "kilometers" },
+      );
       const orthogonalDist = turf.distance(
         turf.point([lngLat.lng, lngLat.lat]),
         orthogonalPoint,
-        { units: 'meters' }
+        { units: "meters" },
       );
       if (orthogonalDist < perpendicularToLineSnap.distanceFromCursor) {
         shouldUsePerpendicular = false;
@@ -2217,11 +2484,16 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
 
     if (shouldUsePerpendicular && parallelLineMatch !== null) {
       // Calculate distance to parallel snap point
-      const parallelPoint = turf.destination(from, 0.1, parallelLineMatch.bearing, { units: 'kilometers' });
+      const parallelPoint = turf.destination(
+        from,
+        0.1,
+        parallelLineMatch.bearing,
+        { units: "kilometers" },
+      );
       const parallelDist = turf.distance(
         turf.point([lngLat.lng, lngLat.lat]),
         parallelPoint,
-        { units: 'meters' }
+        { units: "meters" },
       );
       if (parallelDist < perpendicularToLineSnap.distanceFromCursor) {
         shouldUsePerpendicular = false;
@@ -2233,7 +2505,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       snapInfo = {
         type: "point",
         coord: perpendicularToLineSnap.coord,
-        snappedFeature: snapInfo.snappedFeature
+        snappedFeature: snapInfo.snappedFeature,
       };
       isPerpendicularToLineSnap = true;
       // Clear orthogonal and parallel snaps since perpendicular won
@@ -2243,7 +2515,9 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   }
 
   // Store perpendicular-to-line snap state for indicator
-  state.perpendicularToLineSnap = isPerpendicularToLineSnap ? perpendicularToLineSnap : null;
+  state.perpendicularToLineSnap = isPerpendicularToLineSnap
+    ? perpendicularToLineSnap
+    : null;
 
   // Determine reference bearing for angle input
   let referenceBearing = 0; // Default to true north
@@ -2317,7 +2591,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         lastVertex,
         state.currentDistance,
         snapInfo.segment,
-        [lngLat.lng, lngLat.lat]
+        [lngLat.lng, lngLat.lat],
       );
       if (circleLineIntersection) {
         previewVertex = circleLineIntersection.coord;
@@ -2327,7 +2601,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
           from,
           state.currentDistance / 1000,
           bearingToUse,
-          { units: "kilometers" }
+          { units: "kilometers" },
         );
         previewVertex = destinationPoint.geometry.coordinates;
       }
@@ -2337,7 +2611,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         from,
         state.currentDistance / 1000,
         bearingToUse,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       previewVertex = destinationPoint.geometry.coordinates;
     }
@@ -2350,20 +2624,20 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing + 180,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
       end: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
     };
 
     const intersection = calculateLineIntersection(
       lastVertex,
       orthogonalMatch.bearing,
-      perpLine
+      perpLine,
     );
     if (intersection) {
       previewVertex = intersection.coord;
@@ -2373,11 +2647,11 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         lastVertex,
         orthogonalMatch.referenceBearing,
         orthogonalMatch.bearing,
-        orthogonalMatch.referenceSegment
+        orthogonalMatch.referenceSegment,
       );
       const closingBearing = turf.bearing(
         turf.point(previewVertex),
-        turf.point(closingPerpendicularSnap.firstVertex)
+        turf.point(closingPerpendicularSnap.firstVertex),
       );
       const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
       this.updateClosingRightAngleIndicator(
@@ -2385,20 +2659,20 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         closingPerpendicularSnap.firstVertex,
         closingPerpendicularSnap.firstSegmentBearing,
         closingBearing,
-        firstSegment
+        firstSegment,
       );
     } else {
       // Fallback to mouse distance
       const mouseDistance = turf.distance(
         from,
         turf.point([lngLat.lng, lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         orthogonalMatch.bearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       previewVertex = destinationPoint.geometry.coordinates;
     }
@@ -2414,26 +2688,26 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing + 180,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
       end: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
         0.1,
         closingPerpendicularSnap.perpendicularBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       ).geometry.coordinates,
     };
 
     const intersection = calculateLineIntersection(
       lastVertex,
       mouseBearing,
-      perpLine
+      perpLine,
     );
     if (intersection) {
       previewVertex = intersection.coord;
       const closingBearing = turf.bearing(
         turf.point(previewVertex),
-        turf.point(closingPerpendicularSnap.firstVertex)
+        turf.point(closingPerpendicularSnap.firstVertex),
       );
       const firstSegment = { start: state.vertices[0], end: state.vertices[1] };
       this.updateClosingRightAngleIndicator(
@@ -2441,20 +2715,20 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
         closingPerpendicularSnap.firstVertex,
         closingPerpendicularSnap.firstSegmentBearing,
         closingBearing,
-        firstSegment
+        firstSegment,
       );
     } else {
       // Fallback to mouse position
       const mouseDistance = turf.distance(
         from,
         turf.point([lngLat.lng, lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         mouseBearing,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       previewVertex = destinationPoint.geometry.coordinates;
     }
@@ -2464,7 +2738,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     const intersection = calculateLineIntersection(
       lastVertex,
       bearingToUse,
-      snapInfo.segment
+      snapInfo.segment,
     );
     if (intersection) {
       previewVertex = intersection.coord;
@@ -2473,13 +2747,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       const mouseDistance = turf.distance(
         from,
         turf.point([lngLat.lng, lngLat.lat]),
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       const destinationPoint = turf.destination(
         from,
         mouseDistance,
         bearingToUse,
-        { units: "kilometers" }
+        { units: "kilometers" },
       );
       previewVertex = destinationPoint.geometry.coordinates;
     }
@@ -2497,13 +2771,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     const mouseDistance = turf.distance(
       from,
       turf.point([lngLat.lng, lngLat.lat]),
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
     const destinationPoint = turf.destination(
       from,
       mouseDistance,
       bearingToUse,
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
     previewVertex = destinationPoint.geometry.coordinates;
     this.removeGuideCircle(state);
@@ -2527,11 +2801,11 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     // Vectors from line start
     const toSnap = [
       perpSnap.coord[0] - lineStart.geometry.coordinates[0],
-      perpSnap.coord[1] - lineStart.geometry.coordinates[1]
+      perpSnap.coord[1] - lineStart.geometry.coordinates[1],
     ];
     const toLastVert = [
       lastVertPoint.geometry.coordinates[0] - lineStart.geometry.coordinates[0],
-      lastVertPoint.geometry.coordinates[1] - lineStart.geometry.coordinates[1]
+      lastVertPoint.geometry.coordinates[1] - lineStart.geometry.coordinates[1],
     ];
 
     // Cross product: toSnap × toLastVert
@@ -2548,7 +2822,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       perpSnap.lineBearing,
       bearingToPerp,
       perpSnap.lineSegment,
-      flipInside
+      flipInside,
     );
   } else if (
     isOrthogonalSnap &&
@@ -2562,7 +2836,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       lastVertex,
       orthogonalMatch.referenceBearing,
       bearingToUse,
-      orthogonalMatch.referenceSegment
+      orthogonalMatch.referenceSegment,
     );
   } else {
     this.removeRightAngleIndicator(state);
@@ -2579,7 +2853,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       state,
       lastVertex,
       previewVertex,
-      state.parallelLineSnap.matchedLine
+      state.parallelLineSnap.matchedLine,
     );
   } else {
     this.removeParallelLineIndicators(state);
@@ -2610,13 +2884,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       this._ctx,
       this.map,
       e,
-      { lng: snapInfo.coord[0], lat: snapInfo.coord[1] }
+      { lng: snapInfo.coord[0], lat: snapInfo.coord[1] },
     );
     if (underlyingLineInfo && underlyingLineInfo.segment) {
       this.updateLineSegmentSplitLabels(
         state,
         underlyingLineInfo.segment,
-        snapInfo.coord
+        snapInfo.coord,
       );
     } else {
       this.removeLineSegmentSplitLabels(state);
@@ -2645,7 +2919,7 @@ DrawPolygonDistance.updateDistanceLabel = function (
   state,
   startVertex,
   endVertex,
-  distance
+  distance,
 ) {
   const map = this.map;
   if (!map) return;
@@ -2678,7 +2952,7 @@ DrawPolygonDistance.updateDistanceLabel = function (
     midpoint,
     offsetDistance,
     perpendicularBearing,
-    { units: "kilometers" }
+    { units: "kilometers" },
   );
 
   // Create a feature for the text label at the offset midpoint
@@ -2749,7 +3023,7 @@ DrawPolygonDistance.removeDistanceLabel = function (state) {
 DrawPolygonDistance.updateLineSegmentSplitLabels = function (
   state,
   segment,
-  snapPoint
+  snapPoint,
 ) {
   const map = this.map;
   if (!map) return;
@@ -2764,12 +3038,12 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function (
   const distance1 = turf.distance(
     turf.point(segment.start),
     turf.point(snapCoord),
-    { units: "meters" }
+    { units: "meters" },
   );
   const distance2 = turf.distance(
     turf.point(snapCoord),
     turf.point(segment.end),
-    { units: "meters" }
+    { units: "meters" },
   );
 
   const labelFeatures = [];
@@ -2780,11 +3054,11 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function (
     const distanceText1 = `${distance1.toFixed(1)}m`;
     const midpoint1 = turf.midpoint(
       turf.point(segment.start),
-      turf.point(snapCoord)
+      turf.point(snapCoord),
     );
     const bearing1 = turf.bearing(
       turf.point(segment.start),
-      turf.point(snapCoord)
+      turf.point(snapCoord),
     );
 
     // Calculate rotation and flip if upside down
@@ -2800,7 +3074,7 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function (
       midpoint1,
       offsetDistance,
       perpendicularBearing1,
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
 
     labelFeatures.push({
@@ -2823,11 +3097,11 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function (
     const distanceText2 = `${distance2.toFixed(1)}m`;
     const midpoint2 = turf.midpoint(
       turf.point(snapCoord),
-      turf.point(segment.end)
+      turf.point(segment.end),
     );
     const bearing2 = turf.bearing(
       turf.point(snapCoord),
-      turf.point(segment.end)
+      turf.point(segment.end),
     );
 
     // Calculate rotation and flip if upside down
@@ -2843,7 +3117,7 @@ DrawPolygonDistance.updateLineSegmentSplitLabels = function (
       midpoint2,
       offsetDistance,
       perpendicularBearing2,
-      { units: "kilometers" }
+      { units: "kilometers" },
     );
 
     labelFeatures.push({
@@ -3075,7 +3349,10 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
       return;
     }
     // Also check if either input is focused (even if empty)
-    if (document.activeElement === state.distanceInput || document.activeElement === state.angleInput) {
+    if (
+      document.activeElement === state.distanceInput ||
+      document.activeElement === state.angleInput
+    ) {
       return;
     }
 

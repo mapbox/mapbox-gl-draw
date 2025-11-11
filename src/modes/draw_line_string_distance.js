@@ -617,22 +617,60 @@ DrawLineStringDistance.detectHoveredIntersectionPoint = function (state, e) {
     layers: bufferLayers,
   });
 
-  // Look for a snappingPoint feature with guidelineIds
-  const intersectionPoint = featuresAtPoint.find((feature) => {
+  // DEBUG: Log all features at the hover point
+  if (featuresAtPoint.length > 0) {
+    console.log('===== FEATURES AT HOVER POINT =====');
+    featuresAtPoint.forEach((f, idx) => {
+      console.log(`Feature ${idx}:`, {
+        geometry: f.geometry?.type,
+        properties: f.properties,
+        layer: f.layer?.id,
+        source: f.source
+      });
+    });
+    console.log('===================================');
+  }
+
+  // Look for a midpoint feature FIRST (point with isMidpoint === true)
+  // Midpoints also have type: 'snappingPoint', so check for them before intersections
+  const midpoint = featuresAtPoint.find((feature) => {
     return (
       feature.properties &&
       feature.properties.type === "snappingPoint" &&
+      feature.properties.isMidpoint === true &&
       feature.properties.guidelineIds
     );
   });
 
-  if (!intersectionPoint) return null;
+  if (midpoint) {
+    return {
+      coord: midpoint.geometry.coordinates,
+      feature: midpoint,
+      guidelineIds: JSON.parse(midpoint.properties.guidelineIds),
+      type: "midpoint",
+    };
+  }
 
-  return {
-    coord: intersectionPoint.geometry.coordinates,
-    guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
-    feature: intersectionPoint,
-  };
+  // Look for an intersection point (snappingPoint with multiple guidelines, NOT a midpoint)
+  const intersectionPoint = featuresAtPoint.find((feature) => {
+    return (
+      feature.properties &&
+      feature.properties.type === "snappingPoint" &&
+      feature.properties.guidelineIds &&
+      feature.properties.isMidpoint !== true
+    );
+  });
+
+  if (intersectionPoint) {
+    return {
+      coord: intersectionPoint.geometry.coordinates,
+      guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
+      feature: intersectionPoint,
+      type: 'intersection'
+    };
+  }
+
+  return null;
 };
 
 DrawLineStringDistance.extendGuidelines = function (state, intersectionInfo) {
@@ -640,6 +678,122 @@ DrawLineStringDistance.extendGuidelines = function (state, intersectionInfo) {
   if (!map) return [];
 
   const extendedLines = [];
+
+  // Handle midpoint type - create perpendicular guideline
+  if (intersectionInfo.type === "midpoint") {
+    const { coord, guidelineIds } = intersectionInfo;
+
+    // Get the parent line from the guideline ID
+    const guidelineId = guidelineIds[0]; // Midpoints have only one parent guideline
+    const sourceId = intersectionInfo.feature.source;
+    const source = map.getSource(sourceId);
+    if (!source) return [];
+
+    // Get all features from the source
+    const allFeatures = map.querySourceFeatures(sourceId, {
+      sourceLayer: intersectionInfo.feature.sourceLayer,
+    });
+
+    const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
+    if (!guidelineFeature) return [];
+
+    const geometry = guidelineFeature.geometry;
+    let lineBearing;
+
+    // Calculate the bearing of the line segment containing the midpoint
+    if (geometry.type === "LineString") {
+      const coords = geometry.coordinates;
+      if (coords.length < 2) return [];
+
+      // Find the segment that contains this midpoint
+      let segmentBearing;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const start = coords[i];
+        const end = coords[i + 1];
+        const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+        // Check if this is close to our midpoint
+        const dist = turf.distance(turf.point(mid), turf.point(coord), {
+          units: "meters",
+        });
+        if (dist < 1) {
+          // Within 1 meter
+          segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+          break;
+        }
+      }
+
+      if (segmentBearing === undefined) {
+        // Fallback: use bearing from first to last point
+        segmentBearing = turf.bearing(
+          turf.point(coords[0]),
+          turf.point(coords[coords.length - 1]),
+        );
+      }
+
+      lineBearing = segmentBearing;
+    } else if (geometry.type === "MultiLineString") {
+      // Handle MultiLineString - find which line contains the midpoint
+      let segmentBearing;
+      for (const lineCoords of geometry.coordinates) {
+        if (lineCoords.length < 2) continue;
+
+        for (let i = 0; i < lineCoords.length - 1; i++) {
+          const start = lineCoords[i];
+          const end = lineCoords[i + 1];
+          const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+          const dist = turf.distance(turf.point(mid), turf.point(coord), {
+            units: "meters",
+          });
+          if (dist < 1) {
+            segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+            break;
+          }
+        }
+        if (segmentBearing !== undefined) break;
+      }
+
+      if (segmentBearing === undefined) return [];
+      lineBearing = segmentBearing;
+    } else {
+      return []; // Don't handle other geometry types
+    }
+
+    // Create perpendicular line (90 degrees to the original line)
+    const perpendicularBearing = lineBearing + 90;
+    const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+
+    const extendedStart = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing + 180,
+      { units: "kilometers" }
+    );
+    const extendedEnd = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing,
+      { units: "kilometers" }
+    );
+
+    extendedLines.push({
+      type: "Feature",
+      properties: { isExtendedGuideline: true, isMidpointGuideline: true },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          extendedStart.geometry.coordinates,
+          coord,
+          extendedEnd.geometry.coordinates,
+        ],
+      },
+    });
+
+    return extendedLines;
+  }
+
+  // Handle intersection type - extend the original guidelines
   const { coord, guidelineIds } = intersectionInfo;
 
   // For each guideline ID, query the feature and extend it
