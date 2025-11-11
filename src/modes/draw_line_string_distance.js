@@ -951,19 +951,25 @@ DrawLineStringDistance.removeAngleReferenceLine = function () {
 DrawLineStringDistance.clickOnMap = function (state, e) {
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
-    // Check for extended guideline intersection snapping
-    const intersectionCoord = checkExtendedGuidelineIntersectionClick(
-      this._ctx,
-      this.map,
-      state,
-      e,
-      this.getSnapInfo.bind(this)
-    );
+    // Use the preview vertex if it exists (from onMouseMove), otherwise calculate it
+    let vertexCoord;
+    if (state.previewVertex) {
+      vertexCoord = state.previewVertex;
+    } else {
+      // Check for extended guideline intersection snapping
+      const intersectionCoord = checkExtendedGuidelineIntersectionClick(
+        this._ctx,
+        this.map,
+        state,
+        e,
+        this.getSnapInfo.bind(this)
+      );
 
-    const vertexCoord = intersectionCoord || (() => {
-      const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
-      return [snappedCoord.lng, snappedCoord.lat];
-    })();
+      vertexCoord = intersectionCoord || (() => {
+        const snappedCoord = this._ctx.snapping.snapCoord(e.lngLat);
+        return [snappedCoord.lng, snappedCoord.lat];
+      })();
+    }
 
     state.vertices.push(vertexCoord);
     state.line.updateCoordinate(0, vertexCoord[0], vertexCoord[1]);
@@ -990,7 +996,44 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     return;
   }
 
-  // Subsequent vertices - apply new priority system
+  // Subsequent vertices - use preview vertex if available (from onMouseMove)
+  // This ensures the vertex is placed exactly where the black dot indicator shows
+  if (state.previewVertex) {
+    const newVertex = state.previewVertex;
+
+    state.vertices.push(newVertex);
+    state.line.updateCoordinate(
+      state.vertices.length - 1,
+      newVertex[0],
+      newVertex[1]
+    );
+
+    // Store snapped line info if snapped to a line
+    const snappedCoord = { lng: newVertex[0], lat: newVertex[1] };
+    const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
+    if (snappedLineInfo) {
+      state.snappedLineBearing = snappedLineInfo.bearing;
+      state.snappedLineSegment = snappedLineInfo.segment;
+    } else {
+      state.snappedLineBearing = null;
+      state.snappedLineSegment = null;
+    }
+
+    // Clear distance and angle inputs for next segment
+    if (state.distanceInput) {
+      state.distanceInput.value = "";
+      state.currentDistance = null;
+      state.distanceInput.focus();
+    }
+    if (state.angleInput) {
+      state.angleInput.value = "";
+      state.currentAngle = null;
+    }
+
+    return;
+  }
+
+  // Fallback: recalculate if preview vertex is not available
   let newVertex;
   const lastVertex = state.vertices[state.vertices.length - 1];
   const from = turf.point(lastVertex);
@@ -1621,8 +1664,11 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
 
     // Only show preview point when actually snapping to something
     if (snapInfo) {
+      // Store preview vertex in state so it can be used in clickOnMap
+      state.previewVertex = snapInfo.coord;
       this.updatePreviewPoint(state, snapInfo.coord);
     } else {
+      state.previewVertex = null;
       this.removePreviewPoint(state);
     }
 
@@ -2196,6 +2242,9 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   } else {
     this.removeLineSegmentSplitLabels(state);
   }
+
+  // Store preview vertex in state so it can be used in clickOnMap
+  state.previewVertex = previewVertex;
 
   // Show preview point when snapping to something OR when orthogonal/parallel snap is active
   if (snapInfo || isOrthogonalSnap || isParallelLineSnap) {
