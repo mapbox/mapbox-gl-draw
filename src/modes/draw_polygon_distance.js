@@ -971,20 +971,6 @@ DrawPolygonDistance.detectHoveredIntersectionPoint = function (state, e) {
     layers: bufferLayers,
   });
 
-  // DEBUG: Log all features at the hover point
-  if (featuresAtPoint.length > 0) {
-    console.log('===== FEATURES AT HOVER POINT =====');
-    featuresAtPoint.forEach((f, idx) => {
-      console.log(`Feature ${idx}:`, {
-        geometry: f.geometry?.type,
-        properties: f.properties,
-        layer: f.layer?.id,
-        source: f.source
-      });
-    });
-    console.log('===================================');
-  }
-
   // Look for a midpoint feature FIRST (point with isMidpoint === true)
   // Midpoints also have type: 'snappingPoint', so check for them before intersections
   const midpoint = featuresAtPoint.find((feature) => {
@@ -1061,17 +1047,18 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
 
       // Find the segment that contains this midpoint
       let segmentBearing;
+      const coordPoint = turf.point(coord); // Cache the point object
       for (let i = 0; i < coords.length - 1; i++) {
         const start = coords[i];
         const end = coords[i + 1];
         const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
 
-        // Check if this is close to our midpoint
-        const dist = turf.distance(turf.point(mid), turf.point(coord), {
+        // Use proper turf.distance for lat/lon coordinates
+        const dist = turf.distance(turf.point(mid), coordPoint, {
           units: "meters",
         });
         if (dist < 1) {
-          // Within 1 meter
+          // Within 1 meter - calculate bearing and exit early
           segmentBearing = turf.bearing(turf.point(start), turf.point(end));
           break;
         }
@@ -1089,6 +1076,7 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
     } else if (geometry.type === "MultiLineString") {
       // Handle MultiLineString - find which line contains the midpoint
       let segmentBearing;
+      const coordPoint = turf.point(coord); // Cache the point object
       for (const lineCoords of geometry.coordinates) {
         if (lineCoords.length < 2) continue;
 
@@ -1097,7 +1085,8 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
           const end = lineCoords[i + 1];
           const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
 
-          const dist = turf.distance(turf.point(mid), turf.point(coord), {
+          // Use proper turf.distance for lat/lon coordinates
+          const dist = turf.distance(turf.point(mid), coordPoint, {
             units: "meters",
           });
           if (dist < 1) {
@@ -1151,19 +1140,17 @@ DrawPolygonDistance.extendGuidelines = function (state, intersectionInfo) {
   // Handle intersection type - extend the original guidelines
   const { coord, guidelineIds } = intersectionInfo;
 
-  // For each guideline ID, query the feature and extend it
+  // Query source features once and cache for all guidelines
+  const sourceId = intersectionInfo.feature.source;
+  const source = map.getSource(sourceId);
+  if (!source) return [];
+
+  const allFeatures = map.querySourceFeatures(sourceId, {
+    sourceLayer: intersectionInfo.feature.sourceLayer,
+  });
+
+  // For each guideline ID, find and extend it
   for (const guidelineId of guidelineIds) {
-    // Query the guideline feature from the source
-    const sourceId = intersectionInfo.feature.source;
-    const source = map.getSource(sourceId);
-    if (!source) continue;
-
-    // Get all features from the source (for GeoJSON sources)
-    // We need to find the feature with the matching ID
-    const allFeatures = map.querySourceFeatures(sourceId, {
-      sourceLayer: intersectionInfo.feature.sourceLayer,
-    });
-
     const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
     if (!guidelineFeature) continue;
 
