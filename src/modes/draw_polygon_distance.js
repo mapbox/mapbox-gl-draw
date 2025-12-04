@@ -3201,6 +3201,37 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removeLineSegmentSplitLabels(state);
   }
 
+  // Show distance to first intersection in drawing direction (always active when drawing)
+  // This is an expensive operation - throttle it
+  if (state.vertices.length >= 1 && shouldRunHeavyCompute) {
+    // Calculate the drawing bearing from last vertex to preview vertex
+    const drawingBearing = turf.bearing(
+      turf.point(lastVertex),
+      turf.point(previewVertex)
+    );
+
+    // Find the first intersection in the drawing direction
+    const intersection = this.findFirstIntersectionInDirection(
+      state,
+      previewVertex,
+      drawingBearing,
+      0.5 // Search up to 500m ahead
+    );
+
+    if (intersection) {
+      this.updateGuidelineIntersectionDistanceLabel(
+        state,
+        previewVertex,
+        intersection.coord,
+        intersection.distance
+      );
+    } else {
+      this.removeGuidelineIntersectionDistanceLabel(state);
+    }
+  } else if (state.vertices.length === 0) {
+    this.removeGuidelineIntersectionDistanceLabel(state);
+  }
+
   // Store preview vertex in state so it can be used in clickOnMap
   state.previewVertex = previewVertex;
 
@@ -3319,6 +3350,277 @@ DrawPolygonDistance.removeDistanceLabel = function (state) {
   }
   if (map.getSource && map.getSource("distance-label-text")) {
     map.removeSource("distance-label-text");
+  }
+};
+
+// Cache for intersection search results - reduces expensive queries
+let intersectionCache = {
+  key: null,
+  result: null,
+  timestamp: 0
+};
+const INTERSECTION_CACHE_TTL = 50; // Cache valid for 50ms
+const UNITS_METERS = { units: "meters" };
+const UNITS_KM = { units: "kilometers" };
+
+/**
+ * Find the first intersection between a ray (from previewVertex in drawingBearing direction)
+ * and any snap layer features.
+ * OPTIMIZED: Uses bbox-based querying and caching to reduce expensive operations.
+ * @param {Array} previewVertex - Current preview vertex [lng, lat]
+ * @param {number} drawingBearing - Bearing of the drawing direction
+ * @param {number} maxDistance - Maximum distance to search (in km)
+ * @returns {Object|null} - {coord, distance, feature} or null if no intersection found
+ */
+DrawPolygonDistance.findFirstIntersectionInDirection = function (
+  state,
+  previewVertex,
+  drawingBearing,
+  maxDistance = 0.5
+) {
+  const map = this.map;
+  if (!map) return null;
+
+  // Create cache key from position and bearing (rounded)
+  const cacheKey = `${previewVertex[0].toFixed(6)},${previewVertex[1].toFixed(6)}-${Math.round(drawingBearing)}`;
+
+  // Check cache
+  const now = Date.now();
+  if (intersectionCache.key === cacheKey && (now - intersectionCache.timestamp) < INTERSECTION_CACHE_TTL) {
+    return intersectionCache.result;
+  }
+
+  // Create a ray from previewVertex in the drawing direction
+  const startPoint = turf.point(previewVertex);
+  const endPoint = turf.destination(startPoint, maxDistance, drawingBearing, UNITS_KM);
+  const endCoords = endPoint.geometry.coordinates;
+
+  const rayLine = turf.lineString([previewVertex, endCoords]);
+
+  // Get all snap layers
+  const snapLayers = this._ctx.options.snapLayers;
+  if (!snapLayers) return null;
+
+  // Calculate bbox for the ray to limit query area
+  const minLng = Math.min(previewVertex[0], endCoords[0]);
+  const maxLng = Math.max(previewVertex[0], endCoords[0]);
+  const minLat = Math.min(previewVertex[1], endCoords[1]);
+  const maxLat = Math.max(previewVertex[1], endCoords[1]);
+
+  // Convert bbox to screen coordinates
+  const sw = map.project([minLng, minLat]);
+  const ne = map.project([maxLng, maxLat]);
+
+  let closestIntersection = null;
+  let closestDistance = Infinity;
+
+  // Query features from snap layers - use cached layer IDs if available
+  if (!state._cachedLayerIds || state._layerIdsCacheTime < now - 5000) {
+    state._cachedLayerIds =
+      typeof snapLayers === "function"
+        ? map.getStyle().layers.filter(snapLayers).map((l) => l.id)
+        : snapLayers;
+    state._layerIdsCacheTime = now;
+  }
+  const layerIds = state._cachedLayerIds;
+
+  // Query with bbox constraint
+  const allFeatures = map.queryRenderedFeatures(
+    [[sw.x, ne.y], [ne.x, sw.y]],
+    { layers: layerIds.filter(id => map.getLayer(id)) }
+  );
+
+  for (const feature of allFeatures) {
+    let lineToIntersect = null;
+
+    if (feature.geometry.type === "LineString") {
+      lineToIntersect = feature;
+    } else if (feature.geometry.type === "Polygon") {
+      lineToIntersect = turf.polygonToLine(feature);
+    } else if (feature.geometry.type === "MultiLineString") {
+      for (const coords of feature.geometry.coordinates) {
+        const line = turf.lineString(coords);
+        const intersections = turf.lineIntersect(rayLine, line);
+        if (intersections.features.length > 0) {
+          for (const intersection of intersections.features) {
+            const dist = turf.distance(startPoint, intersection, UNITS_METERS);
+            if (dist > 0.1 && dist < closestDistance) {
+              closestDistance = dist;
+              closestIntersection = {
+                coord: intersection.geometry.coordinates,
+                distance: dist,
+                feature: feature,
+              };
+            }
+          }
+        }
+      }
+      continue;
+    } else {
+      continue;
+    }
+
+    if (lineToIntersect) {
+      const intersections = turf.lineIntersect(rayLine, lineToIntersect);
+      if (intersections.features.length > 0) {
+        for (const intersection of intersections.features) {
+          const dist = turf.distance(startPoint, intersection, UNITS_METERS);
+          if (dist > 0.1 && dist < closestDistance) {
+            closestDistance = dist;
+            closestIntersection = {
+              coord: intersection.geometry.coordinates,
+              distance: dist,
+              feature: feature,
+            };
+          }
+        }
+      }
+    }
+  }
+
+  // Update cache
+  intersectionCache = { key: cacheKey, result: closestIntersection, timestamp: now };
+
+  return closestIntersection;
+};
+
+/**
+ * Show distance label from preview vertex to the first intersection in drawing direction
+ */
+DrawPolygonDistance.updateGuidelineIntersectionDistanceLabel = function (
+  state,
+  previewVertex,
+  intersectionCoord,
+  distance
+) {
+  const map = this.map;
+  if (!map) return;
+
+  // Format distance
+  const distanceText = `${distance.toFixed(1)}m`;
+
+  // Calculate midpoint between preview vertex and intersection
+  const start = turf.point(previewVertex);
+  const end = turf.point(intersectionCoord);
+  const midpoint = turf.midpoint(start, end);
+
+  // Calculate bearing for rotation
+  const bearing = turf.bearing(start, end);
+
+  // Calculate text rotation (perpendicular to line, consistent with segment length label)
+  let rotation = bearing - 90;
+  // Normalize to 0-360
+  rotation = ((rotation % 360) + 360) % 360;
+  // If upside down (between 90° and 270°), flip it 180°
+  if (rotation > 90 && rotation < 270) {
+    rotation = (rotation + 180) % 360;
+  }
+
+  // Offset the label position to the side of the line
+  const offsetDistance = 3 / 1000; // 3m in km
+  const perpendicularBearing = bearing - 90;
+  const offsetMidpoint = turf.destination(
+    midpoint,
+    offsetDistance,
+    perpendicularBearing,
+    { units: "kilometers" }
+  );
+
+  // Create label feature
+  const labelFeature = {
+    type: "Feature",
+    properties: {
+      guidelineDistanceLabel: true,
+      distance: distanceText,
+      rotation: rotation,
+    },
+    geometry: {
+      type: "Point",
+      coordinates: offsetMidpoint.geometry.coordinates,
+    },
+  };
+
+  // Create line feature to show the distance visually
+  const lineFeature = {
+    type: "Feature",
+    properties: {
+      guidelineDistanceLine: true,
+    },
+    geometry: {
+      type: "LineString",
+      coordinates: [previewVertex, intersectionCoord],
+    },
+  };
+
+  const featureCollection = {
+    type: "FeatureCollection",
+    features: [labelFeature, lineFeature],
+  };
+
+  // Update or create the layer
+  if (!map.getSource("guideline-intersection-distance")) {
+    map.addSource("guideline-intersection-distance", {
+      type: "geojson",
+      data: featureCollection,
+    });
+
+    // Add line layer
+    map.addLayer({
+      id: "guideline-intersection-distance-line",
+      type: "line",
+      source: "guideline-intersection-distance",
+      filter: ["==", ["get", "guidelineDistanceLine"], true],
+      paint: {
+        "line-color": "#666666",
+        "line-width": 1,
+        "line-dasharray": [4, 4],
+        "line-opacity": 0.7,
+      },
+    });
+
+    // Add text label layer
+    map.addLayer({
+      id: "guideline-intersection-distance-label",
+      type: "symbol",
+      source: "guideline-intersection-distance",
+      filter: ["==", ["get", "guidelineDistanceLabel"], true],
+      layout: {
+        "text-field": ["get", "distance"],
+        "text-size": 10,
+        "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        "text-offset": [0, 0],
+        "text-anchor": "center",
+        "text-rotate": ["get", "rotation"],
+        "text-rotation-alignment": "map",
+        "text-pitch-alignment": "map",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+      },
+      paint: {
+        "text-color": "#666666",
+        "text-opacity": 1,
+      },
+    });
+  } else {
+    map.getSource("guideline-intersection-distance").setData(featureCollection);
+  }
+};
+
+/**
+ * Remove the guideline intersection distance label
+ */
+DrawPolygonDistance.removeGuidelineIntersectionDistanceLabel = function (state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer("guideline-intersection-distance-label")) {
+    map.removeLayer("guideline-intersection-distance-label");
+  }
+  if (map.getLayer && map.getLayer("guideline-intersection-distance-line")) {
+    map.removeLayer("guideline-intersection-distance-line");
+  }
+  if (map.getSource && map.getSource("guideline-intersection-distance")) {
+    map.removeSource("guideline-intersection-distance");
   }
 };
 
@@ -3704,6 +4006,7 @@ DrawPolygonDistance.onStop = function (state) {
   this.removeDistanceLabel(state);
   this.removeLineSegmentSplitLabels(state);
   this.removePreviewPoint(state);
+  this.removeGuidelineIntersectionDistanceLabel(state);
 
   // Clean up extended guidelines
   if (state.hoverDebounceTimer) {
