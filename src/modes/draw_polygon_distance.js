@@ -546,6 +546,7 @@ DrawPolygonDistance.getOrthogonalBearing = function (
           referenceBearing: lastSegmentBearing,
           referenceType: "previous",
           referenceSegment: { start: secondLastVertex, end: lastVertex },
+          angleFromReference: angle,
         };
       }
     }
@@ -574,6 +575,7 @@ DrawPolygonDistance.getOrthogonalBearing = function (
           referenceBearing: firstSegmentBearing,
           referenceType: "first",
           referenceSegment: { start: firstVertex, end: secondVertex },
+          angleFromReference: angle,
         };
       }
     }
@@ -597,6 +599,7 @@ DrawPolygonDistance.getOrthogonalBearing = function (
           referenceBearing: state.snappedLineBearing,
           referenceType: "snapped",
           referenceSegment: state.snappedLineSegment,
+          angleFromReference: angle,
         };
       }
     }
@@ -945,6 +948,85 @@ DrawPolygonDistance.removeParallelLineIndicators = function (state) {
   // Remove source
   if (map.getSource && map.getSource("parallel-line-indicators")) {
     map.removeSource("parallel-line-indicators");
+  }
+};
+
+DrawPolygonDistance.updateCollinearSnapLine = function (
+  state,
+  lastVertex,
+  previewVertex,
+  referenceBearing
+) {
+  const map = this.map;
+  if (!map) return;
+
+  // Extend the line in both directions from the last vertex
+  const lastVertexPoint = turf.point(lastVertex);
+  const extensionDistance = 0.2; // 200 meters in kilometers
+
+  const extendedBackward = turf.destination(
+    lastVertexPoint,
+    extensionDistance,
+    referenceBearing + 180,
+    { units: 'kilometers' }
+  );
+  const extendedForward = turf.destination(
+    lastVertexPoint,
+    extensionDistance,
+    referenceBearing,
+    { units: 'kilometers' }
+  );
+
+  // Create extended line feature
+  const extendedLineFeature = {
+    type: 'Feature',
+    properties: { isCollinearLine: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+        extendedBackward.geometry.coordinates,
+        extendedForward.geometry.coordinates
+      ]
+    }
+  };
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [extendedLineFeature]
+  };
+
+  // Render extended line
+  if (!map.getSource('collinear-snap-line')) {
+    map.addSource('collinear-snap-line', {
+      type: 'geojson',
+      data: featureCollection
+    });
+
+    map.addLayer({
+      id: 'collinear-snap-line',
+      type: 'line',
+      source: 'collinear-snap-line',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 0.3,
+        'line-dasharray': [4, 4]
+      }
+    });
+  } else {
+    map.getSource('collinear-snap-line').setData(featureCollection);
+  }
+};
+
+DrawPolygonDistance.removeCollinearSnapLine = function (state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('collinear-snap-line')) {
+    map.removeLayer('collinear-snap-line');
+  }
+  if (map.getSource && map.getSource('collinear-snap-line')) {
+    map.removeSource('collinear-snap-line');
   }
 };
 
@@ -2818,15 +2900,31 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     !isClosingPerpendicularSnap &&
     orthogonalMatch
   ) {
-    this.updateRightAngleIndicator(
-      state,
-      lastVertex,
-      orthogonalMatch.referenceBearing,
-      bearingToUse,
-      orthogonalMatch.referenceSegment,
-    );
+    // Check if this is a collinear snap (0° or 180°) or a perpendicular snap (90° or 270°)
+    const isCollinear = orthogonalMatch.angleFromReference === 0 || orthogonalMatch.angleFromReference === 180;
+    if (isCollinear) {
+      // Show collinear snap line instead of right-angle indicator
+      this.updateCollinearSnapLine(
+        state,
+        lastVertex,
+        previewVertex,
+        orthogonalMatch.referenceBearing
+      );
+      this.removeRightAngleIndicator(state);
+    } else {
+      // Show right-angle indicator for perpendicular snaps
+      this.updateRightAngleIndicator(
+        state,
+        lastVertex,
+        orthogonalMatch.referenceBearing,
+        bearingToUse,
+        orthogonalMatch.referenceSegment,
+      );
+      this.removeCollinearSnapLine(state);
+    }
   } else {
     this.removeRightAngleIndicator(state);
+    this.removeCollinearSnapLine(state);
   }
 
   // Clean up closing indicator if not in use
@@ -3369,6 +3467,7 @@ DrawPolygonDistance.finishDrawing = function (state) {
   this.removeRightAngleIndicator(state);
   this.removeLineSegmentSplitLabels(state);
   this.removePreviewPoint(state);
+  this.removeCollinearSnapLine(state);
 
   this.fire(Constants.events.CREATE, {
     features: [state.polygon.toGeoJSON()],
@@ -3397,6 +3496,7 @@ DrawPolygonDistance.onStop = function (state) {
   this.removeExtendedGuidelines(state);
   this.removeAngleReferenceLine();
   this.removeParallelLineIndicators(state);
+  this.removeCollinearSnapLine(state);
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();
