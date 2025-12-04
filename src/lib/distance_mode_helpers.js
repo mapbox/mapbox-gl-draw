@@ -757,6 +757,83 @@ export function calculatePerpendicularToLine(fromVertex, lineSegment, cursorPosi
 }
 
 /**
+ * Extract bearings from extended guidelines.
+ * Returns an array of {bearing, guideline} objects for each extended guideline.
+ * Used to enable perpendicular snapping to extended guidelines.
+ */
+export function getExtendedGuidelineBearings(extendedGuidelines) {
+  if (!extendedGuidelines || extendedGuidelines.length === 0) {
+    return [];
+  }
+
+  const bearings = [];
+
+  for (const guideline of extendedGuidelines) {
+    if (guideline.geometry && guideline.geometry.type === 'LineString') {
+      const coords = guideline.geometry.coordinates;
+      if (coords.length >= 2) {
+        // Calculate bearing from first to last coordinate
+        const bearing = turf.bearing(
+          turf.point(coords[0]),
+          turf.point(coords[coords.length - 1])
+        );
+        bearings.push({
+          bearing: bearing,
+          guideline: guideline,
+          isMidpointGuideline: guideline.properties && guideline.properties.isMidpointGuideline
+        });
+      }
+    }
+  }
+
+  return bearings;
+}
+
+/**
+ * Check if the mouse bearing is perpendicular to any extended guideline.
+ * Returns an orthogonal match object if perpendicular, or null otherwise.
+ * @param {Array} guidelineBearings - Array from getExtendedGuidelineBearings()
+ * @param {number} mouseBearing - Current mouse bearing in degrees
+ * @param {number} tolerance - Tolerance in degrees for matching
+ * @returns {Object|null} Match object with bearing, referenceBearing, etc. or null
+ */
+export function getPerpendicularToGuidelineBearing(guidelineBearings, mouseBearing, tolerance) {
+  if (!guidelineBearings || guidelineBearings.length === 0) {
+    return null;
+  }
+
+  let bestMatch = null;
+  let bestDiff = Infinity;
+  const normalizedMouse = ((mouseBearing % 360) + 360) % 360;
+
+  for (const guidelineInfo of guidelineBearings) {
+    const guidelineBearing = guidelineInfo.bearing;
+
+    // Check perpendicular angles (90° and 270° from guideline bearing)
+    for (const angle of [90, 270]) {
+      const perpendicularBearing = guidelineBearing + angle;
+      const normalizedPerp = ((perpendicularBearing % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedPerp - normalizedMouse);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        bestMatch = {
+          bearing: perpendicularBearing,
+          referenceBearing: guidelineBearing,
+          referenceType: "extendedGuideline",
+          guideline: guidelineInfo.guideline,
+          angleFromReference: angle
+        };
+      }
+    }
+  }
+
+  return bestMatch;
+}
+
+/**
  * Check if clicking near an extended guideline intersection point.
  * This handles the logic for detecting when the cursor is near an intersection
  * between an extended guideline and another line feature.

@@ -16,6 +16,8 @@ import {
   resolveSnapConflicts,
   snapToNearbyVertex,
   calculatePerpendicularToLine,
+  getExtendedGuidelineBearings,
+  getPerpendicularToGuidelineBearing,
 } from "../lib/distance_mode_helpers.js";
 
 const DrawLineStringDistance = {};
@@ -1385,10 +1387,27 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     }
   }
 
-  // Disable orthogonal/perpendicular snaps when extended guidelines are active
+  // Check orthogonal snapping - either to previous segment OR to extended guidelines
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  let orthogonalMatch = null;
+  let isPerpendicularToGuideline = false;
+
+  if (extendedGuidelinesActive && state.vertices.length >= 1) {
+    // When extended guidelines are active, check for perpendicular to guideline bearings
+    const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
+    orthogonalMatch = getPerpendicularToGuidelineBearing(
+      guidelineBearings,
+      mouseBearing,
+      this._ctx.options.orthogonalSnapTolerance
+    );
+    if (orthogonalMatch) {
+      isPerpendicularToGuideline = true;
+    }
+  } else if (!extendedGuidelinesActive) {
+    // Regular orthogonal snapping to previous segment or snapped line
+    orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  }
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
@@ -1523,9 +1542,8 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     // Special case: Both orthogonal and closing perpendicular are active
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
-  } else if (orthogonalMatch !== null && !extendedGuidelinesActive) {
-    // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
-    // Skip if extended guidelines are active
+  } else if (orthogonalMatch !== null && (!extendedGuidelinesActive || isPerpendicularToGuideline)) {
+    // Priority 2: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
   } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
@@ -2011,10 +2029,27 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     }
   }
 
-  // Disable orthogonal/perpendicular snaps when extended guidelines are active
+  // Check orthogonal snapping - either to previous segment OR to extended guidelines
   const extendedGuidelinesActive = state.extendedGuidelines && state.extendedGuidelines.length > 0;
 
-  let orthogonalMatch = extendedGuidelinesActive ? null : this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  let orthogonalMatch = null;
+  let isPerpendicularToGuideline = false;
+
+  if (extendedGuidelinesActive && state.vertices.length >= 1) {
+    // When extended guidelines are active, check for perpendicular to guideline bearings
+    const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
+    orthogonalMatch = getPerpendicularToGuidelineBearing(
+      guidelineBearings,
+      mouseBearing,
+      this._ctx.options.orthogonalSnapTolerance
+    );
+    if (orthogonalMatch) {
+      isPerpendicularToGuideline = true;
+    }
+  } else if (!extendedGuidelinesActive) {
+    // Regular orthogonal snapping to previous segment or snapped line
+    orthogonalMatch = this.getOrthogonalBearing(state, mouseBearing, this._ctx.options.orthogonalSnapTolerance);
+  }
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
   let parallelLineMatch = null;
@@ -2150,9 +2185,8 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     // We'll handle this in the length priority section
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
-  } else if (orthogonalMatch !== null && !extendedGuidelinesActive) {
-    // Priority 2: Bearing snap (orthogonal/parallel to previous segment or snapped line)
-    // Skip if extended guidelines are active
+  } else if (orthogonalMatch !== null && (!extendedGuidelinesActive || isPerpendicularToGuideline)) {
+    // Priority 2: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
   } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
