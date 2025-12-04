@@ -1092,11 +1092,17 @@ DrawLineStringDistance.removeAngleReferenceLine = function () {
 };
 
 DrawLineStringDistance.clickOnMap = function (state, e) {
+  // Check if shift is held to bypass snapping
+  const shiftHeld = CommonSelectors.isShiftDown(e);
+
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
     // Use the preview vertex if it exists (from onMouseMove), otherwise calculate it
     let vertexCoord;
-    if (state.previewVertex) {
+    if (shiftHeld) {
+      // Shift held - use raw mouse position
+      vertexCoord = [e.lngLat.lng, e.lngLat.lat];
+    } else if (state.previewVertex) {
       vertexCoord = state.previewVertex;
     } else {
       // Check for extended guideline intersection snapping
@@ -1182,6 +1188,31 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   const from = turf.point(lastVertex);
   const hasUserDistance =
     state.currentDistance !== null && state.currentDistance > 0;
+
+  // If shift held, use raw mouse position (bypass snapping)
+  if (shiftHeld) {
+    newVertex = [e.lngLat.lng, e.lngLat.lat];
+    state.vertices.push(newVertex);
+    state.line.updateCoordinate(
+      state.vertices.length - 1,
+      newVertex[0],
+      newVertex[1]
+    );
+    state.snappedLineBearing = null;
+    state.snappedLineSegment = null;
+
+    // Clear distance and angle inputs for next segment
+    if (state.distanceInput) {
+      state.distanceInput.value = "";
+      state.currentDistance = null;
+      state.distanceInput.focus();
+    }
+    if (state.angleInput) {
+      state.angleInput.value = "";
+      state.currentAngle = null;
+    }
+    return;
+  }
 
   // Get snap info (point or line)
   let snapInfo = null;
@@ -1680,6 +1711,43 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
 
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
+
+  // Check if shift is held to temporarily disable snapping
+  const shiftHeld = CommonSelectors.isShiftDown(e);
+  if (shiftHeld && state.vertices.length >= 1) {
+    // Shift held - use raw mouse position, bypass all snapping
+    const lastVertex = state.vertices[state.vertices.length - 1];
+    const from = turf.point(lastVertex);
+    const previewVertex = [lngLat.lng, lngLat.lat];
+
+    // Calculate actual distance to preview vertex
+    const actualDistance = turf.distance(from, turf.point(previewVertex), {
+      units: "meters",
+    });
+
+    // Update distance label only
+    this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
+
+    // Clear all snap indicators
+    this.removeRightAngleIndicator(state);
+    this.removeClosingRightAngleIndicator(state);
+    this.removeGuideCircle(state);
+    this.removePreviewPoint(state);
+    this.removeLineSegmentSplitLabels(state);
+    this.removeParallelLineIndicators(state);
+    this.removeCollinearSnapLine(state);
+
+    // Store preview vertex
+    state.previewVertex = previewVertex;
+
+    // Update line preview
+    state.line.updateCoordinate(
+      state.vertices.length,
+      previewVertex[0],
+      previewVertex[1]
+    );
+    return;
+  }
 
   // Handle extended guideline hover logic
   const intersectionPointInfo = this.detectHoveredIntersectionPoint(state, e);
