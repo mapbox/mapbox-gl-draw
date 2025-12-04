@@ -18,7 +18,16 @@ import {
   calculatePerpendicularToLine,
   getExtendedGuidelineBearings,
   getPerpendicularToGuidelineBearing,
+  clearPointCache,
 } from "../lib/distance_mode_helpers.js";
+
+// Reusable unit options to avoid repeated object allocation
+const TURF_UNITS_KM = { units: "kilometers" };
+const TURF_UNITS_M = { units: "meters" };
+
+// Throttle state for onMouseMove heavy operations
+let lastHeavyComputeTime = 0;
+const HEAVY_COMPUTE_THROTTLE_MS = 16; // ~60fps max for heavy operations
 
 const DrawPolygonDistance = {};
 
@@ -2341,6 +2350,13 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
 
+  // Throttle heavy computations to avoid performance issues
+  const now = Date.now();
+  const shouldRunHeavyCompute = (now - lastHeavyComputeTime) >= HEAVY_COMPUTE_THROTTLE_MS;
+  if (shouldRunHeavyCompute) {
+    lastHeavyComputeTime = now;
+  }
+
   // Check if shift is held to temporarily disable snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
   if (shiftHeld && state.vertices.length >= 1) {
@@ -2350,9 +2366,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     const previewVertex = [lngLat.lng, lngLat.lat];
 
     // Calculate actual distance to preview vertex
-    const actualDistance = turf.distance(from, turf.point(previewVertex), {
-      units: "meters",
-    });
+    const actualDistance = turf.distance(from, turf.point(previewVertex), TURF_UNITS_M);
 
     // Update distance label only
     this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
@@ -2635,19 +2649,25 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   }
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
+  // This is an expensive operation - use cached result when throttled
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
-    const nearbyLines = findNearbyParallelLines(
-      this._ctx,
-      this.map,
-      lastVertex,
-      lngLat,
-    );
-    parallelLineMatch = getParallelBearing(
-      nearbyLines,
-      mouseBearing,
-      this._ctx.options.parallelSnapTolerance,
-    );
+    if (shouldRunHeavyCompute || !state._lastParallelLineMatch) {
+      const nearbyLines = findNearbyParallelLines(
+        this._ctx,
+        this.map,
+        lastVertex,
+        lngLat,
+      );
+      parallelLineMatch = getParallelBearing(
+        nearbyLines,
+        mouseBearing,
+        this._ctx.options.parallelSnapTolerance,
+      );
+      state._lastParallelLineMatch = parallelLineMatch;
+    } else {
+      parallelLineMatch = state._lastParallelLineMatch;
+    }
   }
 
   // Check for perpendicular-to-line snap (when snapping to a line)
@@ -3699,6 +3719,9 @@ DrawPolygonDistance.onStop = function (state) {
   this.removeAngleReferenceLine();
   this.removeParallelLineIndicators(state);
   this.removeCollinearSnapLine(state);
+
+  // Clear point cache to free memory
+  clearPointCache();
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();

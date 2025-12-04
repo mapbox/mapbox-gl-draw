@@ -18,7 +18,16 @@ import {
   calculatePerpendicularToLine,
   getExtendedGuidelineBearings,
   getPerpendicularToGuidelineBearing,
+  clearPointCache,
 } from "../lib/distance_mode_helpers.js";
+
+// Reusable unit options to avoid repeated object allocation
+const TURF_UNITS_KM = { units: "kilometers" };
+const TURF_UNITS_M = { units: "meters" };
+
+// Throttle state for onMouseMove heavy operations
+let lastHeavyComputeTime = 0;
+const HEAVY_COMPUTE_THROTTLE_MS = 16; // ~60fps max for heavy operations
 
 const DrawLineStringDistance = {};
 
@@ -1774,6 +1783,13 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   state.currentPosition = lngLat;
   state.lastPoint = pointOnScreen;
 
+  // Throttle heavy computations to avoid performance issues
+  const now = Date.now();
+  const shouldRunHeavyCompute = (now - lastHeavyComputeTime) >= HEAVY_COMPUTE_THROTTLE_MS;
+  if (shouldRunHeavyCompute) {
+    lastHeavyComputeTime = now;
+  }
+
   // Check if shift is held to temporarily disable snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
   if (shiftHeld && state.vertices.length >= 1) {
@@ -1783,9 +1799,7 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     const previewVertex = [lngLat.lng, lngLat.lat];
 
     // Calculate actual distance to preview vertex
-    const actualDistance = turf.distance(from, turf.point(previewVertex), {
-      units: "meters",
-    });
+    const actualDistance = turf.distance(from, turf.point(previewVertex), TURF_UNITS_M);
 
     // Update distance label only
     this.updateDistanceLabel(state, lastVertex, previewVertex, actualDistance);
@@ -2055,10 +2069,16 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   }
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
+  // This is an expensive operation - use cached result when throttled
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
-    const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, lngLat);
-    parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
+    if (shouldRunHeavyCompute || !state._lastParallelLineMatch) {
+      const nearbyLines = findNearbyParallelLines(this._ctx, this.map, lastVertex, lngLat);
+      parallelLineMatch = getParallelBearing(nearbyLines, mouseBearing, this._ctx.options.parallelSnapTolerance);
+      state._lastParallelLineMatch = parallelLineMatch;
+    } else {
+      parallelLineMatch = state._lastParallelLineMatch;
+    }
   }
 
   // Check for perpendicular-to-line snap (when snapping to a line)
@@ -2574,7 +2594,8 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   }
 
   // Show distance to first intersection in drawing direction (always active when drawing)
-  if (state.vertices.length >= 1) {
+  // This is an expensive operation - throttle it
+  if (state.vertices.length >= 1 && shouldRunHeavyCompute) {
     // Calculate the drawing bearing from last vertex to preview vertex
     const drawingBearing = turf.bearing(
       turf.point(lastVertex),
@@ -2599,7 +2620,7 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     } else {
       this.removeGuidelineIntersectionDistanceLabel(state);
     }
-  } else {
+  } else if (state.vertices.length === 0) {
     this.removeGuidelineIntersectionDistanceLabel(state);
   }
 
@@ -2726,9 +2747,20 @@ DrawLineStringDistance.removeDistanceLabel = function (state) {
   }
 };
 
+// Cache for intersection search results - reduces expensive queries
+let intersectionCache = {
+  key: null,
+  result: null,
+  timestamp: 0
+};
+const INTERSECTION_CACHE_TTL = 50; // Cache valid for 50ms
+const UNITS_METERS = { units: "meters" };
+const UNITS_KM = { units: "kilometers" };
+
 /**
  * Find the first intersection between a ray (from previewVertex in drawingBearing direction)
  * and any snap layer features.
+ * OPTIMIZED: Uses bbox-based querying and caching to reduce expensive operations.
  * @param {Array} previewVertex - Current preview vertex [lng, lat]
  * @param {number} drawingBearing - Bearing of the drawing direction
  * @param {number} maxDistance - Maximum distance to search (in km)
@@ -2743,81 +2775,69 @@ DrawLineStringDistance.findFirstIntersectionInDirection = function (
   const map = this.map;
   if (!map) return null;
 
+  // Create cache key from position and bearing (rounded)
+  const cacheKey = `${previewVertex[0].toFixed(6)},${previewVertex[1].toFixed(6)}-${Math.round(drawingBearing)}`;
+
+  // Check cache
+  const now = Date.now();
+  if (intersectionCache.key === cacheKey && (now - intersectionCache.timestamp) < INTERSECTION_CACHE_TTL) {
+    return intersectionCache.result;
+  }
+
   // Create a ray from previewVertex in the drawing direction
   const startPoint = turf.point(previewVertex);
-  const endPoint = turf.destination(startPoint, maxDistance, drawingBearing, {
-    units: "kilometers",
-  });
+  const endPoint = turf.destination(startPoint, maxDistance, drawingBearing, UNITS_KM);
+  const endCoords = endPoint.geometry.coordinates;
 
-  const rayLine = turf.lineString([
-    previewVertex,
-    endPoint.geometry.coordinates,
-  ]);
+  const rayLine = turf.lineString([previewVertex, endCoords]);
 
   // Get all snap layers
   const snapLayers = this._ctx.options.snapLayers;
   if (!snapLayers) return null;
 
+  // Calculate bbox for the ray to limit query area
+  const minLng = Math.min(previewVertex[0], endCoords[0]);
+  const maxLng = Math.max(previewVertex[0], endCoords[0]);
+  const minLat = Math.min(previewVertex[1], endCoords[1]);
+  const maxLat = Math.max(previewVertex[1], endCoords[1]);
+
+  // Convert bbox to screen coordinates
+  const sw = map.project([minLng, minLat]);
+  const ne = map.project([maxLng, maxLat]);
+
   let closestIntersection = null;
   let closestDistance = Infinity;
 
-  // Query features from snap layers
-  const layerIds =
-    typeof snapLayers === "function"
-      ? map
-          .getStyle()
-          .layers.filter(snapLayers)
-          .map((l) => l.id)
-      : snapLayers;
+  // Query features from snap layers - use cached layer IDs if available
+  if (!state._cachedLayerIds || state._layerIdsCacheTime < now - 5000) {
+    state._cachedLayerIds =
+      typeof snapLayers === "function"
+        ? map.getStyle().layers.filter(snapLayers).map((l) => l.id)
+        : snapLayers;
+    state._layerIdsCacheTime = now;
+  }
+  const layerIds = state._cachedLayerIds;
 
-  for (const layerId of layerIds) {
-    if (!map.getLayer(layerId)) continue;
+  // Query with bbox constraint
+  const allFeatures = map.queryRenderedFeatures(
+    [[sw.x, ne.y], [ne.x, sw.y]],
+    { layers: layerIds.filter(id => map.getLayer(id)) }
+  );
 
-    // Get features from the layer
-    const features = map.queryRenderedFeatures({ layers: [layerId] });
+  for (const feature of allFeatures) {
+    let lineToIntersect = null;
 
-    for (const feature of features) {
-      let lineToIntersect = null;
-
-      if (feature.geometry.type === "LineString") {
-        lineToIntersect = feature;
-      } else if (feature.geometry.type === "Polygon") {
-        // Convert polygon to line for intersection
-        lineToIntersect = turf.polygonToLine(feature);
-      } else if (feature.geometry.type === "MultiLineString") {
-        // Handle each line in MultiLineString
-        for (const coords of feature.geometry.coordinates) {
-          const line = turf.lineString(coords);
-          const intersections = turf.lineIntersect(rayLine, line);
-          if (intersections.features.length > 0) {
-            for (const intersection of intersections.features) {
-              const dist = turf.distance(startPoint, intersection, {
-                units: "meters",
-              });
-              if (dist > 0.1 && dist < closestDistance) {
-                closestDistance = dist;
-                closestIntersection = {
-                  coord: intersection.geometry.coordinates,
-                  distance: dist,
-                  feature: feature,
-                };
-              }
-            }
-          }
-        }
-        continue;
-      } else {
-        continue;
-      }
-
-      if (lineToIntersect) {
-        const intersections = turf.lineIntersect(rayLine, lineToIntersect);
+    if (feature.geometry.type === "LineString") {
+      lineToIntersect = feature;
+    } else if (feature.geometry.type === "Polygon") {
+      lineToIntersect = turf.polygonToLine(feature);
+    } else if (feature.geometry.type === "MultiLineString") {
+      for (const coords of feature.geometry.coordinates) {
+        const line = turf.lineString(coords);
+        const intersections = turf.lineIntersect(rayLine, line);
         if (intersections.features.length > 0) {
           for (const intersection of intersections.features) {
-            const dist = turf.distance(startPoint, intersection, {
-              units: "meters",
-            });
-            // Only consider intersections ahead (distance > 0.1m to avoid self-intersection)
+            const dist = turf.distance(startPoint, intersection, UNITS_METERS);
             if (dist > 0.1 && dist < closestDistance) {
               closestDistance = dist;
               closestIntersection = {
@@ -2829,8 +2849,31 @@ DrawLineStringDistance.findFirstIntersectionInDirection = function (
           }
         }
       }
+      continue;
+    } else {
+      continue;
+    }
+
+    if (lineToIntersect) {
+      const intersections = turf.lineIntersect(rayLine, lineToIntersect);
+      if (intersections.features.length > 0) {
+        for (const intersection of intersections.features) {
+          const dist = turf.distance(startPoint, intersection, UNITS_METERS);
+          if (dist > 0.1 && dist < closestDistance) {
+            closestDistance = dist;
+            closestIntersection = {
+              coord: intersection.geometry.coordinates,
+              distance: dist,
+              feature: feature,
+            };
+          }
+        }
+      }
     }
   }
+
+  // Update cache
+  intersectionCache = { key: cacheKey, result: closestIntersection, timestamp: now };
 
   return closestIntersection;
 };
@@ -3802,6 +3845,9 @@ DrawLineStringDistance.onStop = function (state) {
   this.removeAngleReferenceLine();
   this.removeParallelLineIndicators(state);
   this.removeCollinearSnapLine(state);
+
+  // Clear point cache to free memory
+  clearPointCache();
 
   if (state.distanceContainer) {
     state.distanceContainer.remove();

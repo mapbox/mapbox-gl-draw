@@ -1,5 +1,40 @@
 import * as turf from '@turf/turf';
 
+// Reusable unit options to avoid object allocation
+const UNITS_METERS = { units: 'meters' };
+const UNITS_KM = { units: 'kilometers' };
+
+// Cache for turf.point objects to reduce GC pressure
+const pointCache = new Map();
+const MAX_POINT_CACHE_SIZE = 100;
+
+/**
+ * Get or create a cached turf point. Reuses existing point objects when possible.
+ * @param {Array} coord - [lng, lat] coordinate array
+ * @returns {Object} Turf point feature
+ */
+function getCachedPoint(coord) {
+  const key = `${coord[0]},${coord[1]}`;
+  let point = pointCache.get(key);
+  if (!point) {
+    point = turf.point(coord);
+    // Limit cache size to prevent memory bloat
+    if (pointCache.size >= MAX_POINT_CACHE_SIZE) {
+      const firstKey = pointCache.keys().next().value;
+      pointCache.delete(firstKey);
+    }
+    pointCache.set(key, point);
+  }
+  return point;
+}
+
+/**
+ * Clear the point cache (call when switching modes or cleaning up)
+ */
+export function clearPointCache() {
+  pointCache.clear();
+}
+
 /**
  * Find the nearest line segment to a given point from an array of coordinates
  * Returns the segment {start, end} and the distance in meters
@@ -13,7 +48,7 @@ export function findNearestSegment(coords, snapPoint) {
     const segmentEnd = coords[i + 1];
     const segment = turf.lineString([segmentStart, segmentEnd]);
     const nearestPoint = turf.nearestPointOnLine(segment, snapPoint);
-    const distance = turf.distance(snapPoint, nearestPoint, { units: 'meters' });
+    const distance = turf.distance(snapPoint, nearestPoint, UNITS_METERS);
 
     if (distance < minDistance) {
       minDistance = distance;
@@ -380,9 +415,18 @@ export function findExtendedGuidelineIntersection(extendedGuidelines, snapInfo, 
   return null;
 }
 
+// Cache for parallel line search results
+let parallelLinesCache = {
+  key: null,
+  result: [],
+  timestamp: 0
+};
+const PARALLEL_CACHE_TTL = 100; // Cache valid for 100ms
+
 /**
  * Find the closest snap lines that intersect the orthogonal line from the midpoint
  * of the line being drawn. Returns the closest line on each side (max 2 lines).
+ * OPTIMIZED: Uses bbox-based querying and caching to reduce expensive operations.
  * @param {Object} ctx - The context object with options
  * @param {Object} map - The Mapbox map instance
  * @param {Array} lastVertex - The last vertex coordinate [lng, lat]
@@ -394,46 +438,52 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
     return [];
   }
 
+  // Create cache key from rounded positions (to allow small movements to hit cache)
+  const precision = 5; // ~1m precision
+  const cacheKey = `${lastVertex[0].toFixed(precision)},${lastVertex[1].toFixed(precision)}-${currentPosition.lng.toFixed(precision)},${currentPosition.lat.toFixed(precision)}`;
+
+  // Check cache
+  const now = Date.now();
+  if (parallelLinesCache.key === cacheKey && (now - parallelLinesCache.timestamp) < PARALLEL_CACHE_TTL) {
+    return parallelLinesCache.result;
+  }
+
+  const lastVertexPoint = getCachedPoint(lastVertex);
+  const currentPosPoint = getCachedPoint([currentPosition.lng, currentPosition.lat]);
+
   // Calculate midpoint of the line being drawn
-  const midpoint = turf.midpoint(
-    turf.point(lastVertex),
-    turf.point([currentPosition.lng, currentPosition.lat])
-  );
+  const midpoint = turf.midpoint(lastVertexPoint, currentPosPoint);
+  const midpointCoords = midpoint.geometry.coordinates;
 
   // Calculate bearing of the line being drawn
-  const lineBearing = turf.bearing(
-    turf.point(lastVertex),
-    turf.point([currentPosition.lng, currentPosition.lat])
-  );
+  const lineBearing = turf.bearing(lastVertexPoint, currentPosPoint);
 
   // Create orthogonal line (perpendicular to the line being drawn)
-  // Extend it using the configured search distance in both directions from the midpoint
   const searchDistance = ctx.options.parallelSnapSearchDistance || 1;
   const orthogonalBearing = lineBearing + 90;
-  const orthogonalStart = turf.destination(
-    midpoint,
-    searchDistance,
-    orthogonalBearing + 180,
-    { units: 'kilometers' }
-  );
-  const orthogonalEnd = turf.destination(
-    midpoint,
-    searchDistance,
-    orthogonalBearing,
-    { units: 'kilometers' }
-  );
+  const orthogonalStart = turf.destination(midpoint, searchDistance, orthogonalBearing + 180, UNITS_KM);
+  const orthogonalEnd = turf.destination(midpoint, searchDistance, orthogonalBearing, UNITS_KM);
 
-  const orthogonalLine = turf.lineString([
-    orthogonalStart.geometry.coordinates,
-    orthogonalEnd.geometry.coordinates
-  ]);
+  const orthStartCoords = orthogonalStart.geometry.coordinates;
+  const orthEndCoords = orthogonalEnd.geometry.coordinates;
+  const orthogonalLine = turf.lineString([orthStartCoords, orthEndCoords]);
 
-  // Query all snap features (without bbox restriction)
-  // Note: bbox optimization was causing issues - query returns features but none intersect
+  // Calculate bbox for the orthogonal line to limit query area
+  const minLng = Math.min(orthStartCoords[0], orthEndCoords[0]);
+  const maxLng = Math.max(orthStartCoords[0], orthEndCoords[0]);
+  const minLat = Math.min(orthStartCoords[1], orthEndCoords[1]);
+  const maxLat = Math.max(orthStartCoords[1], orthEndCoords[1]);
+
+  // Convert bbox to screen coordinates for queryRenderedFeatures
+  const sw = map.project([minLng, minLat]);
+  const ne = map.project([maxLng, maxLat]);
+
+  // Query only features within the bbox
   const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
-  const allFeatures = map.queryRenderedFeatures({
-    layers: bufferLayers
-  });
+  const allFeatures = map.queryRenderedFeatures(
+    [[sw.x, ne.y], [ne.x, sw.y]], // [topLeft, bottomRight]
+    { layers: bufferLayers }
+  );
 
   const intersectingLines = [];
 
@@ -463,30 +513,26 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
           if (intersections.features.length > 0) {
             // Calculate bearing of the snap line
             const bearing = turf.bearing(
-              turf.point(coords[0]),
-              turf.point(coords[coords.length - 1])
+              getCachedPoint(coords[0]),
+              getCachedPoint(coords[coords.length - 1])
             );
 
             // Calculate distance from midpoint to intersection
             const intersectionPoint = intersections.features[0].geometry.coordinates;
             const distanceFromMidpoint = turf.distance(
               midpoint,
-              turf.point(intersectionPoint),
-              { units: 'meters' }
+              getCachedPoint(intersectionPoint),
+              UNITS_METERS
             );
 
             // Determine which side of the midpoint the intersection is on
-            const intersectionBearing = turf.bearing(
-              midpoint,
-              turf.point(intersectionPoint)
-            );
+            const intersectionBearing = turf.bearing(midpoint, getCachedPoint(intersectionPoint));
 
             // Normalize bearings
             const normOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
             const normIntersection = ((intersectionBearing % 360) + 360) % 360;
 
-            // Determine side: if intersection bearing is close to orthogonal bearing, it's "right side"
-            // otherwise it's "left side"
+            // Determine side
             let diff = Math.abs(normOrthogonal - normIntersection);
             if (diff > 180) diff = 360 - diff;
             const side = diff < 90 ? 'right' : 'left';
@@ -509,13 +555,16 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
   }
 
   // Find the single closest line (regardless of side)
-  if (intersectingLines.length === 0) {
-    return [];
+  let result = [];
+  if (intersectingLines.length > 0) {
+    intersectingLines.sort((a, b) => a.distanceFromMidpoint - b.distanceFromMidpoint);
+    result = [intersectingLines[0]];
   }
 
-  intersectingLines.sort((a, b) => a.distanceFromMidpoint - b.distanceFromMidpoint);
+  // Update cache
+  parallelLinesCache = { key: cacheKey, result, timestamp: now };
 
-  return [intersectingLines[0]];
+  return result;
 }
 
 /**
