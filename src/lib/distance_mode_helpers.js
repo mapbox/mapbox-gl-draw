@@ -85,6 +85,92 @@ export function getUnderlyingLineBearing(ctx, map, e, snappedCoord) {
 }
 
 /**
+ * Get BOTH adjacent segments at a corner point (vertex)
+ * Returns an array of bearings and segments when the point is at a vertex
+ * This enables perpendicular snapping to both adjacent lines at corners
+ */
+export function getAdjacentSegmentsAtVertex(ctx, map, e, snappedCoord) {
+  const snapping = ctx.snapping;
+  if (!snapping) {
+    return null;
+  }
+
+  // Query all features at click point across all snap buffer layers
+  const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+  const allFeaturesAtPoint = map.queryRenderedFeatures(e.point, {
+    layers: bufferLayers
+  });
+
+  // Look for a line or polygon feature
+  const lineFeatures = allFeaturesAtPoint.filter((feature) => {
+    const geomType = feature.geometry.type;
+    return geomType === 'LineString' ||
+           geomType === 'MultiLineString' ||
+           geomType === 'Polygon' ||
+           geomType === 'MultiPolygon';
+  });
+
+  if (lineFeatures.length === 0) {
+    return null;
+  }
+
+  const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
+  const segments = [];
+  const VERTEX_TOLERANCE = 1; // meters - distance to consider as being on a vertex
+
+  for (const feature of lineFeatures) {
+    let geom = feature.geometry;
+    if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+      geom = turf.polygonToLine(geom).geometry;
+    }
+
+    if (geom.type !== 'LineString' && geom.type !== 'MultiLineString') {
+      continue;
+    }
+
+    const coords = geom.type === 'LineString' ? geom.coordinates : geom.coordinates.flat();
+
+    // Check if snap point is very close to a vertex (corner)
+    for (let i = 0; i < coords.length; i++) {
+      const vertexDist = turf.distance(snapPoint, turf.point(coords[i]), { units: 'meters' });
+      if (vertexDist < VERTEX_TOLERANCE) {
+        // This is a corner point - get both adjacent segments
+
+        // Previous segment (from previous vertex to this vertex)
+        if (i > 0) {
+          const prevSegment = { start: coords[i - 1], end: coords[i] };
+          const prevBearing = turf.bearing(turf.point(prevSegment.start), turf.point(prevSegment.end));
+          segments.push({ bearing: prevBearing, segment: prevSegment });
+        } else if (geom.type === 'LineString' && coords.length > 2 &&
+                   turf.distance(turf.point(coords[0]), turf.point(coords[coords.length - 1]), { units: 'meters' }) < 1) {
+          // Closed polygon - wrap around
+          const prevSegment = { start: coords[coords.length - 2], end: coords[i] };
+          const prevBearing = turf.bearing(turf.point(prevSegment.start), turf.point(prevSegment.end));
+          segments.push({ bearing: prevBearing, segment: prevSegment });
+        }
+
+        // Next segment (from this vertex to next vertex)
+        if (i < coords.length - 1) {
+          const nextSegment = { start: coords[i], end: coords[i + 1] };
+          const nextBearing = turf.bearing(turf.point(nextSegment.start), turf.point(nextSegment.end));
+          segments.push({ bearing: nextBearing, segment: nextSegment });
+        } else if (geom.type === 'LineString' && coords.length > 2 &&
+                   turf.distance(turf.point(coords[0]), turf.point(coords[coords.length - 1]), { units: 'meters' }) < 1) {
+          // Closed polygon - wrap around
+          const nextSegment = { start: coords[i], end: coords[1] };
+          const nextBearing = turf.bearing(turf.point(nextSegment.start), turf.point(nextSegment.end));
+          segments.push({ bearing: nextBearing, segment: nextSegment });
+        }
+
+        break; // Found the vertex, no need to continue
+      }
+    }
+  }
+
+  return segments.length > 0 ? segments : null;
+}
+
+/**
  * Get the bearing of a snapped line at a given coordinate
  * Returns the bearing and segment of the nearest line segment
  */

@@ -6,6 +6,7 @@ import {
   findNearestSegment,
   getUnderlyingLineBearing,
   getSnappedLineBearing,
+  getAdjacentSegmentsAtVertex,
   calculateCircleLineIntersection,
   calculateLineIntersection,
   findExtendedGuidelineIntersection,
@@ -57,6 +58,7 @@ DrawPolygonDistance.onSetup = function (opts) {
     snapTolerance: 20,
     snappedLineBearing: null,
     snappedLineSegment: null,
+    adjacentSegments: null, // Array of {bearing, segment} for corner points
     labelDebounceTimer: null,
     // Extended guideline hover state
     hoverDebounceTimer: null,
@@ -508,7 +510,8 @@ DrawPolygonDistance.getOrthogonalBearing = function (
 
   // Cache key based on state that affects orthogonal bearings
   // Use 1-degree precision instead of tolerance-based quantization to avoid geometric drift
-  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${Math.round(
+  const adjacentSegmentsKey = state.adjacentSegments ? state.adjacentSegments.length : 0;
+  const cacheKey = `${state.vertices.length}-${state.snappedLineBearing}-${adjacentSegmentsKey}-${Math.round(
     currentBearing,
   )}`;
 
@@ -601,6 +604,31 @@ DrawPolygonDistance.getOrthogonalBearing = function (
           referenceSegment: state.snappedLineSegment,
           angleFromReference: angle,
         };
+      }
+    }
+  }
+
+  // Check ALL adjacent segments at corner points (enables perpendicular to both lines)
+  if (state.adjacentSegments && state.adjacentSegments.length > 0 && state.vertices.length >= 1) {
+    for (const adjacentSegment of state.adjacentSegments) {
+      for (const angle of orthogonalAngles) {
+        const orthogonalBearing = adjacentSegment.bearing + angle;
+        const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+        const normalizedCurrent = ((currentBearing % 360) + 360) % 360;
+
+        let diff = Math.abs(normalizedOrthogonal - normalizedCurrent);
+        if (diff > 180) diff = 360 - diff;
+
+        if (diff <= tolerance && diff < bestDiff) {
+          bestDiff = diff;
+          bestMatch = {
+            bearing: orthogonalBearing,
+            referenceBearing: adjacentSegment.bearing,
+            referenceType: "adjacent",
+            referenceSegment: adjacentSegment.segment,
+            angleFromReference: angle,
+          };
+        }
       }
     }
   }
@@ -1589,6 +1617,19 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     if (underlyingLineInfo) {
       state.snappedLineBearing = underlyingLineInfo.bearing;
       state.snappedLineSegment = underlyingLineInfo.segment;
+    }
+
+    // Check for adjacent segments at corner points (enables perpendicular to both lines)
+    const adjacentSegments = getAdjacentSegmentsAtVertex(
+      this._ctx,
+      this.map,
+      e,
+      snappedCoord
+    );
+    if (adjacentSegments && adjacentSegments.length > 1) {
+      state.adjacentSegments = adjacentSegments;
+    } else {
+      state.adjacentSegments = null;
     }
     return;
   }
