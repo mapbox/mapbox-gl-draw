@@ -2354,6 +2354,31 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
+  } else if (isParallelLineSnap && snapInfo && snapInfo.type === "line") {
+    // Parallel line snap + nearby line -> extend/shorten to intersection
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      bearingToUse,
+      snapInfo.segment
+    );
+    if (intersection) {
+      previewVertex = intersection.coord;
+    } else {
+      // Fallback to mouse distance if intersection fails
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: "kilometers" }
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        bearingToUse,
+        { units: "kilometers" }
+      );
+      previewVertex = destinationPoint.geometry.coordinates;
+    }
+    this.removeGuideCircle(state);
   } else if (usePointDirection && snapInfo) {
     // Point snap: use distance to point
     previewVertex = snapInfo.coord;

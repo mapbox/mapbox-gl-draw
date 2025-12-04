@@ -2220,6 +2220,30 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       );
       newVertex = destinationPoint.geometry.coordinates;
     }
+  } else if (isParallelLineSnap && snapInfo && snapInfo.type === "line") {
+    // Parallel line snap + nearby line -> extend/shorten to intersection
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      bearingToUse,
+      snapInfo.segment,
+    );
+    if (intersection) {
+      newVertex = intersection.coord;
+    } else {
+      // Fallback to mouse distance if intersection fails
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([e.lngLat.lng, e.lngLat.lat]),
+        { units: "kilometers" },
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        bearingToUse,
+        { units: "kilometers" },
+      );
+      newVertex = destinationPoint.geometry.coordinates;
+    }
   } else if (usePointDirection && snapInfo) {
     // Point snap: use distance to point
     newVertex = snapInfo.coord;
@@ -2927,6 +2951,31 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removeGuideCircle(state);
   } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === "line") {
     // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
+    const intersection = calculateLineIntersection(
+      lastVertex,
+      bearingToUse,
+      snapInfo.segment,
+    );
+    if (intersection) {
+      previewVertex = intersection.coord;
+    } else {
+      // Fallback to mouse distance if intersection fails
+      const mouseDistance = turf.distance(
+        from,
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: "kilometers" },
+      );
+      const destinationPoint = turf.destination(
+        from,
+        mouseDistance,
+        bearingToUse,
+        { units: "kilometers" },
+      );
+      previewVertex = destinationPoint.geometry.coordinates;
+    }
+    this.removeGuideCircle(state);
+  } else if (isParallelLineSnap && snapInfo && snapInfo.type === "line") {
+    // Parallel line snap + nearby line -> extend/shorten to intersection
     const intersection = calculateLineIntersection(
       lastVertex,
       bearingToUse,
