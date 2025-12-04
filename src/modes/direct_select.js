@@ -6,9 +6,132 @@ import * as Constants from '../constants.js';
 import moveFeatures from '../lib/move_features.js';
 import { showMovementVector, removeMovementVector, showAdjacentSegmentLengths, removeAdjacentSegmentLengths } from '../lib/movement_vector.js';
 import { findClickedEdge, determineRailDirection, constrainToRail, showRailLine, removeRailLine, showRailIndicator, removeRailIndicator } from '../lib/rail_constraint.js';
+import {
+  showRightAngleIndicator,
+  removeRightAngleIndicator,
+  showCollinearSnapLine,
+  removeCollinearSnapLine,
+  showParallelLineIndicator,
+  removeParallelLineIndicator,
+  removeAllSnapIndicators
+} from '../lib/snap_indicators.js';
+import {
+  findNearbyParallelLines,
+  getParallelBearing,
+  calculatePerpendicularToLine
+} from '../lib/distance_mode_helpers.js';
+import * as turf from '@turf/turf';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
 const isMidpoint = isOfMetaType(Constants.meta.MIDPOINT);
+
+/**
+ * Get the bearings of segments adjacent to a vertex
+ * Returns an array of {bearing, segment} objects for snapping reference
+ */
+function getAdjacentSegmentBearings(feature, coordPath) {
+  const geojson = feature.toGeoJSON();
+  const geom = geojson.geometry;
+
+  let coordinates = [];
+  if (geom.type === 'LineString') {
+    coordinates = geom.coordinates;
+  } else if (geom.type === 'Polygon') {
+    coordinates = geom.coordinates[0]; // Outer ring
+  } else {
+    return [];
+  }
+
+  // Parse coord path to get index
+  const pathParts = coordPath.split('.');
+  const vertexIndex = parseInt(pathParts[pathParts.length - 1], 10);
+
+  if (isNaN(vertexIndex) || vertexIndex < 0 || vertexIndex >= coordinates.length) {
+    return [];
+  }
+
+  const segments = [];
+  const vertex = coordinates[vertexIndex];
+
+  // Previous segment (from previous vertex to this vertex)
+  if (vertexIndex > 0) {
+    const prevVertex = coordinates[vertexIndex - 1];
+    const bearing = turf.bearing(turf.point(prevVertex), turf.point(vertex));
+    segments.push({
+      bearing: bearing,
+      segment: { start: prevVertex, end: vertex },
+      type: 'previous'
+    });
+  } else if (geom.type === 'Polygon' && coordinates.length > 2) {
+    // For polygon first vertex, wrap to last segment
+    const lastVertex = coordinates[coordinates.length - 2]; // -2 because polygon closes
+    const bearing = turf.bearing(turf.point(lastVertex), turf.point(vertex));
+    segments.push({
+      bearing: bearing,
+      segment: { start: lastVertex, end: vertex },
+      type: 'previous'
+    });
+  }
+
+  // Next segment (from this vertex to next vertex)
+  if (vertexIndex < coordinates.length - 1) {
+    const nextVertex = coordinates[vertexIndex + 1];
+    const bearing = turf.bearing(turf.point(vertex), turf.point(nextVertex));
+    segments.push({
+      bearing: bearing,
+      segment: { start: vertex, end: nextVertex },
+      type: 'next'
+    });
+  } else if (geom.type === 'Polygon' && coordinates.length > 2) {
+    // For polygon last vertex, wrap to first segment
+    const firstVertex = coordinates[1]; // Skip closing vertex
+    const bearing = turf.bearing(turf.point(vertex), turf.point(firstVertex));
+    segments.push({
+      bearing: bearing,
+      segment: { start: vertex, end: firstVertex },
+      type: 'next'
+    });
+  }
+
+  return segments;
+}
+
+/**
+ * Check if mouse bearing is orthogonal to any adjacent segment
+ * Returns the best matching orthogonal bearing or null
+ */
+function getOrthogonalSnapBearing(adjacentSegments, mouseBearing, tolerance) {
+  if (!adjacentSegments || adjacentSegments.length === 0) {
+    return null;
+  }
+
+  const orthogonalAngles = [0, 90, 180, 270];
+  let bestMatch = null;
+  let bestDiff = Infinity;
+  const normalizedMouse = ((mouseBearing % 360) + 360) % 360;
+
+  for (const segmentInfo of adjacentSegments) {
+    for (const angle of orthogonalAngles) {
+      const orthogonalBearing = segmentInfo.bearing + angle;
+      const normalizedOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
+
+      let diff = Math.abs(normalizedOrthogonal - normalizedMouse);
+      if (diff > 180) diff = 360 - diff;
+
+      if (diff <= tolerance && diff < bestDiff) {
+        bestDiff = diff;
+        bestMatch = {
+          bearing: orthogonalBearing,
+          referenceBearing: segmentInfo.bearing,
+          referenceSegment: segmentInfo.segment,
+          angleFromReference: angle
+        };
+      }
+    }
+  }
+
+  return bestMatch;
+}
 
 const DirectSelect = {};
 
@@ -53,6 +176,7 @@ DirectSelect.stopDragging = function(state) {
   removeMovementVector(this.map);
   removeRailIndicator(this.map);
   removeAdjacentSegmentLengths(this.map);
+  removeAllSnapIndicators(this.map);
   state.dragMoveStartLocation = null;
 
   // Clear rail constraint state
@@ -60,6 +184,12 @@ DirectSelect.stopDragging = function(state) {
   state.railEdge = null;
   state.railDirection = null;
   state.railBearing = null;
+
+  // Clear snapping state
+  state.orthogonalSnapActive = false;
+  state.parallelSnapActive = false;
+  state.currentOrthogonalMatch = null;
+  state.currentParallelMatch = null;
 
   state.dragMoving = false;
   state.canDragMove = false;
@@ -74,6 +204,13 @@ DirectSelect.onVertex = function (state, e) {
     state.selectedCoordPaths = [about.coord_path];
   } else if (isShiftDown(e) && selectedIndex === -1) {
     state.selectedCoordPaths.push(about.coord_path);
+  }
+
+  // Extract adjacent segment bearings for single vertex selection (for orthogonal snapping)
+  if (state.selectedCoordPaths.length === 1) {
+    state.adjacentSegments = getAdjacentSegmentBearings(state.feature, state.selectedCoordPaths[0]);
+  } else {
+    state.adjacentSegments = null;
   }
 
   const selectedCoordinates = this.pathsToCoordinates(state.featureId, state.selectedCoordPaths);
@@ -160,7 +297,13 @@ DirectSelect.onSetup = function(opts) {
     railConstraintActive: false,
     railEdge: null, // Edge that was grabbed
     railDirection: null, // Determined rail direction
-    railBearing: null // Bearing to constrain movement to
+    railBearing: null, // Bearing to constrain movement to
+    // Snapping state
+    adjacentSegments: null, // Bearings of segments adjacent to selected vertex
+    orthogonalSnapActive: false,
+    parallelSnapActive: false,
+    currentOrthogonalMatch: null,
+    currentParallelMatch: null
   };
 
   this.setSelected(featureId);
@@ -180,6 +323,8 @@ DirectSelect.onStop = function() {
   // Clean up visualizations on mode exit
   removeMovementVector(this.map);
   removeRailIndicator(this.map);
+  removeAllSnapIndicators(this.map);
+  removeAdjacentSegmentLengths(this.map);
 };
 
 DirectSelect.toDisplayFeatures = function(state, geojson, push) {
@@ -253,6 +398,9 @@ DirectSelect.onDrag = function(state, e) {
   e.originalEvent.stopPropagation();
   let lngLat = e.lngLat;
 
+  // Check if shift is held to temporarily disable snapping
+  const shiftHeld = isShiftDown(e);
+
   // Handle rail constraint when edge was grabbed
   if (state.railEdge && state.dragMoveStartLocation) {
     // Continuously determine rail direction based on current mouse position
@@ -287,15 +435,157 @@ DirectSelect.onDrag = function(state, e) {
   }
 
   if (state.selectedCoordPaths.length === 1) {
-    // Apply snapping after rail constraint
-    if (!state.railConstraintActive) {
-      lngLat = this._ctx.snapping.snapCoord(lngLat);
-    }
-    // following the dragVertex() path below seems to cause a lag where our point
-    // ends up one step behind the snapped location
-    state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
-  } else {
+    // Single vertex dragging - apply enhanced snapping
 
+    // Shift key bypasses all snapping
+    if (shiftHeld) {
+      removeAllSnapIndicators(this.map);
+      state.orthogonalSnapActive = false;
+      state.parallelSnapActive = false;
+      state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+    } else if (!state.railConstraintActive) {
+      // Enhanced snapping when not using rail constraint
+
+      // Get the current vertex position (drag start)
+      const startVertex = [state.dragMoveStartLocation.lng, state.dragMoveStartLocation.lat];
+
+      // Calculate mouse bearing from start to current
+      const mouseBearing = turf.bearing(
+        turf.point(startVertex),
+        turf.point([lngLat.lng, lngLat.lat])
+      );
+
+      // Calculate mouse distance
+      const mouseDistance = turf.distance(
+        turf.point(startVertex),
+        turf.point([lngLat.lng, lngLat.lat]),
+        { units: 'kilometers' }
+      );
+
+      // Get orthogonal snap tolerance from options (default 5 degrees)
+      const orthogonalTolerance = this._ctx.options.orthogonalSnapTolerance || 5;
+      const parallelTolerance = this._ctx.options.parallelSnapTolerance || 5;
+
+      // Check for orthogonal snap to adjacent segments
+      let orthogonalMatch = null;
+      if (state.adjacentSegments && state.adjacentSegments.length > 0) {
+        orthogonalMatch = getOrthogonalSnapBearing(state.adjacentSegments, mouseBearing, orthogonalTolerance);
+      }
+
+      // Check for parallel snap to nearby lines
+      let parallelMatch = null;
+      const nearbyLines = findNearbyParallelLines(this._ctx, this.map, startVertex, lngLat);
+      if (nearbyLines && nearbyLines.length > 0) {
+        parallelMatch = getParallelBearing(nearbyLines, mouseBearing, parallelTolerance);
+      }
+
+      // Check for perpendicular-to-line snap
+      let perpendicularMatch = null;
+      const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
+      const snapInfo = this._ctx.snapping.snappedFeature;
+      if (snapInfo && snapInfo.geometry && (snapInfo.geometry.type === 'LineString' || snapInfo.geometry.type === 'Polygon')) {
+        // Get the line segment
+        let coords = snapInfo.geometry.coordinates;
+        if (snapInfo.geometry.type === 'Polygon') {
+          coords = coords[0];
+        }
+        if (coords.length >= 2) {
+          // Find nearest segment
+          const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
+          let nearestSegment = null;
+          let minDist = Infinity;
+          for (let i = 0; i < coords.length - 1; i++) {
+            const segLine = turf.lineString([coords[i], coords[i + 1]]);
+            const nearest = turf.nearestPointOnLine(segLine, snapPoint);
+            if (nearest.properties.dist < minDist) {
+              minDist = nearest.properties.dist;
+              nearestSegment = { start: coords[i], end: coords[i + 1] };
+            }
+          }
+          if (nearestSegment) {
+            perpendicularMatch = calculatePerpendicularToLine(startVertex, nearestSegment, lngLat);
+          }
+        }
+      }
+
+      // Determine which snap to use (priority: orthogonal > parallel > perpendicular > regular)
+      let finalLngLat = lngLat;
+      state.orthogonalSnapActive = false;
+      state.parallelSnapActive = false;
+
+      if (orthogonalMatch) {
+        // Apply orthogonal snap
+        const destinationPoint = turf.destination(
+          turf.point(startVertex),
+          mouseDistance,
+          orthogonalMatch.bearing,
+          { units: 'kilometers' }
+        );
+        finalLngLat = {
+          lng: destinationPoint.geometry.coordinates[0],
+          lat: destinationPoint.geometry.coordinates[1]
+        };
+        state.orthogonalSnapActive = true;
+        state.currentOrthogonalMatch = orthogonalMatch;
+
+        // Show appropriate indicator
+        const isCollinear = orthogonalMatch.angleFromReference === 0 || orthogonalMatch.angleFromReference === 180;
+        if (isCollinear) {
+          showCollinearSnapLine(this.map, startVertex, orthogonalMatch.referenceBearing);
+          removeRightAngleIndicator(this.map);
+        } else {
+          showRightAngleIndicator(
+            this.map,
+            startVertex,
+            orthogonalMatch.referenceBearing,
+            orthogonalMatch.bearing
+          );
+          removeCollinearSnapLine(this.map);
+        }
+        removeParallelLineIndicator(this.map);
+
+      } else if (parallelMatch) {
+        // Apply parallel snap
+        const destinationPoint = turf.destination(
+          turf.point(startVertex),
+          mouseDistance,
+          parallelMatch.bearing,
+          { units: 'kilometers' }
+        );
+        finalLngLat = {
+          lng: destinationPoint.geometry.coordinates[0],
+          lat: destinationPoint.geometry.coordinates[1]
+        };
+        state.parallelSnapActive = true;
+        state.currentParallelMatch = parallelMatch;
+
+        // Show parallel indicator
+        showParallelLineIndicator(this.map, startVertex, parallelMatch.bearing);
+        removeRightAngleIndicator(this.map);
+        removeCollinearSnapLine(this.map);
+
+      } else if (perpendicularMatch && perpendicularMatch.distanceFromCursor < 20) {
+        // Apply perpendicular snap if close enough (within 20 meters)
+        finalLngLat = {
+          lng: perpendicularMatch.coord[0],
+          lat: perpendicularMatch.coord[1]
+        };
+        removeAllSnapIndicators(this.map);
+
+      } else {
+        // Regular point/line snapping
+        finalLngLat = snappedCoord;
+        removeAllSnapIndicators(this.map);
+      }
+
+      lngLat = finalLngLat;
+      state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+    } else {
+      // Rail constraint is active
+      state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+    }
+  } else {
+    // Multiple vertices or feature dragging
     const delta = {
       lng: lngLat.lng - state.dragMoveLocation.lng,
       lat: lngLat.lat - state.dragMoveLocation.lat
