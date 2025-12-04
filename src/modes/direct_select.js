@@ -4,7 +4,7 @@ import constrainFeatureMovement from '../lib/constrain_feature_movement.js';
 import doubleClickZoom from '../lib/double_click_zoom.js';
 import * as Constants from '../constants.js';
 import moveFeatures from '../lib/move_features.js';
-import { showMovementVector, removeMovementVector } from '../lib/movement_vector.js';
+import { showMovementVector, removeMovementVector, showAdjacentSegmentLengths, removeAdjacentSegmentLengths } from '../lib/movement_vector.js';
 import { findClickedEdge, determineRailDirection, constrainToRail, showRailLine, removeRailLine, showRailIndicator, removeRailIndicator } from '../lib/rail_constraint.js';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
@@ -52,6 +52,7 @@ DirectSelect.stopDragging = function(state) {
   // Remove visualizations
   removeMovementVector(this.map);
   removeRailIndicator(this.map);
+  removeAdjacentSegmentLengths(this.map);
   state.dragMoveStartLocation = null;
 
   // Clear rail constraint state
@@ -308,6 +309,13 @@ DirectSelect.onDrag = function(state, e) {
   // Show movement vector from original grab position to current position
   if (state.dragMoveStartLocation) {
     showMovementVector(this.map, state.dragMoveStartLocation, lngLat);
+  }
+
+  // Show adjacent segment lengths when dragging a single vertex
+  if (state.selectedCoordPaths.length === 1) {
+    showAdjacentSegmentLengths(this.map, state.feature, state.selectedCoordPaths[0], lngLat);
+  } else {
+    removeAdjacentSegmentLengths(this.map);
   }
 };
 
