@@ -2649,25 +2649,20 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   }
 
   // Detect parallel lines nearby (orthogonal intersection method, configurable tolerance)
-  // This is an expensive operation - use cached result when throttled
+  // findNearbyParallelLines has internal caching, so we always call it but it returns cached results when appropriate
   let parallelLineMatch = null;
   if (!extendedGuidelinesActive && state.vertices.length >= 1) {
-    if (shouldRunHeavyCompute || !state._lastParallelLineMatch) {
-      const nearbyLines = findNearbyParallelLines(
-        this._ctx,
-        this.map,
-        lastVertex,
-        lngLat,
-      );
-      parallelLineMatch = getParallelBearing(
-        nearbyLines,
-        mouseBearing,
-        this._ctx.options.parallelSnapTolerance,
-      );
-      state._lastParallelLineMatch = parallelLineMatch;
-    } else {
-      parallelLineMatch = state._lastParallelLineMatch;
-    }
+    const nearbyLines = findNearbyParallelLines(
+      this._ctx,
+      this.map,
+      lastVertex,
+      lngLat,
+    );
+    parallelLineMatch = getParallelBearing(
+      nearbyLines,
+      mouseBearing,
+      this._ctx.options.parallelSnapTolerance,
+    );
   }
 
   // Check for perpendicular-to-line snap (when snapping to a line)
