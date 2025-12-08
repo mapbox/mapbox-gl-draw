@@ -294,5 +294,32 @@ test('direct_select', async (t) => {
     await cleanUp();
   });
 
+  await t.test('direct_select - stopping mode mid-drag should reset the plugin state', async () => {
+    map.dragPan.enable();
+
+    const [polygonId] = Draw.add(getGeoJSON('polygon'));
+    Draw.changeMode(Constants.modes.DIRECT_SELECT, {
+      featureId: polygonId
+    });
+
+    const originalPolygon = getGeoJSON('polygon');
+    const centroid = turfCentroid(originalPolygon).geometry.coordinates;
+    await afterNextRender();
+
+    assert.equal(map.dragPan.isEnabled(), true, 'dragPan should be enabled initially');
+
+    map.fire('mousedown', makeMouseEvent(centroid[0], centroid[1]));
+    map.fire('mousemove', makeMouseEvent(centroid[0] + 15, centroid[1] + 15, { buttons: 1 }));
+
+    assert.equal(map.dragPan.isEnabled(), false, 'dragPan should be disabled during drag');
+
+    Draw.changeMode(Constants.modes.SIMPLE_SELECT);
+    await afterNextRender();
+
+    assert.equal(map.dragPan.isEnabled(), true, 'dragPan should be re-enabled after stopping mode');
+
+    await cleanUp();
+  });
+
   document.body.removeChild(mapContainer);
 });
