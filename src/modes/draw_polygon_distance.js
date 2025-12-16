@@ -19,6 +19,7 @@ import {
   getExtendedGuidelineBearings,
   getPerpendicularToGuidelineBearing,
   clearPointCache,
+  calculatePixelDistanceToExtendedGuidelines,
 } from "../lib/distance_mode_helpers.js";
 
 // Reusable unit options to avoid repeated object allocation
@@ -77,6 +78,8 @@ DrawPolygonDistance.onSetup = function (opts) {
     extendedGuidelines: null,
     lastHoverPosition: null,
     isHoveringExtendedGuidelines: false,
+    isInExtendedGuidelinePersistenceZone: false, // true when within 5x snap distance of guideline
+    isActivelySnappingToGuideline: false, // true when actually snapping to the guideline
     // Parallel line snapping state
     parallelLineSnap: null,
   };
@@ -1409,6 +1412,13 @@ DrawPolygonDistance.renderExtendedGuidelines = function (state, extendedLines) {
     // Add mouseover handler to enable snapping
     const mouseoverHandler = (e) => {
       if (e.features && e.features.length > 0) {
+        // Clear snap-hover state from previous snapped feature before switching
+        if (this._ctx.snapping.snappedFeature &&
+            this._ctx.snapping.snappedFeature.id !== undefined &&
+            !(this._ctx.snapping.snappedFeature.properties &&
+              this._ctx.snapping.snappedFeature.properties.isExtendedGuideline)) {
+          this._ctx.snapping.setSnapHoverState(this._ctx.snapping.snappedFeature, false);
+        }
         const feature = e.features[0];
         this._ctx.snapping.snappedGeometry = feature.geometry;
         this._ctx.snapping.snappedFeature = feature;
@@ -1497,7 +1507,23 @@ DrawPolygonDistance.removeExtendedGuidelines = function (state) {
 
   state.extendedGuidelines = null;
   state.hoveredIntersectionPoint = null;
+  state.isInExtendedGuidelinePersistenceZone = false;
+  state.isActivelySnappingToGuideline = false;
   state.lastHoverPosition = null;
+};
+
+/**
+ * Update the opacity of extended guidelines based on snapping state.
+ * Full opacity (0.3) when actively snapping, reduced opacity (0.15) when in persistence zone.
+ */
+DrawPolygonDistance.updateExtendedGuidelinesOpacity = function (state) {
+  const map = this.map;
+  if (!map || !map.getLayer("extended-guidelines")) return;
+
+  // Full opacity when actively snapping, half opacity when in persistence zone but not snapping
+  const opacity = state.isActivelySnappingToGuideline ? 0.3 : 0.15;
+
+  map.setPaintProperty("extended-guidelines", "line-opacity", opacity);
 };
 
 DrawPolygonDistance.showAngleReferenceLine = function (
@@ -2418,40 +2444,94 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
       state.hoveredIntersectionPoint.coord[1] !== currentCoord[1];
 
     if (isDifferentPoint) {
-      // Clear existing debounce timer and extended guidelines
-      if (state.hoverDebounceTimer) {
-        clearTimeout(state.hoverDebounceTimer);
-        state.hoverDebounceTimer = null;
-      }
-      this.removeExtendedGuidelines(state);
-
-      // Store new hover point
-      state.hoveredIntersectionPoint = intersectionPointInfo;
-      state.lastHoverPosition = [lngLat.lng, lngLat.lat];
-
-      // Start new debounce timer (500ms)
-      state.hoverDebounceTimer = setTimeout(() => {
-        // Extend and render guidelines
-        const extendedLines = this.extendGuidelines(
-          state,
-          intersectionPointInfo,
+      // Check if we have existing extended guidelines and are within their persistence zone
+      let keepExistingGuidelines = false;
+      if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+        const snapDistance = this._ctx.options.snapDistance || 20;
+        const persistenceZone = snapDistance * 5;
+        const pixelDistanceToGuideline = calculatePixelDistanceToExtendedGuidelines(
+          this.map,
+          state.extendedGuidelines,
+          lngLat
         );
-        state.extendedGuidelines = extendedLines;
-        this.renderExtendedGuidelines(state, extendedLines);
-      }, 500);
-    }
-    // If same point and extended guidelines exist, keep them visible (do nothing)
-  } else {
-    // Not hovering over an intersection point
-    // Only remove extended guidelines if we're also not hovering over the extended lines themselves
-    if (!state.isHoveringExtendedGuidelines) {
-      if (state.hoverDebounceTimer || state.extendedGuidelines) {
-        // Clear debounce timer and remove extended guidelines
+        keepExistingGuidelines = pixelDistanceToGuideline <= persistenceZone;
+      }
+
+      if (keepExistingGuidelines) {
+        // We're within persistence zone of existing guidelines - keep them
+        // Clear snap-hover state for the different point we detected but won't use
+        if (intersectionPointInfo.feature && this._ctx.snapping) {
+          this._ctx.snapping.setSnapHoverState(intersectionPointInfo.feature, false);
+        }
+        // Update opacity to faded since we're not actively snapping to them
+        state.isActivelySnappingToGuideline = false;
+        state.isInExtendedGuidelinePersistenceZone = true;
+        this.updateExtendedGuidelinesOpacity(state);
+        // Don't start new debounce for the different point
+      } else {
+        // Clear existing debounce timer and extended guidelines
         if (state.hoverDebounceTimer) {
           clearTimeout(state.hoverDebounceTimer);
           state.hoverDebounceTimer = null;
         }
         this.removeExtendedGuidelines(state);
+
+        // Store new hover point
+        state.hoveredIntersectionPoint = intersectionPointInfo;
+        state.lastHoverPosition = [lngLat.lng, lngLat.lat];
+
+        // Start new debounce timer (500ms)
+        state.hoverDebounceTimer = setTimeout(() => {
+          // Extend and render guidelines
+          const extendedLines = this.extendGuidelines(
+            state,
+            intersectionPointInfo,
+          );
+          state.extendedGuidelines = extendedLines;
+          this.renderExtendedGuidelines(state, extendedLines);
+          // Set initial opacity state - actively snapping since we're hovering intersection
+          state.isActivelySnappingToGuideline = true;
+          state.isInExtendedGuidelinePersistenceZone = true;
+        }, 500);
+      }
+    } else if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+      // Same point, guidelines exist - update opacity to full since we're on the intersection
+      state.isActivelySnappingToGuideline = true;
+      state.isInExtendedGuidelinePersistenceZone = true;
+      this.updateExtendedGuidelinesOpacity(state);
+    }
+  } else {
+    // Not hovering over an intersection point
+    // Check if we're within the persistence zone (5x snap distance) of extended guidelines
+    if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+      const snapDistance = this._ctx.options.snapDistance || 20;
+      const persistenceZone = snapDistance * 5; // 5x snap distance for persistence
+      const pixelDistanceToGuideline = calculatePixelDistanceToExtendedGuidelines(
+        this.map,
+        state.extendedGuidelines,
+        lngLat
+      );
+
+      // Update state for whether we're actively snapping or just in persistence zone
+      state.isActivelySnappingToGuideline = state.isHoveringExtendedGuidelines;
+      state.isInExtendedGuidelinePersistenceZone = pixelDistanceToGuideline <= persistenceZone;
+
+      // Update guideline opacity based on snapping state
+      this.updateExtendedGuidelinesOpacity(state);
+
+      // Only remove guidelines if we're outside the persistence zone
+      if (!state.isInExtendedGuidelinePersistenceZone) {
+        if (state.hoverDebounceTimer) {
+          clearTimeout(state.hoverDebounceTimer);
+          state.hoverDebounceTimer = null;
+        }
+        this.removeExtendedGuidelines(state);
+      }
+    } else if (!state.isHoveringExtendedGuidelines) {
+      // No guidelines exist yet, clear any pending debounce timer
+      if (state.hoverDebounceTimer) {
+        clearTimeout(state.hoverDebounceTimer);
+        state.hoverDebounceTimer = null;
       }
     }
   }

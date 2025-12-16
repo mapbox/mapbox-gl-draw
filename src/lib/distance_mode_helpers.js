@@ -980,3 +980,80 @@ export function checkExtendedGuidelineIntersectionClick(ctx, map, state, e, getS
 
   return null;
 }
+
+/**
+ * Calculate the minimum pixel distance from cursor to any extended guideline.
+ * This is used to determine if cursor is within the persistence zone.
+ *
+ * @param {Object} map - The Mapbox GL map instance
+ * @param {Array} extendedGuidelines - Array of extended guideline GeoJSON features
+ * @param {Object} cursorLngLat - Current cursor position {lng, lat}
+ * @returns {number} Minimum pixel distance to any extended guideline, or Infinity if no guidelines
+ */
+export function calculatePixelDistanceToExtendedGuidelines(map, extendedGuidelines, cursorLngLat) {
+  if (!map || !extendedGuidelines || extendedGuidelines.length === 0 || !cursorLngLat) {
+    return Infinity;
+  }
+
+  const cursorPoint = map.project([cursorLngLat.lng, cursorLngLat.lat]);
+  let minPixelDistance = Infinity;
+
+  for (const guideline of extendedGuidelines) {
+    if (!guideline.geometry || !guideline.geometry.coordinates) continue;
+
+    const coords = guideline.geometry.coordinates;
+
+    // For each segment of the guideline
+    for (let i = 0; i < coords.length - 1; i++) {
+      const start = map.project(coords[i]);
+      const end = map.project(coords[i + 1]);
+
+      // Calculate perpendicular distance from point to line segment
+      const pixelDist = pointToLineSegmentDistance(
+        cursorPoint.x, cursorPoint.y,
+        start.x, start.y,
+        end.x, end.y
+      );
+
+      if (pixelDist < minPixelDistance) {
+        minPixelDistance = pixelDist;
+      }
+    }
+  }
+
+  return minPixelDistance;
+}
+
+/**
+ * Calculate the distance from a point to a line segment (in pixels).
+ * Uses standard point-to-line-segment distance formula.
+ *
+ * @param {number} px - Point x coordinate
+ * @param {number} py - Point y coordinate
+ * @param {number} x1 - Line segment start x
+ * @param {number} y1 - Line segment start y
+ * @param {number} x2 - Line segment end x
+ * @param {number} y2 - Line segment end y
+ * @returns {number} Distance in pixels
+ */
+function pointToLineSegmentDistance(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const lengthSquared = dx * dx + dy * dy;
+
+  if (lengthSquared === 0) {
+    // Line segment is a point
+    return Math.sqrt((px - x1) * (px - x1) + (py - y1) * (py - y1));
+  }
+
+  // Calculate projection of point onto line segment
+  let t = ((px - x1) * dx + (py - y1) * dy) / lengthSquared;
+  t = Math.max(0, Math.min(1, t)); // Clamp to segment
+
+  // Find closest point on segment
+  const closestX = x1 + t * dx;
+  const closestY = y1 + t * dy;
+
+  // Return distance
+  return Math.sqrt((px - closestX) * (px - closestX) + (py - closestY) * (py - closestY));
+}

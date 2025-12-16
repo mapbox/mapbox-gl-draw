@@ -18,7 +18,11 @@ import {
 import {
   findNearbyParallelLines,
   getParallelBearing,
-  calculatePerpendicularToLine
+  calculatePerpendicularToLine,
+  getExtendedGuidelineBearings,
+  getPerpendicularToGuidelineBearing,
+  getAdjacentSegmentsAtVertex,
+  calculatePixelDistanceToExtendedGuidelines
 } from '../lib/distance_mode_helpers.js';
 import * as turf from '@turf/turf';
 
@@ -135,6 +139,909 @@ function getOrthogonalSnapBearing(adjacentSegments, mouseBearing, tolerance) {
 
 const DirectSelect = {};
 
+/**
+ * Create the distance input UI for vertex editing
+ */
+DirectSelect.createDistanceInput = function(state) {
+  // Check if angle/distance input UI is enabled
+  if (!this._ctx.options.useAngleDistanceInput) {
+    return;
+  }
+
+  // Create container
+  const container = document.createElement('div');
+  container.className = 'distance-mode-container direct-select-distance';
+
+  // Calculate position from normalized coordinates
+  const mapContainer = this._ctx.map.getContainer();
+  const mapWidth = mapContainer.offsetWidth;
+  const mapHeight = mapContainer.offsetHeight;
+  const [normX, normY] = this._ctx.options.angleDistanceInputPosition;
+
+  // Convert normalized position to pixel coordinates
+  const pixelX = mapWidth * normX;
+  const pixelY = mapHeight * normY;
+
+  container.style.cssText = `
+    position: fixed;
+    top: ${pixelY}px;
+    left: ${pixelX}px;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 6px 10px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    pointer-events: auto;
+    transition: opacity 0.2s ease-in-out;
+  `;
+
+  // Create label/state display
+  const label = document.createElement('span');
+  label.className = 'distance-mode-label';
+  label.textContent = 'D for distance';
+  label.style.cssText = `
+    color: #666;
+    font-size: 9px;
+    white-space: nowrap;
+    width: 80px;
+    text-align: center;
+    display: inline-block;
+  `;
+
+  // Create input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'distance (m)';
+  input.className = 'distance-mode-input';
+  input.style.cssText = `
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 9px;
+    width: 80px;
+    display: none;
+    outline: none;
+    background: transparent;
+    transition: background-color 0.2s;
+  `;
+
+  // Create clear button
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '×';
+  clearBtn.className = 'distance-mode-clear';
+  clearBtn.style.cssText = `
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+    display: none;
+  `;
+
+  const updateDisplay = () => {
+    if (state.currentDistance !== null && state.currentDistance > 0) {
+      label.style.display = 'none';
+      input.style.display = 'block';
+      clearBtn.style.display = 'block';
+    } else {
+      label.style.display = 'block';
+      input.style.display = 'none';
+      clearBtn.style.display = 'none';
+    }
+  };
+
+  // Add focus/blur handlers
+  input.addEventListener('focus', () => {
+    input.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+  });
+
+  input.addEventListener('blur', () => {
+    input.style.backgroundColor = 'transparent';
+  });
+
+  input.addEventListener('input', (e) => {
+    const value = e.target.value;
+    if (value === '' || !isNaN(parseFloat(value))) {
+      state.currentDistance = value === '' ? null : parseFloat(value);
+      updateDisplay();
+    } else {
+      e.target.value = state.currentDistance !== null ? state.currentDistance.toString() : '';
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      state.currentDistance = null;
+      input.value = '';
+      input.blur();
+      updateDisplay();
+    }
+  });
+
+  clearBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    state.currentDistance = null;
+    input.value = '';
+    input.blur();
+    updateDisplay();
+  });
+
+  // Store reference for use in keyHandler
+  const self = this;
+
+  // Add keyboard shortcuts
+  const keyHandler = (e) => {
+    // Only respond when dragging a vertex
+    if (!state.dragMoving || state.selectedCoordPaths.length !== 1) {
+      return;
+    }
+
+    // 'D' key to toggle distance input
+    if (e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Toggle: if distance is active, clear it; otherwise activate it
+      if (state.currentDistance !== null || document.activeElement === input) {
+        state.currentDistance = null;
+        input.value = '';
+        input.blur();
+        updateDisplay();
+      } else {
+        input.style.display = 'block';
+        label.style.display = 'none';
+        input.focus();
+      }
+    }
+  };
+  document.addEventListener('keydown', keyHandler);
+
+  container.appendChild(label);
+  container.appendChild(input);
+  container.appendChild(clearBtn);
+  document.body.appendChild(container);
+
+  state.distanceInput = input;
+  state.distanceContainer = container;
+  state.distanceKeyHandler = keyHandler;
+  state.distanceUpdateDisplay = updateDisplay;
+
+  updateDisplay();
+};
+
+/**
+ * Create the angle input UI for vertex editing
+ */
+DirectSelect.createAngleInput = function(state) {
+  // Check if angle/distance input UI is enabled
+  if (!this._ctx.options.useAngleDistanceInput) {
+    return;
+  }
+
+  const distanceContainer = state.distanceContainer;
+  if (!distanceContainer) {
+    return;
+  }
+
+  // Create separator
+  const separator = document.createElement('span');
+  separator.style.cssText = `
+    color: #ccc;
+    font-size: 11px;
+    padding: 0 3px;
+  `;
+  separator.textContent = '|';
+
+  // Create label/state display
+  const label = document.createElement('span');
+  label.className = 'angle-mode-label';
+  label.textContent = 'A for angle';
+  label.style.cssText = `
+    color: #666;
+    font-size: 9px;
+    white-space: nowrap;
+    width: 80px;
+    text-align: center;
+    display: inline-block;
+  `;
+
+  // Create input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'angle (°)';
+  input.className = 'angle-mode-input';
+  input.style.cssText = `
+    border: 1px solid rgba(200, 200, 200, 0.8);
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 9px;
+    width: 80px;
+    display: none;
+    outline: none;
+    background: transparent;
+    transition: background-color 0.2s;
+  `;
+
+  // Create clear button
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '×';
+  clearBtn.className = 'angle-mode-clear';
+  clearBtn.style.cssText = `
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+    display: none;
+  `;
+
+  const updateDisplay = () => {
+    if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
+      label.style.display = 'none';
+      input.style.display = 'block';
+      clearBtn.style.display = 'block';
+    } else {
+      label.style.display = 'block';
+      input.style.display = 'none';
+      clearBtn.style.display = 'none';
+    }
+  };
+
+  // Add focus/blur handlers
+  input.addEventListener('focus', () => {
+    input.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+  });
+
+  input.addEventListener('blur', () => {
+    input.style.backgroundColor = 'transparent';
+  });
+
+  input.addEventListener('input', (e) => {
+    const value = e.target.value;
+    if (value === '' || !isNaN(parseFloat(value))) {
+      state.currentAngle = value === '' ? null : parseFloat(value);
+      updateDisplay();
+    } else {
+      e.target.value = state.currentAngle !== null ? state.currentAngle.toString() : '';
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      state.currentAngle = null;
+      input.value = '';
+      input.blur();
+      updateDisplay();
+    }
+  });
+
+  clearBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    state.currentAngle = null;
+    input.value = '';
+    input.blur();
+    updateDisplay();
+  });
+
+  // Add keyboard shortcuts
+  const keyHandler = (e) => {
+    // Only respond when dragging a vertex
+    if (!state.dragMoving || state.selectedCoordPaths.length !== 1) {
+      return;
+    }
+
+    // 'A' key to toggle angle input
+    if (e.key === 'a' || e.key === 'A') {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Toggle: if angle is active, clear it; otherwise activate it
+      if (state.currentAngle !== null || document.activeElement === input) {
+        state.currentAngle = null;
+        input.value = '';
+        input.blur();
+        updateDisplay();
+      } else {
+        input.style.display = 'block';
+        label.style.display = 'none';
+        input.focus();
+      }
+    }
+  };
+  document.addEventListener('keydown', keyHandler);
+
+  distanceContainer.appendChild(separator);
+  distanceContainer.appendChild(label);
+  distanceContainer.appendChild(input);
+  distanceContainer.appendChild(clearBtn);
+
+  state.angleInput = input;
+  state.angleKeyHandler = keyHandler;
+  state.angleSeparator = separator;
+  state.angleUpdateDisplay = updateDisplay;
+
+  updateDisplay();
+};
+
+/**
+ * Show the distance/angle input UI
+ */
+DirectSelect.showDistanceAngleUI = function(state) {
+  if (state.distanceContainer) {
+    state.distanceContainer.style.display = 'flex';
+  }
+};
+
+/**
+ * Hide the distance/angle input UI
+ */
+DirectSelect.hideDistanceAngleUI = function(state) {
+  if (state.distanceContainer) {
+    state.distanceContainer.style.display = 'none';
+  }
+  // Clear values
+  if (state.distanceInput) {
+    state.distanceInput.value = '';
+    state.currentDistance = null;
+    if (state.distanceUpdateDisplay) state.distanceUpdateDisplay();
+  }
+  if (state.angleInput) {
+    state.angleInput.value = '';
+    state.currentAngle = null;
+    if (state.angleUpdateDisplay) state.angleUpdateDisplay();
+  }
+};
+
+/**
+ * Remove the distance/angle input UI elements
+ */
+DirectSelect.removeDistanceAngleUI = function(state) {
+  if (state.distanceKeyHandler) {
+    document.removeEventListener('keydown', state.distanceKeyHandler);
+    state.distanceKeyHandler = null;
+  }
+  if (state.angleKeyHandler) {
+    document.removeEventListener('keydown', state.angleKeyHandler);
+    state.angleKeyHandler = null;
+  }
+  if (state.distanceContainer && state.distanceContainer.parentNode) {
+    state.distanceContainer.parentNode.removeChild(state.distanceContainer);
+    state.distanceContainer = null;
+  }
+  state.distanceInput = null;
+  state.angleInput = null;
+};
+
+/**
+ * Detect if the mouse is hovering over an intersection point (snappingPoint)
+ * Returns intersection info if found, null otherwise
+ */
+DirectSelect.detectHoveredIntersectionPoint = function(state, e) {
+  const map = this.map;
+  if (!map || !this._ctx.snapping) return null;
+
+  // Query features at the hover point from snap buffer layers
+  const bufferLayers = this._ctx.snapping.bufferLayers.map(
+    (layerId) => '_snap_buffer_' + layerId
+  );
+  const featuresAtPoint = map.queryRenderedFeatures(e.point, {
+    layers: bufferLayers,
+  });
+
+  // Look for a midpoint feature FIRST (point with isMidpoint === true)
+  const midpoint = featuresAtPoint.find((feature) => {
+    return (
+      feature.properties &&
+      feature.properties.type === 'snappingPoint' &&
+      feature.properties.isMidpoint === true &&
+      feature.properties.guidelineIds
+    );
+  });
+
+  if (midpoint) {
+    return {
+      coord: midpoint.geometry.coordinates,
+      feature: midpoint,
+      guidelineIds: JSON.parse(midpoint.properties.guidelineIds),
+      type: 'midpoint',
+    };
+  }
+
+  // Look for an intersection point (snappingPoint with multiple guidelines, NOT a midpoint)
+  const intersectionPoint = featuresAtPoint.find((feature) => {
+    return (
+      feature.properties &&
+      feature.properties.type === 'snappingPoint' &&
+      feature.properties.guidelineIds &&
+      feature.properties.isMidpoint !== true
+    );
+  });
+
+  if (intersectionPoint) {
+    return {
+      coord: intersectionPoint.geometry.coordinates,
+      guidelineIds: JSON.parse(intersectionPoint.properties.guidelineIds),
+      feature: intersectionPoint,
+      type: 'intersection'
+    };
+  }
+
+  return null;
+};
+
+/**
+ * Extend guidelines from an intersection or midpoint
+ * Returns array of extended line features
+ */
+DirectSelect.extendGuidelines = function(state, intersectionInfo) {
+  const map = this.map;
+  if (!map) return [];
+
+  const extendedLines = [];
+
+  // Handle midpoint type - create perpendicular guideline
+  if (intersectionInfo.type === 'midpoint') {
+    const { coord, guidelineIds } = intersectionInfo;
+
+    // Get the parent line from the guideline ID
+    const guidelineId = guidelineIds[0]; // Midpoints have only one parent guideline
+    const sourceId = intersectionInfo.feature.source;
+    const source = map.getSource(sourceId);
+    if (!source) return [];
+
+    // Get all features from the source
+    const allFeatures = map.querySourceFeatures(sourceId, {
+      sourceLayer: intersectionInfo.feature.sourceLayer,
+    });
+
+    const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
+    if (!guidelineFeature) return [];
+
+    const geometry = guidelineFeature.geometry;
+    let lineBearing;
+
+    // Calculate the bearing of the line segment containing the midpoint
+    if (geometry.type === 'LineString') {
+      const coords = geometry.coordinates;
+      if (coords.length < 2) return [];
+
+      // Find the segment that contains this midpoint
+      let segmentBearing;
+      const coordPoint = turf.point(coord);
+      for (let i = 0; i < coords.length - 1; i++) {
+        const start = coords[i];
+        const end = coords[i + 1];
+        const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+        const dist = turf.distance(turf.point(mid), coordPoint, { units: 'meters' });
+        if (dist < 1) {
+          segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+          break;
+        }
+      }
+
+      if (segmentBearing === undefined) {
+        segmentBearing = turf.bearing(
+          turf.point(coords[0]),
+          turf.point(coords[coords.length - 1])
+        );
+      }
+
+      lineBearing = segmentBearing;
+    } else if (geometry.type === 'MultiLineString') {
+      let segmentBearing;
+      const coordPoint = turf.point(coord);
+      for (const lineCoords of geometry.coordinates) {
+        if (lineCoords.length < 2) continue;
+
+        for (let i = 0; i < lineCoords.length - 1; i++) {
+          const start = lineCoords[i];
+          const end = lineCoords[i + 1];
+          const mid = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
+
+          const dist = turf.distance(turf.point(mid), coordPoint, { units: 'meters' });
+          if (dist < 1) {
+            segmentBearing = turf.bearing(turf.point(start), turf.point(end));
+            break;
+          }
+        }
+        if (segmentBearing !== undefined) break;
+      }
+
+      if (segmentBearing === undefined) return [];
+      lineBearing = segmentBearing;
+    } else {
+      return [];
+    }
+
+    // Create perpendicular line (90 degrees to the original line)
+    const perpendicularBearing = lineBearing + 90;
+    const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+
+    const extendedStart = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing + 180,
+      { units: 'kilometers' }
+    );
+    const extendedEnd = turf.destination(
+      turf.point(coord),
+      extensionDistance,
+      perpendicularBearing,
+      { units: 'kilometers' }
+    );
+
+    extendedLines.push({
+      type: 'Feature',
+      properties: { isExtendedGuideline: true, isMidpointGuideline: true },
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          extendedStart.geometry.coordinates,
+          coord,
+          extendedEnd.geometry.coordinates,
+        ],
+      },
+    });
+
+    return extendedLines;
+  }
+
+  // Handle intersection type - extend the original guidelines
+  const { coord, guidelineIds } = intersectionInfo;
+
+  // Query source features once and cache for all guidelines
+  const sourceId = intersectionInfo.feature.source;
+  const source = map.getSource(sourceId);
+  if (!source) return [];
+
+  const allFeatures = map.querySourceFeatures(sourceId, {
+    sourceLayer: intersectionInfo.feature.sourceLayer,
+  });
+
+  // For each guideline ID, find and extend it
+  for (const guidelineId of guidelineIds) {
+    const guidelineFeature = allFeatures.find((f) => f.id === guidelineId);
+    if (!guidelineFeature) continue;
+
+    let geometry = guidelineFeature.geometry;
+
+    if (geometry.type === 'LineString') {
+      const coords = geometry.coordinates;
+      if (coords.length < 2) continue;
+
+      const bearing = turf.bearing(
+        turf.point(coords[0]),
+        turf.point(coords[coords.length - 1])
+      );
+
+      const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+      const extendedStart = turf.destination(
+        turf.point(coords[0]),
+        extensionDistance,
+        bearing + 180,
+        { units: 'kilometers' }
+      );
+      const extendedEnd = turf.destination(
+        turf.point(coords[coords.length - 1]),
+        extensionDistance,
+        bearing,
+        { units: 'kilometers' }
+      );
+
+      extendedLines.push({
+        type: 'Feature',
+        properties: { isExtendedGuideline: true },
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            extendedStart.geometry.coordinates,
+            ...coords,
+            extendedEnd.geometry.coordinates,
+          ],
+        },
+      });
+    } else if (geometry.type === 'MultiLineString') {
+      for (const lineCoords of geometry.coordinates) {
+        if (lineCoords.length < 2) continue;
+
+        const bearing = turf.bearing(
+          turf.point(lineCoords[0]),
+          turf.point(lineCoords[lineCoords.length - 1])
+        );
+
+        const extensionDistance = this._ctx.options.extendedGuidelineDistance || 0.2;
+        const extendedStart = turf.destination(
+          turf.point(lineCoords[0]),
+          extensionDistance,
+          bearing + 180,
+          { units: 'kilometers' }
+        );
+        const extendedEnd = turf.destination(
+          turf.point(lineCoords[lineCoords.length - 1]),
+          extensionDistance,
+          bearing,
+          { units: 'kilometers' }
+        );
+
+        extendedLines.push({
+          type: 'Feature',
+          properties: { isExtendedGuideline: true },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              extendedStart.geometry.coordinates,
+              ...lineCoords,
+              extendedEnd.geometry.coordinates,
+            ],
+          },
+        });
+      }
+    }
+  }
+
+  return extendedLines;
+};
+
+/**
+ * Render extended guidelines on the map
+ */
+DirectSelect.renderExtendedGuidelines = function(state, extendedLines) {
+  const map = this.map;
+  if (!map) return;
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: extendedLines,
+  };
+
+  // Create or update the visual layer for extended guidelines
+  if (!map.getSource('extended-guidelines')) {
+    map.addSource('extended-guidelines', {
+      type: 'geojson',
+      data: featureCollection,
+    });
+
+    map.addLayer({
+      id: 'extended-guidelines',
+      type: 'line',
+      source: 'extended-guidelines',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 0.3,
+        'line-dasharray': [4, 4],
+      },
+    });
+  } else {
+    map.getSource('extended-guidelines').setData(featureCollection);
+  }
+
+  // Create or update the snap buffer layer for extended guidelines
+  const bufferLayerId = '_snap_buffer_extended-guidelines';
+  const snapDistance = this._ctx.options.snapDistance || 15;
+
+  if (!map.getLayer(bufferLayerId)) {
+    map.addLayer({
+      id: bufferLayerId,
+      type: 'line',
+      source: 'extended-guidelines',
+      paint: {
+        'line-color': 'hsla(0,100%,50%,0.001)',
+        'line-width': snapDistance * 2,
+      },
+    });
+
+    // Add mouseover handler to enable snapping
+    const mouseoverHandler = (e) => {
+      if (e.features && e.features.length > 0) {
+        // Clear snap-hover state from previous snapped feature before switching
+        if (this._ctx.snapping.snappedFeature &&
+            this._ctx.snapping.snappedFeature.id !== undefined &&
+            !(this._ctx.snapping.snappedFeature.properties &&
+              this._ctx.snapping.snappedFeature.properties.isExtendedGuideline)) {
+          this._ctx.snapping.setSnapHoverState(this._ctx.snapping.snappedFeature, false);
+        }
+        const feature = e.features[0];
+        this._ctx.snapping.snappedGeometry = feature.geometry;
+        this._ctx.snapping.snappedFeature = feature;
+        state.isHoveringExtendedGuidelines = true;
+      }
+    };
+
+    const mouseoutHandler = () => {
+      state.isHoveringExtendedGuidelines = false;
+      if (
+        this._ctx.snapping.snappedGeometry &&
+        this._ctx.snapping.snappedFeature &&
+        this._ctx.snapping.snappedFeature.properties &&
+        this._ctx.snapping.snappedFeature.properties.isExtendedGuideline
+      ) {
+        this._ctx.snapping.snappedGeometry = undefined;
+        this._ctx.snapping.snappedFeature = undefined;
+      }
+    };
+
+    state.extendedGuidelineMouseoverHandler = mouseoverHandler;
+    state.extendedGuidelineMouseoutHandler = mouseoutHandler;
+
+    map.on('mousemove', bufferLayerId, mouseoverHandler);
+    map.on('mouseout', bufferLayerId, mouseoutHandler);
+  }
+};
+
+/**
+ * Update the guide circle showing distance constraint
+ */
+DirectSelect.updateGuideCircle = function(state, center, radius) {
+  // Check if we can reuse the existing circle (optimization)
+  if (
+    state.guideCircle &&
+    state.guideCircleRadius === radius &&
+    state.guideCircleCenter &&
+    state.guideCircleCenter[0] === center[0] &&
+    state.guideCircleCenter[1] === center[1]
+  ) {
+    return; // No need to regenerate
+  }
+
+  const steps = 64;
+  const circleCoords = [];
+
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * 360;
+    const pt = turf.destination(turf.point(center), radius / 1000, angle, {
+      units: 'kilometers',
+    });
+    circleCoords.push(pt.geometry.coordinates);
+  }
+
+  const circleFeature = {
+    type: 'Feature',
+    properties: { isGuideCircle: true },
+    geometry: {
+      type: 'LineString',
+      coordinates: circleCoords,
+    },
+  };
+
+  state.guideCircle = circleFeature;
+  state.guideCircleRadius = radius;
+  state.guideCircleCenter = center;
+
+  const map = this.map;
+  if (!map) return;
+
+  if (!map.getSource('distance-guide-circle')) {
+    map.addSource('distance-guide-circle', {
+      type: 'geojson',
+      data: circleFeature,
+    });
+
+    map.addLayer({
+      id: 'distance-guide-circle',
+      type: 'line',
+      source: 'distance-guide-circle',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 0.2,
+        'line-dasharray': [2, 2],
+      },
+    });
+  } else {
+    map.getSource('distance-guide-circle').setData(circleFeature);
+  }
+};
+
+/**
+ * Remove the guide circle
+ */
+DirectSelect.removeGuideCircle = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  if (map.getLayer && map.getLayer('distance-guide-circle')) {
+    map.removeLayer('distance-guide-circle');
+  }
+  if (map.getSource && map.getSource('distance-guide-circle')) {
+    map.removeSource('distance-guide-circle');
+  }
+  state.guideCircle = null;
+  state.guideCircleRadius = null;
+  state.guideCircleCenter = null;
+};
+
+/**
+ * Remove extended guidelines from the map
+ */
+DirectSelect.removeExtendedGuidelines = function(state) {
+  const map = this.map;
+  if (!map) return;
+
+  const bufferLayerId = '_snap_buffer_extended-guidelines';
+
+  // Remove event handlers
+  if (state.extendedGuidelineMouseoverHandler) {
+    map.off('mousemove', bufferLayerId, state.extendedGuidelineMouseoverHandler);
+    state.extendedGuidelineMouseoverHandler = null;
+  }
+  if (state.extendedGuidelineMouseoutHandler) {
+    map.off('mouseout', bufferLayerId, state.extendedGuidelineMouseoutHandler);
+    state.extendedGuidelineMouseoutHandler = null;
+  }
+
+  // Clear snap-hover state from the intersection point
+  if (state.hoveredIntersectionPoint && this._ctx.snapping) {
+    const feature = state.hoveredIntersectionPoint.feature;
+    if (feature && feature.id !== undefined) {
+      this._ctx.snapping.setSnapHoverState(feature, false);
+    }
+  }
+
+  // Remove buffer layer
+  if (map.getLayer && map.getLayer(bufferLayerId)) {
+    map.removeLayer(bufferLayerId);
+  }
+
+  // Remove visual layer
+  if (map.getLayer && map.getLayer('extended-guidelines')) {
+    map.removeLayer('extended-guidelines');
+  }
+  if (map.getSource && map.getSource('extended-guidelines')) {
+    map.removeSource('extended-guidelines');
+  }
+
+  // Clear snapping if it's pointing to extended guidelines
+  if (
+    this._ctx.snapping.snappedFeature &&
+    this._ctx.snapping.snappedFeature.properties &&
+    this._ctx.snapping.snappedFeature.properties.isExtendedGuideline
+  ) {
+    this._ctx.snapping.snappedGeometry = undefined;
+    this._ctx.snapping.snappedFeature = undefined;
+  }
+
+  state.extendedGuidelines = null;
+  state.hoveredIntersectionPoint = null;
+  state.isHoveringExtendedGuidelines = false;
+  state.isInExtendedGuidelinePersistenceZone = false;
+  state.isActivelySnappingToGuideline = false;
+};
+
+/**
+ * Update the opacity of extended guidelines based on snapping state.
+ * Full opacity (0.3) when actively snapping, reduced opacity (0.15) when in persistence zone.
+ */
+DirectSelect.updateExtendedGuidelinesOpacity = function (state) {
+  const map = this.map;
+  if (!map || !map.getLayer("extended-guidelines")) return;
+
+  // Full opacity when actively snapping, half opacity when in persistence zone but not snapping
+  const opacity = state.isActivelySnappingToGuideline ? 0.3 : 0.15;
+
+  map.setPaintProperty("extended-guidelines", "line-opacity", opacity);
+};
+
 // INTERNAL FUCNTIONS
 
 DirectSelect.fireUpdate = function() {
@@ -165,6 +1072,11 @@ DirectSelect.startDragging = function(state, e) {
   if (clickedEdge) {
     state.railEdge = clickedEdge;
   }
+
+  // Show distance/angle input UI when starting to drag a single vertex
+  if (state.selectedCoordPaths.length === 1) {
+    this.showDistanceAngleUI(state);
+  }
 };
 
 DirectSelect.stopDragging = function(state) {
@@ -191,9 +1103,26 @@ DirectSelect.stopDragging = function(state) {
   state.currentOrthogonalMatch = null;
   state.currentParallelMatch = null;
 
+  // Clear hover debounce timer
+  if (state.hoverDebounceTimer) {
+    clearTimeout(state.hoverDebounceTimer);
+    state.hoverDebounceTimer = null;
+  }
+  state.lastHoverPosition = null;
+
+  // Remove extended guidelines
+  this.removeExtendedGuidelines(state);
+
+  // Remove guide circle
+  this.removeGuideCircle(state);
+
+  // Hide distance/angle input UI
+  this.hideDistanceAngleUI(state);
+
   state.dragMoving = false;
   state.canDragMove = false;
   state.dragMoveLocation = null;
+  state.originalVertexCoord = null;
 };
 
 DirectSelect.onVertex = function (state, e) {
@@ -204,6 +1133,12 @@ DirectSelect.onVertex = function (state, e) {
     state.selectedCoordPaths = [about.coord_path];
   } else if (isShiftDown(e) && selectedIndex === -1) {
     state.selectedCoordPaths.push(about.coord_path);
+  }
+
+  // Store the actual vertex coordinate (not mouse position) for distance calculations
+  if (state.selectedCoordPaths.length === 1) {
+    const vertexCoord = state.feature.getCoordinate(state.selectedCoordPaths[0]);
+    state.originalVertexCoord = vertexCoord; // [lng, lat]
   }
 
   // Extract adjacent segment bearings for single vertex selection (for orthogonal snapping)
@@ -303,7 +1238,29 @@ DirectSelect.onSetup = function(opts) {
     orthogonalSnapActive: false,
     parallelSnapActive: false,
     currentOrthogonalMatch: null,
-    currentParallelMatch: null
+    currentParallelMatch: null,
+    // Distance/Angle input state
+    currentDistance: null,
+    currentAngle: null,
+    distanceInput: null,
+    angleInput: null,
+    distanceContainer: null,
+    // Extended guideline state
+    extendedGuidelines: null,
+    hoveredIntersectionPoint: null,
+    isHoveringExtendedGuidelines: false,
+    isInExtendedGuidelinePersistenceZone: false, // true when within 5x snap distance of guideline
+    isActivelySnappingToGuideline: false, // true when actually snapping to the guideline
+    extendedGuidelineMouseoverHandler: null,
+    extendedGuidelineMouseoutHandler: null,
+    hoverDebounceTimer: null,
+    lastHoverPosition: null,
+    // Guide circle state
+    guideCircle: null,
+    guideCircleRadius: null,
+    guideCircleCenter: null,
+    // Original vertex position for distance calculations
+    originalVertexCoord: null
   };
 
   this.setSelected(featureId);
@@ -314,10 +1271,14 @@ DirectSelect.onSetup = function(opts) {
     trash: true
   });
 
+  // Create distance/angle input UI
+  this.createDistanceInput(state);
+  this.createAngleInput(state);
+
   return state;
 };
 
-DirectSelect.onStop = function() {
+DirectSelect.onStop = function(state) {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
   // Clean up visualizations on mode exit
@@ -325,6 +1286,11 @@ DirectSelect.onStop = function() {
   removeRailIndicator(this.map);
   removeAllSnapIndicators(this.map);
   removeAdjacentSegmentLengths(this.map);
+  // Clean up distance/angle input UI and extended guidelines
+  if (state) {
+    this.removeDistanceAngleUI(state);
+    this.removeExtendedGuidelines(state);
+  }
 };
 
 DirectSelect.toDisplayFeatures = function(state, geojson, push) {
@@ -437,32 +1403,256 @@ DirectSelect.onDrag = function(state, e) {
   if (state.selectedCoordPaths.length === 1) {
     // Single vertex dragging - apply enhanced snapping
 
-    // Shift key bypasses all snapping
-    if (shiftHeld) {
+    // Handle extended guideline hover detection
+    if (!shiftHeld && !state.railConstraintActive) {
+      const intersectionPointInfo = this.detectHoveredIntersectionPoint(state, e);
+
+      if (intersectionPointInfo) {
+        // Hovering over an intersection or midpoint
+        const currentCoord = intersectionPointInfo.coord;
+        const lastPos = state.lastHoverPosition;
+
+        // Check if this is a different point than before
+        const isDifferentPoint = !lastPos ||
+          Math.abs(currentCoord[0] - lastPos[0]) > 0.000001 ||
+          Math.abs(currentCoord[1] - lastPos[1]) > 0.000001;
+
+        if (isDifferentPoint) {
+          // Check if we have existing extended guidelines and are within their persistence zone
+          let keepExistingGuidelines = false;
+          if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+            const snapDistance = this._ctx.options.snapDistance || 20;
+            const persistenceZone = snapDistance * 5;
+            const pixelDistanceToGuideline = calculatePixelDistanceToExtendedGuidelines(
+              this.map,
+              state.extendedGuidelines,
+              e.lngLat
+            );
+            keepExistingGuidelines = pixelDistanceToGuideline <= persistenceZone;
+          }
+
+          if (keepExistingGuidelines) {
+            // We're within persistence zone of existing guidelines - keep them
+            // Clear snap-hover state for the different point we detected but won't use
+            if (intersectionPointInfo.feature && this._ctx.snapping) {
+              this._ctx.snapping.setSnapHoverState(intersectionPointInfo.feature, false);
+            }
+            // Update opacity to faded since we're not actively snapping to them
+            state.isActivelySnappingToGuideline = false;
+            state.isInExtendedGuidelinePersistenceZone = true;
+            this.updateExtendedGuidelinesOpacity(state);
+            // Don't start new debounce for the different point
+          } else {
+            // Clear existing debounce timer and extended guidelines
+            if (state.hoverDebounceTimer) {
+              clearTimeout(state.hoverDebounceTimer);
+              state.hoverDebounceTimer = null;
+            }
+            this.removeExtendedGuidelines(state);
+
+            // Store new intersection point info
+            state.hoveredIntersectionPoint = intersectionPointInfo;
+            state.lastHoverPosition = [currentCoord[0], currentCoord[1]];
+
+            // Start new debounce timer (500ms)
+            state.hoverDebounceTimer = setTimeout(() => {
+              // Extend and render guidelines
+              const extendedLines = this.extendGuidelines(state, intersectionPointInfo);
+              state.extendedGuidelines = extendedLines;
+              this.renderExtendedGuidelines(state, extendedLines);
+              // Set initial opacity state - actively snapping since we're hovering intersection
+              state.isActivelySnappingToGuideline = true;
+              state.isInExtendedGuidelinePersistenceZone = true;
+            }, 500);
+          }
+        } else if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+          // Same point, guidelines exist - update opacity to full since we're on the intersection
+          state.isActivelySnappingToGuideline = true;
+          state.isInExtendedGuidelinePersistenceZone = true;
+          this.updateExtendedGuidelinesOpacity(state);
+        }
+      } else {
+        // Not hovering over an intersection point
+        // Check if we're within the persistence zone (5x snap distance) of extended guidelines
+        if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+          const snapDistance = this._ctx.options.snapDistance || 20;
+          const persistenceZone = snapDistance * 5; // 5x snap distance for persistence
+          const pixelDistanceToGuideline = calculatePixelDistanceToExtendedGuidelines(
+            this.map,
+            state.extendedGuidelines,
+            e.lngLat
+          );
+
+          // Update state for whether we're actively snapping or just in persistence zone
+          state.isActivelySnappingToGuideline = state.isHoveringExtendedGuidelines;
+          state.isInExtendedGuidelinePersistenceZone = pixelDistanceToGuideline <= persistenceZone;
+
+          // Update guideline opacity based on snapping state
+          this.updateExtendedGuidelinesOpacity(state);
+
+          // Only remove guidelines if we're outside the persistence zone
+          if (!state.isInExtendedGuidelinePersistenceZone) {
+            if (state.hoverDebounceTimer) {
+              clearTimeout(state.hoverDebounceTimer);
+              state.hoverDebounceTimer = null;
+            }
+            this.removeExtendedGuidelines(state);
+            state.lastHoverPosition = null;
+          }
+        } else if (!state.isHoveringExtendedGuidelines) {
+          // No guidelines exist yet, clear any pending debounce timer
+          if (state.hoverDebounceTimer) {
+            clearTimeout(state.hoverDebounceTimer);
+            state.hoverDebounceTimer = null;
+          }
+          state.lastHoverPosition = null;
+        }
+      }
+    }
+
+    // IMPORTANT: For distance calculations, ALWAYS use the original vertex position
+    // (not the mouse click position which may be slightly offset)
+    // This ensures distance input measures from the vertex's true original position
+    const distanceOrigin = state.originalVertexCoord ||
+      [state.dragMoveStartLocation.lng, state.dragMoveStartLocation.lat];
+
+    // Check if user has entered distance or angle constraints
+    // DISTANCE INPUT TAKES ABSOLUTE PRIORITY over all other snapping
+    const hasUserDistance = state.currentDistance !== null && state.currentDistance > 0;
+    const hasUserAngle = state.currentAngle !== null && !isNaN(state.currentAngle);
+
+    // Calculate mouse bearing from origin to current mouse position
+    const mouseBearing = turf.bearing(
+      turf.point(distanceOrigin),
+      turf.point([lngLat.lng, lngLat.lat])
+    );
+
+    // Calculate mouse distance (only used when no distance constraint)
+    const mouseDistance = turf.distance(
+      turf.point(distanceOrigin),
+      turf.point([lngLat.lng, lngLat.lat]),
+      { units: 'kilometers' }
+    );
+
+    // ============================================================
+    // DISTANCE INPUT PRIORITY: When distance is specified, the final
+    // position MUST be exactly that distance from the original vertex.
+    // No other snapping can override this distance.
+    // ============================================================
+    if (hasUserDistance) {
+      // Show guide circle at the user-specified distance
+      this.updateGuideCircle(state, distanceOrigin, state.currentDistance);
+
+      let bearingToUse = mouseBearing;
+
+      // If angle is also specified, use exact position
+      if (hasUserAngle) {
+        bearingToUse = state.currentAngle;
+        removeAllSnapIndicators(this.map);
+      } else if (!shiftHeld) {
+        // Only snap bearing (not distance) when shift is not held
+        const orthogonalTolerance = this._ctx.options.orthogonalSnapTolerance || 5;
+        const parallelTolerance = this._ctx.options.parallelSnapTolerance || 5;
+
+        // Check for orthogonal snap to adjacent segments
+        let orthogonalMatch = null;
+        if (state.adjacentSegments && state.adjacentSegments.length > 0) {
+          orthogonalMatch = getOrthogonalSnapBearing(state.adjacentSegments, mouseBearing, orthogonalTolerance);
+        }
+
+        // Check for orthogonal snap to extended guidelines
+        if (!orthogonalMatch && state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+          const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
+          orthogonalMatch = getPerpendicularToGuidelineBearing(guidelineBearings, mouseBearing, orthogonalTolerance);
+        }
+
+        // Check for parallel snap to nearby lines (only if no orthogonal match)
+        let parallelMatch = null;
+        if (!orthogonalMatch) {
+          const nearbyLines = findNearbyParallelLines(this._ctx, this.map, distanceOrigin, lngLat);
+          if (nearbyLines && nearbyLines.length > 0) {
+            parallelMatch = getParallelBearing(nearbyLines, mouseBearing, parallelTolerance);
+          }
+        }
+
+        if (orthogonalMatch) {
+          bearingToUse = orthogonalMatch.bearing;
+          state.orthogonalSnapActive = true;
+          state.parallelSnapActive = false;
+          state.currentOrthogonalMatch = orthogonalMatch;
+
+          const isCollinear = orthogonalMatch.angleFromReference === 0 || orthogonalMatch.angleFromReference === 180;
+          if (isCollinear) {
+            showCollinearSnapLine(this.map, distanceOrigin, orthogonalMatch.referenceBearing);
+            removeRightAngleIndicator(this.map);
+          } else {
+            showRightAngleIndicator(this.map, distanceOrigin, orthogonalMatch.referenceBearing, orthogonalMatch.bearing);
+            removeCollinearSnapLine(this.map);
+          }
+          removeParallelLineIndicator(this.map);
+        } else if (parallelMatch) {
+          bearingToUse = parallelMatch.bearing;
+          state.orthogonalSnapActive = false;
+          state.parallelSnapActive = true;
+          state.currentParallelMatch = parallelMatch;
+
+          showParallelLineIndicator(this.map, distanceOrigin, parallelMatch.bearing);
+          removeRightAngleIndicator(this.map);
+          removeCollinearSnapLine(this.map);
+        } else {
+          state.orthogonalSnapActive = false;
+          state.parallelSnapActive = false;
+          removeAllSnapIndicators(this.map);
+        }
+      } else {
+        // Shift held - no bearing snap
+        state.orthogonalSnapActive = false;
+        state.parallelSnapActive = false;
+        removeAllSnapIndicators(this.map);
+      }
+
+      // ALWAYS calculate final position at EXACTLY the user-specified distance
+      const destinationPoint = turf.destination(
+        turf.point(distanceOrigin),
+        state.currentDistance / 1000, // Convert meters to kilometers
+        bearingToUse,
+        { units: 'kilometers' }
+      );
+      lngLat = {
+        lng: destinationPoint.geometry.coordinates[0],
+        lat: destinationPoint.geometry.coordinates[1]
+      };
+      state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+
+    } else if (hasUserAngle) {
+      // Angle constraint only (relative to TRUE NORTH) - use mouse distance
+      this.removeGuideCircle(state);
+
+      const destinationPoint = turf.destination(
+        turf.point(distanceOrigin),
+        mouseDistance,
+        state.currentAngle,
+        { units: 'kilometers' }
+      );
+      lngLat = {
+        lng: destinationPoint.geometry.coordinates[0],
+        lat: destinationPoint.geometry.coordinates[1]
+      };
       removeAllSnapIndicators(this.map);
+      state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+
+    } else if (shiftHeld) {
+      // Shift key bypasses all snapping (no distance/angle constraint)
+      removeAllSnapIndicators(this.map);
+      this.removeGuideCircle(state);
       state.orthogonalSnapActive = false;
       state.parallelSnapActive = false;
       state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+
     } else if (!state.railConstraintActive) {
-      // Enhanced snapping when not using rail constraint
+      // No distance/angle constraints - use regular snapping logic
+      this.removeGuideCircle(state);
 
-      // Get the current vertex position (drag start)
-      const startVertex = [state.dragMoveStartLocation.lng, state.dragMoveStartLocation.lat];
-
-      // Calculate mouse bearing from start to current
-      const mouseBearing = turf.bearing(
-        turf.point(startVertex),
-        turf.point([lngLat.lng, lngLat.lat])
-      );
-
-      // Calculate mouse distance
-      const mouseDistance = turf.distance(
-        turf.point(startVertex),
-        turf.point([lngLat.lng, lngLat.lat]),
-        { units: 'kilometers' }
-      );
-
-      // Get orthogonal snap tolerance from options (default 5 degrees)
       const orthogonalTolerance = this._ctx.options.orthogonalSnapTolerance || 5;
       const parallelTolerance = this._ctx.options.parallelSnapTolerance || 5;
 
@@ -472,9 +1662,15 @@ DirectSelect.onDrag = function(state, e) {
         orthogonalMatch = getOrthogonalSnapBearing(state.adjacentSegments, mouseBearing, orthogonalTolerance);
       }
 
+      // Check for orthogonal snap to extended guidelines
+      if (!orthogonalMatch && state.extendedGuidelines && state.extendedGuidelines.length > 0) {
+        const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
+        orthogonalMatch = getPerpendicularToGuidelineBearing(guidelineBearings, mouseBearing, orthogonalTolerance);
+      }
+
       // Check for parallel snap to nearby lines
       let parallelMatch = null;
-      const nearbyLines = findNearbyParallelLines(this._ctx, this.map, startVertex, lngLat);
+      const nearbyLines = findNearbyParallelLines(this._ctx, this.map, distanceOrigin, lngLat);
       if (nearbyLines && nearbyLines.length > 0) {
         parallelMatch = getParallelBearing(nearbyLines, mouseBearing, parallelTolerance);
       }
@@ -484,13 +1680,11 @@ DirectSelect.onDrag = function(state, e) {
       const snappedCoord = this._ctx.snapping.snapCoord(lngLat);
       const snapInfo = this._ctx.snapping.snappedFeature;
       if (snapInfo && snapInfo.geometry && (snapInfo.geometry.type === 'LineString' || snapInfo.geometry.type === 'Polygon')) {
-        // Get the line segment
         let coords = snapInfo.geometry.coordinates;
         if (snapInfo.geometry.type === 'Polygon') {
           coords = coords[0];
         }
         if (coords.length >= 2) {
-          // Find nearest segment
           const snapPoint = turf.point([snappedCoord.lng, snappedCoord.lat]);
           let nearestSegment = null;
           let minDist = Infinity;
@@ -503,7 +1697,7 @@ DirectSelect.onDrag = function(state, e) {
             }
           }
           if (nearestSegment) {
-            perpendicularMatch = calculatePerpendicularToLine(startVertex, nearestSegment, lngLat);
+            perpendicularMatch = calculatePerpendicularToLine(distanceOrigin, nearestSegment, lngLat);
           }
         }
       }
@@ -514,9 +1708,8 @@ DirectSelect.onDrag = function(state, e) {
       state.parallelSnapActive = false;
 
       if (orthogonalMatch) {
-        // Apply orthogonal snap
         const destinationPoint = turf.destination(
-          turf.point(startVertex),
+          turf.point(distanceOrigin),
           mouseDistance,
           orthogonalMatch.bearing,
           { units: 'kilometers' }
@@ -528,26 +1721,19 @@ DirectSelect.onDrag = function(state, e) {
         state.orthogonalSnapActive = true;
         state.currentOrthogonalMatch = orthogonalMatch;
 
-        // Show appropriate indicator
         const isCollinear = orthogonalMatch.angleFromReference === 0 || orthogonalMatch.angleFromReference === 180;
         if (isCollinear) {
-          showCollinearSnapLine(this.map, startVertex, orthogonalMatch.referenceBearing);
+          showCollinearSnapLine(this.map, distanceOrigin, orthogonalMatch.referenceBearing);
           removeRightAngleIndicator(this.map);
         } else {
-          showRightAngleIndicator(
-            this.map,
-            startVertex,
-            orthogonalMatch.referenceBearing,
-            orthogonalMatch.bearing
-          );
+          showRightAngleIndicator(this.map, distanceOrigin, orthogonalMatch.referenceBearing, orthogonalMatch.bearing);
           removeCollinearSnapLine(this.map);
         }
         removeParallelLineIndicator(this.map);
 
       } else if (parallelMatch) {
-        // Apply parallel snap
         const destinationPoint = turf.destination(
-          turf.point(startVertex),
+          turf.point(distanceOrigin),
           mouseDistance,
           parallelMatch.bearing,
           { units: 'kilometers' }
@@ -559,13 +1745,11 @@ DirectSelect.onDrag = function(state, e) {
         state.parallelSnapActive = true;
         state.currentParallelMatch = parallelMatch;
 
-        // Show parallel indicator
-        showParallelLineIndicator(this.map, startVertex, parallelMatch.bearing);
+        showParallelLineIndicator(this.map, distanceOrigin, parallelMatch.bearing);
         removeRightAngleIndicator(this.map);
         removeCollinearSnapLine(this.map);
 
       } else if (perpendicularMatch && perpendicularMatch.distanceFromCursor < 20) {
-        // Apply perpendicular snap if close enough (within 20 meters)
         finalLngLat = {
           lng: perpendicularMatch.coord[0],
           lat: perpendicularMatch.coord[1]
@@ -573,19 +1757,21 @@ DirectSelect.onDrag = function(state, e) {
         removeAllSnapIndicators(this.map);
 
       } else {
-        // Regular point/line snapping
         finalLngLat = snappedCoord;
         removeAllSnapIndicators(this.map);
       }
 
       lngLat = finalLngLat;
       state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
+
     } else {
-      // Rail constraint is active
+      // Rail constraint is active (no distance/angle constraint)
+      this.removeGuideCircle(state);
       state.feature.updateCoordinate(state.selectedCoordPaths[0], lngLat.lng, lngLat.lat);
     }
   } else {
-    // Multiple vertices or feature dragging
+    // Multiple vertices or feature dragging - remove guide circle
+    this.removeGuideCircle(state);
     const delta = {
       lng: lngLat.lng - state.dragMoveLocation.lng,
       lat: lngLat.lat - state.dragMoveLocation.lat
