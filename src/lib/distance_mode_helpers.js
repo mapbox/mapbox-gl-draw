@@ -839,8 +839,8 @@ export function getExtendedGuidelineBearings(extendedGuidelines) {
 }
 
 /**
- * Check if the mouse bearing is perpendicular to any extended guideline.
- * Returns an orthogonal match object if perpendicular, or null otherwise.
+ * Check if the mouse bearing is orthogonal (perpendicular or parallel) to any extended guideline.
+ * Returns an orthogonal match object if within tolerance, or null otherwise.
  * @param {Array} guidelineBearings - Array from getExtendedGuidelineBearings()
  * @param {number} mouseBearing - Current mouse bearing in degrees
  * @param {number} tolerance - Tolerance in degrees for matching
@@ -858,18 +858,19 @@ export function getPerpendicularToGuidelineBearing(guidelineBearings, mouseBeari
   for (const guidelineInfo of guidelineBearings) {
     const guidelineBearing = guidelineInfo.bearing;
 
-    // Check perpendicular angles (90° and 270° from guideline bearing)
-    for (const angle of [90, 270]) {
-      const perpendicularBearing = guidelineBearing + angle;
-      const normalizedPerp = ((perpendicularBearing % 360) + 360) % 360;
+    // Check all orthogonal angles (0°, 90°, 180°, 270° from guideline bearing)
+    // 0° and 180° = parallel to guideline, 90° and 270° = perpendicular to guideline
+    for (const angle of [0, 90, 180, 270]) {
+      const orthogonalBearing = guidelineBearing + angle;
+      const normalizedOrtho = ((orthogonalBearing % 360) + 360) % 360;
 
-      let diff = Math.abs(normalizedPerp - normalizedMouse);
+      let diff = Math.abs(normalizedOrtho - normalizedMouse);
       if (diff > 180) diff = 360 - diff;
 
       if (diff <= tolerance && diff < bestDiff) {
         bestDiff = diff;
         bestMatch = {
-          bearing: perpendicularBearing,
+          bearing: orthogonalBearing,
           referenceBearing: guidelineBearing,
           referenceType: "extendedGuideline",
           guideline: guidelineInfo.guideline,

@@ -1685,6 +1685,19 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       state.snappedLineSegment = null;
     }
 
+    // Check for adjacent segments at corner points (enables perpendicular to both lines)
+    const adjacentSegments = getAdjacentSegmentsAtVertex(
+      this._ctx,
+      this.map,
+      e,
+      snappedCoord
+    );
+    if (adjacentSegments && adjacentSegments.length > 1) {
+      state.adjacentSegments = adjacentSegments;
+    } else {
+      state.adjacentSegments = null;
+    }
+
     // Clear distance and angle inputs for next segment
     if (state.distanceInput) {
       state.distanceInput.value = "";
@@ -1897,7 +1910,7 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   let isPerpendicularToGuideline = false;
 
   if (extendedGuidelinesActive && state.vertices.length >= 1) {
-    // When extended guidelines are active, check for perpendicular to guideline bearings
+    // When extended guidelines are active, check for orthogonal (perpendicular/parallel) to guideline bearings
     const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
     orthogonalMatch = getPerpendicularToGuidelineBearing(
       guidelineBearings,
@@ -2629,7 +2642,7 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   let isPerpendicularToGuideline = false;
 
   if (extendedGuidelinesActive && state.vertices.length >= 1) {
-    // When extended guidelines are active, check for perpendicular to guideline bearings
+    // When extended guidelines are active, check for orthogonal (perpendicular/parallel) to guideline bearings
     const guidelineBearings = getExtendedGuidelineBearings(state.extendedGuidelines);
     orthogonalMatch = getPerpendicularToGuidelineBearing(
       guidelineBearings,
