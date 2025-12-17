@@ -448,46 +448,31 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
     return parallelLinesCache.result;
   }
 
-  const lastVertexPoint = getCachedPoint(lastVertex);
   const currentPosPoint = getCachedPoint([currentPosition.lng, currentPosition.lat]);
 
-  // Calculate midpoint of the line being drawn
-  const midpoint = turf.midpoint(lastVertexPoint, currentPosPoint);
-  const midpointCoords = midpoint.geometry.coordinates;
+  // Query features near the mouse position using a screen-space radius
+  // This is simpler and more reliable than the perpendicular intersection method
+  const searchRadiusPixels = ctx.options.parallelSnapSearchRadius || 300; // pixels - larger radius to find parallel lines
+  const mouseScreenPos = map.project([currentPosition.lng, currentPosition.lat]);
 
-  // Calculate bearing of the line being drawn
-  const lineBearing = turf.bearing(lastVertexPoint, currentPosPoint);
-
-  // Create orthogonal line (perpendicular to the line being drawn)
-  const searchDistance = ctx.options.parallelSnapSearchDistance || 1;
-  const orthogonalBearing = lineBearing + 90;
-  const orthogonalStart = turf.destination(midpoint, searchDistance, orthogonalBearing + 180, UNITS_KM);
-  const orthogonalEnd = turf.destination(midpoint, searchDistance, orthogonalBearing, UNITS_KM);
-
-  const orthStartCoords = orthogonalStart.geometry.coordinates;
-  const orthEndCoords = orthogonalEnd.geometry.coordinates;
-  const orthogonalLine = turf.lineString([orthStartCoords, orthEndCoords]);
-
-  // Calculate bbox for the orthogonal line to limit query area
-  const minLng = Math.min(orthStartCoords[0], orthEndCoords[0]);
-  const maxLng = Math.max(orthStartCoords[0], orthEndCoords[0]);
-  const minLat = Math.min(orthStartCoords[1], orthEndCoords[1]);
-  const maxLat = Math.max(orthStartCoords[1], orthEndCoords[1]);
-
-  // Convert bbox to screen coordinates for queryRenderedFeatures
-  const sw = map.project([minLng, minLat]);
-  const ne = map.project([maxLng, maxLat]);
-
-  // Query only features within the bbox
   const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
   const allFeatures = map.queryRenderedFeatures(
-    [[sw.x, ne.y], [ne.x, sw.y]], // [topLeft, bottomRight]
+    [
+      [mouseScreenPos.x - searchRadiusPixels, mouseScreenPos.y - searchRadiusPixels],
+      [mouseScreenPos.x + searchRadiusPixels, mouseScreenPos.y + searchRadiusPixels]
+    ],
     { layers: bufferLayers }
   );
 
-  const intersectingLines = [];
+  const nearbyLines = [];
+  const seenFeatureIds = new Set(); // Avoid duplicates
 
   for (const feature of allFeatures) {
+    // Skip duplicates (same feature can appear multiple times in query)
+    const featureKey = feature.id || `${feature.properties?.id || ''}-${feature.geometry?.coordinates?.[0]}`;
+    if (seenFeatureIds.has(featureKey)) continue;
+    seenFeatureIds.add(featureKey);
+
     let geom = feature.geometry;
 
     // Skip points
@@ -497,68 +482,107 @@ export function findNearbyParallelLines(ctx, map, lastVertex, currentPosition) {
 
     // Convert polygons to lines
     if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
-      geom = turf.polygonToLine(geom).geometry;
+      try {
+        geom = turf.polygonToLine(geom).geometry;
+      } catch (e) {
+        continue;
+      }
     }
 
-    // Only process LineString
+    // Process LineString and MultiLineString
     if (geom.type === 'LineString') {
       const coords = geom.coordinates;
       if (coords.length >= 2) {
-        const snapLine = turf.lineString(coords);
-
-        // Check if this line intersects our orthogonal line
+        // Find the nearest point on this line to the mouse
         try {
-          const intersections = turf.lineIntersect(snapLine, orthogonalLine);
+          const line = turf.lineString(coords);
+          const nearestPoint = turf.nearestPointOnLine(line, currentPosPoint);
+          const distanceToMouse = turf.distance(currentPosPoint, nearestPoint, UNITS_METERS);
 
-          if (intersections.features.length > 0) {
-            // Calculate bearing of the snap line
-            const bearing = turf.bearing(
-              getCachedPoint(coords[0]),
-              getCachedPoint(coords[coords.length - 1])
-            );
+          // Find the segment containing the nearest point for accurate bearing
+          const nearestCoord = nearestPoint.geometry.coordinates;
+          let segmentBearing = null;
+          let minSegDist = Infinity;
+          let bestSegment = null;
 
-            // Calculate distance from midpoint to intersection
-            const intersectionPoint = intersections.features[0].geometry.coordinates;
-            const distanceFromMidpoint = turf.distance(
-              midpoint,
-              getCachedPoint(intersectionPoint),
-              UNITS_METERS
-            );
+          for (let i = 0; i < coords.length - 1; i++) {
+            const segStart = coords[i];
+            const segEnd = coords[i + 1];
+            const segLine = turf.lineString([segStart, segEnd]);
+            const segNearest = turf.nearestPointOnLine(segLine, turf.point(nearestCoord));
+            const segDist = turf.distance(turf.point(nearestCoord), segNearest, UNITS_METERS);
 
-            // Determine which side of the midpoint the intersection is on
-            const intersectionBearing = turf.bearing(midpoint, getCachedPoint(intersectionPoint));
+            if (segDist < minSegDist) {
+              minSegDist = segDist;
+              segmentBearing = turf.bearing(turf.point(segStart), turf.point(segEnd));
+              bestSegment = { start: segStart, end: segEnd };
+            }
+          }
 
-            // Normalize bearings
-            const normOrthogonal = ((orthogonalBearing % 360) + 360) % 360;
-            const normIntersection = ((intersectionBearing % 360) + 360) % 360;
-
-            // Determine side
-            let diff = Math.abs(normOrthogonal - normIntersection);
-            if (diff > 180) diff = 360 - diff;
-            const side = diff < 90 ? 'right' : 'left';
-
-            intersectingLines.push({
+          if (segmentBearing !== null && bestSegment) {
+            nearbyLines.push({
               feature: feature,
-              bearing: bearing,
-              segment: { start: coords[0], end: coords[coords.length - 1] },
+              bearing: segmentBearing,
+              segment: bestSegment,
               geometry: geom,
-              distanceFromMidpoint: distanceFromMidpoint,
-              side: side
+              distanceToMouse: distanceToMouse
             });
           }
         } catch (e) {
-          // Ignore intersection errors
           continue;
+        }
+      }
+    } else if (geom.type === 'MultiLineString') {
+      // Process each line in the MultiLineString
+      for (const lineCoords of geom.coordinates) {
+        if (lineCoords.length >= 2) {
+          try {
+            const line = turf.lineString(lineCoords);
+            const nearestPoint = turf.nearestPointOnLine(line, currentPosPoint);
+            const distanceToMouse = turf.distance(currentPosPoint, nearestPoint, UNITS_METERS);
+
+            // Find the segment for bearing
+            const nearestCoord = nearestPoint.geometry.coordinates;
+            let segmentBearing = null;
+            let minSegDist = Infinity;
+            let bestSegment = null;
+
+            for (let i = 0; i < lineCoords.length - 1; i++) {
+              const segStart = lineCoords[i];
+              const segEnd = lineCoords[i + 1];
+              const segLine = turf.lineString([segStart, segEnd]);
+              const segNearest = turf.nearestPointOnLine(segLine, turf.point(nearestCoord));
+              const segDist = turf.distance(turf.point(nearestCoord), segNearest, UNITS_METERS);
+
+              if (segDist < minSegDist) {
+                minSegDist = segDist;
+                segmentBearing = turf.bearing(turf.point(segStart), turf.point(segEnd));
+                bestSegment = { start: segStart, end: segEnd };
+              }
+            }
+
+            if (segmentBearing !== null && bestSegment) {
+              nearbyLines.push({
+                feature: feature,
+                bearing: segmentBearing,
+                segment: bestSegment,
+                geometry: { type: 'LineString', coordinates: lineCoords },
+                distanceToMouse: distanceToMouse
+              });
+            }
+          } catch (e) {
+            continue;
+          }
         }
       }
     }
   }
 
-  // Find the single closest line (regardless of side)
+  // Sort by distance to mouse and return the closest ones (up to 5)
   let result = [];
-  if (intersectingLines.length > 0) {
-    intersectingLines.sort((a, b) => a.distanceFromMidpoint - b.distanceFromMidpoint);
-    result = [intersectingLines[0]];
+  if (nearbyLines.length > 0) {
+    nearbyLines.sort((a, b) => a.distanceToMouse - b.distanceToMouse);
+    result = nearbyLines.slice(0, 5); // Return up to 5 closest lines
   }
 
   // Update cache
