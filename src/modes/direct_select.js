@@ -151,8 +151,8 @@ const DirectSelect = {};
  */
 DirectSelect.createDistanceInput = function(state) {
   createDistanceInputUI(this._ctx, state, {
-    shouldActivateKeyHandler: () => state.dragMoving && state.selectedCoordPaths.length === 1,
-    initiallyHidden: true,
+    shouldActivateKeyHandler: () => true,
+    initiallyHidden: false,
     forceCreate: true
   });
 };
@@ -162,7 +162,7 @@ DirectSelect.createDistanceInput = function(state) {
  */
 DirectSelect.createAngleInput = function(state) {
   createAngleInputUI(this._ctx, state, {
-    shouldActivateKeyHandler: () => state.dragMoving && state.selectedCoordPaths.length === 1,
+    shouldActivateKeyHandler: () => true,
     forceCreate: true
   });
 };
@@ -773,8 +773,8 @@ DirectSelect.stopDragging = function(state) {
   // Remove guide circle
   this.removeGuideCircle(state);
 
-  // Hide distance/angle input UI
-  this.hideDistanceAngleUI(state);
+  // Note: Do NOT hide distance/angle input UI here - it should stay visible
+  // throughout the direct_select session. It only gets removed in onStop.
 
   state.dragMoving = false;
   state.canDragMove = false;

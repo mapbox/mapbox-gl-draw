@@ -56,18 +56,16 @@
   cursor: crosshair;
 }
 .mapboxgl-map.mouse-move.mode-direct_select .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: grab;
-  cursor: -moz-grab;
-  cursor: -webkit-grab;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-vertex.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: move;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-midpoint.mouse-pointer .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: cell;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-feature.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: move;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-static.mouse-pointer  .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: grab;
