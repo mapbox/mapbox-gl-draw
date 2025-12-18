@@ -24,6 +24,13 @@ import {
   getAdjacentSegmentsAtVertex,
   calculatePixelDistanceToExtendedGuidelines
 } from '../lib/distance_mode_helpers.js';
+import {
+  createDistanceInput as createDistanceInputUI,
+  createAngleInput as createAngleInputUI,
+  showDistanceAngleUI,
+  hideDistanceAngleUI,
+  removeDistanceAngleUI
+} from '../lib/angle_distance_input.js';
 import * as turf from '@turf/turf';
 
 const isVertex = isOfMetaType(Constants.meta.VERTEX);
@@ -143,392 +150,42 @@ const DirectSelect = {};
  * Create the distance input UI for vertex editing
  */
 DirectSelect.createDistanceInput = function(state) {
-  // Check if angle/distance input UI is enabled
-  if (!this._ctx.options.useAngleDistanceInput) {
-    return;
-  }
-
-  // Create container
-  const container = document.createElement('div');
-  container.className = 'distance-mode-container direct-select-distance';
-
-  // Calculate position from normalized coordinates
-  const mapContainer = this._ctx.map.getContainer();
-  const mapWidth = mapContainer.offsetWidth;
-  const mapHeight = mapContainer.offsetHeight;
-  const [normX, normY] = this._ctx.options.angleDistanceInputPosition;
-
-  // Convert normalized position to pixel coordinates
-  const pixelX = mapWidth * normX;
-  const pixelY = mapHeight * normY;
-
-  container.style.cssText = `
-    position: fixed;
-    top: ${pixelY}px;
-    left: ${pixelX}px;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 6px 10px;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    pointer-events: auto;
-    transition: opacity 0.2s ease-in-out;
-  `;
-
-  // Create label/state display
-  const label = document.createElement('span');
-  label.className = 'distance-mode-label';
-  label.textContent = 'D for distance';
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
-
-  // Create input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'distance (m)';
-  input.className = 'distance-mode-input';
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
-
-  // Create clear button
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = '×';
-  clearBtn.className = 'distance-mode-clear';
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
-
-  const updateDisplay = () => {
-    if (state.currentDistance !== null && state.currentDistance > 0) {
-      label.style.display = 'none';
-      input.style.display = 'block';
-      clearBtn.style.display = 'block';
-    } else {
-      label.style.display = 'block';
-      input.style.display = 'none';
-      clearBtn.style.display = 'none';
-    }
-  };
-
-  // Add focus/blur handlers
-  input.addEventListener('focus', () => {
-    input.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+  createDistanceInputUI(this._ctx, state, {
+    shouldActivateKeyHandler: () => state.dragMoving && state.selectedCoordPaths.length === 1,
+    initiallyHidden: true,
+    forceCreate: true
   });
-
-  input.addEventListener('blur', () => {
-    input.style.backgroundColor = 'transparent';
-  });
-
-  input.addEventListener('input', (e) => {
-    const value = e.target.value;
-    if (value === '' || !isNaN(parseFloat(value))) {
-      state.currentDistance = value === '' ? null : parseFloat(value);
-      updateDisplay();
-    } else {
-      e.target.value = state.currentDistance !== null ? state.currentDistance.toString() : '';
-    }
-  });
-
-  input.addEventListener('keydown', (e) => {
-    e.stopPropagation();
-
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      state.currentDistance = null;
-      input.value = '';
-      input.blur();
-      updateDisplay();
-    }
-  });
-
-  clearBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    state.currentDistance = null;
-    input.value = '';
-    input.blur();
-    updateDisplay();
-  });
-
-  // Store reference for use in keyHandler
-  const self = this;
-
-  // Add keyboard shortcuts
-  const keyHandler = (e) => {
-    // Only respond when dragging a vertex
-    if (!state.dragMoving || state.selectedCoordPaths.length !== 1) {
-      return;
-    }
-
-    // 'D' key to toggle distance input
-    if (e.key === 'd' || e.key === 'D') {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Toggle: if distance is active, clear it; otherwise activate it
-      if (state.currentDistance !== null || document.activeElement === input) {
-        state.currentDistance = null;
-        input.value = '';
-        input.blur();
-        updateDisplay();
-      } else {
-        input.style.display = 'block';
-        label.style.display = 'none';
-        input.focus();
-      }
-    }
-  };
-  document.addEventListener('keydown', keyHandler);
-
-  container.appendChild(label);
-  container.appendChild(input);
-  container.appendChild(clearBtn);
-  document.body.appendChild(container);
-
-  state.distanceInput = input;
-  state.distanceContainer = container;
-  state.distanceKeyHandler = keyHandler;
-  state.distanceUpdateDisplay = updateDisplay;
-
-  updateDisplay();
 };
 
 /**
  * Create the angle input UI for vertex editing
  */
 DirectSelect.createAngleInput = function(state) {
-  // Check if angle/distance input UI is enabled
-  if (!this._ctx.options.useAngleDistanceInput) {
-    return;
-  }
-
-  const distanceContainer = state.distanceContainer;
-  if (!distanceContainer) {
-    return;
-  }
-
-  // Create separator
-  const separator = document.createElement('span');
-  separator.style.cssText = `
-    color: #ccc;
-    font-size: 11px;
-    padding: 0 3px;
-  `;
-  separator.textContent = '|';
-
-  // Create label/state display
-  const label = document.createElement('span');
-  label.className = 'angle-mode-label';
-  label.textContent = 'A for angle';
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
-
-  // Create input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'angle (°)';
-  input.className = 'angle-mode-input';
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
-
-  // Create clear button
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = '×';
-  clearBtn.className = 'angle-mode-clear';
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
-
-  const updateDisplay = () => {
-    if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
-      label.style.display = 'none';
-      input.style.display = 'block';
-      clearBtn.style.display = 'block';
-    } else {
-      label.style.display = 'block';
-      input.style.display = 'none';
-      clearBtn.style.display = 'none';
-    }
-  };
-
-  // Add focus/blur handlers
-  input.addEventListener('focus', () => {
-    input.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+  createAngleInputUI(this._ctx, state, {
+    shouldActivateKeyHandler: () => state.dragMoving && state.selectedCoordPaths.length === 1,
+    forceCreate: true
   });
-
-  input.addEventListener('blur', () => {
-    input.style.backgroundColor = 'transparent';
-  });
-
-  input.addEventListener('input', (e) => {
-    const value = e.target.value;
-    if (value === '' || !isNaN(parseFloat(value))) {
-      state.currentAngle = value === '' ? null : parseFloat(value);
-      updateDisplay();
-    } else {
-      e.target.value = state.currentAngle !== null ? state.currentAngle.toString() : '';
-    }
-  });
-
-  input.addEventListener('keydown', (e) => {
-    e.stopPropagation();
-
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      state.currentAngle = null;
-      input.value = '';
-      input.blur();
-      updateDisplay();
-    }
-  });
-
-  clearBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    state.currentAngle = null;
-    input.value = '';
-    input.blur();
-    updateDisplay();
-  });
-
-  // Add keyboard shortcuts
-  const keyHandler = (e) => {
-    // Only respond when dragging a vertex
-    if (!state.dragMoving || state.selectedCoordPaths.length !== 1) {
-      return;
-    }
-
-    // 'A' key to toggle angle input
-    if (e.key === 'a' || e.key === 'A') {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Toggle: if angle is active, clear it; otherwise activate it
-      if (state.currentAngle !== null || document.activeElement === input) {
-        state.currentAngle = null;
-        input.value = '';
-        input.blur();
-        updateDisplay();
-      } else {
-        input.style.display = 'block';
-        label.style.display = 'none';
-        input.focus();
-      }
-    }
-  };
-  document.addEventListener('keydown', keyHandler);
-
-  distanceContainer.appendChild(separator);
-  distanceContainer.appendChild(label);
-  distanceContainer.appendChild(input);
-  distanceContainer.appendChild(clearBtn);
-
-  state.angleInput = input;
-  state.angleKeyHandler = keyHandler;
-  state.angleSeparator = separator;
-  state.angleUpdateDisplay = updateDisplay;
-
-  updateDisplay();
 };
 
 /**
  * Show the distance/angle input UI
  */
 DirectSelect.showDistanceAngleUI = function(state) {
-  if (state.distanceContainer) {
-    state.distanceContainer.style.display = 'flex';
-  }
+  showDistanceAngleUI(state);
 };
 
 /**
  * Hide the distance/angle input UI
  */
 DirectSelect.hideDistanceAngleUI = function(state) {
-  if (state.distanceContainer) {
-    state.distanceContainer.style.display = 'none';
-  }
-  // Clear values
-  if (state.distanceInput) {
-    state.distanceInput.value = '';
-    state.currentDistance = null;
-    if (state.distanceUpdateDisplay) state.distanceUpdateDisplay();
-  }
-  if (state.angleInput) {
-    state.angleInput.value = '';
-    state.currentAngle = null;
-    if (state.angleUpdateDisplay) state.angleUpdateDisplay();
-  }
+  hideDistanceAngleUI(state);
 };
 
 /**
  * Remove the distance/angle input UI elements
  */
 DirectSelect.removeDistanceAngleUI = function(state) {
-  if (state.distanceKeyHandler) {
-    document.removeEventListener('keydown', state.distanceKeyHandler);
-    state.distanceKeyHandler = null;
-  }
-  if (state.angleKeyHandler) {
-    document.removeEventListener('keydown', state.angleKeyHandler);
-    state.angleKeyHandler = null;
-  }
-  if (state.distanceContainer && state.distanceContainer.parentNode) {
-    state.distanceContainer.parentNode.removeChild(state.distanceContainer);
-    state.distanceContainer = null;
-  }
-  state.distanceInput = null;
-  state.angleInput = null;
+  removeDistanceAngleUI(state);
 };
 
 /**

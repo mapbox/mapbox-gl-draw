@@ -21,6 +21,11 @@ import {
   clearPointCache,
   calculatePixelDistanceToExtendedGuidelines,
 } from "../lib/distance_mode_helpers.js";
+import {
+  createDistanceInput as createDistanceInputUI,
+  createAngleInput as createAngleInputUI,
+  removeDistanceAngleUI,
+} from "../lib/angle_distance_input.js";
 
 // Reusable unit options to avoid repeated object allocation
 const TURF_UNITS_KM = { units: "kilometers" };
@@ -91,377 +96,30 @@ DrawPolygonDistance.onSetup = function (opts) {
 };
 
 DrawPolygonDistance.createDistanceInput = function (state) {
-  // Check if angle/distance input UI is enabled
-  if (!this._ctx.options.useAngleDistanceInput) {
-    return;
-  }
-
-  // Create container
-  const container = document.createElement("div");
-  container.className = "distance-mode-container";
-
-  // Calculate position from normalized coordinates
-  const mapContainer = this._ctx.map.getContainer();
-  const mapWidth = mapContainer.offsetWidth;
-  const mapHeight = mapContainer.offsetHeight;
-  const [normX, normY] = this._ctx.options.angleDistanceInputPosition;
-
-  // Convert normalized position to pixel coordinates
-  // Using top/left with translate(-50%, -50%) to center on the point
-  const pixelX = mapWidth * normX;
-  const pixelY = mapHeight * normY;
-
-  container.style.cssText = `
-    position: fixed;
-    top: ${pixelY}px;
-    left: ${pixelX}px;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 6px 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    pointer-events: auto;
-    transition: opacity 0.2s ease-in-out;
-  `;
-
-  // Create label/state display
-  const label = document.createElement("span");
-  label.className = "distance-mode-label";
-  label.textContent = "D for distance";
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
-
-  // Create input
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "distance (m)";
-  input.className = "distance-mode-input";
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
-
-  // Create clear button
-  const clearBtn = document.createElement("button");
-  clearBtn.textContent = "×";
-  clearBtn.className = "distance-mode-clear";
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
-
-  const updateDisplay = () => {
-    if (state.currentDistance !== null && state.currentDistance > 0) {
-      label.style.display = "none";
-      input.style.display = "block";
-      clearBtn.style.display = "block";
-    } else {
-      label.style.display = "block";
-      input.style.display = "none";
-      clearBtn.style.display = "none";
-    }
-  };
-
-  // Add focus/blur handlers for the grey tint
-  input.addEventListener("focus", () => {
-    input.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-  });
-
-  input.addEventListener("blur", () => {
-    input.style.backgroundColor = "transparent";
-  });
-
-  input.addEventListener("input", (e) => {
-    const value = e.target.value;
-    if (value === "" || !isNaN(parseFloat(value))) {
-      state.currentDistance = value === "" ? null : parseFloat(value);
-      updateDisplay();
-      if (state.currentPosition) {
-        this.onMouseMove(state, {
-          point: state.lastPoint || { x: 0, y: 0 },
-          lngLat: state.currentPosition,
-        });
-      }
-    } else {
-      e.target.value =
-        state.currentDistance !== null ? state.currentDistance.toString() : "";
-    }
-  });
-
-  input.addEventListener("keydown", (e) => {
-    e.stopPropagation();
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (state.vertices.length >= 3) {
-        this.finishDrawing(state);
-      }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      state.currentDistance = null;
-      input.value = "";
-      input.blur();
-      updateDisplay();
-    } else if (e.key === "Backspace" && e.target.value === "") {
-      e.preventDefault();
-      this.onKeyUp(state, { keyCode: 8 });
-    }
-  });
-
-  clearBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    state.currentDistance = null;
-    input.value = "";
-    input.blur();
-    updateDisplay();
-  });
-
-  // Store reference to mode context for use in keyHandler
   const self = this;
-
-  // Add keyboard shortcuts
-  const keyHandler = (e) => {
-    // 'D' key to toggle distance input
-    if (e.key === "d" || e.key === "D") {
-      if (state.vertices.length > 0) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Toggle: if distance is active, clear it; otherwise activate it
-        if (
-          state.currentDistance !== null ||
-          document.activeElement === input
-        ) {
-          state.currentDistance = null;
-          input.value = "";
-          input.blur();
-          updateDisplay();
-        } else {
-          input.style.display = "block";
-          label.style.display = "none";
-          input.focus();
-        }
+  createDistanceInputUI(this._ctx, state, {
+    shouldActivateKeyHandler: () => state.vertices.length > 0,
+    onEnter: () => {
+      if (state.vertices.length >= 3) {
+        self.finishDrawing(state);
       }
-    }
-    // Backspace to remove last vertex (bypasses need for trash controls)
-    else if (e.key === "Backspace" && document.activeElement !== input) {
-      e.preventDefault();
-      e.stopPropagation();
-      self.onTrash(state);
-    }
-  };
-  document.addEventListener("keydown", keyHandler);
-
-  container.appendChild(label);
-  container.appendChild(input);
-  container.appendChild(clearBtn);
-  document.body.appendChild(container);
-
-  state.distanceInput = input;
-  state.distanceContainer = container;
-  state.distanceKeyHandler = keyHandler;
-
-  updateDisplay();
+    },
+    onBackspace: () => self.onTrash(state),
+    initiallyHidden: false
+  });
 };
 
 DrawPolygonDistance.createAngleInput = function (state) {
-  // Check if angle/distance input UI is enabled
-  if (!this._ctx.options.useAngleDistanceInput) {
-    return;
-  }
-
-  // We'll add the angle input to the same container as distance
-  // So we just need to add elements to the existing distance container
-  const distanceContainer = state.distanceContainer;
-  if (!distanceContainer) {
-    return;
-  }
-
-  // Create separator
-  const separator = document.createElement("span");
-  separator.style.cssText = `
-    color: #ccc;
-    font-size: 11px;
-    padding: 0 3px;
-  `;
-  separator.textContent = "|";
-
-  // Create label/state display
-  const label = document.createElement("span");
-  label.className = "angle-mode-label";
-  label.textContent = "A for angle";
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
-
-  // Create input
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "angle (°)";
-  input.className = "angle-mode-input";
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
-
-  // Create clear button
-  const clearBtn = document.createElement("button");
-  clearBtn.textContent = "×";
-  clearBtn.className = "angle-mode-clear";
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
-
-  const updateDisplay = () => {
-    if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
-      label.style.display = "none";
-      input.style.display = "block";
-      clearBtn.style.display = "block";
-    } else {
-      label.style.display = "block";
-      input.style.display = "none";
-      clearBtn.style.display = "none";
-    }
-  };
-
-  // Add focus/blur handlers for the grey tint
-  input.addEventListener("focus", () => {
-    input.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-  });
-
-  input.addEventListener("blur", () => {
-    input.style.backgroundColor = "transparent";
-  });
-
-  input.addEventListener("input", (e) => {
-    const value = e.target.value;
-    if (value === "" || !isNaN(parseFloat(value))) {
-      state.currentAngle = value === "" ? null : parseFloat(value);
-      updateDisplay();
-      if (state.currentPosition) {
-        this.onMouseMove(state, {
-          point: state.lastPoint || { x: 0, y: 0 },
-          lngLat: state.currentPosition,
-        });
-      }
-    } else {
-      e.target.value =
-        state.currentAngle !== null ? state.currentAngle.toString() : "";
-    }
-  });
-
-  input.addEventListener("keydown", (e) => {
-    e.stopPropagation();
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (state.vertices.length >= 3) {
-        this.finishDrawing(state);
-      }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      state.currentAngle = null;
-      input.value = "";
-      input.blur();
-      updateDisplay();
-    } else if (e.key === "Backspace" && e.target.value === "") {
-      e.preventDefault();
-      this.onKeyUp(state, { keyCode: 8 });
-    }
-  });
-
-  clearBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    state.currentAngle = null;
-    input.value = "";
-    input.blur();
-    updateDisplay();
-  });
-
-  // Store reference to mode context for use in keyHandler
   const self = this;
-
-  // Add keyboard shortcuts
-  const keyHandler = (e) => {
-    // 'A' key to toggle angle input
-    if (e.key === "a" || e.key === "A") {
-      if (state.vertices.length > 0) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Toggle: if angle is active, clear it; otherwise activate it
-        if (state.currentAngle !== null || document.activeElement === input) {
-          state.currentAngle = null;
-          input.value = "";
-          input.blur();
-          updateDisplay();
-        } else {
-          input.style.display = "block";
-          label.style.display = "none";
-          input.focus();
-        }
+  createAngleInputUI(this._ctx, state, {
+    shouldActivateKeyHandler: () => state.vertices.length > 0,
+    onEnter: () => {
+      if (state.vertices.length >= 3) {
+        self.finishDrawing(state);
       }
-    }
-  };
-  document.addEventListener("keydown", keyHandler);
-
-  distanceContainer.appendChild(separator);
-  distanceContainer.appendChild(label);
-  distanceContainer.appendChild(input);
-  distanceContainer.appendChild(clearBtn);
-
-  state.angleInput = input;
-  state.angleKeyHandler = keyHandler;
-  state.angleSeparator = separator;
-
-  updateDisplay();
+    },
+    onBackspace: () => self.onTrash(state)
+  });
 };
 
 DrawPolygonDistance.getSnapInfo = function (lngLat) {
@@ -4114,23 +3772,8 @@ DrawPolygonDistance.onStop = function (state) {
   // Clear point cache to free memory
   clearPointCache();
 
-  if (state.distanceContainer) {
-    state.distanceContainer.remove();
-    state.distanceContainer = null;
-  }
-
-  if (state.distanceKeyHandler) {
-    document.removeEventListener("keydown", state.distanceKeyHandler);
-    state.distanceKeyHandler = null;
-  }
-
-  if (state.angleKeyHandler) {
-    document.removeEventListener("keydown", state.angleKeyHandler);
-    state.angleKeyHandler = null;
-  }
-
-  state.distanceInput = null;
-  state.angleInput = null;
+  // Remove distance/angle input UI
+  removeDistanceAngleUI(state);
 
   if (this.getFeature(state.polygon.id) === undefined) return;
 
