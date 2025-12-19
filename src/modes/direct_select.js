@@ -938,6 +938,13 @@ DirectSelect.onSetup = function(opts) {
 DirectSelect.onStop = function(state) {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
+
+  // Ensure dragPan is re-enabled when exiting the mode
+  // This handles cases where stopDragging wasn't called or failed to re-enable it
+  if (state && state.initialDragPanState === true && this.map && this.map.dragPan) {
+    this.map.dragPan.enable();
+  }
+
   // Clean up visualizations on mode exit
   removeMovementVector(this.map);
   removeRailIndicator(this.map);

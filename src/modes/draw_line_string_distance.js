@@ -618,6 +618,15 @@ DrawLineStringDistance.renderExtendedGuidelines = function (state, extendedLines
     // Add mouseover handler to enable snapping
     const mouseoverHandler = (e) => {
       if (e.features && e.features.length > 0) {
+        // Don't override snappingPoint snaps - they have priority over extended guidelines
+        if (this._ctx.snapping.snappedFeature &&
+            this._ctx.snapping.snappedFeature.properties &&
+            this._ctx.snapping.snappedFeature.properties.type === 'snappingPoint') {
+          // Keep the snappingPoint as the snap target, but mark that we're also hovering guidelines
+          state.isHoveringExtendedGuidelines = true;
+          return;
+        }
+
         // Clear snap-hover state from previous snapped feature before switching
         if (this._ctx.snapping.snappedFeature &&
             this._ctx.snapping.snappedFeature.id !== undefined &&
@@ -1022,9 +1031,18 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
           }
         }
       } else {
-        // Snapping to something else - check if it's a line that intersects with extended guideline
+        // Snapping to something else - check if it's a snappingPoint or a line that intersects with extended guideline
         const tempSnapInfo = this.getSnapInfo(e.lngLat);
-        if (tempSnapInfo && tempSnapInfo.type === 'line') {
+
+        // Check if this is a snappingPoint (corner/intersection point) - always allow snapping to these
+        const isSnappingPoint =
+          snapping.snappedFeature.properties &&
+          snapping.snappedFeature.properties.type === 'snappingPoint';
+
+        if (isSnappingPoint && tempSnapInfo && tempSnapInfo.type === 'point') {
+          // Allow snapping to snappingPoints even when extended guidelines are active
+          snapInfo = tempSnapInfo;
+        } else if (tempSnapInfo && tempSnapInfo.type === 'line') {
           const intersectionSnap = findExtendedGuidelineIntersection(
             state.extendedGuidelines,
             tempSnapInfo,
@@ -1630,9 +1648,18 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
           // Snapping to extended guideline - allow it
           snapInfo = this.getSnapInfo(lngLat);
         } else {
-          // Snapping to something else - check if it's a line that intersects with extended guideline
+          // Snapping to something else - check if it's a snappingPoint or a line that intersects with extended guideline
           const tempSnapInfo = this.getSnapInfo(lngLat);
-          if (tempSnapInfo && tempSnapInfo.type === 'line') {
+
+          // Check if this is a snappingPoint (corner/intersection point) - always allow snapping to these
+          const isSnappingPoint =
+            snapping.snappedFeature.properties &&
+            snapping.snappedFeature.properties.type === 'snappingPoint';
+
+          if (isSnappingPoint && tempSnapInfo && tempSnapInfo.type === 'point') {
+            // Allow snapping to snappingPoints even when extended guidelines are active
+            snapInfo = tempSnapInfo;
+          } else if (tempSnapInfo && tempSnapInfo.type === 'line') {
             // It's a line - check for intersection with extended guideline
             const intersectionSnap = findExtendedGuidelineIntersection(
               state.extendedGuidelines,
