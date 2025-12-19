@@ -268,7 +268,7 @@ export function createAngleInput(ctx, state, options = {}) {
   // Create label/state display
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-angle-label';
-  label.textContent = 'A for angle';
+  label.textContent = 'X for angle';
   label.style.cssText = `
     color: #666;
     font-size: 9px;
