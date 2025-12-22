@@ -81,7 +81,6 @@
     width: 0;
     height: 0;
     background: rgba(0,0,0,.1);
-    border: 2px dotted #fff;
     opacity: 0.5;
 }
 
@@ -90,66 +89,62 @@
   position: fixed;
   transform: translate(-50%, -50%);
   z-index: 10000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(200, 200, 200, 0.8);
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  padding: 6px 10px;
+  background: #FFFFFF;
+  border-radius: 0.35rem;
+  box-shadow: 1px 1px 10px 0px rgba(0, 0, 0, 0.2);;
+  padding: 0.35rem 0.5rem;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   pointer-events: auto;
   transition: opacity 0.2s ease-in-out;
 }
 
-.mapbox-gl-draw-distance-label,
-.mapbox-gl-draw-angle-label {
-  color: #666;
-  font-size: 9px;
-  white-space: nowrap;
-  width: 80px;
-  text-align: center;
-  display: inline-block;
+.mapbox-gl-draw-label{
+    color: #514f4d;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    width: 4rem;
+    text-align: center;
+    display: inline-block;
+    pointer-events: none;
 }
 
-.mapbox-gl-draw-distance-label.hidden,
-.mapbox-gl-draw-angle-label.hidden {
+.mapbox-gl-draw-label.hidden {
   display: none;
 }
 
-.mapbox-gl-draw-distance-input,
-.mapbox-gl-draw-angle-input {
-  border: 1px solid rgba(200, 200, 200, 0.8);
-  border-radius: 4px;
-  padding: 3px 6px;
-  font-size: 9px;
-  width: 80px;
+.mapbox-gl-draw-input {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.65rem;
+  width: 4rem;
   display: none;
   outline: none;
-  background: transparent;
+  background: #f5f3f0;
+  border: none;
   transition: background-color 0.2s;
 }
 
-.mapbox-gl-draw-distance-input:not(.hidden),
-.mapbox-gl-draw-angle-input:not(.hidden) {
+.mapbox-gl-draw-input:not(.hidden) {
   display: block;
 }
 
-.mapbox-gl-draw-distance-input.focused,
-.mapbox-gl-draw-angle-input.focused {
-  background-color: rgba(0, 0, 0, 0.05);
+.mapbox-gl-draw-input.focused {
+  background-color: none;
 }
 
-.mapbox-gl-draw-distance-clear,
-.mapbox-gl-draw-angle-clear {
+.mapbox-gl-draw-input:not(:placeholder-shown) {
+    width: 2rem;
+}
+.mapbox-gl-draw-clear {
   border: none;
   background: none;
-  color: #666;
-  font-size: 16px;
+  color: #514f4d;
+  font-size: 0.85rem;
   cursor: pointer;
-  padding: 0 3px;
+  padding: 0 0.25rem;
   line-height: 1;
   display: none;
 }
@@ -160,7 +155,6 @@
 }
 
 .mapbox-gl-draw-input-separator {
-  color: #ccc;
-  font-size: 11px;
-  padding: 0 3px;
+  color: #d9d4cc;
+  font-size: 0.85rem;
 }
