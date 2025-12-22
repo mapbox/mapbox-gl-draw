@@ -135,6 +135,9 @@
   background-color: none;
 }
 
+.mapbox-gl-draw-input:not(:placeholder-shown) {
+    width: 2rem;
+}
 .mapbox-gl-draw-clear {
   border: none;
   background: none;
