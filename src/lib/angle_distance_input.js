@@ -100,7 +100,7 @@ export function createDistanceInput(ctx, state, options = {}) {
 
   input.addEventListener('keydown', (e) => {
     // Prevent event from bubbling to map
-    if (e.key === 'Enter' || e.key === 'Escape' || (e.key === 'Backspace' && e.target.value === '')) {
+    if (e.key === 'Enter' || e.key === 'Escape') {
       e.stopPropagation();
     }
 
@@ -113,9 +113,6 @@ export function createDistanceInput(ctx, state, options = {}) {
       input.value = '';
       input.blur();
       updateDisplay();
-    } else if (e.key === 'Backspace' && e.target.value === '') {
-      e.preventDefault();
-      if (onBackspace) onBackspace();
     }
   });
 
@@ -151,12 +148,6 @@ export function createDistanceInput(ctx, state, options = {}) {
         label.style.display = 'none';
         input.focus();
       }
-    }
-    // Backspace to remove last vertex (when not focused on input)
-    else if (e.key === 'Backspace' && document.activeElement !== input) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (onBackspace) onBackspace();
     }
   };
   document.addEventListener('keydown', keyHandler);
@@ -266,7 +257,7 @@ export function createAngleInput(ctx, state, options = {}) {
 
   input.addEventListener('keydown', (e) => {
     // Prevent event from bubbling to map
-    if (e.key === 'Enter' || e.key === 'Escape' || (e.key === 'Backspace' && e.target.value === '')) {
+    if (e.key === 'Enter' || e.key === 'Escape') {
       e.stopPropagation();
     }
 
@@ -279,9 +270,6 @@ export function createAngleInput(ctx, state, options = {}) {
       input.value = '';
       input.blur();
       updateDisplay();
-    } else if (e.key === 'Backspace' && e.target.value === '') {
-      e.preventDefault();
-      if (onBackspace) onBackspace();
     }
   });
 
