@@ -49,66 +49,23 @@ export function createDistanceInput(ctx, state, options = {}) {
     position: fixed;
     top: ${pixelY}px;
     left: ${pixelX}px;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 6px 10px;
-    display: ${initiallyHidden ? 'none' : 'flex'};
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    pointer-events: auto;
-    transition: opacity 0.2s ease-in-out;
   `;
 
   // Create label/state display
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-distance-label';
-  label.textContent = 'D for distance';
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
+  label.textContent = '[L] Length';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = 'distance (m)';
+  input.placeholder = 'Length [m]';
   input.className = 'mapbox-gl-draw-distance-input';
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
 
   // Create clear button
   const clearBtn = document.createElement('button');
   clearBtn.textContent = '×';
   clearBtn.className = 'mapbox-gl-draw-distance-clear';
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
@@ -178,8 +135,8 @@ export function createDistanceInput(ctx, state, options = {}) {
       return;
     }
 
-    // 'D' key to toggle distance input
-    if (e.key === 'd' || e.key === 'D') {
+    // 'L' key to toggle distance input
+    if (e.key === 'l' || e.key === 'L') {
       e.preventDefault();
       e.stopPropagation();
 
@@ -259,56 +216,22 @@ export function createAngleInput(ctx, state, options = {}) {
   const separator = document.createElement('span');
   separator.className = 'mapbox-gl-draw-input-separator';
   separator.textContent = '|';
-  separator.style.cssText = `
-    color: #ccc;
-    font-size: 11px;
-    padding: 0 3px;
-  `;
 
   // Create label/state display
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-angle-label';
-  label.textContent = 'X for angle';
-  label.style.cssText = `
-    color: #666;
-    font-size: 9px;
-    white-space: nowrap;
-    width: 80px;
-    text-align: center;
-    display: inline-block;
-  `;
+  label.textContent = '[A] Angle';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = 'angle (°)';
+  input.placeholder = 'Angle [°]';
   input.className = 'mapbox-gl-draw-angle-input';
-  input.style.cssText = `
-    border: 1px solid rgba(200, 200, 200, 0.8);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 9px;
-    width: 80px;
-    display: none;
-    outline: none;
-    background: transparent;
-    transition: background-color 0.2s;
-  `;
 
   // Create clear button
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = '×';
+  clearBtn.textContent = 'x';
   clearBtn.className = 'mapbox-gl-draw-angle-clear';
-  clearBtn.style.cssText = `
-    border: none;
-    background: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 3px;
-    line-height: 1;
-    display: none;
-  `;
 
   const updateDisplay = () => {
     if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
