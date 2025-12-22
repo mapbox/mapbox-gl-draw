@@ -24,6 +24,8 @@ import {
 import {
   createDistanceInput as createDistanceInputUI,
   createAngleInput as createAngleInputUI,
+  showDistanceAngleUI,
+  hideDistanceAngleUI,
   removeDistanceAngleUI,
 } from "../lib/angle_distance_input.js";
 

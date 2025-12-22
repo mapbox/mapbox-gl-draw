@@ -152,7 +152,7 @@ const DirectSelect = {};
 DirectSelect.createDistanceInput = function(state) {
   createDistanceInputUI(this._ctx, state, {
     shouldActivateKeyHandler: () => true,
-    initiallyHidden: false,
+    initiallyHidden: true,
     forceCreate: true
   });
 };

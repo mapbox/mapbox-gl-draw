@@ -157,6 +157,11 @@ export function createDistanceInput(ctx, state, options = {}) {
   container.appendChild(clearBtn);
   document.body.appendChild(container);
 
+  // Hide initially if requested
+  if (initiallyHidden) {
+    container.style.display = 'none';
+  }
+
   // Store references in state
   state.distanceInput = input;
   state.distanceContainer = container;
