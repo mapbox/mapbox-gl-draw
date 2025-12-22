@@ -101,8 +101,7 @@
   transition: opacity 0.2s ease-in-out;
 }
 
-.mapbox-gl-draw-distance-label,
-.mapbox-gl-draw-angle-label {
+.mapbox-gl-draw-label{
     color: #514f4d;
     font-size: 0.65rem;
     white-space: nowrap;
@@ -112,13 +111,11 @@
     pointer-events: none;
 }
 
-.mapbox-gl-draw-distance-label.hidden,
-.mapbox-gl-draw-angle-label.hidden {
+.mapbox-gl-draw-label.hidden {
   display: none;
 }
 
-.mapbox-gl-draw-distance-input,
-.mapbox-gl-draw-angle-input {
+.mapbox-gl-draw-input {
   border-radius: 0.25rem;
   padding: 0.125rem 0.25rem;
   font-size: 0.65rem;
@@ -130,18 +127,15 @@
   transition: background-color 0.2s;
 }
 
-.mapbox-gl-draw-distance-input:not(.hidden),
-.mapbox-gl-draw-angle-input:not(.hidden) {
+.mapbox-gl-draw-input:not(.hidden) {
   display: block;
 }
 
-.mapbox-gl-draw-distance-input.focused,
-.mapbox-gl-draw-angle-input.focused {
+.mapbox-gl-draw-input.focused {
   background-color: none;
 }
 
-.mapbox-gl-draw-distance-clear,
-.mapbox-gl-draw-angle-clear {
+.mapbox-gl-draw-clear {
   border: none;
   background: none;
   color: #514f4d;

@@ -53,19 +53,19 @@ export function createDistanceInput(ctx, state, options = {}) {
 
   // Create label/state display
   const label = document.createElement('span');
-  label.className = 'mapbox-gl-draw-distance-label';
+  label.className = 'mapbox-gl-draw-label';
   label.textContent = '[L] Length';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Length [m]';
-  input.className = 'mapbox-gl-draw-distance-input';
+  input.className = 'mapbox-gl-draw-input';
 
   // Create clear button
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = '×';
-  clearBtn.className = 'mapbox-gl-draw-distance-clear';
+  clearBtn.textContent = 'x';
+  clearBtn.className = 'mapbox-gl-draw-clear';
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
@@ -210,19 +210,19 @@ export function createAngleInput(ctx, state, options = {}) {
 
   // Create label/state display
   const label = document.createElement('span');
-  label.className = 'mapbox-gl-draw-angle-label';
+  label.className = 'mapbox-gl-draw-label';
   label.textContent = '[A] Angle';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Angle [°]';
-  input.className = 'mapbox-gl-draw-angle-input';
+  input.className = 'mapbox-gl-draw-input';
 
   // Create clear button
   const clearBtn = document.createElement('button');
   clearBtn.textContent = 'x';
-  clearBtn.className = 'mapbox-gl-draw-angle-clear';
+  clearBtn.className = 'mapbox-gl-draw-clear';
 
   const updateDisplay = () => {
     if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
