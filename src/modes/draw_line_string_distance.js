@@ -2550,9 +2550,9 @@ DrawLineStringDistance.findFirstIntersectionInDirection = function (
 
   const rayLine = turf.lineString([previewVertex, endCoords]);
 
-  // Get all snap layers
-  const snapLayers = this._ctx.options.snapLayers;
-  if (!snapLayers) return null;
+  // Get snap buffer layers (these are queryable even when original layers have 0 opacity)
+  const snapping = this._ctx.snapping;
+  if (!snapping || !snapping.bufferLayers || snapping.bufferLayers.length === 0) return null;
 
   // Calculate bbox for the ray to limit query area
   const minLng = Math.min(previewVertex[0], endCoords[0]);
@@ -2567,15 +2567,14 @@ DrawLineStringDistance.findFirstIntersectionInDirection = function (
   let closestIntersection = null;
   let closestDistance = Infinity;
 
-  // Query features from snap layers - use cached layer IDs if available
-  if (!state._cachedLayerIds || state._layerIdsCacheTime < now - 5000) {
-    state._cachedLayerIds =
-      typeof snapLayers === "function"
-        ? map.getStyle().layers.filter(snapLayers).map((l) => l.id)
-        : snapLayers;
-    state._layerIdsCacheTime = now;
+  // Query features from snap buffer layers - use cached layer IDs if available
+  if (!state._cachedBufferLayerIds || state._bufferLayerIdsCacheTime < now - 5000) {
+    state._cachedBufferLayerIds = snapping.bufferLayers.map(
+      (layerId) => "_snap_buffer_" + layerId
+    );
+    state._bufferLayerIdsCacheTime = now;
   }
-  const layerIds = state._cachedLayerIds;
+  const layerIds = state._cachedBufferLayerIds;
 
   // Query with bbox constraint
   const allFeatures = map.queryRenderedFeatures(
