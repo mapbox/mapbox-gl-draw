@@ -1635,40 +1635,64 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
 
     // If extended guidelines are active, use exclusive snapping
     if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
-      // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+      // FIRST: Check if cursor is near the intersection point that triggered the guidelines
+      // This has highest priority since extended guideline buffer may overlap the point
+      if (state.hoveredIntersectionPoint) {
+        const intersectionCoord = state.hoveredIntersectionPoint.coord;
+        const distToIntersection = turf.distance(
+          turf.point(intersectionCoord),
+          turf.point([lngLat.lng, lngLat.lat]),
+          TURF_UNITS_M
+        );
+        const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+        const snapToleranceMeters = (this._ctx.options.snapDistance || 20) * metersPerPixel;
 
-      // Check what the snapping system is currently snapping to
-      const snapping = this._ctx.snapping;
-      if (snapping && snapping.snappedFeature) {
-        const isExtendedGuideline =
-          snapping.snappedFeature.properties &&
-          snapping.snappedFeature.properties.isExtendedGuideline;
+        if (distToIntersection <= snapToleranceMeters) {
+          snapInfo = {
+            type: 'point',
+            coord: intersectionCoord,
+            snappedFeature: state.hoveredIntersectionPoint.feature
+          };
+        }
+      }
 
-        if (isExtendedGuideline) {
-          // Snapping to extended guideline - allow it
-          snapInfo = this.getSnapInfo(lngLat);
-        } else {
-          // Snapping to something else - check if it's a snappingPoint or a line that intersects with extended guideline
-          const tempSnapInfo = this.getSnapInfo(lngLat);
+      // Only continue with other snapping if we didn't snap to the intersection point
+      if (!snapInfo) {
+        // ONLY snap to: 1) extended guideline, 2) intersections with other lines
 
-          // Check if this is a snappingPoint (corner/intersection point) - always allow snapping to these
-          const isSnappingPoint =
+        // Check what the snapping system is currently snapping to
+        const snapping = this._ctx.snapping;
+        if (snapping && snapping.snappedFeature) {
+          const isExtendedGuideline =
             snapping.snappedFeature.properties &&
-            snapping.snappedFeature.properties.type === 'snappingPoint';
+            snapping.snappedFeature.properties.isExtendedGuideline;
 
-          if (isSnappingPoint && tempSnapInfo && tempSnapInfo.type === 'point') {
-            // Allow snapping to snappingPoints even when extended guidelines are active
-            snapInfo = tempSnapInfo;
-          } else if (tempSnapInfo && tempSnapInfo.type === 'line') {
-            // It's a line - check for intersection with extended guideline
-            const intersectionSnap = findExtendedGuidelineIntersection(
-              state.extendedGuidelines,
-              tempSnapInfo,
-              lngLat,
-              state.snapTolerance
-            );
-            if (intersectionSnap) {
-              snapInfo = intersectionSnap;
+          if (isExtendedGuideline) {
+            // Snapping to extended guideline - allow it
+            snapInfo = this.getSnapInfo(lngLat);
+          } else {
+            // Snapping to something else - check if it's a snappingPoint or a line that intersects with extended guideline
+            const tempSnapInfo = this.getSnapInfo(lngLat);
+
+            // Check if this is a snappingPoint (corner/intersection point) - always allow snapping to these
+            const isSnappingPoint =
+              snapping.snappedFeature.properties &&
+              snapping.snappedFeature.properties.type === 'snappingPoint';
+
+            if (isSnappingPoint && tempSnapInfo && tempSnapInfo.type === 'point') {
+              // Allow snapping to snappingPoints even when extended guidelines are active
+              snapInfo = tempSnapInfo;
+            } else if (tempSnapInfo && tempSnapInfo.type === 'line') {
+              // It's a line - check for intersection with extended guideline
+              const intersectionSnap = findExtendedGuidelineIntersection(
+                state.extendedGuidelines,
+                tempSnapInfo,
+                lngLat,
+                state.snapTolerance
+              );
+              if (intersectionSnap) {
+                snapInfo = intersectionSnap;
+              }
             }
           }
         }
@@ -1738,31 +1762,55 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
 
   // If extended guidelines are active, use exclusive snapping
   if (state.extendedGuidelines && state.extendedGuidelines.length > 0) {
-    // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+    // FIRST: Check if cursor is near the intersection point that triggered the guidelines
+    // This has highest priority since extended guideline buffer may overlap the point
+    if (state.hoveredIntersectionPoint) {
+      const intersectionCoord = state.hoveredIntersectionPoint.coord;
+      const distToIntersection = turf.distance(
+        turf.point(intersectionCoord),
+        turf.point([lngLat.lng, lngLat.lat]),
+        TURF_UNITS_M
+      );
+      const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+      const snapToleranceMeters = (this._ctx.options.snapDistance || 20) * metersPerPixel;
 
-    // Check what the snapping system is currently snapping to
-    const snapping = this._ctx.snapping;
-    if (snapping && snapping.snappedFeature) {
-      const isExtendedGuideline =
-        snapping.snappedFeature.properties &&
-        snapping.snappedFeature.properties.isExtendedGuideline;
+      if (distToIntersection <= snapToleranceMeters) {
+        snapInfo = {
+          type: 'point',
+          coord: intersectionCoord,
+          snappedFeature: state.hoveredIntersectionPoint.feature
+        };
+      }
+    }
 
-      if (isExtendedGuideline) {
-        // Snapping to extended guideline - allow it
-        snapInfo = this.getSnapInfo(lngLat);
-      } else {
-        // Snapping to something else - check if it's a line that intersects with extended guideline
-        const tempSnapInfo = this.getSnapInfo(lngLat);
-        if (tempSnapInfo && tempSnapInfo.type === 'line') {
-          // It's a line - check for intersection with extended guideline
-          const intersectionSnap = findExtendedGuidelineIntersection(
-            state.extendedGuidelines,
-            tempSnapInfo,
-            lngLat,
-            state.snapTolerance
-          );
-          if (intersectionSnap) {
-            snapInfo = intersectionSnap;
+    // Only continue with other snapping if we didn't snap to the intersection point
+    if (!snapInfo) {
+      // ONLY snap to: 1) extended guideline, 2) intersections with other lines
+
+      // Check what the snapping system is currently snapping to
+      const snapping = this._ctx.snapping;
+      if (snapping && snapping.snappedFeature) {
+        const isExtendedGuideline =
+          snapping.snappedFeature.properties &&
+          snapping.snappedFeature.properties.isExtendedGuideline;
+
+        if (isExtendedGuideline) {
+          // Snapping to extended guideline - allow it
+          snapInfo = this.getSnapInfo(lngLat);
+        } else {
+          // Snapping to something else - check if it's a line that intersects with extended guideline
+          const tempSnapInfo = this.getSnapInfo(lngLat);
+          if (tempSnapInfo && tempSnapInfo.type === 'line') {
+            // It's a line - check for intersection with extended guideline
+            const intersectionSnap = findExtendedGuidelineIntersection(
+              state.extendedGuidelines,
+              tempSnapInfo,
+              lngLat,
+              state.snapTolerance
+            );
+            if (intersectionSnap) {
+              snapInfo = intersectionSnap;
+            }
           }
         }
       }
