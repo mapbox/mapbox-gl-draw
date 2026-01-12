@@ -23,6 +23,8 @@ import {
   calculateCircleLineIntersection,
   calculateLineIntersection,
   findExtendedGuidelineIntersection,
+  findAllGuidelineIntersections,
+  findCollinearIntersections,
   getExtendedGuidelineBearings,
   getPerpendicularToGuidelineBearing,
   getAdjacentSegmentsAtVertex,
@@ -1293,6 +1295,22 @@ DirectSelect.onDrag = function(state, e) {
         }
       }
 
+      // Check for intersections between extended guidelines and ANY snap lines (proactive search)
+      if (!snapInfo) {
+        const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+        const snapToleranceMeters = (this._ctx.options.snapDistance || 20) * metersPerPixel;
+        const guidelineIntersection = findAllGuidelineIntersections(
+          this.map,
+          this._ctx.snapping,
+          state.extendedGuidelines,
+          lngLat,
+          snapToleranceMeters
+        );
+        if (guidelineIntersection) {
+          snapInfo = guidelineIntersection;
+        }
+      }
+
       if (!snapInfo) {
         const snapping = this._ctx.snapping;
         if (snapping && snapping.snappedFeature) {
@@ -1408,6 +1426,133 @@ DirectSelect.onDrag = function(state, e) {
       orthogonalMatch = getOrthogonalSnapBearing(state.adjacentSegments, mouseBearing, orthogonalTolerance);
     }
 
+    // Pixel-based collinear/orthogonal snap with intersection detection
+    // Creates extended lines along segment directions and snaps to intersections with other snap lines
+    if (!extendedGuidelinesActive && state.adjacentSegments && state.adjacentSegments.length > 0) {
+      const snapDistance = this._ctx.options.snapDistance || 20;
+      const cursorScreenPos = this.map.project([lngLat.lng, lngLat.lat]);
+      const originScreenPos = this.map.project(distanceOrigin);
+
+      // Build extended lines for all orthogonal directions (0°, 90°, 180°, 270° from each segment)
+      const extendedLines = [];
+      for (const segmentInfo of state.adjacentSegments) {
+        for (const angle of [0, 90, 180, 270]) {
+          const bearing = segmentInfo.bearing + angle;
+          const vertexPoint = turf.point(distanceOrigin);
+          const extendedEnd = turf.destination(vertexPoint, 0.5, bearing, { units: 'kilometers' });
+
+          // Create line from origin to extended end
+          const lineCoords = [distanceOrigin, extendedEnd.geometry.coordinates];
+          const lineScreenStart = originScreenPos;
+          const lineScreenEnd = this.map.project(extendedEnd.geometry.coordinates);
+
+          extendedLines.push({
+            bearing,
+            coords: lineCoords,
+            screenStart: lineScreenStart,
+            screenEnd: lineScreenEnd,
+            isCollinear: angle === 0 || angle === 180,
+            segmentInfo
+          });
+        }
+      }
+
+      // Find the closest extended line to cursor (pixel distance)
+      let closestLine = null;
+      let closestPixelDist = Infinity;
+
+      for (const line of extendedLines) {
+        const pixelDist = pointToLineSegmentDistancePixels(
+          cursorScreenPos.x, cursorScreenPos.y,
+          line.screenStart.x, line.screenStart.y,
+          line.screenEnd.x, line.screenEnd.y
+        );
+
+        if (pixelDist < closestPixelDist && pixelDist <= snapDistance) {
+          closestPixelDist = pixelDist;
+          closestLine = line;
+        }
+      }
+
+      // If cursor is near an extended line, check for intersections with snap geometry
+      if (closestLine) {
+        const snapping = this._ctx.snapping;
+        if (snapping && snapping.snappedGeometry) {
+          const geom = snapping.snappedGeometry;
+          if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+            try {
+              // Create extended line for intersection test (extend in both directions)
+              const vertexPoint = turf.point(distanceOrigin);
+              const extStart = turf.destination(vertexPoint, 0.5, closestLine.bearing + 180, { units: 'kilometers' });
+              const extEnd = turf.destination(vertexPoint, 0.5, closestLine.bearing, { units: 'kilometers' });
+              const extendedLine = turf.lineString([
+                extStart.geometry.coordinates,
+                distanceOrigin,
+                extEnd.geometry.coordinates
+              ]);
+
+              let snappedLine;
+              if (geom.type === 'LineString') {
+                snappedLine = turf.lineString(geom.coordinates);
+              } else {
+                snappedLine = turf.multiLineString(geom.coordinates);
+              }
+
+              const intersections = turf.lineIntersect(extendedLine, snappedLine);
+              if (intersections.features.length > 0) {
+                // Find closest intersection to cursor
+                const cursorPoint = turf.point([lngLat.lng, lngLat.lat]);
+                let closestIntersection = null;
+                let minDist = Infinity;
+
+                for (const intersection of intersections.features) {
+                  const dist = turf.distance(cursorPoint, intersection, { units: 'meters' });
+                  if (dist < minDist) {
+                    minDist = dist;
+                    closestIntersection = intersection.geometry.coordinates;
+                  }
+                }
+
+                // Snap to intersection if cursor is within snap tolerance
+                const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+                const snapToleranceMeters = snapDistance * metersPerPixel;
+
+                if (closestIntersection && minDist <= snapToleranceMeters) {
+                  snapInfo = {
+                    type: 'point',
+                    coord: closestIntersection,
+                    snappedFeature: snapping.snappedFeature,
+                    isCollinearIntersection: true
+                  };
+                }
+              }
+            } catch (e) {
+              // Continue without intersection snap
+            }
+          }
+        }
+      }
+    }
+
+    // Helper function for pixel distance from point to line segment
+    function pointToLineSegmentDistancePixels(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const lengthSquared = dx * dx + dy * dy;
+
+      if (lengthSquared === 0) {
+        return Math.sqrt((px - x1) * (px - x1) + (py - y1) * (py - y1));
+      }
+
+      let t = ((px - x1) * dx + (py - y1) * dy) / lengthSquared;
+      t = Math.max(0, Math.min(1, t));
+
+      const closestX = x1 + t * dx;
+      const closestY = y1 + t * dy;
+
+      return Math.sqrt((px - closestX) * (px - closestX) + (py - closestY) * (py - closestY));
+    }
+
     // Check parallel line snap (only when extended guidelines are NOT active)
     let parallelLineMatch = null;
     if (!extendedGuidelinesActive) {
@@ -1491,14 +1636,17 @@ DirectSelect.onDrag = function(state, e) {
     } else if (snapInfo && snapInfo.type === 'point') {
       bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
       usePointDirection = true;
+    } else if (snapInfo && snapInfo.type === 'line') {
+      // Line snap takes priority over bearing-based snaps
+      bearingToUse = snapInfo.bearing;
     } else if (orthogonalMatch !== null && (!extendedGuidelinesActive || isPerpendicularToGuideline)) {
+      // Bearing snap only activates when no concrete snap target nearby
       bearingToUse = orthogonalMatch.bearing;
       isOrthogonalSnap = true;
     } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
+      // Parallel line snap only activates when no concrete snap target nearby
       bearingToUse = parallelLineMatch.bearing;
       isParallelLineSnap = true;
-    } else if (snapInfo && snapInfo.type === 'line') {
-      bearingToUse = snapInfo.bearing;
     }
 
     // ============================================================
@@ -1526,15 +1674,6 @@ DirectSelect.onDrag = function(state, e) {
         }
       } else {
         const dest = turf.destination(from, state.currentDistance / 1000, bearingToUse, { units: 'kilometers' });
-        finalLngLat = { lng: dest.geometry.coordinates[0], lat: dest.geometry.coordinates[1] };
-      }
-    } else if (isOrthogonalSnap && snapInfo && snapInfo.type === 'line') {
-      this.removeGuideCircle(state);
-      const intersection = calculateLineIntersection(distanceOrigin, bearingToUse, snapInfo.segment);
-      if (intersection) {
-        finalLngLat = { lng: intersection.coord[0], lat: intersection.coord[1] };
-      } else {
-        const dest = turf.destination(from, mouseDistance, bearingToUse, { units: 'kilometers' });
         finalLngLat = { lng: dest.geometry.coordinates[0], lat: dest.geometry.coordinates[1] };
       }
     } else if (usePointDirection && snapInfo) {

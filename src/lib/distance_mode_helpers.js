@@ -415,6 +415,299 @@ export function findExtendedGuidelineIntersection(extendedGuidelines, snapInfo, 
   return null;
 }
 
+/**
+ * Find all intersection points between extended guidelines and nearby snap lines.
+ * This proactively calculates intersections so users can snap to them even when
+ * not directly hovering over the snap line's buffer.
+ *
+ * @param {Object} map - The Mapbox GL map instance
+ * @param {Object} snapping - The snapping context with bufferLayers info
+ * @param {Array} extendedGuidelines - Array of extended guideline GeoJSON features
+ * @param {Object} cursorPosition - Current cursor position {lng, lat}
+ * @param {number} snapToleranceMeters - Snap tolerance in meters
+ * @returns {Object|null} Snap info for the closest intersection, or null
+ */
+export function findAllGuidelineIntersections(map, snapping, extendedGuidelines, cursorPosition, snapToleranceMeters) {
+  if (!map || !snapping || !extendedGuidelines || extendedGuidelines.length === 0) {
+    return null;
+  }
+
+  const cursorPoint = turf.point([cursorPosition.lng, cursorPosition.lat]);
+
+  // Query all snap buffer layers for line features near the cursor
+  const bufferLayers = snapping.bufferLayers || [];
+  const queryLayers = bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+
+  // Create a bounding box around the extended guidelines to query features
+  let allCoords = [];
+  for (const guideline of extendedGuidelines) {
+    if (guideline.geometry && guideline.geometry.coordinates) {
+      allCoords = allCoords.concat(guideline.geometry.coordinates);
+    }
+  }
+
+  if (allCoords.length === 0) {
+    return null;
+  }
+
+  // Get bounds of extended guidelines and expand slightly
+  let bbox;
+  try {
+    bbox = turf.bbox(turf.lineString(allCoords));
+  } catch (e) {
+    return null;
+  }
+  const sw = map.project([bbox[0], bbox[1]]);
+  const ne = map.project([bbox[2], bbox[3]]);
+
+  // Query features within the guideline bounds
+  let allFeatures = [];
+  try {
+    allFeatures = map.queryRenderedFeatures(
+      [[sw.x - 50, ne.y - 50], [ne.x + 50, sw.y + 50]],
+      { layers: queryLayers }
+    );
+  } catch (e) {
+    return null;
+  }
+
+  // Filter to only line/polygon features (not extended guidelines themselves)
+  const lineFeatures = allFeatures.filter(f => {
+    if (f.properties && f.properties.isExtendedGuideline) {
+      return false;
+    }
+    const geomType = f.geometry.type;
+    return geomType === 'LineString' ||
+           geomType === 'MultiLineString' ||
+           geomType === 'Polygon' ||
+           geomType === 'MultiPolygon';
+  });
+
+  let closestIntersection = null;
+  let minDistance = Infinity;
+  let closestFeature = null;
+
+  // Check each line feature against each guideline
+  for (const feature of lineFeatures) {
+    let geom = feature.geometry;
+
+    // Convert polygons to linestrings
+    if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+      try {
+        geom = turf.polygonToLine(geom).geometry;
+      } catch (e) {
+        continue;
+      }
+    }
+
+    // Get coordinates array
+    let coordsArrays = [];
+    if (geom.type === 'LineString') {
+      coordsArrays = [geom.coordinates];
+    } else if (geom.type === 'MultiLineString') {
+      coordsArrays = geom.coordinates;
+    }
+
+    for (const coords of coordsArrays) {
+      if (coords.length < 2) continue;
+
+      let lineString;
+      try {
+        lineString = turf.lineString(coords);
+      } catch (e) {
+        continue;
+      }
+
+      // Check against each guideline
+      for (const guideline of extendedGuidelines) {
+        try {
+          const guidelineLineString = turf.lineString(guideline.geometry.coordinates);
+          const intersections = turf.lineIntersect(guidelineLineString, lineString);
+
+          for (const intersection of intersections.features) {
+            const intersectionCoord = intersection.geometry.coordinates;
+            const intersectionPoint = turf.point(intersectionCoord);
+
+            // Check distance from cursor to intersection
+            const distanceToCursor = turf.distance(cursorPoint, intersectionPoint, UNITS_METERS);
+
+            if (distanceToCursor < minDistance) {
+              minDistance = distanceToCursor;
+              closestIntersection = intersectionCoord;
+              closestFeature = feature;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    }
+  }
+
+  // If we found an intersection within snap tolerance, return it as a point snap
+  if (closestIntersection && minDistance <= snapToleranceMeters) {
+    return {
+      type: 'point',
+      coord: closestIntersection,
+      snappedFeature: closestFeature,
+      isGuidelineIntersection: true
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Find intersection points between a collinear direction line and nearby snap lines.
+ * This allows users to "drag a line out until it meets something" by snapping to
+ * where the collinear extension of an adjacent segment crosses other snap lines.
+ *
+ * @param {Object} map - The Mapbox GL map instance
+ * @param {Object} snapping - The snapping context with bufferLayers info
+ * @param {Array} vertexCoord - The vertex being dragged [lng, lat]
+ * @param {number} collinearBearing - The bearing of the collinear direction
+ * @param {Object} cursorPosition - Current cursor position {lng, lat}
+ * @param {number} snapToleranceMeters - Snap tolerance in meters
+ * @returns {Object|null} Snap info for the closest intersection, or null
+ */
+export function findCollinearIntersections(map, snapping, vertexCoord, collinearBearing, cursorPosition, snapToleranceMeters) {
+  if (!map || !vertexCoord || collinearBearing === null || collinearBearing === undefined) {
+    return null;
+  }
+
+  const cursorPoint = turf.point([cursorPosition.lng, cursorPosition.lat]);
+  const vertexPoint = turf.point(vertexCoord);
+
+  // Create an extended line along the collinear direction (500m in each direction for better coverage)
+  const extensionDistance = 0.5; // 500m in km
+  const extendedStart = turf.destination(vertexPoint, extensionDistance, collinearBearing + 180, UNITS_KM);
+  const extendedEnd = turf.destination(vertexPoint, extensionDistance, collinearBearing, UNITS_KM);
+
+  const collinearLine = turf.lineString([
+    extendedStart.geometry.coordinates,
+    vertexCoord,
+    extendedEnd.geometry.coordinates
+  ]);
+
+  // Get bounds of collinear line and expand
+  let bbox;
+  try {
+    bbox = turf.bbox(collinearLine);
+  } catch (e) {
+    return null;
+  }
+  const sw = map.project([bbox[0], bbox[1]]);
+  const ne = map.project([bbox[2], bbox[3]]);
+
+  // Query features - try snap buffer layers first, then fall back to all features
+  let allFeatures = [];
+  const bufferLayers = (snapping && snapping.bufferLayers) || [];
+  const queryLayers = bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+
+  try {
+    if (queryLayers.length > 0) {
+      allFeatures = map.queryRenderedFeatures(
+        [[sw.x - 100, ne.y - 100], [ne.x + 100, sw.y + 100]],
+        { layers: queryLayers }
+      );
+    }
+    // If no features found with buffer layers, try querying all features
+    if (allFeatures.length === 0) {
+      allFeatures = map.queryRenderedFeatures(
+        [[sw.x - 100, ne.y - 100], [ne.x + 100, sw.y + 100]]
+      );
+    }
+  } catch (e) {
+    return null;
+  }
+
+  // Filter to only line/polygon features (exclude draw layers and extended guidelines)
+  const lineFeatures = allFeatures.filter(f => {
+    if (f.properties && f.properties.isExtendedGuideline) {
+      return false;
+    }
+    // Exclude mapbox-gl-draw internal layers
+    if (f.layer && f.layer.id && (f.layer.id.startsWith('gl-draw') || f.layer.id.startsWith('mapbox-gl-draw'))) {
+      return false;
+    }
+    const geomType = f.geometry.type;
+    return geomType === 'LineString' ||
+           geomType === 'MultiLineString' ||
+           geomType === 'Polygon' ||
+           geomType === 'MultiPolygon';
+  });
+
+  let closestIntersection = null;
+  let minDistance = Infinity;
+  let closestFeature = null;
+
+  // Check each line feature against the collinear line
+  for (const feature of lineFeatures) {
+    let geom = feature.geometry;
+
+    // Convert polygons to linestrings
+    if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+      try {
+        geom = turf.polygonToLine(geom).geometry;
+      } catch (e) {
+        continue;
+      }
+    }
+
+    // Get coordinates array
+    let coordsArrays = [];
+    if (geom.type === 'LineString') {
+      coordsArrays = [geom.coordinates];
+    } else if (geom.type === 'MultiLineString') {
+      coordsArrays = geom.coordinates;
+    }
+
+    for (const coords of coordsArrays) {
+      if (coords.length < 2) continue;
+
+      let lineString;
+      try {
+        lineString = turf.lineString(coords);
+      } catch (e) {
+        continue;
+      }
+
+      // Find intersections
+      try {
+        const intersections = turf.lineIntersect(collinearLine, lineString);
+
+        for (const intersection of intersections.features) {
+          const intersectionCoord = intersection.geometry.coordinates;
+          const intersectionPoint = turf.point(intersectionCoord);
+
+          // Check distance from cursor to intersection
+          const distanceToCursor = turf.distance(cursorPoint, intersectionPoint, UNITS_METERS);
+
+          if (distanceToCursor < minDistance) {
+            minDistance = distanceToCursor;
+            closestIntersection = intersectionCoord;
+            closestFeature = feature;
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+  }
+
+  // If we found an intersection within snap tolerance, return it as a point snap
+  if (closestIntersection && minDistance <= snapToleranceMeters) {
+    return {
+      type: 'point',
+      coord: closestIntersection,
+      snappedFeature: closestFeature,
+      isCollinearIntersection: true
+    };
+  }
+
+  return null;
+}
+
 // Cache for parallel line search results
 let parallelLinesCache = {
   key: null,

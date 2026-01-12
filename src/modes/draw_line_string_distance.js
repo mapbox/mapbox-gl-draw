@@ -10,6 +10,7 @@ import {
   calculateCircleLineIntersection,
   calculateLineIntersection,
   findExtendedGuidelineIntersection,
+  findAllGuidelineIntersections,
   checkExtendedGuidelineIntersectionClick,
   findNearbyParallelLines,
   getParallelBearing,
@@ -1251,26 +1252,27 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     // Priority 1: Point snap direction
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
+  } else if (snapInfo && snapInfo.type === "line") {
+    // Priority 2: Line snap bearing - takes priority over bearing-based snaps
+    bearingToUse = snapInfo.bearing;
   } else if (bothSnapsActive) {
-    // Special case: Both orthogonal and closing perpendicular are active
+    // Priority 3: Both orthogonal and closing perpendicular are active (only when no concrete snap)
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
   } else if (orthogonalMatch !== null && (!extendedGuidelinesActive || isPerpendicularToGuideline)) {
-    // Priority 2: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
+    // Priority 4: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
+    // Only activates when no concrete snap target nearby
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
   } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
-    // Priority 3: Parallel line snap (snap to bearing of nearby lines)
-    // Skip if extended guidelines are active
+    // Priority 5: Parallel line snap (snap to bearing of nearby lines)
+    // Only activates when no concrete snap target nearby
     bearingToUse = parallelLineMatch.bearing;
     isParallelLineSnap = true;
   } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
-    // Priority 4: Closing perpendicular snap
-    // Skip if extended guidelines are active
+    // Priority 6: Closing perpendicular snap
+    // Only activates when no concrete snap target nearby
     isClosingPerpendicularSnap = true;
-  } else if (snapInfo && snapInfo.type === "line") {
-    // Priority 5: Line snap bearing (lowest priority for direction)
-    bearingToUse = snapInfo.bearing;
   }
 
   // Determine length priority
@@ -1352,9 +1354,11 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   } else if (
     closingPerpendicularSnap !== null &&
     !usePointDirection &&
-    !isOrthogonalSnap
+    !isOrthogonalSnap &&
+    !snapInfo
   ) {
     // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
+    // Only activates when no concrete snap target nearby
     const perpLine = {
       start: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
@@ -1388,30 +1392,6 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
         from,
         mouseDistance,
         mouseBearing,
-        { units: "kilometers" }
-      );
-      newVertex = destinationPoint.geometry.coordinates;
-    }
-  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === "line") {
-    // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = calculateLineIntersection(
-      lastVertex,
-      bearingToUse,
-      snapInfo.segment
-    );
-    if (intersection) {
-      newVertex = intersection.coord;
-    } else {
-      // Fallback to mouse distance if intersection fails
-      const mouseDistance = turf.distance(
-        from,
-        turf.point([e.lngLat.lng, e.lngLat.lat]),
-        { units: "kilometers" }
-      );
-      const destinationPoint = turf.destination(
-        from,
-        mouseDistance,
-        bearingToUse,
         { units: "kilometers" }
       );
       newVertex = destinationPoint.geometry.coordinates;
@@ -1656,7 +1636,23 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
         }
       }
 
-      // Only continue with other snapping if we didn't snap to the intersection point
+      // Check for intersections between extended guidelines and ANY snap lines (proactive search)
+      if (!snapInfo) {
+        const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+        const snapToleranceMeters = (this._ctx.options.snapDistance || 20) * metersPerPixel;
+        const guidelineIntersection = findAllGuidelineIntersections(
+          this.map,
+          this._ctx.snapping,
+          state.extendedGuidelines,
+          lngLat,
+          snapToleranceMeters
+        );
+        if (guidelineIntersection) {
+          snapInfo = guidelineIntersection;
+        }
+      }
+
+      // Only continue with other snapping if we didn't snap to an intersection point
       if (!snapInfo) {
         // ONLY snap to: 1) extended guideline intersections with other lines, 2) extended guideline itself
 
@@ -1843,7 +1839,23 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
       }
     }
 
-    // Only continue with other snapping if we didn't snap to the intersection point
+    // Check for intersections between extended guidelines and ANY snap lines (proactive search)
+    if (!snapInfo) {
+      const metersPerPixel = 156543.03392 * Math.cos(lngLat.lat * Math.PI / 180) / Math.pow(2, this.map.getZoom());
+      const snapToleranceMeters = (this._ctx.options.snapDistance || 20) * metersPerPixel;
+      const guidelineIntersection = findAllGuidelineIntersections(
+        this.map,
+        this._ctx.snapping,
+        state.extendedGuidelines,
+        lngLat,
+        snapToleranceMeters
+      );
+      if (guidelineIntersection) {
+        snapInfo = guidelineIntersection;
+      }
+    }
+
+    // Only continue with other snapping if we didn't snap to an intersection point
     if (!snapInfo) {
       // ONLY snap to: 1) extended guideline intersections with other lines, 2) extended guideline itself
 
@@ -2139,29 +2151,28 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     // Priority 1: Point snap direction
     bearingToUse = turf.bearing(from, turf.point(snapInfo.coord));
     usePointDirection = true;
+  } else if (snapInfo && snapInfo.type === "line") {
+    // Priority 2: Line snap bearing - takes priority over bearing-based snaps
+    bearingToUse = snapInfo.bearing;
   } else if (bothSnapsActive) {
-    // Special case: Both orthogonal and closing perpendicular are active
-    // We'll handle this in the length priority section
+    // Priority 3: Both orthogonal and closing perpendicular are active (only when no concrete snap)
     isOrthogonalSnap = true;
     isClosingPerpendicularSnap = true;
   } else if (orthogonalMatch !== null && (!extendedGuidelinesActive || isPerpendicularToGuideline)) {
-    // Priority 2: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
+    // Priority 4: Bearing snap (orthogonal/parallel to previous segment, snapped line, or extended guideline)
+    // Only activates when no concrete snap target nearby
     bearingToUse = orthogonalMatch.bearing;
     isOrthogonalSnap = true;
   } else if (parallelLineMatch !== null && !extendedGuidelinesActive) {
-    // Priority 3: Parallel line snap (snap to bearing of nearby lines)
-    // Skip if extended guidelines are active
+    // Priority 5: Parallel line snap (snap to bearing of nearby lines)
+    // Only activates when no concrete snap target nearby
     bearingToUse = parallelLineMatch.bearing;
     isParallelLineSnap = true;
     state.parallelLineSnap = parallelLineMatch;
   } else if (closingPerpendicularSnap !== null && !extendedGuidelinesActive) {
-    // Priority 4: Closing perpendicular snap
-    // Skip if extended guidelines are active
-    // (This will be handled in the length priority section)
+    // Priority 6: Closing perpendicular snap
+    // Only activates when no concrete snap target nearby
     isClosingPerpendicularSnap = true;
-  } else if (snapInfo && snapInfo.type === "line") {
-    // Priority 5: Line snap bearing (lowest priority for direction)
-    bearingToUse = snapInfo.bearing;
   }
 
   // Clear parallel line snap if not active
@@ -2267,9 +2278,11 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   } else if (
     closingPerpendicularSnap !== null &&
     !usePointDirection &&
-    !isOrthogonalSnap
+    !isOrthogonalSnap &&
+    !snapInfo
   ) {
     // Closing perpendicular snap: find intersection where closing segment is perpendicular to first segment
+    // Only activates when no concrete snap target nearby
     const perpLine = {
       start: turf.destination(
         turf.point(closingPerpendicularSnap.firstVertex),
@@ -2322,56 +2335,6 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
       previewVertex = destinationPoint.geometry.coordinates;
     }
     this.removeGuideCircle(state);
-  } else if (orthogonalMatch !== null && snapInfo && snapInfo.type === "line") {
-    // Priority 2 for length: Bearing snap + line nearby -> extend/shorten to intersection
-    const intersection = calculateLineIntersection(
-      lastVertex,
-      bearingToUse,
-      snapInfo.segment
-    );
-    if (intersection) {
-      previewVertex = intersection.coord;
-    } else {
-      // Fallback to mouse distance if intersection fails
-      const mouseDistance = turf.distance(
-        from,
-        turf.point([lngLat.lng, lngLat.lat]),
-        { units: "kilometers" }
-      );
-      const destinationPoint = turf.destination(
-        from,
-        mouseDistance,
-        bearingToUse,
-        { units: "kilometers" }
-      );
-      previewVertex = destinationPoint.geometry.coordinates;
-    }
-    this.removeGuideCircle(state);
-  } else if (isParallelLineSnap && snapInfo && snapInfo.type === "line") {
-    // Parallel line snap + nearby line -> extend/shorten to intersection
-    const intersection = calculateLineIntersection(
-      lastVertex,
-      bearingToUse,
-      snapInfo.segment
-    );
-    if (intersection) {
-      previewVertex = intersection.coord;
-    } else {
-      // Fallback to mouse distance if intersection fails
-      const mouseDistance = turf.distance(
-        from,
-        turf.point([lngLat.lng, lngLat.lat]),
-        { units: "kilometers" }
-      );
-      const destinationPoint = turf.destination(
-        from,
-        mouseDistance,
-        bearingToUse,
-        { units: "kilometers" }
-      );
-      previewVertex = destinationPoint.geometry.coordinates;
-    }
-    this.removeGuideCircle(state);
   } else if (usePointDirection && snapInfo) {
     // Point snap: use distance to point
     previewVertex = snapInfo.coord;
@@ -2379,6 +2342,21 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
   } else if (snapInfo && snapInfo.type === "line") {
     // Line snap: use snapped position
     previewVertex = snapInfo.coord;
+    this.removeGuideCircle(state);
+  } else if (isOrthogonalSnap || isParallelLineSnap) {
+    // Bearing snap (orthogonal/parallel) without any snap target: use mouse distance with bearing
+    const mouseDistance = turf.distance(
+      from,
+      turf.point([lngLat.lng, lngLat.lat]),
+      { units: "kilometers" }
+    );
+    const destinationPoint = turf.destination(
+      from,
+      mouseDistance,
+      bearingToUse,
+      { units: "kilometers" }
+    );
+    previewVertex = destinationPoint.geometry.coordinates;
     this.removeGuideCircle(state);
   } else {
     // No snap: use mouse distance with bearing
