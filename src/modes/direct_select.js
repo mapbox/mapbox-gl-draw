@@ -1301,7 +1301,68 @@ DirectSelect.onDrag = function(state, e) {
             snapping.snappedFeature.properties.isExtendedGuideline;
 
           if (isExtendedGuideline) {
-            snapInfo = this.getSnapInfo(lngLat);
+            // Snapping to extended guideline - check for intersections with OTHER nearby lines first
+            const guidelineSnapInfo = this.getSnapInfo(lngLat);
+
+            // Query for other line features near the cursor that might intersect the guideline
+            const bufferLayers = snapping.bufferLayers.map(layerId => '_snap_buffer_' + layerId);
+            const allFeaturesAtPoint = this.map.queryRenderedFeatures(e.point, {
+              layers: bufferLayers
+            });
+
+            // Look for a non-extended-guideline line feature
+            const otherLineFeature = allFeaturesAtPoint.find((feature) => {
+              if (feature.properties && feature.properties.isExtendedGuideline) {
+                return false;
+              }
+              const geomType = feature.geometry.type;
+              return geomType === 'LineString' ||
+                     geomType === 'MultiLineString' ||
+                     geomType === 'Polygon' ||
+                     geomType === 'MultiPolygon';
+            });
+
+            if (otherLineFeature && guidelineSnapInfo) {
+              // Found another line - check for intersection with extended guideline
+              let otherGeom = otherLineFeature.geometry;
+              if (otherGeom.type === 'Polygon' || otherGeom.type === 'MultiPolygon') {
+                otherGeom = turf.polygonToLine(otherGeom).geometry;
+              }
+
+              if (otherGeom.type === 'LineString' || otherGeom.type === 'MultiLineString') {
+                const snapPoint = turf.point([lngLat.lng, lngLat.lat]);
+                const coords = otherGeom.type === 'LineString' ? otherGeom.coordinates : otherGeom.coordinates.flat();
+
+                const result = findNearestSegment(coords, snapPoint);
+                if (result) {
+                  const otherLineSnapInfo = {
+                    type: 'line',
+                    coord: guidelineSnapInfo.coord,
+                    bearing: turf.bearing(
+                      turf.point(result.segment.start),
+                      turf.point(result.segment.end)
+                    ),
+                    segment: result.segment,
+                    snappedFeature: otherLineFeature
+                  };
+
+                  const intersectionSnap = findExtendedGuidelineIntersection(
+                    state.extendedGuidelines,
+                    otherLineSnapInfo,
+                    lngLat,
+                    state.snapTolerance || 20
+                  );
+                  if (intersectionSnap) {
+                    snapInfo = intersectionSnap;
+                  }
+                }
+              }
+            }
+
+            // If no intersection found, use the guideline snap
+            if (!snapInfo) {
+              snapInfo = guidelineSnapInfo;
+            }
           } else {
             const tempSnapInfo = this.getSnapInfo(lngLat);
             const isSnappingPoint =
