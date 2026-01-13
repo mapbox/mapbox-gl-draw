@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn link)",
+      "Bash(yarn build)",
+      "Bash(npm run build:*)",
+      "Bash(npm run build-min:*)",
+      "Bash(npx rollup:*)",
+      "Read(//c/Users/ErikF/Pictures/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(node --check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

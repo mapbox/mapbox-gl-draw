@@ -1,9 +1,12 @@
+console.log('🔗 LINKED mapbox-gl-draw loaded');
+
 import runSetup from './src/setup.js';
 import setupOptions from './src/options.js';
 import setupAPI from './src/api.js';
 import modes from './src/modes/index.js';
 import * as Constants from './src/constants.js';
 import * as lib from './src/lib/index.js';
+import './dist/mapbox-gl-draw.css';
 
 const setupDraw = function(options, api) {
   options = setupOptions(options);

@@ -56,18 +56,16 @@
   cursor: crosshair;
 }
 .mapboxgl-map.mouse-move.mode-direct_select .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: grab;
-  cursor: -moz-grab;
-  cursor: -webkit-grab;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-vertex.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: move;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-midpoint.mouse-pointer .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: cell;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-direct_select.feature-feature.mouse-move .mapboxgl-canvas-container.mapboxgl-interactive {
-  cursor: move;
+  cursor: crosshair;
 }
 .mapboxgl-map.mode-static.mouse-pointer  .mapboxgl-canvas-container.mapboxgl-interactive {
   cursor: grab;
@@ -83,6 +81,80 @@
     width: 0;
     height: 0;
     background: rgba(0,0,0,.1);
-    border: 2px dotted #fff;
     opacity: 0.5;
+}
+
+/* Angle/Distance Input UI */
+.mapbox-gl-draw-angle-distance-container {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  background: #FFFFFF;
+  border-radius: 0.35rem;
+  box-shadow: 1px 1px 10px 0px rgba(0, 0, 0, 0.2);;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  pointer-events: auto;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.mapbox-gl-draw-label{
+    color: #514f4d;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    width: 4rem;
+    text-align: center;
+    display: inline-block;
+    pointer-events: none;
+}
+
+.mapbox-gl-draw-label.hidden {
+  display: none;
+}
+
+.mapbox-gl-draw-input {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.65rem;
+  width: 4rem;
+  display: none;
+  outline: none;
+  background: #f5f3f0;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.mapbox-gl-draw-input:not(.hidden) {
+  display: block;
+}
+
+.mapbox-gl-draw-input.focused {
+  background-color: none;
+}
+
+.mapbox-gl-draw-input:not(:placeholder-shown) {
+    width: 2rem;
+}
+.mapbox-gl-draw-clear {
+  border: none;
+  background: none;
+  color: #514f4d;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+  display: none;
+}
+
+.mapbox-gl-draw-distance-clear:not(.hidden),
+.mapbox-gl-draw-angle-clear:not(.hidden) {
+  display: block;
+}
+
+.mapbox-gl-draw-input-separator {
+  color: #d9d4cc;
+  font-size: 0.85rem;
 }
