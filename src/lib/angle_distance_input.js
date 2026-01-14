@@ -34,21 +34,14 @@ export function createDistanceInput(ctx, state, options = {}) {
   const container = document.createElement('div');
   container.className = 'mapbox-gl-draw-angle-distance-container';
 
-  // Calculate position from normalized coordinates
-  const mapContainer = ctx.map.getContainer();
-  const mapWidth = mapContainer.offsetWidth;
-  const mapHeight = mapContainer.offsetHeight;
-  const [normX, normY] = ctx.options.angleDistanceInputPosition;
-
-  // Convert normalized position to pixel coordinates
-  const pixelX = mapWidth * normX;
-  const pixelY = mapHeight * normY;
+  // Get position values from options (rem or any CSS units)
+  const [leftPos, topPos] = ctx.options.angleDistanceInputPosition;
 
   // Set critical inline styles (CSS classes can override for customization)
   container.style.cssText = `
     position: fixed;
-    top: ${pixelY}px;
-    left: ${pixelX}px;
+    top: ${topPos};
+    left: ${leftPos};
   `;
 
   // Create label/state display

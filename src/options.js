@@ -43,19 +43,18 @@ const defaultOptions = {
   useAngleDistanceInput: true,
 
   /**
-   * Position of the angle/distance input container in normalized coordinates [x, y]
-   * where [0, 0] is top-left corner and [1, 1] is bottom-right corner.
-   * The coordinates represent the center point of the input container.
-   * @type {[number, number]}
-   * @default [0.5, 0.9] (bottom-center, matching current behavior)
+   * Position of the angle/distance input container using rem units [left, top]
+   * Supports any valid CSS positioning values.
+   * @type {[string, string]}
+   * @default ['50%', 'calc(100% - 3rem)'] (bottom-center)
    * @example
-   * [0.5, 0.9]   - bottom-center (default)
-   * [0, 0]       - top-left corner
-   * [1, 1]       - bottom-right corner
-   * [0.5, 0.5]   - center of map
-   * [0.2, 0.8]   - lower-left area
+   * ['50%', 'calc(100% - 3rem)']  - bottom-center (default)
+   * ['1rem', '1rem']              - top-left with 1rem padding
+   * ['calc(100% - 20rem)', '1rem'] - top-right with padding
+   * ['50%', '50%']                - center of map
+   * ['2rem', 'calc(100% - 5rem)'] - lower-left area
    */
-  angleDistanceInputPosition: [0.5, 0.93],
+  angleDistanceInputPosition: ['50%', 'calc(100% - 3rem)'],
 };
 
 const showControls = {
