@@ -162,15 +162,16 @@
 }
 
 .mapbox-gl-draw-input {
-  border-radius: 0.25rem;
-  padding: 0.25rem 0.4rem;
-  font-size: 0.7rem;
-  width: 3.5rem;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.65rem;
+  width: 2.5rem;
+  height: 1.1rem;
   outline: none;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   color: #1f2937;
-  text-align: center;
+  text-align: left;
   transition: border-color 0.15s, background-color 0.15s;
 }
 
@@ -183,12 +184,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
   border: none;
   background: #e5e7eb;
   color: #6b7280;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 600;
   cursor: pointer;
   border-radius: 50%;
