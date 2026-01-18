@@ -25,54 +25,58 @@ export function createDistanceInput(ctx, state, options = {}) {
     forceCreate = false
   } = options;
 
-  // Check if angle/distance input UI is enabled (skip check if forceCreate is true)
   if (!forceCreate && !ctx.options.useAngleDistanceInput) {
     return null;
   }
 
-  // Create container
+  // Create main container
   const container = document.createElement('div');
   container.className = 'mapbox-gl-draw-angle-distance-container';
 
-  // Get position values from options (rem or any CSS units)
   const [leftPos, topPos] = ctx.options.angleDistanceInputPosition;
-
-  // Set critical inline styles (CSS classes can override for customization)
   container.style.cssText = `
     position: fixed;
     top: ${topPos};
     left: ${leftPos};
   `;
 
-  // Create label/state display
+  // Create section wrapper
+  const section = document.createElement('div');
+  section.className = 'mapbox-gl-draw-section';
+
+  // Create label with key badge
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-label';
-  label.textContent = '[L] Length';
+  label.innerHTML = '<span class="key">L</span><span class="text">Length</span>';
+
+  // Create input wrapper
+  const inputWrapper = document.createElement('div');
+  inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = 'Length [m]';
+  input.placeholder = 'm';
   input.className = 'mapbox-gl-draw-input';
 
   // Create clear button
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'x';
+  clearBtn.innerHTML = '×';
   clearBtn.className = 'mapbox-gl-draw-clear';
+
+  inputWrapper.appendChild(input);
+  inputWrapper.appendChild(clearBtn);
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
-      label.style.display = 'none';
-      input.style.display = 'block';
-      clearBtn.style.display = 'block';
+      label.classList.add('hidden');
+      inputWrapper.classList.add('active');
     } else {
-      label.style.display = 'inline-block';
-      input.style.display = 'none';
-      clearBtn.style.display = 'none';
+      label.classList.remove('hidden');
+      inputWrapper.classList.remove('active');
     }
   };
 
-  // Add focus/blur handlers
   input.addEventListener('focus', () => {
     input.classList.add('focused');
   });
@@ -92,7 +96,6 @@ export function createDistanceInput(ctx, state, options = {}) {
   });
 
   input.addEventListener('keydown', (e) => {
-    // Prevent event from bubbling to map
     if (e.key === 'Enter' || e.key === 'Escape') {
       e.stopPropagation();
     }
@@ -118,46 +121,41 @@ export function createDistanceInput(ctx, state, options = {}) {
     updateDisplay();
   });
 
-  // Add keyboard shortcuts
   const keyHandler = (e) => {
-    // Only respond when conditions are met
     if (!shouldActivateKeyHandler()) {
       return;
     }
 
-    // 'L' key to toggle distance input
     if (e.key === 'l' || e.key === 'L') {
       e.preventDefault();
       e.stopPropagation();
 
-      // Toggle: if distance is active, clear it; otherwise activate it
       if (state.currentDistance !== null || document.activeElement === input) {
         state.currentDistance = null;
         input.value = '';
         input.blur();
         updateDisplay();
       } else {
-        input.style.display = 'block';
-        label.style.display = 'none';
+        label.classList.add('hidden');
+        inputWrapper.classList.add('active');
         input.focus();
       }
     }
   };
   document.addEventListener('keydown', keyHandler);
 
-  container.appendChild(label);
-  container.appendChild(input);
-  container.appendChild(clearBtn);
+  section.appendChild(label);
+  section.appendChild(inputWrapper);
+  container.appendChild(section);
   document.body.appendChild(container);
 
-  // Hide initially if requested
   if (initiallyHidden) {
     container.style.display = 'none';
   }
 
-  // Store references in state
   state.distanceInput = input;
   state.distanceContainer = container;
+  state.distanceSection = section;
   state.distanceKeyHandler = keyHandler;
   state.distanceUpdateDisplay = updateDisplay;
 
@@ -165,6 +163,7 @@ export function createDistanceInput(ctx, state, options = {}) {
 
   return {
     container,
+    section,
     input,
     label,
     clearBtn,
@@ -191,7 +190,6 @@ export function createAngleInput(ctx, state, options = {}) {
     forceCreate = false
   } = options;
 
-  // Check if angle/distance input UI is enabled (skip check if forceCreate is true)
   if (!forceCreate && !ctx.options.useAngleDistanceInput) {
     return null;
   }
@@ -204,37 +202,44 @@ export function createAngleInput(ctx, state, options = {}) {
   // Create separator
   const separator = document.createElement('span');
   separator.className = 'mapbox-gl-draw-input-separator';
-  separator.textContent = '|';
 
-  // Create label/state display
+  // Create section wrapper
+  const section = document.createElement('div');
+  section.className = 'mapbox-gl-draw-section';
+
+  // Create label with key badge
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-label';
-  label.textContent = '[A] Angle';
+  label.innerHTML = '<span class="key">A</span><span class="text">Angle</span>';
+
+  // Create input wrapper
+  const inputWrapper = document.createElement('div');
+  inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
   // Create input
   const input = document.createElement('input');
   input.type = 'text';
-  input.placeholder = 'Angle [°]';
+  input.placeholder = '°';
   input.className = 'mapbox-gl-draw-input';
 
   // Create clear button
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'x';
+  clearBtn.innerHTML = '×';
   clearBtn.className = 'mapbox-gl-draw-clear';
+
+  inputWrapper.appendChild(input);
+  inputWrapper.appendChild(clearBtn);
 
   const updateDisplay = () => {
     if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
-      label.style.display = 'none';
-      input.style.display = 'block';
-      clearBtn.style.display = 'block';
+      label.classList.add('hidden');
+      inputWrapper.classList.add('active');
     } else {
-      label.style.display = 'inline-block';
-      input.style.display = 'none';
-      clearBtn.style.display = 'none';
+      label.classList.remove('hidden');
+      inputWrapper.classList.remove('active');
     }
   };
 
-  // Add focus/blur handlers
   input.addEventListener('focus', () => {
     input.classList.add('focused');
   });
@@ -254,7 +259,6 @@ export function createAngleInput(ctx, state, options = {}) {
   });
 
   input.addEventListener('keydown', (e) => {
-    // Prevent event from bubbling to map
     if (e.key === 'Enter' || e.key === 'Escape') {
       e.stopPropagation();
     }
@@ -280,27 +284,23 @@ export function createAngleInput(ctx, state, options = {}) {
     updateDisplay();
   });
 
-  // Add keyboard shortcuts
   const keyHandler = (e) => {
-    // Only respond when conditions are met
     if (!shouldActivateKeyHandler()) {
       return;
     }
 
-    // 'A' key to toggle angle input
     if (e.key === 'a' || e.key === 'A') {
       e.preventDefault();
       e.stopPropagation();
 
-      // Toggle: if angle is active, clear it; otherwise activate it
       if (state.currentAngle !== null || document.activeElement === input) {
         state.currentAngle = null;
         input.value = '';
         input.blur();
         updateDisplay();
       } else {
-        input.style.display = 'block';
-        label.style.display = 'none';
+        label.classList.add('hidden');
+        inputWrapper.classList.add('active');
         input.focus();
       }
     }
@@ -308,12 +308,12 @@ export function createAngleInput(ctx, state, options = {}) {
   document.addEventListener('keydown', keyHandler);
 
   distanceContainer.appendChild(separator);
-  distanceContainer.appendChild(label);
-  distanceContainer.appendChild(input);
-  distanceContainer.appendChild(clearBtn);
+  section.appendChild(label);
+  section.appendChild(inputWrapper);
+  distanceContainer.appendChild(section);
 
-  // Store references in state
   state.angleInput = input;
+  state.angleSection = section;
   state.angleKeyHandler = keyHandler;
   state.angleSeparator = separator;
   state.angleUpdateDisplay = updateDisplay;
@@ -322,6 +322,7 @@ export function createAngleInput(ctx, state, options = {}) {
 
   return {
     separator,
+    section,
     input,
     label,
     clearBtn,
@@ -348,7 +349,6 @@ export function hideDistanceAngleUI(state) {
   if (state.distanceContainer) {
     state.distanceContainer.style.display = 'none';
   }
-  // Clear values
   if (state.distanceInput) {
     state.distanceInput.value = '';
     state.currentDistance = null;
@@ -381,20 +381,19 @@ export function createSnappingIndicator(ctx, state, options = {}) {
     return null;
   }
 
+  // Create separator
   const separator = document.createElement('span');
   separator.className = 'mapbox-gl-draw-input-separator';
-  separator.textContent = '|';
 
+  // Create label with key badge
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-snapping-label';
-  label.textContent = '[⇧] Snapping';
+  label.innerHTML = '<span class="key">⇧</span><span class="text">Snap</span>';
 
   const updateLabel = (shiftHeld) => {
     if (shiftHeld) {
-      label.textContent = '[⇧] No Snap';
       label.classList.add('disabled');
     } else {
-      label.textContent = '[⇧] Snapping';
       label.classList.remove('disabled');
     }
     if (ctx.snapping) {
@@ -465,7 +464,9 @@ export function removeDistanceAngleUI(state) {
     state.distanceContainer = null;
   }
   state.distanceInput = null;
+  state.distanceSection = null;
   state.angleInput = null;
+  state.angleSection = null;
   state.snappingIndicatorSeparator = null;
   state.snappingIndicatorLabel = null;
 }
