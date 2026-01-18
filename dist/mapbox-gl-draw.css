@@ -158,3 +158,17 @@
   color: #d9d4cc;
   font-size: 0.85rem;
 }
+
+.mapbox-gl-draw-snapping-label {
+  color: #514f4d;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  padding: 0.125rem 0.35rem;
+  border-radius: 0.2rem;
+  transition: all 0.15s ease;
+}
+
+.mapbox-gl-draw-snapping-label.disabled {
+  background-color: #514f4d;
+  color: #ffffff;
+}

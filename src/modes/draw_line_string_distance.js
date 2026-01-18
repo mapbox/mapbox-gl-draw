@@ -25,6 +25,7 @@ import {
 import {
   createDistanceInput as createDistanceInputUI,
   createAngleInput as createAngleInputUI,
+  createSnappingIndicator as createSnappingIndicatorUI,
   removeDistanceAngleUI,
 } from "../lib/angle_distance_input.js";
 
@@ -92,6 +93,7 @@ DrawLineStringDistance.onSetup = function (opts) {
 
   this.createDistanceInput(state);
   this.createAngleInput(state);
+  this.createSnappingIndicator(state);
 
   return state;
 };
@@ -121,6 +123,10 @@ DrawLineStringDistance.createAngleInput = function (state) {
     },
     onBackspace: () => self.onTrash(state)
   });
+};
+
+DrawLineStringDistance.createSnappingIndicator = function (state) {
+  createSnappingIndicatorUI(this._ctx, state);
 };
 
 DrawLineStringDistance.onClick = function (state, e) {
@@ -1493,6 +1499,16 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     this.removeLineSegmentSplitLabels(state);
     this.removeParallelLineIndicators(state);
     this.removeCollinearSnapLine(state);
+
+    // Clear the snap vertex indicator (black dot) and snapping state
+    if (this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      if (this._ctx.snapping.snappedFeature) {
+        this._ctx.snapping.setSnapHoverState(this._ctx.snapping.snappedFeature, false);
+      }
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
 
     // Store preview vertex
     state.previewVertex = previewVertex;

@@ -362,6 +362,80 @@ export function hideDistanceAngleUI(state) {
 }
 
 /**
+ * Create the snapping indicator UI (appends to distance container)
+ * Shows whether snapping is enabled or disabled based on Shift key state
+ * @param {Object} ctx - The draw context
+ * @param {Object} state - The mode state
+ * @param {Object} options - Configuration options
+ * @param {boolean} [options.forceCreate=false] - Skip useAngleDistanceInput check
+ */
+export function createSnappingIndicator(ctx, state, options = {}) {
+  const { forceCreate = false } = options;
+
+  if (!forceCreate && !ctx.options.useAngleDistanceInput) {
+    return null;
+  }
+
+  const distanceContainer = state.distanceContainer;
+  if (!distanceContainer) {
+    return null;
+  }
+
+  const separator = document.createElement('span');
+  separator.className = 'mapbox-gl-draw-input-separator';
+  separator.textContent = '|';
+
+  const label = document.createElement('span');
+  label.className = 'mapbox-gl-draw-snapping-label';
+  label.textContent = '[⇧] Snapping';
+
+  const updateLabel = (shiftHeld) => {
+    if (shiftHeld) {
+      label.textContent = '[⇧] No Snap';
+      label.classList.add('disabled');
+    } else {
+      label.textContent = '[⇧] Snapping';
+      label.classList.remove('disabled');
+    }
+    if (ctx.snapping) {
+      ctx.snapping.setDisabled(shiftHeld);
+    }
+  };
+
+  const keydownHandler = (e) => {
+    if (e.key === 'Shift') {
+      updateLabel(true);
+    }
+  };
+
+  const keyupHandler = (e) => {
+    if (e.key === 'Shift') {
+      updateLabel(false);
+    }
+  };
+
+  document.addEventListener('keydown', keydownHandler);
+  document.addEventListener('keyup', keyupHandler);
+
+  distanceContainer.appendChild(separator);
+  distanceContainer.appendChild(label);
+
+  state.snappingIndicatorSeparator = separator;
+  state.snappingIndicatorLabel = label;
+  state.snappingKeydownHandler = keydownHandler;
+  state.snappingKeyupHandler = keyupHandler;
+  state.snappingCtx = ctx;
+
+  return {
+    separator,
+    label,
+    keydownHandler,
+    keyupHandler,
+    updateLabel
+  };
+}
+
+/**
  * Remove the distance/angle input UI elements and clean up event listeners
  * @param {Object} state - The mode state
  */
@@ -374,10 +448,24 @@ export function removeDistanceAngleUI(state) {
     document.removeEventListener('keydown', state.angleKeyHandler);
     state.angleKeyHandler = null;
   }
+  if (state.snappingKeydownHandler) {
+    document.removeEventListener('keydown', state.snappingKeydownHandler);
+    state.snappingKeydownHandler = null;
+  }
+  if (state.snappingKeyupHandler) {
+    document.removeEventListener('keyup', state.snappingKeyupHandler);
+    state.snappingKeyupHandler = null;
+  }
+  if (state.snappingCtx && state.snappingCtx.snapping) {
+    state.snappingCtx.snapping.setDisabled(false);
+    state.snappingCtx = null;
+  }
   if (state.distanceContainer && state.distanceContainer.parentNode) {
     state.distanceContainer.parentNode.removeChild(state.distanceContainer);
     state.distanceContainer = null;
   }
   state.distanceInput = null;
   state.angleInput = null;
+  state.snappingIndicatorSeparator = null;
+  state.snappingIndicatorLabel = null;
 }

@@ -11,6 +11,7 @@ export default class Snapping {
     this.snappedFeature = undefined;
     this.snappedGeometry = undefined;
     this.bufferLayers = [];
+    this.disabled = false;
 
     this.ctx.api.refreshSnapLayers = () => {
       this.updateSnapLayers();
@@ -27,6 +28,10 @@ export default class Snapping {
 
     this.ctx.api.clearSnapCoord = () => {
       this.clearSnapCoord();
+    };
+
+    this.ctx.api.setSnapDisabled = (disabled) => {
+      this.setDisabled(disabled);
     };
 
     this.map.on("styledata", () => {
@@ -53,6 +58,10 @@ export default class Snapping {
   };
 
   mouseoverHandler = (e) => {
+    if (this.disabled) {
+      return;
+    }
+
     const f = !this.ctx.options.snapFeatureFilter
       ? e.features[0]
       : e.features.find(this.ctx.options.snapFeatureFilter);
@@ -86,6 +95,18 @@ export default class Snapping {
       this.snappedFeature = undefined;
     }
   };
+
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    if (disabled) {
+      this.clearSnapCoord();
+      if (this.snappedFeature) {
+        this.setSnapHoverState(this.snappedFeature, false);
+      }
+      this.snappedFeature = undefined;
+      this.snappedGeometry = undefined;
+    }
+  }
 
   setSnapHoverState(f, state) {
     if (f.id !== undefined) {
