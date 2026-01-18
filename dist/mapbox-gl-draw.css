@@ -90,9 +90,9 @@
   transform: translate(-50%, -50%);
   z-index: 10000;
   background: #FFFFFF;
-  border-radius: 0.5rem;
+  border-radius: 0.35rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  padding: 0.5rem 0.75rem;
+  padding: 0.2rem 0.35rem;
   display: flex;
   align-items: center;
   gap: 0;
@@ -105,8 +105,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 5.5rem;
-  height: 1.75rem;
+  min-width: 5rem;
+  height: 1.5rem;
   position: relative;
 }
 
@@ -203,9 +203,9 @@
 
 .mapbox-gl-draw-input-separator {
   width: 1px;
-  height: 1.25rem;
+  height: 1rem;
   background: #e5e7eb;
-  margin: 0 0.25rem;
+  margin: 0 0.15rem;
 }
 
 .mapbox-gl-draw-snapping-label {
@@ -213,8 +213,8 @@
   font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
-  min-width: 5.5rem;
-  height: 1.75rem;
+  min-width: 5rem;
+  height: 1.5rem;
   text-align: center;
   display: inline-flex;
   align-items: center;
