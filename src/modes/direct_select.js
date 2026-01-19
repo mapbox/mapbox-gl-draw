@@ -150,9 +150,10 @@ DirectSelect.onSetup = function(opts) {
   return state;
 };
 
-DirectSelect.onStop = function() {
+DirectSelect.onStop = function(state) {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
+  this.stopDragging(state);
 };
 
 DirectSelect.toDisplayFeatures = function(state, geojson, push) {
