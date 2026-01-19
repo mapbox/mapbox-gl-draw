@@ -226,14 +226,14 @@
   font-size: 0.7rem;
   font-weight: 500;
   white-space: nowrap;
-  min-width: 5rem;
-  height: 1.5rem;
+  padding: 0.15rem 0.5rem;
   text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.25rem;
+  border-radius: 0.2rem;
   transition: background-color 0.15s, color 0.15s;
+  cursor: default;
 }
 
 .mapbox-gl-draw-snapping-label .key {
@@ -261,6 +261,29 @@
 }
 
 .mapbox-gl-draw-snapping-label.disabled .text {
+  text-decoration: line-through;
+  text-decoration-color: #9ca3af;
+}
+
+/* Hover state when shift is held - invite to lock */
+.mapbox-gl-draw-snapping-label.disabled:hover {
+  background-color: #f3f4f6;
+  cursor: pointer;
+}
+
+/* Locked state - snapping disabled and locked */
+.mapbox-gl-draw-snapping-label.locked {
+  color: #9ca3af;
+  background-color: #f3f4f6;
+  cursor: pointer;
+}
+
+.mapbox-gl-draw-snapping-label.locked .key {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.mapbox-gl-draw-snapping-label.locked .text {
   text-decoration: line-through;
   text-decoration-color: #9ca3af;
 }

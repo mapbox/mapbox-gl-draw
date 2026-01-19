@@ -398,6 +398,7 @@ export function hideDistanceAngleUI(state) {
 /**
  * Create the snapping indicator UI (appends to distance container)
  * Shows whether snapping is enabled or disabled based on Shift key state
+ * Supports locking the disabled state by clicking while Shift is held
  * @param {Object} ctx - The draw context
  * @param {Object} state - The mode state
  * @param {Object} options - Configuration options
@@ -424,28 +425,57 @@ export function createSnappingIndicator(ctx, state, options = {}) {
   label.className = 'mapbox-gl-draw-snapping-label';
   label.innerHTML = '<span class="key">⇧</span><span class="text">Snap</span>';
 
-  const updateLabel = (shiftHeld) => {
-    if (shiftHeld) {
+  let isLocked = false;
+  let shiftHeld = false;
+
+  const updateLabel = () => {
+    label.classList.remove('disabled', 'locked');
+
+    if (isLocked) {
+      label.classList.add('locked');
+      if (ctx.snapping) {
+        ctx.snapping.setDisabled(true);
+      }
+    } else if (shiftHeld) {
       label.classList.add('disabled');
+      if (ctx.snapping) {
+        ctx.snapping.setDisabled(true);
+      }
     } else {
-      label.classList.remove('disabled');
-    }
-    if (ctx.snapping) {
-      ctx.snapping.setDisabled(shiftHeld);
+      if (ctx.snapping) {
+        ctx.snapping.setDisabled(false);
+      }
     }
   };
 
   const keydownHandler = (e) => {
-    if (e.key === 'Shift') {
-      updateLabel(true);
+    if (e.key === 'Shift' && !isLocked) {
+      shiftHeld = true;
+      updateLabel();
     }
   };
 
   const keyupHandler = (e) => {
     if (e.key === 'Shift') {
-      updateLabel(false);
+      shiftHeld = false;
+      if (!isLocked) {
+        updateLabel();
+      }
     }
   };
+
+  // Click to lock/unlock
+  label.addEventListener('click', () => {
+    if (isLocked) {
+      // Unlock
+      isLocked = false;
+      updateLabel();
+    } else if (shiftHeld) {
+      // Lock while shift is held
+      isLocked = true;
+      updateLabel();
+    }
+  });
 
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
