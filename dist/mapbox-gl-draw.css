@@ -184,22 +184,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1rem;
-  height: 1rem;
   border: none;
-  background: #e5e7eb;
-  color: #6b7280;
-  font-size: 0.55rem;
-  font-weight: 600;
+  background: none;
+  color: #9ca3af;
+  font-size: 0.7rem;
   cursor: pointer;
-  border-radius: 50%;
-  transition: background-color 0.15s, color 0.15s;
+  padding: 0 0.15rem;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
   line-height: 1;
 }
 
+.mapbox-gl-draw-input-wrapper:hover .mapbox-gl-draw-clear,
+.mapbox-gl-draw-input:focus ~ .mapbox-gl-draw-clear {
+  opacity: 1;
+}
+
 .mapbox-gl-draw-clear:hover {
-  background: #d1d5db;
-  color: #374151;
+  color: #6b7280;
 }
 
 .mapbox-gl-draw-input-separator {
