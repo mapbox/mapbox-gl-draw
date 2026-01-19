@@ -265,10 +265,16 @@
   text-decoration-color: #9ca3af;
 }
 
-/* Hover state when shift is held - invite to lock */
+/* Hover state when shift is held - show lock icon invite */
 .mapbox-gl-draw-snapping-label.disabled:hover {
   background-color: #f3f4f6;
   cursor: pointer;
+}
+
+.mapbox-gl-draw-snapping-label.hover-lock .key,
+.mapbox-gl-draw-snapping-label.hover-unlock .key {
+  background: transparent;
+  color: #4b5563;
 }
 
 /* Locked state - snapping disabled and locked */
@@ -279,8 +285,8 @@
 }
 
 .mapbox-gl-draw-snapping-label.locked .key {
-  background: #ef4444;
-  color: #ffffff;
+  background: transparent;
+  color: #6b7280;
 }
 
 .mapbox-gl-draw-snapping-label.locked .text {

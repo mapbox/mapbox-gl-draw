@@ -399,6 +399,7 @@ export function hideDistanceAngleUI(state) {
  * Create the snapping indicator UI (appends to distance container)
  * Shows whether snapping is enabled or disabled based on Shift key state
  * Supports locking the disabled state by clicking while Shift is held
+ * Lock state persists between drawings via ctx.snappingLocked
  * @param {Object} ctx - The draw context
  * @param {Object} state - The mode state
  * @param {Object} options - Configuration options
@@ -423,25 +424,50 @@ export function createSnappingIndicator(ctx, state, options = {}) {
   // Create label with key badge
   const label = document.createElement('span');
   label.className = 'mapbox-gl-draw-snapping-label';
-  label.innerHTML = '<span class="key">⇧</span><span class="text">Snap</span>';
+  const keySpan = document.createElement('span');
+  keySpan.className = 'key';
+  keySpan.textContent = '⇧';
+  const textSpan = document.createElement('span');
+  textSpan.className = 'text';
+  textSpan.textContent = 'Snap';
+  label.appendChild(keySpan);
+  label.appendChild(textSpan);
 
-  let isLocked = false;
   let shiftHeld = false;
+  let isHovering = false;
+
+  const ICON_SHIFT = '⇧';
+  const ICON_LOCKED = '\u{1F512}\u{FE0E}';
+  const ICON_UNLOCKED = '\u{1F513}\u{FE0E}';
 
   const updateLabel = () => {
-    label.classList.remove('disabled', 'locked');
+    const isLocked = ctx.snappingLocked || false;
+    label.classList.remove('disabled', 'locked', 'hover-lock', 'hover-unlock');
 
     if (isLocked) {
       label.classList.add('locked');
+      if (isHovering) {
+        label.classList.add('hover-unlock');
+        keySpan.textContent = ICON_UNLOCKED;
+      } else {
+        keySpan.textContent = ICON_LOCKED;
+      }
       if (ctx.snapping) {
         ctx.snapping.setDisabled(true);
       }
     } else if (shiftHeld) {
       label.classList.add('disabled');
+      if (isHovering) {
+        label.classList.add('hover-lock');
+        keySpan.textContent = ICON_LOCKED;
+      } else {
+        keySpan.textContent = ICON_SHIFT;
+      }
       if (ctx.snapping) {
         ctx.snapping.setDisabled(true);
       }
     } else {
+      keySpan.textContent = ICON_SHIFT;
       if (ctx.snapping) {
         ctx.snapping.setDisabled(false);
       }
@@ -449,7 +475,7 @@ export function createSnappingIndicator(ctx, state, options = {}) {
   };
 
   const keydownHandler = (e) => {
-    if (e.key === 'Shift' && !isLocked) {
+    if (e.key === 'Shift' && !ctx.snappingLocked) {
       shiftHeld = true;
       updateLabel();
     }
@@ -458,25 +484,36 @@ export function createSnappingIndicator(ctx, state, options = {}) {
   const keyupHandler = (e) => {
     if (e.key === 'Shift') {
       shiftHeld = false;
-      if (!isLocked) {
+      if (!ctx.snappingLocked) {
         updateLabel();
       }
     }
   };
 
+  const mouseenterHandler = () => {
+    isHovering = true;
+    updateLabel();
+  };
+
+  const mouseleaveHandler = () => {
+    isHovering = false;
+    updateLabel();
+  };
+
   // Click to lock/unlock
-  label.addEventListener('click', () => {
-    if (isLocked) {
-      // Unlock
-      isLocked = false;
+  const clickHandler = () => {
+    if (ctx.snappingLocked) {
+      ctx.snappingLocked = false;
       updateLabel();
     } else if (shiftHeld) {
-      // Lock while shift is held
-      isLocked = true;
+      ctx.snappingLocked = true;
       updateLabel();
     }
-  });
+  };
 
+  label.addEventListener('click', clickHandler);
+  label.addEventListener('mouseenter', mouseenterHandler);
+  label.addEventListener('mouseleave', mouseleaveHandler);
   document.addEventListener('keydown', keydownHandler);
   document.addEventListener('keyup', keyupHandler);
 
@@ -487,7 +524,13 @@ export function createSnappingIndicator(ctx, state, options = {}) {
   state.snappingIndicatorLabel = label;
   state.snappingKeydownHandler = keydownHandler;
   state.snappingKeyupHandler = keyupHandler;
+  state.snappingClickHandler = clickHandler;
+  state.snappingMouseenterHandler = mouseenterHandler;
+  state.snappingMouseleaveHandler = mouseleaveHandler;
   state.snappingCtx = ctx;
+
+  // Initialize display based on persisted lock state
+  updateLabel();
 
   return {
     separator,
@@ -519,10 +562,24 @@ export function removeDistanceAngleUI(state) {
     document.removeEventListener('keyup', state.snappingKeyupHandler);
     state.snappingKeyupHandler = null;
   }
-  if (state.snappingCtx && state.snappingCtx.snapping) {
-    state.snappingCtx.snapping.setDisabled(false);
-    state.snappingCtx = null;
+  if (state.snappingIndicatorLabel) {
+    if (state.snappingClickHandler) {
+      state.snappingIndicatorLabel.removeEventListener('click', state.snappingClickHandler);
+      state.snappingClickHandler = null;
+    }
+    if (state.snappingMouseenterHandler) {
+      state.snappingIndicatorLabel.removeEventListener('mouseenter', state.snappingMouseenterHandler);
+      state.snappingMouseenterHandler = null;
+    }
+    if (state.snappingMouseleaveHandler) {
+      state.snappingIndicatorLabel.removeEventListener('mouseleave', state.snappingMouseleaveHandler);
+      state.snappingMouseleaveHandler = null;
+    }
   }
+  if (state.snappingCtx && state.snappingCtx.snapping && !state.snappingCtx.snappingLocked) {
+    state.snappingCtx.snapping.setDisabled(false);
+  }
+  state.snappingCtx = null;
   if (state.distanceContainer && state.distanceContainer.parentNode) {
     state.distanceContainer.parentNode.removeChild(state.distanceContainer);
     state.distanceContainer = null;

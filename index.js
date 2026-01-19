@@ -1,5 +1,3 @@
-console.log('🔗 LINKED mapbox-gl-draw loaded');
-
 import runSetup from './src/setup.js';
 import setupOptions from './src/options.js';
 import setupAPI from './src/api.js';
