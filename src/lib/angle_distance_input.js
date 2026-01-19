@@ -53,19 +53,29 @@ export function createDistanceInput(ctx, state, options = {}) {
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
-  // Create input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = 'm';
-  input.className = 'mapbox-gl-draw-input';
-
-  // Create clear button
+  // Create clear button (styled like key badge)
   const clearBtn = document.createElement('button');
   clearBtn.innerHTML = '×';
   clearBtn.className = 'mapbox-gl-draw-clear';
 
-  inputWrapper.appendChild(input);
+  // Create input group (input + unit)
+  const inputGroup = document.createElement('div');
+  inputGroup.className = 'mapbox-gl-draw-input-group';
+
+  // Create input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'mapbox-gl-draw-input';
+
+  // Create unit suffix
+  const unit = document.createElement('span');
+  unit.className = 'mapbox-gl-draw-input-unit';
+  unit.textContent = 'm';
+
+  inputGroup.appendChild(input);
+  inputGroup.appendChild(unit);
   inputWrapper.appendChild(clearBtn);
+  inputWrapper.appendChild(inputGroup);
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
@@ -216,19 +226,29 @@ export function createAngleInput(ctx, state, options = {}) {
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
-  // Create input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = '°';
-  input.className = 'mapbox-gl-draw-input';
-
-  // Create clear button
+  // Create clear button (styled like key badge)
   const clearBtn = document.createElement('button');
   clearBtn.innerHTML = '×';
   clearBtn.className = 'mapbox-gl-draw-clear';
 
-  inputWrapper.appendChild(input);
+  // Create input group (input + unit)
+  const inputGroup = document.createElement('div');
+  inputGroup.className = 'mapbox-gl-draw-input-group';
+
+  // Create input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'mapbox-gl-draw-input';
+
+  // Create unit suffix
+  const unit = document.createElement('span');
+  unit.className = 'mapbox-gl-draw-input-unit';
+  unit.textContent = '°';
+
+  inputGroup.appendChild(input);
+  inputGroup.appendChild(unit);
   inputWrapper.appendChild(clearBtn);
+  inputWrapper.appendChild(inputGroup);
 
   const updateDisplay = () => {
     if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
