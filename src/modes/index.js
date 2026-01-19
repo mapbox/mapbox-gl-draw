@@ -1,4 +1,3 @@
-
 import simple_select from './simple_select.js';
 import direct_select from './direct_select.js';
 import draw_point from './draw_point.js';

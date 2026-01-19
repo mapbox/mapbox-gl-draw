@@ -9,7 +9,11 @@
       "Read(//c/Users/ErikF/Pictures/**)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(node --check:*)"
+      "Bash(node --check:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh issue view:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

@@ -25,6 +25,7 @@ import {
 import {
   createDistanceInput as createDistanceInputUI,
   createAngleInput as createAngleInputUI,
+  createSnappingIndicator as createSnappingIndicatorUI,
   removeDistanceAngleUI,
 } from "../lib/angle_distance_input.js";
 
@@ -92,6 +93,7 @@ DrawLineStringDistance.onSetup = function (opts) {
 
   this.createDistanceInput(state);
   this.createAngleInput(state);
+  this.createSnappingIndicator(state);
 
   return state;
 };
@@ -121,6 +123,10 @@ DrawLineStringDistance.createAngleInput = function (state) {
     },
     onBackspace: () => self.onTrash(state)
   });
+};
+
+DrawLineStringDistance.createSnappingIndicator = function (state) {
+  createSnappingIndicatorUI(this._ctx, state);
 };
 
 DrawLineStringDistance.onClick = function (state, e) {
@@ -817,6 +823,15 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   // Check if shift is held to bypass snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
 
+  const prevVertex = state.vertices[state.vertices.length - 1];
+
+  // Ignore click if it's on the same spot as the previous vertex
+  if (prevVertex && state.previewVertex &&
+      prevVertex[0] === state.previewVertex[0] &&
+      prevVertex[1] === state.previewVertex[1]) {
+    return;
+  }
+
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
     // Use the preview vertex if it exists (from onMouseMove), otherwise calculate it
@@ -1493,6 +1508,16 @@ DrawLineStringDistance.onMouseMove = function (state, e) {
     this.removeLineSegmentSplitLabels(state);
     this.removeParallelLineIndicators(state);
     this.removeCollinearSnapLine(state);
+
+    // Clear the snap vertex indicator (black dot) and snapping state
+    if (this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      if (this._ctx.snapping.snappedFeature) {
+        this._ctx.snapping.setSnapHoverState(this._ctx.snapping.snappedFeature, false);
+      }
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
 
     // Store preview vertex
     state.previewVertex = previewVertex;
@@ -3767,7 +3792,8 @@ DrawLineStringDistance.onStop = function (state) {
 
   if (this.getFeature(state.line.id) === undefined) return;
 
-  if (state.vertices.length < 2) {
+  state.line.removeConsecutiveDuplicates();
+  if (state.vertices.length < 2 || !state.line.isValid()) {
     this.deleteFeature([state.line.id], { silent: true });
   }
 };

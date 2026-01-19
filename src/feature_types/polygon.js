@@ -1,5 +1,9 @@
 import Feature from './feature.js';
 
+function coordsEqual(a, b) {
+  return a && b && a[0] === b[0] && a[1] === b[1];
+}
+
 const Polygon = function(ctx, geojson) {
   Feature.call(this, ctx, geojson);
   this.coordinates = this.coordinates.map(ring => ring.slice(0, -1));
@@ -25,12 +29,18 @@ Polygon.prototype.setCoordinates = function(coords) {
 };
 
 Polygon.prototype.addCoordinate = function(path, lng, lat) {
-  this.changed();
   const ids = path.split('.').map(x => parseInt(x, 10));
-
   const ring = this.coordinates[ids[0]];
-
-  ring.splice(ids[1], 0, [lng, lat]);
+  const newCoord = [lng, lat];
+  const ringLen = ring.length;
+  const prevIdx = (ids[1] - 1 + ringLen) % ringLen;
+  const prev = ring[prevIdx];
+  const next = ring[ids[1]];
+  if (coordsEqual(newCoord, prev) || coordsEqual(newCoord, next)) {
+    return;
+  }
+  this.changed();
+  ring.splice(ids[1], 0, newCoord);
 };
 
 Polygon.prototype.removeCoordinate = function(path) {
@@ -56,7 +66,6 @@ Polygon.prototype.getCoordinates = function() {
 };
 
 Polygon.prototype.updateCoordinate = function(path, lng, lat) {
-  this.changed();
   const parts = path.split('.');
   const ringId = parseInt(parts[0], 10);
   const coordId = parseInt(parts[1], 10);
@@ -66,6 +75,25 @@ Polygon.prototype.updateCoordinate = function(path, lng, lat) {
   }
 
   this.coordinates[ringId][coordId] = [lng, lat];
+  this.changed();
+};
+
+Polygon.prototype.removeConsecutiveDuplicates = function() {
+  let changed = false;
+  for (let r = 0; r < this.coordinates.length; r++) {
+    const ring = this.coordinates[r];
+    for (let i = ring.length - 1; i > 0; i--) {
+      if (coordsEqual(ring[i], ring[i - 1])) {
+        ring.splice(i, 1);
+        changed = true;
+      }
+    }
+    if (ring.length > 0 && coordsEqual(ring[ring.length - 1], ring[0])) {
+      ring.splice(ring.length - 1, 1);
+      changed = true;
+    }
+  }
+  if (changed) this.changed();
 };
 
 export default Polygon;

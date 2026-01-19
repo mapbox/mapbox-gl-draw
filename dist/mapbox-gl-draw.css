@@ -91,70 +91,205 @@
   z-index: 10000;
   background: #FFFFFF;
   border-radius: 0.35rem;
-  box-shadow: 1px 1px 10px 0px rgba(0, 0, 0, 0.2);;
-  padding: 0.35rem 0.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.2rem 0.35rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  gap: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.75rem;
   pointer-events: auto;
-  transition: opacity 0.2s ease-in-out;
 }
 
-.mapbox-gl-draw-label{
-    color: #514f4d;
-    font-size: 0.65rem;
-    white-space: nowrap;
-    width: 4rem;
-    text-align: center;
-    display: inline-block;
-    pointer-events: none;
+.mapbox-gl-draw-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5rem;
+  height: 1.5rem;
+  position: relative;
+}
+
+.mapbox-gl-draw-label {
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  border-radius: 0.2rem;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.mapbox-gl-draw-label:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.mapbox-gl-draw-label .key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  background: #e5e7eb;
+  border-radius: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-right: 0.35rem;
 }
 
 .mapbox-gl-draw-label.hidden {
   display: none;
 }
 
-.mapbox-gl-draw-input {
-  border-radius: 0.25rem;
-  padding: 0.125rem 0.25rem;
-  font-size: 0.65rem;
-  width: 4rem;
+.mapbox-gl-draw-input-wrapper {
   display: none;
-  outline: none;
-  background: #f5f3f0;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.mapbox-gl-draw-input-wrapper.active {
+  display: flex;
+}
+
+.mapbox-gl-draw-input-group {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 0.2rem;
+  padding: 0.05rem 0.5rem;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.mapbox-gl-draw-input-group:focus-within {
+  background: #ffffff;
+  border-color: #9ca3af;
+}
+
+.mapbox-gl-draw-input {
   border: none;
-  transition: background-color 0.2s;
+  background: transparent;
+  font-size: 0.7rem;
+  width: 2rem;
+  outline: none;
+  color: #374151;
+  text-align: right;
+  padding: 0;
+  font-weight: 500;
 }
 
-.mapbox-gl-draw-input:not(.hidden) {
-  display: block;
+.mapbox-gl-draw-input-unit {
+  font-size: 0.7rem;
+  color: #374151;
+  font-weight: 500;
+  margin-left: 0.05rem;
 }
 
-.mapbox-gl-draw-input.focused {
-  background-color: none;
-}
-
-.mapbox-gl-draw-input:not(:placeholder-shown) {
-    width: 2rem;
-}
 .mapbox-gl-draw-clear {
+  position: absolute;
+  right: -0.5rem;
+  color: #b0b0b0;
+  font-size: 0.65rem;
   border: none;
   background: none;
-  color: #514f4d;
-  font-size: 0.85rem;
   cursor: pointer;
-  padding: 0 0.25rem;
+  padding: 0;
   line-height: 1;
-  display: none;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
 }
 
-.mapbox-gl-draw-distance-clear:not(.hidden),
-.mapbox-gl-draw-angle-clear:not(.hidden) {
-  display: block;
+.mapbox-gl-draw-input-wrapper:hover .mapbox-gl-draw-clear {
+  opacity: 1;
+}
+
+.mapbox-gl-draw-clear:hover {
+  color: #888;
 }
 
 .mapbox-gl-draw-input-separator {
-  color: #d9d4cc;
-  font-size: 0.85rem;
+  width: 1px;
+  height: 1rem;
+  background: #e5e7eb;
+  margin: 0 0.15rem;
+}
+
+.mapbox-gl-draw-snapping-label {
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0.15rem 0.5rem;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.2rem;
+  transition: background-color 0.15s, color 0.15s;
+  cursor: default;
+}
+
+.mapbox-gl-draw-snapping-label .key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  background: #e5e7eb;
+  border-radius: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-right: 0.35rem;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.mapbox-gl-draw-snapping-label.disabled {
+  color: #9ca3af;
+}
+
+.mapbox-gl-draw-snapping-label.disabled .key {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.mapbox-gl-draw-snapping-label.disabled .text {
+  text-decoration: line-through;
+  text-decoration-color: #9ca3af;
+}
+
+/* Hover state when shift is held - show lock icon invite */
+.mapbox-gl-draw-snapping-label.disabled:hover {
+  background-color: #f3f4f6;
+  cursor: pointer;
+}
+
+.mapbox-gl-draw-snapping-label.hover-lock .key,
+.mapbox-gl-draw-snapping-label.hover-unlock .key {
+  background: transparent;
+  color: #4b5563;
+}
+
+/* Locked state - snapping disabled and locked */
+.mapbox-gl-draw-snapping-label.locked {
+  color: #9ca3af;
+  background-color: #f3f4f6;
+  cursor: pointer;
+}
+
+.mapbox-gl-draw-snapping-label.locked .key {
+  background: transparent;
+  color: #6b7280;
+}
+
+.mapbox-gl-draw-snapping-label.locked .text {
+  text-decoration: line-through;
+  text-decoration-color: #9ca3af;
 }
