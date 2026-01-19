@@ -53,11 +53,6 @@ export function createDistanceInput(ctx, state, options = {}) {
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
-  // Create clear button (styled like key badge)
-  const clearBtn = document.createElement('button');
-  clearBtn.innerHTML = '×';
-  clearBtn.className = 'mapbox-gl-draw-clear';
-
   // Create input group (input + unit)
   const inputGroup = document.createElement('div');
   inputGroup.className = 'mapbox-gl-draw-input-group';
@@ -72,10 +67,22 @@ export function createDistanceInput(ctx, state, options = {}) {
   unit.className = 'mapbox-gl-draw-input-unit';
   unit.textContent = 'm';
 
+  // Create clear button (subtle, on right)
+  const clearBtn = document.createElement('button');
+  clearBtn.innerHTML = '×';
+  clearBtn.className = 'mapbox-gl-draw-clear';
+
   inputGroup.appendChild(input);
   inputGroup.appendChild(unit);
-  inputWrapper.appendChild(clearBtn);
   inputWrapper.appendChild(inputGroup);
+  inputWrapper.appendChild(clearBtn);
+
+  // Click on label activates input mode
+  label.addEventListener('click', () => {
+    label.classList.add('hidden');
+    inputWrapper.classList.add('active');
+    input.focus();
+  });
 
   const updateDisplay = () => {
     if (state.currentDistance !== null && state.currentDistance > 0) {
@@ -226,11 +233,6 @@ export function createAngleInput(ctx, state, options = {}) {
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'mapbox-gl-draw-input-wrapper';
 
-  // Create clear button (styled like key badge)
-  const clearBtn = document.createElement('button');
-  clearBtn.innerHTML = '×';
-  clearBtn.className = 'mapbox-gl-draw-clear';
-
   // Create input group (input + unit)
   const inputGroup = document.createElement('div');
   inputGroup.className = 'mapbox-gl-draw-input-group';
@@ -245,10 +247,22 @@ export function createAngleInput(ctx, state, options = {}) {
   unit.className = 'mapbox-gl-draw-input-unit';
   unit.textContent = '°';
 
+  // Create clear button (subtle, on right)
+  const clearBtn = document.createElement('button');
+  clearBtn.innerHTML = '×';
+  clearBtn.className = 'mapbox-gl-draw-clear';
+
   inputGroup.appendChild(input);
   inputGroup.appendChild(unit);
-  inputWrapper.appendChild(clearBtn);
   inputWrapper.appendChild(inputGroup);
+  inputWrapper.appendChild(clearBtn);
+
+  // Click on label activates input mode
+  label.addEventListener('click', () => {
+    label.classList.add('hidden');
+    inputWrapper.classList.add('active');
+    input.focus();
+  });
 
   const updateDisplay = () => {
     if (state.currentAngle !== null && !isNaN(state.currentAngle)) {
