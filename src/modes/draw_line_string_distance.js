@@ -823,6 +823,15 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   // Check if shift is held to bypass snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
 
+  const prevVertex = state.vertices[state.vertices.length - 1];
+
+  // Ignore click if it's on the same spot as the previous vertex
+  if (prevVertex && state.previewVertex &&
+      prevVertex[0] === state.previewVertex[0] &&
+      prevVertex[1] === state.previewVertex[1]) {
+    return;
+  }
+
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
     // Use the preview vertex if it exists (from onMouseMove), otherwise calculate it
@@ -3783,7 +3792,8 @@ DrawLineStringDistance.onStop = function (state) {
 
   if (this.getFeature(state.line.id) === undefined) return;
 
-  if (state.vertices.length < 2) {
+  state.line.removeConsecutiveDuplicates();
+  if (state.vertices.length < 2 || !state.line.isValid()) {
     this.deleteFeature([state.line.id], { silent: true });
   }
 };

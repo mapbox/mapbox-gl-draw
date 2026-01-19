@@ -1282,6 +1282,15 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   // Check if shift is held to bypass snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
 
+  const prevVertex = state.vertices[state.vertices.length - 1];
+
+  // Ignore click if it's on the same spot as the previous vertex
+  if (prevVertex && state.previewVertex &&
+      prevVertex[0] === state.previewVertex[0] &&
+      prevVertex[1] === state.previewVertex[1]) {
+    return;
+  }
+
   // First vertex - use existing snap functionality
   if (state.vertices.length === 0) {
     // Use the preview vertex if it exists (from onMouseMove), otherwise calculate it
@@ -3928,7 +3937,8 @@ DrawPolygonDistance.onStop = function (state) {
 
   if (this.getFeature(state.polygon.id) === undefined) return;
 
-  if (state.vertices.length < 3) {
+  state.polygon.removeConsecutiveDuplicates();
+  if (state.vertices.length < 3 || !state.polygon.isValid()) {
     this.deleteFeature([state.polygon.id], { silent: true });
   }
 };
