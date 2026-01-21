@@ -35,7 +35,7 @@ export function createDistanceInput(ctx, state, options = {}) {
 
   const [leftPos, topPos] = ctx.options.angleDistanceInputPosition;
   container.style.cssText = `
-    position: fixed;
+    position: absolute;
     top: ${topPos};
     left: ${leftPos};
   `;
@@ -164,7 +164,7 @@ export function createDistanceInput(ctx, state, options = {}) {
   section.appendChild(label);
   section.appendChild(inputWrapper);
   container.appendChild(section);
-  document.body.appendChild(container);
+  ctx.map.getContainer().appendChild(container);
 
   if (initiallyHidden) {
     container.style.display = 'none';
