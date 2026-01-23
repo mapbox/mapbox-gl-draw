@@ -30,6 +30,13 @@ import {
   hideDistanceAngleUI,
   removeDistanceAngleUI,
 } from "../lib/angle_distance_input.js";
+import {
+  DRAWING_SUB_MODES,
+  createDrawingModeSelector,
+  hideDrawingModeSelector,
+  showDrawingModeSelector,
+  removeDrawingModeSelector,
+} from "../lib/drawing_mode_selector.js";
 
 // Reusable unit options to avoid repeated object allocation
 const TURF_UNITS_KM = { units: "kilometers" };
@@ -93,9 +100,13 @@ DrawPolygonDistance.onSetup = function (opts) {
     parallelLineSnap: null,
   };
 
+  createDrawingModeSelector(this._ctx, state);
   this.createDistanceInput(state);
   this.createAngleInput(state);
   this.createSnappingIndicator(state);
+
+  // Hide distance/angle UI initially - it shows when drawing starts
+  hideDistanceAngleUI(state);
 
   return state;
 };
@@ -1321,6 +1332,10 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     state.vertices.push(vertexCoord);
     state.polygon.updateCoordinate("0.0", vertexCoord[0], vertexCoord[1]);
 
+    // Hide mode selector and show distance/angle UI
+    hideDrawingModeSelector(state);
+    showDistanceAngleUI(state);
+
     // Store snapped line info if snapped to a line
     const snappedCoord = { lng: vertexCoord[0], lat: vertexCoord[1] };
     const snappedLineInfo = getSnappedLineBearing(this._ctx, snappedCoord);
@@ -1353,6 +1368,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     } else {
       state.adjacentSegments = null;
     }
+    return;
+  }
+
+  // Rectangle mode: after 2 vertices (edge defined), complete the rectangle
+  if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2) {
+    const rectVertex = state.previewVertex || [e.lngLat.lng, e.lngLat.lat];
+    this.completeRectangle(state, rectVertex);
     return;
   }
 
@@ -2086,6 +2108,12 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     coords.push(previewVertex);
     coords.push(state.vertices[0]); // Close the polygon
     state.polygon.setCoordinates([coords]);
+    return;
+  }
+
+  // Rectangle mode: constrain to perpendicular after edge is defined
+  if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2) {
+    this.handleRectanglePreview(state, e);
     return;
   }
 
@@ -3873,12 +3901,116 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
 
     if (state.vertices.length > 1) {
       state.vertices.pop();
-      state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      // In rectangle mode, reset polygon to just the remaining vertices
+      if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE) {
+        const coords = [...state.vertices, state.vertices[0]];
+        state.polygon.setCoordinates([coords]);
+      } else {
+        state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      }
     } else if (state.vertices.length === 1) {
       state.vertices.pop();
       state.polygon.setCoordinates([[]]);
+      // Show mode selector again, hide distance/angle UI
+      showDrawingModeSelector(state);
+      hideDistanceAngleUI(state);
     }
   }
+};
+
+DrawPolygonDistance.handleRectanglePreview = function (state, e) {
+  const v0 = state.vertices[0];
+  const v1 = state.vertices[1];
+  const lngLat = e.lngLat;
+
+  const edgeBearing = turf.bearing(turf.point(v0), turf.point(v1));
+  const mousePoint = turf.point([lngLat.lng, lngLat.lat]);
+
+  // Project mouse onto perpendicular from the midpoint of the edge
+  const edgeLine = turf.lineString([v0, v1]);
+  const nearestOnEdge = turf.nearestPointOnLine(edgeLine, mousePoint);
+  const perpDistance = turf.distance(nearestOnEdge, mousePoint, TURF_UNITS_KM);
+
+  // Determine which side of the edge the mouse is on
+  const crossProduct =
+    (v1[0] - v0[0]) * (lngLat.lat - v0[1]) -
+    (v1[1] - v0[1]) * (lngLat.lng - v0[0]);
+  const side = crossProduct > 0 ? -1 : 1;
+  const actualPerpBearing = edgeBearing + (side * 90);
+
+  // Use distance constraint if user entered a value
+  const dist = (state.currentDistance !== null && state.currentDistance > 0)
+    ? state.currentDistance / 1000
+    : perpDistance;
+
+  // Calculate the rectangle corners
+  const v2 = turf.destination(turf.point(v1), dist, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+  const v3 = turf.destination(turf.point(v0), dist, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+
+  state.previewVertex = v2;
+
+  // Update polygon to show rectangle preview
+  state.polygon.setCoordinates([[v0, v1, v2, v3, v0]]);
+
+  // Update distance label showing perpendicular distance
+  const perpDistanceMeters = dist * 1000;
+  this.updateDistanceLabel(state, v1, v2, perpDistanceMeters);
+
+  // Update guide circle if distance is set
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    this.updateGuideCircle(state, v1, state.currentDistance);
+  } else {
+    this.removeGuideCircle(state);
+  }
+};
+
+DrawPolygonDistance.completeRectangle = function (state, perpendicularPoint) {
+  const v0 = state.vertices[0];
+  const v1 = state.vertices[1];
+
+  // Use the current polygon coordinates which were already computed by handleRectanglePreview
+  const currentCoords = state.polygon.coordinates[0];
+  let v2, v3;
+
+  if (currentCoords && currentCoords.length === 5) {
+    // Polygon already has the rectangle preview (v0, v1, v2, v3, v0)
+    v2 = currentCoords[2];
+    v3 = currentCoords[3];
+  } else {
+    // Fallback: compute from the perpendicular point
+    const edgeBearing = turf.bearing(turf.point(v0), turf.point(v1));
+    const clickedPoint = turf.point(perpendicularPoint);
+    const edgeLine = turf.lineString([v0, v1]);
+    const nearestOnEdge = turf.nearestPointOnLine(edgeLine, clickedPoint);
+    const perpDistance = turf.distance(nearestOnEdge, clickedPoint, TURF_UNITS_KM);
+
+    const crossProduct =
+      (v1[0] - v0[0]) * (perpendicularPoint[1] - v0[1]) -
+      (v1[1] - v0[1]) * (perpendicularPoint[0] - v0[0]);
+    const side = crossProduct > 0 ? -1 : 1;
+    const actualPerpBearing = edgeBearing + (side * 90);
+
+    v2 = turf.destination(turf.point(v1), perpDistance, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+    v3 = turf.destination(turf.point(v0), perpDistance, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+  }
+
+  state.vertices = [v0, v1, v2, v3];
+  state.polygon.setCoordinates([[v0, v1, v2, v3, v0]]);
+
+  this.removeGuideCircle(state);
+  this.removeRightAngleIndicator(state);
+  this.removeLineSegmentSplitLabels(state);
+  this.removePreviewPoint(state);
+  this.removeCollinearSnapLine(state);
+  this.removeDistanceLabel(state);
+
+  this.fire(Constants.events.CREATE, {
+    features: [state.polygon.toGeoJSON()],
+  });
+
+  this.changeMode(Constants.modes.SIMPLE_SELECT, {
+    featureIds: [state.polygon.id],
+  });
 };
 
 DrawPolygonDistance.finishDrawing = function (state) {
@@ -3934,6 +4066,7 @@ DrawPolygonDistance.onStop = function (state) {
 
   // Remove distance/angle input UI
   removeDistanceAngleUI(state);
+  removeDrawingModeSelector(state);
 
   if (this.getFeature(state.polygon.id) === undefined) return;
 
@@ -3947,11 +4080,17 @@ DrawPolygonDistance.onTrash = function (state) {
   // Remove the last drawn vertex instead of deleting the entire feature
   if (state.vertices.length > 1) {
     state.vertices.pop();
-    state.polygon.removeCoordinate(`0.${state.vertices.length}`);
 
-    // Also remove the preview coordinate
-    if (state.polygon.coordinates[0].length > state.vertices.length) {
+    if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE) {
+      const coords = state.vertices.length > 1
+        ? [...state.vertices, state.vertices[0]]
+        : [state.vertices[0]];
+      state.polygon.setCoordinates([coords]);
+    } else {
       state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      if (state.polygon.coordinates[0].length > state.vertices.length) {
+        state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      }
     }
 
     // If we have the last mouse position, regenerate the preview
@@ -3966,8 +4105,12 @@ DrawPolygonDistance.onTrash = function (state) {
     if (this._ctx && this._ctx.store && this._ctx.store.render) {
       this._ctx.store.render();
     }
+  } else if (state.vertices.length === 1) {
+    state.vertices.pop();
+    state.polygon.setCoordinates([[]]);
+    showDrawingModeSelector(state);
+    hideDistanceAngleUI(state);
   } else {
-    // If only one or zero vertices, delete the feature and exit
     this.deleteFeature([state.polygon.id], { silent: true });
     this.changeMode(Constants.modes.SIMPLE_SELECT);
   }

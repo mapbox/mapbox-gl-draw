@@ -293,3 +293,62 @@
   text-decoration: line-through;
   text-decoration-color: #9ca3af;
 }
+
+/* Drawing Sub-Mode Selector */
+.mapbox-gl-draw-mode-selector-container {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  background: #FFFFFF;
+  border-radius: 0.35rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.2rem 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.75rem;
+  pointer-events: auto;
+}
+
+.mapbox-gl-draw-mode-selector-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  background: #e5e7eb;
+  border-radius: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.mapbox-gl-draw-mode-selector-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.mapbox-gl-draw-mode-selector-btn {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.2rem;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.mapbox-gl-draw-mode-selector-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.mapbox-gl-draw-mode-selector-btn.active {
+  background-color: #e5e7eb;
+  color: #111827;
+  font-weight: 600;
+}
