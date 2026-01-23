@@ -1,35 +1,24 @@
-/**
- * Drawing Sub-Mode Selector UI
- *
- * Shows a mode selector (Free / Rectangle) before drawing starts.
- * Uses the same position and similar styling as the angle/distance input bar.
- * Hidden once drawing begins (first vertex placed).
- */
-
 export const DRAWING_SUB_MODES = {
   FREE: 'free',
   RECTANGLE: 'rectangle',
+  LINE: 'line',
 };
 
 const SUB_MODE_LABELS = {
   [DRAWING_SUB_MODES.FREE]: 'Free',
   [DRAWING_SUB_MODES.RECTANGLE]: 'Rect',
+  [DRAWING_SUB_MODES.LINE]: 'Line',
 };
 
-const SUB_MODE_ORDER = [DRAWING_SUB_MODES.FREE, DRAWING_SUB_MODES.RECTANGLE];
+const SUB_MODE_ORDER = [DRAWING_SUB_MODES.FREE, DRAWING_SUB_MODES.RECTANGLE, DRAWING_SUB_MODES.LINE];
 
-/**
- * Create the drawing sub-mode selector UI
- * @param {Object} ctx - The draw context
- * @param {Object} state - The mode state
- * @returns {Object|null} The created UI elements or null if disabled
- */
 export function createDrawingModeSelector(ctx, state) {
   if (!ctx.options.useAngleDistanceInput) {
     return null;
   }
 
-  state.drawingSubMode = DRAWING_SUB_MODES.FREE;
+  // Restore previous sub-mode from context, or default to FREE
+  state.drawingSubMode = ctx.lastDrawingSubMode || DRAWING_SUB_MODES.FREE;
 
   const container = document.createElement('div');
   container.className = 'mapbox-gl-draw-mode-selector-container';
@@ -46,29 +35,16 @@ export function createDrawingModeSelector(ctx, state) {
   mKeyBadge.textContent = 'M';
   container.appendChild(mKeyBadge);
 
-  const buttonsWrapper = document.createElement('div');
-  buttonsWrapper.className = 'mapbox-gl-draw-mode-selector-buttons';
+  const modeLabel = document.createElement('span');
+  modeLabel.className = 'mapbox-gl-draw-mode-selector-label';
+  modeLabel.textContent = SUB_MODE_LABELS[state.drawingSubMode];
+  container.appendChild(modeLabel);
 
-  const buttons = {};
-  SUB_MODE_ORDER.forEach((mode) => {
-    const btn = document.createElement('button');
-    btn.className = 'mapbox-gl-draw-mode-selector-btn';
-    btn.textContent = SUB_MODE_LABELS[mode];
-    btn.dataset.mode = mode;
-    if (mode === state.drawingSubMode) {
-      btn.classList.add('active');
-    }
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setActiveMode(state, mode, buttons);
-    });
-    buttonsWrapper.appendChild(btn);
-    buttons[mode] = btn;
-  });
-
-  container.appendChild(buttonsWrapper);
   ctx.map.getContainer().appendChild(container);
+
+  const updateLabel = () => {
+    modeLabel.textContent = SUB_MODE_LABELS[state.drawingSubMode];
+  };
 
   const keyHandler = (e) => {
     if (e.key === 'm' || e.key === 'M') {
@@ -76,52 +52,33 @@ export function createDrawingModeSelector(ctx, state) {
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       e.preventDefault();
       e.stopPropagation();
-      cycleSubMode(state, buttons);
+      const currentIndex = SUB_MODE_ORDER.indexOf(state.drawingSubMode);
+      state.drawingSubMode = SUB_MODE_ORDER[(currentIndex + 1) % SUB_MODE_ORDER.length];
+      ctx.lastDrawingSubMode = state.drawingSubMode;
+      updateLabel();
     }
   };
   document.addEventListener('keydown', keyHandler);
 
   state.modeSelectorContainer = container;
   state.modeSelectorKeyHandler = keyHandler;
-  state.modeSelectorButtons = buttons;
+  state.modeSelectorLabel = modeLabel;
 
-  return { container, buttons, keyHandler };
+  return { container, modeLabel, keyHandler };
 }
 
-function setActiveMode(state, mode, buttons) {
-  state.drawingSubMode = mode;
-  Object.keys(buttons).forEach((key) => {
-    buttons[key].classList.toggle('active', key === mode);
-  });
-}
-
-function cycleSubMode(state, buttons) {
-  const currentIndex = SUB_MODE_ORDER.indexOf(state.drawingSubMode);
-  const nextIndex = (currentIndex + 1) % SUB_MODE_ORDER.length;
-  setActiveMode(state, SUB_MODE_ORDER[nextIndex], buttons);
-}
-
-/**
- * Hide the mode selector (called when drawing starts)
- */
 export function hideDrawingModeSelector(state) {
   if (state.modeSelectorContainer) {
     state.modeSelectorContainer.style.display = 'none';
   }
 }
 
-/**
- * Show the mode selector (if no vertices placed)
- */
 export function showDrawingModeSelector(state) {
   if (state.modeSelectorContainer) {
     state.modeSelectorContainer.style.display = 'flex';
   }
 }
 
-/**
- * Remove the mode selector UI and clean up event listeners
- */
 export function removeDrawingModeSelector(state) {
   if (state.modeSelectorKeyHandler) {
     document.removeEventListener('keydown', state.modeSelectorKeyHandler);
@@ -131,5 +88,5 @@ export function removeDrawingModeSelector(state) {
     state.modeSelectorContainer.parentNode.removeChild(state.modeSelectorContainer);
     state.modeSelectorContainer = null;
   }
-  state.modeSelectorButtons = null;
+  state.modeSelectorLabel = null;
 }
