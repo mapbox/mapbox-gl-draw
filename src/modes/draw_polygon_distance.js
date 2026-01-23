@@ -2089,7 +2089,9 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
 
   // Check if shift is held to temporarily disable snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
-  if (shiftHeld && state.vertices.length >= 1) {
+  const inRectanglePhase = state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2;
+  const inLineOffsetPhase = state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset';
+  if (shiftHeld && state.vertices.length >= 1 && !inRectanglePhase && !inLineOffsetPhase) {
     // Shift held - use raw mouse position, bypass all snapping
     const lastVertex = state.vertices[state.vertices.length - 1];
     const from = turf.point(lastVertex);
@@ -2134,13 +2136,23 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
   }
 
   // Rectangle mode: constrain to perpendicular after edge is defined
-  if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2) {
+  if (inRectanglePhase) {
+    if (shiftHeld && this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
     this.handleRectanglePreview(state, e);
     return;
   }
 
   // Line mode offset phase: show offset polygon preview
-  if (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset') {
+  if (inLineOffsetPhase) {
+    if (shiftHeld && this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
     this.handleLineOffsetPreview(state, e);
     return;
   }
@@ -3988,10 +4000,25 @@ DrawPolygonDistance.handleRectanglePreview = function (state, e) {
   const side = crossProduct > 0 ? -1 : 1;
   const actualPerpBearing = edgeBearing + (side * 90);
 
-  // Use distance constraint if user entered a value
-  const dist = (state.currentDistance !== null && state.currentDistance > 0)
-    ? state.currentDistance / 1000
-    : perpDistance;
+  // Priority: distance input > snap > raw mouse
+  let dist;
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    dist = state.currentDistance / 1000;
+  } else {
+    const snapped = this._ctx.snapping.snapCoord(lngLat);
+    if (snapped.snapped) {
+      const snappedPoint = turf.point([snapped.lng, snapped.lat]);
+      const projOnEdge = turf.nearestPointOnLine(edgeLine, snappedPoint);
+      const snapDist = turf.distance(projOnEdge, snappedPoint, TURF_UNITS_KM);
+      const snapCross =
+        (v1[0] - v0[0]) * (snapped.lat - v0[1]) -
+        (v1[1] - v0[1]) * (snapped.lng - v0[0]);
+      const snapSide = snapCross > 0 ? -1 : 1;
+      dist = (snapSide === side && snapDist > 0) ? snapDist : perpDistance;
+    } else {
+      dist = perpDistance;
+    }
+  }
 
   // Calculate the rectangle corners
   const v2 = turf.destination(turf.point(v1), dist, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
@@ -4105,10 +4132,21 @@ DrawPolygonDistance.handleLineOffsetPreview = function (state, e) {
   const nearestOnLine = turf.nearestPointOnLine(polyline, mousePoint);
   const perpDistanceKm = turf.distance(nearestOnLine, mousePoint, TURF_UNITS_KM);
 
-  // Use distance input if user entered a value, otherwise use mouse distance
-  const offsetKm = (state.currentDistance !== null && state.currentDistance > 0)
-    ? state.currentDistance / 1000
-    : perpDistanceKm;
+  // Priority: distance input > snap > raw mouse
+  let offsetKm;
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    offsetKm = state.currentDistance / 1000;
+  } else {
+    const snapped = this._ctx.snapping.snapCoord(lngLat);
+    if (snapped.snapped) {
+      const snappedPoint = turf.point([snapped.lng, snapped.lat]);
+      const nearestOnPoly = turf.nearestPointOnLine(polyline, snappedPoint);
+      const snapDist = turf.distance(nearestOnPoly, snappedPoint, TURF_UNITS_KM);
+      offsetKm = snapDist > 0 ? snapDist : perpDistanceKm;
+    } else {
+      offsetKm = perpDistanceKm;
+    }
+  }
 
   state.lineOffsetWidth = offsetKm * 1000; // Store in meters
 
