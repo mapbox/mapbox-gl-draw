@@ -30,6 +30,13 @@ import {
   hideDistanceAngleUI,
   removeDistanceAngleUI,
 } from "../lib/angle_distance_input.js";
+import {
+  DRAWING_SUB_MODES,
+  createDrawingModeSelector,
+  hideDrawingModeSelector,
+  showDrawingModeSelector,
+  removeDrawingModeSelector,
+} from "../lib/drawing_mode_selector.js";
 
 // Reusable unit options to avoid repeated object allocation
 const TURF_UNITS_KM = { units: "kilometers" };
@@ -91,11 +98,18 @@ DrawPolygonDistance.onSetup = function (opts) {
     isActivelySnappingToGuideline: false, // true when actually snapping to the guideline
     // Parallel line snapping state
     parallelLineSnap: null,
+    // Line sub-mode state
+    linePhase: 'drawing', // 'drawing' or 'offset'
+    lineOffsetWidth: null,
   };
 
+  createDrawingModeSelector(this._ctx, state);
   this.createDistanceInput(state);
   this.createAngleInput(state);
   this.createSnappingIndicator(state);
+
+  // Hide distance/angle UI initially - it shows when drawing starts
+  hideDistanceAngleUI(state);
 
   return state;
 };
@@ -105,7 +119,12 @@ DrawPolygonDistance.createDistanceInput = function (state) {
   createDistanceInputUI(this._ctx, state, {
     shouldActivateKeyHandler: () => state.vertices.length > 0,
     onEnter: () => {
-      if (state.vertices.length >= 3) {
+      if (state.drawingSubMode === DRAWING_SUB_MODES.LINE) {
+        if (state.linePhase === 'offset') return;
+        if (state.vertices.length >= 2) {
+          self.enterLineOffsetPhase(state);
+        }
+      } else if (state.vertices.length >= 3) {
         self.finishDrawing(state);
       }
     },
@@ -119,7 +138,12 @@ DrawPolygonDistance.createAngleInput = function (state) {
   createAngleInputUI(this._ctx, state, {
     shouldActivateKeyHandler: () => state.vertices.length > 0,
     onEnter: () => {
-      if (state.vertices.length >= 3) {
+      if (state.drawingSubMode === DRAWING_SUB_MODES.LINE) {
+        if (state.linePhase === 'offset') return;
+        if (state.vertices.length >= 2) {
+          self.enterLineOffsetPhase(state);
+        }
+      } else if (state.vertices.length >= 3) {
         self.finishDrawing(state);
       }
     },
@@ -1284,8 +1308,9 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
 
   const prevVertex = state.vertices[state.vertices.length - 1];
 
-  // Ignore click if it's on the same spot as the previous vertex
-  if (prevVertex && state.previewVertex &&
+  // Ignore click if it's on the same spot as the previous vertex (not in offset phase)
+  if (state.linePhase !== 'offset' &&
+      prevVertex && state.previewVertex &&
       prevVertex[0] === state.previewVertex[0] &&
       prevVertex[1] === state.previewVertex[1]) {
     return;
@@ -1320,6 +1345,10 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
 
     state.vertices.push(vertexCoord);
     state.polygon.updateCoordinate("0.0", vertexCoord[0], vertexCoord[1]);
+
+    // Hide mode selector and show distance/angle UI
+    hideDrawingModeSelector(state);
+    showDistanceAngleUI(state);
 
     // Store snapped line info if snapped to a line
     const snappedCoord = { lng: vertexCoord[0], lat: vertexCoord[1] };
@@ -1356,13 +1385,26 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     return;
   }
 
+  // Rectangle mode: after 2 vertices (edge defined), complete the rectangle
+  if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2) {
+    const rectVertex = state.previewVertex || [e.lngLat.lng, e.lngLat.lat];
+    this.completeRectangle(state, rectVertex);
+    return;
+  }
+
+  // Line mode offset phase: click to confirm the offset width
+  if (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset') {
+    this.completeLineOffset(state);
+    return;
+  }
+
   // Subsequent vertices - use preview vertex if available (from onMouseMove)
   // This ensures the vertex is placed exactly where the black dot indicator shows
   if (state.previewVertex) {
     const newVertex = state.previewVertex;
 
-    // Check for polygon closing
-    if (state.vertices.length >= 3) {
+    // Check for polygon closing (not in line mode)
+    if (state.drawingSubMode !== DRAWING_SUB_MODES.LINE && state.vertices.length >= 3) {
       const firstVertex = state.vertices[0];
       const dist = turf.distance(
         turf.point(firstVertex),
@@ -1434,8 +1476,8 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
   if (shiftHeld) {
     newVertex = [e.lngLat.lng, e.lngLat.lat];
 
-    // Check for polygon closing
-    if (state.vertices.length >= 3) {
+    // Check for polygon closing (not in line mode)
+    if (state.drawingSubMode !== DRAWING_SUB_MODES.LINE && state.vertices.length >= 3) {
       const firstVertex = state.vertices[0];
       const dist = turf.distance(
         turf.point(firstVertex),
@@ -1979,8 +2021,8 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     newVertex = destinationPoint.geometry.coordinates;
   }
 
-  // Check for polygon closing
-  if (state.vertices.length >= 3) {
+  // Check for polygon closing (not in line mode)
+  if (state.drawingSubMode !== DRAWING_SUB_MODES.LINE && state.vertices.length >= 3) {
     const firstVertex = state.vertices[0];
     const dist = turf.distance(turf.point(firstVertex), turf.point(newVertex), {
       units: "meters",
@@ -2047,7 +2089,9 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
 
   // Check if shift is held to temporarily disable snapping
   const shiftHeld = CommonSelectors.isShiftDown(e);
-  if (shiftHeld && state.vertices.length >= 1) {
+  const inRectanglePhase = state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE && state.vertices.length === 2;
+  const inLineOffsetPhase = state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset';
+  if (shiftHeld && state.vertices.length >= 1 && !inRectanglePhase && !inLineOffsetPhase) {
     // Shift held - use raw mouse position, bypass all snapping
     const lastVertex = state.vertices[state.vertices.length - 1];
     const from = turf.point(lastVertex);
@@ -2084,8 +2128,32 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     // Update polygon preview
     const coords = state.vertices.map(v => v);
     coords.push(previewVertex);
-    coords.push(state.vertices[0]); // Close the polygon
+    if (state.drawingSubMode !== DRAWING_SUB_MODES.LINE) {
+      coords.push(state.vertices[0]); // Close the polygon
+    }
     state.polygon.setCoordinates([coords]);
+    return;
+  }
+
+  // Rectangle mode: constrain to perpendicular after edge is defined
+  if (inRectanglePhase) {
+    if (shiftHeld && this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
+    this.handleRectanglePreview(state, e);
+    return;
+  }
+
+  // Line mode offset phase: show offset polygon preview
+  if (inLineOffsetPhase) {
+    if (shiftHeld && this._ctx.snapping) {
+      this._ctx.snapping.clearSnapCoord();
+      this._ctx.snapping.snappedFeature = undefined;
+      this._ctx.snapping.snappedGeometry = undefined;
+    }
+    this.handleLineOffsetPreview(state, e);
     return;
   }
 
@@ -3154,9 +3222,11 @@ DrawPolygonDistance.onMouseMove = function (state, e) {
     this.removePreviewPoint(state);
   }
 
-  // Update polygon preview - always close the polygon ring
+  // Update polygon preview
   const allCoords = [...state.vertices, previewVertex];
-  allCoords.push(state.vertices[0]);
+  if (state.drawingSubMode !== DRAWING_SUB_MODES.LINE) {
+    allCoords.push(state.vertices[0]); // Close the polygon ring
+  }
   state.polygon.setCoordinates([allCoords]);
 };
 
@@ -3839,14 +3909,30 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
 
   // Enter key
   if (e.keyCode === 13 || CommonSelectors.isEnterKey(e)) {
-    if (state.vertices.length >= 3) {
+    if (state.drawingSubMode === DRAWING_SUB_MODES.LINE) {
+      if (state.linePhase === 'offset') {
+        // Already in offset phase - ignore enter (click to confirm)
+        return;
+      }
+      if (state.vertices.length >= 2) {
+        this.enterLineOffsetPhase(state);
+      }
+    } else if (state.vertices.length >= 3) {
       this.finishDrawing(state);
     }
   }
 
   // Escape key
   if (e.keyCode === 27 || CommonSelectors.isEscapeKey(e)) {
-    if (state.vertices.length >= 3) {
+    if (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset') {
+      // Cancel offset phase, go back to line drawing
+      state.linePhase = 'drawing';
+      this.removeDistanceLabel(state);
+      this.removeGuideCircle(state);
+      // Reset polygon to line preview
+      const coords = [...state.vertices, state.vertices[0]];
+      state.polygon.setCoordinates([coords]);
+    } else if (state.vertices.length >= 3) {
       this.finishDrawing(state);
     } else {
       this.deleteFeature([state.polygon.id], { silent: true });
@@ -3856,6 +3942,10 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
 
   // Backspace
   if (e.keyCode === 8) {
+    // Don't allow backspace during line offset phase
+    if (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase === 'offset') {
+      return;
+    }
     // Don't delete vertex if user is typing in distance or angle input
     if (state.distanceInput && state.distanceInput.value !== "") {
       return;
@@ -3873,12 +3963,343 @@ DrawPolygonDistance.onKeyUp = function (state, e) {
 
     if (state.vertices.length > 1) {
       state.vertices.pop();
-      state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      // In rectangle mode, reset polygon to just the remaining vertices
+      if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE) {
+        const coords = [...state.vertices, state.vertices[0]];
+        state.polygon.setCoordinates([coords]);
+      } else {
+        state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      }
     } else if (state.vertices.length === 1) {
       state.vertices.pop();
       state.polygon.setCoordinates([[]]);
+      // Show mode selector again, hide distance/angle UI
+      showDrawingModeSelector(state);
+      hideDistanceAngleUI(state);
     }
   }
+};
+
+DrawPolygonDistance.handleRectanglePreview = function (state, e) {
+  const v0 = state.vertices[0];
+  const v1 = state.vertices[1];
+  const lngLat = e.lngLat;
+
+  const edgeBearing = turf.bearing(turf.point(v0), turf.point(v1));
+  const mousePoint = turf.point([lngLat.lng, lngLat.lat]);
+
+  // Project mouse onto perpendicular from the midpoint of the edge
+  const edgeLine = turf.lineString([v0, v1]);
+  const nearestOnEdge = turf.nearestPointOnLine(edgeLine, mousePoint);
+  const perpDistance = turf.distance(nearestOnEdge, mousePoint, TURF_UNITS_KM);
+
+  // Determine which side of the edge the mouse is on
+  const crossProduct =
+    (v1[0] - v0[0]) * (lngLat.lat - v0[1]) -
+    (v1[1] - v0[1]) * (lngLat.lng - v0[0]);
+  const side = crossProduct > 0 ? -1 : 1;
+  const actualPerpBearing = edgeBearing + (side * 90);
+
+  // Priority: distance input > snap > raw mouse
+  let dist;
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    dist = state.currentDistance / 1000;
+  } else {
+    const snapped = this._ctx.snapping.snapCoord(lngLat);
+    if (snapped.snapped) {
+      const snappedPoint = turf.point([snapped.lng, snapped.lat]);
+      const projOnEdge = turf.nearestPointOnLine(edgeLine, snappedPoint);
+      const snapDist = turf.distance(projOnEdge, snappedPoint, TURF_UNITS_KM);
+      const snapCross =
+        (v1[0] - v0[0]) * (snapped.lat - v0[1]) -
+        (v1[1] - v0[1]) * (snapped.lng - v0[0]);
+      const snapSide = snapCross > 0 ? -1 : 1;
+      dist = (snapSide === side && snapDist > 0) ? snapDist : perpDistance;
+    } else {
+      dist = perpDistance;
+    }
+  }
+
+  // Calculate the rectangle corners
+  const v2 = turf.destination(turf.point(v1), dist, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+  const v3 = turf.destination(turf.point(v0), dist, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+
+  state.previewVertex = v2;
+
+  // Update polygon to show rectangle preview
+  state.polygon.setCoordinates([[v0, v1, v2, v3, v0]]);
+
+  // Update distance label showing perpendicular distance
+  const perpDistanceMeters = dist * 1000;
+  this.updateDistanceLabel(state, v1, v2, perpDistanceMeters);
+
+  // Update guide circle if distance is set
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    this.updateGuideCircle(state, v1, state.currentDistance);
+  } else {
+    this.removeGuideCircle(state);
+  }
+};
+
+DrawPolygonDistance.completeRectangle = function (state, perpendicularPoint) {
+  const v0 = state.vertices[0];
+  const v1 = state.vertices[1];
+
+  // Use the current polygon coordinates which were already computed by handleRectanglePreview
+  const currentCoords = state.polygon.coordinates[0];
+  let v2, v3;
+
+  if (currentCoords && currentCoords.length === 5) {
+    // Polygon already has the rectangle preview (v0, v1, v2, v3, v0)
+    v2 = currentCoords[2];
+    v3 = currentCoords[3];
+  } else {
+    // Fallback: compute from the perpendicular point
+    const edgeBearing = turf.bearing(turf.point(v0), turf.point(v1));
+    const clickedPoint = turf.point(perpendicularPoint);
+    const edgeLine = turf.lineString([v0, v1]);
+    const nearestOnEdge = turf.nearestPointOnLine(edgeLine, clickedPoint);
+    const perpDistance = turf.distance(nearestOnEdge, clickedPoint, TURF_UNITS_KM);
+
+    const crossProduct =
+      (v1[0] - v0[0]) * (perpendicularPoint[1] - v0[1]) -
+      (v1[1] - v0[1]) * (perpendicularPoint[0] - v0[0]);
+    const side = crossProduct > 0 ? -1 : 1;
+    const actualPerpBearing = edgeBearing + (side * 90);
+
+    v2 = turf.destination(turf.point(v1), perpDistance, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+    v3 = turf.destination(turf.point(v0), perpDistance, actualPerpBearing, TURF_UNITS_KM).geometry.coordinates;
+  }
+
+  state.vertices = [v0, v1, v2, v3];
+  state.polygon.setCoordinates([[v0, v1, v2, v3, v0]]);
+
+  this.removeGuideCircle(state);
+  this.removeRightAngleIndicator(state);
+  this.removeLineSegmentSplitLabels(state);
+  this.removePreviewPoint(state);
+  this.removeCollinearSnapLine(state);
+  this.removeDistanceLabel(state);
+
+  this.fire(Constants.events.CREATE, {
+    features: [state.polygon.toGeoJSON()],
+  });
+
+  this.changeMode(Constants.modes.SIMPLE_SELECT, {
+    featureIds: [state.polygon.id],
+  });
+};
+
+DrawPolygonDistance.enterLineOffsetPhase = function (state) {
+  state.linePhase = 'offset';
+  state.lineOffsetWidth = null;
+  state.previewVertex = null;
+
+  // Clear and blur distance/angle inputs for the offset phase
+  if (state.distanceInput) {
+    state.distanceInput.value = '';
+    state.distanceInput.blur();
+    state.currentDistance = null;
+    if (state.distanceUpdateDisplay) state.distanceUpdateDisplay();
+  }
+  if (state.angleInput) {
+    state.angleInput.value = '';
+    state.angleInput.blur();
+    state.currentAngle = null;
+    if (state.angleUpdateDisplay) state.angleUpdateDisplay();
+  }
+
+  this.removePreviewPoint(state);
+  this.removeRightAngleIndicator(state);
+  this.removeCollinearSnapLine(state);
+  this.removeDistanceLabel(state);
+
+  // Trigger immediate preview if we have a current mouse position
+  if (state.currentPosition) {
+    this.handleLineOffsetPreview(state, {
+      lngLat: state.currentPosition,
+      point: state.lastPoint || { x: 0, y: 0 },
+    });
+  }
+};
+
+DrawPolygonDistance.handleLineOffsetPreview = function (state, e) {
+  const lngLat = e.lngLat;
+  const mousePoint = turf.point([lngLat.lng, lngLat.lat]);
+
+  // Compute perpendicular distance from the mouse to the polyline
+  const polyline = turf.lineString(state.vertices);
+  const nearestOnLine = turf.nearestPointOnLine(polyline, mousePoint);
+  const perpDistanceKm = turf.distance(nearestOnLine, mousePoint, TURF_UNITS_KM);
+
+  // Priority: distance input > snap > raw mouse
+  let offsetKm;
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    offsetKm = state.currentDistance / 1000;
+  } else {
+    const snapped = this._ctx.snapping.snapCoord(lngLat);
+    if (snapped.snapped) {
+      const snappedPoint = turf.point([snapped.lng, snapped.lat]);
+      const nearestOnPoly = turf.nearestPointOnLine(polyline, snappedPoint);
+      const snapDist = turf.distance(nearestOnPoly, snappedPoint, TURF_UNITS_KM);
+      offsetKm = snapDist > 0 ? snapDist : perpDistanceKm;
+    } else {
+      offsetKm = perpDistanceKm;
+    }
+  }
+
+  state.lineOffsetWidth = offsetKm * 1000; // Store in meters
+
+  // Compute the offset polygon
+  const polygonCoords = this.computeOffsetPolygon(state.vertices, offsetKm);
+  if (polygonCoords) {
+    state.polygon.setCoordinates([polygonCoords]);
+  }
+
+  // Show distance label from the last segment midpoint
+  const lastIdx = state.vertices.length - 1;
+  const lastVertex = state.vertices[lastIdx];
+  const lastBearing = turf.bearing(
+    turf.point(state.vertices[lastIdx - 1]),
+    turf.point(lastVertex)
+  );
+  const perpPoint = turf.destination(
+    turf.point(lastVertex), offsetKm, lastBearing + 90, TURF_UNITS_KM
+  ).geometry.coordinates;
+  this.updateDistanceLabel(state, lastVertex, perpPoint, offsetKm * 1000);
+
+  if (state.currentDistance !== null && state.currentDistance > 0) {
+    this.updateGuideCircle(state, lastVertex, state.currentDistance);
+  } else {
+    this.removeGuideCircle(state);
+  }
+};
+
+DrawPolygonDistance.completeLineOffset = function (state) {
+  // Use the polygon coordinates already set by handleLineOffsetPreview
+  const currentCoords = state.polygon.coordinates[0];
+  if (!currentCoords || currentCoords.length < 4) {
+    this.deleteFeature([state.polygon.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+    return;
+  }
+
+  // Ensure the polygon is closed
+  const first = currentCoords[0];
+  const last = currentCoords[currentCoords.length - 1];
+  let polygonCoords = currentCoords;
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    polygonCoords = [...currentCoords, first];
+  }
+
+  // Update state.vertices to match polygon (without closing point) for onStop validation
+  state.vertices = polygonCoords.slice(0, -1);
+  state.polygon.setCoordinates([polygonCoords]);
+
+  this.removeGuideCircle(state);
+  this.removeDistanceLabel(state);
+  this.removeRightAngleIndicator(state);
+  this.removePreviewPoint(state);
+  this.removeCollinearSnapLine(state);
+
+  this.fire(Constants.events.CREATE, {
+    features: [state.polygon.toGeoJSON()],
+  });
+
+  this.changeMode(Constants.modes.SIMPLE_SELECT, {
+    featureIds: [state.polygon.id],
+  });
+};
+
+DrawPolygonDistance.computeOffsetPolygon = function (vertices, offsetKm) {
+  const n = vertices.length;
+  if (n < 2) return null;
+
+  // Compute bearing for each segment
+  const bearings = [];
+  for (let i = 0; i < n - 1; i++) {
+    bearings.push(turf.bearing(turf.point(vertices[i]), turf.point(vertices[i + 1])));
+  }
+
+  // Compute left and right offset points for each vertex
+  const leftPoints = [];
+  const rightPoints = [];
+
+  for (let i = 0; i < n; i++) {
+    const pt = turf.point(vertices[i]);
+
+    if (i === 0) {
+      // First vertex: offset perpendicular to first segment
+      leftPoints.push(turf.destination(pt, offsetKm, bearings[0] - 90, TURF_UNITS_KM).geometry.coordinates);
+      rightPoints.push(turf.destination(pt, offsetKm, bearings[0] + 90, TURF_UNITS_KM).geometry.coordinates);
+    } else if (i === n - 1) {
+      // Last vertex: offset perpendicular to last segment
+      const lastB = bearings[bearings.length - 1];
+      leftPoints.push(turf.destination(pt, offsetKm, lastB - 90, TURF_UNITS_KM).geometry.coordinates);
+      rightPoints.push(turf.destination(pt, offsetKm, lastB + 90, TURF_UNITS_KM).geometry.coordinates);
+    } else {
+      // Inner vertex: find intersection of adjacent offset lines
+      const leftPt = this.computeOffsetVertex(vertices, i, bearings, offsetKm, -90);
+      const rightPt = this.computeOffsetVertex(vertices, i, bearings, offsetKm, 90);
+      leftPoints.push(leftPt);
+      rightPoints.push(rightPt);
+    }
+  }
+
+  // Build polygon: left side forward, then right side backward
+  const coords = [
+    ...leftPoints,
+    ...rightPoints.reverse(),
+    leftPoints[0] // close
+  ];
+
+  return coords;
+};
+
+DrawPolygonDistance.computeOffsetVertex = function (vertices, i, bearings, offsetKm, perpSign) {
+  const pt = turf.point(vertices[i]);
+
+  // Offset lines for segment i-1 and segment i
+  const b1 = bearings[i - 1];
+  const b2 = bearings[i];
+  const perpB1 = b1 + perpSign;
+  const perpB2 = b2 + perpSign;
+
+  // Create offset line segments (extended for reliable intersection)
+  const ext = offsetKm * 10;
+  const line1Start = turf.destination(
+    turf.destination(turf.point(vertices[i - 1]), offsetKm, perpB1, TURF_UNITS_KM),
+    ext, b1 + 180, TURF_UNITS_KM
+  ).geometry.coordinates;
+  const line1End = turf.destination(
+    turf.destination(turf.point(vertices[i]), offsetKm, perpB1, TURF_UNITS_KM),
+    ext, b1, TURF_UNITS_KM
+  ).geometry.coordinates;
+
+  const line2Start = turf.destination(
+    turf.destination(turf.point(vertices[i]), offsetKm, perpB2, TURF_UNITS_KM),
+    ext, b2 + 180, TURF_UNITS_KM
+  ).geometry.coordinates;
+  const line2End = turf.destination(
+    turf.destination(turf.point(vertices[i + 1]), offsetKm, perpB2, TURF_UNITS_KM),
+    ext, b2, TURF_UNITS_KM
+  ).geometry.coordinates;
+
+  const line1 = turf.lineString([line1Start, line1End]);
+  const line2 = turf.lineString([line2Start, line2End]);
+  const intersection = turf.lineIntersect(line1, line2);
+
+  if (intersection.features.length > 0) {
+    // Check miter distance - if too far, use bevel
+    const miterPoint = intersection.features[0].geometry.coordinates;
+    const miterDist = turf.distance(pt, turf.point(miterPoint), TURF_UNITS_KM);
+    if (miterDist < offsetKm * 3) {
+      return miterPoint;
+    }
+  }
+
+  // Fallback: simple perpendicular offset (bevel)
+  return turf.destination(pt, offsetKm, perpB2, TURF_UNITS_KM).geometry.coordinates;
 };
 
 DrawPolygonDistance.finishDrawing = function (state) {
@@ -3934,6 +4355,7 @@ DrawPolygonDistance.onStop = function (state) {
 
   // Remove distance/angle input UI
   removeDistanceAngleUI(state);
+  removeDrawingModeSelector(state);
 
   if (this.getFeature(state.polygon.id) === undefined) return;
 
@@ -3947,11 +4369,17 @@ DrawPolygonDistance.onTrash = function (state) {
   // Remove the last drawn vertex instead of deleting the entire feature
   if (state.vertices.length > 1) {
     state.vertices.pop();
-    state.polygon.removeCoordinate(`0.${state.vertices.length}`);
 
-    // Also remove the preview coordinate
-    if (state.polygon.coordinates[0].length > state.vertices.length) {
+    if (state.drawingSubMode === DRAWING_SUB_MODES.RECTANGLE) {
+      const coords = state.vertices.length > 1
+        ? [...state.vertices, state.vertices[0]]
+        : [state.vertices[0]];
+      state.polygon.setCoordinates([coords]);
+    } else {
       state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      if (state.polygon.coordinates[0].length > state.vertices.length) {
+        state.polygon.removeCoordinate(`0.${state.vertices.length}`);
+      }
     }
 
     // If we have the last mouse position, regenerate the preview
@@ -3966,8 +4394,12 @@ DrawPolygonDistance.onTrash = function (state) {
     if (this._ctx && this._ctx.store && this._ctx.store.render) {
       this._ctx.store.render();
     }
+  } else if (state.vertices.length === 1) {
+    state.vertices.pop();
+    state.polygon.setCoordinates([[]]);
+    showDrawingModeSelector(state);
+    hideDistanceAngleUI(state);
   } else {
-    // If only one or zero vertices, delete the feature and exit
     this.deleteFeature([state.polygon.id], { silent: true });
     this.changeMode(Constants.modes.SIMPLE_SELECT);
   }
@@ -3984,7 +4416,8 @@ DrawPolygonDistance.toDisplayFeatures = function (state, geojson, display) {
   if (geojson.geometry.coordinates.length === 0) return;
 
   const coordinateCount = geojson.geometry.coordinates[0].length;
-  if (coordinateCount < 3) {
+  const minCoords = (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase !== 'offset') ? 2 : 3;
+  if (coordinateCount < minCoords) {
     return;
   }
 
@@ -4010,6 +4443,29 @@ DrawPolygonDistance.toDisplayFeatures = function (state, geojson, display) {
         },
       });
     });
+  }
+
+  // Line mode phase 1: always render as open LineString
+  if (state.drawingSubMode === DRAWING_SUB_MODES.LINE && state.linePhase !== 'offset') {
+    const coords = geojson.geometry.coordinates[0];
+    // Strip closing coordinate if present
+    let lineCoords = coords;
+    if (coords.length > 2 &&
+        coords[coords.length - 1][0] === coords[0][0] &&
+        coords[coords.length - 1][1] === coords[0][1]) {
+      lineCoords = coords.slice(0, -1);
+    }
+    if (lineCoords.length >= 2) {
+      display({
+        type: Constants.geojsonTypes.FEATURE,
+        properties: geojson.properties,
+        geometry: {
+          coordinates: lineCoords,
+          type: Constants.geojsonTypes.LINE_STRING,
+        },
+      });
+    }
+    return;
   }
 
   // Display as LineString for first 1-2 vertices for reliable rendering at all zoom levels
