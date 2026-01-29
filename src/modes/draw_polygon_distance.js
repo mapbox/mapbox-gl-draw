@@ -101,6 +101,7 @@ DrawPolygonDistance.onSetup = function (opts) {
     // Line sub-mode state
     linePhase: 'drawing', // 'drawing' or 'offset'
     lineOffsetWidth: null,
+    lineOffsetSide: null, // 'left' or 'right' based on mouse position
   };
 
   createDrawingModeSelector(this._ctx, state);
@@ -4093,6 +4094,7 @@ DrawPolygonDistance.completeRectangle = function (state, perpendicularPoint) {
 DrawPolygonDistance.enterLineOffsetPhase = function (state) {
   state.linePhase = 'offset';
   state.lineOffsetWidth = null;
+  state.lineOffsetSide = null;
   state.previewVertex = null;
 
   // Clear and blur distance/angle inputs for the offset phase
@@ -4132,6 +4134,21 @@ DrawPolygonDistance.handleLineOffsetPreview = function (state, e) {
   const nearestOnLine = turf.nearestPointOnLine(polyline, mousePoint);
   const perpDistanceKm = turf.distance(nearestOnLine, mousePoint, TURF_UNITS_KM);
 
+  // Determine which side of the line the mouse is on
+  // Use the overall line direction (start to end) as a consistent reference
+  // This prevents side-flipping when mouse moves between differently-oriented segments
+  const lineStart = state.vertices[0];
+  const lineEnd = state.vertices[state.vertices.length - 1];
+  const overallBearing = turf.bearing(turf.point(lineStart), turf.point(lineEnd));
+  const nearestCoord = nearestOnLine.geometry.coordinates;
+  const bearingToMouse = turf.bearing(turf.point(nearestCoord), mousePoint);
+  // Calculate the relative angle (normalize to -180 to 180)
+  let relativeAngle = bearingToMouse - overallBearing;
+  if (relativeAngle > 180) relativeAngle -= 360;
+  if (relativeAngle < -180) relativeAngle += 360;
+  // Positive relative angle (0 to 180) means mouse is on the right, negative means left
+  const offsetSide = relativeAngle >= 0 ? 'right' : 'left';
+
   // Priority: distance input > snap > raw mouse
   let offsetKm;
   if (state.currentDistance !== null && state.currentDistance > 0) {
@@ -4149,9 +4166,10 @@ DrawPolygonDistance.handleLineOffsetPreview = function (state, e) {
   }
 
   state.lineOffsetWidth = offsetKm * 1000; // Store in meters
+  state.lineOffsetSide = offsetSide; // Store which side
 
-  // Compute the offset polygon
-  const polygonCoords = this.computeOffsetPolygon(state.vertices, offsetKm);
+  // Compute the offset polygon (one-sided based on mouse position)
+  const polygonCoords = this.computeOffsetPolygon(state.vertices, offsetKm, offsetSide);
   if (polygonCoords) {
     state.polygon.setCoordinates([polygonCoords]);
   }
@@ -4163,8 +4181,10 @@ DrawPolygonDistance.handleLineOffsetPreview = function (state, e) {
     turf.point(state.vertices[lastIdx - 1]),
     turf.point(lastVertex)
   );
+  // Use the correct perpendicular direction based on offset side
+  const perpAngle = offsetSide === 'left' ? lastBearing - 90 : lastBearing + 90;
   const perpPoint = turf.destination(
-    turf.point(lastVertex), offsetKm, lastBearing + 90, TURF_UNITS_KM
+    turf.point(lastVertex), offsetKm, perpAngle, TURF_UNITS_KM
   ).geometry.coordinates;
   this.updateDistanceLabel(state, lastVertex, perpPoint, offsetKm * 1000);
 
@@ -4211,7 +4231,7 @@ DrawPolygonDistance.completeLineOffset = function (state) {
   });
 };
 
-DrawPolygonDistance.computeOffsetPolygon = function (vertices, offsetKm) {
+DrawPolygonDistance.computeOffsetPolygon = function (vertices, offsetKm, side = 'right') {
   const n = vertices.length;
   if (n < 2) return null;
 
@@ -4221,36 +4241,35 @@ DrawPolygonDistance.computeOffsetPolygon = function (vertices, offsetKm) {
     bearings.push(turf.bearing(turf.point(vertices[i]), turf.point(vertices[i + 1])));
   }
 
-  // Compute left and right offset points for each vertex
-  const leftPoints = [];
-  const rightPoints = [];
+  // Determine perpendicular angle based on side
+  // left = -90 degrees from bearing, right = +90 degrees from bearing
+  const perpSign = side === 'left' ? -90 : 90;
+
+  // Compute offset points for each vertex (one side only)
+  const offsetPoints = [];
 
   for (let i = 0; i < n; i++) {
     const pt = turf.point(vertices[i]);
 
     if (i === 0) {
       // First vertex: offset perpendicular to first segment
-      leftPoints.push(turf.destination(pt, offsetKm, bearings[0] - 90, TURF_UNITS_KM).geometry.coordinates);
-      rightPoints.push(turf.destination(pt, offsetKm, bearings[0] + 90, TURF_UNITS_KM).geometry.coordinates);
+      offsetPoints.push(turf.destination(pt, offsetKm, bearings[0] + perpSign, TURF_UNITS_KM).geometry.coordinates);
     } else if (i === n - 1) {
       // Last vertex: offset perpendicular to last segment
       const lastB = bearings[bearings.length - 1];
-      leftPoints.push(turf.destination(pt, offsetKm, lastB - 90, TURF_UNITS_KM).geometry.coordinates);
-      rightPoints.push(turf.destination(pt, offsetKm, lastB + 90, TURF_UNITS_KM).geometry.coordinates);
+      offsetPoints.push(turf.destination(pt, offsetKm, lastB + perpSign, TURF_UNITS_KM).geometry.coordinates);
     } else {
       // Inner vertex: find intersection of adjacent offset lines
-      const leftPt = this.computeOffsetVertex(vertices, i, bearings, offsetKm, -90);
-      const rightPt = this.computeOffsetVertex(vertices, i, bearings, offsetKm, 90);
-      leftPoints.push(leftPt);
-      rightPoints.push(rightPt);
+      const offsetPt = this.computeOffsetVertex(vertices, i, bearings, offsetKm, perpSign);
+      offsetPoints.push(offsetPt);
     }
   }
 
-  // Build polygon: left side forward, then right side backward
+  // Build polygon: original vertices forward, then offset vertices backward, close
   const coords = [
-    ...leftPoints,
-    ...rightPoints.reverse(),
-    leftPoints[0] // close
+    ...vertices,
+    ...offsetPoints.reverse(),
+    vertices[0] // close
   ];
 
   return coords;
