@@ -857,6 +857,13 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
       })();
     }
 
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [vertexCoord];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
+        return;
+      }
+    }
+
     state.vertices.push(vertexCoord);
     state.line.updateCoordinate(0, vertexCoord[0], vertexCoord[1]);
 
@@ -899,6 +906,13 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   // This ensures the vertex is placed exactly where the black dot indicator shows
   if (state.previewVertex) {
     const newVertex = state.previewVertex;
+
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [...state.vertices, newVertex];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
+        return;
+      }
+    }
 
     state.vertices.push(newVertex);
     state.line.updateCoordinate(
@@ -955,6 +969,14 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
   // If shift held, use raw mouse position (bypass snapping)
   if (shiftHeld) {
     newVertex = [e.lngLat.lng, e.lngLat.lat];
+
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [...state.vertices, newVertex];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
+        return;
+      }
+    }
+
     state.vertices.push(newVertex);
     state.line.updateCoordinate(
       state.vertices.length - 1,
@@ -1439,6 +1461,13 @@ DrawLineStringDistance.clickOnMap = function (state, e) {
     const nearbyVertex = snapToNearbyVertex(newVertex, state.vertices, 0.5);
     if (nearbyVertex) {
       newVertex = nearbyVertex;
+    }
+  }
+
+  if (this._ctx.options.validateVertex) {
+    const proposedCoords = [...state.vertices, newVertex];
+    if (!this._ctx.options.validateVertex(proposedCoords)) {
+      return;
     }
   }
 

@@ -194,5 +194,13 @@ export default function(ctx, api) {
     return api;
   };
 
+  api.setValidateVertex = function(callback) {
+    if (callback !== null && typeof callback !== 'function') {
+      throw new Error('validateVertex must be a function or null');
+    }
+    ctx.options.validateVertex = callback;
+    return api;
+  };
+
   return api;
 }

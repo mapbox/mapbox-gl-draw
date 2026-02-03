@@ -55,6 +55,16 @@ const defaultOptions = {
    * ['2rem', 'calc(100% - 5rem)'] - lower-left area
    */
   angleDistanceInputPosition: ['50%', 'calc(100% - 3rem)'],
+
+  /**
+   * Callback function to validate vertices before they are added.
+   * Receives the proposed coordinates array and returns boolean.
+   * @type {function|null}
+   * @default null
+   * @param {Array<Array<number>>} proposedCoords - Array of [lng, lat] coordinates
+   * @returns {boolean} - true to allow vertex, false to reject
+   */
+  validateVertex: null,
 };
 
 const showControls = {

@@ -1344,6 +1344,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
         })();
     }
 
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [vertexCoord];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
+        return;
+      }
+    }
+
     state.vertices.push(vertexCoord);
     state.polygon.updateCoordinate("0.0", vertexCoord[0], vertexCoord[1]);
 
@@ -1421,6 +1428,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       }
     }
 
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [...state.vertices, newVertex];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
+        return;
+      }
+    }
+
     state.vertices.push(newVertex);
     state.polygon.updateCoordinate(
       `0.${state.vertices.length - 1}`,
@@ -1487,6 +1501,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
       );
       if (dist < 10) {
         this.finishDrawing(state);
+        return;
+      }
+    }
+
+    if (this._ctx.options.validateVertex) {
+      const proposedCoords = [...state.vertices, newVertex];
+      if (!this._ctx.options.validateVertex(proposedCoords)) {
         return;
       }
     }
@@ -2041,6 +2062,13 @@ DrawPolygonDistance.clickOnMap = function (state, e) {
     const nearbyVertex = snapToNearbyVertex(newVertex, state.vertices, 0.5);
     if (nearbyVertex) {
       newVertex = nearbyVertex;
+    }
+  }
+
+  if (this._ctx.options.validateVertex) {
+    const proposedCoords = [...state.vertices, newVertex];
+    if (!this._ctx.options.validateVertex(proposedCoords)) {
+      return;
     }
   }
 
