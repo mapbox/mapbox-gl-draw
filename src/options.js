@@ -37,13 +37,10 @@ const hideControls = {
 };
 
 function addSources(styles, sourceBucket) {
-  return styles.map((style) => {
-    if (style.source) return style;
-    return Object.assign({}, style, {
-      id: `${style.id}.${sourceBucket}`,
-      source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
-    });
-  });
+  return styles.map((style) => Object.assign({}, style, {
+    id: `${style.id}.${sourceBucket}`,
+    source: (sourceBucket === 'hot') ? Constants.sources.HOT : Constants.sources.COLD
+  }));
 }
 
 export default function(options = {}) {
@@ -62,7 +59,11 @@ export default function(options = {}) {
   withDefaults = Object.assign({}, defaultOptions, withDefaults);
 
   // Layers with a shared source should be adjacent for performance reasons
-  withDefaults.styles = addSources(withDefaults.styles, 'cold').concat(addSources(withDefaults.styles, 'hot'));
+  const sourcedStyles = withDefaults.styles.filter((style) => style.source);
+  const unsourcedStyles = withDefaults.styles.filter((style) => !style.source);
+  withDefaults.styles = sourcedStyles
+    .concat(addSources(unsourcedStyles, 'cold'))
+    .concat(addSources(unsourcedStyles, 'hot'));
 
   return withDefaults;
 }
