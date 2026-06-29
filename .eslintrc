@@ -19,7 +19,7 @@
     "import/no-duplicates": "error",
     "import/no-commonjs": "error",
 
-    "indent": [2,2],
+    "indent": ["error", 2],
     "array-bracket-spacing": "off",
     "block-scoped-var": "error",
     "consistent-return": "off",
