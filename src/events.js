@@ -20,6 +20,14 @@ export default function(ctx) {
   let currentModeName = null;
   let currentMode = null;
 
+  const isLeftClick = (e) => {
+    const originalEvent = e?.originalEvent;
+    if (!originalEvent) { return true; }
+    if ('button' in originalEvent) { return originalEvent.button === 0; }
+    if ('buttons' in originalEvent) { return originalEvent.buttons === 1; }
+    return true;
+  };
+
   events.drag = function(event, isDrag) {
     if (isDrag({
       point: event.point,
@@ -51,6 +59,7 @@ export default function(ctx) {
   };
 
   events.mousedown = function(event) {
+    if (!isLeftClick(event)) return;
     mouseDownInfo = {
       time: new Date().getTime(),
       point: event.point
@@ -61,6 +70,7 @@ export default function(ctx) {
   };
 
   events.mouseup = function(event) {
+    if (!isLeftClick(event)) return;
     const target = getFeaturesAndSetCursor(event, ctx);
     event.featureTarget = target;
 
