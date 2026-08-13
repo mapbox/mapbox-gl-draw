@@ -106,14 +106,14 @@ npm run test
 
 ### Publishing
 
-To GitHub and NPM:
+To publish new version on GitHub and NPM, create pull request with version bump and update changelog. After PR is merged, run the following commands on the commit that was merged to `main` branch:
 
 ```
-npm version (major|minor|patch)
-git push --tags
-git push
-npm publish
+git tag v{x.y.z}
+git push origin v{x.y.z}
 ```
+
+Create a release on GitHub with the same version number and changelog after successful run of `.github/workflows/npm-release.yml`
 
 To CDN:
 
@@ -121,7 +121,7 @@ To CDN:
 # make sure you are authenticated for AWS
 git checkout v{x.y.z}
 npm ci
-npm run prepublish
+npm run prepublishOnly
 aws s3 cp --recursive --acl public-read dist s3://mapbox-gl-js/plugins/mapbox-gl-draw/v{x.y.z}
 ```
 
