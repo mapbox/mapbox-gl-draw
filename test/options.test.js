@@ -231,4 +231,79 @@ test('Options test', async (t) => {
 
     assert.deepEqual(styles, Draw.options.styles);
   });
+
+  await t.test('custom styles with existing source are not duplicated', () => {
+    const Draw = new MapboxDraw({styles: [{
+      'id': 'custom-source-layer',
+      'source': 'my-custom-source',
+      'type': 'fill',
+      'filter': ['all', ['==', '$type', 'Polygon']],
+      'paint': {
+        'fill-color': '#fff'
+      }
+    }]});
+
+    const styles = [{
+      'id': 'custom-source-layer',
+      'source': 'my-custom-source',
+      'type': 'fill',
+      'filter': ['all', ['==', '$type', 'Polygon']],
+      'paint': {
+        'fill-color': '#fff'
+      }
+    }];
+
+    assert.deepEqual(styles, Draw.options.styles);
+  });
+
+  await t.test('custom styles with mixed sourced and unsourced styles', () => {
+    const Draw = new MapboxDraw({styles: [{
+      'id': 'custom-source-layer',
+      'source': 'my-custom-source',
+      'type': 'fill',
+      'filter': ['all', ['==', '$type', 'Polygon']],
+      'paint': {
+        'fill-color': '#fff'
+      }
+    }, {
+      'id': 'custom-point',
+      'type': 'circle',
+      'filter': ['all', ['==', '$type', 'Point']],
+      'paint': {
+        'circle-color': '#fff'
+      }
+    }]});
+
+    const styles = [
+      {
+        'id': 'custom-source-layer',
+        'source': 'my-custom-source',
+        'type': 'fill',
+        'filter': ['all', ['==', '$type', 'Polygon']],
+        'paint': {
+          'fill-color': '#fff'
+        }
+      },
+      {
+        'id': 'custom-point.cold',
+        'source': 'mapbox-gl-draw-cold',
+        'type': 'circle',
+        'filter': ['all', ['==', '$type', 'Point']],
+        'paint': {
+          'circle-color': '#fff'
+        }
+      },
+      {
+        'id': 'custom-point.hot',
+        'source': 'mapbox-gl-draw-hot',
+        'type': 'circle',
+        'filter': ['all', ['==', '$type', 'Point']],
+        'paint': {
+          'circle-color': '#fff'
+        }
+      }
+    ];
+
+    assert.deepEqual(styles, Draw.options.styles);
+  });
 });
