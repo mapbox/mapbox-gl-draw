@@ -73,12 +73,18 @@
           "true"
         ],
         [
-          0.2,
-          2
+          "literal",
+          [
+            0.2,
+            2
+          ]
         ],
         [
-          2,
-          0
+          "literal",
+          [
+            2,
+            0
+          ]
         ]
       ],
       "line-width": 2
@@ -334,14 +340,20 @@
           "true"
         ],
         [
-          0.2,
-          2
+          "literal",
+          [
+            0.2,
+            2
+          ]
         ],
         [
-          2,
-          0
+          "literal",
+          [
+            2,
+            0
+          ]
         ]
-      ],
+    ],
       "line-width": 2
     },
     "source": "mapbox-gl-draw-hot"
