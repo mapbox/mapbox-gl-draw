@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.2
+
+* Fix selection precision in DirectSelect mode by @denull in https://github.com/mapbox/mapbox-gl-draw/pull/1428
+* Reset drag-pan state on stopping DirectSelect mode by @leonkenneth in https://github.com/mapbox/mapbox-gl-draw/pull/1491
+* Avoid duplicate layers when a style already defines a source by @0xOnyx in https://github.com/mapbox/mapbox-gl-draw/pull/1501
+* Improve style cross-engine compatibility by @pschroten in https://github.com/mapbox/mapbox-gl-draw/pull/1570
+
 ## 1.5.1
 
 * Fix midpoint rendering precision by @romain-tracktik in https://github.com/mapbox/mapbox-gl-draw/pull/1433
