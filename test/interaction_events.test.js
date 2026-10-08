@@ -158,6 +158,15 @@ test('ensure user interactions fire right events', async (t) => {
     ], 'no unexpected draw events');
   });
 
+  await t.test('right-click on the point does not select it', async () => {
+    // Now in `simple_select` mode with nothing selected ...
+    // Right-click should be ignored by Draw and not trigger any events.
+    map.fire('mousedown', makeMouseEvent(25, 25, { button: 2 }));
+    map.fire('mouseup', makeMouseEvent(25, 25, { button: 2 }));
+
+    assert.deepEqual(flushDrawEvents(), [], 'no draw events fired for right-click');
+  });
+
   await t.test('re-select that point', async () => {
     // Now in `simple_select` mode ...
     // Move around, then click the existing point
