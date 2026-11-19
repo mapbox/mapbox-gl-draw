@@ -72,7 +72,7 @@
     "vite": "^8.0.0"
   },
   "dependencies": {
-    "@mapbox/geojson-area": "^0.2.2",
+    "@mapbox/geojson-area": "^0.3.0",
     "@mapbox/geojson-normalize": "^0.1.0",
     "@mapbox/point-geometry": "^1.1.0",
     "@turf/projection": "^7.2.0",
