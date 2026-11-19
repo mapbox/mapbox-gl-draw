@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@mapbox/geojson-area": "^0.2.2",
-    "@mapbox/geojson-normalize": "^0.0.1",
+    "@mapbox/geojson-normalize": "^0.1.0",
     "@mapbox/point-geometry": "^1.1.0",
     "@turf/projection": "^7.2.0",
     "fast-deep-equal": "^3.1.3",
